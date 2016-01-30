@@ -72,7 +72,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
     /**
      * Servlet that created this connection.
      */
-    private transient RTMPTServlet servlet;
+    private RTMPTServlet servlet;
 
     /**
      * Timestamp of last data received on the connection
@@ -83,7 +83,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     private AtomicLong lastBytesWritten = new AtomicLong(0);
 
-    private transient IoSession ioSession;
+    private IoSession ioSession;
 
     /** Constructs a new RTMPTConnection */
     RTMPTConnection() {
