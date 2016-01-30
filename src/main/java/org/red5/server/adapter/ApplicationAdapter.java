@@ -46,38 +46,50 @@ public class ApplicationAdapter extends MultiThreadedApplicationAdapter {
 
     /** {@inheritDoc} */
     @Override
-    public synchronized boolean connect(IConnection conn, IScope scope, Object[] params) {
-        return super.connect(conn, scope, params);
+    public boolean connect(IConnection conn, IScope scope, Object[] params) {
+        synchronized (this) {
+            return super.connect(conn, scope, params);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized void disconnect(IConnection conn, IScope scope) {
-        super.disconnect(conn, scope);
+    public void disconnect(IConnection conn, IScope scope) {
+        synchronized (this) {
+            super.disconnect(conn, scope);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized boolean start(IScope scope) {
-        return super.start(scope);
+    public boolean start(IScope scope) {
+        synchronized (this) {
+            return super.start(scope);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized void stop(IScope scope) {
-        super.stop(scope);
+    public void stop(IScope scope) {
+        synchronized (this) {
+            super.stop(scope);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized boolean join(IClient client, IScope scope) {
-        return super.join(client, scope);
+    public boolean join(IClient client, IScope scope) {
+        synchronized (this) {
+            return super.join(client, scope);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized void leave(IClient client, IScope scope) {
-        super.leave(client, scope);
+    public void leave(IClient client, IScope scope) {
+        synchronized (this) {
+            super.leave(client, scope);
+        }
     }
 
 }
