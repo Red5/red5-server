@@ -44,12 +44,12 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
     /**
      * Broadcasting stream associated with this scope
      */
-    private transient IClientBroadcastStream clientBroadcastStream;
+    private IClientBroadcastStream clientBroadcastStream;
 
     /**
      * Simple in memory push pipe, triggered by an active provider to push messages to consumer
      */
-    private final transient InMemoryPushPushPipe pipe;
+    private final InMemoryPushPushPipe pipe;
 
     /**
      * Number of components.
