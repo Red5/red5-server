@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,40 +23,40 @@ package org.red5.server.net.remoting.codec;
  */
 public class RemotingCodecFactory {
 
-	/**
-	 * Remoting protocol decoder
-	 */
-	protected RemotingProtocolDecoder decoder;
+    /**
+     * Remoting protocol decoder
+     */
+    protected RemotingProtocolDecoder decoder;
 
-	/**
-	 * Remoting protocol encoder
-	 */
-	protected RemotingProtocolEncoder encoder;
+    /**
+     * Remoting protocol encoder
+     */
+    protected RemotingProtocolEncoder encoder;
 
-	/**
-	 * Initialization, creates and binds encoder and decoder
-	 */
-	public void init() {
-		decoder = new RemotingProtocolDecoder();
-		encoder = new RemotingProtocolEncoder();
-	}
+    /**
+     * Initialization, creates and binds encoder and decoder
+     */
+    public void init() {
+        decoder = new RemotingProtocolDecoder();
+        encoder = new RemotingProtocolEncoder();
+    }
 
-	/**
-	 * Returns the remoting decoder.
-	 * 
-	 * @return decoder
-	 */
-	public RemotingProtocolDecoder getRemotingDecoder() {
-		return decoder;
-	}
+    /**
+     * Returns the remoting decoder.
+     * 
+     * @return decoder
+     */
+    public RemotingProtocolDecoder getRemotingDecoder() {
+        return decoder;
+    }
 
-	/**
-	 * Returns the remoting encoder.
-	 * 
-	 * @return encoder
-	 */
-	public RemotingProtocolEncoder getRemotingEncoder() {
-		return encoder;
-	}
+    /**
+     * Returns the remoting encoder.
+     * 
+     * @return encoder
+     */
+    public RemotingProtocolEncoder getRemotingEncoder() {
+        return encoder;
+    }
 
 }

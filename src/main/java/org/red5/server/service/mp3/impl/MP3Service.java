@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,22 +31,22 @@ import org.red5.server.service.mp3.IMP3Service;
  */
 public class MP3Service extends BaseStreamableFileService implements IMP3Service {
 
-	/** {@inheritDoc} */
-	@Override
-	public String getPrefix() {
-		return "mp3";
-	}
+    /** {@inheritDoc} */
+    @Override
+    public String getPrefix() {
+        return "mp3";
+    }
 
-	/** {@inheritDoc} */
-	@Override
-	public String getExtension() {
-		return ".mp3";
-	}
+    /** {@inheritDoc} */
+    @Override
+    public String getExtension() {
+        return ".mp3";
+    }
 
-	/** {@inheritDoc} */
-	@Override
-	public IStreamableFile getStreamableFile(File file) throws IOException {
-		return new MP3(file);
-	}
+    /** {@inheritDoc} */
+    @Override
+    public IStreamableFile getStreamableFile(File file) throws IOException {
+        return new MP3(file);
+    }
 
 }

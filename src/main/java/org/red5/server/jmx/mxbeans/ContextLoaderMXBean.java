@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@ import javax.management.MXBean;
 @MXBean
 public interface ContextLoaderMXBean extends ShutdownMXBean {
 
-	public void setContextsConfig(String contextsConfig);
+    public void setContextsConfig(String contextsConfig);
 
-	public void init() throws Exception;
+    public void init() throws Exception;
 
-	public void shutdown();	
-	
-	public void setParentContext(String parentContextKey, String appContextId);
+    public void shutdown();
 
-	public String getContextsConfig();
+    public void setParentContext(String parentContextKey, String appContextId);
 
-	public void loadContext(String name, String config);
-	
-	public void unloadContext(String name);
-	
+    public String getContextsConfig();
+
+    public void loadContext(String name, String config);
+
+    public void unloadContext(String name);
+
 }

@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,24 @@ import org.springframework.context.ApplicationContext;
  */
 public interface IApplicationLoader {
 
-	/**
-	 * Load a new application for the given context path from a directory.
-	 * 
-	 * @param contextPath context path
-	 * @param virtualHosts virtual hosts
-	 * @param directory directory
-	 * @throws Exception for fun
-	 */
-	public void loadApplication(String contextPath, String virtualHosts, String directory) throws Exception;
-	
-	/**
-	 * Return the root {@link ApplicationContext}.
-	 * 
-	 * @return application context
-	 */
-	public ApplicationContext getRootContext();
+    /**
+     * Load a new application for the given context path from a directory.
+     * 
+     * @param contextPath
+     *            context path
+     * @param virtualHosts
+     *            virtual hosts
+     * @param directory
+     *            directory
+     * @throws Exception
+     *             for fun
+     */
+    public void loadApplication(String contextPath, String virtualHosts, String directory) throws Exception;
+
+    /**
+     * Return the root {@link ApplicationContext}.
+     * 
+     * @return application context
+     */
+    public ApplicationContext getRootContext();
 }

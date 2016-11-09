@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,24 +35,24 @@ import org.red5.server.api.service.IServiceCall;
 @MXBean
 public interface CoreHandlerMXBean {
 
-	public boolean connect(IConnection conn, IScope scope);
+    public boolean connect(IConnection conn, IScope scope);
 
-	public boolean connect(IConnection conn, IScope scope, Object[] params);
+    public boolean connect(IConnection conn, IScope scope, Object[] params);
 
-	public void disconnect(IConnection conn, IScope scope);
+    public void disconnect(IConnection conn, IScope scope);
 
-	public boolean join(IClient client, IScope scope);
+    public boolean join(IClient client, IScope scope);
 
-	public void leave(IClient client, IScope scope);
+    public void leave(IClient client, IScope scope);
 
-	public void removeChildScope(IBasicScope scope);
+    public void removeChildScope(IBasicScope scope);
 
-	public boolean serviceCall(IConnection conn, IServiceCall call);
+    public boolean serviceCall(IConnection conn, IServiceCall call);
 
-	public boolean start(IScope scope);
+    public boolean start(IScope scope);
 
-	public void stop(IScope scope);
+    public void stop(IScope scope);
 
-	public boolean handleEvent(IEvent event);
+    public boolean handleEvent(IEvent event);
 
 }

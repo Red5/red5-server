@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ import org.red5.server.api.stream.IStreamPublishSecurity;
  */
 public class DenyAllStreamAccess implements IStreamPublishSecurity, IStreamPlaybackSecurity {
 
-	/** {@inheritDoc} */
-	public boolean isPublishAllowed(IScope scope, String name, String mode) {
-		return false;
-	}
+    /** {@inheritDoc} */
+    public boolean isPublishAllowed(IScope scope, String name, String mode) {
+        return false;
+    }
 
-	/** {@inheritDoc} */
-	public boolean isPlaybackAllowed(IScope scope, String name, int start, int length, boolean flushPlaylist) {
-		return false;
-	}
+    /** {@inheritDoc} */
+    public boolean isPlaybackAllowed(IScope scope, String name, int start, int length, boolean flushPlaylist) {
+        return false;
+    }
 
 }

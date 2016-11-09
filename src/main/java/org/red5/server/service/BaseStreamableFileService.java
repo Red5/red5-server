@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,61 +35,61 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseStreamableFileService implements IStreamableFileService {
 
-	private static final Logger log = LoggerFactory.getLogger(BaseStreamableFileService.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseStreamableFileService.class);
 
-	/** {@inheritDoc} */
-	public void setPrefix(String prefix) {
-	}
+    /** {@inheritDoc} */
+    public void setPrefix(String prefix) {
+    }
 
-	/** {@inheritDoc} */
-	public abstract String getPrefix();
+    /** {@inheritDoc} */
+    public abstract String getPrefix();
 
-	/** {@inheritDoc} */
-	public void setExtension(String extension) {
-	}
+    /** {@inheritDoc} */
+    public void setExtension(String extension) {
+    }
 
-	/** {@inheritDoc} */
-	public abstract String getExtension();
+    /** {@inheritDoc} */
+    public abstract String getExtension();
 
-	/** {@inheritDoc} */
-	public String prepareFilename(String name) {
-		String prefix = getPrefix() + ':';
-		if (name.startsWith(prefix)) {
-			name = name.substring(prefix.length());
-			// if there is no extension on the file add the first one
-			log.debug("prepareFilename - lastIndexOf: {} length: {}", name.lastIndexOf('.'), name.length());
-			if (name.lastIndexOf('.') != name.length() - 4) {
-				name = name + getExtension().split(",")[0];
-			}
-		}
+    /** {@inheritDoc} */
+    public String prepareFilename(String name) {
+        String prefix = getPrefix() + ':';
+        if (name.startsWith(prefix)) {
+            name = name.substring(prefix.length());
+            // if there is no extension on the file add the first one
+            log.debug("prepareFilename - lastIndexOf: {} length: {}", name.lastIndexOf('.'), name.length());
+            if (name.lastIndexOf('.') != name.length() - 4) {
+                name = name + getExtension().split(",")[0];
+            }
+        }
 
-		return name;
-	}
+        return name;
+    }
 
-	/** {@inheritDoc} */
-	public boolean canHandle(File file) {
-    	boolean valid = false;
-    	if (file.exists()) {
-        	String absPath = file.getAbsolutePath().toLowerCase();
-        	int dotIndex = absPath.lastIndexOf('.');
-        	if (dotIndex > -1) {
-            	String fileExt = absPath.substring(dotIndex);
-            	log.debug("canHandle - Path: {} Ext: {}", absPath, fileExt);
-            	String[] exts = getExtension().split(",");
-            	for (String ext : exts) {
-            		if (ext.equals(fileExt)) {
-            			valid = true;
-            			break;
-            		}
-            	}
-        	} else {
-        		log.warn("No file extension was detected, please retry with a supported extension: {}", getExtension());
-        	}
-    	}
-		return valid;
-	}
+    /** {@inheritDoc} */
+    public boolean canHandle(File file) {
+        boolean valid = false;
+        if (file.exists()) {
+            String absPath = file.getAbsolutePath().toLowerCase();
+            int dotIndex = absPath.lastIndexOf('.');
+            if (dotIndex > -1) {
+                String fileExt = absPath.substring(dotIndex);
+                log.debug("canHandle - Path: {} Ext: {}", absPath, fileExt);
+                String[] exts = getExtension().split(",");
+                for (String ext : exts) {
+                    if (ext.equals(fileExt)) {
+                        valid = true;
+                        break;
+                    }
+                }
+            } else {
+                log.warn("No file extension was detected, please retry with a supported extension: {}", getExtension());
+            }
+        }
+        return valid;
+    }
 
-	/** {@inheritDoc} */
-	public abstract IStreamableFile getStreamableFile(File file) throws IOException;
+    /** {@inheritDoc} */
+    public abstract IStreamableFile getStreamableFile(File file) throws IOException;
 
 }

@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,36 +32,36 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class RTMPMinaCodecFactory implements ProtocolCodecFactory, ApplicationContextAware, InitializingBean {
 
-	protected ApplicationContext appCtx;
-	
+    protected ApplicationContext appCtx;
+
     /**
      * RTMP Mina protocol decoder.
      */
-	protected RTMPMinaProtocolDecoder decoder;
-	
+    protected RTMPMinaProtocolDecoder decoder = new RTMPMinaProtocolDecoder();
+
     /**
      * RTMP Mina protocol encoder.
      */
-	protected RTMPMinaProtocolEncoder encoder;
+    protected RTMPMinaProtocolEncoder encoder = new RTMPMinaProtocolEncoder();
 
-	public void afterPropertiesSet() throws Exception {
-		decoder = (RTMPMinaProtocolDecoder) appCtx.getBean("minaDecoder");
-		encoder = (RTMPMinaProtocolEncoder) appCtx.getBean("minaEncoder");
-	}
-	
-	/** {@inheritDoc} */
+    public void afterPropertiesSet() throws Exception {
+        decoder = (RTMPMinaProtocolDecoder) appCtx.getBean("minaDecoder");
+        encoder = (RTMPMinaProtocolEncoder) appCtx.getBean("minaEncoder");
+    }
+
+    /** {@inheritDoc} */
     public ProtocolDecoder getDecoder(IoSession session) {
-		return decoder;
-	}
+        return decoder;
+    }
 
-	/** {@inheritDoc} */
+    /** {@inheritDoc} */
     public ProtocolEncoder getEncoder(IoSession session) {
-		return encoder;
-	}
+        return encoder;
+    }
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		appCtx = applicationContext;
-	}
-	
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        appCtx = applicationContext;
+    }
+
 }

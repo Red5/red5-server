@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,7 @@ import org.red5.server.service.BaseStreamableFileService;
 import org.red5.server.service.flv.IFLVService;
 
 /**
- * A FLVServiceImpl sets up the service and hands out FLV objects to 
- * its callers.
+ * A FLVServiceImpl sets up the service and hands out FLV objects to its callers.
  * 
  * @author The Red5 Project
  * @author Dominick Accattato (daccattato@gmail.com)
@@ -37,37 +36,39 @@ import org.red5.server.service.flv.IFLVService;
  */
 public class FLVService extends BaseStreamableFileService implements IFLVService {
 
-	/**
-	 * Generate FLV metadata?
-	 */
-	private boolean generateMetadata;
+    /**
+     * Generate FLV metadata?
+     */
+    private boolean generateMetadata;
 
-	/** {@inheritDoc} */
-	@Override
-	public String getPrefix() {
-		return "flv";
-	}
+    /** {@inheritDoc} */
+    @Override
+    public String getPrefix() {
+        return "flv";
+    }
 
-	/** {@inheritDoc} */
-	@Override
-	public String getExtension() {
-		return ".flv";
-	}
+    /** {@inheritDoc} */
+    @Override
+    public String getExtension() {
+        return ".flv";
+    }
 
-	/** {@inheritDoc}
-	 */
-	@Override
-	public IStreamableFile getStreamableFile(File file) throws IOException {
-		return new FLV(file, generateMetadata);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IStreamableFile getStreamableFile(File file) throws IOException {
+        return new FLV(file, generateMetadata);
+    }
 
-	/**
-	 * Generate metadata or not
-	 *
-	 * @param generate  <pre>true</pre> if there's need to generate metadata, <pre>false</pre> otherwise
-	 */
-	public void setGenerateMetadata(boolean generate) {
-		generateMetadata = generate;
-	}
+    /**
+     * Generate metadata or not
+     *
+     * @param generate
+     *            true if there's need to generate metadata, false otherwise
+     */
+    public void setGenerateMetadata(boolean generate) {
+        generateMetadata = generate;
+    }
 
 }

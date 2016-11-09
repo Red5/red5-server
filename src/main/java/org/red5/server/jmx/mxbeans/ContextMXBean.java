@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,43 +32,45 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 
 /**
- * <p>This is basic context implementation used by Red5.</p>
+ * <p>
+ * This is basic context implementation used by Red5.
+ * </p>
  */
 @MXBean
 public interface ContextMXBean {
 
-	public IScope getGlobalScope();
+    public IScope getGlobalScope();
 
-	public IScope resolveScope(String path);
+    public IScope resolveScope(String path);
 
-	public IScope resolveScope(IScope root, String path);
+    public IScope resolveScope(IScope root, String path);
 
-	public IPersistenceStore getPersistanceStore();
+    public IPersistenceStore getPersistanceStore();
 
-	public ApplicationContext getApplicationContext();
+    public ApplicationContext getApplicationContext();
 
-	public void setContextPath(String contextPath);
+    public void setContextPath(String contextPath);
 
-	public IClientRegistry getClientRegistry();
+    public IClientRegistry getClientRegistry();
 
-	public IScope getScope();
+    public IScope getScope();
 
-	public IServiceInvoker getServiceInvoker();
+    public IServiceInvoker getServiceInvoker();
 
-	public Object lookupService(String serviceName);
+    public Object lookupService(String serviceName);
 
-	public IScopeHandler lookupScopeHandler(String contextPath);
+    public IScopeHandler lookupScopeHandler(String contextPath);
 
-	public IMappingStrategy getMappingStrategy();
+    public IMappingStrategy getMappingStrategy();
 
-	public Resource[] getResources(String pattern) throws IOException;
+    public Resource[] getResources(String pattern) throws IOException;
 
-	public Resource getResource(String path);
+    public Resource getResource(String path);
 
-	public IScope resolveScope(String host, String path);
+    public IScope resolveScope(String host, String path);
 
-	public Object getBean(String beanId);
+    public Object getBean(String beanId);
 
-	public Object getCoreService(String beanId);
+    public Object getCoreService(String beanId);
 
 }

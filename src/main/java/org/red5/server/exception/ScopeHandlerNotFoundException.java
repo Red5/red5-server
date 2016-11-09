@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,16 @@ package org.red5.server.exception;
  */
 public class ScopeHandlerNotFoundException extends RuntimeException {
 
-	private static final long serialVersionUID = 1894151808129303439L;
+    private static final long serialVersionUID = 1894151808129303439L;
 
-	/**
-	 * Create exception from given scope handler name
-	 * @param handlerName            Scope handler name
-	 */
-	public ScopeHandlerNotFoundException(String handlerName) {
-		super("No scope handler found: " + handlerName);
-	}
+    /**
+     * Create exception from given scope handler name
+     * 
+     * @param handlerName
+     *            Scope handler name
+     */
+    public ScopeHandlerNotFoundException(String handlerName) {
+        super("No scope handler found: " + handlerName);
+    }
 
 }

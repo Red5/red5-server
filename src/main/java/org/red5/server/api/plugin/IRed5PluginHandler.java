@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,23 +29,25 @@ import org.red5.server.adapter.MultiThreadedApplicationAdapter;
  */
 public interface IRed5PluginHandler {
 
-	/**
-	 * Initialize the plug-in handler.
-	 */
-	void init();
-	
-	/**
-	 * Set the application making use of this plug-in handler.
-	 * 
-	 * @param application application adapter
-	 */
-	void setApplication(MultiThreadedApplicationAdapter application);
+    /**
+     * Initialize the plug-in handler.
+     */
+    void init();
 
-	/**
-	 * Set properties to be used by this handler.
-	 * 
-	 * @param props plugin properties map
-	 */
-	void setProperties(Map<String, Object> props);
-	
+    /**
+     * Set the application making use of this plug-in handler.
+     * 
+     * @param application
+     *            application adapter
+     */
+    void setApplication(MultiThreadedApplicationAdapter application);
+
+    /**
+     * Set properties to be used by this handler.
+     * 
+     * @param props
+     *            plugin properties map
+     */
+    void setProperties(Map<String, Object> props);
+
 }

@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,12 @@ package org.red5.server.stream;
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface ISeekableStreamSource extends IStreamSource {
-	/**
-	 * Seek the stream source to timestamp ts (in milliseconds).
-	 * @param ts Timestamp to seek to
-	 * @return Actual timestamp seeked to
-	 */
-	int seek(int ts);
+    /**
+     * Seek the stream source to timestamp ts (in milliseconds).
+     * 
+     * @param ts
+     *            Timestamp to seek to
+     * @return Actual timestamp seeked to
+     */
+    int seek(int ts);
 }

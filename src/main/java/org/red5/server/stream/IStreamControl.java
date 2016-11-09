@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@
 package org.red5.server.stream;
 
 /**
- * Stream Control Event. 
+ * Stream Control Event.
  * 
- * Marker interface for stream control operations. Play, Pause, Resume, Seek,
- * Stop, etc.
+ * Marker interface for stream control operations. Play, Pause, Resume, Seek, Stop, etc.
  */
 public interface IStreamControl {
 

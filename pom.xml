@@ -1,14 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.red5</groupId>
+        <artifactId>red5-parent</artifactId>
+        <version>1.0.8-M13</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>red5-server</artifactId>
-    <packaging>jar</packaging>
     <name>Red5 :: Server</name>
     <description>The Red5 server</description>
-    <groupId>org.red5</groupId>
-    <version>1.0.7-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <url>https://github.com/Red5/red5-server</url>
-    <inceptionYear>2005</inceptionYear>
     <organization>
         <name>Red5</name>
         <url>https://github.com/Red5</url>
@@ -55,19 +57,14 @@
         </developer>
     </developers>
     <properties>
-    	<build.dir>target</build.dir>
-    	<finalName>${project.artifactId}-${project.version}</finalName>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <red5-io.version>1.0.7-SNAPSHOT</red5-io.version>
-        <red5-service.version>1.0.7-SNAPSHOT</red5-service.version>
-        <spring.version>4.1.7.RELEASE</spring.version>
-        <mina.version>2.0.9</mina.version>
-        <slf4j.version>1.7.9</slf4j.version>
-        <logback.version>1.1.2</logback.version>
-        <quartz.version>2.2.1</quartz.version>
-        <bc.version>1.52</bc.version>
-        <junit.version>4.12</junit.version>
-        <tomcat.version>8.0.26</tomcat.version>
+        <build.dir>target</build.dir>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <red5-io.version>${project.parent.version}</red5-io.version>
+        <red5-service.version>${project.parent.version}</red5-service.version>
+        <red5-server-common.version>${project.parent.version}</red5-server-common.version>
+        <tomcatplugin.version>1.17</tomcatplugin.version>
+        <websocket.version>1.6</websocket.version>
+        <cors-filter.version>2.5</cors-filter.version>
     </properties>
     <repositories>
         <repository>
@@ -84,7 +81,7 @@
     <build>
         <defaultGoal>install</defaultGoal>
         <directory>${build.dir}</directory>
-         <finalName>${finalName}</finalName>
+        <finalName>${finalName}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -109,151 +106,42 @@
         </testResources>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <compilerVersion>1.6</compilerVersion>
-                    <fork>true</fork>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <executable>${maven.compiler.executable}</executable>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
-                <executions>
-                    <execution>
-                        <id>javadoc-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <verbose>true</verbose>
-                    <failOnError>false</failOnError>
-                    <sourcepath>${basedir}/src/main/java</sourcepath>
-                    <includeDependencySources>false</includeDependencySources>
-                    <dependencySourceIncludes>
-                        <dependencySourceInclude>org.red5:*</dependencySourceInclude>
-                    </dependencySourceIncludes>
-                    <detectOfflineLinks>false</detectOfflineLinks>
-                    <stylesheetfile>${basedir}/src/main/javadoc/javadoc.css</stylesheetfile>
-                    <links>
-                        <link>http://download.oracle.com/javase/7/docs/api</link>
-                        <link>http://docs.spring.io/spring/docs/4.0.x/javadoc-api</link>
-                        <link>http://www.slf4j.org/api</link>
-                        <link>http://logging.apache.org/log4j/1.2/apidocs</link>
-                    </links>
-                    <tags>
-                        <tag>
-                            <name>todo</name>
-                            <!-- todo tag for all places -->
-                            <placement>a</placement>
-                            <head>To do:</head>
-                        </tag>
-                    </tags>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                </manifest>
-                                <manifestEntries>
-                                    <SCM-Revision>${buildNumber}</SCM-Revision>
-                                    <Implementation-Build>${buildNumber}</Implementation-Build>
-                                </manifestEntries>
-                            </archive>
-                            <excludes>
-                                <exclude>**/org/red5/server/Bootstrap.class</exclude>
-                                <exclude>**/org/red5/server/Shutdown.class</exclude>
-                                <exclude>**/org/red5/server/jmx/mxbeans/ShutdownMXBean.class</exclude>
-                                <exclude>**/org/red5/classloading/**</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.4</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/red5_codeformat_eclipse.xml</exclude>
+                        <exclude>**/red5_codetemplate.xml</exclude>
+                    </excludes>
+                    <archive>
+                        <manifestEntries>
+                            <Build-OS>${os.name} ${os.version}</Build-OS>
+                            <Build-Java>Java ${java.version}</Build-Java>
+                            <Build-Number>${buildNumber}</Build-Number>
+                            <Main-Class>Version</Main-Class>
+                            <Class-Path>lib/slf4j-api-${slf4j.version}.jar lib/logback-classic-${logback.version}.jar lib/logback-core-${logback.version}.jar lib/red5-server-common-${project.parent.version}.jar</Class-Path>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.7</version>
                 <extensions>true</extensions>
             </plugin>
             <plugin>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>1.8.1</version>
-                <configuration>
-                    <connectionType>connection</connectionType>
-                </configuration>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <goals>deploy</goals>
-                </configuration>
-            </plugin>            
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.mina</groupId>
-                <artifactId>mina-parent</artifactId>
-                <version>${mina.version}</version>
-                <type>pom</type>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
             <version>${tomcat.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -289,88 +177,50 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
+        <!--
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4</version>
+            <groupId>uk.org.lidalia</groupId>
+            <artifactId>sysout-over-slf4j</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-codec</artifactId>
-                    <groupId>commons-codec</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr</artifactId>
-            <version>3.5.2</version>
-            <exclusions>
-            	<exclusion>
-            		<artifactId>ST4</artifactId>
-            		<groupId>org.antlr</groupId>
-            	</exclusion>
-            </exclusions>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
         </dependency>
         <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-            <version>2.2.2</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.9.1</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache-core</artifactId>
-            <version>2.6.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>2.0.4</version>
-            <exclusions>
-            	<exclusion>
-            		<artifactId>antlr</artifactId>
-            		<groupId>antlr</groupId>
-            	</exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.python</groupId>
-            <artifactId>jython-standalone</artifactId>
-            <version>2.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jruby</groupId>
-            <artifactId>jruby</artifactId>
-            <version>1.6.8</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.red5</groupId>
             <artifactId>red5-server-common</artifactId>
-            <version>${project.version}</version>
+            <version>${red5-server-common.version}</version>
         </dependency>
         <dependency>
             <groupId>org.red5</groupId>
             <artifactId>red5-io</artifactId>
             <version>${red5-io.version}</version>
             <type>jar</type>
-            <!-- <scope>system</scope> <systemPath>${basedir}/lib/red5-io-1.0.2.jar</systemPath> -->
             <exclusions>
                 <exclusion>
                     <artifactId>bcprov-jdk15on</artifactId>
@@ -397,40 +247,8 @@
                     <groupId>commons-codec</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-collections</artifactId>
-                    <groupId>commons-collections</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>commons-lang3</artifactId>
                     <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-aop</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-beans</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-core</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-context</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-context-support</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-expression</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-web</artifactId>
-                    <groupId>org.springframework</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>quartz</artifactId>
@@ -441,34 +259,15 @@
         <dependency>
             <groupId>org.red5</groupId>
             <artifactId>red5-service</artifactId>
-            <version>${red5-service.version}</version>
+            <version>${project.version}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>aopalliance</groupId>
-            <artifactId>aopalliance</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <groupId>org.bouncycastle</groupId>
-            <version>${bc.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>mina-core</artifactId>
-            <groupId>org.apache.mina</groupId>
-            <version>${mina.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>mina-integration-jmx</artifactId>
-            <groupId>org.apache.mina</groupId>
-            <version>${mina.version}</version>
-            <exclusions>
-                <exclusion>
-                	<artifactId>ognl</artifactId>
-                	<groupId>ognl</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.red5</groupId>
+            <artifactId>red5-service</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+            <classifier>daemon</classifier>
         </dependency>
         <dependency>
             <artifactId>mina-integration-beans</artifactId>
@@ -476,118 +275,47 @@
             <version>${mina.version}</version>
         </dependency>
         <dependency>
-            <artifactId>commons-beanutils</artifactId>
-            <groupId>commons-beanutils</groupId>
-            <version>1.9.2</version>
-        </dependency>
-        <dependency>
-            <artifactId>commons-codec</artifactId>
-            <groupId>commons-codec</groupId>
-            <version>1.9</version>
-        </dependency>
-        <dependency>
-            <artifactId>commons-collections</artifactId>
-            <groupId>commons-collections</groupId>
-            <version>3.2.1</version>
-        </dependency>
-        <dependency>
-            <artifactId>commons-lang3</artifactId>
-            <groupId>org.apache.commons</groupId>
-            <version>3.4</version>
-        </dependency>
-        <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
             <version>${quartz.version}</version>
         </dependency>
+        <!-- Runtime plugin deps -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>websocket</artifactId>
+            <version>${websocket.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>tomcatplugin</artifactId>
+            <version>${tomcatplugin.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <version>${tomcat.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-el</artifactId>
+            <version>${tomcat.version}</version>
+            <scope>provided</scope>
         </dependency>
+        <!-- Provides CORS functionality http://software.dzhuvinov.com/cors-filter.html -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-expression</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.thetransactioncompany</groupId>
+            <artifactId>cors-filter</artifactId>
+            <version>${cors-filter.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <profiles>
@@ -597,7 +325,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.8</version>
+                        <version>2.10</version>
                         <executions>
                             <execution>
                                 <id>copy-dependencies</id>
@@ -612,11 +340,43 @@
                                     <excludeTransitive>false</excludeTransitive>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>copy-dependencies-plugin</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                                    <includeScope>provided</includeScope>
+                                    <excludeTransitive>false</excludeTransitive>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-red5-service</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                          <groupId>org.red5</groupId>
+                                          <artifactId>red5-service</artifactId>
+                                          <version>${project.version}</version>
+                                          <type>tar.gz</type>
+                                          <classifier>daemon</classifier>
+                                          <overWrite>true</overWrite>
+                                          <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
                         </executions>
-                    </plugin>  
+                   </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4</version>
+                        <version>2.6</version>
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/server.xml</descriptor>
@@ -631,51 +391,14 @@
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
-                            </execution>
-                        </executions>
-                    </plugin>                  
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.3</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
+                                <configuration>
+                                    <finalName>${project.artifactId}</finalName>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-                <repository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-            </distributionManagement>
         </profile>
         <profile>
             <id>war</id>
@@ -683,14 +406,14 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-war-plugin</artifactId>
-                        <version>2.2</version>
+                        <version>2.6</version>
                         <configuration>
                             <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
                         </configuration>
                     </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.4</version>
+                        <version>2.6</version>
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/war.xml</descriptor>
@@ -707,31 +430,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>updatebuildnumber</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>buildnumber-maven-plugin</artifactId>
-                        <version>1.2</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>create</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <doCheck>false</doCheck>
-                            <doUpdate>false</doUpdate>
-                            <shortRevisionLength>5</shortRevisionLength>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

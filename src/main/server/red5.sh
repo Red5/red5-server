@@ -10,8 +10,17 @@ case "$OS" in
   CYGWIN*|MINGW*) # Windows Cygwin or Windows MinGW
   P=";" # Since these are actually Windows, let Java know
   ;;
+  Linux*)
+      LD_LIBRARY_PATH=$RED5_HOME/lib/native
+      export LD_LIBRARY_PATH
+      # Native path
+      NATIVE="-Djava.library.path=$LD_LIBRARY_PATH"
+  ;;
   Darwin*)
-
+      DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$RED5_HOME/lib/native
+      export DYLD_LIBRARY_PATH
+      # Native path
+      NATIVE="-Djava.library.path=$DYLD_LIBRARY_PATH"
   ;;
   SunOS*)
       if [ -z "$JAVA_HOME" ]; then 
@@ -30,19 +39,21 @@ echo "Running on " $OS
 if [ -z "$JVM_OPTS" ]; then 
     JVM_OPTS="-Xverify:none -XX:+TieredCompilation -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:ReservedCodeCacheSize=32m -Dorg.terracotta.quartz.skipUpdateCheck=true"
 fi
-# Set up logging options
-LOGGING_OPTS="-Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector -Dcatalina.useNaming=true"
 # Set up security options
 SECURITY_OPTS="-Djava.security.debug=failure"
 # Set up tomcat options
-TOMCAT_OPTS="-Dcatalina.home=$RED5_HOME"
+TOMCAT_OPTS="-Dcatalina.home=$RED5_HOME -Dcatalina.useNaming=true"
 # Jython options
 JYTHON="-Dpython.home=lib"
 
-export JAVA_OPTS="$LOGGING_OPTS $SECURITY_OPTS $JAVA_OPTS $JVM_OPTS $TOMCAT_OPTS $JYTHON"
+export JAVA_OPTS="$SECURITY_OPTS $JAVA_OPTS $JVM_OPTS $TOMCAT_OPTS $NATIVE $JYTHON"
 
 if [ -z "$RED5_MAINCLASS" ]; then
   export RED5_MAINCLASS=org.red5.server.Bootstrap
+fi
+
+if [ -z "$RED5_OPTS" ]; then
+  export RED5_OPTS=9999
 fi
 
 for JAVA in "${JAVA_HOME}/bin/java" "${JAVA_HOME}/Home/bin/java" "/usr/bin/java" "/usr/local/bin/java"

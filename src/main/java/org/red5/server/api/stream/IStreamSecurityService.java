@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,51 +30,55 @@ import org.red5.server.api.scope.IScopeService;
  */
 public interface IStreamSecurityService extends IScopeService {
 
-	/** 
-	 * Name of a bean defining that scope service.
-	 * */
-	public static final String BEAN_NAME = "streamSecurityService";
+    /**
+     * Name of a bean defining that scope service.
+     * */
+    public static final String BEAN_NAME = "streamSecurityService";
 
-	/**
-	 * Add handler that protects stream publishing.
-	 * 
-	 * @param handler Handler to add.
-	 */
-	public void registerStreamPublishSecurity(IStreamPublishSecurity handler);
+    /**
+     * Add handler that protects stream publishing.
+     * 
+     * @param handler
+     *            Handler to add.
+     */
+    public void registerStreamPublishSecurity(IStreamPublishSecurity handler);
 
-	/**
-	 * Remove handler that protects stream publishing.
-	 * 
-	 * @param handler Handler to remove.
-	 */
-	public void unregisterStreamPublishSecurity(IStreamPublishSecurity handler);
+    /**
+     * Remove handler that protects stream publishing.
+     * 
+     * @param handler
+     *            Handler to remove.
+     */
+    public void unregisterStreamPublishSecurity(IStreamPublishSecurity handler);
 
-	/**
-	 * Get handlers that protect stream publishing.
-	 * 
-	 * @return list of handlers
-	 */
-	public Set<IStreamPublishSecurity> getStreamPublishSecurity();
+    /**
+     * Get handlers that protect stream publishing.
+     * 
+     * @return list of handlers
+     */
+    public Set<IStreamPublishSecurity> getStreamPublishSecurity();
 
-	/**
-	 * Add handler that protects stream playback.
-	 * 
-	 * @param handler Handler to add.
-	 */
-	public void registerStreamPlaybackSecurity(IStreamPlaybackSecurity handler);
+    /**
+     * Add handler that protects stream playback.
+     * 
+     * @param handler
+     *            Handler to add.
+     */
+    public void registerStreamPlaybackSecurity(IStreamPlaybackSecurity handler);
 
-	/**
-	 * Remove handler that protects stream playback.
-	 * 
-	 * @param handler Handler to remove.
-	 */
-	public void unregisterStreamPlaybackSecurity(IStreamPlaybackSecurity handler);
+    /**
+     * Remove handler that protects stream playback.
+     * 
+     * @param handler
+     *            Handler to remove.
+     */
+    public void unregisterStreamPlaybackSecurity(IStreamPlaybackSecurity handler);
 
-	/**
-	 * Get handlers that protect stream plaback.
-	 * 
-	 * @return list of handlers
-	 */
-	public Set<IStreamPlaybackSecurity> getStreamPlaybackSecurity();
+    /**
+     * Get handlers that protect stream plaback.
+     * 
+     * @return list of handlers
+     */
+    public Set<IStreamPlaybackSecurity> getStreamPlaybackSecurity();
 
 }

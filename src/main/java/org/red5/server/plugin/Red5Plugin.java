@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,54 +30,55 @@ import org.springframework.context.ApplicationContext;
  */
 public abstract class Red5Plugin implements IRed5Plugin {
 
-	protected ApplicationContext context;
-	
-	protected Server server;
-	
-	/** {@inheritDoc} */
-	public void doStart() throws Exception {
-	}
-	
-	/** {@inheritDoc} */
-	public void doStop() throws Exception {
-	}
+    protected ApplicationContext context;
 
-	/**
-	 * Initialize the plug-in
-	 */
-	public void init() {
-	}
-	
-	/** {@inheritDoc} */
-	public String getName() {
-		return null;
-	}
+    protected Server server;
 
-	/** {@inheritDoc} */
-	public void setApplicationContext(ApplicationContext context) {
-		this.context = context;
-	}
+    /** {@inheritDoc} */
+    public void doStart() throws Exception {
+    }
 
-	/**
-	 * Return the server reference.
-	 * 
-	 * @return server
-	 */
-	public Server getServer() {
-		return server;
-	}
-	
-	/** {@inheritDoc} */
-	public void setServer(Server server) {
-		this.server = server;
-	}
+    /** {@inheritDoc} */
+    public void doStop() throws Exception {
+    }
 
-	/**
-	 * Set the application making use of this plug-in.
-	 * 
-	 * @param application application
-	 */
-	public void setApplication(MultiThreadedApplicationAdapter application) {	
-	}
-	
+    /**
+     * Initialize the plug-in
+     */
+    public void init() {
+    }
+
+    /** {@inheritDoc} */
+    public String getName() {
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    public void setApplicationContext(ApplicationContext context) {
+        this.context = context;
+    }
+
+    /**
+     * Return the server reference.
+     * 
+     * @return server
+     */
+    public Server getServer() {
+        return server;
+    }
+
+    /** {@inheritDoc} */
+    public void setServer(Server server) {
+        this.server = server;
+    }
+
+    /**
+     * Set the application making use of this plug-in.
+     * 
+     * @param application
+     *            application
+     */
+    public void setApplication(MultiThreadedApplicationAdapter application) {
+    }
+
 }

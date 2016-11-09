@@ -1,7 +1,7 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/Red5/
+ * RED5 Open Source Media Server - https://github.com/Red5/
  * 
- * Copyright 2006-2015 by respective authors (see below). All rights reserved.
+ * Copyright 2006-2016 by respective authors (see below). All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Network dump filter, performs raw data and headers dump on message recieve
+ * Network dump filter, performs raw data and headers dump on message receive
  */
 public class NetworkDumpFilter extends IoFilterAdapter {
-    /**
-     * Logger
-     */
-	protected static Logger log = LoggerFactory.getLogger(ProxyFilter.class);
+
+    protected static Logger log = LoggerFactory.getLogger(ProxyFilter.class);
 
     /**
      * Raw data byte channel
@@ -47,46 +45,46 @@ public class NetworkDumpFilter extends IoFilterAdapter {
 
     /**
      * Create network dump filter from given dump channels
-     * @param headers           Channel to dump headers
-     * @param raw               Channel to dump raw data
+     * 
+     * @param headers
+     *            Channel to dump headers
+     * @param raw
+     *            Channel to dump raw data
      */
-    public NetworkDumpFilter(WritableByteChannel headers,
-			WritableByteChannel raw) {
-		this.raw = raw;
-		this.headers = headers;
-	}
+    public NetworkDumpFilter(WritableByteChannel headers, WritableByteChannel raw) {
+        this.raw = raw;
+        this.headers = headers;
+    }
 
-	/** {@inheritDoc} */
+    /** {@inheritDoc} */
     @Override
-	public void messageReceived(NextFilter next, IoSession session,
-			Object message) throws Exception {
-		if (message instanceof IoBuffer) {
-			IoBuffer out = (IoBuffer) message;
-			if (headers != null) {
-				IoBuffer header = IoBuffer.allocate(12);
-				header.putLong(System.currentTimeMillis());
-				header.putInt(out.limit() - out.position());
-				header.flip();
-				headers.write(header.buf());
-			}
-			if (raw != null) {
-				raw.write(out.asReadOnlyBuffer().buf());
-			}
-		}
-		next.messageReceived(session, message);
-	}
+    public void messageReceived(NextFilter next, IoSession session, Object message) throws Exception {
+        if (message instanceof IoBuffer) {
+            IoBuffer out = (IoBuffer) message;
+            if (headers != null) {
+                IoBuffer header = IoBuffer.allocate(12);
+                header.putLong(System.currentTimeMillis());
+                header.putInt(out.limit() - out.position());
+                header.flip();
+                headers.write(header.buf());
+            }
+            if (raw != null) {
+                raw.write(out.asReadOnlyBuffer().buf());
+            }
+        }
+        next.messageReceived(session, message);
+    }
 
-	/** {@inheritDoc} */
+    /** {@inheritDoc} */
     @Override
-	public void sessionClosed(NextFilter next, IoSession session)
-			throws Exception {
-		if (headers.isOpen()) {
-			headers.close();
-		}
-		if (raw.isOpen()) {
-			raw.close();
-		}
-		next.sessionClosed(session);
-	}
+    public void sessionClosed(NextFilter next, IoSession session) throws Exception {
+        if (headers.isOpen()) {
+            headers.close();
+        }
+        if (raw.isOpen()) {
+            raw.close();
+        }
+        next.sessionClosed(session);
+    }
 
 }
