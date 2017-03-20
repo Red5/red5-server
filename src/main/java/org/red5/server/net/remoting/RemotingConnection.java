@@ -61,6 +61,11 @@ public class RemotingConnection implements IRemotingConnection {
     private final static String CLIENT = "red5.client";
 
     /**
+     * Duty type
+     */
+    protected volatile Duty duty = Duty.REMOTING;
+
+    /**
      * Scope
      */
     protected IScope scope;
@@ -150,7 +155,17 @@ public class RemotingConnection implements IRemotingConnection {
 
     /** {@inheritDoc} */
     public String getType() {
-        return IConnection.TRANSIENT;
+        return IConnection.Type.TRANSIENT.name().toLowerCase();
+    }
+
+    /** {@inheritDoc} */
+    public Duty getDuty() {
+        return duty;
+    }
+
+    /** {@inheritDoc} */
+    public void setDuty(Duty duty) {
+        this.duty = duty;
     }
 
     /** {@inheritDoc} */

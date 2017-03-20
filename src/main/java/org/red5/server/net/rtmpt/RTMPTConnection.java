@@ -26,6 +26,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
 import org.red5.logging.Red5LoggerFactory;
+import org.red5.server.api.IConnection;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.codec.RTMP;
 import org.red5.server.net.rtmp.message.Packet;
@@ -86,7 +87,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /** Constructs a new RTMPTConnection */
     RTMPTConnection() {
-        super(POLLING);
+        super(IConnection.Type.POLLING.name().toLowerCase());
         // create a DummySession for the HTTP-based connection to allow our Mina based system happy
         ioSession = new DummySession();
         ioSession.setAttribute(RTMPConnection.RTMP_SESSION_ID, sessionId);

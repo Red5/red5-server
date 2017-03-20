@@ -192,6 +192,9 @@
              to get smaller delay for downstream server commands.
           -->
         <property name="underrunTrigger" value="${subscriberstream.underrun.trigger}"/>
+        <!-- Threshold for number of pending video frames -->
+        <property name="maxPendingVideoFrames" value="${subscriberstream.max.pending.frames}"/>
+        <property name="maxSequentialPendingVideoFrames" value="${subscriberstream.max.sequential.frames}"/>
     </bean>
 
     <bean id="clientBroadcastStream" scope="prototype" lazy-init="true" class="org.red5.server.stream.ClientBroadcastStream">
