@@ -1203,7 +1203,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         // log w3c connect event
         IConnection conn = Red5.getConnectionLocal();
         // converted to seconds
-        long publishDuration = (System.currentTimeMillis() - stream.getCreationTime()) / 1000;
+        long now = System.currentTimeMillis();
+        long startTime = stream.getStartTime() > 0 ? stream.getStartTime() : now;
+        long publishDuration = Math.max((now - startTime) / 1000, 0L);
         if (conn != null) {
             log.info("W3C x-category:stream x-event:unpublish c-ip:{} cs-bytes:{} sc-bytes:{} x-sname:{} x-file-length:{} x-name:{}", new Object[] { conn.getRemoteAddress(), conn.getReadBytes(), conn.getWrittenBytes(), stream.getName(), publishDuration, stream.getPublishedName() });
         } else {
