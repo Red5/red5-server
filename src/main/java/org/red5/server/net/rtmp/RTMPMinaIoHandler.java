@@ -30,6 +30,7 @@ import org.apache.mina.core.service.IoProcessor;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.write.WriteRequestQueue;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
+import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.codec.RTMP;
 import org.red5.server.net.rtmp.message.Packet;
@@ -131,7 +132,9 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
                     byte state = conn.getStateCode();
                     // checking the state before allowing a task to be created will hopefully prevent rejected task exceptions
                     if (state != RTMP.STATE_DISCONNECTING && state != RTMP.STATE_DISCONNECTED) {
+                        Red5.setConnectionLocal(conn);
                         conn.handleMessageReceived((Packet) message);
+                        Red5.setConnectionLocal(null);
                     } else {
                         log.info("Ignoring received message on {} due to state: {}", sessionId, RTMP.states[state]);
                     }

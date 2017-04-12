@@ -61,7 +61,7 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection>, Appl
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, new CustomizableThreadFactory("ConnectionChecker-"));
 
-    protected ConcurrentMap<String, RTMPConnection> connMap = new ConcurrentHashMap<String, RTMPConnection>();
+    protected ConcurrentMap<String, RTMPConnection> connMap = new ConcurrentHashMap<>();
 
     protected AtomicInteger conns = new AtomicInteger();
 
