@@ -34,6 +34,7 @@
                     <property name="redirectPort" value="${https.port}" />
                     <property name="connectionProperties">
                         <map>
+                            <entry key="maxHttpHeaderSize" value="${http.max_headers_size}"/>
                             <entry key="maxKeepAliveRequests" value="${http.max_keep_alive_requests}"/>
                             <entry key="keepAliveTimout" value="-1"/>
                         </map>
@@ -91,7 +92,8 @@
                             <entry key="truststoreFile" value="${rtmps.truststorefile}" />
                             <entry key="truststorePass" value="${rtmps.truststorepass}" />
                             <entry key="clientAuth" value="false" />
-                            <entry key="allowUnsafeLegacyRenegotiation" value="true" />                             
+                            <entry key="allowUnsafeLegacyRenegotiation" value="true" />
+                            <entry key="maxHttpHeaderSize" value="${http.max_headers_size}"/>
                             <entry key="maxKeepAliveRequests" value="${http.max_keep_alive_requests}"/>
                             <entry key="keepAliveTimout" value="-1"/>
                             <entry key="useExecutor" value="true"/>
