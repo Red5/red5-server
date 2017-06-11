@@ -31,14 +31,11 @@ Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.o
 
 # [Releases](https://github.com/Red5/red5-server/releases/latest)
 ----------------
+### Red5 1.0.9 Release (11 June 2017)
+[Tarball &amp; ZIP](https://github.com/Red5/red5-server/releases/tag/v1.0.9-RELEASE)
+
 ### Red5 1.0.8 Release (23 December 2016)
 [Tarball &amp; ZIP](https://github.com/Red5/red5-server/releases/tag/v1.0.8-RELEASE)
-
-### Red5 1.0.7 Release (12 May 2016)
-[Tarball &amp; ZIP](https://github.com/Red5/red5-server/releases/tag/v1.0.7-RELEASE)
-
-### Red5 1.0.6 Release (8 September 2015)
-[Tarball &amp; ZIP](https://github.com/Red5/red5-server/releases/tag/v1.0.6-RELEASE)
 
 ## Previous
 [Previous releases](https://github.com/Red5/red5-server/blob/master/README.md#previous-releases)
@@ -110,6 +107,8 @@ mvn eclipse:eclipse
 # Older Releases
 The artifacts for the following releases are no longer available; if your project requires them, you'll have to build them from source. The listings are here only for historical purposes.
 
+ * [Red5 1.0.7 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.7-RELEASE) (12 May 2016)
+ * [Red5 1.0.6 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.6-RELEASE) (8 September 2015)
  * [Red5 1.0.5 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.5-RELEASE) (7 February 2015)
  * [Red5 1.0.4 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.4-RELEASE) (26 December 2014)
  * [Red5 1.0.3 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.3-RELEASE) (5 August 2014)
