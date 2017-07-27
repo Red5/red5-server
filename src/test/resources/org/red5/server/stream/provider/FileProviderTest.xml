@@ -14,6 +14,7 @@
                 <bean id="flvFileService" class="org.red5.server.service.flv.impl.FLVService">
                     <property name="generateMetadata" value="true"/>
                 </bean>
+                <bean id="mp4FileService" class="org.red5.server.service.mp4.impl.MP4Service"/>
             </list>
         </property>
     </bean>    
