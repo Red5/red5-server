@@ -170,10 +170,19 @@
         <property name="arguments" value="4096"/>
     </bean>
 
+    <!-- Use injection to set the FLV implementation for writing FLV files -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod">
+            <value>org.red5.io.flv.impl.FLVWriter.setFLV</value>
+        </property>
+        <property name="arguments" ref="flv.impl"/>
+    </bean>
+
     <!-- Low level access for recording to file -->
     <bean id="fileConsumer" scope="prototype" lazy-init="true" class="org.red5.server.stream.consumer.FileConsumer">
         <property name="delayWrite" value="${fileconsumer.delayed.write}"/>
         <property name="queueThreshold" value="${fileconsumer.queue.size}"/>
+        <property name="waitForVideoKeyframe" value="${fileconsumer.wait.for.keyframe}"/>
     </bean>
 
     <!-- ClientBroadcastStream and PlaylistSubscriberStream
