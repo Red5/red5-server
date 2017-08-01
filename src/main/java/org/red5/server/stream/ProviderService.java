@@ -169,13 +169,15 @@ public class ProviderService implements IProviderService {
         if (bs != null) {
             log.debug("Unsubscribing scope {} from provider {}", broadcastScope, bs.getProvider());
             broadcastScope.unsubscribe(bs.getProvider());
-        }
-        // if the scope has no listeners try to remove it
-        if (!((BasicScope) broadcastScope).hasEventListeners()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Scope has no event listeners attempting removal");
-            }
-            scope.removeChildScope(broadcastScope);
+            // if the scope has no listeners try to remove it
+            if (!((BasicScope) broadcastScope).hasEventListeners()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Scope has no event listeners attempting removal");
+                }
+                scope.removeChildScope(broadcastScope);
+            }            
+        } else {
+            log.debug("Broadcast scope was null for {}", name);
         }
         // verify that scope was removed
         return scope.getBasicScope(ScopeType.BROADCAST, name) == null;
