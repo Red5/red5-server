@@ -21,6 +21,7 @@ package org.red5.server.stream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -76,6 +77,8 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
     private static final Logger log = LoggerFactory.getLogger(ServerStream.class);
 
     private static final long WAIT_THRESHOLD = 0;
+
+    private static EnumSet<StreamState> PLAYING_OR_PAUSED = EnumSet.of(StreamState.PLAYING, StreamState.PAUSED);
 
     /**
      * Stream published name
@@ -424,7 +427,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
      * Start this server-side stream
      */
     public void start() {
-        if (state != StreamState.UNINIT) {
+        if (state.get() != StreamState.UNINIT) {
             throw new IllegalStateException("State " + state + " not valid to start");
         }
         if (items.size() == 0) {
@@ -452,7 +455,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
      * Stop this server-side stream
      */
     public void stop() {
-        if (state == StreamState.PLAYING || state == StreamState.PAUSED) {
+        if (PLAYING_OR_PAUSED.contains(state.get())) {
             if (liveJobName != null) {
                 scheduler.removeScheduledJob(liveJobName);
                 liveJobName = null;
@@ -493,7 +496,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
     /** {@inheritDoc} */
     @SuppressWarnings("incomplete-switch")
     public void pause() {
-        switch (state) {
+        switch (state.get()) {
             case PLAYING:
                 setState(StreamState.PAUSED);
                 break;
@@ -508,14 +511,14 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
     /** {@inheritDoc} */
     public void seek(int position) {
         // seek only allowed when playing or paused
-        if (state == StreamState.PLAYING || state == StreamState.PAUSED) {
+        if (PLAYING_OR_PAUSED.contains(state.get())) {
             sendVODSeekCM(msgIn, position);
         }
     }
 
     /** {@inheritDoc} */
     public void close() {
-        if (state == StreamState.PLAYING || state == StreamState.PAUSED) {
+        if (PLAYING_OR_PAUSED.contains(state.get())) {
             stop();
         }
         if (msgOut != null) {
@@ -567,7 +570,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
      */
     protected void play(IPlayItem item) {
         // dont play unless we are stopped
-        if (state == StreamState.STOPPED) {
+        if (state.get() == StreamState.STOPPED) {
             // assume this is not live stream
             boolean isLive = false;
             if (providerService != null) {
@@ -738,7 +741,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
                     delta = nextTS - vodStartTS - (System.currentTimeMillis() - serverStartTS);
                     if (delta < WAIT_THRESHOLD) {
                         if (doPushMessage()) {
-                            if (state != StreamState.PLAYING) {
+                            if (state.get() != StreamState.PLAYING) {
                                 // Stream is not playing, don't load more messages
                                 nextRTMPMessage = null;
                             }
@@ -757,7 +760,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
                 if (vodJobName != null) {
                     vodJobName = null;
                     if (doPushMessage()) {
-                        if (state == StreamState.PLAYING) {
+                        if (state.get() == StreamState.PLAYING) {
                             scheduleNextMessage();
                         } else {
                             // Stream is paused, don't load more messages
