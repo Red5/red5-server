@@ -38,6 +38,7 @@ import org.apache.mina.core.service.AbstractIoService;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.service.IoServiceStatistics;
 import org.apache.mina.core.service.SimpleIoProcessorPool;
+import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.SocketSessionConfig;
@@ -93,7 +94,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
 
     protected int receiveBufferSize = 65536;
 
-    private int readerIdleTime = 2;
+    // maximum idle time 1m
+    private int idleTime = 60;
 
     private int trafficClass = 0x08 | 0x10;
 
@@ -171,8 +173,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         sessionConf.setMaxReadBufferSize(receiveBufferSize);
         // sets the interval (seconds) between each throughput calculation, the default value is 3 seconds
         sessionConf.setThroughputCalculationInterval(thoughputCalcInterval);
-        // set the reader idle time (seconds)
-        sessionConf.setReaderIdleTime(readerIdleTime);
+        // set the idle time (seconds)
+        sessionConf.setIdleTime(IdleStatus.BOTH_IDLE, idleTime);
         sessionConf.setKeepAlive(keepAlive);
         // to prevent setting of the traffic class we expect a value of -1
         if (trafficClass == -1) {
@@ -382,8 +384,17 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
      * @param readerIdleTime
      *            the readerIdleTime to set
      */
+    @Deprecated
     public void setReaderIdleTime(int readerIdleTime) {
-        this.readerIdleTime = readerIdleTime;
+    }
+
+    /**
+     * Sets the idle time for connected sessions.
+     * 
+     * @param idleTime in seconds
+     */
+    public void setIdleTime(int idleTime) {
+        this.idleTime = idleTime;
     }
 
     /**
