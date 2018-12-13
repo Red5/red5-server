@@ -21,7 +21,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
     <script>
     $(document).ready(function(){
-      var socket = new WebSocket('ws://localhost:8081/chat', 'chat');
+      var socket = new WebSocket('ws://localhost:5080/chat/', 'chat');
       socket.onmessage = function(event){
         $('#messages').append($('<li>').text(event.data));
       };

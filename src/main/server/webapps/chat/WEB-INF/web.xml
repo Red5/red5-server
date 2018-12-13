@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<web-app 
-   xmlns="http://java.sun.com/xml/ns/j2ee" 
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
-   version="2.4"> 
- 
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+         http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     <display-name>chat</display-name>
-	
-	<context-param>
-		<param-name>webAppRootKey</param-name>
-		<param-value>/chat</param-value>
-	</context-param>
- 
-    <listener>
-        <listener-class>org.red5.logging.ContextLoggingListener</listener-class>
-    </listener>
-    
+    <context-param>
+        <param-name>webAppRootKey</param-name>
+        <param-value>/chat</param-value>
+    </context-param>
+    <!-- WebSocket subprotocols -->
+    <context-param>
+        <param-name>subProtocols</param-name>
+        <param-value>chat,json</param-value>
+    </context-param>
+    <!-- WebSocket filter -->
     <filter>
-        <filter-name>LoggerContextFilter</filter-name>
-        <filter-class>org.red5.logging.LoggerContextFilter</filter-class>
+        <filter-name>WebSocketFilter</filter-name>
+        <filter-class>org.red5.net.websocket.server.WsFilter</filter-class>
+        <async-supported>true</async-supported>
     </filter>
-    
     <filter-mapping>
-        <filter-name>LoggerContextFilter</filter-name>
+        <filter-name>WebSocketFilter</filter-name>
         <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
-
 </web-app>

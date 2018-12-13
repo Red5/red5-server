@@ -12,24 +12,22 @@
         <!-- Expand war files prior to startup of the remaining services -->
         <property name="expandWars" value="true" />
     </bean>
-    
+
     <!--
     The tomcat connectors may be blocking or non-blocking. Select between either option via the protocol property.
         Blocking I/O:
             <property name="protocol" value="org.apache.coyote.http11.Http11Protocol" />
         Non-blocking I/O:
-            <property name="protocol" value="org.apache.coyote.http11.Http11NioProtocol" />  
+            <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
      -->
-    
     <!-- Tomcat without SSL enabled -->
     <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader,warDeployer" lazy-init="true">
-
+        <property name="websocketEnabled" value="true" />
         <property name="webappFolder" value="${red5.root}/webapps" />
-        
         <property name="connectors">
             <list>
                 <bean name="httpConnector" class="org.red5.server.tomcat.TomcatConnector">
-                    <property name="protocol" value="org.apache.coyote.http11.Http11NioProtocol" />
+                    <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
                     <property name="address" value="${http.host}:${http.port}" />
                     <property name="redirectPort" value="${https.port}" />
                     <property name="connectionProperties">
@@ -42,13 +40,11 @@
                 </bean>
             </list>
         </property>
-        
         <property name="baseHost">
            <bean class="org.apache.catalina.core.StandardHost">
                <property name="name" value="${http.host}" />
            </bean>
         </property>
-
         <property name="valves">
             <list>
                 <bean id="valve.access" class="org.apache.catalina.valves.AccessLogValve">
@@ -60,25 +56,23 @@
                 </bean>
             </list>
         </property>
-        
     </bean>
- 
+
     <!-- Tomcat with SSL enabled -->
 <!--
     <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
-
+        <property name="websocketEnabled" value="true" />
         <property name="webappFolder" value="${red5.root}/webapps" />
-        
         <property name="connectors">
             <list>
                 <bean name="httpConnector" class="org.red5.server.tomcat.TomcatConnector">
-                    <property name="protocol" value="org.apache.coyote.http11.Http11NioProtocol" />
+                    <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
                     <property name="address" value="${http.host}:${http.port}" />
                     <property name="redirectPort" value="${https.port}" />
                 </bean>
                 <bean name="httpsConnector" class="org.red5.server.tomcat.TomcatConnector">
                     <property name="secure" value="true" />
-                    <property name="protocol" value="org.apache.coyote.http11.Http11NioProtocol" />
+                    <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
                     <property name="address" value="${http.host}:${https.port}" />
                     <property name="redirectPort" value="${http.port}" />
                     <property name="connectionProperties">
@@ -105,22 +99,12 @@
                 </bean>
             </list>
         </property>
-
         <property name="baseHost">
             <bean class="org.apache.catalina.core.StandardHost">
                 <property name="name" value="${http.host}" />
             </bean>
         </property>
-        
     </bean>
 -->
-    <!-- This entry enabled websocket support on port 8081 at localhost -->
-    <bean id="webSocketTransport" class="org.red5.net.websocket.WebSocketTransport">
-        <property name="addresses">
-            <list>
-                <value>${ws.host}:${ws.port}</value>
-            </list>
-        </property>
-    </bean>
 
 </beans>
