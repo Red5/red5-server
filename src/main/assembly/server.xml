@@ -148,33 +148,6 @@
                 <include>*.swf</include>
             </includes>
         </fileSet>
-        <!-- Installer -->
-        <fileSet>
-            <directory>${project.basedir}/src/main/server/webapps/installer</directory>
-            <outputDirectory>webapps/installer</outputDirectory>
-            <includes>
-                <include>*.html</include>
-                <include>*.js</include>
-                <include>*.swf</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/main/server/webapps/installer/WEB-INF</directory>
-            <outputDirectory>webapps/installer/WEB-INF</outputDirectory>
-            <includes>
-                <include>*.xml</include>
-                <include>*.properties</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/main/server/webapps/installer/history</directory>
-            <outputDirectory>webapps/installer/history</outputDirectory>
-            <includes>
-                <include>*.html</include>
-                <include>*.js</include>
-                <include>*.css</include>
-            </includes>
-        </fileSet>
         <!-- Live -->
         <fileSet>
             <directory>${project.basedir}/src/main/server/webapps/live/WEB-INF</directory>
