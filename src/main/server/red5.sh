@@ -56,7 +56,7 @@ if [ -z "$RED5_OPTS" ]; then
   export RED5_OPTS=9999
 fi
 
-for JAVA in "${JAVA_HOME}/bin/java" "${JAVA_HOME}/Home/bin/java" "/usr/bin/java" "/usr/local/bin/java"
+for JAVA in "/usr/bin/java" "/usr/local/bin/java" "${JAVA_HOME}/bin/java" "${JAVA_HOME}/Home/bin/java" 
 do
   if [ -x "$JAVA" ]
   then

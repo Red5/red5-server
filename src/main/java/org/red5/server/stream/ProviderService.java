@@ -21,6 +21,7 @@ package org.red5.server.stream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Set;
 
 import org.red5.logging.Red5LoggerFactory;
@@ -47,6 +48,9 @@ public class ProviderService implements IProviderService {
 
     private static final Logger log = Red5LoggerFactory.getLogger(ProviderService.class);
 
+    // whether or not to support FCS/FMS/AMS live-wait (default to off)
+    private boolean liveWaitSupport;
+
     /** {@inheritDoc} */
     public INPUT_TYPE lookupProviderInput(IScope scope, String name, int type) {
         INPUT_TYPE result = INPUT_TYPE.NOT_FOUND;
@@ -58,7 +62,7 @@ public class ProviderService implements IProviderService {
             result = INPUT_TYPE.VOD;
             File file = getStreamFile(scope, name);
             if (file == null) {
-                if (type == -2) {
+                if (type == -2 && liveWaitSupport) {
                     result = INPUT_TYPE.LIVE_WAIT;
                 }
                 log.debug("Requested stream: {} does not appear to be of VOD type", name);
@@ -175,7 +179,7 @@ public class ProviderService implements IProviderService {
                     log.debug("Scope has no event listeners attempting removal");
                 }
                 scope.removeChildScope(broadcastScope);
-            }            
+            }
         } else {
             log.debug("Broadcast scope was null for {}", name);
         }
@@ -209,33 +213,38 @@ public class ProviderService implements IProviderService {
         IStreamFilenameGenerator filenameGenerator = (IStreamFilenameGenerator) ScopeUtils.getScopeService(scope, IStreamFilenameGenerator.class, DefaultStreamFilenameGenerator.class);
         // get the filename
         String filename = filenameGenerator.generateFilename(scope, name, GenerationType.PLAYBACK);
-        File file;
+        // start life as null and only update upon positive outcome
+        File file = null;
         try {
+            // get ahead of the game with the direct check first
+            File tmp = Paths.get(filename).toFile();
             // most likely case first
-            if (!filenameGenerator.resolvesToAbsolutePath()) {
+            if (tmp.exists()) {
+                file = tmp;
+            } else if (!filenameGenerator.resolvesToAbsolutePath()) {
                 try {
                     file = scope.getContext().getResource(filename).getFile();
                 } catch (FileNotFoundException e) {
                     log.debug("File {} not found, nulling it", filename);
-                    file = null;
                 }
-            } else {
-                file = new File(filename);
-            }
-            // check file existence
-            if (file != null && !file.exists()) {
-                // if it does not exist then null it out
-                file = null;
             }
         } catch (IOException e) {
             log.info("Exception attempting to lookup file: {}", e.getMessage());
             if (log.isDebugEnabled()) {
                 log.warn("Exception attempting to lookup file: {}", name, e);
             }
-            // null out the file (fix for issue #238)
-            file = null;
         }
         return file;
+    }
+
+    /** {@inheritDoc} */
+    public boolean isLiveWaitSupport() {
+        return liveWaitSupport;
+    }
+
+    /** {@inheritDoc} */
+    public void setLiveWaitSupport(boolean liveWaitSupport) {
+        this.liveWaitSupport = liveWaitSupport;
     }
 
 }

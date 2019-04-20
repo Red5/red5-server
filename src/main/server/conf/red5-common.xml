@@ -72,7 +72,12 @@
     <bean id="streamService" class="org.red5.server.stream.StreamService"/>
 
     <!-- High level access to broadcasted streams -->
-    <bean id="providerService" class="org.red5.server.stream.ProviderService"/>
+    <bean id="providerService" class="org.red5.server.stream.ProviderService">
+        <!-- Uncomment this if you want legacy live-wait support, otherwise its now off by default -->
+        <!--
+        <property name="liveWaitSupport" value="true"/>
+        -->
+    </bean>
 
     <!-- Provides output to consumers -->
     <bean id="consumerService" class="org.red5.server.stream.ConsumerService"/>
