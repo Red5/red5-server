@@ -83,9 +83,7 @@
     <bean id="consumerService" class="org.red5.server.stream.ConsumerService"/>
 
     <!-- Scheduling service -->
-    <bean id="schedulingService" class="org.red5.server.scheduling.QuartzSchedulingService">
-        <property name="configFile" value="${red5.root}/conf/quartz.properties"/>   
-    </bean>
+    <bean id="schedulingService" class="org.red5.server.scheduling.JDKSchedulingService"/>
 
     <!-- Use injection to setup thread pool for remoting clients -->
     <bean id="remotingClient" class="org.red5.server.net.remoting.RemotingClient">

@@ -58,14 +58,15 @@ public class ProviderService implements IProviderService {
             // we have live input
             result = INPUT_TYPE.LIVE;
         } else {
-            // "default" to VOD as a missing file will be picked up later on 
-            result = INPUT_TYPE.VOD;
             File file = getStreamFile(scope, name);
             if (file == null) {
                 if (type == -2 && liveWaitSupport) {
                     result = INPUT_TYPE.LIVE_WAIT;
                 }
                 log.debug("Requested stream: {} does not appear to be of VOD type", name);
+            } else {
+                // "default" to VOD as a missing file will be picked up later on
+                result = INPUT_TYPE.VOD;
             }
         }
         return result;

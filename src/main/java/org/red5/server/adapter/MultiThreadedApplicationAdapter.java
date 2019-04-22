@@ -68,7 +68,7 @@ import org.red5.server.messaging.IMessageInput;
 import org.red5.server.plugin.PluginDescriptor;
 import org.red5.server.plugin.PluginRegistry;
 import org.red5.server.plugin.Red5Plugin;
-import org.red5.server.scheduling.QuartzSchedulingService;
+import org.red5.server.scheduling.JDKSchedulingService;
 import org.red5.server.so.SharedObjectService;
 import org.red5.server.stream.IProviderService;
 import org.red5.server.stream.PlaylistSubscriberStream;
@@ -952,7 +952,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return Name of the scheduled job
      */
     public String addScheduledJob(int interval, IScheduledJob job) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         return service.addScheduledJob(interval, job);
     }
 
@@ -967,7 +967,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(long timeDelta, IScheduledJob job) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         return service.addScheduledOnceJob(timeDelta, job);
     }
 
@@ -983,7 +983,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(Date date, IScheduledJob job) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         return service.addScheduledOnceJob(date, job);
     }
 
@@ -999,7 +999,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return the name of the scheduled job
      */
     public String addScheduledJobAfterDelay(int interval, IScheduledJob job, int delay) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         return service.addScheduledJobAfterDelay(interval, job, delay);
     }
 
@@ -1010,7 +1010,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *            Scheduled job name
      */
     public void pauseScheduledJob(String name) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         service.pauseScheduledJob(name);
     }
 
@@ -1021,7 +1021,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *            Scheduled job name
      */
     public void resumeScheduledJob(String name) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         service.resumeScheduledJob(name);
     }
 
@@ -1032,7 +1032,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *            Scheduled job name
      */
     public void removeScheduledJob(String name) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         service.removeScheduledJob(name);
     }
 
@@ -1042,7 +1042,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return List of scheduled job names as list of Strings.
      */
     public List<String> getScheduledJobNames() {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, QuartzSchedulingService.class, false);
+        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         return service.getScheduledJobNames();
     }
 
