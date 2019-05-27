@@ -121,27 +121,27 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * List of application listeners.
      */
-    private CopyOnWriteArraySet<IApplication> listeners = new CopyOnWriteArraySet<IApplication>();
+    private CopyOnWriteArraySet<IApplication> listeners = new CopyOnWriteArraySet<>();
 
     /**
-     * Scheduling service. Uses Quartz. Adds and removes scheduled jobs.
+     * Scheduling service; adds and removes scheduled jobs.
      */
     protected ISchedulingService schedulingService;
 
     /**
      * List of handlers that protect stream publishing.
      */
-    private Set<IStreamPublishSecurity> publishSecurity = new HashSet<IStreamPublishSecurity>();
+    private Set<IStreamPublishSecurity> publishSecurity = new HashSet<>();
 
     /**
      * List of handlers that protect stream playback.
      */
-    private Set<IStreamPlaybackSecurity> playbackSecurity = new HashSet<IStreamPlaybackSecurity>();
+    private Set<IStreamPlaybackSecurity> playbackSecurity = new HashSet<>();
 
     /**
      * List of handlers that protect shared objects.
      */
-    private Set<ISharedObjectSecurity> sharedObjectSecurity = new HashSet<ISharedObjectSecurity>();
+    private Set<ISharedObjectSecurity> sharedObjectSecurity = new HashSet<>();
 
     /**
      * Register a listener that will get notified about application events.
@@ -848,6 +848,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         return service.hasSharedObject(scope, name);
     }
 
+    /** {@inheritDoc} */
+    public boolean clearSharedObjects(IScope scope, String name) {
+        ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
+        return service.clearSharedObjects(scope, name);
+    }
+
     /* Wrapper around the stream interfaces */
 
     /** {@inheritDoc} */
@@ -952,8 +958,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return Name of the scheduled job
      */
     public String addScheduledJob(int interval, IScheduledJob job) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        return service.addScheduledJob(interval, job);
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        return schedulingService.addScheduledJob(interval, job);
     }
 
     /**
@@ -967,8 +975,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(long timeDelta, IScheduledJob job) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        return service.addScheduledOnceJob(timeDelta, job);
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        return schedulingService.addScheduledOnceJob(timeDelta, job);
     }
 
     /**
@@ -983,8 +993,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(Date date, IScheduledJob job) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        return service.addScheduledOnceJob(date, job);
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        return schedulingService.addScheduledOnceJob(date, job);
     }
 
     /**
@@ -999,8 +1011,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return the name of the scheduled job
      */
     public String addScheduledJobAfterDelay(int interval, IScheduledJob job, int delay) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        return service.addScheduledJobAfterDelay(interval, job, delay);
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        return schedulingService.addScheduledJobAfterDelay(interval, job, delay);
     }
 
     /**
@@ -1010,8 +1024,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *            Scheduled job name
      */
     public void pauseScheduledJob(String name) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        service.pauseScheduledJob(name);
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        schedulingService.pauseScheduledJob(name);
     }
 
     /**
@@ -1021,8 +1037,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *            Scheduled job name
      */
     public void resumeScheduledJob(String name) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        service.resumeScheduledJob(name);
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        schedulingService.resumeScheduledJob(name);
     }
 
     /**
@@ -1032,8 +1050,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *            Scheduled job name
      */
     public void removeScheduledJob(String name) {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        service.removeScheduledJob(name);
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        schedulingService.removeScheduledJob(name);
     }
 
     /**
@@ -1042,8 +1062,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return List of scheduled job names as list of Strings.
      */
     public List<String> getScheduledJobNames() {
-        ISchedulingService service = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
-        return service.getScheduledJobNames();
+        if (schedulingService == null) {
+            schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
+        }
+        return schedulingService.getScheduledJobNames();
     }
 
     /**
@@ -1079,12 +1101,6 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
             file = null;
         }
         return duration;
-    }
-
-    /** {@inheritDoc} */
-    public boolean clearSharedObjects(IScope scope, String name) {
-        ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
-        return service.clearSharedObjects(scope, name);
     }
 
     /**

@@ -26,7 +26,7 @@
 	
     <bean id="providerService" class="org.red5.server.stream.ProviderService" />
     <bean id="consumerService" class="org.red5.server.stream.ConsumerService" />
-    <bean id="schedulingService" class="org.red5.server.scheduling.QuartzSchedulingService" />
+    <bean id="schedulingService" class="org.red5.server.scheduling.JDKSchedulingService" />
 
     <!-- Global stuff from red5-default.xml -->
     <bean id="global.clientRegistry" class="org.red5.server.ClientRegistry" />

@@ -17,9 +17,7 @@
     </appender>
     <root level="TRACE">
         <appender-ref ref="CONSOLE" />
-<!--
         <appender-ref ref="FILE" />
- -->
     </root>
 <!-- 
     <logger name="org.red5.server" level="TRACE">

@@ -47,7 +47,8 @@ import org.red5.server.net.remoting.message.RemotingPacket;
 import org.red5.server.net.servlet.ServletUtils;
 
 /**
- * Connection class so the Red5 object works in methods invoked through remoting. Attributes are stored in the session of the implementing servlet container.
+ * Connection class so the Red5 object works in methods invoked through remoting. Attributes are stored in the session of the implementing
+ * servlet container.
  * 
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
@@ -396,8 +397,12 @@ public class RemotingConnection implements IRemotingConnection {
         if (name == null) {
             return null;
         }
-
         return session.getAttribute(name);
+    }
+
+    @Override
+    public Object getAttribute(Enum<?> enm) {
+        return getAttribute(enm.name());
     }
 
     /** {@inheritDoc} */
@@ -451,6 +456,11 @@ public class RemotingConnection implements IRemotingConnection {
         return (getAttribute(name) != null);
     }
 
+    @Override
+    public boolean hasAttribute(Enum<?> enm) {
+        return hasAttribute(enm.name());
+    }
+
     /** {@inheritDoc} */
     public boolean removeAttribute(String name) {
         if (name == null) {
@@ -464,6 +474,11 @@ public class RemotingConnection implements IRemotingConnection {
             session.removeAttribute(name);
         }
         return true;
+    }
+
+    @Override
+    public boolean removeAttribute(Enum<?> enm) {
+        return removeAttribute(enm.name());
     }
 
     /** {@inheritDoc} */
@@ -494,6 +509,11 @@ public class RemotingConnection implements IRemotingConnection {
             session.setAttribute(name, value);
         }
         return true;
+    }
+
+    @Override
+    public boolean setAttribute(Enum<?> enm, Object value) {
+        return setAttribute(enm.name(), value);
     }
 
     /** {@inheritDoc} */

@@ -24,11 +24,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
     public boolean appStart(IScope app) {
         // save ref
         appScope = app;
-        // create persistent SO
-        createSharedObject(app, persistentSO, true);
-        // get the SO
+        // create / get the SO
         ISharedObject sharedObject = getSharedObject(app, persistentSO, true);
-        //
         return super.appStart(app);
     }
 
