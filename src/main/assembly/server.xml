@@ -60,6 +60,7 @@
             </includes>
             <excludes>
                 <exclude>red5-server-*.jar</exclude>
+                <exclude>red5-service-*.jar</exclude>
                 <exclude>servlet-api-*.jar</exclude>
                 <exclude>javassist-*.jar</exclude>
                 <exclude>mina-*.jar</exclude>
