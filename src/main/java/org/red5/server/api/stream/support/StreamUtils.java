@@ -39,7 +39,7 @@ public abstract class StreamUtils {
     private static final Logger logger = LoggerFactory.getLogger(StreamUtils.class);
 
     /* Map to hold reference to the instanced server streams */
-    private static volatile ConcurrentMap<String, IServerStream> serverStreamMap = new ConcurrentHashMap<String, IServerStream>(16, 0.75f, 4);
+    private static volatile ConcurrentMap<String, IServerStream> serverStreamMap = new ConcurrentHashMap<>(16, 0.75f, 4);
 
     /**
      * Creates server stream

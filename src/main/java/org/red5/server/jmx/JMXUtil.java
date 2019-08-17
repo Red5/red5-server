@@ -108,7 +108,7 @@ public class JMXUtil {
             }
             log.debug("Register name: {}", cName);
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            mbs.registerMBean(new StandardMBean(Class.forName(clazz.getName()).newInstance(), interfaceClass), new ObjectName("org.red5.server:type=" + cName));
+            mbs.registerMBean(new StandardMBean(Class.forName(clazz.getName()).getDeclaredConstructor().newInstance(), interfaceClass), new ObjectName("org.red5.server:type=" + cName));
             status = true;
         } catch (Exception e) {
             log.error("Could not register the {} MBean", clazz.getName(), e);

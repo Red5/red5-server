@@ -119,7 +119,7 @@
     </bean>
 -->
 
-    <!-- Cache to use for keyframe metadata. -->
+    <!-- Cache to use for keyframe metadata -->
     <bean id="keyframe.cache" class="org.red5.io.CachingFileKeyFrameMetaCache">
         <property name="maxCacheEntry" value="${keyframe.cache.entry.max}" />
     </bean>

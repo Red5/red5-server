@@ -321,7 +321,7 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection>, Appl
         } else if (cls == RTMPTConnection.class) {
             conn = (RTMPTConnection) applicationContext.getBean(RTMPTConnection.class);
         } else {
-            conn = (RTMPConnection) cls.newInstance();
+            conn = (RTMPConnection) cls.getDeclaredConstructor().newInstance();
         }
         return conn;
     }

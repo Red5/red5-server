@@ -24,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -346,6 +345,7 @@ public class FilePersistence extends RamPersistence {
      *            Object to attach to
      * @return Persistable object
      */
+    @SuppressWarnings("deprecation")
     private IPersistable doLoad(String name, IPersistable object) {
         log.debug("doLoad - name: {} object: {}", name, object);
         IPersistable result = object;
@@ -412,11 +412,7 @@ public class FilePersistence extends RamPersistence {
                                 throw new NoSuchMethodException();
                             }
                             result = (IPersistable) constructor.newInstance(in);
-                        } catch (NoSuchMethodException err) {
-                            // no valid constructor found, use empty constructor
-                            result = (IPersistable) theClass.newInstance();
-                            result.deserialize(in);
-                        } catch (InvocationTargetException err) {
+                        } catch (Exception err) {
                             // error while invoking found constructor, use empty constructor
                             result = (IPersistable) theClass.newInstance();
                             result.deserialize(in);
@@ -487,15 +483,17 @@ public class FilePersistence extends RamPersistence {
      * 
      * @param object
      *            Persistable object
-     * @return <pre>
-     * true
-     * </pre>
+     * @return
+     * 
+     *         <pre>
+     *         true
+     *         </pre>
      * 
      *         on success,
      * 
      *         <pre>
-     * false
-     * </pre>
+     *         false
+     *         </pre>
      * 
      *         otherwise
      */

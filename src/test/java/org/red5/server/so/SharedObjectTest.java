@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.red5.server.so.Complex;
 import org.red5.server.api.IAttributeStore;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.so.ISharedObject;
