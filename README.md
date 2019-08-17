@@ -98,6 +98,8 @@ Features supported via plugin (These are mostly deprecated):
 # Older Releases
 The artifacts for the following releases are no longer available; if your project requires them, you'll have to build them from source. The listings are here only for historical purposes.
 
+
+ * [Red5 1.1.1 Release](https://github.com/Red5/red5-server/releases/tag/v1.1.1-RELEASE) (29 May 2019)
  * [Red5 1.1.0 Release](https://github.com/Red5/red5-server/releases/tag/v1.1.0-RELEASE) (22 April 2019)
  * [Red5 1.0.10 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.10-RELEASE) (9 February 2019)
  * [Red5 1.0.9 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.9-RELEASE) (11 June 2017)
