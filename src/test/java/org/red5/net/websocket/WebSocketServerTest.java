@@ -1,19 +1,8 @@
 /*
- * RED5 Open Source Flash Server - https://github.com/red5
- * 
- * Copyright 2006-2018 by respective authors (see below). All rights reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * RED5 Open Source Flash Server - https://github.com/red5 Copyright 2006-2018 by respective authors (see below). All rights reserved. Licensed under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.red5.net.websocket;
@@ -76,32 +65,13 @@ public class WebSocketServerTest {
     private static Object writtenResult;
 
     private static WebSocketScope scope;
-    
+
     /*
-     * Test data from the rfc
-        <pre>	   
-        A single-frame unmasked text message (contains "Hello")
-        0x81 0x05 0x48 0x65 0x6c 0x6c 0x6f
-        
-        A single-frame masked text message (contains "Hello")
-        0x81 0x85 0x37 0xfa 0x21 0x3d 0x7f 0x9f 0x4d 0x51 0x58
-        
-        A fragmented unmasked text message
-        0x01 0x03 0x48 0x65 0x6c (contains "Hel")
-        0x80 0x02 0x6c 0x6f (contains "lo")
-        
-        Unmasked Ping request and masked Ping response
-        
-        0x89 0x05 0x48 0x65 0x6c 0x6c 0x6f (contains a body of "Hello", but the contents of the body are arbitrary)
-        
-        0x8a 0x85 0x37 0xfa 0x21 0x3d 0x7f 0x9f 0x4d 0x51 0x58 (contains a body of "Hello", matching the body of the ping)
-        
-        A 256 bytes binary message in a single unmasked frame
-        0x82 0x7E 0x0100 [256 bytes of binary data]
-        
-        A 64KiB binary message in a single unmasked frame
-        0x82 0x7F 0x0000000000010000 [65536 bytes of binary data]
-        </pre>	 
+     * Test data from the rfc <pre> A single-frame unmasked text message (contains "Hello") 0x81 0x05 0x48 0x65 0x6c 0x6c 0x6f A single-frame masked text message (contains "Hello")
+     * 0x81 0x85 0x37 0xfa 0x21 0x3d 0x7f 0x9f 0x4d 0x51 0x58 A fragmented unmasked text message 0x01 0x03 0x48 0x65 0x6c (contains "Hel") 0x80 0x02 0x6c 0x6f (contains "lo") Unmasked
+     * Ping request and masked Ping response 0x89 0x05 0x48 0x65 0x6c 0x6c 0x6f (contains a body of "Hello", but the contents of the body are arbitrary) 0x8a 0x85 0x37 0xfa 0x21 0x3d
+     * 0x7f 0x9f 0x4d 0x51 0x58 (contains a body of "Hello", matching the body of the ping) A 256 bytes binary message in a single unmasked frame 0x82 0x7E 0x0100 [256 bytes of binary
+     * data] A 64KiB binary message in a single unmasked frame 0x82 0x7F 0x0000000000010000 [65536 bytes of binary data] </pre>
      */
     @SuppressWarnings("unused")
     @Test
@@ -194,11 +164,11 @@ public class WebSocketServerTest {
         WebSocketConnection conn = new WebSocketConnection(scope, sess);
         //session.setAttribute(Constants.CONNECTION, conn);
         // decode
-//        DummyDecoder decoder = new DummyDecoder();
-//        decoder.dummyDecode(session, in, new DummyOutput());
-//        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
-//        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
-//        log.info("testMasked exit");
+        //        DummyDecoder decoder = new DummyDecoder();
+        //        decoder.dummyDecode(session, in, new DummyOutput());
+        //        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
+        //        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
+        //        log.info("testMasked exit");
     }
 
     @SuppressWarnings("unused")
@@ -212,11 +182,11 @@ public class WebSocketServerTest {
         WebSocketConnection conn = new WebSocketConnection(scope, sess);
         //session.setAttribute(Constants.CONNECTION, conn);
         // decode
-//        DummyDecoder decoder = new DummyDecoder();
-//        decoder.dummyDecode(session, in, new DummyOutput());
-//        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
-//        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
-//        log.info("testUnmasked exit");
+        //        DummyDecoder decoder = new DummyDecoder();
+        //        decoder.dummyDecode(session, in, new DummyOutput());
+        //        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
+        //        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
+        //        log.info("testUnmasked exit");
     }
 
     @SuppressWarnings("unused")
@@ -231,96 +201,96 @@ public class WebSocketServerTest {
         WebSocketConnection conn = new WebSocketConnection(scope, sess);
         //session.setAttribute(Constants.CONNECTION, conn);
         // decode
-//        DummyDecoder decoder = new DummyDecoder();
-//        DummyOutput out = new DummyOutput();
-//        // create io buffer
-//        IoBuffer in = IoBuffer.allocate(5, false);
-//        // add part 1
-//        in.put(part1);
-//        in.flip();
-//        // decode with first fragment
-//        decoder.dummyDecode(session, in, out);
-//        // add part 2
-//        in = IoBuffer.allocate(4, false);
-//        in.put(part2);
-//        in.flip();
-//        // decode with second fragment
-//        decoder.dummyDecode(session, in, out);
-//        // check result
-//        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
-//        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
+        //        DummyDecoder decoder = new DummyDecoder();
+        //        DummyOutput out = new DummyOutput();
+        //        // create io buffer
+        //        IoBuffer in = IoBuffer.allocate(5, false);
+        //        // add part 1
+        //        in.put(part1);
+        //        in.flip();
+        //        // decode with first fragment
+        //        decoder.dummyDecode(session, in, out);
+        //        // add part 2
+        //        in = IoBuffer.allocate(4, false);
+        //        in.put(part2);
+        //        in.flip();
+        //        // decode with second fragment
+        //        decoder.dummyDecode(session, in, out);
+        //        // check result
+        //        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
+        //        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
         log.info("testFragmented exit");
     }
 
-//    @Test
-//    public void testUnmaskedPing() throws Throwable {
-//        log.info("testUnmaskedPing enter");
-//        // unmasked ping
-//        IoBuffer in = IoBuffer.wrap(new byte[] { (byte) 0x89, (byte) 0x05, (byte) 0x48, (byte) 0x65, (byte) 0x6c, (byte) 0x6c, (byte) 0x6f });
-//        // create session and conn
-//        DummySession session = new DummySession();
-//        WebSocketConnection conn = new WebSocketConnection(session);
-//        session.setAttribute(Constants.CONNECTION, conn);
-//        // decode
-//        DummyDecoder decoder = new DummyDecoder();
-//        decoder.dummyDecode(session, in, new DummyOutput());
-//        assertTrue(((WSMessage) writtenResult).getMessageType() == MessageType.PING);
-//        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
-//        log.info("testUnmaskedPing exit");
-//    }
+    //    @Test
+    //    public void testUnmaskedPing() throws Throwable {
+    //        log.info("testUnmaskedPing enter");
+    //        // unmasked ping
+    //        IoBuffer in = IoBuffer.wrap(new byte[] { (byte) 0x89, (byte) 0x05, (byte) 0x48, (byte) 0x65, (byte) 0x6c, (byte) 0x6c, (byte) 0x6f });
+    //        // create session and conn
+    //        DummySession session = new DummySession();
+    //        WebSocketConnection conn = new WebSocketConnection(session);
+    //        session.setAttribute(Constants.CONNECTION, conn);
+    //        // decode
+    //        DummyDecoder decoder = new DummyDecoder();
+    //        decoder.dummyDecode(session, in, new DummyOutput());
+    //        assertTrue(((WSMessage) writtenResult).getMessageType() == MessageType.PING);
+    //        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
+    //        log.info("testUnmaskedPing exit");
+    //    }
 
-//    @Test
-//    public void testMaskedPong() throws Throwable {
-//        log.info("testMaskedPong enter");
-//        // masked pong
-//        IoBuffer in = IoBuffer.wrap(new byte[] { (byte) 0x8a, (byte) 0x85, (byte) 0x37, (byte) 0xfa, (byte) 0x21, (byte) 0x3d, (byte) 0x7f, (byte) 0x9f, (byte) 0x4d, (byte) 0x51, (byte) 0x58 });
-//        // create session and conn
-//        DummySession session = new DummySession();
-//        WebSocketConnection conn = new WebSocketConnection(session);
-//        session.setAttribute(Constants.CONNECTION, conn);
-//        // decode
-//        DummyDecoder decoder = new DummyDecoder();
-//        decoder.dummyDecode(session, in, new DummyOutput());
-//        assertTrue(((WSMessage) writtenResult).getMessageType() == MessageType.PONG);
-//        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
-//        log.info("testMaskedPong exit");
-//    }
+    //    @Test
+    //    public void testMaskedPong() throws Throwable {
+    //        log.info("testMaskedPong enter");
+    //        // masked pong
+    //        IoBuffer in = IoBuffer.wrap(new byte[] { (byte) 0x8a, (byte) 0x85, (byte) 0x37, (byte) 0xfa, (byte) 0x21, (byte) 0x3d, (byte) 0x7f, (byte) 0x9f, (byte) 0x4d, (byte) 0x51, (byte) 0x58 });
+    //        // create session and conn
+    //        DummySession session = new DummySession();
+    //        WebSocketConnection conn = new WebSocketConnection(session);
+    //        session.setAttribute(Constants.CONNECTION, conn);
+    //        // decode
+    //        DummyDecoder decoder = new DummyDecoder();
+    //        decoder.dummyDecode(session, in, new DummyOutput());
+    //        assertTrue(((WSMessage) writtenResult).getMessageType() == MessageType.PONG);
+    //        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
+    //        log.info("testMaskedPong exit");
+    //    }
 
-//    @Test
-//    public void testUnmaskedRoundTrip() throws Throwable {
-//        log.info("testUnmaskedRoundTrip enter");
-//        // create session and conn
-//        DummySession session = new DummySession();
-//        WebSocketConnection conn = new WebSocketConnection(session);
-//        session.setAttribute(Constants.CONNECTION, conn);
-//        // encode
-//        DummyEncoder encoder = new DummyEncoder();
-//        encoder.dummyEncode(session, Packet.build("Hello".getBytes(), WSMessage.MessageType.TEXT), new DummyOutput());
-//        // decode
-//        DummyDecoder decoder = new DummyDecoder();
-//        decoder.dummyDecode(session, (IoBuffer) writtenResult, new DummyOutput());
-//        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
-//        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
-//        log.info("testUnmaskedRoundTrip exit");
-//    }
+    //    @Test
+    //    public void testUnmaskedRoundTrip() throws Throwable {
+    //        log.info("testUnmaskedRoundTrip enter");
+    //        // create session and conn
+    //        DummySession session = new DummySession();
+    //        WebSocketConnection conn = new WebSocketConnection(session);
+    //        session.setAttribute(Constants.CONNECTION, conn);
+    //        // encode
+    //        DummyEncoder encoder = new DummyEncoder();
+    //        encoder.dummyEncode(session, Packet.build("Hello".getBytes(), WSMessage.MessageType.TEXT), new DummyOutput());
+    //        // decode
+    //        DummyDecoder decoder = new DummyDecoder();
+    //        decoder.dummyDecode(session, (IoBuffer) writtenResult, new DummyOutput());
+    //        assertTrue(((WSMessage) writtenResult).getMessageType() == WSMessage.MessageType.TEXT);
+    //        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
+    //        log.info("testUnmaskedRoundTrip exit");
+    //    }
 
-//    @Test
-//    public void testUnmaskedPingRoundTrip() throws Throwable {
-//        log.info("testUnmaskedPingRoundTrip enter");
-//        // create session and conn
-//        DummySession session = new DummySession();
-//        WebSocketConnection conn = new WebSocketConnection(session);
-//        session.setAttribute(Constants.CONNECTION, conn);
-//        // encode
-//        DummyEncoder encoder = new DummyEncoder();
-//        encoder.dummyEncode(session, Packet.build("Hello".getBytes(), MessageType.PING), new DummyOutput());
-//        // decode
-//        DummyDecoder decoder = new DummyDecoder();
-//        decoder.dummyDecode(session, (IoBuffer) writtenResult, new DummyOutput());
-//        assertTrue(((WSMessage) writtenResult).getMessageType() == MessageType.PING);
-//        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
-//        log.info("testUnmaskedPingRoundTrip exit");
-//    }
+    //    @Test
+    //    public void testUnmaskedPingRoundTrip() throws Throwable {
+    //        log.info("testUnmaskedPingRoundTrip enter");
+    //        // create session and conn
+    //        DummySession session = new DummySession();
+    //        WebSocketConnection conn = new WebSocketConnection(session);
+    //        session.setAttribute(Constants.CONNECTION, conn);
+    //        // encode
+    //        DummyEncoder encoder = new DummyEncoder();
+    //        encoder.dummyEncode(session, Packet.build("Hello".getBytes(), MessageType.PING), new DummyOutput());
+    //        // decode
+    //        DummyDecoder decoder = new DummyDecoder();
+    //        decoder.dummyDecode(session, (IoBuffer) writtenResult, new DummyOutput());
+    //        assertTrue(((WSMessage) writtenResult).getMessageType() == MessageType.PING);
+    //        assertEquals("Hello", ((WSMessage) writtenResult).getMessageAsString());
+    //        log.info("testUnmaskedPingRoundTrip exit");
+    //    }
 
     @Test
     public void testUriWithParams() throws Throwable {
@@ -386,14 +356,14 @@ public class WebSocketServerTest {
         boolean failed;
 
         public Object call() throws Exception {
-//            WSClient client = new WSClient("localhost", 8888);
-//            //WSClient client = new WSClient("localhost", 8888, 8192 * 10);
-//            client.connect();
-//            if (client.isConnected()) {
-//                client.send("This is a test: " + System.currentTimeMillis());
-//            } else {
-//                failed = true;
-//            }
+            //            WSClient client = new WSClient("localhost", 8888);
+            //            //WSClient client = new WSClient("localhost", 8888, 8192 * 10);
+            //            client.connect();
+            //            if (client.isConnected()) {
+            //                client.send("This is a test: " + System.currentTimeMillis());
+            //            } else {
+            //                failed = true;
+            //            }
             return failed;
         }
 
@@ -559,11 +529,11 @@ public class WebSocketServerTest {
     private class DummySession extends WsSession {
 
         //localEndpoint, wsRemoteEndpoint, wsWebSocketContainer, requestUri, requestParameterMap, queryString, userPrincipal, httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig;
-        
+
         public DummySession() throws DeploymentException {
             this(null, null, null, null, null, null, null, RandomStringUtils.randomAlphanumeric(8), null, null, null, false, null);
         }
-        
+
         public DummySession(Endpoint localEndpoint, WsRemoteEndpointImplBase wsRemoteEndpoint, WsWebSocketContainer wsWebSocketContainer, URI requestUri, Map<String, List<String>> requestParameterMap, String queryString, Principal userPrincipal, String httpSessionId, List<Extension> negotiatedExtensions, String subProtocol, Map<String, String> pathParameters, boolean secure, EndpointConfig endpointConfig)
                 throws DeploymentException {
             super(localEndpoint, wsRemoteEndpoint, wsWebSocketContainer, requestUri, requestParameterMap, queryString, userPrincipal, httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);

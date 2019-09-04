@@ -16,7 +16,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
 
     private ISharedObject TSO;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#appStart(org.red5.server.api.scope.IScope)
      */
     @SuppressWarnings("unused")
@@ -29,7 +30,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         return super.appStart(app);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#appStop(org.red5.server.api.scope.IScope)
      */
     @Override
@@ -37,7 +39,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         super.appStop(app);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#roomStart(org.red5.server.api.scope.IScope)
      */
     @Override
@@ -46,7 +49,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         return super.roomStart(room);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#roomStop(org.red5.server.api.scope.IScope)
      */
     @Override
@@ -54,7 +58,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         super.roomStop(room);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#appConnect(org.red5.server.api.IConnection, java.lang.Object[])
      */
     @Override
@@ -68,7 +73,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         return super.appConnect(conn, params);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#roomConnect(org.red5.server.api.IConnection, java.lang.Object[])
      */
     @Override
@@ -76,7 +82,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         return super.roomConnect(conn, params);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#appDisconnect(org.red5.server.api.IConnection)
      */
     @Override
@@ -84,7 +91,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         super.appDisconnect(conn);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#roomDisconnect(org.red5.server.api.IConnection)
      */
     @Override
@@ -92,7 +100,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         super.roomDisconnect(conn);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#roomJoin(org.red5.server.api.IClient, org.red5.server.api.scope.IScope)
      */
     @Override
@@ -100,7 +109,8 @@ public class SOApplication extends MultiThreadedApplicationAdapter {
         return super.roomJoin(client, room);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.red5.server.adapter.MultiThreadedApplicationAdapter#roomLeave(org.red5.server.api.IClient, org.red5.server.api.scope.IScope)
      */
     @Override
