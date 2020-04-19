@@ -2003,4 +2003,26 @@ public class BroadcastRestServiceV2UnitTest {
 		
 	}
 	
+	@Test
+	public void testSendMessage() {
+		Scope scope = mock(Scope.class);
+		String scopeName = "scope";
+		when(scope.getName()).thenReturn(scopeName);
+		
+		String streamId = "stream1";
+		String message = "hi";
+		
+		AntMediaApplicationAdapter app = new AntMediaApplicationAdapter();
+
+		ApplicationContext context = mock(ApplicationContext.class);
+
+		restServiceReal.setAppCtx(context);
+		restServiceReal.setApplication(app);
+		restServiceReal.setScope(scope);
+		assertEquals(false, restServiceReal.sendMessage(message,streamId).isSuccess());
+
+		
+	}
+	
+
 }
