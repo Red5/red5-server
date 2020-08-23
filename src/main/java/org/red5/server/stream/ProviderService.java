@@ -218,6 +218,11 @@ public class ProviderService implements IProviderService {
                     log.debug("File {} not found, nulling it", filename);
                 }
             }
+            // check file existence
+            if (file != null && !file.exists()) {
+                // if it does not exist then null it out
+                file = null;
+            }
         } catch (IOException e) {
             log.info("Exception attempting to lookup file: {}", e.getMessage());
             if (log.isDebugEnabled()) {
