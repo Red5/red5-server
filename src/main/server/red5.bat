@@ -8,7 +8,7 @@ if NOT DEFINED JAVA_HOME goto err
 
 REM JAVA options
 REM You can set JVM additional options here if you want
-if NOT DEFINED JVM_OPTS set JVM_OPTS=-Xms256m -Xmx1g -Xverify:none -XX:+TieredCompilation -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:ReservedCodeCacheSize=32m -Dorg.terracotta.quartz.skipUpdateCheck=true
+if NOT DEFINED JVM_OPTS set JVM_OPTS=-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms256m -Xmx1g -Xverify:none -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m
 REM Set up logging options
 set LOGGING_OPTS=-Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector -Dcatalina.useNaming=true
 REM Set up security options
@@ -17,11 +17,9 @@ set SECURITY_OPTS=-Djava.security.debug=failure
 REM Set up tomcat options
 set TOMCAT_OPTS=-Dcatalina.home=%RED5_HOME%
 REM Native path
-set NATIVE=-Djava.library.path="%RED5_HOME%\lib\native"
-REM Setup python/jython path
-set JYTHON_OPTS=-Dpython.home=lib
+set NATIVE=-Djava.library.path="%RED5_HOME%\lib\amd64-Windows-msvc"
 REM Combined java options
-set JAVA_OPTS=%LOGGING_OPTS% %SECURITY_OPTS% %JAVA_OPTS% %JVM_OPTS% %TOMCAT_OPTS% %NATIVE% %JYTHON_OPTS%
+set JAVA_OPTS=%LOGGING_OPTS% %SECURITY_OPTS% %JAVA_OPTS% %JVM_OPTS% %TOMCAT_OPTS% %NATIVE%
 
 set RED5_CLASSPATH=%RED5_HOME%\red5-service.jar;%RED5_HOME%\conf;%CLASSPATH%
 
