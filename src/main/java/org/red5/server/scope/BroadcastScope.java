@@ -258,7 +258,11 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
      */
     public void setClientBroadcastStream(IClientBroadcastStream clientBroadcastStream) {
         if (this.clientBroadcastStream != null) {
-            log.info("ClientBroadcastStream already exists: {} new: {}", this.clientBroadcastStream, clientBroadcastStream);
+            log.debug("ClientBroadcastStream already exists: {} new: {}", this.clientBroadcastStream, clientBroadcastStream);
+            if (this.clientBroadcastStream == clientBroadcastStream) {
+                // no need to set it if its already set
+                return;
+            }
         }
         this.clientBroadcastStream = clientBroadcastStream;
     }

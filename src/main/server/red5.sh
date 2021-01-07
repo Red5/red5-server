@@ -37,7 +37,7 @@ echo "Running on " $OS
 # JAVA options
 # You can set JVM additional options here if you want
 if [ -z "$JVM_OPTS" ]; then 
-    JVM_OPTS="--illegal-access=debug -Xms256m -Xmx1g -Xverify:none -XX:+TieredCompilation -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m"
+    JVM_OPTS="-Xms256m -Xmx1g -Xverify:none -XX:+TieredCompilation -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m"
 fi
 # Set up security options
 SECURITY_OPTS="-Djava.security.debug=failure"
@@ -56,7 +56,7 @@ if [ -z "$RED5_OPTS" ]; then
   export RED5_OPTS=9999
 fi
 
-for JAVA in "/usr/bin/java" "/usr/local/bin/java" "${JAVA_HOME}/bin/java" "${JAVA_HOME}/Home/bin/java" 
+for JAVA in "${JAVA_HOME}/bin/java" "${JAVA_HOME}/Home/bin/java" "/usr/bin/java" "/usr/local/bin/java" 
 do
   if [ -x "$JAVA" ]
   then
