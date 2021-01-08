@@ -167,11 +167,14 @@
             <version>2.4.0-b180725.0644</version>
         </dependency>
         -->
+        <!-- xerces is not needed when building with JDK11+ -->
+        <!--
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
         </dependency>
+    -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
