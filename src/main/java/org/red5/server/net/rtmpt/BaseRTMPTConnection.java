@@ -106,7 +106,7 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
     @Override
     public void close() {
         closing = true;
-        if (!(pendingOutMessages.isEmpty())) {
+        if (pendingOutMessages.size() > 0) {
             if (log.isTraceEnabled()) {
                 log.trace("Clearing pending messages out: {}", pendingOutMessages.size());
             }
