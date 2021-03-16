@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base RTMPT client / session.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -100,13 +100,13 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
      *            the size the resulting buffer should have
      * @return a buffer containing the data to send or null if no messages are pending
      */
-    abstract public IoBuffer getPendingMessages(int targetSize);
+    public abstract IoBuffer getPendingMessages(int targetSize);
 
     /** {@inheritDoc} */
     @Override
     public void close() {
         closing = true;
-        if (pendingOutMessages.size() > 0) {
+        if (!(pendingOutMessages.isEmpty())) {
             if (log.isTraceEnabled()) {
                 log.trace("Clearing pending messages out: {}", pendingOutMessages.size());
             }
@@ -171,7 +171,7 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         log.debug("decode");
         if (closing || state.getState() == RTMP.STATE_DISCONNECTED) {
             // connection is being closed, don't decode any new packets
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         if (log.isTraceEnabled()) {
             log.trace("Current bytes read at decode: {}", data.limit());
