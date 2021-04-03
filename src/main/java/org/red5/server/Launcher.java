@@ -43,7 +43,6 @@ public class Launcher {
         // install the slf4j bridge (mostly for JUL logging)
         SLF4JBridgeHandler.install();
         // log stdout and stderr to slf4j
-        //SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
         // get the first logger
         Logger log = Red5LoggerFactory.getLogger(Launcher.class);
         // version info banner

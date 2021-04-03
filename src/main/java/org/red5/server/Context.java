@@ -223,7 +223,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
             if (config == null) {
                 config = "red5.xml";
             }
-            //coreContext = new ClassPathXmlApplicationContext(config).useBeanFactory("red5.core").getFactory();
+            
             coreContext = (BeanFactory) new ClassPathXmlApplicationContext(config).getBean("red5.core");
         } else {
             logger.info("Setting parent bean factory as core");
