@@ -21,6 +21,9 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  */
 public class Launcher {
 
+    
+    private static final String root = "red5.root";
+
     /**
      * Launch Red5 under it's own classloader
      * 
@@ -28,15 +31,13 @@ public class Launcher {
      *             on error
      */
     public void launch() throws Exception {
-        System.out.printf("Root: %s%nDeploy type: %s%n", System.getProperty("red5.root"), System.getProperty("red5.deployment.type"));
+        System.out.printf("Root: %s%nDeploy type: %s%n", System.getProperty(root), System.getProperty("red5.deployment.type"));
         // check for the logback disable flag
         boolean useLogback = Boolean.valueOf(System.getProperty("useLogback", "true"));
-        if (useLogback) {
-            // check for context selector in system properties
-            if (System.getProperty("logback.ContextSelector") == null) {
+        // check for context selector in system properties
+        if (useLogback && System.getProperty("logback.ContextSelector") == null) {
                 // set our selector
                 System.setProperty("logback.ContextSelector", "org.red5.logging.LoggingContextSelector");
-            }
         }
         Red5LoggerFactory.setUseLogback(useLogback);
         // install the slf4j bridge (mostly for JUL logging)
@@ -55,8 +56,8 @@ public class Launcher {
         FileSystemXmlApplicationContext root = new FileSystemXmlApplicationContext(new String[] { "classpath:/red5.xml" }, false);
         // set the current threads classloader as the loader for the factory/appctx
         root.setClassLoader(Thread.currentThread().getContextClassLoader());
-        root.setId("red5.root");
-        root.setBeanName("red5.root");
+        root.setId(root);
+        root.setBeanName(root);
         // refresh must be called before accessing the bean factory
         log.trace("Refreshing root server context");
         root.refresh();
