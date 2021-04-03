@@ -18,6 +18,11 @@ public class DerbyLogInterceptor {
     protected static Logger log = LoggerFactory.getLogger(DerbyLogInterceptor.class);
 
     private static ThreadLocal<StringBuilder> local = new ThreadLocal<>();
+    
+    private DerbyLogInterceptor () {
+        throw new IllegalStateException("Utility class");
+    }
+    
 
     public static OutputStream handleDerbyLogFile() {
         return new OutputStream() {
