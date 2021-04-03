@@ -49,7 +49,7 @@ public class LoggerContextFilter implements Filter {
 
     public void init(FilterConfig config) throws ServletException {
         ServletContext servletContext = config.getServletContext();
-        contextName = servletContext.getContextPath().replaceAll("/", "");
+        contextName = servletContext.getContextPath().replace("/", "");
         if ("".equals(contextName)) {
             contextName = "root";
         }
@@ -74,7 +74,9 @@ public class LoggerContextFilter implements Filter {
         // remove the thread local ref so that log contexts dont use the wrong contextName
         ((LoggingContextSelector) selector).removeLocalContext();
     }
+    
 
+    // This method is empty because this java class is to be extended
     public void destroy() {
     }
 }
