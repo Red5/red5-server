@@ -107,27 +107,6 @@ public class CuePointInjectionTest extends TestCase {
 
         ITag tag = null;
         ITag injectedTag = null;
-        // read any existing tags and insert cue points
-        //		while (reader.hasMoreTags()) {
-        //			tag = reader.readTag();
-        //			// if there are cuePoints in the TreeSet
-        //			if (!ts.isEmpty()) {
-        //				// If the tag has a greater timestamp than the
-        //				// cuePointTimeStamp, then inject the tag
-        //				while (tag.getTimestamp() > cuePointTimeStamp) {
-        //					injectedTag = injectCuePoint(ts.first(), tag);
-        //					writer.writeTag(injectedTag);
-        //					tag.setPreviousTagSize((injectedTag.getBodySize() + 11));
-        //					// Advance to the next CuePoint
-        //					ts.remove(ts.first());
-        //					if (ts.isEmpty()) {
-        //						break;
-        //					}
-        //					cuePointTimeStamp = getTimeInMilliseconds(ts.first());
-        //				}
-        //			}
-        //			writer.writeTag(tag);
-        //		}
         while (!ts.isEmpty()) {
             injectedTag = injectCuePoint(ts.first(), tag);
             writer.writeTag(injectedTag);
