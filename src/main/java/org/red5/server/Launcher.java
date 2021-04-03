@@ -27,10 +27,10 @@ public class Launcher {
     /**
      * Launch Red5 under it's own classloader
      * 
-     * @throws Exception
+     * @throws LaunchErrorException
      *             on error
      */
-    public void launch() throws Exception {
+    public void launch() throws LaunchErrorException {
         System.out.printf("Root: %s%nDeploy type: %s%n", System.getProperty(root), System.getProperty("red5.deployment.type"));
         // check for the logback disable flag
         boolean useLogback = Boolean.valueOf(System.getProperty("useLogback", "true"));
