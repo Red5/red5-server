@@ -66,6 +66,33 @@ public class InboundHandshake extends RTMPHandshake {
         return decodeClientRequest1(in);
     }
 
+
+
+    /**
+     * encrypts the response to the client request C1
+     * this was duplicated code 181 - 196 and 247 - 262 from original file,
+     *  but it was already commented out. is it useless or obsolete ?
+     * 
+     */
+    public void encrypt_rtmpe(int handshaketype, int DIGEST_LENGTH, byte[] signatureResp, byte[] digestresp){
+
+        switch (handshakeType) {
+            case RTMPConnection.RTMP_ENCRYPTED_XTEA:
+            log.debug("RTMPE type 8 XTEA");
+            // encrypt signatureResp
+            for (int i = 0; i < DIGEST_LENGTH; i += 8) {
+                //encryptXtea(signatureResp, i, digestResp[i] % 15);
+            }
+            break;
+            case RTMPConnection.RTMP_ENCRYPTED_BLOWFISH:
+            log.debug("RTMPE type 9 Blowfish");
+            // encrypt signatureResp
+            for (int i = 0; i < DIGEST_LENGTH; i += 8) {
+                //encryptBlowfish(signatureResp, i, digestResp[i] % 15);
+            }
+            break;
+        }
+    }
     /**
      * Decodes the first client request (C1) and returns a server response (S0S1).
      * 
@@ -179,22 +206,11 @@ public class InboundHandshake extends RTMPHandshake {
         calculateHMAC_SHA256(c1, 0, (Constants.HANDSHAKE_SIZE - DIGEST_LENGTH), digestResp, DIGEST_LENGTH, signatureResponse, 0);
         log.debug("Signature response: {}", Hex.encodeHexString(signatureResponse));
         if (useEncryption()) {
-            switch (handshakeType) {
-                case RTMPConnection.RTMP_ENCRYPTED_XTEA:
-                    log.debug("RTMPE type 8 XTEA");
-                    // encrypt signatureResp
-                    for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                        //encryptXtea(signatureResp, i, digestResp[i] % 15);
-                    }
-                    break;
-                case RTMPConnection.RTMP_ENCRYPTED_BLOWFISH:
-                    log.debug("RTMPE type 9 Blowfish");
-                    // encrypt signatureResp
-                    for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                        //encryptBlowfish(signatureResp, i, digestResp[i] % 15);
-                    }
-                    break;
-            }
+
+            //si besoin de return les paramètres adapter, code dupliqué regroupé dans une méthode auxilière
+            ecrypt_rtmpe(handshaketype, DIGEST_LENGTH, signatureResp, digestresp);
+        
+        
         }
         // copy signature into C1 as S2
         System.arraycopy(signatureResponse, 0, c1, (Constants.HANDSHAKE_SIZE - DIGEST_LENGTH), DIGEST_LENGTH);
@@ -245,22 +261,12 @@ public class InboundHandshake extends RTMPHandshake {
             calculateHMAC_SHA256(s1, digestPosServer, DIGEST_LENGTH, GENUINE_FP_KEY, GENUINE_FP_KEY.length, digest, 0);
             calculateHMAC_SHA256(c2, 0, Constants.HANDSHAKE_SIZE - DIGEST_LENGTH, digest, DIGEST_LENGTH, signature, 0);
             if (useEncryption()) {
-                switch (handshakeType) {
-                    case RTMPConnection.RTMP_ENCRYPTED_XTEA:
-                        log.debug("RTMPE type 8 XTEA");
-                        // encrypt signature
-                        for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                            //encryptXtea(signature, i, digest[i] % 15);
-                        }
-                        break;
-                    case RTMPConnection.RTMP_ENCRYPTED_BLOWFISH:
-                        log.debug("RTMPE type 9 Blowfish");
-                        // encrypt signature
-                        for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                            //encryptBlowfish(signature, i, digest[i] % 15);
-                        }
-                        break;
-                }
+
+                //si besoin de return les paramètres adapter, code dupliqué regroupé dans une méthode auxilière
+                ecrypt_rtmpe(handshaketype, DIGEST_LENGTH, signatureResp, digestresp);
+                
+                
+                
                 // update 'encoder / decoder state' for the RC4 keys both parties *pretend* as if handshake part 2 (1536 bytes) was encrypted
                 // effectively this hides / discards the first few bytes of encrypted session which is known to increase the secure-ness of RC4
                 // RC4 state is just a function of number of bytes processed so far that's why we just run 1536 arbitrary bytes through the keys below
