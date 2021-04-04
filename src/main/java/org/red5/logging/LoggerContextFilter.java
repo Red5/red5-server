@@ -49,7 +49,7 @@ public class LoggerContextFilter implements Filter {
 
     public void init(FilterConfig config) throws ServletException {
         ServletContext servletContext = config.getServletContext();
-        contextName = servletContext.getContextPath().replace("/", "");
+        contextName = servletContext.getContextPath().replaceAll("/", "");
         if ("".equals(contextName)) {
             contextName = "root";
         }

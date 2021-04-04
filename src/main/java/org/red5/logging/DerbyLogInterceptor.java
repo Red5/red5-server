@@ -21,7 +21,7 @@ public class DerbyLogInterceptor {
 
     private static String header = "Derby log: {}";
 
-    private DerbyLogInterceptor() {
+    private DerbyLogInterceptor() throws IllegalStateException{
         throw new IllegalStateException("Utility class");
     }
 
