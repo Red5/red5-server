@@ -112,8 +112,8 @@ public class WarLoaderServlet extends ContextLoaderListener {
             // get the main factory
             parentFactory = (DefaultListableBeanFactory) factory.getParentBeanFactory();
 
-        } catch (Throwable t) {
-            logger.error("", t);
+        } catch (NullPointerException e) {
+            logger.error("", e);
         }
 
         long startupIn = System.currentTimeMillis() - time;
