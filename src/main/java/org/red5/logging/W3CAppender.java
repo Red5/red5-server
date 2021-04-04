@@ -177,7 +177,7 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         for (String field : fieldList) {
             String value = elements.get(field);
             if (value == null) {
-                addInformations(sbuf);
+                addInformations(sbuf,field, cal, event);
             } 
             else {
                 sbuf.append(value);
@@ -240,7 +240,7 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
     /**
      * add informations when the field walue is null
      */
-    private static void addInformations(StringBuilder sbuf, String field){
+    private static void addInformations(StringBuilder sbuf, String field, Calendar cal, LoggingEvent event){
         if ("date".equals(field)) {
             sbuf.append(cal.get(Calendar.MONTH) + 1);
             sbuf.append('/');
