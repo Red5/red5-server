@@ -18,18 +18,19 @@ public class DerbyLogInterceptor {
     protected static Logger log = LoggerFactory.getLogger(DerbyLogInterceptor.class);
 
     private static ThreadLocal<StringBuilder> local = new ThreadLocal<>();
-    
-    private DerbyLogInterceptor () {
+
+    private static String header = "Derby log: {}";
+
+    private DerbyLogInterceptor() {
         throw new IllegalStateException("Utility class");
     }
-    
 
     public static OutputStream handleDerbyLogFile() {
         return new OutputStream() {
 
             @Override
             public void write(byte[] b) throws IOException {
-                log.info("Derby log: {}", new String(b));
+                log.info(header, new String(b));
             }
 
             @Override
@@ -40,10 +41,10 @@ public class DerbyLogInterceptor {
                 }
                 //look for LF
                 if (i == 10) {
-                    log.info("Derby log: {}", sb.toString());
+                    log.info(header, sb.toString());
                     sb.delete(0, sb.length() - 1);
                 } else {
-                    log.trace("Derby log: {}", i);
+                    log.trace(header, i);
                     sb.append(new String(intToDWord(i)));
                 }
                 local.set(sb);
