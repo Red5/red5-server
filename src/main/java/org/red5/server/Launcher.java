@@ -30,14 +30,12 @@ public class Launcher {
     public void launch() throws Exception {
         System.out.printf("Root: %s%nDeploy type: %s%n", System.getProperty("red5.root"), System.getProperty("red5.deployment.type"));
         // check for the logback disable flag
+        // and check for context selector in system properties
         boolean useLogback = Boolean.valueOf(System.getProperty("useLogback", "true"));
-        if (useLogback) {
-            // check for context selector in system properties
-            if (System.getProperty("logback.ContextSelector") == null) {
+        if ((useLogback) && (System.getProperty("logback.ContextSelector") == null)) {
                 // set our selector
                 System.setProperty("logback.ContextSelector", "org.red5.logging.LoggingContextSelector");
             }
-        }
         Red5LoggerFactory.setUseLogback(useLogback);
         // install the slf4j bridge (mostly for JUL logging)
         SLF4JBridgeHandler.install();
