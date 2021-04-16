@@ -13,7 +13,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.write.WriteRequest;
-import org.apache.mina.core.write.WriteRequestWrapper;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.red5.server.net.rtmp.InboundHandshake;
 import org.red5.server.net.rtmp.RTMPConnManager;
@@ -153,7 +152,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                             }
                             byte[] encrypted = new byte[message.remaining()];
                             message.get(encrypted);
-                            message.clear();
+                            //message.clear(); // resets mark, may cause invalid mark ex in mina
                             message.free();
                             byte[] plain = cipher.update(encrypted);
                             IoBuffer messageDecrypted = IoBuffer.wrap(plain);
@@ -197,7 +196,6 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                 }
                 byte[] plain = new byte[message.remaining()];
                 message.get(plain);
-                message.clear();
                 message.free();
                 //encrypt and write
                 byte[] encrypted = cipher.update(plain);
@@ -207,20 +205,6 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                 }
                 nextFilter.filterWrite(session, new EncryptedWriteRequest(request, messageEncrypted));
             }
-        }
-    }
-
-    private static class EncryptedWriteRequest extends WriteRequestWrapper {
-        private final IoBuffer encryptedMessage;
-
-        private EncryptedWriteRequest(WriteRequest writeRequest, IoBuffer encryptedMessage) {
-            super(writeRequest);
-            this.encryptedMessage = encryptedMessage;
-        }
-
-        @Override
-        public Object getMessage() {
-            return encryptedMessage;
         }
     }
 
