@@ -131,6 +131,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
      * Starts internal server listening for shutdown requests.
      */
     public void start() {
+        log.info("Shutdown server start");
         // dump to stdout
         System.out.printf("Token: %s%n", token);
         // write out the token to a file so that red5 may be shutdown external to this VM instance.
@@ -147,11 +148,20 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
             log.warn("Exception handling token file", e);
         }
         final InetAddress loopbackAddr = InetAddress.getLoopbackAddress();
+        // handle format of localhost/127.0.0.1
+        final String localAddr = loopbackAddr.getHostAddress();
+        int pos = localAddr.indexOf('/');
+        final String localIPAddr = pos >= 0 ? localAddr.substring(pos) : localAddr;
+        log.info("Starting socket server on {}:{}", localIPAddr, port);
         while (!shutdown.get()) {
             // server socket on loopback address (127.0.0.1) with given port and a backlog of 8
             try (ServerSocket serverSocket = new ServerSocket(port, 8, loopbackAddr); Socket clientSocket = serverSocket.accept(); PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true); BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
                 log.info("Connected - local: {} remote: {}", clientSocket.getLocalSocketAddress(), clientSocket.getRemoteSocketAddress());
-                if (clientSocket.getRemoteSocketAddress().toString().startsWith(loopbackAddr.toString())) {                    
+                String remoteAddr = clientSocket.getRemoteSocketAddress().toString();
+                // handle SocketAddress format of /127.0.0.1:9999
+                String remoteIPAddr = remoteAddr.substring(1, remoteAddr.indexOf(':'));
+                log.info("IP addresses - local: {} remote: {}", localIPAddr, remoteIPAddr);
+                if (localIPAddr.equals(remoteIPAddr)) {
                     String inputLine = in.readLine();
                     if (inputLine != null && token.equals(inputLine)) {
                         log.info("Shutdown request validated using token");
