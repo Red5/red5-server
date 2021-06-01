@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.net.BindException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -145,16 +146,22 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
         } catch (Exception e) {
             log.warn("Exception handling token file", e);
         }
+        final InetAddress loopbackAddr = InetAddress.getLoopbackAddress();
         while (!shutdown.get()) {
-            try (ServerSocket serverSocket = new ServerSocket(port); Socket clientSocket = serverSocket.accept(); PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true); BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
+            // server socket on loopback address (127.0.0.1) with given port and a backlog of 8
+            try (ServerSocket serverSocket = new ServerSocket(port, 8, loopbackAddr); Socket clientSocket = serverSocket.accept(); PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true); BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
                 log.info("Connected - local: {} remote: {}", clientSocket.getLocalSocketAddress(), clientSocket.getRemoteSocketAddress());
-                String inputLine = in.readLine();
-                if (inputLine != null && token.equals(inputLine)) {
-                    log.info("Shutdown request validated using token");
-                    out.println("Ok");
-                    shutdownOrderly();
+                if (clientSocket.getRemoteSocketAddress().toString().startsWith(loopbackAddr.toString())) {                    
+                    String inputLine = in.readLine();
+                    if (inputLine != null && token.equals(inputLine)) {
+                        log.info("Shutdown request validated using token");
+                        out.println("Ok");
+                        shutdownOrderly();
+                    } else {
+                        out.println("Invalid input");
+                    }
                 } else {
-                    out.println("Bye");
+                    out.println("Invalid requester");
                 }
             } catch (BindException be) {
                 log.error("Cannot bind to port: {}, ensure no other instances are bound or choose another port", port, be);
