@@ -1,19 +1,8 @@
 /*
- * RED5 Open Source Media Server - https://github.com/Red5/
- * 
- * Copyright 2006-2016 by respective authors (see below). All rights reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * RED5 Open Source Media Server - https://github.com/Red5/ Copyright 2006-2016 by respective authors (see below). All rights reserved. Licensed under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.red5.server.net.rtmpe;
@@ -24,7 +13,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.write.WriteRequest;
-import org.apache.mina.core.write.WriteRequestWrapper;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.red5.server.net.rtmp.InboundHandshake;
 import org.red5.server.net.rtmp.RTMPConnManager;
@@ -134,7 +122,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                                 rtmp.setEncrypted(true);
                                 session.setAttribute(RTMPConnection.RTMPE_CIPHER_IN, handshake.getCipherIn());
                                 session.setAttribute(RTMPConnection.RTMPE_CIPHER_OUT, handshake.getCipherOut());
-                            } 
+                            }
                             // remove handshake from session now that we are connected
                             session.removeAttribute(RTMPConnection.RTMP_HANDSHAKE);
                             // add protocol filter as the last one in the chain
@@ -164,7 +152,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                             }
                             byte[] encrypted = new byte[message.remaining()];
                             message.get(encrypted);
-                            message.clear();
+                            //message.clear(); // resets mark, may cause invalid mark ex in mina
                             message.free();
                             byte[] plain = cipher.update(encrypted);
                             IoBuffer messageDecrypted = IoBuffer.wrap(plain);
@@ -208,7 +196,6 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                 }
                 byte[] plain = new byte[message.remaining()];
                 message.get(plain);
-                message.clear();
                 message.free();
                 //encrypt and write
                 byte[] encrypted = cipher.update(plain);
@@ -218,20 +205,6 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                 }
                 nextFilter.filterWrite(session, new EncryptedWriteRequest(request, messageEncrypted));
             }
-        }
-    }
-
-    private static class EncryptedWriteRequest extends WriteRequestWrapper {
-        private final IoBuffer encryptedMessage;
-
-        private EncryptedWriteRequest(WriteRequest writeRequest, IoBuffer encryptedMessage) {
-            super(writeRequest);
-            this.encryptedMessage = encryptedMessage;
-        }
-
-        @Override
-        public Object getMessage() {
-            return encryptedMessage;
         }
     }
 

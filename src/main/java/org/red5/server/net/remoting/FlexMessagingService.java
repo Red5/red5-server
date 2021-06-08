@@ -1,19 +1,8 @@
 /*
- * RED5 Open Source Media Server - https://github.com/Red5/
- * 
- * Copyright 2006-2016 by respective authors (see below). All rights reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * RED5 Open Source Media Server - https://github.com/Red5/ Copyright 2006-2016 by respective authors (see below). All rights reserved. Licensed under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.red5.server.net.remoting;
@@ -274,14 +263,9 @@ public class FlexMessagingService {
                         ext.setDestination("Red5Chat");
                         ext.setBody(adapter.manage(msg));
                         /*
-                        //grab any headers
-                        Map<String, Object> headers = msg.getHeaders();
-                        log.debug("Headers: {}", headers);
-                        if (headers.containsKey(Message.FLEX_CLIENT_ID_HEADER)) {
-                        	headers.put(Message.FLEX_CLIENT_ID_HEADER, msg.getClientId());
-                        }
-                        ext.setHeaders(headers);
-                        */
+                         * //grab any headers Map<String, Object> headers = msg.getHeaders(); log.debug("Headers: {}", headers); if (headers.containsKey(Message.FLEX_CLIENT_ID_HEADER)) {
+                         * headers.put(Message.FLEX_CLIENT_ID_HEADER, msg.getClientId()); } ext.setHeaders(headers);
+                         */
                         //add as a child (body) of the command message
                         result.setBody(new Object[] { ext });
 
@@ -437,11 +421,9 @@ public class FlexMessagingService {
                 @SuppressWarnings("unused")
                 Map<String, Object> newValues = (Map<String, Object>) contents.get(2);
                 /*
-                // Commented out as it triggeres a crash in the compiler on Java 1.5
-                for (@SuppressWarnings("unused") String name: attributeNames) {
-                	// TODO: store attribute change for registered clients
-                }
-                */
+                 * // Commented out as it triggeres a crash in the compiler on Java 1.5 for (@SuppressWarnings("unused") String name: attributeNames) { // TODO: store attribute change for
+                 * registered clients }
+                 */
                 break;
 
             default:

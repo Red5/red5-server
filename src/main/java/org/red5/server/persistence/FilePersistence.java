@@ -1,19 +1,8 @@
 /*
- * RED5 Open Source Media Server - https://github.com/Red5/
- * 
- * Copyright 2006-2016 by respective authors (see below). All rights reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * RED5 Open Source Media Server - https://github.com/Red5/ Copyright 2006-2016 by respective authors (see below). All rights reserved. Licensed under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.red5.server.persistence;
@@ -24,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -346,6 +334,7 @@ public class FilePersistence extends RamPersistence {
      *            Object to attach to
      * @return Persistable object
      */
+    @SuppressWarnings("deprecation")
     private IPersistable doLoad(String name, IPersistable object) {
         log.debug("doLoad - name: {} object: {}", name, object);
         IPersistable result = object;
@@ -412,11 +401,7 @@ public class FilePersistence extends RamPersistence {
                                 throw new NoSuchMethodException();
                             }
                             result = (IPersistable) constructor.newInstance(in);
-                        } catch (NoSuchMethodException err) {
-                            // no valid constructor found, use empty constructor
-                            result = (IPersistable) theClass.newInstance();
-                            result.deserialize(in);
-                        } catch (InvocationTargetException err) {
+                        } catch (Exception err) {
                             // error while invoking found constructor, use empty constructor
                             result = (IPersistable) theClass.newInstance();
                             result.deserialize(in);
@@ -487,15 +472,17 @@ public class FilePersistence extends RamPersistence {
      * 
      * @param object
      *            Persistable object
-     * @return <pre>
-     * true
-     * </pre>
+     * @return
+     * 
+     *         <pre>
+     *         true
+     *         </pre>
      * 
      *         on success,
      * 
      *         <pre>
-     * false
-     * </pre>
+     *         false
+     *         </pre>
      * 
      *         otherwise
      */

@@ -1,19 +1,8 @@
 /*
- * RED5 Open Source Media Server - https://github.com/Red5/
- * 
- * Copyright 2006-2016 by respective authors (see below). All rights reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * RED5 Open Source Media Server - https://github.com/Red5/ Copyright 2006-2016 by respective authors (see below). All rights reserved. Licensed under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.red5.server.service;
@@ -25,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.net.BindException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -105,7 +95,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
 
     // reference to the runnable
     private Future<?> future;
-    
+
     // reference to the jee server
     private LoaderBase jeeServer;
 
@@ -121,10 +111,10 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
                 log.info("JEE server was found: {}", jeeServer.toString());
             }
         } catch (Exception e) {
-            
+
         }
         // start blocks, so it must be on its own thread
-        future = executor.submit(new Runnable(){
+        future = executor.submit(new Runnable() {
             public void run() {
                 start();
             }
@@ -141,6 +131,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
      * Starts internal server listening for shutdown requests.
      */
     public void start() {
+        log.info("Shutdown server start");
         // dump to stdout
         System.out.printf("Token: %s%n", token);
         // write out the token to a file so that red5 may be shutdown external to this VM instance.
@@ -156,27 +147,49 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
         } catch (Exception e) {
             log.warn("Exception handling token file", e);
         }
-        while (!shutdown.get()) {
-            try (
-                    ServerSocket serverSocket = new ServerSocket(port); 
-                    Socket clientSocket = serverSocket.accept(); 
-                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true); 
+        final InetAddress loopbackAddr = InetAddress.getLoopbackAddress();
+        // handle format of localhost/127.0.0.1
+        final String localAddr = loopbackAddr.getHostAddress();
+        int pos = localAddr.indexOf('/');
+        final String localIPAddr = pos >= 0 ? localAddr.substring(pos) : localAddr;
+        log.info("Starting socket server on {}:{}", localIPAddr, port);
+        ServerSocket serverSocket = null;
+        try {
+            // server socket on loopback address (127.0.0.1) with given port and a backlog of 8
+            serverSocket = new ServerSocket(port, 8, loopbackAddr);
+            while (!shutdown.get()) {
+                try {
+                    Socket clientSocket = serverSocket.accept();
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                 ) {
-                log.info("Connected - local: {} remote: {}", clientSocket.getLocalSocketAddress(), clientSocket.getRemoteSocketAddress());
-                String inputLine = in.readLine();
-                if (inputLine != null && token.equals(inputLine)) {
-                    log.info("Shutdown request validated using token");
-                    out.println("Ok");
-                    shutdownOrderly();
-                } else {
-                    out.println("Bye");
+                    log.info("Connected - local: {} remote: {}", clientSocket.getLocalSocketAddress(), clientSocket.getRemoteSocketAddress());
+                    String remoteAddr = clientSocket.getRemoteSocketAddress().toString();
+                    // handle SocketAddress format of /127.0.0.1:9999
+                    String remoteIPAddr = remoteAddr.substring(1, remoteAddr.indexOf(':'));
+                    log.info("IP addresses - local: {} remote: {}", localIPAddr, remoteIPAddr);
+                    if (localIPAddr.equals(remoteIPAddr)) {
+                        String inputLine = in.readLine();
+                        if (inputLine != null && token.equals(inputLine)) {
+                            log.info("Shutdown request validated using token");
+                            out.println("Ok");
+                            shutdownOrderly();
+                        } else {
+                            out.println("Invalid input");
+                        }
+                    } else {
+                        out.println("Invalid requester");
+                    }
+                    clientSocket.close();
+                } catch (Throwable t) { // catch anything we might encounter
+                    log.warn("Exception caught when trying to listen on port {} or listening for a connection", port, t);
                 }
-            } catch (BindException be) {
-                log.error("Cannot bind to port: {}, ensure no other instances are bound or choose another port", port, be);
-                shutdownOrderly();
-            } catch (IOException e) {
-                log.warn("Exception caught when trying to listen on port {} or listening for a connection", port, e);
+            }
+        } catch (BindException be) {
+            log.error("Cannot bind to port: {}, ensure no other instances are bound or choose another port", port, be);
+            shutdownOrderly();
+        } finally {
+            if (serverSocket != null) {
+                serverSocket.close();   
             }
         }
     }

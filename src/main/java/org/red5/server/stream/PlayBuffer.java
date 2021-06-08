@@ -1,19 +1,8 @@
 /*
- * RED5 Open Source Media Server - https://github.com/Red5/
- * 
- * Copyright 2006-2016 by respective authors (see below). All rights reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * RED5 Open Source Media Server - https://github.com/Red5/ Copyright 2006-2016 by respective authors (see below). All rights reserved. Licensed under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.red5.server.stream;
@@ -99,7 +88,7 @@ public class PlayBuffer {
      * 
      * @param message
      *            RTMP message
-     * @return <tt>true</tt> indicates success and <tt>false</tt> indicates buffer is full.
+     * @return true indicates success and false indicates buffer is full.
      */
     public boolean putMessage(RTMPMessage message) {
         IRTMPEvent body = message.getBody();
@@ -118,7 +107,7 @@ public class PlayBuffer {
     /**
      * Take a message from this buffer. The message count decreases.
      * 
-     * @return <tt>null</tt> if buffer is empty.
+     * @return null if buffer is empty.
      */
     public RTMPMessage takeMessage() {
         RTMPMessage message = messageQueue.poll();
@@ -135,7 +124,7 @@ public class PlayBuffer {
     /**
      * Peek a message but not take it from the buffer. The message count doesn't change.
      * 
-     * @return <tt>null</tt> if buffer is empty.
+     * @return null if buffer is empty.
      */
     public RTMPMessage peekMessage() {
         return messageQueue.peek();

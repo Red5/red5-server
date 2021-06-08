@@ -1,19 +1,8 @@
 /*
- * RED5 Open Source Media Server - https://github.com/Red5/
- * 
- * Copyright 2006-2016 by respective authors (see below). All rights reserved.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * RED5 Open Source Media Server - https://github.com/Red5/ Copyright 2006-2016 by respective authors (see below). All rights reserved. Licensed under the Apache License, Version
+ * 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package org.red5.server.stream;
@@ -27,24 +16,24 @@ package org.red5.server.stream;
  */
 public interface ITokenBucket {
     /**
-     * Acquire tokens amount of <tt>tokenCount</tt> waiting <tt>wait</tt> milliseconds if token not available.
+     * Acquire tokens amount of tokenCount waiting wait milliseconds if token not available.
      * 
      * @param tokenCount
      *            The count of tokens to acquire.
      * @param wait
-     *            Milliseconds to wait. <tt>0</tt> means no wait and any value below zero means wait forever.
-     * @return <tt>true</tt> if successfully acquired or <tt>false</tt> if not acquired.
+     *            Milliseconds to wait. 0 means no wait and any value below zero means wait forever.
+     * @return true if successfully acquired or false if not acquired.
      */
     boolean acquireToken(long tokenCount, long wait);
 
     /**
-     * Nonblockingly acquire token. If the token is not available and <tt>task</tt> is not null, the callback will be executed when the token is available. The tokens are not consumed automatically before callback, so it's recommended to acquire token again in callback function.
+     * Nonblockingly acquire token. If the token is not available and task is not null, the callback will be executed when the token is available. The tokens are not consumed automatically before callback, so it's recommended to acquire token again in callback function.
      * 
      * @param tokenCount
      *            Number of tokens
      * @param callback
      *            Callback
-     * @return <tt>true</tt> if successfully acquired or <tt>false</tt> if not acquired.
+     * @return true if successfully acquired or false if not acquired.
      */
     boolean acquireTokenNonblocking(long tokenCount, ITokenBucketCallback callback);
 
@@ -72,7 +61,7 @@ public interface ITokenBucket {
     double getSpeed();
 
     /**
-     * Reset this token bucket. All pending threads are woken up with <tt>false</tt> returned for acquiring token and callback is removed without calling back.
+     * Reset this token bucket. All pending threads are woken up with false returned for acquiring token and callback is removed without calling back.
      */
     void reset();
 

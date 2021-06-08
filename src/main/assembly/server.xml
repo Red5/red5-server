@@ -188,6 +188,11 @@
             <directory>${project.basedir}/src/main/server/webapps/oflaDemo</directory>
             <outputDirectory>webapps/oflaDemo</outputDirectory>
         </fileSet>
+        <!-- SOSample -->
+        <fileSet>
+            <directory>${project.basedir}/src/main/server/webapps/SOSample</directory>
+            <outputDirectory>webapps/SOSample</outputDirectory>
+        </fileSet>
         <!-- Websocket chat -->
         <fileSet>
             <directory>${project.basedir}/src/main/server/webapps/chat</directory>
