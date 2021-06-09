@@ -21,10 +21,10 @@ public class DerbyLogInterceptor {
 
     public static OutputStream handleDerbyLogFile() {
         return new OutputStream() {
-
+        	private final String derbyLog = "Derby log: {}";
             @Override
             public void write(byte[] b) throws IOException {
-                log.info("Derby log: {}", new String(b));
+                log.info(derbyLog , new String(b));
             }
 
             @Override
@@ -35,10 +35,10 @@ public class DerbyLogInterceptor {
                 }
                 //look for LF
                 if (i == 10) {
-                    log.info("Derby log: {}", sb.toString());
+                    log.info(derbyLog , sb.toString());
                     sb.delete(0, sb.length() - 1);
                 } else {
-                    log.trace("Derby log: {}", i);
+                    log.trace(derbyLog, i);
                     sb.append(new String(intToDWord(i)));
                 }
                 local.set(sb);
