@@ -76,13 +76,17 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
         log.debug("Connection scope: {}", (connectionScope == null ? "is null" : "not null"));
         // when the scope is null bad things seem to happen, if a null scope is OK then
         // this block will need to be removed - Paul
+        
         if (connectionScope != null) {
             // Get client registry for connection scope
             IClientRegistry clientRegistry = connectionScope.getContext().getClientRegistry();
             log.debug("Client registry: {}", (clientRegistry == null ? "is null" : "not null"));
+            
             if (clientRegistry != null) {
                 IClient client = conn.getClient();
+                
                 if (client == null) {
+                	
                     if (!clientRegistry.hasClient(id)) {
                         if (conn instanceof RTMPTConnection) {
                             log.debug("Creating new client for RTMPT connection");
@@ -91,6 +95,7 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
                             clientRegistry.addClient(client);
                             // set the client on the connection
                             conn.setClient(client);
+                            
                         } else if (conn instanceof RTMPConnection) {
                             log.debug("Creating new client for RTMP connection");
                             // this is a new connection, create a new client to hold it
@@ -98,23 +103,32 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
                             // set the client on the connection
                             conn.setClient(client);
                         }
-                    } else {
+                    }
+                    
+                    else {
                         client = clientRegistry.lookupClient(id);
                         conn.setClient(client);
                     }
+                    
                 } else {
                     // set the client on the connection
                     conn.setClient(client);
                 }
+                
                 // add any rtmp connections to the manager
                 IConnectionManager<RTMPConnection> connManager = RTMPConnManager.getInstance();
                 if (conn instanceof RTMPTConnection) {
                     connManager.setConnection((RTMPTConnection) conn);
-                } else if (conn instanceof RTMPConnection) {
+                }
+                
+                else if (conn instanceof RTMPConnection) {
                     connManager.setConnection((RTMPConnection) conn);
-                } else {
+                }
+                
+                else {
                     log.warn("Connection was not added to manager: {}", conn);
                 }
+                
                 // assign connection to client
                 conn.initialize(client);
                 // we could checked for banned clients here
@@ -122,9 +136,11 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
             } else {
                 log.error("No client registry was found, clients cannot be looked-up or created");
             }
+            
         } else {
             log.error("No connection scope was found");
         }
+        
         return connect;
     }
 

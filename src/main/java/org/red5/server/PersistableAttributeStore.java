@@ -168,14 +168,14 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
      *             if error
      */
     public void serialize(Output output) throws IOException {
-        Map<String, Object> persistentAttributes = new HashMap<String, Object>();
+        Map<String, Object> persistentAttributes = new HashMap<>();
         for (Map.Entry<String, Object> entry : getAttributes().entrySet()) {
-            final String name = entry.getKey();
-            if (name.startsWith(IPersistable.TRANSIENT_PREFIX)) {
+            final String nameAttribute = entry.getKey();
+            if (nameAttribute.startsWith(IPersistable.TRANSIENT_PREFIX)) {
                 continue;
             }
 
-            persistentAttributes.put(name, entry.getValue());
+            persistentAttributes.put(nameAttribute, entry.getValue());
         }
         Serializer.serialize(output, persistentAttributes);
     }

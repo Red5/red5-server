@@ -112,8 +112,8 @@ public class WarLoaderServlet extends ContextLoaderListener {
             // get the main factory
             parentFactory = (DefaultListableBeanFactory) factory.getParentBeanFactory();
 
-        } catch (Throwable t) {
-            logger.error("", t);
+        } catch (NullPointerException e) {
+            logger.error("", e);
         }
 
         long startupIn = System.currentTimeMillis() - time;
@@ -192,8 +192,8 @@ public class WarLoaderServlet extends ContextLoaderListener {
                 Object attr = ctx.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
                 if (attr != null) {
                     // get web application context from the servlet context
-                    ConfigurableWebApplicationContext applicationContext = (ConfigurableWebApplicationContext) attr;
-                    ConfigurableBeanFactory factory = applicationContext.getBeanFactory();
+                    ConfigurableWebApplicationContext applicationContextAttribute = (ConfigurableWebApplicationContext) attr;
+                    ConfigurableBeanFactory factory = applicationContextAttribute.getBeanFactory();
                     // for (String scope : factory.getRegisteredScopeNames()) {
                     // logger.debug("Registered scope: " + scope);
                     // }
@@ -205,7 +205,7 @@ public class WarLoaderServlet extends ContextLoaderListener {
                     } catch (RuntimeException e) {
                     }
                     factory.destroySingletons();
-                    applicationContext.close();
+                    applicationContextAttribute.close();
                 }
             } catch (Throwable e) {
                 logger.warn("Exception {}", e);
