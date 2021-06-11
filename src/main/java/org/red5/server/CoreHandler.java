@@ -49,6 +49,48 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
         return connect(conn, scope, null);
     }
 
+
+    /** Auxiliary function to connect
+     * 
+     * Creates a client if needed then sets the client on the connection
+     * 
+     * @param client
+     *            the connected client
+     * @param clientRegistry
+     *            the client's registry
+     * @param conn
+     *            Client connection
+     * @param params
+     *            Parameters passed from client side with connect call
+     * @return the connection with an updated client
+    */
+    private IConnection connectionHandleClient(Iclient client, IclientRegistry clientRegistry, IConnection conn, Object[] params) {
+        if (client == null) {
+            if (!clientRegistry.hasClient(id)) {
+                if (conn instanceof RTMPTConnection) {
+                    log.debug("Creating new client for RTMPT connection");
+                    // create a new client using the session id as the client's id
+                    client = new Client(id, (ClientRegistry) clientRegistry);
+                    clientRegistry.addClient(client);
+                    // set the client on the connection
+                    conn.setClient(client);
+                } else if (conn instanceof RTMPConnection) {
+                    log.debug("Creating new client for RTMP connection");
+                    // this is a new connection, create a new client to hold it
+                    client = clientRegistry.newClient(params);
+                    // set the client on the connection
+                    conn.setClient(client);
+                }
+            } else {
+                client = clientRegistry.lookupClient(id);
+                conn.setClient(client);
+            }
+        } else {
+            // set the client on the connection
+            conn.setClient(client);
+        }
+        return conn;
+    }
     /**
      * Connects client to the scope
      *
@@ -82,30 +124,10 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
             log.debug("Client registry: {}", (clientRegistry == null ? "is null" : "not null"));
             if (clientRegistry != null) {
                 IClient client = conn.getClient();
-                if (client == null) {
-                    if (!clientRegistry.hasClient(id)) {
-                        if (conn instanceof RTMPTConnection) {
-                            log.debug("Creating new client for RTMPT connection");
-                            // create a new client using the session id as the client's id
-                            client = new Client(id, (ClientRegistry) clientRegistry);
-                            clientRegistry.addClient(client);
-                            // set the client on the connection
-                            conn.setClient(client);
-                        } else if (conn instanceof RTMPConnection) {
-                            log.debug("Creating new client for RTMP connection");
-                            // this is a new connection, create a new client to hold it
-                            client = clientRegistry.newClient(params);
-                            // set the client on the connection
-                            conn.setClient(client);
-                        }
-                    } else {
-                        client = clientRegistry.lookupClient(id);
-                        conn.setClient(client);
-                    }
-                } else {
-                    // set the client on the connection
-                    conn.setClient(client);
-                }
+
+                
+                conn = connectionHandleClient(client, clientRegistry, conn, params);
+
                 // add any rtmp connections to the manager
                 IConnectionManager<RTMPConnection> connManager = RTMPConnManager.getInstance();
                 if (conn instanceof RTMPTConnection) {
