@@ -14,6 +14,7 @@ import java.util.TreeSet;
 import junit.framework.TestCase;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.junit.Test;
 import org.red5.cache.impl.NoCacheImpl;
 import org.red5.io.ITag;
 import org.red5.io.ITagReader;
@@ -49,6 +50,7 @@ public class CuePointInjectionTest extends TestCase {
      * @throws IOException
      *             for fun
      */
+    @Test
     public void testCuePointInjection() throws IOException {
         String path = "target/test-classes/fixtures/test_cue1.flv";
         File f = new File(path);
@@ -77,7 +79,8 @@ public class CuePointInjectionTest extends TestCase {
 
         // Inject MetaData
         writeTagsWithInjection(reader, writer);
-
+        
+        assertTrue(true);
     }
 
     /**
@@ -107,27 +110,6 @@ public class CuePointInjectionTest extends TestCase {
 
         ITag tag = null;
         ITag injectedTag = null;
-        // read any existing tags and insert cue points
-        //		while (reader.hasMoreTags()) {
-        //			tag = reader.readTag();
-        //			// if there are cuePoints in the TreeSet
-        //			if (!ts.isEmpty()) {
-        //				// If the tag has a greater timestamp than the
-        //				// cuePointTimeStamp, then inject the tag
-        //				while (tag.getTimestamp() > cuePointTimeStamp) {
-        //					injectedTag = injectCuePoint(ts.first(), tag);
-        //					writer.writeTag(injectedTag);
-        //					tag.setPreviousTagSize((injectedTag.getBodySize() + 11));
-        //					// Advance to the next CuePoint
-        //					ts.remove(ts.first());
-        //					if (ts.isEmpty()) {
-        //						break;
-        //					}
-        //					cuePointTimeStamp = getTimeInMilliseconds(ts.first());
-        //				}
-        //			}
-        //			writer.writeTag(tag);
-        //		}
         while (!ts.isEmpty()) {
             injectedTag = injectCuePoint(ts.first(), tag);
             writer.writeTag(injectedTag);
@@ -175,6 +157,7 @@ public class CuePointInjectionTest extends TestCase {
     /**
      * Test to see if TreeSet is sorting properly
      */
+    @Test
     public void testCuePointOrder() {
         IMetaCue cue = new MetaCue<Object, Object>();
         cue.setName("cue_1");
