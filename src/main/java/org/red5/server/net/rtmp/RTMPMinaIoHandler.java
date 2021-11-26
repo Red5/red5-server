@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class RTMPMinaIoHandler extends IoHandlerAdapter {
 
     private static Logger log = LoggerFactory.getLogger(RTMPMinaIoHandler.class);
-    
+
     /**
      * Cache isTrace to avoid calling into logback on packet thread during production. Good for stream threads,
      * but no real benefit during setups/teardowns. Also helps during remote debugging to activate/deactivate in real time.

@@ -188,7 +188,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
             shutdownOrderly();
         } finally {
             if (serverSocket != null) {
-                serverSocket.close();   
+                serverSocket.close();
             }
         }
     }
