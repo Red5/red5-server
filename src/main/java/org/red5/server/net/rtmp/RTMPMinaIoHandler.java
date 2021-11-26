@@ -35,6 +35,18 @@ import org.slf4j.LoggerFactory;
 public class RTMPMinaIoHandler extends IoHandlerAdapter {
 
     private static Logger log = LoggerFactory.getLogger(RTMPMinaIoHandler.class);
+    
+    /**
+     * Cache isTrace to avoid calling into logback on packet thread during production. Good for stream threads,
+     * but no real benefit during setups/teardowns. Also helps during remote debugging to activate/deactivate in real time.
+     */
+    private static final boolean isTrace = log.isTraceEnabled();
+
+    /**
+     * Cache isDebug to avoid calling into logback on packet thread during production. Good for stream threads,
+     * but no real benefit during setups/teardowns. Also helps during remote debugging to activate/deactivate in real time.
+     */
+    private static final boolean isDebug = log.isDebugEnabled();
 
     /**
      * RTMP events handler
@@ -96,7 +108,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     /** {@inheritDoc} */
     @Override
     public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("Idle (session: {}) local: {} remote: {}\nread: {} write: {}", session.getId(), session.getLocalAddress(), session.getRemoteAddress(), session.getReadBytes(), session.getWrittenBytes());
         }
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
@@ -114,7 +126,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     public void sessionClosed(IoSession session) throws Exception {
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
         log.debug("Session closed: {} id: {}", session.getId(), sessionId);
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("Session attributes: {}", session.getAttributeKeys());
         }
         if (sessionId != null) {
@@ -143,12 +155,12 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     /** {@inheritDoc} */
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("messageReceived session: {} message: {}", session, message);
             log.trace("Filter chain: {}", session.getFilterChain());
         }
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("Message received on session: {} id: {}", session.getId(), sessionId);
         }
         RTMPMinaConnection conn = (RTMPMinaConnection) RTMPConnManager.getInstance().getConnectionBySessionId(sessionId);
@@ -177,7 +189,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     public void messageSent(IoSession session, Object message) throws Exception {
         log.trace("messageSent session: {} message: {}", session, message);
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("Message sent on session: {} id: {}", session.getId(), sessionId);
         }
         if (sessionId != null) {
@@ -188,13 +200,13 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
                     case RTMP.STATE_CONNECTED:
                         if (message instanceof Packet) {
                             handler.messageSent(conn, (Packet) message);
-                        } else if (log.isDebugEnabled()) {
+                        } else if (isDebug) {
                             log.debug("Message was not of Packet type; its type: {}", message != null ? message.getClass().getName() : "null");
                         }
                         break;
                     case RTMP.STATE_CONNECT:
                     case RTMP.STATE_HANDSHAKE:
-                        if (log.isTraceEnabled()) {
+                        if (isTrace) {
                             log.trace("messageSent: {}", Hex.encodeHexString(((IoBuffer) message).array()));
                         }
                         break;
@@ -213,7 +225,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         log.debug("Filter chain: {}", session.getFilterChain());
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.warn("Exception caught on session: {} id: {}", session.getId(), sessionId, cause);
         }
         if (cause instanceof IOException) {
@@ -245,7 +257,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         } else {
             // clean up
             final String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
-            if (log.isDebugEnabled()) {
+            if (isDebug) {
                 log.debug("Forcing close on session: {} id: {}", session.getId(), sessionId);
                 log.debug("Session closing: {}", session.isClosing());
             }
@@ -272,7 +284,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
                         Object obj = session.getAttribute(key);
                         log.debug("{}: {}", key, obj);
                         if (obj != null) {
-                            if (log.isTraceEnabled()) {
+                            if (isTrace) {
                                 log.trace("Attribute: {}", obj.getClass().getName());
                             }
                             if (obj instanceof IoProcessor) {

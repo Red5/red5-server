@@ -111,7 +111,6 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
                 log.info("JEE server was found: {}", jeeServer.toString());
             }
         } catch (Exception e) {
-
         }
         // start blocks, so it must be on its own thread
         future = executor.submit(new Runnable() {
