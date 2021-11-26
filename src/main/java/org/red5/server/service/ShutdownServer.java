@@ -183,12 +183,16 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
                     log.warn("Exception caught when trying to listen on port {} or listening for a connection", port, t);
                 }
             }
-        } catch (BindException be) {
+        } catch (Exception be) {
             log.error("Cannot bind to port: {}, ensure no other instances are bound or choose another port", port, be);
             shutdownOrderly();
         } finally {
             if (serverSocket != null) {
-                serverSocket.close();
+                try {
+                    serverSocket.close();
+                } catch (IOException ioe) {
+                    log.warn("IOException at close", ioe);
+                }
             }
         }
     }
