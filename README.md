@@ -130,6 +130,7 @@ Donate to the cause using
 ### Supporters
 
 [![YourKit](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/java/profiler/)
+
 YourKit supports open source projects with innovative and intelligent tools
 for monitoring and profiling Java and .NET applications.
 
