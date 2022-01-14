@@ -129,7 +129,8 @@ Donate to the cause using
 
 ### Supporters
 
+[![YourKit](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/java/profiler/)
 YourKit supports open source projects with innovative and intelligent tools
-for monitoring and profiling Java and .NET applications. [![YourKit](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/java/profiler/)
+for monitoring and profiling Java and .NET applications.
 
-Red5 Pro [![Red5pro](https://www.red5pro.com/wp-content/uploads/2019/08/Red5Pro_logo_white_red.svg)](https://red5pro.com/)
+[![Red5pro](https://www.red5pro.com/wp-content/uploads/2019/08/Red5Pro_logo_white_red.svg)](https://red5pro.com/)
