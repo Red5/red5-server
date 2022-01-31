@@ -1,6 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">
 <cross-domain-policy>
 <site-control permitted-cross-domain-policies="all"/>
-<allow-access-from domain="*"/>
+<allow-access-from domain="*" to-ports="1935"/>
+<allow-http-request-headers-from domain="*" headers="*"/>
 </cross-domain-policy>
