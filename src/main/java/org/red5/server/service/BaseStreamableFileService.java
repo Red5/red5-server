@@ -51,7 +51,6 @@ public abstract class BaseStreamableFileService implements IStreamableFileServic
                 name = name + getExtension().split(",")[0];
             }
         }
-
         return name;
     }
 
