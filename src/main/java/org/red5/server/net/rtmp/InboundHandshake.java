@@ -17,7 +17,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.bouncycastle.util.BigIntegers;
 import org.red5.server.api.Red5;
 import org.red5.server.net.rtmp.message.Constants;
-import org.slf4j.LoggerFactory;
 
 /**
  * Performs handshaking for server connections.
@@ -39,12 +38,10 @@ public class InboundHandshake extends RTMPHandshake {
 
     public InboundHandshake() {
         super(RTMPConnection.RTMP_NON_ENCRYPTED);
-        log = LoggerFactory.getLogger(InboundHandshake.class);
     }
 
     public InboundHandshake(byte handshakeType) {
         super(handshakeType);
-        log = LoggerFactory.getLogger(InboundHandshake.class);
     }
 
     public InboundHandshake(byte handshakeType, int algorithm) {
@@ -184,14 +181,14 @@ public class InboundHandshake extends RTMPHandshake {
                     log.debug("RTMPE type 8 XTEA");
                     // encrypt signatureResp
                     for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                        //encryptXtea(signatureResp, i, digestResp[i] % 15);
+                        encryptXtea(signatureResponse, i, digestResp[i] % 15);
                     }
                     break;
                 case RTMPConnection.RTMP_ENCRYPTED_BLOWFISH:
                     log.debug("RTMPE type 9 Blowfish");
                     // encrypt signatureResp
                     for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                        //encryptBlowfish(signatureResp, i, digestResp[i] % 15);
+                        encryptBlowfish(signatureResponse, i, digestResp[i] % 15);
                     }
                     break;
             }
@@ -250,14 +247,14 @@ public class InboundHandshake extends RTMPHandshake {
                         log.debug("RTMPE type 8 XTEA");
                         // encrypt signature
                         for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                            //encryptXtea(signature, i, digest[i] % 15);
+                            encryptXtea(signature, i, digest[i] % 15);
                         }
                         break;
                     case RTMPConnection.RTMP_ENCRYPTED_BLOWFISH:
                         log.debug("RTMPE type 9 Blowfish");
                         // encrypt signature
                         for (int i = 0; i < DIGEST_LENGTH; i += 8) {
-                            //encryptBlowfish(signature, i, digest[i] % 15);
+                            encryptBlowfish(signature, i, digest[i] % 15);
                         }
                         break;
                 }
@@ -406,6 +403,33 @@ public class InboundHandshake extends RTMPHandshake {
             }
         }
         return result;
+    }
+
+    /**
+     * Encrypt via xtea.
+     * 
+     * @param in
+     * @param index
+     * @param keyId
+     */
+    private void encryptXtea(byte[] in, int index, int keyId) {
+        //xtea_le_init(XTEA_KEYS[keyId]);
+        //xtea_le_crypt(out, in, 1, NULL, 0);
+    }
+
+    /**
+     * Encrypt via blowfish.
+     * 
+     * @param in
+     * @param index
+     * @param keyId
+     */
+    private void encryptBlowfish(byte[] in, int index, int keyId) {
+        if (blowfish == null) {
+            initBlowfishEncryption(keyId);
+        }
+        // overwrite in as out using same array
+        blowfish.processBlock(in, index, in, index);
     }
 
     public void setHandshakeBytes(byte[] handshake) {
