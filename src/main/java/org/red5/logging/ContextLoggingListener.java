@@ -39,7 +39,7 @@ public class ContextLoggingListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
-        String contextName = servletContext.getContextPath().replaceAll("/", "");
+        String contextName = servletContext.getContextPath().replace("/", "");
         if ("".equals(contextName)) {
             contextName = "root";
         }

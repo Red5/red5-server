@@ -88,38 +88,14 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         if (!message.startsWith("W3C")) {
             return;
         }
+
         // http://logback.qos.ch/apidocs/ch/qos/logback/classic/spi/LoggingEvent.html
-        StringBuilder sbuf = new StringBuilder(128);
-        //see if header has been written
-        if (!headerWritten) {
-            //build the header
-            StringBuilder sb = new StringBuilder("#Software: ");
-            sb.append(Red5.VERSION);
-            sb.append("\n#Version: 1.0");
-            sb.append("\n#Date: ");
-            sb.append(new Date());
-            sb.append("\n#Fields: ");
-            for (String field : fields.split(";")) {
-                sb.append(field);
-                sb.append(' ');
-            }
-            sb.append('\n');
-            sbuf.append(sb.toString());
-            headerWritten = true;
-            sb = null;
-        }
-        //break the message into pieces
-        String[] arr = message.split(" ");
-        //create a map
-        Map<String, String> elements = new HashMap<>(arr.length);
-        int i = 0;
-        for (String s : arr) {
-            if ((i = s.indexOf(':')) != -1) {
-                String key = s.substring(0, i);
-                String value = s.substring(i + 1);
-                elements.put(key, value);
-            }
-        }
+        // build the header if it has not been written
+        StringBuilder sbuf = this.headerBuilder();
+
+        //create a map which contains parts of the message
+        Map<String, String> elements = this.messageMapper(message);
+
         //Events					Categories
         //connect-pending			session
         //connect					session                     
@@ -139,14 +115,13 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         //vhost-stop                vhost                               
         //app-start                 application                         
         //app-stop                  application    
+
         //filter based on event type - asterik allows all events
-        if (!events.equals("*")) {
-            if (!eventsList.contains(elements.get("x-event"))) {
-                elements.clear();
-                elements = null;
-                sbuf = null;
-                return;
-            }
+        if (!events.equals("*") && !eventsList.contains(elements.get("x-event"))) {
+            elements.clear();
+            elements = null;
+            sbuf = null;
+            return;
         }
         //x-category		event category		
         //x-event			type of event
@@ -190,42 +165,21 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         //x-service-name   	name of the service providing the connection    
         //x-sc-qos-bytes	bytes transferred from server to client for quality of service
         //x-comment	      	comments
+
         //we may need date and/or time
         Calendar cal = GregorianCalendar.getInstance();
         cal.clear();
         cal.setTimeInMillis(event.getTimeStamp());
+
         //loop through the field names and grab the values from the map
         //fields without a value get a tab character as a place holder if
         //their value is not available to the server
         for (String field : fieldList) {
             String value = elements.get(field);
             if (value == null) {
-                if ("date".equals(field)) {
-                    sbuf.append(cal.get(Calendar.MONTH) + 1);
-                    sbuf.append('/');
-                    sbuf.append(cal.get(Calendar.DAY_OF_MONTH));
-                    sbuf.append('/');
-                    sbuf.append(cal.get(Calendar.YEAR));
-                } else if ("time".equals(field)) {
-                    sbuf.append(cal.get(Calendar.HOUR_OF_DAY));
-                    sbuf.append(':');
-                    int min = cal.get(Calendar.MINUTE);
-                    if (min < 10) {
-                        sbuf.append('0');
-                        sbuf.append(min);
-                    } else {
-                        sbuf.append(min);
-                    }
-                } else if ("s-ip".equals(field)) {
-                    //where should we grab the server ip from?
-                    sbuf.append("127.0.0.1");
-                } else if ("x-pid".equals(field)) {
-                    //should we pass thread name?
-                    sbuf.append(event.getThreadName());
-                } else {
-                    sbuf.append('\t');
-                }
-            } else {
+                addInformations(sbuf,field, cal, event);
+            } 
+            else {
                 sbuf.append(value);
             }
             //space padded
@@ -240,6 +194,82 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         } catch (IOException ioe) {
             addStatus(new ErrorStatus("IO failure in appender", this, ioe));
         }
+    }
+
+    private StringBuilder headerBuilder() {
+
+        StringBuilder sbuf = new StringBuilder(128);
+        //see if header has been written
+        if (!headerWritten) {
+            //build the header
+            StringBuilder sb = new StringBuilder("#Software: ");
+            sb.append(Red5.VERSION);
+            sb.append("\n#Version: 1.0");
+            sb.append("\n#Date: ");
+            sb.append(new Date());
+            sb.append("\n#Fields: ");
+            for (String field : fields.split(";")) {
+                sb.append(field);
+                sb.append(' ');
+            }
+            sb.append('\n');
+            sbuf.append(sb.toString());
+            headerWritten = true;
+        }
+
+        return sbuf;
+    }
+
+    private Map<String, String> messageMapper(String message) {
+        //break the message into pieces
+        String[] arr = message.split(" ");
+        //create a map
+        Map<String, String> elements = new HashMap<>(arr.length);
+        int i = 0;
+        for (String s : arr) {
+            if ((i = s.indexOf(':')) != -1) {
+                String key = s.substring(0, i);
+                String value = s.substring(i + 1);
+                elements.put(key, value);
+            }
+        }
+
+        return elements;
+    }
+
+    /**
+     * add informations when the field walue is null
+     */
+    private static void addInformations(StringBuilder sbuf, String field, Calendar cal, LoggingEvent event){
+        if ("date".equals(field)) {
+            sbuf.append(cal.get(Calendar.MONTH) + 1);
+            sbuf.append('/');
+            sbuf.append(cal.get(Calendar.DAY_OF_MONTH));
+            sbuf.append('/');
+            sbuf.append(cal.get(Calendar.YEAR));
+        } else if ("time".equals(field)) {
+            sbuf.append(cal.get(Calendar.HOUR_OF_DAY));
+            sbuf.append(':');
+
+            Integer min = cal.get(Calendar.MINUTE);
+            sbuf.append(displayMinute(min));
+
+        } else if ("s-ip".equals(field)) {
+            //where should we grab the server ip from?
+            sbuf.append("127.0.0.1");
+        } else if ("x-pid".equals(field)) {
+            //should we pass thread name?
+            sbuf.append(event.getThreadName());
+        } else {
+            sbuf.append('\t');
+        }
+    }
+
+    private static String displayMinute(Integer minute) {
+        if (minute < 10)
+            return ('0' + minute.toString());
+        else
+            return (minute.toString());
     }
 
 }

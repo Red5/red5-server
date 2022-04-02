@@ -216,14 +216,13 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     public void setApplicationContext(ApplicationContext context) {
         this.applicationContext = context;
         String deploymentType = System.getProperty("red5.deployment.type");
-        logger.debug("Deployment type: " + deploymentType);
+        logger.debug("Deployment type: {}", deploymentType);
         if (deploymentType == null) {
             // standalone core context
             String config = System.getProperty("red5.conf_file");
             if (config == null) {
                 config = "red5.xml";
             }
-            //coreContext = new ClassPathXmlApplicationContext(config).useBeanFactory("red5.core").getFactory();
             coreContext = (BeanFactory) new ClassPathXmlApplicationContext(config).getBean("red5.core");
         } else {
             logger.info("Setting parent bean factory as core");
@@ -294,12 +293,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     public Object lookupService(String serviceName) {
         serviceName = getMappingStrategy().mapServiceName(serviceName);
         try {
-            Object bean = applicationContext.getBean(serviceName);
-            if (bean != null) {
-                return bean;
-            } else {
-                throw new ServiceNotFoundException(serviceName);
-            }
+            return applicationContext.getBean(serviceName);
         } catch (NoSuchBeanDefinitionException err) {
             throw new ServiceNotFoundException(serviceName);
         }
@@ -319,7 +313,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
         String scopeHandlerName = getMappingStrategy().mapScopeHandlerName(contextPath);
         // Get bean from bean factory
         Object bean = applicationContext.getBean(scopeHandlerName);
-        if (bean != null && bean instanceof IScopeHandler) {
+        if (bean instanceof IScopeHandler) {
             return (IScopeHandler) bean;
         } else {
             throw new ScopeHandlerNotFoundException(scopeHandlerName);
