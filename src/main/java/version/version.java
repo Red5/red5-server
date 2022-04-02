@@ -1,3 +1,4 @@
+package version;
 import org.red5.server.api.Red5;
 
 /**
