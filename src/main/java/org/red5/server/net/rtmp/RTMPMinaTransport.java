@@ -83,6 +83,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
 
     protected int receiveBufferSize = 65536;
 
+    protected int maxReadBufferSize = 65536;
+
     // maximum idle time 1m
     private int idleTime = 60;
 
@@ -157,9 +159,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         sessionConf.setReuseAddress(true);
         sessionConf.setTcpNoDelay(tcpNoDelay);
         sessionConf.setSendBufferSize(sendBufferSize);
-        // 
         sessionConf.setReceiveBufferSize(receiveBufferSize);
-        sessionConf.setMaxReadBufferSize(receiveBufferSize);
+        sessionConf.setMaxReadBufferSize(maxReadBufferSize);
         // sets the interval (seconds) between each throughput calculation, the default value is 3 seconds
         sessionConf.setThroughputCalculationInterval(thoughputCalcInterval);
         // set the idle time (seconds)
