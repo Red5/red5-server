@@ -275,6 +275,14 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         this.receiveBufferSize = receiveBufferSize;
     }
 
+    public int getMaxReadBufferSize() {
+        return maxReadBufferSize;
+    }
+
+    public void setMaxReadBufferSize(int maxReadBufferSize) {
+        this.maxReadBufferSize = maxReadBufferSize;
+    }
+
     /**
      * @param trafficClass
      *            the trafficClass to set
