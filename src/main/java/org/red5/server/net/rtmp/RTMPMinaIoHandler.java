@@ -21,9 +21,11 @@ import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.write.WriteRequestQueue;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.codec.RTMP;
+import org.red5.server.net.rtmp.codec.RTMPMinaCodecFactory;
 import org.red5.server.net.rtmp.message.Packet;
 import org.red5.server.net.rtmpe.RTMPEIoFilter;
 import org.slf4j.Logger;
@@ -61,6 +63,9 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         if (!session.getFilterChain().contains("rtmpeFilter")) {
             // add rtmpe filter, rtmp protocol filter is added upon successful handshake
             session.getFilterChain().addFirst("rtmpeFilter", new RTMPEIoFilter());
+            // add protocol filter as the last one in the chain
+            log.debug("Adding RTMP protocol filter");
+            session.getFilterChain().addAfter("rtmpeFilter", "protocolFilter", new ProtocolCodecFilter(new RTMPMinaCodecFactory()));
         }
         // connection instance
         RTMPMinaConnection conn = null;

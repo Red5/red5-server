@@ -80,12 +80,9 @@ public class InboundHandshake extends RTMPHandshake {
         if (log.isTraceEnabled()) {
             log.debug("decodeClientRequest1: {}", Hex.encodeHexString(in.array()));
         }
-        if (in.hasArray()) {
-            c1 = in.array();
-        } else {
-            c1 = new byte[Constants.HANDSHAKE_SIZE];
-            in.get(c1);
-        }
+        // copy into a new array to ensure the position is respected
+        c1 = new byte[Constants.HANDSHAKE_SIZE];
+        in.get(c1);
         //if (log.isTraceEnabled()) {
         //    log.trace("C1: {}", Hex.encodeHexString(c1));
         //}
@@ -177,6 +174,10 @@ public class InboundHandshake extends RTMPHandshake {
         log.debug("Signature response: {}", Hex.encodeHexString(signatureResponse));
         if (useEncryption()) {
             switch (handshakeType) {
+                case RTMPConnection.RTMP_ENCRYPTED:
+                    log.debug("RTMPE type 6");
+                    // we dont encrypt signatureResp for type 6
+                    break;
                 case RTMPConnection.RTMP_ENCRYPTED_XTEA:
                     log.debug("RTMPE type 8 XTEA");
                     // encrypt signatureResp
@@ -226,13 +227,8 @@ public class InboundHandshake extends RTMPHandshake {
         if (log.isTraceEnabled()) {
             log.debug("decodeClientRequest2: {}", Hex.encodeHexString(in.array()));
         }
-        byte[] c2;
-        if (in.hasArray()) {
-            c2 = in.array();
-        } else {
-            c2 = new byte[Constants.HANDSHAKE_SIZE];
-            in.get(c2);
-        }
+        byte[] c2 = new byte[Constants.HANDSHAKE_SIZE];
+        in.get(c2);
         if (fp9Handshake) {
             // client signature c2[HANDSHAKE_SIZE - DIGEST_LENGTH]
             byte[] digest = new byte[DIGEST_LENGTH];
@@ -243,6 +239,9 @@ public class InboundHandshake extends RTMPHandshake {
             calculateHMAC_SHA256(c2, 0, Constants.HANDSHAKE_SIZE - DIGEST_LENGTH, digest, DIGEST_LENGTH, signature, 0);
             if (useEncryption()) {
                 switch (handshakeType) {
+                    case RTMPConnection.RTMP_ENCRYPTED:
+                        log.debug("RTMPE type 6");
+                        break;
                     case RTMPConnection.RTMP_ENCRYPTED_XTEA:
                         log.debug("RTMPE type 8 XTEA");
                         // encrypt signature
@@ -279,7 +278,6 @@ public class InboundHandshake extends RTMPHandshake {
                 if (unvalidatedConnectionAllowed) {
                     // accept and unvalidated handshake; used to deal with ffmpeg
                     log.debug("Unvalidated client allowed to proceed");
-                    return true;
                 } else {
                     return false;
                 }
