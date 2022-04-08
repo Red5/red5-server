@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Adobe DTD for cross-domain policy files -->
+<!-- Copyright (c) 2008-2009, Adobe Systems Inc. -->
+
+<!ELEMENT cross-domain-policy (site-control?,allow-access-from*,allow-http-request-headers-from*,allow-access-from-identity*)>
+
+<!ELEMENT site-control EMPTY>
+<!ATTLIST site-control permitted-cross-domain-policies (all|by-content-type|by-ftp-filename|master-only|none) #REQUIRED>
+
+<!ELEMENT allow-access-from EMPTY>
+<!ATTLIST allow-access-from domain CDATA #REQUIRED>
+<!ATTLIST allow-access-from to-ports CDATA #IMPLIED>
+<!ATTLIST allow-access-from secure (true|false) "true">
+
+<!ELEMENT allow-http-request-headers-from EMPTY>
+<!ATTLIST allow-http-request-headers-from domain CDATA #REQUIRED>
+<!ATTLIST allow-http-request-headers-from headers CDATA #REQUIRED>
+<!ATTLIST allow-http-request-headers-from secure (true|false) "true">
+
+<!ELEMENT allow-access-from-identity (signatory)>
+
+<!ELEMENT signatory (certificate)>
+
+<!ELEMENT certificate EMPTY>
+<!ATTLIST certificate fingerprint CDATA #IMPLIED>
+<!ATTLIST certificate fingerprint-algorithm CDATA #IMPLIED>
+
+<!-- End of file. -->

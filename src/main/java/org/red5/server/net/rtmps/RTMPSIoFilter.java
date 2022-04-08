@@ -7,6 +7,8 @@
 
 package org.red5.server.net.rtmps;
 
+import java.util.Optional;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
@@ -15,6 +17,7 @@ import org.red5.server.net.rtmp.InboundHandshake;
 import org.red5.server.net.rtmp.RTMPConnManager;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
+import org.red5.server.net.rtmp.ReadBuffer;
 import org.red5.server.net.rtmp.codec.RTMP;
 import org.red5.server.net.rtmp.codec.RTMPMinaCodecFactory;
 import org.red5.server.net.rtmp.message.Constants;
@@ -43,50 +46,46 @@ public class RTMPSIoFilter extends RTMPEIoFilter {
                 log.info("RTMPS Session id: {}", sessionId);
                 RTMPMinaConnection conn = (RTMPMinaConnection) RTMPConnManager.getInstance().getConnectionBySessionId(sessionId);
                 // filter based on current connection state
-                RTMP rtmp = conn.getState();
                 final byte connectionState = conn.getStateCode();
-                // assume message is an IoBuffer
-                IoBuffer message = (IoBuffer) obj;
+                // get a buffer for incoming data
+                ReadBuffer buffer = Optional.ofNullable((ReadBuffer) session.getAttribute(RTMPConnection.RTMP_BUFFER)).orElseGet(() -> {
+                    // add the attribute
+                    session.setAttribute(RTMPConnection.RTMP_BUFFER, new ReadBuffer());
+                    // get for return
+                    return (ReadBuffer) session.getAttribute(RTMPConnection.RTMP_BUFFER);
+                });
+                // buffer the incoming data
+                buffer.addBuffer((IoBuffer) obj);
                 // client handshake handling
-                InboundHandshake handshake = null;
+                InboundHandshake handshake = session.containsAttribute(RTMPConnection.RTMP_HANDSHAKE) ? (InboundHandshake) session.getAttribute(RTMPConnection.RTMP_HANDSHAKE) : null;
                 switch (connectionState) {
                     case RTMP.STATE_CONNECT:
-                        if (message.indexOf("P".getBytes()[0]) == 0) {
-                            log.info("Non-native RTMPS connection requested for: {}", sessionId);
-                            // indicates that the FP sent "POST" for a non-native rtmps connection
-                            break;
-                        }
                         // get the handshake from the session and process C0+C1 if we have enough bytes
-                        handshake = (InboundHandshake) session.getAttribute(RTMPConnection.RTMP_HANDSHAKE);
-                        // buffer the incoming message or part of message
-                        handshake.addBuffer(message);
                         // check the size, we want 1537 bytes for C0C1
-                        int c0c1Size = handshake.getBufferSize();
+                        int c0c1Size = buffer.getBufferSize();
                         log.trace("Incoming C0C1 size: {}", c0c1Size);
                         if (c0c1Size >= (Constants.HANDSHAKE_SIZE + 1)) {
                             log.debug("decodeHandshakeC0C1");
-                            // get the buffered bytes
-                            IoBuffer buf = handshake.getBufferAsIoBuffer();
+                            // get the buffered bytes 1536 + connection type byte
+                            byte[] dst = buffer.getBuffer(Constants.HANDSHAKE_SIZE + 1);
                             // set handshake to match client requested type
-                            byte connectionType = buf.get();
+                            byte connectionType = dst[0];
+                            if (connectionType == "P".getBytes()[0]) {
+                                log.info("Non-native RTMPS connection requested for: {}", sessionId);
+                                // indicates that the FP sent "POST" for a non-native rtmps connection
+                                break;
+                            }
                             handshake.setHandshakeType(connectionType);
                             log.trace("Incoming C0 connection type: {}", connectionType);
-                            // create array for decode
-                            byte[] dst = new byte[Constants.HANDSHAKE_SIZE];
-                            // copy out 1536 bytes
-                            buf.get(dst);
+                            IoBuffer decBuffer = IoBuffer.wrap(dst);
+                            // skip the connection type
+                            decBuffer.get();
                             //log.debug("C1 - buffer: {}", Hex.encodeHexString(dst));
-                            // set state to indicate we're waiting for C2
-                            rtmp.setState(RTMP.STATE_HANDSHAKE);
-                            // buffer any extra bytes
-                            int remaining = buf.remaining();
-                            if (remaining > 0) {
-                                // store the remaining bytes in a thread local for use by C2 decoding
-                                handshake.addBuffer(buf);
-                                log.trace("Stored {} bytes for later decoding", remaining);
-                            }
-                            IoBuffer s1 = handshake.decodeClientRequest1(IoBuffer.wrap(dst));
+                            // decode it
+                            IoBuffer s1 = handshake.decodeClientRequest1(decBuffer);
                             if (s1 != null) {
+                                // set state to indicate we're waiting for C2
+                                ((RTMPConnection) conn).setStateCode(RTMP.STATE_HANDSHAKE);
                                 //log.trace("S1 byte order: {}", s1.order());
                                 session.write(s1);
                             } else {
@@ -97,41 +96,31 @@ public class RTMPSIoFilter extends RTMPEIoFilter {
                         break;
                     case RTMP.STATE_HANDSHAKE:
                         // get the handshake from the session and process C2 if we have enough bytes
-                        handshake = (InboundHandshake) session.getAttribute(RTMPConnection.RTMP_HANDSHAKE);
-                        // buffer the incoming message
-                        handshake.addBuffer(message);
                         // no connection type byte is supposed to be in C2 data
-                        int c2Size = handshake.getBufferSize();
+                        int c2Size = buffer.getBufferSize();
                         log.trace("Incoming C2 size: {}", c2Size);
                         if (c2Size >= Constants.HANDSHAKE_SIZE) {
                             log.debug("decodeHandshakeC2");
-                            // get the buffered bytes
-                            IoBuffer buf = handshake.getBufferAsIoBuffer();
-                            // create array for decode
-                            byte[] dst = new byte[Constants.HANDSHAKE_SIZE];
-                            // get C2 out
-                            buf.get(dst);
+                            // create array for decode containing C2
+                            byte[] dst = buffer.getBuffer(Constants.HANDSHAKE_SIZE);
                             if (handshake.decodeClientRequest2(IoBuffer.wrap(dst))) {
                                 log.debug("Connected, removing handshake data and adding rtmp protocol filter");
                                 // set state to indicate we're connected
-                                rtmp.setState(RTMP.STATE_CONNECTED);
+                                ((RTMPConnection) conn).setStateCode(RTMP.STATE_CONNECTED);
                                 // remove handshake from session now that we are connected
                                 session.removeAttribute(RTMPConnection.RTMP_HANDSHAKE);
                                 // add protocol filter as the last one in the chain
                                 log.debug("Adding RTMP protocol filter");
                                 session.getFilterChain().addAfter("rtmpsFilter", "protocolFilter", new ProtocolCodecFilter(new RTMPMinaCodecFactory()));
                                 // check for remaining stored bytes left over from C0C1 and prepend to the dst array
-                                if (buf.hasRemaining()) {
-                                    log.trace("Receiving message: {}", buf);
-                                    nextFilter.messageReceived(session, buf);
-                                }
+                                // leave the remaining bytes in the buffer for the next step to handle / decrypt / decode
                             } else {
                                 log.warn("Client was rejected due to invalid handshake");
                                 conn.close();
                             }
                         }
                     case RTMP.STATE_CONNECTED:
-                        log.trace("Receiving message: {}", message);
+                        IoBuffer message = buffer.getBufferAsIoBuffer();
                         nextFilter.messageReceived(session, message);
                         break;
                     case RTMP.STATE_ERROR:

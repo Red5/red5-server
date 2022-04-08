@@ -69,7 +69,10 @@
     </bean>
 
     <!-- High level access to streams -->
-    <bean id="streamService" class="org.red5.server.stream.StreamService"/>
+    <bean id="streamService" class="org.red5.server.stream.StreamService">
+        <property name="stripTypePrefix" value="true"/>
+        <property name="nameAliasingEnabled" value="false"/>
+    </bean>
 
     <!-- High level access to broadcasted streams -->
     <bean id="providerService" class="org.red5.server.stream.ProviderService">
