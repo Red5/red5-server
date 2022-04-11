@@ -119,29 +119,35 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                             log.warn("Client was rejected due to invalid handshake");
                             conn.close();
                         }
+                    } else {
+                        // don't fall through to connected process if we didn't have enough for the handshake
+                        break;
                     }
                     // allow fall-through
                 case RTMP.STATE_CONNECTED:
-                    IoBuffer message = buffer.getBufferAsIoBuffer();
-                    // assuming majority of connections will not be encrypted
-                    if (!((RTMPConnection) conn).isEncrypted()) {
-                        log.trace("Receiving message: {}", message);
-                        nextFilter.messageReceived(session, message);
-                    } else {
-                        Cipher cipher = (Cipher) session.getAttribute(RTMPConnection.RTMPE_CIPHER_IN);
-                        if (cipher != null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Decrypting message: {}", message);
+                    // skip empty buffer
+                    if (buffer.getBufferSize() > 0) {
+                        IoBuffer message = buffer.getBufferAsIoBuffer();
+                        // assuming majority of connections will not be encrypted
+                        if (!((RTMPConnection) conn).isEncrypted()) {
+                            log.trace("Receiving message: {}", message);
+                            nextFilter.messageReceived(session, message);
+                        } else {
+                            Cipher cipher = (Cipher) session.getAttribute(RTMPConnection.RTMPE_CIPHER_IN);
+                            if (cipher != null) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Decrypting message: {}", message);
+                                }
+                                byte[] encrypted = new byte[message.remaining()];
+                                message.get(encrypted);
+                                message.free();
+                                byte[] plain = cipher.update(encrypted);
+                                IoBuffer messageDecrypted = IoBuffer.wrap(plain);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Receiving decrypted message: {}", messageDecrypted);
+                                }
+                                nextFilter.messageReceived(session, messageDecrypted);
                             }
-                            byte[] encrypted = new byte[message.remaining()];
-                            message.get(encrypted);
-                            message.free();
-                            byte[] plain = cipher.update(encrypted);
-                            IoBuffer messageDecrypted = IoBuffer.wrap(plain);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Receiving decrypted message: {}", messageDecrypted);
-                            }
-                            nextFilter.messageReceived(session, messageDecrypted);
                         }
                     }
                     break;
