@@ -140,14 +140,12 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         //app-start                 application                         
         //app-stop                  application    
         //filter based on event type - asterik allows all events
-        if (!events.equals("*")) {
-            if (!eventsList.contains(elements.get("x-event"))) {
+        if ((!events.equals("*")) && (!eventsList.contains(elements.get("x-event"))) {
                 elements.clear();
                 elements = null;
                 sbuf = null;
                 return;
             }
-        }
         //x-category		event category		
         //x-event			type of event
         //date				date at which the event occurred

@@ -223,7 +223,6 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
             if (config == null) {
                 config = "red5.xml";
             }
-            //coreContext = new ClassPathXmlApplicationContext(config).useBeanFactory("red5.core").getFactory();
             coreContext = (BeanFactory) new ClassPathXmlApplicationContext(config).getBean("red5.core");
         } else {
             logger.info("Setting parent bean factory as core");
@@ -319,7 +318,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
         String scopeHandlerName = getMappingStrategy().mapScopeHandlerName(contextPath);
         // Get bean from bean factory
         Object bean = applicationContext.getBean(scopeHandlerName);
-        if (bean != null && bean instanceof IScopeHandler) {
+        if (bean instanceof IScopeHandler) {
             return (IScopeHandler) bean;
         } else {
             throw new ScopeHandlerNotFoundException(scopeHandlerName);

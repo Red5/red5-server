@@ -37,7 +37,7 @@ public class RemotingProtocolDecoder {
      * @return a List of {@link RemotingPacket} objects.
      */
     public List<Object> decodeBuffer(IoBuffer buffer) {
-        List<Object> list = new LinkedList<Object>();
+        List<Object> list = new LinkedList<>();
         Object packet = null;
         try {
             packet = decode(buffer);
@@ -73,14 +73,13 @@ public class RemotingProtocolDecoder {
      *            Input data as byte buffer
      * @return header map
      */
-    @SuppressWarnings("unchecked")
     protected Map<String, Object> readHeaders(IoBuffer in) {
         int version = in.getUnsignedShort(); // skip the version
         int count = in.getUnsignedShort();
         log.debug("Read headers - version: {} count: {}", version, count);
         if (count == 0) {
             // No headers present
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
         Input input;
         if (version == 3) {
@@ -88,7 +87,7 @@ public class RemotingProtocolDecoder {
         } else {
             input = new org.red5.io.amf.Input(in);
         }
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
         for (int i = 0; i < count; i++) {
             String name = input.getString();
             boolean required = in.get() == 0x01;
@@ -110,7 +109,7 @@ public class RemotingProtocolDecoder {
     protected List<RemotingCall> decodeCalls(IoBuffer in) {
         log.debug("Decode calls");
         //in.getInt();
-        List<RemotingCall> calls = new LinkedList<RemotingCall>();
+        List<RemotingCall> calls = new LinkedList<>();
         org.red5.io.amf.Input input = new org.red5.io.amf.Input(in);
         int count = in.getUnsignedShort();
         log.debug("Calls: {}", count);
@@ -124,7 +123,6 @@ public class RemotingProtocolDecoder {
             Object[] args = null;
             boolean isAMF3 = false;
             @SuppressWarnings("unused")
-            int length = in.getInt();
             // Set the limit and deserialize
             // NOTE: disabled because the FP sends wrong values here
             /*
@@ -133,7 +131,7 @@ public class RemotingProtocolDecoder {
             byte type = in.get();
             if (type == AMF.TYPE_ARRAY) {
                 int elements = in.getInt();
-                List<Object> values = new ArrayList<Object>();
+                List<Object> values = new ArrayList<>();
                 RefStorage refStorage = null;
                 for (int j = 0; j < elements; j++) {
                     byte amf3Check = in.get();

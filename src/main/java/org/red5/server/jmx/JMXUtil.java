@@ -77,7 +77,7 @@ public class JMXUtil {
             for (int i = 0; i < notifInfo.length; i++) {
                 log.info(" ** NAME: \t" + notifInfo[i].getName());
                 log.info("    DESCR: \t" + notifInfo[i].getDescription());
-                String notifTypes[] = notifInfo[i].getNotifTypes();
+                String[] notifTypes = notifInfo[i].getNotifTypes();
                 for (int j = 0; j < notifTypes.length; j++) {
                     log.info("    TYPE: \t" + notifTypes[j]);
                 }

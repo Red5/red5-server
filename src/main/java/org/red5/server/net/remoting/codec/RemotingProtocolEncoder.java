@@ -70,7 +70,7 @@ public class RemotingProtocolEncoder {
         for (IRemotingHeader header : headers) {
             Output.putString(buf, IRemotingHeader.PERSISTENT_HEADER);
             output.writeBoolean(false);
-            Map<String, Object> param = new HashMap<String, Object>();
+            Map<String, Object> param = new HashMap<>();
             param.put("name", header.getName());
             param.put("mustUnderstand", header.getMustUnderstand() ? Boolean.TRUE : Boolean.FALSE);
             param.put("data", header.getValue());
@@ -145,7 +145,7 @@ public class RemotingProtocolEncoder {
             // Return exception details to client
             status.setApplication(((ClientDetailsException) error).getParameters());
             if (((ClientDetailsException) error).includeStacktrace()) {
-                List<String> stack = new ArrayList<String>();
+                List<String> stack = new ArrayList<>();
                 for (StackTraceElement element : error.getStackTrace()) {
                     stack.add(element.toString());
                 }
