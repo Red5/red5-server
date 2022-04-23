@@ -9,6 +9,7 @@ target/
 *~
 
 Thumbs.db
-build.sh
+*.sh
 log/
+*.log
 temp/

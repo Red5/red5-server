@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<configuration>
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>[%p] [%thread] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender class="ch.qos.logback.core.FileAppender" name="FILE">
+        <File>target/test.log</File>
+        <Append>false</Append>
+        <encoder>
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{35} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <root level="TRACE">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+    <!-- <logger name="org.springframework" level="INFO" /> <logger name="org.apache" 
+        level="INFO" /> -->
+</configuration>

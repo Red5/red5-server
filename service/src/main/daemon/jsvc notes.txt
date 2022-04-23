@@ -1,0 +1,78 @@
+./jsvc -debug -server -version -procname red5 -user mondain -home /usr/lib/jvm/java-7-oracle -outfile /tmp/jsvcout.log -errfile /tmp/jsvcerr.log -cwd /home/mondain/workspace/red5-server/target/red5-server-1.0.2-RELEASE -cp /home/mondain/workspace/red5-server/target/red5-server-1.0.2-RELEASE/lib/commons-daemon-1.0.15.jar:/home/mondain/workspace/red5-server/target/red5-server-1.0.2-RELEASE/red5-service.jar org.red5.daemon.EngineLauncher
+
+Usage: jsvc [-options] class [args...]
+
+Where options include:
+
+    -help | --help | -?
+        show this help page (implies -nodetach)
+    -jvm <JVM name>
+        use a specific Java Virtual Machine. Available JVMs:
+            'server'
+    -client
+        use a client Java Virtual Machine.
+    -server
+        use a server Java Virtual Machine.
+    -cp | -classpath <directories and zip/jar files>
+        set search path for service classes and resouces
+    -java-home | -home <directory>
+        set the path of your JDK or JRE installation (or set
+        the JAVA_HOME environment variable)
+    -version
+        show the current Java environment version (to check
+        correctness of -home and -jvm. Implies -nodetach)
+    -showversion
+        show the current Java environment version (to check
+        correctness of -home and -jvm) and continue execution.
+    -nodetach
+        don't detach from parent process and become a daemon
+    -debug
+        verbosely print debugging information
+    -check
+        only check service (implies -nodetach)
+    -user <user>
+        user used to run the daemon (defaults to current user)
+    -verbose[:class|gc|jni]
+        enable verbose output
+    -cwd </full/path>
+        set working directory to given location (defaults to /)
+    -outfile </full/path/to/file>
+        Location for output from stdout (defaults to /dev/null)
+        Use the value '&2' to simulate '1>&2'
+    -errfile </full/path/to/file>
+        Location for output from stderr (defaults to /dev/null)
+        Use the value '&1' to simulate '2>&1'
+    -pidfile </full/path/to/file>
+        Location for output from the file containing the pid of jsvc
+        (defaults to /var/run/jsvc.pid)
+    -D<name>=<value>
+        set a Java system property
+    -X<option>
+        set Virtual Machine specific option
+    -ea[:<packagename>...|:<classname>]
+    -enableassertions[:<packagename>...|:<classname>]
+        enable assertions
+    -da[:<packagename>...|:<classname>]
+    -disableassertions[:<packagename>...|:<classname>]
+        disable assertions
+    -esa | -enablesystemassertions
+        enable system assertions
+    -dsa | -disablesystemassertions
+        disable system assertions
+    -agentlib:<libname>[=<options>]
+        load native agent library <libname>, e.g. -agentlib:hprof
+    -agentpath:<pathname>[=<options>]
+        load native agent library by full pathname
+    -javaagent:<jarpath>[=<options>]
+        load Java programming language agent, see java.lang.instrument
+    -procname <procname>
+        use the specified process name
+    -wait <waittime>
+        wait waittime seconds for the service to start
+        waittime should multiple of 10 (min=10)
+    -stop
+        stop the service using the file given in the -pidfile option
+    -keepstdin
+        does not redirect stdin to /dev/null
+
+jsvc (Apache Commons Daemon) 1.0.15-dev
