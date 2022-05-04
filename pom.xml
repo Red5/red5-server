@@ -95,7 +95,6 @@
         <red5-io.version>${project.version}</red5-io.version>
         <red5-server-common.version>${project.version}</red5-server-common.version>
         <red5-service.version>${project.version}</red5-service.version>
-
         <slf4j.version>1.7.36</slf4j.version>
         <logback.version>1.2.11</logback.version>
         <bc.version>1.62</bc.version>
@@ -109,7 +108,7 @@
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-codec.version>1.13</commons-codec.version>
         <commons-collections.version>4.4</commons-collections.version>
-        <commons-io.version>2.6</commons-io.version>
+        <commons-io.version>2.11.0</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <httpcore.version>[4.4.11,)</httpcore.version>
         <httpclient.version>[4.5.13,)</httpclient.version>
