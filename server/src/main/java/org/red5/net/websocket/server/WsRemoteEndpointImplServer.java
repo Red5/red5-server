@@ -12,20 +12,17 @@ import javax.websocket.SendResult;
 import org.apache.coyote.http11.upgrade.UpgradeInfo;
 import org.apache.tomcat.util.net.AbstractEndpoint;
 import org.apache.tomcat.util.net.SocketWrapperBase;
-import org.apache.tomcat.util.res.StringManager;
 import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the server side {@link javax.websocket.RemoteEndpoint} implementation - i.e. what the server uses to send data to the client.
  */
 public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
-    private static final StringManager sm = StringManager.getManager(WsRemoteEndpointImplServer.class);
+    //private static final StringManager sm = StringManager.getManager(WsRemoteEndpointImplServer.class);
 
-    private Logger log = LoggerFactory.getLogger(WsRemoteEndpointImplServer.class); // must not be static
+    //private Logger log = LoggerFactory.getLogger(WsRemoteEndpointImplServer.class); // must not be static
 
     private final SocketWrapperBase<?> socketWrapper;
 

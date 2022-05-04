@@ -263,14 +263,14 @@ public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
                     case DISCONNECT:
                         conn.close();
                         break;
+                    case PUBLISH:
+                    case PLAY:
+                    case PLAY2:
                     case CREATE_STREAM:
                     case INIT_STREAM:
                     case CLOSE_STREAM:
                     case RELEASE_STREAM:
                     case DELETE_STREAM:
-                    case PUBLISH:
-                    case PLAY:
-                    case PLAY2:
                     case SEEK:
                     case PAUSE:
                     case PAUSE_RAW:

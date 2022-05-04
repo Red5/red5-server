@@ -47,6 +47,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
 
     private static final boolean isTrace = log.isTraceEnabled();
 
+    @SuppressWarnings("unused")
     private static final boolean isDebug = log.isDebugEnabled();
 
     /**

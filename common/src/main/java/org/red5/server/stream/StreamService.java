@@ -328,6 +328,34 @@ public class StreamService implements IStreamService {
     public void play(String name, int start, int length, boolean flushPlaylist) {
         log.debug("Play called - name: {} start: {} length: {} flush playlist: {}", new Object[] { name, start, length, flushPlaylist });
         IConnection conn = Red5.getConnectionLocal();
+        // pull querystring if it exists and add to the connection; similar to publish
+        Map<String, String> params = null;
+        if (name != null && name.contains("?")) {
+            // read and utilize the query string values
+            params = new HashMap<>();
+            String queryString = name;
+            // check if we start with '?' or not
+            if (name.charAt(0) != '?') {
+                queryString = name.split("\\?")[1];
+            } else if (name.charAt(0) == '?') {
+                queryString = name.substring(1);
+            }
+            // set the query string in the connection
+            conn.setAttribute("queryString", queryString);
+            // now break up into key/value blocks
+            String[] kvs = queryString.split("&");
+            // take each key/value block and break into its key value parts
+            for (String kv : kvs) {
+                String[] split = kv.split("=");
+                String key = split[0], value = split[1];
+                // add to the map which goes on the stream post-security checking
+                params.put(key, value);
+                // set the parameter in the connection
+                conn.setAttribute(key, value);
+            }
+            // grab the streams name
+            name = name.substring(0, name.indexOf("?"));
+        }
         if (conn instanceof IStreamCapableConnection) {
             IScope scope = conn.getScope();
             IStreamCapableConnection streamConn = (IStreamCapableConnection) conn;
@@ -403,7 +431,7 @@ public class StreamService implements IStreamService {
                         stream.close();
                         streamConn.deleteStreamById(streamId);
                     }
-                    log.warn("Unable to play stream " + name, err);
+                    log.warn("Unable to play stream {}", name, err);
                     sendNSFailed(streamConn, StatusCodes.NS_FAILED, err.getMessage(), name, streamId);
                 }
             }
@@ -622,23 +650,30 @@ public class StreamService implements IStreamService {
 
     /** {@inheritDoc} */
     public void publish(String name, String mode) {
+        IConnection conn = Red5.getConnectionLocal();
         Map<String, String> params = null;
         if (name != null && name.contains("?")) {
             // read and utilize the query string values
             params = new HashMap<>();
-            String tmp = name;
+            String queryString = name;
             // check if we start with '?' or not
             if (name.charAt(0) != '?') {
-                tmp = name.split("\\?")[1];
+                queryString = name.split("\\?")[1];
             } else if (name.charAt(0) == '?') {
-                tmp = name.substring(1);
+                queryString = name.substring(1);
             }
+            // set the query string in the connection
+            conn.setAttribute("queryString", queryString);
             // now break up into key/value blocks
-            String[] kvs = tmp.split("&");
+            String[] kvs = queryString.split("&");
             // take each key/value block and break into its key value parts
             for (String kv : kvs) {
                 String[] split = kv.split("=");
-                params.put(split[0], split[1]);
+                String key = split[0], value = split[1];
+                // add to the map which goes on the stream post-security checking
+                params.put(key, value);
+                // set the parameter in the connection
+                conn.setAttribute(key, value);
             }
             // grab the streams name
             name = name.substring(0, name.indexOf("?"));
@@ -649,7 +684,6 @@ public class StreamService implements IStreamService {
             name = name.replaceAll("(mp4\\:|f4v\\:)", "");
             log.debug("publish name (updated): {}", name);
         }
-        IConnection conn = Red5.getConnectionLocal();
         if (conn instanceof IStreamCapableConnection) {
             IScope scope = conn.getScope();
             IStreamCapableConnection streamConn = (IStreamCapableConnection) conn;
