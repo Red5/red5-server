@@ -677,8 +677,10 @@ public class StreamService implements IStreamService {
             }
             // grab the streams name
             name = name.substring(0, name.indexOf("?"));
+            log.debug("publish called with name: {} and mode: {}; query string: {}", name, mode, queryString);
+        } else {
+            log.debug("publish called with name: {} and mode: {}", name, mode);
         }
-        log.debug("publish called with name: {} and mode: {}", name, mode);
         // if stripping prefixes, do so here
         if (stripTypePrefix) {
             name = name.replaceAll("(mp4\\:|f4v\\:)", "");
