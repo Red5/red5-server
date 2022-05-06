@@ -327,15 +327,14 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     public void write(Packet out) {
         if (ioSession != null) {
             final Semaphore lock = getLock();
-            if (log.isTraceEnabled()) {
-                log.trace("Write lock wait count: {} closed: {}", lock.getQueueLength(), isClosed());
-            }
+            //if (log.isTraceEnabled()) {
+            //    log.trace("Write lock wait count: {} closed: {}", lock.getQueueLength(), isClosed());
+            //}
             while (!isClosed()) {
                 boolean acquired = false;
                 try {
                     acquired = lock.tryAcquire(10, TimeUnit.MILLISECONDS);
-                    if (acquired) {
-                        // attempt write if not closing
+                    if (acquired) { // attempt write if not closing 
                         if (!ioSession.isClosing()) {
                             if (log.isTraceEnabled()) {
                                 log.trace("Writing message");
@@ -348,12 +347,11 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
                 } catch (InterruptedException e) {
                     log.warn("Interrupted while waiting for write lock. State: {}", RTMP.states[state.getState()], e);
                     if (log.isInfoEnabled()) {
-                        // further debugging to assist with possible connection problems
+                        // further debugging to assist with possible connection problems 
                         log.info("Session id: {} in queue size: {} pending msgs: {} last ping/pong: {}", getSessionId(), currentQueueSize(), getPendingMessages(), getLastPingSentAndLastPongReceivedInterval());
                         log.info("Available permits - decoder: {} encoder: {}", decoderLock.availablePermits(), encoderLock.availablePermits());
                     }
-                    String exMsg = e.getMessage();
-                    // if the exception cause is null break out of here to prevent looping until closed
+                    String exMsg = e.getMessage(); // if the exception cause is null break out of here to prevent looping until closed 
                     if (exMsg == null || exMsg.indexOf("null") >= 0) {
                         log.debug("Exception writing to connection: {}", this);
                         break;

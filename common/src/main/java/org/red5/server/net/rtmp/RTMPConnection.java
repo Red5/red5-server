@@ -49,11 +49,13 @@ import org.red5.server.api.stream.IStreamService;
 import org.red5.server.exception.ClientRejectedException;
 import org.red5.server.net.protocol.RTMPDecodeState;
 import org.red5.server.net.rtmp.codec.RTMP;
+import org.red5.server.net.rtmp.event.AudioData;
 import org.red5.server.net.rtmp.event.BytesRead;
 import org.red5.server.net.rtmp.event.ChunkSize;
 import org.red5.server.net.rtmp.event.ClientBW;
 import org.red5.server.net.rtmp.event.ClientInvokeEvent;
 import org.red5.server.net.rtmp.event.ClientNotifyEvent;
+import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
@@ -1366,6 +1368,10 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
             }
             old.incrementAndGet();
         }
+        // XXX(paul) work-around for RTMPE issue with Mina messageSent callback
+        if (isEncrypted()) {
+            writtenMessages.incrementAndGet();
+        }
     }
 
     /**
@@ -1602,7 +1608,10 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      *            Message to mark
      */
     public void messageSent(Packet message) {
-        if (message.getMessage() instanceof VideoData) {
+        //log.info("messageSent: {}", message);
+        IRTMPEvent event = message.getMessage();
+        if (event instanceof VideoData) {
+            log.info("Video message sent");
             Number streamId = message.getHeader().getStreamId();
             AtomicInteger pending = pendingVideos.get(streamId.doubleValue());
             if (isTrace) {
@@ -1611,6 +1620,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
             if (pending != null) {
                 pending.decrementAndGet();
             }
+        } else if (event instanceof AudioData) {
+            log.info("Audio message sent");
+        } else if (event instanceof Notify) {
+            log.info("Notify message sent");
+        } else {
+            log.warn("Message sent: {} data type: {}", event.getType(), event.getDataType());
         }
         writtenMessages.incrementAndGet();
     }

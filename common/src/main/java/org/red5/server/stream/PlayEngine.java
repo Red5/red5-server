@@ -83,6 +83,10 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     private static final Logger log = Red5LoggerFactory.getLogger(PlayEngine.class);
 
+    private static boolean isDebug = log.isDebugEnabled();
+
+    private static boolean isTrace = log.isTraceEnabled();
+
     private final AtomicReference<IMessageInput> msgInReference = new AtomicReference<>();
 
     private final AtomicReference<IMessageOutput> msgOutReference = new AtomicReference<>();
@@ -280,7 +284,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      * Start stream
      */
     public void start() {
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("start - subscriber stream state: {}", (subscriberStream != null ? subscriberStream.getState() : null));
         }
         switch (subscriberStream.getState()) {
@@ -290,7 +294,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 IMessageOutput out = consumerService.getConsumerOutput(subscriberStream);
                 if (msgOutReference.compareAndSet(null, out)) {
                     out.subscribe(this, null);
-                } else if (log.isDebugEnabled()) {
+                } else if (isDebug) {
                     log.debug("Message output was already set for stream: {}", subscriberStream);
                 }
                 break;
@@ -389,7 +393,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         IMessage msg = null;
         currentItem.set(item);
         long itemLength = item.getLength();
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("Play decision is {} (0=Live, 1=File, 2=Wait, 3=N/A) item length: {}", playDecision, itemLength);
         }
         switch (playDecision) {
@@ -431,7 +435,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 in = providerService.getLiveProviderInput(thisScope, itemName, true);
                 if (msgInReference.compareAndSet(null, in)) {
                     if (type == -1 && itemLength >= 0) {
-                        if (log.isDebugEnabled()) {
+                        if (isDebug) {
                             log.debug("Creating wait job for {}", itemLength);
                         }
                         // Wait given timeout for stream to be published
@@ -443,7 +447,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                             }
                         });
                     } else if (type == -2) {
-                        if (log.isDebugEnabled()) {
+                        if (isDebug) {
                             log.debug("Creating wait job");
                         }
                         // Wait x seconds for the stream to be published
@@ -456,7 +460,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                     } else {
                         connectToProvider(itemName);
                     }
-                } else if (log.isDebugEnabled()) {
+                } else if (isDebug) {
                     log.debug("Message input already set for {}", itemName);
                 }
                 break;
@@ -756,7 +760,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      *             If stream is in stopped state
      */
     public void stop() throws IllegalStateException {
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("stop - subscriber stream state: {}", (subscriberStream != null ? subscriberStream.getState() : null));
         }
         // allow stop if playing or paused
@@ -805,7 +809,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      * Close stream
      */
     public void close() {
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("close");
         }
         if (!subscriberStream.getState().equals(StreamState.CLOSED)) {
@@ -824,7 +828,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             if (out != null) {
                 List<IConsumer> consumers = out.getConsumers();
                 // assume a list of 1 in most cases
-                if (log.isDebugEnabled()) {
+                if (isDebug) {
                     log.debug("Message out consumers: {}", consumers.size());
                 }
                 if (!consumers.isEmpty()) {
@@ -965,7 +969,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      *            The message to send.
      */
     private void doPushMessage(AbstractMessage message) {
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             String msgType = message.getMessageType();
             log.trace("doPushMessage: {}", msgType);
         }
@@ -1019,7 +1023,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         event.setSourceType(eventIn.getSourceType());
         // instance the outgoing message
         RTMPMessage messageOut = RTMPMessage.build(event, eventTime);
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("Source type - in: {} out: {}", eventIn.getSourceType(), messageOut.getBody().getSourceType());
             long delta = System.currentTimeMillis() - playbackStart;
             log.trace("sendMessage: streamStartTS {}, length {}, streamOffset {}, timestamp {} last timestamp {} delta {} buffered {}", new Object[] { streamStartTS.get(), currentItem.get().getLength(), streamOffset, eventTime, lastMessageTs, delta, lastMessageTs - delta });
@@ -1032,7 +1036,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             long length = currentItem.get().getLength();
             if (length >= 0) {
                 int duration = eventTime - streamStartTS.get();
-                if (log.isTraceEnabled()) {
+                if (isTrace) {
                     log.trace("sendMessage duration={} length={}", duration, length);
                 }
                 if (duration - streamOffset >= length) {
@@ -1052,7 +1056,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 // subtract the offset time of when the stream started playing for the client
                 eventTime -= startTs;
                 messageOut.getBody().setTimestamp(eventTime);
-                if (log.isTraceEnabled()) {
+                if (isTrace) {
                     log.trace("sendMessage (updated): streamStartTS={}, length={}, streamOffset={}, timestamp={}", new Object[] { startTs, currentItem.get().getLength(), streamOffset, eventTime });
                 }
             }
@@ -1150,7 +1154,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      * @param bytes
      */
     private void sendOnPlayStatus(String code, int duration, long bytes) {
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("Sending onPlayStatus - code: {} duration: {} bytes: {}", code, duration, bytes);
         }
         // create the buffer
@@ -1204,7 +1208,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     private void sendCompleteStatus() {
         // may be the correct duration
         int duration = (lastMessageTs > 0) ? Math.max(0, lastMessageTs - streamStartTS.get()) : 0;
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("sendCompleteStatus - duration: {} bytes sent: {}", duration, bytesSent.get());
         }
         sendOnPlayStatus(StatusCodes.NS_PLAY_COMPLETE, duration, bytesSent.get());
@@ -1417,7 +1421,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 }
                 break;
             default:
-                if (log.isDebugEnabled()) {
+                if (isDebug) {
                     log.debug("Unhandled pipe event: {}", event);
                 }
         }
@@ -1447,10 +1451,11 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             RTMPMessage rtmpMessage = (RTMPMessage) message;
             IRTMPEvent body = rtmpMessage.getBody();
             if (body instanceof IStreamData) {
+                final String subscribedStreamName = subscriberStream.getBroadcastStreamPublishName();
                 // the subscriber paused 
                 if (subscriberStream.getState() == StreamState.PAUSED) {
                     if (log.isInfoEnabled() && shouldLogPacketDrop()) {
-                        log.info("Dropping packet because we are paused. sessionId={} stream={} count={}", sessionId, subscriberStream.getBroadcastStreamPublishName(), droppedPacketsCount);
+                        log.info("Dropping packet because we are paused. sessionId={} stream={} count={}", sessionId, subscribedStreamName, droppedPacketsCount);
                     }
                     videoFrameDropper.dropPacket(rtmpMessage);
                     return;
@@ -1469,7 +1474,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                                     droppedPacketsCount++;
                                     if (log.isInfoEnabled() && shouldLogPacketDrop()) {
                                         // client disabled video or the app doesn't have enough bandwidth allowed for this stream
-                                        log.info("Drop packet. Failed to acquire token or no video. sessionId={} stream={} count={}", sessionId, subscriberStream.getBroadcastStreamPublishName(), droppedPacketsCount);
+                                        log.info("Drop packet. Failed to acquire token or no video. sessionId={} stream={} count={}", sessionId, subscribedStreamName, droppedPacketsCount);
                                     }
                                     return;
                                 }
@@ -1480,14 +1485,14 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                                 // pending video messages and drop video packets until the queue is below the threshold.
                                 // only check for frame dropping if the codec supports it
                                 long pendingVideos = pendingVideoMessages();
-                                if (log.isTraceEnabled()) {
-                                    log.trace("Pending messages sessionId={} pending={} threshold={} sequential={} stream={}, count={}", new Object[] { sessionId, pendingVideos, maxPendingVideoFrames, numSequentialPendingVideoFrames, subscriberStream.getBroadcastStreamPublishName(), droppedPacketsCount });
+                                if (isTrace) {
+                                    log.trace("Pending messages sessionId={} stream={} pending={} threshold={} sequential={} dropped={}", new Object[] { sessionId, subscribedStreamName, pendingVideos, maxPendingVideoFrames, numSequentialPendingVideoFrames, droppedPacketsCount });
                                 }
                                 if (!videoFrameDropper.canSendPacket(rtmpMessage, pendingVideos)) {
                                     // drop frame as it depends on other frames that were dropped before
                                     droppedPacketsCount++;
                                     if (log.isInfoEnabled() && shouldLogPacketDrop()) {
-                                        log.info("Frame dropper says to drop packet. sessionId={} stream={} count={}", sessionId, subscriberStream.getBroadcastStreamPublishName(), droppedPacketsCount);
+                                        log.info("Frame dropper says to drop packet. sessionId={} stream={} dropped={}", sessionId, subscribedStreamName, droppedPacketsCount);
                                     }
                                     return;
                                 }
@@ -1501,7 +1506,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                                 if (pendingVideos > maxPendingVideoFrames || numSequentialPendingVideoFrames > maxSequentialPendingVideoFrames) {
                                     droppedPacketsCount++;
                                     if (log.isInfoEnabled() && shouldLogPacketDrop()) {
-                                        log.info("Drop packet. Pending above threshold. sessionId={} pending={} threshold={} sequential={} stream={} count={}", new Object[] { sessionId, pendingVideos, maxPendingVideoFrames, numSequentialPendingVideoFrames, subscriberStream.getBroadcastStreamPublishName(), droppedPacketsCount });
+                                        log.info("Drop packet. Pending above threshold. sessionId={} stream={} pending={} threshold={} sequential={} dropped={}", new Object[] { sessionId, subscribedStreamName, pendingVideos, maxPendingVideoFrames, numSequentialPendingVideoFrames, droppedPacketsCount });
                                     }
                                     // drop because the client has insufficient bandwidth
                                     long now = System.currentTimeMillis();
@@ -1570,7 +1575,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 return (Long) pendingRequest.getResult();
             }
         }
-        return 0;
+        return 0L;
     }
 
     /**

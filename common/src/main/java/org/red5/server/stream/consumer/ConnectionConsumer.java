@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.server.api.stream.IClientStream;
 import org.red5.server.messaging.IMessage;
 import org.red5.server.messaging.IMessageComponent;
 import org.red5.server.messaging.IPipe;
@@ -150,7 +149,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
                 log.debug("Message has negative timestamp, flipping it to positive: {}", Integer.MIN_VALUE, eventTime);
                 msg.setTimestamp(eventTime);
             }
-            // get the data type
+            // get the data type (AMF)
             byte dataType = msg.getDataType();
             if (isTrace) {
                 log.trace("Data type: {} source type: {}", dataType, ((BaseEvent) msg).getSourceType());
@@ -273,12 +272,22 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
             if ("pendingCount".equals(serviceName)) {
                 oobCtrlMsg.setResult(conn.getPendingMessages());
             } else if ("pendingVideoCount".equals(serviceName)) {
+                /* 
+                 * This section relies on the messageSent call-back from Mina to update the pending counter
+                 * the logic does not work if RTMPE is used due to the marshalling. For now we will simply return 0
+                 * and the caller sending the oob will proceed. The pending video check was implemented to handle
+                 * flash player connections on slow links and is most likely irrelevant at this point.
+                 * 
                 IClientStream stream = conn.getStreamByChannelId(video.getId());
-                if (stream != null) {
-                    oobCtrlMsg.setResult(conn.getPendingVideoMessages(stream.getStreamId()));
+                log.trace("pending video count for video id: {} stream: {}", video.getId(), stream);
+                if (stream != null) { 
+                    oobCtrlMsg.setResult(conn.getPendingVideoMessages(stream.getStreamId())); 
                 } else {
                     oobCtrlMsg.setResult(0L);
                 }
+                */
+                // always return 0 if the connection is encrypted
+                oobCtrlMsg.setResult(0L);
             } else if ("writeDelta".equals(serviceName)) {
                 //TODO: Revisit the max stream value later
                 long maxStream = 120 * 1024;

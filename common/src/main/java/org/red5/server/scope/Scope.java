@@ -1446,7 +1446,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 // if its broadcast type then allow an alias match in addition to the name match
                 if (type == ScopeType.BROADCAST) {
                     // checks publish and subscribe aliases
-                    scope = stream().filter(child -> child.getType().equals(type) && (name.equals(child.getName()) || name.equals(((IBroadcastScope) child).getClientBroadcastStream().getAlias()) || ((IBroadcastScope) child).getClientBroadcastStream().containsAlias(name))).findFirst();
+                    scope = stream().filter(child -> child.getType().equals(type) && (name.equals(child.getName()) || ((IBroadcastScope) child).getClientBroadcastStream().containsAlias(name))).findFirst();
                 } else {
                     scope = stream().filter(child -> child.getType().equals(type) && name.equals(child.getName())).findFirst();
                 }

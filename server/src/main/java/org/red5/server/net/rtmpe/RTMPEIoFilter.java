@@ -35,14 +35,18 @@ public class RTMPEIoFilter extends IoFilterAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPEIoFilter.class);
 
+    private static boolean isDebug = log.isDebugEnabled();
+
+    private static boolean isTrace = log.isTraceEnabled();
+
     @Override
     public void messageReceived(NextFilter nextFilter, IoSession session, Object obj) throws Exception {
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("messageReceived nextFilter: {} session: {} message: {}", nextFilter, session, obj);
         }
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
         if (sessionId != null) {
-            if (log.isTraceEnabled()) {
+            if (isTrace) {
                 log.trace("RTMP Session id: {}", sessionId);
             }
             RTMPMinaConnection conn = (RTMPMinaConnection) RTMPConnManager.getInstance().getConnectionBySessionId(sessionId);
@@ -135,7 +139,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                         } else {
                             Cipher cipher = (Cipher) session.getAttribute(RTMPConnection.RTMPE_CIPHER_IN);
                             if (cipher != null) {
-                                if (log.isDebugEnabled()) {
+                                if (isDebug) {
                                     log.debug("Decrypting message: {}", message);
                                 }
                                 byte[] encrypted = new byte[message.remaining()];
@@ -143,7 +147,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                                 message.free();
                                 byte[] plain = cipher.update(encrypted);
                                 IoBuffer messageDecrypted = IoBuffer.wrap(plain);
-                                if (log.isDebugEnabled()) {
+                                if (isDebug) {
                                     log.debug("Receiving decrypted message: {}", messageDecrypted);
                                 }
                                 nextFilter.messageReceived(session, messageDecrypted);
@@ -168,14 +172,14 @@ public class RTMPEIoFilter extends IoFilterAdapter {
         log.trace("filterWrite nextFilter: {} session: {} request: {}", nextFilter, session, request);
         Cipher cipher = (Cipher) session.getAttribute(RTMPConnection.RTMPE_CIPHER_OUT);
         if (cipher == null) {
-            if (log.isTraceEnabled()) {
+            if (isTrace) {
                 log.trace("Writing message");
             }
             nextFilter.filterWrite(session, request);
         } else {
             IoBuffer message = (IoBuffer) request.getMessage();
             if (message.hasRemaining()) {
-                if (log.isDebugEnabled()) {
+                if (isDebug) {
                     log.debug("Encrypting message: {}", message);
                 }
                 byte[] plain = new byte[message.remaining()];
@@ -184,7 +188,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                 // encrypt and write
                 byte[] encrypted = cipher.update(plain);
                 IoBuffer messageEncrypted = IoBuffer.wrap(encrypted);
-                if (log.isDebugEnabled()) {
+                if (isDebug) {
                     log.debug("Writing encrypted message: {}", messageEncrypted);
                 }
                 nextFilter.filterWrite(session, new EncryptedWriteRequest(request, messageEncrypted));
