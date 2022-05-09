@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -25,13 +26,14 @@ import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.ScopeType;
 import org.red5.server.persistence.RamPersistence;
 import org.red5.server.so.SharedObjectScope;
+import org.red5.server.stream.ClientBroadcastStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(locations = { "ScopeTest.xml" })
+@ContextConfiguration("file:src/test/resources/org/red5/server/scope/ScopeTest.xml")
 public class ScopeTest extends AbstractJUnit4SpringContextTests {
 
     protected static Logger log = LoggerFactory.getLogger(ScopeTest.class);
@@ -78,10 +80,31 @@ public class ScopeTest extends AbstractJUnit4SpringContextTests {
         //Room 0 /default/junit/room0 (created in the spring config)
         assertNotNull(appScope.getScope("room0"));
         IScope room0 = appScope.getScope("room0");
-        log.debug("Room#0: {}", room0);
+        log.debug(">>>>>>>>>>>> Room#0: {}", room0);
         assertTrue(room0.getDepth() == 2);
+        // create a broadcast scope with a stream and add it to the app
+        BroadcastScope stream1 = new BroadcastScope(appScope, "stream1");
+        assertTrue("Stream failed to be added to the app scope", appScope.addChildScope(stream1));
+        assertNotNull(appScope.hasChildScope(ScopeType.BROADCAST, "stream1"));
+        IBasicScope stream1Scope = appScope.getBasicScope("stream1");
+        stream1Scope = appScope.getBasicScope(ScopeType.BROADCAST, "stream1");
+        log.debug(">>>>>>>>>>>> Stream#1: {}", stream1Scope);
+        ClientBroadcastStream stream = new ClientBroadcastStream();
+        stream1.setClientBroadcastStream(stream);
+        stream.setScope(appScope); // do this or jmx fails setting the publish name
+        stream.setPublishedName("stream1");
+        // check again after stream added no-aliases
+        stream1Scope = appScope.getBasicScope(ScopeType.BROADCAST, "stream1");
+        log.debug(">>>>>>>>>>>> Stream#1: {}", stream1Scope);
+        // add an alias
+        stream.addAlias("streamA");
+        // check again after stream added alias
+        stream1Scope = appScope.getBasicScope(ScopeType.BROADCAST, "streamA");
+        log.debug(">>>>>>>>>>>> Stream#1: {}", stream1Scope);
+        // XXX to test adding rooms etc, uncomment this section
+        /*
         // test runnables represent worker threads creating scopes
-        int workerCount = 10, loops = 100;
+        int workerCount = 3, loops = 100;
         List<Worker> workers = new ArrayList<>();
         for (int s = 0; s < workerCount; s++) {
             workers.add(new Worker(appScope, loops));
@@ -102,11 +125,11 @@ public class ScopeTest extends AbstractJUnit4SpringContextTests {
         assertTrue(roomNames1.size() >= (workerCount + 1));
         roomNames1.forEach(name -> {
             IScope room = appScope.getScope(name);
-            log.info("First level room: {}", room);
+            //log.info("First level room: {}", room);
             assertNotNull(room);
             // each room is expected to have a minimum of 2 child scopes
             Set<String> childNames = room.getScopeNames();
-            log.info("{} child rooms: {}", name, childNames);
+            //log.info("{} child rooms: {}", name, childNames);
             // except for room0
             if (!"room0".equals(name)) {
                 assertTrue(childNames.size() >= 2);
@@ -120,8 +143,8 @@ public class ScopeTest extends AbstractJUnit4SpringContextTests {
             }
         }
         assertTrue(appScope.getBasicScopeNames(ScopeType.ROOM).size() == 1);
-        //appScope.removeChildren();
-        //assertTrue(appScope.getBasicScopeNames(ScopeType.ROOM).size() == 0);
+         * 
+         */
         log.info("testScopeCreation-end");
     }
 

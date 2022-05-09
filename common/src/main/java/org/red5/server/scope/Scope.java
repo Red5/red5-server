@@ -1444,14 +1444,37 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 scope = stream().filter(child -> name.equals(child.getName())).findFirst();
             } else {
                 // if its broadcast type then allow an alias match in addition to the name match
-                if (type == ScopeType.BROADCAST) {
+                if (ScopeType.BROADCAST.equals(type)) {
                     // checks publish and subscribe aliases
-                    scope = stream().filter(child -> child.getType().equals(type) && (name.equals(child.getName()) || ((IBroadcastScope) child).getClientBroadcastStream().containsAlias(name))).findFirst();
+                    for (IBasicScope child : this) {
+                        // ensure type is broadcast type, since we'll pull out a cbs
+                        if (child.getType().equals(type)) {
+                            IClientBroadcastStream cbs = ((IBroadcastScope) child).getClientBroadcastStream();
+                            if (cbs != null) {
+                                String pubName = cbs.getPublishedName();
+                                if (name.equals(child.getName())) {
+                                    log.debug("Scope found by name: {} on {}", name, pubName);
+                                    return child;
+                                } else if (cbs.containsAlias(name)) {
+                                    log.debug("Scope found with alias: {} on {}", name, pubName);
+                                    return child;
+                                } else {
+                                    log.debug("No match for name or alias of {} on published stream: {}", name, pubName);
+                                }
+                            } else {
+                                //log.debug("Broadcast scope: {} has no stream attached", name);
+                                if (name.equals(child.getName())) {
+                                    log.debug("Scope found by name: {} but has no stream", name);
+                                    return child;
+                                }
+                            }
+                        }
+                    }
                 } else {
                     scope = stream().filter(child -> child.getType().equals(type) && name.equals(child.getName())).findFirst();
                 }
             }
-            if (scope.isPresent()) {
+            if (scope != null && scope.isPresent()) {
                 return scope.get();
             }
             return null;

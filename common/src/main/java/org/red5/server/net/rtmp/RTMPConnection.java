@@ -1611,7 +1611,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         //log.info("messageSent: {}", message);
         IRTMPEvent event = message.getMessage();
         if (event instanceof VideoData) {
-            log.info("Video message sent");
+            log.debug("Video message sent");
             Number streamId = message.getHeader().getStreamId();
             AtomicInteger pending = pendingVideos.get(streamId.doubleValue());
             if (isTrace) {
@@ -1621,11 +1621,11 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                 pending.decrementAndGet();
             }
         } else if (event instanceof AudioData) {
-            log.info("Audio message sent");
+            log.debug("Audio message sent");
         } else if (event instanceof Notify) {
-            log.info("Notify message sent");
+            log.debug("Notify message sent");
         } else {
-            log.warn("Message sent: {} data type: {}", event.getType(), event.getDataType());
+            log.debug("Message sent: {} data type: {}", event.getType(), event.getDataType());
         }
         writtenMessages.incrementAndGet();
     }
