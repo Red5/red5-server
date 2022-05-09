@@ -23,7 +23,7 @@
     <name>Red5</name>
     <description>The Red5 server</description>
     <groupId>org.red5</groupId>
-    <version>1.2.23</version>
+    <version>1.2.24</version>
     <url>https://github.com/Red5/red5-server</url>
     <inceptionYear>2005</inceptionYear>
     <organization>

@@ -82,4 +82,11 @@
         <property name="handler" ref="web.handler" />
     </bean>
 
+<!--
+    <bean id="stream1" class="org.red5.server.scope.BroadcastScope">
+		<constructor-arg index="0" ref="web.scope"/>
+    	<constructor-arg index="1" value="stream1"/>
+    </bean>
+-->
+
 </beans>
