@@ -192,7 +192,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     /** {@inheritDoc} */
     @Override
     public void messageSent(IoSession session, Object message) throws Exception {
-        log.info("messageSent session: {} message: {}", session, message);
+        //log.info("messageSent session: {} message: {}", session, message);
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
         if (isTrace) {
             log.trace("Message sent on session: {} id: {}", session.getId(), sessionId);
