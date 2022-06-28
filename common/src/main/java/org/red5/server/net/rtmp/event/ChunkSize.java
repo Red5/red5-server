@@ -29,7 +29,7 @@ public class ChunkSize extends BaseEvent {
 
     /**
      * Create chunk size event with given size
-     * 
+     *
      * @param size
      *            Chunk size
      */

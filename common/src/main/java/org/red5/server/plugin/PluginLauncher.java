@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * Creates the plug-in environment and cleans up on shutdown.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class PluginLauncher implements ApplicationContextAware, InitializingBean {

@@ -11,7 +11,7 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Interface for objects that execute service calls (remote calls from client).
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  */
@@ -19,7 +19,7 @@ public interface IServiceInvoker {
 
     /**
      * Execute the passed service call in the given scope. This looks up the handler for the call in the scope and the context of the scope.
-     * 
+     *
      * @param call
      *            the call to invoke
      * @param scope
@@ -27,9 +27,9 @@ public interface IServiceInvoker {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the call was performed, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -38,7 +38,7 @@ public interface IServiceInvoker {
 
     /**
      * Execute the passed service call in the given object.
-     * 
+     *
      * @param call
      *            the call to invoke
      * @param service
@@ -46,9 +46,9 @@ public interface IServiceInvoker {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the call was performed, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>

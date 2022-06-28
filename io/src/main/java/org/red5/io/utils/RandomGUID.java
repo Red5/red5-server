@@ -19,7 +19,7 @@ public class RandomGUID extends Object {
 
     /**
      * Returns a byte array for the given uuid or guid.
-     * 
+     *
      * @param uid
      *            unique id
      * @return array of bytes containing the id
@@ -42,7 +42,7 @@ public class RandomGUID extends Object {
 
     /**
      * Returns a uuid / guid for a given byte array.
-     * 
+     *
      * @param ba
      *            array of bytes containing the id
      * @return id
@@ -64,7 +64,7 @@ public class RandomGUID extends Object {
 
     /**
      * Returns a nice neat formatted string.
-     * 
+     *
      * @param str
      *            unformatted string
      * @return formatted string

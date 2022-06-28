@@ -13,15 +13,15 @@ import java.nio.charset.UnsupportedCharsetException;
 
 /**
  * Hexadecimal byte dumper
- * 
+ *
  * @author Niko Schweitzer
  */
 public class HexDump {
 
     /**
      * Method prettyPrintHex
-     * 
-     * 
+     *
+     *
      * @param bbToConvert
      *            ByteBuffer to encode
      * @return Hexdump string
@@ -32,8 +32,8 @@ public class HexDump {
 
     /**
      * Method prettyPrintHex
-     * 
-     * 
+     *
+     *
      * @param baToConvert
      *            Array of bytes to encode
      * @return Hexdump string
@@ -50,8 +50,8 @@ public class HexDump {
 
     /**
      * Method prettyPrintHex
-     * 
-     * 
+     *
+     *
      * @param sToConvert
      *            string to convert
      * @return hexdump string
@@ -68,7 +68,7 @@ public class HexDump {
 
     /**
      * Dumps a byte array as hex.
-     * 
+     *
      * @param sb
      *            string builder
      * @param b
@@ -114,7 +114,7 @@ public class HexDump {
 
     /**
      * Sets the WithByteSeparator attribute of the Convert class
-     * 
+     *
      * @param bs
      *            The new WithByteSeparator value
      */
@@ -124,7 +124,7 @@ public class HexDump {
 
     /**
      * Sets the ByteSeparator attribute of the Convert class
-     * 
+     *
      * @param bs
      *            The new ByteSeparator value
      */
@@ -134,7 +134,7 @@ public class HexDump {
 
     /**
      * Sets the BitDigits attribute of the Convert class
-     * 
+     *
      * @param bd
      *            The new BitDigits value
      * @exception Exception
@@ -151,7 +151,7 @@ public class HexDump {
 
     /**
      * Method setBitDigits
-     * 
+     *
      * @param zeroBit
      *            zero bit
      * @param oneBit
@@ -168,7 +168,7 @@ public class HexDump {
 
     /**
      * Description of the Method
-     * 
+     *
      * @param block
      *            Description of Parameter
      * @return Description of the Returned Value
@@ -193,7 +193,7 @@ public class HexDump {
 
     /**
      * Method toBinaryString
-     * 
+     *
      * @param ba
      *            binary array
      * @return the binary representation of the byte array
@@ -204,7 +204,7 @@ public class HexDump {
 
     /**
      * Method toBinaryString
-     * 
+     *
      * @param b
      *            byte array
      * @return the binary representation of the byte
@@ -217,7 +217,7 @@ public class HexDump {
 
     /**
      * Method toBinaryString
-     * 
+     *
      * @param s
      *            short
      * @return the binary representation of the short
@@ -228,7 +228,7 @@ public class HexDump {
 
     /**
      * Method toBinaryString
-     * 
+     *
      * @param i
      *            integer
      * @return the binary representation of the int
@@ -239,7 +239,7 @@ public class HexDump {
 
     /**
      * Method toBinaryString
-     * 
+     *
      * @param l
      *            long
      * @return the binary representation of the long
@@ -250,7 +250,7 @@ public class HexDump {
 
     /**
      * Method toByteArray
-     * 
+     *
      * @param s
      *            short
      * @return the short as array of bytes
@@ -264,7 +264,7 @@ public class HexDump {
 
     /**
      * Method toByteArray
-     * 
+     *
      * @param i
      *            int
      * @return the int as array of bytes
@@ -280,7 +280,7 @@ public class HexDump {
 
     /**
      * Method toByteArray
-     * 
+     *
      * @param l
      *            long
      * @return the long as array of bytes
@@ -300,7 +300,7 @@ public class HexDump {
 
     /**
      * Description of the Method
-     * 
+     *
      * @param block
      *            Description of Parameter
      * @return Description of the Returned Value
@@ -319,7 +319,7 @@ public class HexDump {
 
     /**
      * Description of the Method
-     * 
+     *
      * @param in
      *            string to be converted
      * @return String in readable hex encoding
@@ -331,7 +331,7 @@ public class HexDump {
 
     /**
      * Description of the Method
-     * 
+     *
      * @param block
      *            Description of Parameter
      * @param offset
@@ -358,7 +358,7 @@ public class HexDump {
 
     /**
      * Returns a string of hexadecimal digits from a byte array. Each byte is converted to 2 hex symbols.
-     * 
+     *
      * @param ba
      *            Description of Parameter
      * @return Description of the Returned Value
@@ -369,7 +369,7 @@ public class HexDump {
 
     /**
      * Method toHexString
-     * 
+     *
      * @param b
      *            byte
      * @return the hexadecimal representation of the byte
@@ -382,7 +382,7 @@ public class HexDump {
 
     /**
      * Description of the Method
-     * 
+     *
      * @param s
      *            short
      * @return Description of the Returned Value
@@ -393,7 +393,7 @@ public class HexDump {
 
     /**
      * Method toHexString
-     * 
+     *
      * @param i
      *            int
      * @return the hexadecimal representation of the int
@@ -404,7 +404,7 @@ public class HexDump {
 
     /**
      * Method toHexString
-     * 
+     *
      * @param l
      *            long
      * @return the hexadecimal representation of the long
@@ -415,7 +415,7 @@ public class HexDump {
 
     /**
      * Method toString
-     * 
+     *
      * @param ba
      *            byte array
      * @return the byte array as string
@@ -426,7 +426,7 @@ public class HexDump {
 
     /**
      * Method toString
-     * 
+     *
      * @param b
      *            byte
      * @return the byte as string
@@ -439,7 +439,7 @@ public class HexDump {
 
     /**
      * converts String to Hex String. Example: niko == 6E696B6F
-     * 
+     *
      * @param ba
      *            byte array
      * @param offset
@@ -468,7 +468,7 @@ public class HexDump {
 
     /**
      * Converts readable hex-String to byteArray
-     * 
+     *
      * @param strA
      *            string
      * @return the hexadecimal string as byte array
@@ -678,7 +678,7 @@ public class HexDump {
 
     /**
      * Description of the Method
-     * 
+     *
      * @param b
      *            Description of Parameter
      * @param buf
@@ -693,7 +693,7 @@ public class HexDump {
 
     /**
      * Description of the Method
-     * 
+     *
      * @param b
      *            Description of Parameter
      * @param buf
@@ -714,7 +714,7 @@ public class HexDump {
     /**
      * Returns a string of 8 hexadecimal digits (most significant digit first) corresponding to the integer <i>n</i> , which is treated as
      * unsigned.
-     * 
+     *
      * @param n
      *            Description of Parameter
      * @return Description of the Returned Value

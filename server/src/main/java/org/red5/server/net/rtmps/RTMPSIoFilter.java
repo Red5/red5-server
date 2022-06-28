@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMPS IO filter - Server version.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class RTMPSIoFilter extends RTMPEIoFilter {

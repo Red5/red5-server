@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Simple allocation debugger for Event reference counting.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com) on behalf of (ce@publishing-etc.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -56,7 +56,7 @@ public class AllocationDebugger {
 
     /**
      * Getter for instance
-     * 
+     *
      * @return Allocation debugger instance
      */
     public static AllocationDebugger getInstance() {
@@ -71,7 +71,7 @@ public class AllocationDebugger {
 
     /**
      * Add event to map
-     * 
+     *
      * @param event
      *            Event
      */
@@ -81,7 +81,7 @@ public class AllocationDebugger {
 
     /**
      * Retain event
-     * 
+     *
      * @param event
      *            Event
      */
@@ -96,7 +96,7 @@ public class AllocationDebugger {
 
     /**
      * Release event if there's no more references to it
-     * 
+     *
      * @param event
      *            Event
      */

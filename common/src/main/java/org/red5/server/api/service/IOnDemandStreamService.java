@@ -17,7 +17,7 @@ public interface IOnDemandStreamService extends IScopeService {
 
     /**
      * Has the service an on-demand stream with the passed name?
-     * 
+     *
      * @param scope
      *            the scope to check for the stream
      * @param name
@@ -28,7 +28,7 @@ public interface IOnDemandStreamService extends IScopeService {
 
     /**
      * Get a stream that can be used for playback of the on-demand stream
-     * 
+     *
      * @param scope
      *            the scope to return the stream from
      * @param name

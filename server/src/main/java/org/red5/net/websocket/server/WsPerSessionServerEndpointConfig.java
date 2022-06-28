@@ -10,7 +10,7 @@ import javax.websocket.Extension;
 import javax.websocket.server.ServerEndpointConfig;
 
 /**
- * Wraps the provided {@link ServerEndpointConfig} and provides a per session view - the difference being that the map returned by 
+ * Wraps the provided {@link ServerEndpointConfig} and provides a per session view - the difference being that the map returned by
  * {@link #getUserProperties()} is unique to this instance rather than shared with the wrapped {@link ServerEndpointConfig}.
  */
 public class WsPerSessionServerEndpointConfig implements ServerEndpointConfig {

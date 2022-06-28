@@ -14,7 +14,7 @@ import org.red5.server.api.IAttributeStore;
 
 /**
  * Notifications about shared object updates.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  * @author Joachim Bauch (jojo@struktur.de)
@@ -23,7 +23,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when a client connects to a shared object.
-     * 
+     *
      * @param so
      *            the shared object
      */
@@ -31,7 +31,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when a client disconnects from a shared object.
-     * 
+     *
      * @param so
      *            the shared object
      */
@@ -39,7 +39,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when a shared object attribute is updated.
-     * 
+     *
      * @param so
      *            the shared object
      * @param key
@@ -51,7 +51,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when multiple attributes of a shared object are updated.
-     * 
+     *
      * @param so
      *            the shared object
      * @param values
@@ -61,7 +61,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when multiple attributes of a shared object are updated.
-     * 
+     *
      * @param so
      *            the shared object
      * @param values
@@ -71,7 +71,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when an attribute is deleted from the shared object.
-     * 
+     *
      * @param so
      *            the shared object
      * @param key
@@ -81,7 +81,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when all attributes of a shared object are removed.
-     * 
+     *
      * @param so
      *            the shared object
      */
@@ -89,7 +89,7 @@ public interface ISharedObjectListener {
 
     /**
      * Called when a shared object method call is sent.
-     * 
+     *
      * @param so
      *            the shared object
      * @param method

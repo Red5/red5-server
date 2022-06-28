@@ -91,11 +91,11 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
 
     /**
      * Number of pending messages at which a
-     * 
+     *
      * <pre>
      * NetStream.Play.InsufficientBW
      * </pre>
-     * 
+     *
      * message is generated for VOD streams.
      */
     protected int underrunTrigger = 10;
@@ -139,7 +139,7 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
 
     /**
      * Set interval to check for buffer underruns. Set to 0 to disable.
-     * 
+     *
      * @param bufferCheckInterval
      *            interval in ms
      */
@@ -149,13 +149,13 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
 
     /**
      * Set maximum number of pending messages at which a
-     * 
+     *
      * <pre>
      * NetStream.Play.InsufficientBW
      * </pre>
-     * 
+     *
      * message will be generated for VOD streams
-     * 
+     *
      * @param underrunTrigger
      *            the maximum number of pending messages
      */
@@ -520,7 +520,7 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
                 // send a blank audio packet to reset the player
                 engine.sendBlankAudio(true);
             } else if (!receiveAudio && receive) {
-                // do a seek	
+                // do a seek
                 seekToCurrentPlayback();
             }
         } else {

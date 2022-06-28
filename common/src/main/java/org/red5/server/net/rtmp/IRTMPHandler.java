@@ -16,7 +16,7 @@ public interface IRTMPHandler {
 
     /**
      * Connection open event.
-     * 
+     *
      * @param conn
      *            Connection
      */
@@ -24,7 +24,7 @@ public interface IRTMPHandler {
 
     /**
      * Message received.
-     * 
+     *
      * @param conn
      *            Connection
      * @param packet
@@ -36,7 +36,7 @@ public interface IRTMPHandler {
 
     /**
      * Message sent.
-     * 
+     *
      * @param conn
      *            Connection
      * @param packet
@@ -46,7 +46,7 @@ public interface IRTMPHandler {
 
     /**
      * Connection closed.
-     * 
+     *
      * @param conn
      *            Connection
      */

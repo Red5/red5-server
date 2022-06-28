@@ -31,12 +31,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Default WebSocket endpoint.
- * 
+ *
  * @author Paul Gregoire
  */
 public class DefaultWebSocketEndpoint extends Endpoint {
 
     private final Logger log = LoggerFactory.getLogger(DefaultWebSocketEndpoint.class);
+
+    private final boolean isDebug = log.isDebugEnabled();
+
+    private final boolean isTrace = log.isTraceEnabled();
 
     // websocket manager for this path / endpoint
     private WebSocketScopeManager manager;
@@ -95,12 +99,12 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         }
         if (root instanceof EOFException) {
             // Assume this is triggered by the user closing their browser and ignore it.
-            if (log.isDebugEnabled()) {
+            if (isDebug) {
                 log.warn("EOF exception", root);
             }
         } else if (!session.isOpen() && root instanceof IOException) {
             // IOException after close. Assume this is a variation of the user closing their browser (or refreshing very quickly) and ignore it.
-            if (log.isDebugEnabled()) {
+            if (isDebug) {
                 log.warn("IO exception when not opened", root);
             }
         } else {
@@ -121,7 +125,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
         @Override
         public void onMessage(final String message) {
-            if (log.isTraceEnabled()) {
+            if (isTrace) {
                 log.trace("Message received {}", message);
             }
             final WebSocketConnection conn = connectionLocal.get();
@@ -144,7 +148,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
         @Override
         public void onMessage(ByteBuffer message) {
-            if (log.isTraceEnabled()) {
+            if (isTrace) {
                 log.trace("Message received {}", message);
             }
             final WebSocketConnection conn = connectionLocal.get();
@@ -164,7 +168,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
         @Override
         public void onMessage(PongMessage message) {
-            if (log.isTraceEnabled()) {
+            if (isTrace) {
                 log.trace("Pong received {}", message);
             }
             // update the byte received counter

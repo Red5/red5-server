@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -523,6 +524,23 @@ public class WebSocketConnection extends AttributeStore {
 
     public WsSession getWsSession() {
         return wsSession;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpSessionId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WebSocketConnection other = (WebSocketConnection) obj;
+        return Objects.equals(httpSessionId, other.httpSessionId);
     }
 
     @Override

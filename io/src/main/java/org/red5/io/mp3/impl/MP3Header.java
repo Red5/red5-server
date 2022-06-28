@@ -9,7 +9,7 @@ package org.red5.io.mp3.impl;
 
 /**
  * Header of a MP3 frame.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @see <a href="http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm">File format</a>
@@ -76,7 +76,7 @@ public class MP3Header {
 
     /**
      * Creates MP3 header from frame sync value
-     * 
+     *
      * @param data
      *            Frame sync data
      * @throws Exception
@@ -185,7 +185,7 @@ public class MP3Header {
 
     /**
      * Calculate the size of a MP3 frame for this header.
-     * 
+     *
      * @return size of the frame including the header
      */
     public int frameSize() {
@@ -211,7 +211,7 @@ public class MP3Header {
 
     /**
      * Return the duration of the frame for this header.
-     * 
+     *
      * @return The duration in milliseconds
      */
     public double frameDuration() {

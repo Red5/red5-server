@@ -28,7 +28,7 @@ public interface Output {
     // Basic Data Types
     /**
      * Write number
-     * 
+     *
      * @param num
      *            Number
      */
@@ -36,7 +36,7 @@ public interface Output {
 
     /**
      * Write boolean
-     * 
+     *
      * @param bol
      *            Boolean
      */
@@ -44,7 +44,7 @@ public interface Output {
 
     /**
      * Write string
-     * 
+     *
      * @param string
      *            String
      */
@@ -52,7 +52,7 @@ public interface Output {
 
     /**
      * Write date
-     * 
+     *
      * @param date
      *            Date
      */
@@ -62,7 +62,7 @@ public interface Output {
 
     /**
      * Write array.
-     * 
+     *
      * @param array
      *            Array to write
      */
@@ -70,7 +70,7 @@ public interface Output {
 
     /**
      * Write array.
-     * 
+     *
      * @param array
      *            Array to write
      */
@@ -78,7 +78,7 @@ public interface Output {
 
     /**
      * Write primitive array.
-     * 
+     *
      * @param array
      *            Array to write
      */
@@ -126,7 +126,7 @@ public interface Output {
 
     /**
      * Write XML object
-     * 
+     *
      * @param xml
      *            XML document
      */
@@ -134,7 +134,7 @@ public interface Output {
 
     /**
      * Write ByteArray object (AMF3 only).
-     * 
+     *
      * @param array
      *            object to write
      */
@@ -142,7 +142,7 @@ public interface Output {
 
     /**
      * Write a Vector&lt;int&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */
@@ -150,7 +150,7 @@ public interface Output {
 
     /**
      * Write a Vector&lt;uint&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */
@@ -158,7 +158,7 @@ public interface Output {
 
     /**
      * Write a Vector&lt;Number&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */
@@ -166,7 +166,7 @@ public interface Output {
 
     /**
      * Write a Vector&lt;Object&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */
@@ -174,7 +174,7 @@ public interface Output {
 
     /**
      * Write reference to complex data type
-     * 
+     *
      * @param obj
      *            Referenced object
      */
@@ -191,7 +191,7 @@ public interface Output {
 
     /**
      * Write custom (user) object
-     * 
+     *
      * @param custom
      *            Custom data type object
      */

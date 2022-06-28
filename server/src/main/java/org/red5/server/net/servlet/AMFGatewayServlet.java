@@ -35,7 +35,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Servlet that handles remoting requests.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -86,7 +86,7 @@ public class AMFGatewayServlet extends HttpServlet {
         if (codecFactory == null) {
             ServletContext ctx = getServletContext();
             log.debug("Context path: {}", ctx.getContextPath());
-            //attempt to lookup the webapp context		
+            //attempt to lookup the webapp context
             webAppCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(ctx);
             //now try to look it up as an attribute
             if (webAppCtx == null) {
@@ -111,7 +111,7 @@ public class AMFGatewayServlet extends HttpServlet {
 
     /**
      * Return the global scope to use for the given request.
-     * 
+     *
      * @param req
      *            http request
      * @return scope
@@ -137,7 +137,7 @@ public class AMFGatewayServlet extends HttpServlet {
 
     /**
      * Works out AMF request
-     * 
+     *
      * @param req
      *            Request
      * @param resp
@@ -193,7 +193,7 @@ public class AMFGatewayServlet extends HttpServlet {
 
     /**
      * Decode request
-     * 
+     *
      * @param req
      *            Request
      * @return Remoting packet
@@ -231,7 +231,7 @@ public class AMFGatewayServlet extends HttpServlet {
 
     /**
      * Handles AMF request by making calls
-     * 
+     *
      * @param req
      *            Request
      * @param context
@@ -243,7 +243,7 @@ public class AMFGatewayServlet extends HttpServlet {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         on success
      */
     protected boolean handleRemotingPacket(HttpServletRequest req, IContext context, IScope scope, RemotingPacket message) {
@@ -262,7 +262,7 @@ public class AMFGatewayServlet extends HttpServlet {
 
     /**
      * Sends response to client
-     * 
+     *
      * @param resp
      *            Response
      * @param packet

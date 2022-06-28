@@ -86,7 +86,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
 
     /**
      * Create RTMP connection consumer for given connection and channels.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param videoChannel
@@ -106,7 +106,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
 
     /**
      * Create connection consumer without an RTMP connection.
-     * 
+     *
      * @param videoChannel
      *            video channel
      * @param audioChannel
@@ -272,16 +272,16 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
             if ("pendingCount".equals(serviceName)) {
                 oobCtrlMsg.setResult(conn.getPendingMessages());
             } else if ("pendingVideoCount".equals(serviceName)) {
-                /* 
+                /*
                  * This section relies on the messageSent call-back from Mina to update the pending counter
                  * the logic does not work if RTMPE is used due to the marshalling. For now we will simply return 0
                  * and the caller sending the oob will proceed. The pending video check was implemented to handle
                  * flash player connections on slow links and is most likely irrelevant at this point.
-                 * 
+                 *
                 IClientStream stream = conn.getStreamByChannelId(video.getId());
                 log.trace("pending video count for video id: {} stream: {}", video.getId(), stream);
-                if (stream != null) { 
-                    oobCtrlMsg.setResult(conn.getPendingVideoMessages(stream.getStreamId())); 
+                if (stream != null) {
+                    oobCtrlMsg.setResult(conn.getPendingVideoMessages(stream.getStreamId()));
                 } else {
                     oobCtrlMsg.setResult(0L);
                 }

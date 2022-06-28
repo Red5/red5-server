@@ -16,35 +16,35 @@ import org.red5.server.exception.SharedObjectException;
 
 /**
  * Statistics methods for Red5. They can be used to poll for updates of given elements inside the server. Statistics data will be stored as properties of different shared objects.
- * 
+ *
  * Use
- * 
+ *
  * <pre>
  * getScopeStatisticsSO
  * </pre>
- * 
+ *
  * and
- * 
+ *
  * <pre>
  * getSharedObjectStatisticsSO
  * </pre>
- * 
+ *
  * to get these shared objects. The property names are
- * 
+ *
  * <pre>
  * scopeName
  * </pre>
- * 
+ *
  * for scope attributes and
- * 
+ *
  * <pre>
  * scopeName | sharedObjectName
  * </pre>
- * 
+ *
  * for shared object attributes. Each property holds a Map containing key/value mappings of the corresponding attributes.
- * 
+ *
  * Sometime in the future, the updates on the shared objects will be done automatically so a client doesn't need to poll for them.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -52,7 +52,7 @@ public interface IStatisticsService {
 
     /**
      * Return the shared object that will be used to keep scope statistics.
-     * 
+     *
      * @param scope
      *            A scope to return the shared object for.
      * @return the shared object containing scope statistics
@@ -61,7 +61,7 @@ public interface IStatisticsService {
 
     /**
      * Return the shared object that will be used to keep SO statistics.
-     * 
+     *
      * @param scope
      *            A scope to return the shared object for.
      * @return the shared object containing SO statistics
@@ -70,14 +70,14 @@ public interface IStatisticsService {
 
     /**
      * Return a list of all scopes that currently exist on the server.
-     * 
+     *
      * @return list of scope names
      */
     public Set<String> getScopes();
 
     /**
      * Return a list of all scopes that currently exist on the server below a current path.
-     * 
+     *
      * @param path
      *            Path to start looking for scopes.
      * @return list of scope names
@@ -88,7 +88,7 @@ public interface IStatisticsService {
 
     /**
      * Update statistics for a given scope.
-     * 
+     *
      * @param path
      *            Path to scope to update.
      * @throws ScopeNotFoundException
@@ -98,7 +98,7 @@ public interface IStatisticsService {
 
     /**
      * Return informations about shared objects for a given scope.
-     * 
+     *
      * @param path
      *            Path to scope to return shared object names for.
      * @return list of informations about shared objects
@@ -107,7 +107,7 @@ public interface IStatisticsService {
 
     /**
      * Update informations about a shared object in a given scope.
-     * 
+     *
      * @param path
      *            Path to scope that contains the shared object.
      * @param name

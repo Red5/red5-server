@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 /**
  * Control message used in response to a SWF verification request.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class SWFResponse extends Ping {

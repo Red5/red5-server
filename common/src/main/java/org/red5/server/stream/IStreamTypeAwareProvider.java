@@ -11,7 +11,7 @@ import org.red5.server.messaging.IProvider;
 
 /**
  * Interface for providers that know if they contain video frames.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  *
@@ -22,7 +22,7 @@ public interface IStreamTypeAwareProvider extends IProvider {
 
     /**
      * Check if the provider contains video tags.
-     * 
+     *
      * @return provider has video
      */
     public boolean hasVideo();

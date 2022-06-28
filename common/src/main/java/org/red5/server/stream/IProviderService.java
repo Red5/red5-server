@@ -29,7 +29,7 @@ public interface IProviderService extends IScopeService {
     /**
      * Returns the input type for a named provider if a source of input exists. Live is checked first and VOD second. If the VOD
      * file is not located, a LIVE_WAIT is returned if legacy live-wait support is enabled.
-     * 
+     *
      * @param scope
      *            Scope of provider
      * @param name
@@ -42,7 +42,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Get a named provider as the source of input. Live stream first, VOD stream second.
-     * 
+     *
      * @param scope
      *            Scope of provider
      * @param name
@@ -53,7 +53,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Get a named Live provider as the source of input.
-     * 
+     *
      * @param scope
      *            Scope of provider
      * @param name
@@ -66,7 +66,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Get a named VOD provider as the source of input.
-     * 
+     *
      * @param scope
      *            Scope of provider
      * @param name
@@ -77,7 +77,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Get a named VOD source file.
-     * 
+     *
      * @param scope
      *            Scope of provider
      * @param name
@@ -88,7 +88,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Register a broadcast stream to a scope.
-     * 
+     *
      * @param scope
      *            Scope
      * @param name
@@ -101,7 +101,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Get names of existing broadcast streams in a scope.
-     * 
+     *
      * @param scope
      *            Scope to get stream names from
      * @return List of stream names
@@ -110,7 +110,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Unregister a broadcast stream of a specific name from a scope.
-     * 
+     *
      * @param scope
      *            Scope
      * @param name
@@ -121,7 +121,7 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Unregister a broadcast stream of a specific name from a scope.
-     * 
+     *
      * @param scope
      *            Scope
      * @param name
@@ -134,14 +134,14 @@ public interface IProviderService extends IScopeService {
 
     /**
      * Whether or not legacy live-wait support is enabled.
-     * 
+     *
      * @return true if enabled and false otherwise
      */
     boolean isLiveWaitSupport();
 
     /**
      * Sets live-wait support.
-     * 
+     *
      * @param liveWaitSupport use live-wait or not
      */
     void setLiveWaitSupport(boolean liveWaitSupport);

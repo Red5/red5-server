@@ -45,7 +45,7 @@ public class Channel {
 
     /**
      * Creates channel from connection and channel id
-     * 
+     *
      * @param conn
      *            Connection
      * @param channelId
@@ -123,14 +123,14 @@ public class Channel {
         }
         header.setStreamId(streamId);
         header.setDataType(event.getDataType());
-        // should use RTMPConnection specific method.. 
+        // should use RTMPConnection specific method..
         //log.trace("Connection type for write: {}", connection.getClass().getName());
         connection.write(packet);
     }
 
     /**
      * Discard an event routed to this channel.
-     * 
+     *
      * @param event
      */
     @SuppressWarnings("unused")

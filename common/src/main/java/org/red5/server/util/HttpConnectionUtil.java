@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Utility for using HTTP connections.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -49,7 +49,7 @@ public class HttpConnectionUtil {
 
     /**
      * Returns a client with all our selected properties / params.
-     * 
+     *
      * @return client
      */
     public static final HttpClient getClient() {
@@ -58,7 +58,7 @@ public class HttpConnectionUtil {
 
     /**
      * Returns a client with all our selected properties / params.
-     * 
+     *
      * @param timeout
      *            - socket timeout to set
      * @return client
@@ -86,7 +86,7 @@ public class HttpConnectionUtil {
 
     /**
      * Returns a client with all our selected properties / params and SSL enabled.
-     * 
+     *
      * @return client
      */
     public static final HttpClient getSecureClient() {
@@ -109,7 +109,7 @@ public class HttpConnectionUtil {
 
     /**
      * Logs details about the request error.
-     * 
+     *
      * @param response
      *            http response
      * @throws IOException

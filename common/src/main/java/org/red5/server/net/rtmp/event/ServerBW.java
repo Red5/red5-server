@@ -28,7 +28,7 @@ public class ServerBW extends BaseEvent {
 
     /**
      * Server bandwidth event
-     * 
+     *
      * @param bandwidth
      *            Bandwidth
      */

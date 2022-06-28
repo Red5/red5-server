@@ -13,14 +13,14 @@ package org.red5.codec;
 public interface IStreamCodecInfo {
     /**
      * Has audio support?
-     * 
+     *
      * @return <code>true</code> if stream codec has audio support, <code>false</code> otherwise
      */
     boolean hasAudio();
 
     /**
      * Has video support?
-     * 
+     *
      * @return <code>true</code> if stream codec has video support, <code>false</code> otherwise
      */
     boolean hasVideo();

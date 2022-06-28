@@ -9,7 +9,7 @@ package org.red5.server.api.stream;
 
 /**
  * A subscriber stream that has only one item for play.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */

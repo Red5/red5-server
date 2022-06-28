@@ -22,7 +22,7 @@ import org.red5.io.object.Serializer;
 
 /**
  * Status object that is sent to client with every status event
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  */
@@ -147,7 +147,7 @@ public class StatusObject implements Serializable, ICustomSerializable, External
 
     /**
      * Generate Status object that can be returned through a RTMP channel.
-     * 
+     *
      * @return status
      */
     public Status asStatus() {

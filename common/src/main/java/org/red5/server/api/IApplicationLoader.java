@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Interface for servers that can load new applications.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -19,7 +19,7 @@ public interface IApplicationLoader {
 
     /**
      * Load a new application for the given context path from a directory.
-     * 
+     *
      * @param contextPath
      *            context path
      * @param virtualHosts
@@ -33,7 +33,7 @@ public interface IApplicationLoader {
 
     /**
      * Return the root {@link ApplicationContext}.
-     * 
+     *
      * @return application context
      */
     public ApplicationContext getRootContext();

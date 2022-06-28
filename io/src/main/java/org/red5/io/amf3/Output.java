@@ -566,7 +566,7 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
 
     /**
      * Write a Vector&lt;int&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */
@@ -598,7 +598,7 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
 
     /**
      * Write a Vector&lt;uint&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */
@@ -624,7 +624,7 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
 
     /**
      * Write a Vector&lt;Number&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */
@@ -647,7 +647,7 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
 
     /**
      * Write a Vector&lt;Object&gt;.
-     * 
+     *
      * @param vector
      *            vector
      */

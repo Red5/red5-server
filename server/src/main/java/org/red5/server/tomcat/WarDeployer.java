@@ -34,7 +34,7 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * This service provides the means to auto-deploy a war.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public final class WarDeployer implements ApplicationContextAware, InitializingBean, DisposableBean {
@@ -208,7 +208,7 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
 
     /**
      * Whether or not to expand war files prior to start up.
-     * 
+     *
      * @param expandWars
      *            to expand or not
      */
@@ -218,7 +218,7 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
 
     /**
      * Returns the LoaderMBean.
-     * 
+     *
      * @return LoadeerMBean
      */
     public LoaderMXBean getLoader() {
@@ -246,7 +246,7 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
     protected class DirectoryFilter implements FilenameFilter {
         /**
          * Check whether file matches filter rules
-         * 
+         *
          * @param dir
          *            Directory
          * @param name

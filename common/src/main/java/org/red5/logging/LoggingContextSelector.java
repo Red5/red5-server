@@ -28,9 +28,9 @@ import ch.qos.logback.core.util.StatusPrinter;
 
 /**
  * A class that allows the LoggerFactory to access an web context based LoggerContext.
- * 
+ *
  * Add this java option -Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class LoggingContextSelector implements ContextSelector {
@@ -205,7 +205,7 @@ public class LoggingContextSelector implements ContextSelector {
 
     /**
      * Returns the number of managed contexts Used for testing purposes
-     * 
+     *
      * @return the number of managed contexts
      */
     public int getCount() {
@@ -214,9 +214,9 @@ public class LoggingContextSelector implements ContextSelector {
 
     /**
      * These methods are used by the LoggerContextFilter.
-     * 
+     *
      * They provide a way to tell the selector which context to use, thus saving the cost of a JNDI call at each new request.
-     * 
+     *
      * @param context
      *            logging context
      */

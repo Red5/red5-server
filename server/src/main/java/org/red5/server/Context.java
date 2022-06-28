@@ -91,7 +91,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Initializes app context and context path from given parameters
-     * 
+     *
      * @param context
      *            Application context
      * @param contextPath
@@ -105,7 +105,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return global scope
-     * 
+     *
      * @return Global scope
      */
     public IGlobalScope getGlobalScope() {
@@ -116,7 +116,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return scope resolver
-     * 
+     *
      * @return scope resolver
      */
     public IScopeResolver getScopeResolver() {
@@ -125,7 +125,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Resolves scope using scope resolver collaborator
-     * 
+     *
      * @param path
      *            Path to resolve
      * @return Scope resolution result
@@ -136,7 +136,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Resolves scope from given root using scope resolver.
-     * 
+     *
      * @param root
      *            Scope to start from.
      * @param path
@@ -149,7 +149,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Setter for client registry
-     * 
+     *
      * @param clientRegistry
      *            Client registry
      */
@@ -159,7 +159,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Setter for mapping strategy
-     * 
+     *
      * @param mappingStrategy
      *            Mapping strategy
      */
@@ -169,7 +169,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Setter for scope resolver
-     * 
+     *
      * @param scopeResolver
      *            Scope resolver used to resolve scopes
      */
@@ -179,7 +179,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Setter for service invoker
-     * 
+     *
      * @param serviceInvoker
      *            Service invoker object
      */
@@ -189,7 +189,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return persistence store
-     * 
+     *
      * @return Persistence store
      */
     public IPersistenceStore getPersistanceStore() {
@@ -198,7 +198,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Setter for persistence store
-     * 
+     *
      * @param persistanceStore
      *            Persistence store
      */
@@ -208,7 +208,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Setter for application context
-     * 
+     *
      * @param context
      *            App context
      */
@@ -233,7 +233,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return application context
-     * 
+     *
      * @return App context
      */
     public ApplicationContext getApplicationContext() {
@@ -242,7 +242,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Setter for context path. Adds a slash at the end of path if there isn't one
-     * 
+     *
      * @param contextPath
      *            Context path
      */
@@ -255,7 +255,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return client registry
-     * 
+     *
      * @return Client registry
      */
     public IClientRegistry getClientRegistry() {
@@ -264,7 +264,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return scope
-     * 
+     *
      * @return null
      */
     public IScope getScope() {
@@ -273,7 +273,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return service invoker
-     * 
+     *
      * @return Service invoker
      */
     public IServiceInvoker getServiceInvoker() {
@@ -282,7 +282,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Look up service by name
-     * 
+     *
      * @param serviceName
      *            Service name
      * @return Service object
@@ -307,7 +307,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Look up scope handler for context path
-     * 
+     *
      * @param contextPath
      *            Context path
      * @return Scope handler
@@ -328,7 +328,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return mapping strategy used by this context. Mapping strategy define naming rules (prefixes, postfixes, default application name, etc) for all named objects in context.
-     * 
+     *
      * @return Mapping strategy
      */
     public IMappingStrategy getMappingStrategy() {
@@ -337,13 +337,13 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return array or resource that match given pattern
-     * 
+     *
      * @param pattern
      *            Pattern to check against
      * @return Array of Resource objects
      * @throws IOException
      *             On I/O exception
-     * 
+     *
      * @see org.springframework.core.io.Resource
      */
     public Resource[] getResources(String pattern) throws IOException {
@@ -352,11 +352,11 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return resource by path
-     * 
+     *
      * @param path
      *            Resource path
      * @return Resource
-     * 
+     *
      * @see org.springframework.core.io.Resource
      */
     public Resource getResource(String path) {
@@ -365,13 +365,13 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Resolve scope from host and path
-     * 
+     *
      * @param host
      *            Host
      * @param path
      *            Path
      * @return Scope
-     * 
+     *
      * @see org.red5.server.api.scope.IScope
      * @see org.red5.server.scope.Scope
      */
@@ -388,11 +388,11 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return bean instantiated by bean factory
-     * 
+     *
      * @param beanId
      *            Bean name
      * @return Instantiated bean
-     * 
+     *
      * @see org.springframework.beans.factory.BeanFactory
      */
     public Object getBean(String beanId) {
@@ -413,11 +413,11 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return core Red5 service instantiated by core context bean factory
-     * 
+     *
      * @param beanId
      *            Bean name
      * @return Core Red5 service instantiated
-     * 
+     *
      * @see org.springframework.beans.factory.BeanFactory
      */
     public Object getCoreService(String beanId) {
@@ -430,7 +430,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Return current thread's context classloader
-     * 
+     *
      * @return Classloder context of current thread
      */
     public ClassLoader getClassLoader() {
@@ -439,7 +439,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
 
     /**
      * Allows for reconstruction via CompositeData.
-     * 
+     *
      * @param cd
      *            composite data
      * @return Context class instance

@@ -62,9 +62,9 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Red5 loader for Tomcat.
- * 
+ *
  * http://tomcat.apache.org/tomcat-8.5-doc/api/index.html
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 @ManagedResource(objectName = "org.red5.server:type=TomcatLoader", description = "TomcatLoader")
@@ -85,7 +85,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     protected final static class DirectoryFilter implements FilenameFilter {
         /**
          * Check whether file matches filter rules
-         * 
+         *
          * @param dir
          *            Directory
          * @param name
@@ -174,7 +174,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Add context for path and docbase to current host.
-     * 
+     *
      * @param contextPath
      *            Path
      * @param docBase
@@ -188,7 +188,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Add context for path and docbase to a host.
-     * 
+     *
      * @param contextPath
      *            Path
      * @param docBase
@@ -224,7 +224,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Remove context from the current host.
-     * 
+     *
      * @param path
      *            Path
      */
@@ -514,7 +514,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Starts a web application and its red5 (spring) component. This is basically a stripped down version of start().
-     * 
+     *
      * @return true on success
      * @throws ServletException
      */
@@ -633,7 +633,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Set base host.
-     * 
+     *
      * @param baseHost
      *            Base host
      */
@@ -644,7 +644,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Get base host.
-     * 
+     *
      * @return Base host
      */
     public Host getBaseHost() {
@@ -653,7 +653,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Return Tomcat engine.
-     * 
+     *
      * @return Tomcat engine
      */
     public Engine getEngine() {
@@ -662,7 +662,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Set connectors.
-     * 
+     *
      * @param connectors
      */
     public void setConnectors(List<TomcatConnector> connectors) {
@@ -672,7 +672,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Set additional contexts.
-     * 
+     *
      * @param contexts
      *            Map of contexts
      * @throws ServletException
@@ -686,7 +686,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Setter for embedded object.
-     * 
+     *
      * @param embedded
      *            Embedded object
      */
@@ -697,7 +697,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Getter for embedded object.
-     * 
+     *
      * @return Embedded object
      */
     public EmbeddedTomcat getEmbedded() {
@@ -706,7 +706,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Get the host.
-     * 
+     *
      * @return host
      */
     public Host getHost() {
@@ -715,7 +715,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Set the host.
-     * 
+     *
      * @param host
      *            Host
      */
@@ -726,7 +726,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Set additional hosts.
-     * 
+     *
      * @param hosts
      *            List of hosts added to engine
      */
@@ -737,7 +737,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Setter for realm.
-     * 
+     *
      * @param realm
      *            Realm
      */
@@ -748,7 +748,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Getter for realm.
-     * 
+     *
      * @return Realm
      */
     public Realm getRealm() {
@@ -757,7 +757,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Set additional valves.
-     * 
+     *
      * @param valves
      *            List of valves
      */
@@ -768,7 +768,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Returns enabled state of websocket support.
-     * 
+     *
      * @return true if enabled and false otherwise
      */
     public boolean isWebsocketEnabled() {
@@ -777,7 +777,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Set websocket feature enabled / disabled.
-     * 
+     *
      * @param websocketEnabled
      */
     public void setWebsocketEnabled(boolean websocketEnabled) {
@@ -786,7 +786,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Returns a semi-unique id for this host based on its host values
-     * 
+     *
      * @return host id
      */
     protected String getHostId() {

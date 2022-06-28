@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * rtmpdump -V -z -r "rtmp://a.rtmp.youtube.com/live2" -a "live2" -y "<your stream name here>" -v -f "WIN 11,2,202,235"
  * </pre>
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class YouTubeConnectTest {

@@ -9,7 +9,7 @@ package org.red5.net.websocket.model;
 
 /**
  * WebSocket event enumeration.
- * 
+ *
  * @author Paul Gregoire
  */
 public enum WebSocketEvent {

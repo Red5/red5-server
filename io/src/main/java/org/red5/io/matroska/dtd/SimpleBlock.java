@@ -30,7 +30,7 @@ public class SimpleBlock extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT)
      *
      * @param name
@@ -46,9 +46,9 @@ public class SimpleBlock extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     * 
+     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -88,7 +88,7 @@ public class SimpleBlock extends Tag {
 
     /**
      * getter for binary
-     * 
+     *
      * @return - binary
      */
     public byte[] getBinary() {
@@ -97,7 +97,7 @@ public class SimpleBlock extends Tag {
 
     /**
      * getter for time code
-     * 
+     *
      * @return - time code
      */
     public long getTimeCode() {
@@ -106,7 +106,7 @@ public class SimpleBlock extends Tag {
 
     /**
      * getter for track number
-     * 
+     *
      * @return - track number
      */
     public int getTrackNumber() {
@@ -115,7 +115,7 @@ public class SimpleBlock extends Tag {
 
     /**
      * getter for key frame
-     * 
+     *
      * @return - key frame
      */
     public boolean isKeyFrame() {

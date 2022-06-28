@@ -9,7 +9,7 @@ package org.red5.server.api.statistics;
 
 /**
  * Base class for all stream statistics.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -17,7 +17,7 @@ public interface IStreamStatistics extends IStatisticsBase {
 
     /**
      * Return the currently active timestamp inside the stream.
-     * 
+     *
      * @return the timestamp in milliseconds
      */
     public int getCurrentTimestamp();

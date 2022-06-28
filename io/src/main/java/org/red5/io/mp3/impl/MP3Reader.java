@@ -118,7 +118,7 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
 
     /**
      * Creates reader from file input stream
-     * 
+     *
      * @param file
      *            file input
      * @throws IOException
@@ -193,7 +193,7 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
 
     /**
      * A MP3 stream never has video.
-     * 
+     *
      * @return always returns <code>false</code>
      */
     @Override
@@ -224,7 +224,7 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
 
     /**
      * Creates file metadata object
-     * 
+     *
      * @return Tag
      */
     private ITag createFileMeta() {
@@ -329,7 +329,7 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
 
     /**
      * Get the total readable bytes in a file or ByteBuffer.
-     * 
+     *
      * @return Total readable bytes
      */
     @Override

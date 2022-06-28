@@ -17,7 +17,7 @@ public interface ISeekableProvider extends IProvider {
 
     /**
      * Seek the provider to timestamp ts (in milliseconds).
-     * 
+     *
      * @param ts
      *            Timestamp to seek to
      * @return Actual timestamp seeked to

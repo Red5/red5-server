@@ -31,7 +31,7 @@ public class RemotingProtocolDecoder {
 
     /**
      * Decodes the given buffer.
-     * 
+     *
      * @param buffer
      *            input buffer
      * @return a List of {@link RemotingPacket} objects.
@@ -53,7 +53,7 @@ public class RemotingProtocolDecoder {
 
     /**
      * Decodes the buffer and returns a remoting packet.
-     * 
+     *
      * @param in
      *            input buffer
      * @return A {@link RemotingPacket}
@@ -68,7 +68,7 @@ public class RemotingProtocolDecoder {
 
     /**
      * Read remoting headers.
-     * 
+     *
      * @param in
      *            Input data as byte buffer
      * @return header map

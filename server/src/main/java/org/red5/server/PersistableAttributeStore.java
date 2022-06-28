@@ -95,7 +95,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Set for persistence
-     * 
+     *
      * @param persistent
      *            Persistence flag value
      */
@@ -105,7 +105,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Returns last modification time as timestamp
-     * 
+     *
      * @return Timestamp of last attribute modification
      */
     public long getLastModified() {
@@ -114,7 +114,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Return store name
-     * 
+     *
      * @return Store name
      */
     public String getName() {
@@ -123,7 +123,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Setter for name
-     * 
+     *
      * @param name
      *            Name
      */
@@ -133,7 +133,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Ruturn scope path
-     * 
+     *
      * @return Path
      */
     public String getPath() {
@@ -142,7 +142,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Setter for scope path
-     * 
+     *
      * @param path
      *            Path
      */
@@ -152,7 +152,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Return scope type
-     * 
+     *
      * @return Scope type
      */
     public String getType() {
@@ -210,7 +210,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Return persistent store
-     * 
+     *
      * @return Persistence store
      */
     public IPersistenceStore getStore() {
@@ -263,7 +263,7 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
 
     /**
      * Removes attribute
-     * 
+     *
      * @param name
      *            Attribute name
      * @return true if attribute was removed, false otherwise

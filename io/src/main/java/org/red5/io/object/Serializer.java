@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
 
 /**
  * The Serializer class writes data output and handles the data according to the core data types
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  * @author Harald Radi (harald.radi@nme.at)
@@ -45,7 +45,7 @@ public class Serializer {
 
     /**
      * Serializes output to a core data type object
-     * 
+     *
      * @param out
      *            Output writer
      * @param any
@@ -57,7 +57,7 @@ public class Serializer {
 
     /**
      * Serializes output to a core data type object
-     * 
+     *
      * @param out
      *            Output writer
      * @param field
@@ -124,7 +124,7 @@ public class Serializer {
 
     /**
      * Writes a primitive out as an object
-     * 
+     *
      * @param out
      *            Output writer
      * @param basic
@@ -153,7 +153,7 @@ public class Serializer {
 
     /**
      * Writes a complex type object out
-     * 
+     *
      * @param out
      *            Output writer
      * @param complex
@@ -179,7 +179,7 @@ public class Serializer {
 
     /**
      * Writes Lists out as a data type
-     * 
+     *
      * @param out
      *            Output write
      * @param listType
@@ -198,7 +198,7 @@ public class Serializer {
 
     /**
      * Writes a List out as an Object
-     * 
+     *
      * @param out
      *            Output writer
      * @param list
@@ -232,7 +232,7 @@ public class Serializer {
 
     /**
      * Writes array (or collection) out as output Arrays, Collections, etc
-     * 
+     *
      * @param out
      *            Output object
      * @param arrType
@@ -258,7 +258,7 @@ public class Serializer {
 
     /**
      * Writes an iterator out to the output
-     * 
+     *
      * @param out
      *            Output writer
      * @param it
@@ -277,7 +277,7 @@ public class Serializer {
 
     /**
      * Writes an xml type out to the output
-     * 
+     *
      * @param out
      *            Output writer
      * @param xml
@@ -297,7 +297,7 @@ public class Serializer {
 
     /**
      * Writes a document to the output
-     * 
+     *
      * @param out
      *            Output writer
      * @param doc
@@ -309,7 +309,7 @@ public class Serializer {
 
     /**
      * Write typed object to the output
-     * 
+     *
      * @param out
      *            Output writer
      * @param obj
@@ -332,7 +332,7 @@ public class Serializer {
 
     /**
      * Writes a custom data to the output
-     * 
+     *
      * @param out
      *            Output writer
      * @param obj
@@ -351,7 +351,7 @@ public class Serializer {
 
     /**
      * Checks whether the field should be serialized or not
-     * 
+     *
      * @param keyName
      *            key name
      * @param field
@@ -385,7 +385,7 @@ public class Serializer {
 
     /**
      * Handles classes by name, also provides "shortened" class aliases where appropriate.
-     * 
+     *
      * @param objectClass
      *            class
      * @return class name for given object

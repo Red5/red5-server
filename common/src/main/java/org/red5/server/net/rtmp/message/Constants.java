@@ -210,7 +210,7 @@ public interface Constants {
         TYPE_PING, // 4 Ping / control
         TYPE_SERVER_BANDWIDTH, // 5 Window Acknowledgement Size
         TYPE_CLIENT_BANDWIDTH, // 6 Set Peer Bandwidth
-        TYPE_EDGE_ORIGIN, // 7 
+        TYPE_EDGE_ORIGIN, // 7
         TYPE_AUDIO_DATA, // 8 Audio
         TYPE_VIDEO_DATA, // 9 Video
         TYPE_UNK_0A, // 0x0a 10

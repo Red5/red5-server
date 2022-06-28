@@ -39,7 +39,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Red5 loader for Tomcat virtual hosts.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 @ManagedResource(objectName = "org.red5.server:type=TomcatVHostLoader", description = "TomcatVHostLoader")
@@ -76,7 +76,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
 
     /**
      * Initialization.
-     * 
+     *
      * @throws ServletException
      */
     @Override
@@ -193,7 +193,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
                         }
                         //
                         appctx.setServletContext(servletContext);
-                        //set the root webapp ctx attr on the each servlet context so spring can find it later					
+                        //set the root webapp ctx attr on the each servlet context so spring can find it later
                         servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, appctx);
                         appctx.refresh();
                     } catch (Throwable t) {
@@ -247,7 +247,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
 
     /**
      * Starts a web application and its red5 (spring) component. This is basically a stripped down version of init().
-     * 
+     *
      * @return true on success
      * @throws ServletException
      */
@@ -319,7 +319,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
             }
             //
             appctx.setServletContext(servletContext);
-            //set the root webapp ctx attr on the each servlet context so spring can find it later					
+            //set the root webapp ctx attr on the each servlet context so spring can find it later
             servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, appctx);
             appctx.refresh();
             result = true;
@@ -335,7 +335,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
 
     /**
      * Create a standard host.
-     * 
+     *
      * @return host
      */
     public Host createHost() {
@@ -368,7 +368,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
 
     /**
      * Adds an alias to the current host.
-     * 
+     *
      * @param alias
      *            alias
      */
@@ -379,7 +379,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
 
     /**
      * Removes an alias from the current host.
-     * 
+     *
      * @param alias
      *            Alias
      */
@@ -396,7 +396,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
 
     /**
      * Adds a valve to the current host.
-     * 
+     *
      * @param valve
      *            Valve
      */
@@ -408,7 +408,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
 
     /**
      * Removes a valve from the current host.
-     * 
+     *
      * @param valveInfo
      *            Valve Information.
      */
@@ -423,12 +423,12 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
             log.error("", e);
         }
         //TODO: fix removing valves
-        //((StandardHost) host).removeValve(valve);	
+        //((StandardHost) host).removeValve(valve);
     }
 
     /**
      * Set additional contexts.
-     * 
+     *
      * @param contexts
      *            Map of contexts
      * @throws ServletException

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Stream helper methods.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -32,7 +32,7 @@ public abstract class StreamUtils {
 
     /**
      * Creates server stream
-     * 
+     *
      * @param scope
      *            Scope of stream
      * @param name

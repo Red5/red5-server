@@ -12,7 +12,7 @@ import org.red5.io.ITag;
 
 /**
  * A Tag represents the contents or payload of a FLV file.
- * 
+ *
  * @see <a href="https://code.google.com/p/red5/wiki/FLV#FLV_Tag">FLV Tag</a>
  *
  * @author The Red5 Project
@@ -58,7 +58,7 @@ public class Tag implements ITag {
 
     /**
      * TagImpl Constructor
-     * 
+     *
      * @param dataType
      *            Tag data type
      * @param timestamp
@@ -112,7 +112,7 @@ public class Tag implements ITag {
 
     /**
      * Return the body IoBuffer
-     * 
+     *
      * @return Tag body
      */
     @Override
@@ -122,7 +122,7 @@ public class Tag implements ITag {
 
     /**
      * Return the size of the body
-     * 
+     *
      * @return Tag body size
      */
     @Override
@@ -132,7 +132,7 @@ public class Tag implements ITag {
 
     /**
      * Get the data type
-     * 
+     *
      * @return Tag data type
      */
     @Override
@@ -142,7 +142,7 @@ public class Tag implements ITag {
 
     /**
      * Return the timestamp
-     * 
+     *
      * @return Tag timestamp
      */
     @Override
@@ -152,7 +152,7 @@ public class Tag implements ITag {
 
     /**
      * Return previous tag size
-     * 
+     *
      * @return Previous tag size
      */
     @Override
@@ -162,7 +162,7 @@ public class Tag implements ITag {
 
     /**
      * Prints out the contents of the tag
-     * 
+     *
      * @return Tag contents
      */
     @Override

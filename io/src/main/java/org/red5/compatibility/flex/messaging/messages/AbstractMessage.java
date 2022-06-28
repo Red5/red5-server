@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base class for all Flex compatibility messages.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -58,7 +58,7 @@ public class AbstractMessage implements Message, Serializable {
 
     /**
      * Add message properties to string.
-     * 
+     *
      * @param result
      *            <code>StringBuilder</code> to add properties to
      */
@@ -169,7 +169,7 @@ public class AbstractMessage implements Message, Serializable {
 
     /**
      * Return string representation of the message.
-     * 
+     *
      * @return value
      */
     @Override

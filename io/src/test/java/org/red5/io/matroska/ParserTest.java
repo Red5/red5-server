@@ -51,7 +51,7 @@ public class ParserTest {
 
     /**
      * tests if EBML tag parsed as expected
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -71,7 +71,7 @@ public class ParserTest {
 
     /**
      * tests if EBMLVersion tag parsed as expected
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -93,7 +93,7 @@ public class ParserTest {
 
     /**
      * tests if EBMLReadVersion tag parsed as expected
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -115,7 +115,7 @@ public class ParserTest {
 
     /**
      * tests if DocType tag parsed as expected
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException

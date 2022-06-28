@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Calculates the bandwidth between the client and server. The checks originate from the server.
- * 
+ *
  * @see <a href='http://help.adobe.com/en_US/FlashMediaServer/3.5_Deving/WS5b3ccc516d4fbf351e63e3d11a0773d56e-7ffa.html'>FMS 3.5 Bandwidth Doc</a>
- * 
+ *
  * @author The Red5 Project
  * @author Dan Rossi
  * @author Paul Gregoire
@@ -58,7 +58,7 @@ public class ServerClientDetection implements IPendingServiceCallback, IBandwidt
     // start time using nanos
     private long startTime;
 
-    // time passed overall 
+    // time passed overall
     private long timePassed;
 
     private AtomicInteger packetsSent = new AtomicInteger(0);
@@ -111,7 +111,7 @@ public class ServerClientDetection implements IPendingServiceCallback, IBandwidt
                     // We now have a latency figure so can start sending test data.
                     // Second call. 1st packet sent
                     log.debug("Sending first payload at {} ns", now);
-                    callBWCheck(payload); // 1k	
+                    callBWCheck(payload); // 1k
                     break;
                 case 2:
                     log.debug("Sending second payload at {} ns", now);

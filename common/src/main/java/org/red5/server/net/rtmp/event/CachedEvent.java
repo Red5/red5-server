@@ -12,7 +12,7 @@ import org.red5.server.api.stream.IStreamPacket;
 
 /**
  * Provides a means for storage of RTMP events.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class CachedEvent implements IStreamPacket {

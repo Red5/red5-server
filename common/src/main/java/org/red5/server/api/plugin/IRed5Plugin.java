@@ -12,21 +12,21 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Base interface for a Red5 server Plug-in.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IRed5Plugin {
 
     /**
      * Returns a name / identifier for the plug-in.
-     * 
+     *
      * @return plug-in's name
      */
     String getName();
 
     /**
      * Sets the top-most ApplicationContext within Red5.
-     * 
+     *
      * @param context
      *            application context
      */
@@ -34,7 +34,7 @@ public interface IRed5Plugin {
 
     /**
      * Sets a reference to the server.
-     * 
+     *
      * @param server
      *            server
      */
@@ -42,7 +42,7 @@ public interface IRed5Plugin {
 
     /**
      * Lifecycle method called when the plug-in is started.
-     * 
+     *
      * @throws Exception
      *             on start error
      */
@@ -50,7 +50,7 @@ public interface IRed5Plugin {
 
     /**
      * Lifecycle method called when the plug-in is stopped.
-     * 
+     *
      * @throws Exception
      *             on stop error
      */

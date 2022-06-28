@@ -9,8 +9,8 @@ package org.red5.server.jmx.mxbeans;
 
 import javax.management.MXBean;
 
-/** 
- * 
+/**
+ *
  */
 @MXBean
 public interface RTMPMinaTransportMXBean {

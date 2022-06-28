@@ -28,7 +28,7 @@ public class StreamableFileFactory implements IStreamableFileFactory {
 
     /**
      * Setter for services
-     * 
+     *
      * @param services
      *            Set of streamable file services
      */

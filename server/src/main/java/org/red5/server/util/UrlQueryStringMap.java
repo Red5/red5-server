@@ -9,7 +9,7 @@ import java.util.HashMap;
  *            key
  * @param <V>
  *            value
- * 
+ *
  * @author Paul Gregoire
  */
 @SuppressWarnings("serial")
@@ -21,7 +21,7 @@ public final class UrlQueryStringMap<K, V> extends HashMap<K, V> {
 
     /**
      * Parse a given query string and return an instance of this class.
-     * 
+     *
      * @param queryString
      *            query string
      * @return query string items as map entries

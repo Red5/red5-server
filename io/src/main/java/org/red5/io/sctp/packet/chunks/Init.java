@@ -20,7 +20,7 @@ import org.red5.io.sctp.packet.SctpPacket;
 
 public class Init extends Chunk {
 
-    // initiateTag(4 byte) + advertisedReceiverWindowCredit(4 byte) + numberOfOutboundStreams(2 byte) + numberOfInboundStreams(2 byte) + TSN(4 byte) 
+    // initiateTag(4 byte) + advertisedReceiverWindowCredit(4 byte) + numberOfOutboundStreams(2 byte) + numberOfInboundStreams(2 byte) + TSN(4 byte)
     private static final int MANDATORY_FIELD_SIZE = 16;
 
     private int initiateTag;

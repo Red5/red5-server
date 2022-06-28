@@ -24,13 +24,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMPS client object (RTMPS Native)
- * 
+ *
  * <pre>
  * var nc:NetConnection = new NetConnection();
  * nc.proxyType = "best";
  * nc.connect("rtmps:\\localhost\app");
  * </pre>
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  * @author Kevin Green (kevygreen@gmail.com)
@@ -74,7 +74,7 @@ public class RTMPSClient extends RTMPClient {
                     // will throw RuntimeException after connection error
                     future.getSession();
                 } catch (Throwable e) {
-                    //if there isn't an ClientExceptionHandler set, a 
+                    //if there isn't an ClientExceptionHandler set, a
                     //RuntimeException may be thrown in handleException
                     handleException(e);
                 }
@@ -91,7 +91,7 @@ public class RTMPSClient extends RTMPClient {
 
     /**
      * Password used to access the keystore file.
-     * 
+     *
      * @param password keystore password
      */
     public void setKeyStorePassword(String password) {
@@ -100,7 +100,7 @@ public class RTMPSClient extends RTMPClient {
 
     /**
      * Set the key store type, JKS or PKCS12.
-     * 
+     *
      * @param keyStoreType keystore type
      */
     public void setKeyStoreType(String keyStoreType) {

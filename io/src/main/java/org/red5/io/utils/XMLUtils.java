@@ -42,7 +42,7 @@ public class XMLUtils {
 
     /**
      * Converts string representation of XML into Document
-     * 
+     *
      * @param str
      *            String representation of XML
      * @return DOM object
@@ -67,7 +67,7 @@ public class XMLUtils {
 
     /**
      * Converts doc to String
-     * 
+     *
      * @param dom
      *            DOM object to convert
      * @return XML as String
@@ -78,7 +78,7 @@ public class XMLUtils {
 
     /**
      * Convert a DOM tree into a String using Dom2Writer
-     * 
+     *
      * @return XML as String
      * @param dom
      *            DOM object to convert
@@ -91,7 +91,7 @@ public class XMLUtils {
 
     /**
      * Convert a DOM tree into a String using transform
-     * 
+     *
      * @param domDoc
      *            DOM object
      * @throws java.io.IOException

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Buffer for incoming data.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  *
  */
@@ -29,7 +29,7 @@ public class ReadBuffer {
 
     /**
      * Returns the buffer size.
-     * 
+     *
      * @return buffer remaining
      */
     public int getBufferSize() {
@@ -38,7 +38,7 @@ public class ReadBuffer {
 
     /**
      * Add a byte array to the buffer.
-     * 
+     *
      * @param in
      *            incoming bytes
      */
@@ -49,7 +49,7 @@ public class ReadBuffer {
 
     /**
      * Add a IoBuffer to the buffer.
-     * 
+     *
      * @param in
      *            incoming IoBuffer
      */
@@ -64,7 +64,7 @@ public class ReadBuffer {
 
     /**
      * Returns buffered IoBuffer itself.
-     * 
+     *
      * @return IoBuffer
      */
     public IoBuffer getBufferAsIoBuffer() {
@@ -75,7 +75,7 @@ public class ReadBuffer {
 
     /**
      * Returns buffered byte array.
-     * 
+     *
      * @return bytes
      */
     public byte[] getBuffer() {
@@ -86,7 +86,7 @@ public class ReadBuffer {
 
     /**
      * Returns buffered byte array.
-     * 
+     *
      * @param length size of the array to return
      * @return bytes
      */

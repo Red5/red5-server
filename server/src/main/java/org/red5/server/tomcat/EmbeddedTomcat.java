@@ -19,7 +19,7 @@ import org.apache.catalina.webresources.StandardRoot;
 
 /**
  * Extension of Tomcat's Tomcat class, tailored for Red5.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class EmbeddedTomcat extends Tomcat {
@@ -40,7 +40,7 @@ public class EmbeddedTomcat extends Tomcat {
         config.setDefaultWebXml(noDefaultWebXmlPath());
         // get the host first, creates a new std host if not already set
         getHost();
-        // reset ParentClassLoader 
+        // reset ParentClassLoader
         if (!host.getParentClassLoader().equals(Thread.currentThread().getContextClassLoader())) {
             host.setParentClassLoader(Thread.currentThread().getContextClassLoader());
         }

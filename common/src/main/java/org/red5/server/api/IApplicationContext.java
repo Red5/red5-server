@@ -9,7 +9,7 @@ package org.red5.server.api;
 
 /**
  * Interface that wraps the application server context.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

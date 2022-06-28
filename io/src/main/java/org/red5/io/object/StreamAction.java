@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Represents all the actions which may be permitted on a stream. Some actions are called by client implementations other than a Flash Player itself; ex "getStreamLength".
  * If an action is not specified here, the "CUSTOM" enum will be returned.
- * 
+ *
  * @author Paul Gregoire
  */
 public enum StreamAction {

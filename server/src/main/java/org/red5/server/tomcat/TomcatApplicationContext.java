@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Class that wraps a Tomcat webapp context.
- * 
+ *
  * @author The Red5 Project (red5@osflash.org)
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire
@@ -34,7 +34,7 @@ public class TomcatApplicationContext implements IApplicationContext {
 
     /**
      * Wrap the passed Tomcat webapp context.
-     * 
+     *
      * @param context
      */
     protected TomcatApplicationContext(Context context) {

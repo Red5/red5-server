@@ -13,7 +13,7 @@ import java.util.Random;
 
 /**
  * The UnsignedLong class wraps a value of an unsigned 64 bits number.
- * 
+ *
  * @author Matteo Merli (matteo.merli@gmail.com)
  */
 public final class UnsignedLong extends UnsignedNumber {
@@ -54,7 +54,7 @@ public final class UnsignedLong extends UnsignedNumber {
 
     /**
      * Construct a new random UnsignedLong.
-     * 
+     *
      * @param random
      *            a Random handler
      */

@@ -20,7 +20,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 /**
  * Abstract pipe that books providers/consumers and listeners. Aim to ease the implementation of concrete pipes. For more information on what pipe is, see IPipe interface documentation.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  *
@@ -89,7 +89,7 @@ public abstract class AbstractPipe implements IPipe {
 
     /**
      * Disconnects provider from this pipe. Fires pipe connection event.
-     * 
+     *
      * @param provider
      *            Provider that should be removed
      * @return true on success, false otherwise
@@ -106,7 +106,7 @@ public abstract class AbstractPipe implements IPipe {
 
     /**
      * Disconnects consumer from this pipe. Fires pipe connection event.
-     * 
+     *
      * @param consumer
      *            Consumer that should be removed
      * @return true on success, false otherwise
@@ -123,7 +123,7 @@ public abstract class AbstractPipe implements IPipe {
 
     /**
      * Registers pipe connect events listener
-     * 
+     *
      * @param listener
      *            Listener
      */
@@ -133,7 +133,7 @@ public abstract class AbstractPipe implements IPipe {
 
     /**
      * Removes pipe connection listener
-     * 
+     *
      * @param listener
      *            Listener
      */
@@ -231,7 +231,7 @@ public abstract class AbstractPipe implements IPipe {
 
     /**
      * Broadcast provider connection event
-     * 
+     *
      * @param provider
      *            Provider that has connected
      * @param type
@@ -245,7 +245,7 @@ public abstract class AbstractPipe implements IPipe {
 
     /**
      * Fire any pipe connection event and run all it's tasks
-     * 
+     *
      * @param event
      *            Pipe connection event
      */

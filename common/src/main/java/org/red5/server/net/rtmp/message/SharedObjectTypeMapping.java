@@ -24,7 +24,7 @@ public class SharedObjectTypeMapping {
     public static final Type[] typeMap = new Type[] { null, Type.SERVER_CONNECT, // 01
             Type.SERVER_DISCONNECT, // 02
             Type.SERVER_SET_ATTRIBUTE, // 03
-            Type.CLIENT_UPDATE_DATA, // 04 
+            Type.CLIENT_UPDATE_DATA, // 04
             Type.CLIENT_UPDATE_ATTRIBUTE, // 05
             Type.SERVER_SEND_MESSAGE, // 06
             Type.CLIENT_STATUS, // 07
@@ -36,7 +36,7 @@ public class SharedObjectTypeMapping {
 
     /**
      * Convert byte value of RTMP marker to event type
-     * 
+     *
      * @param rtmpType
      *            RTMP marker value
      * @return Corresponding Shared Object event type
@@ -47,7 +47,7 @@ public class SharedObjectTypeMapping {
 
     /**
      * Convert SO event type to byte representation that RTMP uses
-     * 
+     *
      * @param type
      *            Event type
      * @return Byte representation of given event type
@@ -86,7 +86,7 @@ public class SharedObjectTypeMapping {
 
     /**
      * String representation of type
-     * 
+     *
      * @param type
      *            Type
      * @return String representation of type

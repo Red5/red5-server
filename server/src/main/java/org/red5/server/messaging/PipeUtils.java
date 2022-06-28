@@ -9,14 +9,14 @@ package org.red5.server.messaging;
 
 /**
  * Helper class for pipe structure.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public class PipeUtils {
     /**
      * Connect a provider/consumer with a pipe.
-     * 
+     *
      * @param provider
      *            Provider
      * @param pipe
@@ -31,7 +31,7 @@ public class PipeUtils {
 
     /**
      * Disconnect a provider/consumer from a pipe.
-     * 
+     *
      * @param provider
      *            Provider
      * @param pipe

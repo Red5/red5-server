@@ -9,7 +9,7 @@ package org.red5.io.object;
 
 /**
  * The UnsignedByte class wraps a value of and unsigned 8 bits number.
- * 
+ *
  * @author Matteo Merli (matteo.merli@gmail.com)
  */
 public final class UnsignedByte extends UnsignedNumber {

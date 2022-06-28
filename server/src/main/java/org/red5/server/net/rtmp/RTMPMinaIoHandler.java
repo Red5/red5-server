@@ -251,7 +251,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
 
     /**
      * Close and clean-up the IoSession.
-     * 
+     *
      * @param session
      * @param immediately
      *            close without waiting for the write queue to flush

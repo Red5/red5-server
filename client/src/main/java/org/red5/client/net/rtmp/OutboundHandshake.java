@@ -23,7 +23,7 @@ import org.red5.server.util.FileUtil;
 
 /**
  * Performs handshaking for client connections.
- * 
+ *
  * @author Paul Gregoire
  */
 public class OutboundHandshake extends RTMPHandshake {
@@ -352,7 +352,7 @@ public class OutboundHandshake extends RTMPHandshake {
 
     /**
      * Gets and verifies the server digest.
-     * 
+     *
      * @return true if the server digest is found and verified, false otherwise
      */
     private boolean getServerDigestPosition() {
@@ -384,7 +384,7 @@ public class OutboundHandshake extends RTMPHandshake {
 
     /**
      * Determines the validation scheme for given input.
-     * 
+     *
      * @param handshake the handshake bytes from the server
      * @return true if server used a supported validation scheme, false if unsupported
      */
@@ -433,7 +433,7 @@ public class OutboundHandshake extends RTMPHandshake {
 
     /**
      * Initialize SWF verification data.
-     * 
+     *
      * @param swfFilePath path to the swf file or null
      */
     public void initSwfVerification(String swfFilePath) {

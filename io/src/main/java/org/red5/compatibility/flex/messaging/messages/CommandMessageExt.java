@@ -12,7 +12,7 @@ import org.red5.io.amf3.IExternalizable;
 
 /**
  * An externalizable version of a given CommandMessage. The class alias for this class within flex is "DSC".
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class CommandMessageExt extends CommandMessage implements IExternalizable {

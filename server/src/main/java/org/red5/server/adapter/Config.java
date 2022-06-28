@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * Provides configuration details for Applications.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 @SuppressWarnings("unchecked")

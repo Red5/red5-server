@@ -7,12 +7,17 @@
 
 package org.red5.net.websocket.listener;
 
+import java.util.Objects;
+
 /**
  * Adapter class for WebSocket data listener interface.
- * 
+ *
  * @author Paul Gregoire
  */
 public abstract class WebSocketDataListener implements IWebSocketDataListener {
+
+    // used as a seed for hashCode/equals to prevent dupe instances
+    protected final int localId = Objects.hash(System.nanoTime());
 
     /**
      * The protocol which this listener is interested in handling.
@@ -29,6 +34,23 @@ public abstract class WebSocketDataListener implements IWebSocketDataListener {
     @Override
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    @Override
+    public int hashCode() {
+        return localId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WebSocketDataListener other = (WebSocketDataListener) obj;
+        return localId == other.localId;
     }
 
 }

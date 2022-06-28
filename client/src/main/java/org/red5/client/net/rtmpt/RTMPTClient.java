@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMPT client object
- * 
+ *
  * @author Anton Lebedevich
  */
 public class RTMPTClient extends BaseRTMPClientHandler {
@@ -60,7 +60,7 @@ public class RTMPTClient extends BaseRTMPClientHandler {
 
     /**
      * Received message object router.
-     * 
+     *
      * @param message
      *            an IoBuffer or Packet
      */

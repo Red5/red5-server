@@ -14,7 +14,7 @@ import org.red5.server.api.scope.IScopeService;
 
 /**
  * Service that supports periodic execution of jobs, adding, removing and getting their name as list.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -35,7 +35,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Schedule a job for periodic execution.
-     * 
+     *
      * @param interval
      *            time in milliseconds between two notifications of the job
      * @param job
@@ -46,7 +46,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Schedule a job for single execution in the future. Please note that the jobs are not saved if Red5 is restarted in the meantime.
-     * 
+     *
      * @param timeDelta
      *            time delta in milliseconds from the current date
      * @param job
@@ -57,7 +57,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Schedule a job for single execution at a given date. Please note that the jobs are not saved if Red5 is restarted in the meantime.
-     * 
+     *
      * @param date
      *            date when the job should be executed
      * @param job
@@ -68,7 +68,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Schedule a job for periodic execution which will start after the specified delay.
-     * 
+     *
      * @param interval
      *            time in milliseconds between two notifications of the job
      * @param job
@@ -81,7 +81,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Pauses the trigger which initiates job execution.
-     * 
+     *
      * @param name
      *            name of the job to stop
      */
@@ -89,7 +89,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Resumes the trigger which initiates job execution.
-     * 
+     *
      * @param name
      *            name of the job to stop
      */
@@ -97,7 +97,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Stop executing a previously scheduled job.
-     * 
+     *
      * @param name
      *            name of the job to stop
      */
@@ -105,7 +105,7 @@ public interface ISchedulingService extends IScopeService {
 
     /**
      * Return names of scheduled jobs.
-     * 
+     *
      * @return list of job names
      */
     public List<String> getScheduledJobNames();

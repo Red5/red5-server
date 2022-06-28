@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Simple descriptor for plug-ins.
- * 
+ *
  * @author Paul Gregoire
  */
 public final class PluginDescriptor {

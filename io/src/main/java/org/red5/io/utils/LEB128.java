@@ -9,11 +9,11 @@ package org.red5.io.utils;
 
 /**
  * This class encodes and decodes integers in the LEB128 compression format.
- * 
- * Reference examples: 
+ *
+ * Reference examples:
  * @see <a href="https://github.com/pion/rtp/blob/master/pkg/obu/leb128.go">leb128.go</a>
  * @see <a href="https://github.com/hathibelagal-dev/LEB128/blob/master/lib/leb128.dart">leb128.dart</a>
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -25,7 +25,7 @@ public final class LEB128 {
 
     /**
      * Encodes an int into an LEB128 unsigned integer.
-     * 
+     *
      * @param value integer to encode
      * @return unsigned integer in LEB128 format
      */
@@ -46,7 +46,7 @@ public final class LEB128 {
 
     /**
      * Decodes an LEB128 unsigned integer into a regular int.
-     * 
+     *
      * @param value unsigned integer in LEB128 format to decode
      * @return int
      */

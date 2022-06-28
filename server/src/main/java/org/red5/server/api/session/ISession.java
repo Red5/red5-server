@@ -20,14 +20,14 @@ public interface ISession extends Serializable {
 
     /**
      * Returns creation time in milliseconds.
-     * 
+     *
      * @return creation time
      */
     public long getCreated();
 
     /**
      * Returns the session's identifier.
-     * 
+     *
      * @return session id
      */
     public String getSessionId();
@@ -39,7 +39,7 @@ public interface ISession extends Serializable {
 
     /**
      * Returns the active state of the session.
-     * 
+     *
      * @return is active
      */
     public boolean isActive();
@@ -51,7 +51,7 @@ public interface ISession extends Serializable {
 
     /**
      * Sets the associated client id.
-     * 
+     *
      * @param clientId
      *            client id
      */
@@ -59,14 +59,14 @@ public interface ISession extends Serializable {
 
     /**
      * Returns the client id associated with this session.
-     * 
+     *
      * @return client id
      */
     public String getClientId();
 
     /**
      * Sets where session resources will be located if persisted to disk.
-     * 
+     *
      * @param destinationDirectory
      *            destination directory
      */

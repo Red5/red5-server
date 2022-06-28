@@ -16,14 +16,14 @@ public abstract class UnsignedNumber extends Number {
 
     /**
      * Get a byte array representation of the number. The order will be MSB first (Big Endian).
-     * 
+     *
      * @return the serialized number
      */
     public abstract byte[] getBytes();
 
     /**
      * Perform a bit right shift of the value.
-     * 
+     *
      * @param nBits
      *            the number of positions to shift
      */
@@ -31,7 +31,7 @@ public abstract class UnsignedNumber extends Number {
 
     /**
      * Perform a bit left shift of the value.
-     * 
+     *
      * @param nBits
      *            the number of positions to shift
      */

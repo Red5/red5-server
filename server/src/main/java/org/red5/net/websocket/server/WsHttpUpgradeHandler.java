@@ -243,7 +243,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     /**
      * Check to see if the timeout has expired and process a timeout if that is that case. Note: The name of this method originated with the Servlet 3.0 asynchronous processing but evolved over time to represent a timeout that is triggered independently of the socket read/write timeouts.
-     * 
+     *
      * @param now
      *            - The time (as returned by System.currentTimeMillis() to use as the current time to determine whether the timeout has expired. If negative, the timeout will always be treated as if it has expired.
      */

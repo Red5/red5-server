@@ -73,7 +73,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
 
     /**
      * Create new event of given type
-     * 
+     *
      * @param type
      *            Event type
      */
@@ -83,7 +83,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
 
     /**
      * Create new event of given type
-     * 
+     *
      * @param type
      *            Event type
      * @param source

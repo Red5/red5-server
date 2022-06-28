@@ -11,7 +11,7 @@ import org.red5.server.stream.message.RTMPMessage;
 
 /**
  * Interface for classes that implement logic to drop frames.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -31,7 +31,7 @@ public interface IFrameDropper {
 
     /**
      * Checks if a message may be sent to the subscriber.
-     * 
+     *
      * @param message
      *            the message to check
      * @param pending
@@ -39,9 +39,9 @@ public interface IFrameDropper {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the packet may be sent, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -50,7 +50,7 @@ public interface IFrameDropper {
 
     /**
      * Notify that a packet has been dropped.
-     * 
+     *
      * @param message
      *            the message that was dropped
      */
@@ -58,7 +58,7 @@ public interface IFrameDropper {
 
     /**
      * Notify that a message has been sent.
-     * 
+     *
      * @param message
      *            the message that was sent
      */
@@ -69,7 +69,7 @@ public interface IFrameDropper {
 
     /**
      * Reset the frame dropper to a given state.
-     * 
+     *
      * @param state
      *            the state to reset the frame dropper to
      */

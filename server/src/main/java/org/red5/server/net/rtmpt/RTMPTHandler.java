@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handler for RTMPT messages.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -49,7 +49,7 @@ public class RTMPTHandler extends RTMPHandler {
 
     /**
      * Return hostname for URL.
-     * 
+     *
      * @param url
      *            URL
      * @return Hostname from that URL

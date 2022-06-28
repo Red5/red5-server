@@ -54,7 +54,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
 
     /**
      * Creates Shared Object event with given name, version and persistence flag
-     * 
+     *
      * @param name
      *            Event name
      * @param version
@@ -68,7 +68,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
 
     /**
      * Creates Shared Object event with given listener, name, SO version and persistence flag
-     * 
+     *
      * @param source
      *            Event listener
      * @param name
@@ -106,7 +106,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
 
     /**
      * Setter for version
-     * 
+     *
      * @param version
      *            New version
      */
@@ -121,7 +121,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
 
     /**
      * Setter for name
-     * 
+     *
      * @param name
      *            Event name
      */
@@ -136,7 +136,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
 
     /**
      * Setter for persistence flag
-     * 
+     *
      * @param persistent
      *            Persistence flag
      */

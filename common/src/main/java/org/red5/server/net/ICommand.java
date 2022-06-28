@@ -7,7 +7,7 @@ import org.red5.server.api.service.IServiceCall;
 
 /**
  * Represents a "command" sent to or received from an end-point.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface ICommand {

@@ -23,7 +23,7 @@ public class Launcher {
 
     /**
      * Launch Red5 under it's own classloader
-     * 
+     *
      * @throws Exception
      *             on error
      */

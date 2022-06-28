@@ -9,7 +9,7 @@ package org.red5.client;
 
 /**
  * Utility class for accessing Red5 "client" objects.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -18,7 +18,7 @@ public final class Red5Client {
     /**
      * Current server version with revision
      */
-    public static final String VERSION = "Red5 Client 1.2.24";
+    public static final String VERSION = "Red5 Client 1.2.25";
 
     /**
      * Create a new Red5Client object using the connection local to the current thread A bit of magic that lets you access the red5 scope
@@ -29,7 +29,7 @@ public final class Red5Client {
 
     /**
      * Returns the current version with revision number
-     * 
+     *
      * @return String version
      */
     public static String getVersion() {

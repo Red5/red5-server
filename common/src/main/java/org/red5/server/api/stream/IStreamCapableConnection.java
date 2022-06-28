@@ -13,7 +13,7 @@ import org.red5.server.api.IConnection;
 
 /**
  * A connection that supports streaming.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  * @author Steven Gong (steven.gong@gmail.com)
@@ -22,7 +22,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Return a reserved stream id for use. According to FCS/FMS regulation, the base is 1.
-     * 
+     *
      * @return Reserved stream id
      * @throws IndexOutOfBoundsException
      *             when it is impossible to reserve new stream
@@ -31,7 +31,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Return a reserved stream id for use with a preference for the one supplied.
-     * 
+     *
      * @param streamId
      *            supplied stream id
      * @return Reserved stream id
@@ -42,7 +42,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Unreserve this id for future use.
-     * 
+     *
      * @param streamId
      *            ID of stream to unreserve
      */
@@ -50,7 +50,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Deletes the stream with the given id.
-     * 
+     *
      * @param streamId
      *            ID of stream to delete
      */
@@ -58,7 +58,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Get a stream by its id.
-     * 
+     *
      * @param streamId
      *            Stream id
      * @return Stream with given id
@@ -67,7 +67,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Create a stream that can play only one item.
-     * 
+     *
      * @param streamId
      *            Stream id
      * @return New subscriber stream that can play only one item
@@ -76,7 +76,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Create a stream that can play a list.
-     * 
+     *
      * @param streamId
      *            Stream id
      * @return New stream that can play sequence of items
@@ -85,7 +85,7 @@ public interface IStreamCapableConnection extends IConnection {
 
     /**
      * Create a broadcast stream.
-     * 
+     *
      * @param streamId
      *            Stream id
      * @return New broadcast stream

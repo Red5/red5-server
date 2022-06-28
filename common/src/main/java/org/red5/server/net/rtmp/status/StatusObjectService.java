@@ -138,7 +138,7 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
 
     /**
      * Serializes status object
-     * 
+     *
      * @param out
      *            Byte buffer for output object
      * @param statusObject
@@ -152,7 +152,7 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
 
     /**
      * Return status object by code
-     * 
+     *
      * @param statusCode
      *            Status object code
      * @return Status object with given code
@@ -163,7 +163,7 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
 
     /**
      * Return status object by code as byte array
-     * 
+     *
      * @param statusCode
      *            Status object code
      * @return Status object with given code as byte array

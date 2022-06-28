@@ -31,9 +31,9 @@ import net.sf.ehcache.event.CacheManagerEventListener;
 
 /**
  * Provides an implementation of an object cache using EhCache.
- * 
+ *
  * @see <a href="http://ehcache.sourceforge.net/">ehcache homepage</a>
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */

@@ -51,7 +51,7 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
 
     /**
      * Create aggregate data event with given data buffer.
-     * 
+     *
      * @param data
      *            data
      */
@@ -62,7 +62,7 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
 
     /**
      * Create aggregate data event with given data buffer.
-     * 
+     *
      * @param data
      *            aggregate data
      * @param copy
@@ -107,7 +107,7 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
 
     /**
      * Breaks-up the aggregate into its individual parts and returns them as a list. The parts are returned based on the ordering of the aggregate itself.
-     * 
+     *
      * @return list of IRTMPEvent objects
      */
     public LinkedList<IRTMPEvent> getParts() {
@@ -239,7 +239,7 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
 
     /**
      * Duplicate this message / event.
-     * 
+     *
      * @return duplicated event
      */
     public Aggregate duplicate() throws IOException, ClassNotFoundException {

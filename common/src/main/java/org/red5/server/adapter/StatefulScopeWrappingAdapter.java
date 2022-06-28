@@ -58,7 +58,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Returns any plug-ins descriptors added
-     * 
+     *
      * @return plug-in descriptor list
      */
     public List<PluginDescriptor> getPlugins() {
@@ -67,7 +67,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Adds a list of plug-in descriptors
-     * 
+     *
      * @param plugins
      *            plugins
      */
@@ -101,7 +101,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Wrapper for Scope#getAttributes
-     * 
+     *
      * @return Scope attributes map
      */
     public Map<String, Object> getAttributes() {
@@ -177,7 +177,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Creates child scope
-     * 
+     *
      * @param name
      *            Child scope name
      * @return true on success, false otherwise
@@ -191,7 +191,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Return child scope
-     * 
+     *
      * @param name
      *            Child scope name
      * @return Child scope with given name
@@ -287,7 +287,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Whether this scope has a child scope with given name
-     * 
+     *
      * @param name
      *            Child scope name
      * @return true if it does have it, false otherwise
@@ -298,7 +298,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * If this scope has a parent
-     * 
+     *
      * @return true if this scope has a parent scope, false otherwise
      */
     public boolean hasParent() {
@@ -307,7 +307,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Returns array of resources (as Spring core Resource class instances)
-     * 
+     *
      * @param pattern
      *            Resource pattern
      * @return Returns array of resources
@@ -320,7 +320,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
 
     /**
      * Return resource by name
-     * 
+     *
      * @param path
      *            Resource name
      * @return Resource with given name

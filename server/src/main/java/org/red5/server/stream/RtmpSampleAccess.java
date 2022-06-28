@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Default RtmpSampleAccess bean
- * 
+ *
  * @see org.red5.server.api.stream.IRtmpSampleAccess
  */
 public class RtmpSampleAccess implements IRtmpSampleAccess {
@@ -27,7 +27,7 @@ public class RtmpSampleAccess implements IRtmpSampleAccess {
 
     /**
      * Setter audioAllowed.
-     * 
+     *
      * @param permission
      *            permission
      */
@@ -38,7 +38,7 @@ public class RtmpSampleAccess implements IRtmpSampleAccess {
 
     /**
      * Setter videoAllowed
-     * 
+     *
      * @param permission
      *            permission
      */

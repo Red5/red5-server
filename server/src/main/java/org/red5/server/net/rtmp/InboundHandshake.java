@@ -20,7 +20,7 @@ import org.red5.server.net.rtmp.message.Constants;
 
 /**
  * Performs handshaking for server connections.
- * 
+ *
  * @author Paul Gregoire
  */
 public class InboundHandshake extends RTMPHandshake {
@@ -51,7 +51,7 @@ public class InboundHandshake extends RTMPHandshake {
 
     /**
      * Generates response for versioned connections.
-     * 
+     *
      * @param in
      *            incoming RTMP handshake bytes
      * @return outgoing handshake
@@ -65,13 +65,13 @@ public class InboundHandshake extends RTMPHandshake {
 
     /**
      * Decodes the first client request (C1) and returns a server response (S0S1).
-     * 
+     *
      * <pre>
      * C1 = 1536 bytes from the client
      * S0 = 0x03 (server handshake type - 0x03, 0x06, 0x08, or 0x09)
      * S1 = 1536 bytes from server
      * </pre>
-     * 
+     *
      * @param in
      *            incoming handshake C1
      * @return server response S0+S1
@@ -198,7 +198,7 @@ public class InboundHandshake extends RTMPHandshake {
         System.arraycopy(signatureResponse, 0, c1, (Constants.HANDSHAKE_SIZE - DIGEST_LENGTH), DIGEST_LENGTH);
         // create output buffer for S0+S1+S2
         IoBuffer s0s1s2 = IoBuffer.allocate(Constants.HANDSHAKE_SIZE * 2 + 1); // 3073
-        // set handshake with encryption type 
+        // set handshake with encryption type
         s0s1s2.put(handshakeType); // 1
         s0s1s2.put(s1); // 1536
         s0s1s2.put(c1); // 1536
@@ -213,12 +213,12 @@ public class InboundHandshake extends RTMPHandshake {
 
     /**
      * Decodes the second client request (C2) and returns a server response (S2).
-     * 
+     *
      * <pre>
      * C2 = Copy of S1 bytes
      * S2 = Copy of C1 bytes
      * </pre>
-     * 
+     *
      * @param in
      *            incoming handshake C2
      * @return true if C2 was processed successfully and false otherwise
@@ -294,7 +294,7 @@ public class InboundHandshake extends RTMPHandshake {
 
     /**
      * Generates response for non-versioned connections, such as those before FP9.
-     * 
+     *
      * @param input
      *            incoming RTMP bytes
      * @return outgoing handshake
@@ -355,7 +355,7 @@ public class InboundHandshake extends RTMPHandshake {
 
     /**
      * Determines the validation scheme for given input.
-     * 
+     *
      * @param handshake
      *            handshake bytes from the client
      * @return true if client used a supported validation scheme, false if unsupported
@@ -405,7 +405,7 @@ public class InboundHandshake extends RTMPHandshake {
 
     /**
      * Encrypt via xtea.
-     * 
+     *
      * @param in
      * @param index
      * @param keyId
@@ -417,7 +417,7 @@ public class InboundHandshake extends RTMPHandshake {
 
     /**
      * Encrypt via blowfish.
-     * 
+     *
      * @param in
      * @param index
      * @param keyId

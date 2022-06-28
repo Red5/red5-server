@@ -48,7 +48,7 @@ public class MetaDataInjectionTest extends TestCase {
 
     /**
      * Test MetaData injection
-     * 
+     *
      * @throws IOException
      *             if io exception
      */
@@ -83,7 +83,7 @@ public class MetaDataInjectionTest extends TestCase {
 
     /**
      * Write FLV tags and inject Cue Points
-     * 
+     *
      * @param reader
      * @param writer
      * @throws IOException
@@ -148,7 +148,7 @@ public class MetaDataInjectionTest extends TestCase {
 
     /**
      * Injects metadata (Cue Points) into a tag
-     * 
+     *
      * @param cue
      * @param writer
      * @param tag
@@ -171,7 +171,7 @@ public class MetaDataInjectionTest extends TestCase {
 
     /**
      * Returns a timestamp in milliseconds
-     * 
+     *
      * @param object
      * @return int time
      */

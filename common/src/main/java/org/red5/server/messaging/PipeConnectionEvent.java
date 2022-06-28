@@ -15,9 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Event object corresponds to the connect/disconnect events among providers/consumers on pipes. 
+ * Event object corresponds to the connect/disconnect events among providers/consumers on pipes.
  * This object is immutable except for the parameter map and tasks.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -69,7 +69,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Construct an object with the specific pipe as the source
-     * 
+     *
      * @param source pipe that triggers this event
      * @param type event type
      * @param consumer the consumer
@@ -85,7 +85,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Construct an object with the specific pipe as the source
-     * 
+     *
      * @param source pipe that triggers this event
      * @param type event type
      * @param provider the provider
@@ -101,7 +101,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Return pipe connection provider
-     * 
+     *
      * @return Provider
      */
     public IProvider getProvider() {
@@ -110,7 +110,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Return pipe connection consumer
-     * 
+     *
      * @return Consumer
      */
     public IConsumer getConsumer() {
@@ -119,7 +119,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Return event type
-     * 
+     *
      * @return Event type
      */
     public EventType getType() {
@@ -128,7 +128,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Return event parameters as Map
-     * 
+     *
      * @return Event parameters as Map
      */
     public Map<String, Object> getParamMap() {
@@ -137,7 +137,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Setter for event parameters map
-     * 
+     *
      * @param paramMap
      *            Event parameters as Map
      */
@@ -149,7 +149,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Add task to list
-     * 
+     *
      * @param task
      *            Task to add
      */
@@ -159,7 +159,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Return list of tasks
-     * 
+     *
      * @return List of tasks
      */
     List<Runnable> getTaskList() {
@@ -168,7 +168,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Builds a PipeConnectionEvent with a source pipe and consumer.
-     * 
+     *
      * @param source pipe that triggers this event
      * @param type event type
      * @param consumer the consumer
@@ -181,7 +181,7 @@ public class PipeConnectionEvent extends EventObject {
 
     /**
      * Builds a PipeConnectionEvent with a source pipe and provider.
-     * 
+     *
      * @param source pipe that triggers this event
      * @param type event type
      * @param provider the provider

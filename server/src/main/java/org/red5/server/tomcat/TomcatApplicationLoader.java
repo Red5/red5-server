@@ -18,7 +18,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Class that can load new applications in Tomcat.
- * 
+ *
  * @author The Red5 Project (red5@osflash.org)
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -38,7 +38,7 @@ public class TomcatApplicationLoader implements IApplicationLoader {
 
     /**
      * Wrap Tomcat engine and host.
-     * 
+     *
      * @param embedded
      * @param host
      */

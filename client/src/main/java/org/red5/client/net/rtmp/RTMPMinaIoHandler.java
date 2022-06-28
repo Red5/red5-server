@@ -167,7 +167,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
 
     /**
      * Setter to enable swf verification in the handshake.
-     * 
+     *
      * @param enableSwfVerification to enable SWF verification or not
      */
     public void setEnableSwfVerification(boolean enableSwfVerification) {

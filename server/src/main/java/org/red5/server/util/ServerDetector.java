@@ -9,7 +9,7 @@ package org.red5.server.util;
 
 /**
  * Simple JEE server detector, based on an idea created by Brian Wing Shun Chan.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class ServerDetector {

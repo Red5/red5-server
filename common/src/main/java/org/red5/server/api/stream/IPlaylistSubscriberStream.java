@@ -16,14 +16,14 @@ public interface IPlaylistSubscriberStream extends ISubscriberStream, IPlaylist 
 
     /**
      * Return statistics about this stream.
-     * 
+     *
      * @return statistics
      */
     public IPlaylistSubscriberStreamStatistics getStatistics();
 
     /**
      * Handles a change occurring on the stream.
-     * 
+     *
      * @param state
      *            stream state that we are changing to or notifying of
      * @param changed
@@ -33,7 +33,7 @@ public interface IPlaylistSubscriberStream extends ISubscriberStream, IPlaylist 
 
     /**
      * Replaces an item in the list with another item.
-     * 
+     *
      * @param oldItem
      *            old play item
      * @param newItem

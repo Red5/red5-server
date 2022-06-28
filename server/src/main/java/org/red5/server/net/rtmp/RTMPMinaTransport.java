@@ -40,10 +40,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Transport setup class configures socket acceptor and thread pools for RTMP in Mina.
- * 
+ *
  * <br>
  * <i>Note: This code originates from AsyncWeb. Originally modified by Luke Hubbard.</i> <br>
- * 
+ *
  * @author Luke Hubbard
  * @author Paul Gregoire
  */
@@ -388,7 +388,7 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
 
     /**
      * Sets the idle time for connected sessions.
-     * 
+     *
      * @param idleTime in seconds
      */
     public void setIdleTime(int idleTime) {
@@ -397,7 +397,7 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
 
     /**
      * Returns all the bound addresses and ports as string.
-     * 
+     *
      * @return addresses
      */
     public String getAddress() {
@@ -406,7 +406,7 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
 
     /**
      * Returns the current statistics as a json formatted string.
-     * 
+     *
      * @return json
      */
     public String getStatistics() {

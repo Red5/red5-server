@@ -34,7 +34,7 @@ import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * Simple file-based persistence for objects. Lowers memory usage if used instead of RAM memory storage.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -84,7 +84,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Create file persistence object from given resource pattern resolver
-     * 
+     *
      * @param resolver
      *            Resource pattern resolver and loader
      */
@@ -95,7 +95,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Create file persistence object for given scope
-     * 
+     *
      * @param scope
      *            Scope
      */
@@ -115,7 +115,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Returns the context path.
-     * 
+     *
      * @param rootFile
      * @return context path
      */
@@ -139,7 +139,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Initializes the root directory and creates it if it doesn't already exist.
-     * 
+     *
      * @param rootFile
      * @param contextPath
      * @throws IOException
@@ -229,7 +229,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Return file path for persistable object
-     * 
+     *
      * @param object
      *            Object to obtain file path for
      * @return Path on disk
@@ -240,7 +240,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Return file path for persistable object
-     * 
+     *
      * @param object
      *            Object to obtain file path for
      * @param completePath
@@ -300,7 +300,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Get filename for persistable object
-     * 
+     *
      * @param object
      *            Persistable object
      * @return Name of file where given object is persisted to
@@ -316,7 +316,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Load resource with given name
-     * 
+     *
      * @param name
      *            Resource name
      * @return Persistable object
@@ -327,7 +327,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Load resource with given name and attaches to persistable object
-     * 
+     *
      * @param name
      *            Resource name
      * @param object
@@ -469,21 +469,21 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Save persistable object
-     * 
+     *
      * @param object
      *            Persistable object
      * @return
-     * 
+     *
      *         <pre>
      *         true
      *         </pre>
-     * 
+     *
      *         on success,
-     * 
+     *
      *         <pre>
      *         false
      *         </pre>
-     * 
+     *
      *         otherwise
      */
     protected boolean saveObject(IPersistable object) {
@@ -590,7 +590,7 @@ public class FilePersistence extends RamPersistence {
 
     /**
      * Remove empty dirs
-     * 
+     *
      * @param base
      *            Base directory
      */

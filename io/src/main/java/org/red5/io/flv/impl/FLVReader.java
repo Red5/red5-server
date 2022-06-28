@@ -462,7 +462,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Returns the file buffer.
-     * 
+     *
      * @return File contents as byte buffer
      */
     public IoBuffer getFileData() {
@@ -923,7 +923,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Returns the last tag's timestamp as the files duration.
-     * 
+     *
      * @param flvFile
      *            FLV file
      * @return duration

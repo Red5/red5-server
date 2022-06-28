@@ -9,7 +9,7 @@ package org.red5.server.api.scheduling;
 
 /**
  * Interface that must be implemented by classes that can be scheduled for periodic execution.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -17,7 +17,7 @@ public interface IScheduledJob {
 
     /**
      * Called each time the job is triggered by the scheduling service.
-     * 
+     *
      * @param service
      *            the service that called the job
      * @throws CloneNotSupportedException

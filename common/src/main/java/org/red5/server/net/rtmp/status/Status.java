@@ -70,7 +70,7 @@ public class Status implements StatusCodes, ICustomSerializable, Externalizable 
 
     /**
      * Creates status object with given status code
-     * 
+     *
      * @param code
      *            Status code
      */
@@ -81,7 +81,7 @@ public class Status implements StatusCodes, ICustomSerializable, Externalizable 
 
     /**
      * Creates status object with given level, description and status code
-     * 
+     *
      * @param code
      *            Status code
      * @param level

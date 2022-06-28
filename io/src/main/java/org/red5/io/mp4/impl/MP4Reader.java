@@ -96,7 +96,7 @@ import org.slf4j.LoggerFactory;
  * <li>NetStream.Play.NoSupportedTrackFound: This event is sent if the player does not detect any supported tracks. If there aren't any
  * supported video, audio or data tracks found, Flash Player does not play the file.</li>
  * </ul>
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -143,10 +143,10 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     /** Whether or not the clip contains an audio track */
     private boolean hasAudio = false;
 
-    //default video codec 
+    //default video codec
     private String videoCodecId = "avc1";
 
-    //default audio codec 
+    //default audio codec
     private String audioCodecId = "mp4a";
 
     //decoder bytes / configs
@@ -192,7 +192,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     //keyframe - sample numbers
     private long[] syncSamples;
 
-    //samples 
+    //samples
     private long[] videoSamples;
 
     private long[] audioSamples;
@@ -511,7 +511,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Dumps the children of a container box.
-     * 
+     *
      * @param box
      *            mp4 box
      */
@@ -524,7 +524,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Process the video information contained in the atoms.
-     * 
+     *
      * @param stbl
      * @param vse
      *            VisualSampleEntry
@@ -582,7 +582,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Process the video information contained in the atoms.
-     * 
+     *
      * @param stbl
      * @param scale
      *            timescale
@@ -605,7 +605,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Process an stbl atom with containing video information.
-     * 
+     *
      * @param stbl
      * @param scale
      */
@@ -703,7 +703,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Process the audio information contained in the atoms.
-     * 
+     *
      * @param stbl
      * @param ase
      *            AudioSampleEntry
@@ -809,7 +809,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Process the audio information contained in the atoms.
-     * 
+     *
      * @param stbl
      * @param scale
      *            timescale
@@ -916,7 +916,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Returns the file buffer.
-     * 
+     *
      * @return File contents as byte buffer
      */
     public IoBuffer getFileData() {
@@ -981,7 +981,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      * Create tag for metadata event.
      *
      * Information mostly from http://www.kaourantin.net/2007/08/what-just-happened-to-video-on-web_20.html
-     * 
+     *
      * <pre>
      * 		width: Display width in pixels.
      * 		height: Display height in pixels.
@@ -1002,18 +1002,18 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      * 	    	trackinfo[1].timescale: 44100
      * 	    	trackinfo[1].sampledescription.sampletype: mp4a
      * 	    	trackinfo[1].language: und
-     * 	    
+     *
      * 	    chapters: As mentioned above information about chapters in audiobooks.
-     * 		seekpoints: Array that lists the available keyframes in a file as time stamps in milliseconds. 
-     * 				This is optional as the MP4 file might not contain this information. Generally speaking, 
+     * 		seekpoints: Array that lists the available keyframes in a file as time stamps in milliseconds.
+     * 				This is optional as the MP4 file might not contain this information. Generally speaking,
      * 				most MP4 files will include this by default. You can directly feed the values into NetStream.seek();
-     * 	    videoframerate: The frame rate of the video if a monotone frame rate is used. 
+     * 	    videoframerate: The frame rate of the video if a monotone frame rate is used.
      * 	    		Most videos will have a monotone frame rate.
      * 	    audiosamplerate: The original sampling rate of the audio track.
      * 	    audiochannels: The original number of channels of the audio track.
-     * 		progressivedownloadinfo: Object that provides information from the "pdin" atom. This is optional 
+     * 		progressivedownloadinfo: Object that provides information from the "pdin" atom. This is optional
      * 				and many files will not have this field.
-     * 		tags: Array of key value pairs representing the information present in the "ilst" atom, which is 
+     * 		tags: Array of key value pairs representing the information present in the "ilst" atom, which is
      * 				the equivalent of ID3 tags for MP4 files. These tags are mostly used by iTunes.
      * </pre>
      *
@@ -1106,13 +1106,13 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * Tag sequence MetaData, Video config, Audio config, remaining audio and video
-     * 
+     *
      * Packet prefixes: 17 00 00 00 00 = Video extra data (first video packet) 17 01 00 00 00 = Video keyframe 27 01 00 00 00 = Video
      * interframe af 00 ... 06 = Audio extra data (first audio packet) af 01 = Audio frame
-     * 
+     *
      * Audio extra data(s): af 00 = Prefix 11 90 4f 14 = AAC Main = aottype 0 // 11 90 12 10 = AAC LC = aottype 1 13 90 56 e5 a5 48 00 =
      * HE-AAC SBR = aottype 2 06 = Suffix
-     * 
+     *
      * Still not absolutely certain about this order or the bytes - need to verify later
      */
     private void createPreStreamingTags(int timestamp, boolean clear) {
@@ -1141,7 +1141,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
             firstTags.add(tag);
         }
         // TODO: Handle other mp4 container audio codecs like mp3
-        // mp3 header magic number ((int & 0xffe00000) == 0xffe00000) 
+        // mp3 header magic number ((int & 0xffe00000) == 0xffe00000)
         if (hasAudio) {
             //audio tag #1
             if (audioDecoderBytes != null) {
@@ -1360,7 +1360,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         }
         // if video-only, skip this
         if (audioSamplesToChunks != null) {
-            //add the audio frames / samples / chunks		
+            //add the audio frames / samples / chunks
             sample = 1;
             for (int i = 0; i < audioSamplesToChunks.size(); i++) {
                 SampleToChunkBox.Entry record = audioSamplesToChunks.get(i);
@@ -1380,7 +1380,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                         int size = 0;
                         // if we have no samples, skip size check as its probably not aac
                         if (audioSamples.length > 0) {
-                            //update sample size 
+                            //update sample size
                             size = (int) audioSamples[sample - 1];
                             // skip empty AAC data which is 6 bytes long
                             log.trace("Audio sample - size: {} pos: {}", size, pos);
@@ -1467,7 +1467,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         for (int f = 0; f < len; f++) {
             frame = frames.get(f);
             long offset = frame.getOffset();
-            //look for pos to match frame offset or grab the first keyframe 
+            //look for pos to match frame offset or grab the first keyframe
             //beyond the offset
             if (pos == offset || (offset > pos && frame.isKeyFrame())) {
                 //ensure that it is a keyframe

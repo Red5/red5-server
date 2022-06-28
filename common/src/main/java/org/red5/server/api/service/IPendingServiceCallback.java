@@ -9,7 +9,7 @@ package org.red5.server.api.service;
 
 /**
  * Callback that will be executed when the result of a pending service call has been received.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  *
@@ -18,7 +18,7 @@ public interface IPendingServiceCallback {
 
     /**
      * Triggered when results are recieved
-     * 
+     *
      * @param call
      *            Call object this callback is applied to
      */

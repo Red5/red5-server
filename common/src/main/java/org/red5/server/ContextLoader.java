@@ -40,7 +40,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Red5 applications loader
- * 
+ *
  * @author The Red5 Project
  * @author Tiago Jacobs (tiago@imdt.com.br)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -77,7 +77,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Registers with JMX and registers a shutdown hook.
-     * 
+     *
      * @throws Exception
      *             I/O exception, casting exception and others
      */
@@ -141,7 +141,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Loads a context (Red5 application) and stores it in a context map, then adds it's beans to parent (that is, Red5)
-     * 
+     *
      * @param name
      *            Context name
      * @param config
@@ -196,7 +196,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Unloads a context (Red5 application) and removes it from the context map, then removes it's beans from the parent (that is, Red5)
-     * 
+     *
      * @param name
      *            Context name
      */
@@ -264,7 +264,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Return context by name
-     * 
+     *
      * @param name
      *            Context name
      * @return Application context for given name
@@ -279,7 +279,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Sets a parent context for child context based on a given key.
-     * 
+     *
      * @param parentContextKey
      *            key for the parent context
      * @param appContextId
@@ -338,7 +338,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Setter for parent application context
-     * 
+     *
      * @param parentContext
      *            Parent Spring application context
      */
@@ -348,7 +348,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Return parent context
-     * 
+     *
      * @return parent application context
      */
     public ApplicationContext getParentContext() {
@@ -357,7 +357,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Setter for context config name
-     * 
+     *
      * @param contextsConfig
      *            Context config name
      */

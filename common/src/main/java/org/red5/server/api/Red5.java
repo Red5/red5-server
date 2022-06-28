@@ -21,9 +21,9 @@ import org.slf4j.Logger;
  * Utility class for accessing Red5 API objects.
  *
  * This class uses a thread local, and will be setup by the service invoker.
- * 
+ *
  * The code below shows various uses. <br>
- * 
+ *
  * <pre>
  * IConnection conn = Red5.getConnectionLocal();
  * Red5 r5 = new Red5();
@@ -32,7 +32,7 @@ import org.slf4j.Logger;
  * r5 = new Red5(conn);
  * IClient client = r5.getClient();
  * </pre>
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -55,12 +55,12 @@ public final class Red5 {
     /**
      * Server version with revision
      */
-    public static final String VERSION = "Red5 Server 1.2.24";
+    public static final String VERSION = "Red5 Server 1.2.25";
 
     /**
      * Server version for fmsVer requests
      */
-    public static final String FMS_VERSION = "RED5/1,2,24,0";
+    public static final String FMS_VERSION = "RED5/1,2,25,0";
 
     /**
      * Server capabilities
@@ -96,7 +96,7 @@ public final class Red5 {
 
     /**
      * Create a new Red5 object using given connection.
-     * 
+     *
      * @param conn
      *            Connection object.
      */
@@ -141,7 +141,7 @@ public final class Red5 {
 
     /**
      * Get the connection associated with the current thread. This method allows you to get connection object local to current thread. When you need to get a connection associated with event handler and so forth, this method provides you with it.
-     * 
+     *
      * @return Connection object
      */
     public static IConnection getConnectionLocal() {
@@ -157,7 +157,7 @@ public final class Red5 {
 
     /**
      * Get the connection object.
-     * 
+     *
      * @return Connection object
      */
     public IConnection getConnection() {
@@ -166,7 +166,7 @@ public final class Red5 {
 
     /**
      * Get the scope
-     * 
+     *
      * @return Scope object
      */
     public IScope getScope() {
@@ -175,7 +175,7 @@ public final class Red5 {
 
     /**
      * Get the client
-     * 
+     *
      * @return Client object
      */
     public IClient getClient() {
@@ -184,7 +184,7 @@ public final class Red5 {
 
     /**
      * Get the spring application context
-     * 
+     *
      * @return Application context
      */
     public IContext getContext() {
@@ -193,7 +193,7 @@ public final class Red5 {
 
     /**
      * Returns the current version with revision number
-     * 
+     *
      * @return String version
      */
     public static String getVersion() {
@@ -219,7 +219,7 @@ public final class Red5 {
 
     /**
      * Returns true if java debugging was detected.
-     * 
+     *
      * @return true if debugging, false otherwise
      */
     public static boolean isDebug() {
@@ -237,7 +237,7 @@ public final class Red5 {
 
     /**
      * Allows for reconstruction via CompositeData.
-     * 
+     *
      * @param cd
      *            composite data
      * @return Red5 class instance
@@ -259,7 +259,7 @@ public final class Red5 {
 
     /**
      * Sets the target chunk size to use for publish and play invocations. Default is 128.
-     * 
+     *
      * @param targetChunkSize the chunk size to use
      */
     public static void setTargetChunkSize(int targetChunkSize) {
@@ -268,7 +268,7 @@ public final class Red5 {
 
     /**
      * Returns the target chunk size.
-     * 
+     *
      * @return targetChunkSize
      */
     public static int getTargetChunkSize() {

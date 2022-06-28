@@ -13,7 +13,7 @@ import org.red5.server.util.ScopeUtils;
 
 /**
  * Default filename generator for streams. The files will be stored in a directory "streams" in the application folder. Option for changing directory streams are saved to is investigated as of 0.6RC1.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (bauch@struktur.de)
  */
@@ -21,25 +21,25 @@ public class DefaultStreamFilenameGenerator implements IStreamFilenameGenerator 
 
     /**
      * Generate stream directory based on relative scope path. The base directory is
-     * 
+     *
      * <pre>
      * streams
      * </pre>
-     * 
+     *
      * , e.g. a scope
-     * 
+     *
      * <pre>
      * /application/one/two/
      * </pre>
-     * 
+     *
      * will generate a directory
-     * 
+     *
      * <pre>
      * /streams/one/two/
      * </pre>
-     * 
+     *
      * inside the application.
-     * 
+     *
      * @param scope
      *            Scope
      * @return Directory based on relative scope path
@@ -76,15 +76,15 @@ public class DefaultStreamFilenameGenerator implements IStreamFilenameGenerator 
 
     /**
      * The default filenames are relative to the scope path, so always return
-     * 
+     *
      * <pre>
      * false
      * </pre>
-     * 
+     *
      * .
-     * 
+     *
      * @return always
-     * 
+     *
      *         <pre>
      * false
      * </pre>

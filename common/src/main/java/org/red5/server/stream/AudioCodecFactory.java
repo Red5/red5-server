@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Factory for audio codecs. Creates and returns audio codecs
- * 
+ *
  * @author The Red5 Project
  * @author Vladimir Hmelyoff (vlhm@splitmedialabs.com)
  */
@@ -49,7 +49,7 @@ public class AudioCodecFactory {
 
     /**
      * Create and return new audio codec applicable for byte buffer data
-     * 
+     *
      * @param data
      *            Byte buffer data
      * @return audio codec
@@ -60,7 +60,7 @@ public class AudioCodecFactory {
             //get the codec identifying byte
             int codecId = (data.get() & 0xf0) >> 4;
             switch (codecId) {
-                case 10: //aac 
+                case 10: //aac
                     result = (IAudioStreamCodec) Class.forName("org.red5.codec.AACAudio").getDeclaredConstructor().newInstance();
                     break;
                 case 11:

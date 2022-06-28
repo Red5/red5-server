@@ -11,7 +11,7 @@ import org.red5.server.api.service.IServiceHandlerProvider;
 
 /**
  * Supports registration and lookup of shared object handlers.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  *
@@ -20,7 +20,7 @@ public interface ISharedObjectHandlerProvider extends IServiceHandlerProvider {
 
     /**
      * Register an object that provides methods which handle calls without a service name to a shared object.
-     * 
+     *
      * @param handler
      *            the handler object
      */

@@ -19,7 +19,7 @@ public interface IConnectionEventQueue {
 
     /**
      * Whether queue has waiting connection events
-     * 
+     *
      * @param conn
      *            Connection
      * @return true if queue has waiting events for connection, false otherwise
@@ -28,7 +28,7 @@ public interface IConnectionEventQueue {
 
     /**
      * Return iterator over waiting events
-     * 
+     *
      * @param conn
      *            Connection
      * @return Iterator over events

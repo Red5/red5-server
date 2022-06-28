@@ -11,7 +11,7 @@ import org.red5.io.IStreamableFile;
 
 /**
  * Informations about a MP3 file. Marker interface by now.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

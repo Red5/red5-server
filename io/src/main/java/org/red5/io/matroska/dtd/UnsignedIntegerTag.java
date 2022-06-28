@@ -18,16 +18,16 @@ import org.red5.io.matroska.VINT;
 
 /**
  * http://matroska.org/technical/specs/index.html
- * 
+ *
  * UnsignedInteger tag is class able to store long
- * 
+ *
  */
 public class UnsignedIntegerTag extends Tag {
     private long value;
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT)
      *
      * @param name
@@ -43,9 +43,9 @@ public class UnsignedIntegerTag extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     * 
+     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -79,7 +79,7 @@ public class UnsignedIntegerTag extends Tag {
 
     /**
      * getter for value
-     * 
+     *
      * @return - value
      */
     public long getValue() {
@@ -88,7 +88,7 @@ public class UnsignedIntegerTag extends Tag {
 
     /**
      * setter for value, updates the size of this tag
-     * 
+     *
      * @param value
      *            - value to be set
      * @return - this for chaining

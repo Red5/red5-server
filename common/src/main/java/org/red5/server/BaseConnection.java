@@ -213,7 +213,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Notifies listeners of a property change.
-     * 
+     *
      * @param evt PropertyChangeEvent containing details
      */
     public void notifyPropertyChanged(PropertyChangeEvent evt) {
@@ -241,7 +241,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Initializes client
-     * 
+     *
      * @param client
      *            Client bound to connection
      */
@@ -313,7 +313,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Return connection parameters
-     * 
+     *
      * @return connection parameters
      */
     public Map<String, Object> getConnectParams() {
@@ -332,7 +332,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Check whether connection is alive
-     * 
+     *
      * @return true if connection is bound to scope, false otherwise
      */
     public boolean isConnected() {
@@ -342,7 +342,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Connect to another scope on server
-     * 
+     *
      * @param newScope
      *            New scope
      * @return true on success, false otherwise
@@ -353,7 +353,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Connect to another scope on server with given parameters
-     * 
+     *
      * @param newScope
      *            New scope
      * @param params
@@ -375,7 +375,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Return the current scope.
-     * 
+     *
      * @return scope
      */
     public IScope getScope() {
@@ -427,7 +427,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Notified on event
-     * 
+     *
      * @param event
      *            Event
      */
@@ -437,7 +437,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Dispatches event
-     * 
+     *
      * @param event
      *            Event
      */
@@ -447,7 +447,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Handles event
-     * 
+     *
      * @param event
      *            Event
      * @return true if associated scope was able to handle event, false otherwise
@@ -466,7 +466,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Registers basic scope
-     * 
+     *
      * @param basicScope
      *            Basic scope to register
      */
@@ -477,7 +477,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Registers basic scope
-     * 
+     *
      * @param basicScope
      *            Basic scope to register
      */
@@ -537,7 +537,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Returns whether or not the reader is idle.
-     * 
+     *
      * @return queued messages
      */
     public boolean isReaderIdle() {
@@ -546,7 +546,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Returns whether or not the writer is idle.
-     * 
+     *
      * @return queued messages
      */
     public boolean isWriterIdle() {
@@ -555,7 +555,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Returns whether or not a connection is closed.
-     * 
+     *
      * @return true if closed
      */
     public boolean isClosed() {
@@ -564,7 +564,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Count of outgoing messages not yet written.
-     * 
+     *
      * @return pending messages
      */
     public long getPendingMessages() {
@@ -573,7 +573,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /**
      * Count of outgoing video messages not yet written.
-     * 
+     *
      * @param streamId
      *            the id you want to know about
      * @return pending messages for this streamId

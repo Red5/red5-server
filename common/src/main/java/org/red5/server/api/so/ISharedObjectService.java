@@ -14,7 +14,7 @@ import org.red5.server.api.scope.IScopeService;
 
 /**
  * Service that manages shared objects for given scope.
- * 
+ *
  */
 public interface ISharedObjectService extends IScopeService {
 
@@ -22,7 +22,7 @@ public interface ISharedObjectService extends IScopeService {
 
     /**
      * Get a set of the shared object names.
-     * 
+     *
      * @param scope
      *            the scope to return the shared object names from
      * @return set containing the shared object names
@@ -31,7 +31,7 @@ public interface ISharedObjectService extends IScopeService {
 
     /**
      * Create a new shared object.
-     * 
+     *
      * @param scope
      *            the scope to create the shared object in
      * @param name
@@ -41,9 +41,9 @@ public interface ISharedObjectService extends IScopeService {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the shared object was created or already exists, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -52,24 +52,24 @@ public interface ISharedObjectService extends IScopeService {
 
     /**
      * Get a shared object by name.
-     * 
+     *
      * @param scope
      *            the scope to get the shared object from
      * @param name
      *            the name of the shared object
      * @return shared object, or
-     * 
+     *
      *         <pre>
      * null
      * </pre>
-     * 
+     *
      *         if not found
      */
     public ISharedObject getSharedObject(IScope scope, String name);
 
     /**
      * Get a shared object by name and create it if it doesn't exist.
-     * 
+     *
      * @param scope
      *            the scope to get the shared object from
      * @param name
@@ -82,7 +82,7 @@ public interface ISharedObjectService extends IScopeService {
 
     /**
      * Check if a shared object exists.
-     * 
+     *
      * @param scope
      *            the scope to check for the shared object
      * @param name
@@ -90,9 +90,9 @@ public interface ISharedObjectService extends IScopeService {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the shared object exists, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -115,7 +115,7 @@ public interface ISharedObjectService extends IScopeService {
      * If you call the clearSharedObjects() method and the specified path matches a shared object that is currently active, all its properties are deleted, and a "clear" event is sent to all subscribers of the shared object. If it is a persistent shared object, the persistent store is also cleared.
      * </p>
      * <br>
-     * 
+     *
      * @param scope
      *            the scope to check for the shared object
      * @param name

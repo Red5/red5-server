@@ -17,10 +17,10 @@ import org.red5.io.object.Deserializer;
 
 /**
  * Implementation of the IDataInput interface. Can be used to load an IExternalizable object.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
- * 
+ *
  */
 public class DataInput implements IDataInput {
 
@@ -32,7 +32,7 @@ public class DataInput implements IDataInput {
 
     /**
      * Create a new DataInput.
-     * 
+     *
      * @param input
      *            input to use
      */

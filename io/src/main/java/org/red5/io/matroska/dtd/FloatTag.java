@@ -16,16 +16,16 @@ import org.red5.io.matroska.VINT;
 
 /**
  * http://matroska.org/technical/specs/index.html
- * 
+ *
  * Float tag is class able to store 4 byte float or 8 byte double, stores double by default
- * 
+ *
  */
 public class FloatTag extends Tag {
     private double value;
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT)
      *
      * @param name
@@ -41,9 +41,9 @@ public class FloatTag extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     * 
+     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -81,7 +81,7 @@ public class FloatTag extends Tag {
 
     /**
      * getter for value as double
-     * 
+     *
      * @return - value as double
      */
     public double getValue() {
@@ -90,7 +90,7 @@ public class FloatTag extends Tag {
 
     /**
      * setter for value, updates the size of this tag
-     * 
+     *
      * @param value
      *            - value to be set
      * @return - this for chaining

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Makes remote calls, invoking services, resolves service handlers
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  */
@@ -48,7 +48,7 @@ public class ServiceInvoker implements IServiceInvoker {
 
     /**
      * Setter for service resolvers.
-     * 
+     *
      * @param resolvers
      *            Service resolvers
      */
@@ -58,7 +58,7 @@ public class ServiceInvoker implements IServiceInvoker {
 
     /**
      * Lookup a handler for the passed service name in the given scope.
-     * 
+     *
      * @param scope
      *            Scope
      * @param serviceName

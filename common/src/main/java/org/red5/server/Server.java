@@ -73,7 +73,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Setter for Spring application context
-     * 
+     *
      * @param applicationContext
      *            Application context
      */
@@ -97,7 +97,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Return scope key. Scope key consists of host name concatenated with context path by slash symbol
-     * 
+     *
      * @param hostName
      *            Host name
      * @param contextPath
@@ -110,7 +110,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Does global scope lookup for host name and context path
-     * 
+     *
      * @param hostName
      *            Host name
      * @param contextPath
@@ -161,7 +161,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Return global scope by name
-     * 
+     *
      * @param name
      *            Global scope name
      * @return Global scope
@@ -175,7 +175,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Register global scope
-     * 
+     *
      * @param scope
      *            Global scope to register
      */
@@ -186,7 +186,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Map key (host + / + context path) and global scope name
-     * 
+     *
      * @param hostName
      *            Host name
      * @param contextPath
@@ -204,7 +204,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Remove mapping with given key
-     * 
+     *
      * @param hostName
      *            Host name
      * @param contextPath
@@ -220,7 +220,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Remove all mappings with given context path
-     * 
+     *
      * @param contextPath
      *            Context path
      * @return true if mapping was removed, false if key doesn't exist
@@ -234,7 +234,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Return mapping
-     * 
+     *
      * @return Map of "scope key / scope name" pairs
      */
     public Map<String, String> getMappingTable() {
@@ -243,7 +243,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Return global scope names set iterator
-     * 
+     *
      * @return Iterator
      */
     public Iterator<String> getGlobalNames() {
@@ -252,7 +252,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Return global scopes set iterator
-     * 
+     *
      * @return Iterator
      */
     public Iterator<IGlobalScope> getGlobalScopes() {
@@ -261,7 +261,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * String representation of server
-     * 
+     *
      * @return String representation of server
      */
     @Override
@@ -291,7 +291,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Notify listeners about a newly created scope.
-     * 
+     *
      * @param scope
      *            the scope that was created
      */
@@ -301,7 +301,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Notify listeners that a scope was removed.
-     * 
+     *
      * @param scope
      *            the scope that was removed
      */
@@ -311,7 +311,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Notify listeners that a new connection was established.
-     * 
+     *
      * @param conn
      *            the new connection
      */
@@ -321,7 +321,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Notify listeners that a connection was disconnected.
-     * 
+     *
      * @param conn
      *            the disconnected connection
      */

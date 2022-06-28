@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base class for all RTMP handlers.
- * 
+ *
  * @author The Red5 Project
  * @author Andy Shaules
  * @author Paul Gregoire
@@ -207,7 +207,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Return hostname for URL.
-     * 
+     *
      * @param url
      *            URL
      * @return Hostname from that URL
@@ -232,7 +232,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Handler for pending call result. Dispatches results to all pending call handlers.
-     * 
+     *
      * @param conn
      *            Connection
      * @param invoke
@@ -265,7 +265,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Chunk size change event handler. Abstract, to be implemented in subclasses.
-     * 
+     *
      * @param conn
      *            Connection
      * @param channel
@@ -279,7 +279,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Command event handler, which current consists of an Invoke or Notify type object.
-     * 
+     *
      * @param conn
      *            Connection
      * @param channel
@@ -293,7 +293,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Ping event handler.
-     * 
+     *
      * @param conn
      *            Connection
      * @param channel
@@ -307,7 +307,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Server bandwidth / Window ACK size event handler.
-     * 
+     *
      * @param conn
      *            Connection
      * @param channel
@@ -321,7 +321,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Client bandwidth / Peer bandwidth set event handler.
-     * 
+     *
      * @param conn
      *            Connection
      * @param channel
@@ -335,7 +335,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Stream bytes read event handler.
-     * 
+     *
      * @param conn
      *            Connection
      * @param channel
@@ -351,7 +351,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /**
      * Shared object event handler.
-     * 
+     *
      * @param conn
      *            Connection
      * @param channel
@@ -364,7 +364,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
     protected abstract void onSharedObject(RTMPConnection conn, Channel channel, Header source, SharedObjectMessage message);
 
     /**
-     * Class ensures a stream's event dispatching occurs on only one core at any one time. Eliminates thread racing internal to ClientBroadcastStream 
+     * Class ensures a stream's event dispatching occurs on only one core at any one time. Eliminates thread racing internal to ClientBroadcastStream
      * and keeps all incoming events in order.
      */
     private static class EnsuresPacketExecutionOrder implements Runnable {
@@ -387,7 +387,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
         }
 
         /**
-         * Add packet to the stream's incoming queue. 
+         * Add packet to the stream's incoming queue.
          * @param packet
          */
         public void addPacket(IRTMPEvent packet) {

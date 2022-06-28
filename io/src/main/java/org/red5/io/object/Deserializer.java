@@ -48,7 +48,7 @@ public class Deserializer {
 
     /**
      * Deserializes the input parameter and returns an Object which must then be cast to a core data type
-     * 
+     *
      * @param <T>
      *            type
      * @param in
@@ -144,7 +144,7 @@ public class Deserializer {
 
     /**
      * Checks to see if a given class is blacklisted or not.
-     * 
+     *
      * @param className class name/package
      * @return true if not blacklisted and false if it is blacklisted
      */

@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 
 /**
  * Loader for the RTMPT server which uses Tomcat.
- * 
+ *
  * @author The Red5 Project (red5@osflash.org)
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -63,7 +63,7 @@ public class RTMPTLoader extends TomcatLoader {
 
     /**
      * Setter for server
-     * 
+     *
      * @param server
      *            Value to set for property 'server'.
      */
@@ -74,7 +74,7 @@ public class RTMPTLoader extends TomcatLoader {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws ServletException
      */
     @SuppressWarnings("deprecation")
@@ -159,7 +159,7 @@ public class RTMPTLoader extends TomcatLoader {
 
     /**
      * Set servlet mappings
-     * 
+     *
      * @param mappings
      *            mappings
      */

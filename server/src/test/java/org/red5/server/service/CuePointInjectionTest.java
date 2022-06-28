@@ -45,7 +45,7 @@ public class CuePointInjectionTest extends TestCase {
 
     /**
      * Test MetaData injection
-     * 
+     *
      * @throws IOException
      *             for fun
      */
@@ -82,7 +82,7 @@ public class CuePointInjectionTest extends TestCase {
 
     /**
      * Write FLV tags and inject Cue Points
-     * 
+     *
      * @param reader
      * @param writer
      * @throws IOException
@@ -139,7 +139,7 @@ public class CuePointInjectionTest extends TestCase {
 
     /**
      * Injects metadata (Cue Points) into a tag
-     * 
+     *
      * @param cue
      * @param writer
      * @param tag
@@ -162,7 +162,7 @@ public class CuePointInjectionTest extends TestCase {
 
     /**
      * Returns a timestamp in milliseconds
-     * 
+     *
      * @param object
      * @return int time
      */

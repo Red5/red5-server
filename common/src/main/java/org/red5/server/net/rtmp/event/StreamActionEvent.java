@@ -6,7 +6,7 @@ import org.red5.server.api.event.IEventListener;
 
 /**
  * Represents a stream action occurring on a connection or stream. This event is used to notify an IEventHandler; it is not meant to be sent over the wire to clients.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class StreamActionEvent implements IEvent {

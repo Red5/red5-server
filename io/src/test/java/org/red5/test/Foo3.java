@@ -6,7 +6,7 @@ import org.red5.io.amf3.IExternalizable;
 
 /**
  * Used for testing AMF3 Vectors
- * 
+ *
  * @author Paul
  */
 public class Foo3 implements IExternalizable {

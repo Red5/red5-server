@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 
 /**
  * Central registry for Red5 plug-ins.
- * 
+ *
  * @author Paul Gregoire
  */
 public class PluginRegistry {
@@ -44,7 +44,7 @@ public class PluginRegistry {
 
     /**
      * Registers a plug-in.
-     * 
+     *
      * @param plugin
      *            plugin
      */
@@ -77,7 +77,7 @@ public class PluginRegistry {
 
     /**
      * Unregisters a plug-in.
-     * 
+     *
      * @param plugin
      *            plugin
      */
@@ -112,7 +112,7 @@ public class PluginRegistry {
 
     /**
      * Returns a plug-in.
-     * 
+     *
      * @param pluginName
      *            plugin name
      * @return requested plug-in matching the name given or null if not found
@@ -130,7 +130,7 @@ public class PluginRegistry {
 
     /**
      * Shuts down the registry and stops any plug-ins that are found.
-     * 
+     *
      * @throws Exception
      *             on exception
      */

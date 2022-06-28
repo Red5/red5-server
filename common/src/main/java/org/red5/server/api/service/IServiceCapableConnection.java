@@ -17,7 +17,7 @@ import org.red5.server.net.rtmp.status.Status;
 public interface IServiceCapableConnection extends IConnection {
     /**
      * Invokes service using remoting call object.
-     * 
+     *
      * @param call
      *            Service call object
      */
@@ -25,7 +25,7 @@ public interface IServiceCapableConnection extends IConnection {
 
     /**
      * Invoke service using call and channel.
-     * 
+     *
      * @param call
      *            Service call
      * @param channel
@@ -35,7 +35,7 @@ public interface IServiceCapableConnection extends IConnection {
 
     /**
      * Invoke method by name.
-     * 
+     *
      * @param method
      *            Called method name
      */
@@ -43,7 +43,7 @@ public interface IServiceCapableConnection extends IConnection {
 
     /**
      * Invoke method by name with callback.
-     * 
+     *
      * @param method
      *            Called method name
      * @param callback
@@ -53,7 +53,7 @@ public interface IServiceCapableConnection extends IConnection {
 
     /**
      * Invoke method with parameters.
-     * 
+     *
      * @param method
      *            Method name
      * @param params
@@ -101,7 +101,7 @@ public interface IServiceCapableConnection extends IConnection {
 
     /**
      * Notify method with parameters.
-     * 
+     *
      * @param method
      *            by name
      * @param params
@@ -111,7 +111,7 @@ public interface IServiceCapableConnection extends IConnection {
 
     /**
      * Sends a status object to the connection.
-     * 
+     *
      * @param status
      *            Status
      */
@@ -119,7 +119,7 @@ public interface IServiceCapableConnection extends IConnection {
 
     /**
      * Sends a status object to the connection on a given channel.
-     * 
+     *
      * @param status
      *            Status
      * @param channel

@@ -11,9 +11,9 @@ import org.red5.compatibility.flex.messaging.messages.AsyncMessage;
 
 /**
  * Response to <code>DataMessage</code> requests.
- * 
+ *
  * @see DataMessage
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

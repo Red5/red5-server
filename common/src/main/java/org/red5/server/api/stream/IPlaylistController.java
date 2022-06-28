@@ -9,14 +9,14 @@ package org.red5.server.api.stream;
 
 /**
  * A play list controller that controls the order of play items.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface IPlaylistController {
     /**
      * Get next item to play.
-     * 
+     *
      * @param playlist
      *            The related play list.
      * @param itemIndex
@@ -27,7 +27,7 @@ public interface IPlaylistController {
 
     /**
      * Get previous item to play.
-     * 
+     *
      * @param playlist
      *            The related play list.
      * @param itemIndex

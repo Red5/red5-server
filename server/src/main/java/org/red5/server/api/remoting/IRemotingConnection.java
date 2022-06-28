@@ -13,7 +13,7 @@ import org.red5.server.api.IConnection;
 
 /**
  * Connection coming from Remoting clients.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -21,7 +21,7 @@ public interface IRemotingConnection extends IConnection {
 
     /**
      * Tell the client to add a header with all further requests. This is returned to the client as response for the next request received.
-     * 
+     *
      * @param name
      *            name of the header to add
      * @param value
@@ -31,7 +31,7 @@ public interface IRemotingConnection extends IConnection {
 
     /**
      * Tell the client to add a header with all further requests. This is returned to the client as response for the next request received.
-     * 
+     *
      * @param name
      *            name of the header to add
      * @param value
@@ -43,7 +43,7 @@ public interface IRemotingConnection extends IConnection {
 
     /**
      * Tell the client to no longer send a header with all further requests. This is returned to the client as response for the next request received.
-     * 
+     *
      * @param name
      *            name of the header to remove
      */
@@ -51,7 +51,7 @@ public interface IRemotingConnection extends IConnection {
 
     /**
      * Return headers to send.
-     * 
+     *
      * @return headers to send
      */
     public Collection<IRemotingHeader> getHeaders();

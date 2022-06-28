@@ -25,7 +25,7 @@ public class BinaryTag extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT)
      *
      * @param name
@@ -41,9 +41,9 @@ public class BinaryTag extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     * 
+     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -77,7 +77,7 @@ public class BinaryTag extends Tag {
 
     /**
      * getter for value
-     * 
+     *
      * @return - byte array stored by this binary tag
      */
     public byte[] getValue() {
@@ -86,7 +86,7 @@ public class BinaryTag extends Tag {
 
     /**
      * setter for value, updates the size of this tag
-     * 
+     *
      * @param value
      *            - value to be set
      * @return - this for chaining
@@ -107,7 +107,7 @@ public class BinaryTag extends Tag {
 
     /**
      * Utility helper method to get string representation of given byte array
-     * 
+     *
      * @param bytes
      *            - bytes to be printed
      * @return - String representation of byte array

@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * BaseInput represents a way to map input to a HashMap. This class is meant to be extended.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  */
@@ -33,7 +33,7 @@ public class BaseInput {
 
     /**
      * Store an object into a map.
-     * 
+     *
      * @param obj
      *            Object to store
      * @return reference id
@@ -47,7 +47,7 @@ public class BaseInput {
 
     /**
      * Replace a referenced object with another one. This is used by the AMF3 deserializer to handle circular references.
-     * 
+     *
      * @param refId
      *            reference id
      * @param newRef
@@ -67,7 +67,7 @@ public class BaseInput {
 
     /**
      * Returns the object with the parameters id
-     * 
+     *
      * @param id
      *            Object reference id
      * @return Object Object reference with given id
@@ -78,7 +78,7 @@ public class BaseInput {
 
     /**
      * Checks the deserializer to see if a given class is blacklisted or not.
-     * 
+     *
      * @param className class name/package
      * @return true if not blacklisted and false if it is blacklisted
      */

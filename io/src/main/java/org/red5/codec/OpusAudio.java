@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * Red5 audio codec for the Opus audio format.
  *
  * Opus has no decoder configuration; its all in-band.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class OpusAudio extends AbstractAudio {
@@ -22,7 +22,7 @@ public class OpusAudio extends AbstractAudio {
     private static Logger log = LoggerFactory.getLogger(OpusAudio.class);
 
     /**
-     * Sample rates: 
+     * Sample rates:
        <pre>
         Abbreviation            Audio bandwidth     Effective sample rate
         NB (narrowband)         4 kHz               8 kHz

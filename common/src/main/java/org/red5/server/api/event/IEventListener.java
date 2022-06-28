@@ -11,7 +11,7 @@ public interface IEventListener {
 
     /**
      * Notify of event.
-     * 
+     *
      * @param event
      *            the event object
      */

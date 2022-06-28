@@ -6,7 +6,7 @@ import org.red5.server.api.service.IPendingServiceCallback;
 
 /**
  * Represents an invoke to be executed on a connected client.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class ClientInvokeEvent extends BaseEvent {

@@ -24,7 +24,7 @@ public class CompoundTag extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT)
      *
      * @param name
@@ -40,9 +40,9 @@ public class CompoundTag extends Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     * 
+     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -60,7 +60,7 @@ public class CompoundTag extends Tag {
 
     /**
      * @see Tag#readData(InputStream)
-     * 
+     *
      * @param inputStream
      *            - stream to read tag data from
      * @throws IOException
@@ -99,7 +99,7 @@ public class CompoundTag extends Tag {
 
     /**
      * method to add child tag to this {@link CompoundTag}, updates the size on add
-     * 
+     *
      * @param ch
      *            - child {@link Tag} to be added
      * @return - this for chaining

@@ -22,7 +22,7 @@ import org.w3c.dom.Node;
 
 /**
  * Builds a DOM {@link org.w3c.dom.Document} using a {@link javax.xml.stream.XMLStreamReader}.
- * 
+ *
  * @version $Revision: 1.00 $, $Date: 2004/12/11 00:00:00 $
  * @author Tatu Saloranta
  */
@@ -53,7 +53,7 @@ public class Stax2DomBuilder {
      * Method used to change whether the build methods will add ignorable (element) white space in the DOM tree or not.
      * <p>
      * Whether all-whitespace text segment is ignorable white space or not is based on DTD read in, as per XML specifications (white space is only significant in mixed content or pure text elements).
-     * 
+     *
      * @param ignoreWS
      *            true to ignore whitespace; false otherwise.
      */
@@ -63,7 +63,7 @@ public class Stax2DomBuilder {
 
     /**
      * This method will create a {@link org.w3c.dom.Document} instance using the default JAXP mechanism and populate using the given StAX stream reader.
-     * 
+     *
      * @param r
      *            Stream reader from which input is read.
      * @return <code>Document</code> - DOM document object.
@@ -84,7 +84,7 @@ public class Stax2DomBuilder {
 
     /**
      * This method will populate given {@link org.w3c.dom.Document} using the given StAX stream reader instance.
-     * 
+     *
      * @param r
      *            Stream reader from which input is read.
      * @param doc
@@ -98,7 +98,7 @@ public class Stax2DomBuilder {
 
     /**
      * This method takes a <code>XMLStreamReader</code> and builds up a JDOM tree. Recursion has been eliminated by using nodes' parent/child relationship; this improves performance somewhat (classic recursion-by-iteration-and-explicit stack transformation)
-     * 
+     *
      * @param r
      *            Stream reader to use for reading the document from which to build the tree
      * @param doc

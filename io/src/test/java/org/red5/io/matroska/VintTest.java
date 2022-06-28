@@ -57,7 +57,7 @@ public class VintTest {
 
     /**
      * tests if {@link VINT} can be parsed successfully
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      */

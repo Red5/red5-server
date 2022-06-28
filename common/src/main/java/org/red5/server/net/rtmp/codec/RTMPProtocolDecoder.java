@@ -81,7 +81,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decode all available objects in buffer.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param buffer
@@ -153,7 +153,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes the buffer data.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param state
@@ -161,10 +161,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
      * @param in
      *            IoBuffer of data to be decoded
      * @return one of three possible values:
-     * 
+     *
      *         <pre>
-     * 1. null : the object could not be decoded, or some data was skipped, just continue 
-     * 2. ProtocolState : the decoder was unable to decode the whole object, refer to the protocol state 
+     * 1. null : the object could not be decoded, or some data was skipped, just continue
+     * 2. ProtocolState : the decoder was unable to decode the whole object, refer to the protocol state
      * 3. Object : something was decoded, continue
      * </pre>
      * @throws ProtocolException
@@ -202,7 +202,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes an IoBuffer into a Packet.
-     * 
+     *
      * @param conn
      *            Connection
      * @param state
@@ -306,7 +306,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             // store the last ts in thread local for debugging
             //lastTimestamp.set(header.getTimerBase());
             final IRTMPEvent message = decodeMessage(conn, packet.getHeader(), buf);
-            // flash will send an earlier time stamp when resetting a video stream with a new key frame. To avoid dropping it, we give it the 
+            // flash will send an earlier time stamp when resetting a video stream with a new key frame. To avoid dropping it, we give it the
             // minimal increment since the last message. To avoid relative time stamps being mis-computed, we don't reset the header we stored.
             message.setTimestamp(timestamp);
             if (log.isTraceEnabled()) {
@@ -339,7 +339,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes packet header.
-     * 
+     *
      * @param chh
      *            chunk header
      * @param state
@@ -473,7 +473,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes RTMP message event.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param header
@@ -562,7 +562,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes server bandwidth.
-     * 
+     *
      * @param in
      *            IoBuffer
      * @return RTMP event
@@ -573,7 +573,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes client bandwidth.
-     * 
+     *
      * @param in
      *            Byte buffer
      * @return RTMP event
@@ -644,7 +644,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Perform the actual decoding of the shared object contents.
-     * 
+     *
      * @param so
      *            Shared object message
      * @param in
@@ -726,7 +726,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decode the 'action' for a supplied an Invoke.
-     * 
+     *
      * @param encoding
      *            AMF encoding
      * @param in
@@ -788,7 +788,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes ping event.
-     * 
+     *
      * @param in
      *            IoBuffer
      * @return Ping event
@@ -842,7 +842,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes stream data, to include onMetaData, onCuePoint, and onFI.
-     * 
+     *
      * @param in
      *            input buffer
      * @return Notify
@@ -979,7 +979,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Decodes FlexMessage event.
-     * 
+     *
      * @param in
      *            IoBuffer
      * @return FlexMessage event
@@ -1049,7 +1049,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Sets whether or not a header error on any channel should result in a closed connection.
-     * 
+     *
      * @param closeOnHeaderError
      *            true to close on header decode errors
      */
@@ -1059,7 +1059,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Checks if the passed action is a reserved stream method.
-     * 
+     *
      * @param action
      *            Action to check
      * @return true if passed action is a reserved stream method, false otherwise
@@ -1088,7 +1088,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Sets incoming connection parameters and / or returns encoded parameters for use in a call.
-     * 
+     *
      * @param in
      * @param notify
      * @param input
@@ -1122,7 +1122,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
     /**
      * Set the maximum allowed packet size. Default is 3 Mb.
-     * 
+     *
      * @param maxPacketSize maximum allowed size for a packet
      */
     public static void setMaxPacketSize(int maxPacketSize) {

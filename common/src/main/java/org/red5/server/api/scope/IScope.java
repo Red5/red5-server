@@ -20,13 +20,13 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * The scope object.
- * 
- * A stateful object shared between a group of clients connected to the same context path. Scopes are arranged in hierarchical way, 
+ *
+ * A stateful object shared between a group of clients connected to the same context path. Scopes are arranged in hierarchical way,
  * so its possible for a scope to have a parent and children scopes. If a client connects to a scope then they are also connected to its parent scope.
  * The scope object is used to access resources, shared object, streams, etc. Scope is a general option for grouping things in an application.
- * 
+ *
  * The following are all names for scopes: application, room, place, lobby.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -40,7 +40,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Check to see if this scope has a child scope matching a given name.
-     * 
+     *
      * @param name the name of the child scope
      * @return true if a child scope exists, otherwise false
      */
@@ -48,7 +48,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Checks whether scope has a child scope with given name and type
-     * 
+     *
      * @param type Child scope type
      * @param name Child scope name
      * @return true if a child scope exists, otherwise false
@@ -57,7 +57,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Creates child scope with name given and returns success value. Returns true on success and false if given scope already exists among children.
-     * 
+     *
      * @param name New child scope name
      * @return true if child scope was successfully created, false otherwise
      */
@@ -65,7 +65,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Adds scope as a child scope. Returns true on success and false if given scope is already a child of current.
-     * 
+     *
      * @param scope Scope given
      * @return true if child scope was successfully added, false otherwise
      */
@@ -73,7 +73,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Removes scope from the children scope list.
-     * 
+     *
      * @param scope Scope given
      */
     public void removeChildScope(IBasicScope scope);
@@ -85,7 +85,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Get a set of the child scope names.
-     * 
+     *
      * @return set containing child scope names
      */
     public Set<String> getScopeNames();
@@ -94,7 +94,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Return the broadcast scope for a given name.
-     * 
+     *
      * @param name name
      * @return broadcast scope or null if not found
      */
@@ -102,7 +102,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Get a child scope by name.
-     * 
+     *
      * @param name Name of the child scope
      * @return the child scope, or null if no scope is found
      */
@@ -110,7 +110,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Get a child scope by type and name.
-     * 
+     *
      * @param type Child scope type
      * @param name Name of the child scope
      * @return the child scope, or null if no scope is found
@@ -119,7 +119,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Return scope by name
-     * 
+     *
      * @param name Scope name
      * @return Scope with given name
      */
@@ -127,7 +127,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Get a set of connected clients. You can get the connections by passing the scope to the clients {@link IClient#getConnections()} method.
-     * 
+     *
      * @return Set containing all connected clients
      * @see org.red5.server.api.IClient#getConnections(IScope)
      */
@@ -135,7 +135,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Get a connection iterator. You can call remove, and the connection will be closed.
-     * 
+     *
      * @deprecated Use {@link IScope#getClientConnections()} instead
      * @return Iterator holding all connections
      */
@@ -144,14 +144,14 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Get all current connections. You can call remove, and the connection will be closed.
-     * 
+     *
      * @return Set containing all connections
      */
     public Set<IConnection> getClientConnections();
 
     /**
      * Lookup connections.
-     * 
+     *
      * @deprecated Use {@link IScope#lookupConnection(IClient)} instead
      * @param client object
      * @return Set of connection objects (read-only)
@@ -161,7 +161,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Lookup connection for a given client.
-     * 
+     *
      * @param client object
      * @return connection object
      */
@@ -169,35 +169,35 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Returns scope context
-     * 
+     *
      * @return Scope context
      */
     public IContext getContext();
 
     /**
      * Checks whether scope has handler or not.
-     * 
+     *
      * @return true if scope has a handler, false otherwise
      */
     public boolean hasHandler();
 
     /**
      * Return handler of the scope
-     * 
+     *
      * @return Scope handler
      */
     public IScopeHandler getHandler();
 
     /**
      * Return context path.
-     * 
+     *
      * @return Context path
      */
     public String getContextPath();
 
     /**
      * Adds given connection to the scope
-     * 
+     *
      * @param conn Given connection
      * @return true on success, false if given connection already belongs to this scope
      */
@@ -205,7 +205,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Add given connection to the scope, overloaded for parameters pass case.
-     * 
+     *
      * @param conn Given connection
      * @param params Parameters passed
      * @return true on success, false if given connection already belongs to this scope
@@ -214,21 +214,21 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Removes given connection from list of scope connections. This disconnects all clients of given connection from the scope.
-     * 
+     *
      * @param conn Connection given
      */
     public void disconnect(IConnection conn);
 
     /**
      * Return statistics informations about the scope.
-     * 
+     *
      * @return statistics
      */
     public IScopeStatistics getStatistics();
 
     /**
      * Set attribute by name
-     * 
+     *
      * @param name name
      * @param value value
      * @return true if added, false if not added
@@ -237,7 +237,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Get attribute by name
-     * 
+     *
      * @param name name
      * @return value for the given name in the attributes or null if not found
      */
@@ -245,7 +245,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Whether or not an attribute exists, keyed by the given name
-     * 
+     *
      * @param name name
      * @return true if it exists, false otherwise
      */
@@ -253,7 +253,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Remove attribute by name
-     * 
+     *
      * @param name name
      * @return true if removed, false otherwise
      */
@@ -261,14 +261,14 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
 
     /**
      * Return attribute names
-     * 
+     *
      * @return attribute names
      */
     public Set<String> getAttributeNames();
 
     /**
      * Return scope attributes
-     * 
+     *
      * @return attributes
      */
     public Map<String, Object> getAttributes();

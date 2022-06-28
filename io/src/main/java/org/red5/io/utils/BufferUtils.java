@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Buffer Utility class which reads/writes integers to the input/output buffer
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  * @author Andy Shaules (bowljoman@hotmail.com)
@@ -24,7 +24,7 @@ public class BufferUtils {
 
     /**
      * Writes a Medium Int to the output buffer
-     * 
+     *
      * @param out
      *            Container to write to
      * @param value
@@ -40,7 +40,7 @@ public class BufferUtils {
 
     /**
      * Reads an unsigned Medium Int from the in buffer
-     * 
+     *
      * @param in
      *            Source
      * @return int Integer value
@@ -57,7 +57,7 @@ public class BufferUtils {
 
     /**
      * Reads a Medium Int to the in buffer
-     * 
+     *
      * @param in
      *            Source
      * @return int Medium int
@@ -77,7 +77,7 @@ public class BufferUtils {
 
     /**
      * Puts an input buffer in an output buffer and returns number of bytes written.
-     * 
+     *
      * @param out
      *            Output buffer
      * @param in
@@ -107,7 +107,7 @@ public class BufferUtils {
 
     /**
      * Consumes bytes from an input buffer and returns them in an output buffer.
-     * 
+     *
      * @param in
      *            Input byte array
      * @param numBytesMax

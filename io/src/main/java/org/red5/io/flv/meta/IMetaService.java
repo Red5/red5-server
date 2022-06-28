@@ -14,7 +14,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * IMetaService Defines the MetaData Service API
- * 
+ *
  * @author The Red5 Project
  * @author Dominick Accattato (daccattato@gmail.com)
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
@@ -22,7 +22,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 public interface IMetaService {
 
     // Get FLV from FLVService
-    // grab a reader from FLV	
+    // grab a reader from FLV
     // Set up CuePoints
     // Set up MetaData
     // Pass CuePoint array into MetaData
@@ -37,7 +37,7 @@ public interface IMetaService {
 
     /**
      * Initiates writing of the MetaData
-     * 
+     *
      * @param meta
      *            Metadata
      * @throws IOException
@@ -47,7 +47,7 @@ public interface IMetaService {
 
     /**
      * Writes the MetaData
-     * 
+     *
      * @param metaData
      *            Metadata
      */
@@ -60,7 +60,7 @@ public interface IMetaService {
 
     /**
      * Read the MetaData
-     * 
+     *
      * @return metaData Metadata
      * @param buffer
      *            IoBuffer source
@@ -69,14 +69,14 @@ public interface IMetaService {
 
     /**
      * Read the Meta Cue Points
-     * 
+     *
      * @return Meta cue points
      */
     public IMetaCue[] readMetaCue();
 
     /**
      * Media file to be accessed
-     * 
+     *
      * @param file
      *            file
      */
@@ -84,7 +84,7 @@ public interface IMetaService {
 
     /**
      * Returns the file being accessed
-     * 
+     *
      * @return file
      */
     public File getFile();

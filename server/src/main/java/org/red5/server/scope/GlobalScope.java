@@ -17,7 +17,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
  * Global scope is a top level scope. Server instance is meant to be injected with Spring before initialization (otherwise NullPointerException is thrown).
- * 
+ *
  * @see org.red5.server.api.scope.IGlobalScope
  * @see org.red5.server.api.scope.IScope
  * @see org.red5.server.scope.Scope
@@ -34,7 +34,7 @@ public class GlobalScope extends Scope implements IGlobalScope, GlobalScopeMXBea
     }
 
     /**
-     * 
+     *
      * @param persistenceClass Persistent class name
      * @throws Exception Exception
      */
@@ -47,7 +47,7 @@ public class GlobalScope extends Scope implements IGlobalScope, GlobalScopeMXBea
 
     /**
      * Get persistence store for scope
-     * 
+     *
      * @return Persistence store
      */
     @Override
@@ -65,7 +65,7 @@ public class GlobalScope extends Scope implements IGlobalScope, GlobalScopeMXBea
 
     /**
      * Setter for server
-     * 
+     *
      * @param server Server
      */
     public void setServer(IServer server) {

@@ -22,7 +22,7 @@ import org.red5.server.util.ScopeUtils;
 
 /**
  * Implementation of the statistics service.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

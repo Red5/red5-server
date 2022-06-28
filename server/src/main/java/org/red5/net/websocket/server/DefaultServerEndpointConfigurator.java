@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Red5 implementation of the WebSocket JSR365 ServerEndpointConfig.Configurator.
- * 
+ *
  * @author Paul Gregoire
  */
 public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Configurator {
@@ -35,7 +35,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     private final Logger log = LoggerFactory.getLogger(DefaultServerEndpointConfigurator.class);
 
     // application scope associated with this endpoint configurator
-    private IScope applicationScope = null;
+    private IScope applicationScope;
 
     // Cross-origin policy enable/disabled (defaults to the plugin's setting)
     private boolean crossOriginPolicy = WebSocketPlugin.isCrossOriginPolicy();
@@ -208,7 +208,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
 
     /**
      * Sets the allowed origins for this instance.
-     * 
+     *
      * @param allowedOrigins
      */
     public void setAllowedOrigins(String[] allowedOrigins) {
@@ -218,7 +218,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
 
     /**
      * Adds a HandshakeModifier implementation to the instances modifiers.
-     * 
+     *
      * @param modifier
      * @return true if added and false otherwise
      */
@@ -228,7 +228,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
 
     /**
      * Removes a HandshakeModifier implementation from the instances modifiers.
-     * 
+     *
      * @param modifier
      * @return true if removed and false otherwise
      */

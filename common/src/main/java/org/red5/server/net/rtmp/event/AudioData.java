@@ -54,7 +54,7 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
 
     /**
      * Create audio data event with given data buffer
-     * 
+     *
      * @param data
      *            Audio data
      * @param copy
@@ -151,7 +151,7 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
 
     /**
      * Duplicate this message / event.
-     * 
+     *
      * @return duplicated event
      */
     public AudioData duplicate() throws IOException, ClassNotFoundException {

@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Flex <code>ArrayCollection</code> compatibility class.
- * 
+ *
  * @see <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/collections/ArrayCollection.html">ArrayCollection</a>
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)

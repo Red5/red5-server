@@ -13,7 +13,7 @@ package org.red5.server.api.stream;
 public interface IPlaylist {
     /**
      * Add an item to the list.
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -21,7 +21,7 @@ public interface IPlaylist {
 
     /**
      * Add an item to specific index.
-     * 
+     *
      * @param item
      *            Playlist item
      * @param index
@@ -31,7 +31,7 @@ public interface IPlaylist {
 
     /**
      * Remove an item from list.
-     * 
+     *
      * @param index
      *            Index in list
      */
@@ -51,21 +51,21 @@ public interface IPlaylist {
 
     /**
      * Get currently playing item index.
-     * 
+     *
      * @return Currently playing item index.
      */
     int getCurrentItemIndex();
 
     /**
      * Get currently playing item
-     * 
+     *
      * @return Item
      */
     IPlayItem getCurrentItem();
 
     /**
      * Get the item according to the index.
-     * 
+     *
      * @param index
      *            Item index
      * @return Item at that index in list
@@ -74,17 +74,17 @@ public interface IPlaylist {
 
     /**
      * Check if the playlist has more items after the currently playing one.
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if more items are available,
-     * 
+     *
      *         <pre>
      * false
      * </pre>
-     * 
+     *
      *         otherwise
      */
     boolean hasMoreItems();
@@ -101,7 +101,7 @@ public interface IPlaylist {
 
     /**
      * Set the current item for playing.
-     * 
+     *
      * @param index
      *            Position in list
      */
@@ -109,24 +109,24 @@ public interface IPlaylist {
 
     /**
      * Whether items are randomly played.
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if shuffle is on for this list,
-     * 
+     *
      *         <pre>
      * false
      * </pre>
-     * 
+     *
      *         otherwise
      */
     boolean isRandom();
 
     /**
      * Set whether items should be randomly played.
-     * 
+     *
      * @param random
      *            Shuffle flag
      */
@@ -134,24 +134,24 @@ public interface IPlaylist {
 
     /**
      * Whether rewind the list.
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if playlist is rewind on end,
-     * 
+     *
      *         <pre>
      * false
      * </pre>
-     * 
+     *
      *         otherwise
      */
     boolean isRewind();
 
     /**
      * Set whether rewind the list.
-     * 
+     *
      * @param rewind
      *            New vallue for rewind flag
      */
@@ -159,24 +159,24 @@ public interface IPlaylist {
 
     /**
      * Whether repeat playing an item.
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if repeat mode is on for this playlist,
-     * 
+     *
      *         <pre>
      * false
      * </pre>
-     * 
+     *
      *         otherwise
      */
     boolean isRepeat();
 
     /**
      * Set whether repeat playing an item.
-     * 
+     *
      * @param repeat
      *            New value for item playback repeat flag
      */
@@ -184,7 +184,7 @@ public interface IPlaylist {
 
     /**
      * Set list controller.
-     * 
+     *
      * @param controller
      *            Playlist controller
      */

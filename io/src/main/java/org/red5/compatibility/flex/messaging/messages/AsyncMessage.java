@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base class for for asynchronous Flex compatibility messages.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)

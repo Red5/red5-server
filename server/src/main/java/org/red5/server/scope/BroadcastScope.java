@@ -52,7 +52,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Creates broadcast scope
-     * 
+     *
      * @param parent
      *            Parent scope
      * @param name
@@ -66,7 +66,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Register pipe connection event listener with this scope's pipe. A listener that wants to listen to events when provider/consumer connects to or disconnects from a specific pipe.
-     * 
+     *
      * @param listener
      *            Pipe connection event listener
      * @see org.red5.server.messaging.IPipeConnectionListener
@@ -77,7 +77,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Unregisters pipe connection event listener with this scope's pipe
-     * 
+     *
      * @param listener
      *            Pipe connection event listener
      * @see org.red5.server.messaging.IPipeConnectionListener
@@ -88,7 +88,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Pull message from pipe
-     * 
+     *
      * @return Message object
      * @see org.red5.server.messaging.IMessage
      */
@@ -98,7 +98,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Pull message with timeout
-     * 
+     *
      * @param wait
      *            Timeout
      * @return Message object
@@ -123,7 +123,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Disconnects scope's pipe from given consumer
-     * 
+     *
      * @param consumer
      *            Consumer
      * @return true on success, false otherwise
@@ -134,7 +134,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Getter for pipe consumers
-     * 
+     *
      * @return Pipe consumers
      */
     public List<IConsumer> getConsumers() {
@@ -155,7 +155,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Push a message to this output endpoint. May block the pusher when output can't handle the message at the time.
-     * 
+     *
      * @param message
      *            Message to be pushed
      * @throws IOException
@@ -167,7 +167,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Connect scope's pipe with given provider
-     * 
+     *
      * @param provider
      *            Provider
      * @param paramMap
@@ -180,7 +180,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Disconnects scope's pipe from given provider
-     * 
+     *
      * @param provider
      *            Provider
      * @return true on success, false otherwise
@@ -191,7 +191,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Getter for providers list
-     * 
+     *
      * @return List of providers
      */
     public List<IProvider> getProviders() {
@@ -212,7 +212,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Pipe connection event handler
-     * 
+     *
      * @param event
      *            Pipe connection event
      */
@@ -252,7 +252,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Sets the client broadcast stream
-     * 
+     *
      * @param clientBroadcastStream
      *            stream
      */

@@ -15,7 +15,7 @@ public interface IRtmpSampleAccess {
 
     /**
      * Return true if sample access allowed on audio stream.
-     * 
+     *
      * @param scope
      *            scope
      * @return true if sample access allowed on audio stream
@@ -24,7 +24,7 @@ public interface IRtmpSampleAccess {
 
     /**
      * Return true if sample access allowed on video stream.
-     * 
+     *
      * @param scope
      *            scope
      * @return true if sample access allowed on video stream

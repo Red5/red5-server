@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMPE IO filter - Client version.
- * 
+ *
  * @author Peter Thomas (ptrthomas@gmail.com)
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -169,7 +169,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
 
     /**
      * Provides connection completion.
-     * 
+     *
      * @param session
      * @param conn
      * @param rtmp
@@ -185,7 +185,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
             ((RTMPConnection) conn).setEncrypted(true);
             // add the ciphers
             log.debug("Adding ciphers to the session");
-            // seems counter intuitive, but it works 
+            // seems counter intuitive, but it works
             session.setAttribute(RTMPConnection.RTMPE_CIPHER_IN, handshake.getCipherOut());
             session.setAttribute(RTMPConnection.RTMPE_CIPHER_OUT, handshake.getCipherIn());
             log.trace("Ciphers in: {} out: {}", handshake.getCipherIn(), handshake.getCipherOut());

@@ -21,7 +21,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * Wraps processing of incoming messages.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public final class ReceivedMessageTask implements Callable<Packet> {

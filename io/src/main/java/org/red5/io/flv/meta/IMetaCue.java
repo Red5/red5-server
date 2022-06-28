@@ -9,7 +9,7 @@ package org.red5.io.flv.meta;
 
 /**
  * ICuePoint defines contract methods for use with cuepoints
- * 
+ *
  * @author The Red5 Project
  * @author Dominick Accattato (daccattato@gmail.com)
  */
@@ -17,24 +17,24 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
 
     /**
      * Sets the name
-     * 
+     *
      * @param name
      *            Cue point name
-     * 
+     *
      */
     public void setName(String name);
 
     /**
      * Gets the name
-     * 
+     *
      * @return name Cue point name
-     * 
+     *
      */
     public String getName();
 
     /**
      * Sets the type type can be "event" or "navigation"
-     * 
+     *
      * @param type
      *            Cue point type
      *
@@ -43,7 +43,7 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
 
     /**
      * Gets the type
-     * 
+     *
      * @return type Cue point type
      *
      */
@@ -51,7 +51,7 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
 
     /**
      * Sets the time
-     * 
+     *
      * @param d
      *            Timestamp
      *
@@ -60,7 +60,7 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
 
     /**
      * Gets the time
-     * 
+     *
      * @return time Timestamp
      *
      */

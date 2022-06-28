@@ -79,7 +79,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
 
     /**
      * Creates shared object with given parent scope, name, persistence flag state and store object
-     * 
+     *
      * @param parent
      *            Parent scope
      * @param name
@@ -134,7 +134,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
     /**
      * This is no longer supported and is only here to prevent issues at runtime for those
      * implementing the call.
-     * 
+     *
      * @return false
      */
     @Deprecated
@@ -477,13 +477,13 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
 
     /**
      * Return security handlers for this shared object or
-     * 
+     *
      * <pre>
      * null
      * </pre>
-     * 
+     *
      * if none are found.
-     * 
+     *
      * @return set of security handlers
      */
     private Set<ISharedObjectSecurity> getSecurityHandlers() {
@@ -496,7 +496,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
 
     /**
      * Call handlers and check if connection to the existing SO is allowed.
-     * 
+     *
      * @return is connection allowed
      */
     protected boolean isConnectionAllowed() {
@@ -521,7 +521,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
 
     /**
      * Call handlers and check if writing to the SO is allowed.
-     * 
+     *
      * @param key
      *            key
      * @param value
@@ -550,7 +550,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
 
     /**
      * Call handlers and check if deleting a property from the SO is allowed.
-     * 
+     *
      * @param key
      *            key
      * @return is delete allowed
@@ -577,7 +577,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
 
     /**
      * Call handlers and check if sending a message to the clients connected to the SO is allowed.
-     * 
+     *
      * @param message
      *            message
      * @param arguments
