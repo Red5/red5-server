@@ -17,6 +17,7 @@ import org.red5.net.websocket.listener.IWebSocketDataListener;
 import org.red5.net.websocket.model.WSMessage;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.plugin.PluginRegistry;
+import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.InitializingBean;
 public class WebSocketScope implements InitializingBean, DisposableBean {
 
     private static Logger log = LoggerFactory.getLogger(WebSocketScope.class);
+
+    private WebSocketScopeManager manager;
 
     protected CopyOnWriteArraySet<WebSocketConnection> conns = new CopyOnWriteArraySet<>();
 
@@ -63,7 +66,8 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      */
     public void register() {
         log.info("Application scope: {}", scope);
-        WebSocketScopeManager manager = ((WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME)).getManager(scope);
+        // get the manager on registration and keep a reference locally
+        manager = ((WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME)).getManager(scope);
         if (manager.setApplication(scope)) {
             log.info("WebSocket app added: {}", scope.getName());
         }
@@ -76,6 +80,12 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      * Un-registers from the WebSocketScopeManager.
      */
     public void unregister() {
+        // remove app scope registration only if we're an app scope
+        if (ScopeUtils.isApp(scope)) {
+            manager.removeApplication(scope);
+        }
+        // remove ourself
+        manager.removeWebSocketScope(this);
         // clean up the connections by first closing them
         conns.forEach(conn -> {
             conn.close();
@@ -95,7 +105,8 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      * @return WebSocketConnection for the given id or null if not found
      */
     public WebSocketConnection getConnectionBySessionId(String id) {
-        Optional<WebSocketConnection> opt = conns.stream().filter(conn -> id.equals(conn.getHttpSessionId())).findFirst();
+        log.debug("getConnectionBySessionId: {}", id);
+        Optional<WebSocketConnection> opt = conns.stream().filter(conn -> id.equals(conn.getSessionId())).findFirst();
         if (opt.isPresent()) {
             return opt.get();
         }
@@ -155,12 +166,18 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      * @param conn WebSocketConnection
      */
     public void addConnection(WebSocketConnection conn) {
-        if (conns.add(conn)) {
-            for (IWebSocketDataListener listener : listeners) {
-                listener.onWSConnect(conn);
+        // prevent false failed logging when a connection is already registered
+        if (!conns.contains(conn)) {
+            if (conns.add(conn)) {
+                log.debug("Added connection: {}", conn);
+                for (IWebSocketDataListener listener : listeners) {
+                    listener.onWSConnect(conn);
+                }
+            } else {
+                log.warn("Add connection failed for: {}", conn);
             }
         } else {
-            log.warn("Add connection failed for: {}", conn);
+            log.debug("Add connection skipped, already registered: {}", conn);
         }
     }
 
@@ -170,12 +187,18 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      * @param conn WebSocketConnection
      */
     public void removeConnection(WebSocketConnection conn) {
-        if (conns.remove(conn)) {
-            for (IWebSocketDataListener listener : listeners) {
-                listener.onWSDisconnect(conn);
+        // prevent false failed logging when a connection isnt registered
+        if (conns.contains(conn)) {
+            if (conns.remove(conn)) {
+                log.debug("Removed connection: {}", conn);
+                for (IWebSocketDataListener listener : listeners) {
+                    listener.onWSDisconnect(conn);
+                }
+            } else {
+                log.warn("Remove connection failed for: {}", conn);
             }
         } else {
-            log.warn("Remove connection failed for: {}", conn);
+            log.debug("Remove connection skipped, not registered: {}", conn);
         }
     }
 
@@ -185,7 +208,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      * @param listener IWebSocketDataListener
      */
     public void addListener(IWebSocketDataListener listener) {
-        log.info("addListener: {}", listener);
+        log.debug("addListener to {}: {}", path, listener);
         listeners.add(listener);
     }
 
@@ -195,7 +218,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      * @param listener IWebSocketDataListener
      */
     public void removeListener(IWebSocketDataListener listener) {
-        log.info("removeListener: {}", listener);
+        log.debug("removeListener from {}: {}", path, listener);
         listeners.remove(listener);
     }
 
@@ -206,7 +229,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      *            list of IWebSocketDataListener
      */
     public void setListeners(Collection<IWebSocketDataListener> listeners) {
-        log.trace("setListeners: {}", listeners);
+        log.trace("setListeners on {}: {}", path, listeners);
         this.listeners.addAll(listeners);
     }
 

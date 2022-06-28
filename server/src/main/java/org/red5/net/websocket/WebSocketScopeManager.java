@@ -7,6 +7,7 @@
 
 package org.red5.net.websocket;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -322,21 +323,21 @@ public class WebSocketScopeManager {
             log.trace("Scopes: {}", scopes);
         }
         log.debug("getScope: {}", conn);
-        WebSocketScope wsScope;
+        // ensure that there is a "default" websocket scope
         String path = conn.getPath();
         if (!scopes.containsKey(path)) {
             // check for default scope
             if (!scopes.containsKey("default")) {
-                wsScope = new WebSocketScope();
-                wsScope.setPath(path);
-                notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope);
-                addWebSocketScope(wsScope);
+                WebSocketScope defaultWSScope = new WebSocketScope();
+                defaultWSScope.setPath(path);
+                notifyListeners(WebSocketEvent.SCOPE_CREATED, defaultWSScope);
+                addWebSocketScope(defaultWSScope);
                 //log.debug("Use the IWebSocketScopeListener interface to be notified of new scopes");
             } else {
                 path = "default";
             }
         }
-        wsScope = scopes.get(path);
+        WebSocketScope wsScope = Optional.ofNullable(conn.getScope()).orElse(scopes.get(path));
         log.debug("Returning: {}", wsScope);
         return wsScope;
     }

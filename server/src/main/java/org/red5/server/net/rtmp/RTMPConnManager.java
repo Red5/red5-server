@@ -14,7 +14,9 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,7 +50,9 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection>, Appl
 
     protected static ApplicationContext applicationContext;
 
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, new CustomizableThreadFactory("ConnectionChecker-"));
+    private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, new CustomizableThreadFactory("ConnectionChecker-"));
+
+    private static ScheduledFuture<?> checkerFuture;
 
     protected ConcurrentMap<String, RTMPConnection> connMap = new ConcurrentHashMap<>();
 
@@ -60,7 +64,7 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection>, Appl
 
     {
         // create a scheduled job to check for dead or hung connections
-        executor.scheduleAtFixedRate(new Runnable() {
+        checkerFuture = executor.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 // count the connections that need closing
                 int closedConnections = 0;
@@ -328,6 +332,9 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection>, Appl
     }
 
     public void destroy() throws Exception {
+        if (checkerFuture != null && !checkerFuture.isDone()) {
+            checkerFuture.cancel(true);
+        }
         executor.shutdownNow();
     }
 

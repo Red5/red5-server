@@ -60,7 +60,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     @Override
     public void onOpen(Session session, EndpointConfig config) {
-        log.trace("Session {} opened", session.getId());
+        log.debug("Session opened: {}\n{}", session.getId(), session.getRequestParameterMap());
         // Set maximum messages size to 10,000 bytes
         session.setMaxTextMessageBufferSize(10000);
         session.addMessageHandler(stringHandler);
@@ -74,14 +74,14 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        log.trace("Session {} closed", session.getId());
+        log.debug("Session closed: {}", session.getId());
         // get the connection; try scope first then session
         WebSocketConnection conn = Optional.ofNullable(scope.getConnectionBySessionId(session.getId())).orElse((WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION));
         if (conn != null) {
-            // close the ws conn
-            conn.close();
             // remove the connection
             manager.removeConnection(conn);
+            // close the ws conn
+            conn.close();
         } else {
             log.debug("Connection for id: {} was not found in the scope: {}", session.getId(), scope.getPath());
         }

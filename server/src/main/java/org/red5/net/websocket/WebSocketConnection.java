@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -60,7 +59,13 @@ public class WebSocketConnection extends AttributeStore {
     // associated websocket session
     private final WsSession wsSession;
 
-    private String httpSessionId;
+    private final WebSocketScope scope;
+
+    // unique identifier for the session
+    private final String wsSessionId;
+
+    // unique identifier for this instance based upon the websocket session id
+    private final int hashCode;
 
     private String host;
 
@@ -96,12 +101,16 @@ public class WebSocketConnection extends AttributeStore {
     private final static AtomicLongFieldUpdater<WebSocketConnection> writeUpdater = AtomicLongFieldUpdater.newUpdater(WebSocketConnection.class, "writtenBytes");
 
     public WebSocketConnection(WebSocketScope scope, Session session) {
+        // set the scope for ease of use later
+        this.scope = scope;
         // set our path
         path = scope.getPath();
         // cast ws session
         this.wsSession = (WsSession) session;
-        // set the local session id
-        httpSessionId = Optional.ofNullable(wsSession.getHttpSessionId()).orElse(wsSession.getId());
+        // the websocket session id will be used for hash code comparison, its the only usable value currently
+        wsSessionId = wsSession.getId();
+        hashCode = Integer.valueOf(wsSessionId);
+        log.info("wsSessionId: {}", wsSessionId);
         // get extensions
         wsSession.getNegotiatedExtensions().forEach(extension -> {
             if (extensions == null) {
@@ -259,26 +268,24 @@ public class WebSocketConnection extends AttributeStore {
     public void close() {
         if (connected.compareAndSet(true, false)) {
             // TODO disconnect from scope etc...
+            scope.removeConnection(this);
             // normal close
             if (wsSession.isOpen()) {
                 try {
                     wsSession.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                 }
             }
         }
     }
 
-    public long getReadBytes() {
-        return readBytes;
-    }
-
-    public void updateReadBytes(long read) {
-        readUpdater.addAndGet(this, read);
-    }
-
-    public long getWrittenBytes() {
-        return writtenBytes;
+    /**
+     * Return the WebSocketScope to which we're connected/connecting.
+     *
+     * @return WebSocketScope
+     */
+    public WebSocketScope getScope() {
+        return scope;
     }
 
     /**
@@ -357,25 +364,29 @@ public class WebSocketConnection extends AttributeStore {
      * @return sessionId
      */
     public String getSessionId() {
-        return wsSession.getId();
+        return wsSessionId;
     }
 
     /**
      * Sets / overrides this connections HttpSession id.
      *
      * @param httpSessionId
+     * @deprecated Session id read from WSSession
      */
+    @Deprecated(since = "1.2.26")
     public void setHttpSessionId(String httpSessionId) {
-        this.httpSessionId = httpSessionId;
+        //this.httpSessionId = httpSessionId;
     }
 
     /**
      * Returns the HttpSession id associated with this connection.
      *
      * @return sessionId
+     * @deprecated Session id read from WSSession
      */
+    @Deprecated(since = "1.2.26")
     public String getHttpSessionId() {
-        return httpSessionId;
+        return wsSessionId;
     }
 
     /**
@@ -526,9 +537,21 @@ public class WebSocketConnection extends AttributeStore {
         return wsSession;
     }
 
+    public long getReadBytes() {
+        return readBytes;
+    }
+
+    public void updateReadBytes(long read) {
+        readUpdater.addAndGet(this, read);
+    }
+
+    public long getWrittenBytes() {
+        return writtenBytes;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(httpSessionId);
+        return hashCode;
     }
 
     @Override
@@ -540,16 +563,16 @@ public class WebSocketConnection extends AttributeStore {
         if (getClass() != obj.getClass())
             return false;
         WebSocketConnection other = (WebSocketConnection) obj;
-        return Objects.equals(httpSessionId, other.httpSessionId);
+        return hashCode == other.hashCode();
     }
 
     @Override
     public String toString() {
-        if (wsSession != null && connected.get()) {
-            return "WebSocketConnection [wsId=" + wsSession.getId() + ", sessionId=" + httpSessionId + ", host=" + host + ", origin=" + origin + ", path=" + path + ", secure=" + isSecure() + ", connected=" + connected + "]";
+        if (wsSessionId != null) {
+            return "WebSocketConnection [wsId=" + wsSessionId + ", host=" + host + ", origin=" + origin + ", path=" + path + ", secure=" + isSecure() + ", connected=" + connected + "]";
         }
         if (wsSession == null) {
-            return "WebSocketConnection [wsId=not-set, sessionId=not-set, host=" + host + ", origin=" + origin + ", path=" + path + ", secure=not-set, connected=" + connected + "]";
+            return "WebSocketConnection [wsId=not-set, host=" + host + ", origin=" + origin + ", path=" + path + ", secure=not-set, connected=" + connected + "]";
         }
         return "WebSocketConnection [host=" + host + ", origin=" + origin + ", path=" + path + " connected=false]";
     }

@@ -37,6 +37,7 @@ import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.listeners.IScopeListener;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.ScopeType;
+import org.red5.server.plugin.PluginRegistry;
 import org.red5.server.plugin.Red5Plugin;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
@@ -129,6 +130,7 @@ public class WebSocketPlugin extends Red5Plugin {
     @Override
     public void doStop() throws Exception {
         log.trace("WebSocketPlugin stop");
+        PluginRegistry.unregister(this);
         managerMap.entrySet().forEach(entry -> {
             entry.getValue().stop();
         });
@@ -264,8 +266,8 @@ public class WebSocketPlugin extends Red5Plugin {
         if (parts.length > 1) {
             // skip default in a path if it exists in slot #1
             String name = !"default".equals(parts[1]) ? parts[1] : ((parts.length >= 3) ? parts[2] : parts[1]);
-            if (log.isDebugEnabled()) {
-                log.debug("Managers: {}", managerMap.entrySet());
+            if (log.isTraceEnabled()) {
+                log.trace("Managers: {}", managerMap.entrySet());
             }
             for (Entry<IScope, WebSocketScopeManager> entry : managerMap.entrySet()) {
                 IScope appScope = entry.getKey();
@@ -410,7 +412,7 @@ public class WebSocketPlugin extends Red5Plugin {
             try {
                 // locate the endpoint class
                 Class<?> endpointClass = Class.forName(wsEndpointClass);
-                log.debug("startWebSocket - endpointPath: {} endpointClass: {}", path, endpointClass);
+                log.debug("startWebSocket - endpointPath: {} endpointClass: {}", path, wsEndpointClass);
                 // build an endpoint config
                 ServerEndpointConfig serverEndpointConfig = ServerEndpointConfig.Builder.create(endpointClass, path).configurator(configurator).subprotocols(subProtocols).build();
                 // set the endpoint on the server container

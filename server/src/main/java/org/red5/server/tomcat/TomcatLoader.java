@@ -43,11 +43,14 @@ import org.apache.catalina.realm.JAASRealm;
 import org.apache.catalina.realm.NullRealm;
 import org.apache.catalina.realm.RealmBase;
 import org.red5.logging.Red5LoggerFactory;
+import org.red5.net.websocket.WebSocketPlugin;
 import org.red5.server.ContextLoader;
 import org.red5.server.LoaderBase;
+import org.red5.server.Server;
 import org.red5.server.api.IApplicationContext;
 import org.red5.server.jmx.mxbeans.ContextLoaderMXBean;
 import org.red5.server.jmx.mxbeans.LoaderMXBean;
+import org.red5.server.plugin.PluginRegistry;
 import org.red5.server.security.IRed5Realm;
 import org.red5.server.util.FileUtil;
 import org.slf4j.Logger;
@@ -169,6 +172,19 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        // if websockets are enabled, ensure the websocket plugin is loaded
+        if (websocketEnabled && PluginRegistry.getPlugin(WebSocketPlugin.NAME) == null) {
+            // get common context
+            ApplicationContext common = (ApplicationContext) applicationContext.getBean("red5.common");
+            Server server = (Server) common.getBean("red5.server");
+            // instance the plugin
+            WebSocketPlugin plugin = new WebSocketPlugin();
+            plugin.setApplicationContext(applicationContext);
+            plugin.setServer(server);
+            // start it up and register it
+            plugin.doStart();
+            PluginRegistry.register(plugin);
+        }
         start();
     }
 
@@ -847,6 +863,15 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             }
         } else {
             log.error("Error getting Spring bean factory for shutdown");
+        }
+        try {
+            // stop websocket
+            WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
+            if (plugin != null) {
+                plugin.doStop();
+            }
+        } catch (Exception e) {
+            log.warn("WebSocket plugin stop, failed", e);
         }
         try {
             // stop tomcat
