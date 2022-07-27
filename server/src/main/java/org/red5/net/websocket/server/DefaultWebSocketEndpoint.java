@@ -42,9 +42,6 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     private final boolean isTrace = log.isTraceEnabled();
 
-    // websocket manager for this path / endpoint
-    private WebSocketScopeManager manager;
-
     // websocket scope where connections connect
     private WebSocketScope scope;
 
@@ -66,25 +63,36 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         session.addMessageHandler(stringHandler);
         session.addMessageHandler(binaryHandler);
         session.addMessageHandler(pongHandler);
-        // get the manager
-        manager = (WebSocketScopeManager) config.getUserProperties().get(WSConstants.WS_MANAGER);
         // get ws scope from user props
         scope = (WebSocketScope) config.getUserProperties().get(WSConstants.WS_SCOPE);
+        // get ws connection from session user props
+        WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
+        if (conn != null) {
+            connectionLocal.set(conn);
+        } else {
+            log.warn("WebSocketConnection null at onOpen for {}", session.getId());
+        }
     }
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        log.debug("Session closed: {}", session.getId());
-        // get the connection; try scope first then session
-        WebSocketConnection conn = Optional.ofNullable(scope.getConnectionBySessionId(session.getId())).orElse((WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION));
+        final String sessionId = session.getId();
+        log.debug("Session closed: {}", sessionId);
+        // get the connection
+        WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
+        // if we don't get it from the session, try the scope lookup
+        if (conn == null) {
+            log.trace("Connection for id: {} was not found in the session onClose", sessionId);
+            conn = scope.getConnectionBySessionId(sessionId);
+        }
         if (conn != null) {
-            // remove the connection
-            manager.removeConnection(conn);
-            // close the ws conn
+            // close the ws conn which removes it from the scope
             conn.close();
         } else {
-            log.debug("Connection for id: {} was not found in the scope: {}", session.getId(), scope.getPath());
+            log.debug("Connection for id: {} was not found in the scope or session: {}", sessionId, scope.getPath());
         }
+        // clear the local
+        connectionLocal.set(null);
     }
 
     @Override
@@ -118,7 +126,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
     }
 
     public void setConnectionLocal(WebSocketConnection connection) {
-        this.connectionLocal.set(connection);
+        connectionLocal.set(connection);
     }
 
     private final MessageHandler.Whole<String> stringHandler = new MessageHandler.Whole<String>() {

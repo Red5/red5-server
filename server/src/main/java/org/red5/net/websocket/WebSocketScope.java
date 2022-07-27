@@ -114,6 +114,15 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
     }
 
     /**
+     * Returns the websocket manager or null if not yet registered.
+     *
+     * @return WebSocketScopeManager
+     */
+    public WebSocketScopeManager getManager() {
+        return manager;
+    }
+
+    /**
      * Returns the set of connections.
      *
      * @return conns
