@@ -17,10 +17,15 @@ import org.apache.tomcat.websocket.WsIOException;
 import org.apache.tomcat.websocket.WsSession;
 import org.red5.net.websocket.WSConstants;
 import org.red5.net.websocket.WebSocketConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WsFrameServer extends WsFrameBase {
 
-    private final Log log = LogFactory.getLog(WsFrameServer.class); // must not be static
+    // tomcat requires this log internally
+    private final static Log tomcatLog = LogFactory.getLog(WsFrameServer.class);
+
+    private final Logger log = LoggerFactory.getLogger(WsFrameServer.class); // must not be static
 
     private static final StringManager sm = StringManager.getManager(WsFrameServer.class);
 
@@ -45,10 +50,17 @@ public class WsFrameServer extends WsFrameBase {
      */
     private void onDataAvailable() throws IOException {
         if (log.isDebugEnabled()) {
-            log.debug("wsFrameServer.onDataAvailable");
+            log.debug("wsFrameServer.onDataAvailable - session {}", wsSession);
         }
         // set connection local to the message handler so WSMessage will contain the connection
-        ((DefaultWebSocketEndpoint) wsSession.getLocal()).setConnectionLocal((WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION));
+        DefaultWebSocketEndpoint ep = (DefaultWebSocketEndpoint) wsSession.getLocal();
+        if (ep.getConnectionLocal() == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Endpoint had no connection local for session: {}", wsSession.getId());
+            }
+            WebSocketConnection conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
+            ep.setConnectionLocal(conn);
+        }
         // handle input
         if (isOpen() && inputBuffer.hasRemaining() && !isSuspended()) {
             // There might be a data that was left in the buffer when
@@ -74,7 +86,7 @@ public class WsFrameServer extends WsFrameBase {
             processInputBuffer();
         }
         // clear thread local
-        ((DefaultWebSocketEndpoint) wsSession.getLocal()).setConnectionLocal(null);
+        ////((DefaultWebSocketEndpoint) wsSession.getLocal()).setConnectionLocal(null);
     }
 
     @Override
@@ -103,7 +115,7 @@ public class WsFrameServer extends WsFrameBase {
 
     @Override
     protected Log getLog() {
-        return log;
+        return tomcatLog;
     }
 
     @Override

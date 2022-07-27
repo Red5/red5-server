@@ -184,8 +184,10 @@ public class UpgradeUtil {
         } catch (InstantiationException e) {
             throw new ServletException(e);
         }
+        log.debug("About to upgrade http session: {} qs: {}", wsRequest.getHttpSession(), wsRequest.getQueryString());
         WsHttpUpgradeHandler wsHandler = req.upgrade(WsHttpUpgradeHandler.class);
         wsHandler.preInit(ep, perSessionServerEndpointConfig, sc, wsRequest, negotiatedExtensionsPhase2, subProtocol, transformation, pathParams, req.isSecure());
+        log.debug("preinit completed");
     }
 
     private static List<Transformation> createTransformations(List<Extension> negotiatedExtensions) {

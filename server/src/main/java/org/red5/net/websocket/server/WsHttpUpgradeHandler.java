@@ -93,6 +93,12 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         this.transformation = transformation;
         this.pathParameters = pathParameters;
         this.secure = secure;
+        String httpSessionId = null;
+        Object session = handshakeRequest.getHttpSession();
+        if (session != null) {
+            httpSessionId = ((HttpSession) session).getId();
+        }
+        log.debug("pre-init with http session id: {}", httpSessionId);
     }
 
     @Override
@@ -105,6 +111,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         if (session != null) {
             httpSessionId = ((HttpSession) session).getId();
         }
+        log.debug("init with http session id: {}", httpSessionId);
         // Need to call onOpen using the web application's class loader
         // Create the frame using the application's class loader so it can pick up application specific config from the ServerContainerImpl
         Thread t = Thread.currentThread();
@@ -113,25 +120,50 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         try {
             // instance a remote endpoint server
             wsRemoteEndpointServer = new WsRemoteEndpointImplServer(socketWrapper, upgradeInfo);
+            if (isDebug) {
+                log.debug("New connection 1 {}", wsRemoteEndpointServer);
+            }
+            if (isDebug) {
+                log.debug("WS session pre-ctor - ep: {}, wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", ep, wsRemoteEndpointServer,
+                        webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
+            }
             wsSession = new WsSession(ep, wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
+            if (isDebug) {
+                log.debug("New connection 2 {}", wsSession);
+            }
             wsFrame = new WsFrameServer(socketWrapper, upgradeInfo, wsSession, transformation, applicationClassLoader);
+            if (isDebug) {
+                log.debug("New connection 3 {}", wsFrame);
+            }
             // WsFrame adds the necessary final transformations. Copy the completed transformation chain to the remote end point.
             wsRemoteEndpointServer.setTransformation(wsFrame.getTransformation());
+            if (isDebug) {
+                log.debug("New connection 4");
+            }
             // get the ws scope manager from user props
             WebSocketScopeManager manager = (WebSocketScopeManager) endpointConfig.getUserProperties().get(WSConstants.WS_MANAGER);
+            if (isDebug) {
+                log.debug("New connection 5");
+            }
             // get ws scope from user props
             WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
+            if (isDebug) {
+                log.debug("New connection 6 - Scope: {} WS session: {}", scope, wsSession);
+            }
             // create a ws connection instance
             WebSocketConnection conn = new WebSocketConnection(scope, wsSession);
             // in debug check since WebSocketConnection.toString is a tiny bit expensive
             if (isDebug) {
-                log.debug("New connection: {}", conn);
+                log.debug("New connection 7: {}", conn);
             }
             // set ip and port
             conn.setAttribute(WSConstants.WS_HEADER_REMOTE_IP, socketWrapper.getRemoteAddr());
             conn.setAttribute(WSConstants.WS_HEADER_REMOTE_PORT, socketWrapper.getRemotePort());
             // add the request headers
             conn.setHeaders(handshakeRequest.getHeaders());
+            if (isDebug) {
+                log.debug("New connection 8: {}", conn);
+            }
             // add the connection to the user props
             endpointConfig.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
             // must be added to the session as well since the session ctor copies from the endpoint and doesnt update
@@ -140,7 +172,13 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             conn.setConnected();
             // fire endpoint handler
             ep.onOpen(wsSession, endpointConfig);
+            if (isDebug) {
+                log.debug("New connection 9: endpoint opened");
+            }
             webSocketContainer.registerSession(ep, wsSession);
+            if (isDebug) {
+                log.debug("New connection 10: session registered");
+            }
             // add the connection to the manager
             manager.addConnection(conn);
         } catch (DeploymentException e) {

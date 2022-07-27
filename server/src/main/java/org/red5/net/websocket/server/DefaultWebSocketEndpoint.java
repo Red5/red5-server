@@ -106,17 +106,13 @@ public class DefaultWebSocketEndpoint extends Endpoint {
             count++;
         }
         if (root instanceof EOFException) {
-            // Assume this is triggered by the user closing their browser and ignore it.
-            if (isDebug) {
-                log.warn("EOF exception", root);
-            }
-        } else if (!session.isOpen() && root instanceof IOException) {
+            // Assume this is triggered by the user closing their browser and ignore it
+            log.debug("EOF exception", root);
+        } else if (root instanceof IOException) {
             // IOException after close. Assume this is a variation of the user closing their browser (or refreshing very quickly) and ignore it.
-            if (isDebug) {
-                log.warn("IO exception when not opened", root);
-            }
+            log.debug("IO exception when opened? {}", session.isOpen(), root);
         } else {
-            log.warn("onError: {}", t.toString(), t);
+            log.debug("onError: {}", t.toString(), t);
             onClose(session, new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, t.getMessage()));
         }
     }
@@ -137,16 +133,20 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 log.trace("Message received {}", message);
             }
             final WebSocketConnection conn = connectionLocal.get();
-            try {
-                // update the byte received counter
-                conn.updateReadBytes(message.getBytes().length);
-                // create a websocket message and add the current connection for listener access
-                WSMessage wsMessage = new WSMessage(message);
-                wsMessage.setConnection(conn);
-                // fire the message off to the scope for handling
-                scope.onMessage(wsMessage);
-            } catch (UnsupportedEncodingException e) {
-                log.warn("Exception on message", e);
+            if (conn != null && conn.isConnected()) {
+                try {
+                    // update the byte received counter
+                    conn.updateReadBytes(message.getBytes().length);
+                    // create a websocket message and add the current connection for listener access
+                    WSMessage wsMessage = new WSMessage(message);
+                    wsMessage.setConnection(conn);
+                    // fire the message off to the scope for handling
+                    scope.onMessage(wsMessage);
+                } catch (UnsupportedEncodingException e) {
+                    log.warn("Exception on message", e);
+                }
+            } else {
+                log.debug("Connection null or not connected", conn);
             }
         }
 
@@ -160,14 +160,18 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 log.trace("Message received {}", message);
             }
             final WebSocketConnection conn = connectionLocal.get();
-            // update the byte received counter
-            conn.updateReadBytes(message.limit());
-            // create a websocket message and add the current connection for listener access
-            WSMessage wsMessage = new WSMessage();
-            wsMessage.setPayload(IoBuffer.wrap(message));
-            wsMessage.setConnection(conn);
-            // fire the message off to the scope for handling
-            scope.onMessage(wsMessage);
+            if (conn != null && conn.isConnected()) {
+                // update the byte received counter
+                conn.updateReadBytes(message.limit());
+                // create a websocket message and add the current connection for listener access
+                WSMessage wsMessage = new WSMessage();
+                wsMessage.setPayload(IoBuffer.wrap(message));
+                wsMessage.setConnection(conn);
+                // fire the message off to the scope for handling
+                scope.onMessage(wsMessage);
+            } else {
+                log.debug("Connection null or not connected", conn);
+            }
         }
 
     };
@@ -180,7 +184,10 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 log.trace("Pong received {}", message);
             }
             // update the byte received counter
-            connectionLocal.get().updateReadBytes(1);
+            final WebSocketConnection conn = connectionLocal.get();
+            if (conn != null && conn.isConnected()) {
+                conn.updateReadBytes(1);
+            }
         }
 
     };

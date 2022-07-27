@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
+import javax.websocket.Extension;
 import javax.websocket.Session;
 
 import org.apache.commons.lang3.StringUtils;
@@ -80,12 +81,12 @@ public class WebSocketConnection extends AttributeStore {
      */
     private Map<String, List<String>> headers;
 
-    private Map<String, Object> extensions;
+    private Map<String, Object> extensions = new HashMap<>();
 
     /**
      * Contains uri parameters from the initial request.
      */
-    private Map<String, Object> querystringParameters;
+    private Map<String, Object> querystringParameters = new HashMap<>();
 
     /**
      * Connection protocol (ex. chat, json, etc)
@@ -101,10 +102,12 @@ public class WebSocketConnection extends AttributeStore {
     private final static AtomicLongFieldUpdater<WebSocketConnection> writeUpdater = AtomicLongFieldUpdater.newUpdater(WebSocketConnection.class, "writtenBytes");
 
     public WebSocketConnection(WebSocketScope scope, Session session) {
+        log.debug("New WebSocket - scope: {} session: {}", scope, session);
         // set the scope for ease of use later
         this.scope = scope;
         // set our path
         path = scope.getPath();
+        log.debug("path: {}", path);
         // cast ws session
         this.wsSession = (WsSession) session;
         // the websocket session id will be used for hash code comparison, its the only usable value currently
@@ -112,12 +115,12 @@ public class WebSocketConnection extends AttributeStore {
         hashCode = Integer.valueOf(wsSessionId);
         log.info("wsSessionId: {}", wsSessionId);
         // get extensions
-        wsSession.getNegotiatedExtensions().forEach(extension -> {
-            if (extensions == null) {
-                extensions = new HashMap<>();
-            }
-            extensions.put(extension.getName(), extension);
-        });
+        List<Extension> extList = wsSession.getNegotiatedExtensions();
+        if (extList != null) {
+            extList.forEach(extension -> {
+                extensions.put(extension.getName(), extension);
+            });
+        }
         log.debug("extensions: {}", extensions);
         // get querystring
         String queryString = wsSession.getQueryString();
@@ -126,7 +129,6 @@ public class WebSocketConnection extends AttributeStore {
             // bust it up by ampersand
             String[] qsParams = queryString.split("&");
             // loop-thru adding to the local map
-            querystringParameters = new HashMap<>();
             Stream.of(qsParams).forEach(qsParam -> {
                 String[] parts = qsParam.split("=");
                 if (parts.length == 2) {
@@ -177,7 +179,9 @@ public class WebSocketConnection extends AttributeStore {
                     } catch (TimeoutException e) {
                         log.warn("Send timed out");
                     } catch (Exception e) {
-                        log.warn("Send text exception", e);
+                        if (isConnected()) {
+                            log.warn("Send text exception", e);
+                        }
                     }
                 } else {
                     throw new IOException("WS connection closed");
@@ -273,7 +277,8 @@ public class WebSocketConnection extends AttributeStore {
             if (wsSession.isOpen()) {
                 try {
                     wsSession.close();
-                } catch (Exception e) {
+                } catch (Throwable e) {
+                    log.debug("Exception during close", e);
                 }
             }
         }
