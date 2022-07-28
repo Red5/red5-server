@@ -107,13 +107,21 @@ public class WebSocketConnection extends AttributeStore {
         this.scope = scope;
         // set our path
         path = scope.getPath();
-        log.debug("path: {}", path);
+        if (isDebug) {
+            log.debug("path: {}", path);
+        }
         // cast ws session
         this.wsSession = (WsSession) session;
+        if (isDebug) {
+            log.debug("ws session: {}", wsSession);
+        }
         // the websocket session id will be used for hash code comparison, its the only usable value currently
         wsSessionId = wsSession.getId();
-        hashCode = Integer.valueOf(wsSessionId);
-        log.info("wsSessionId: {}", wsSessionId);
+        if (isDebug) {
+            log.debug("wsSessionId: {}", wsSessionId);
+        }
+        hashCode = wsSessionId.hashCode();
+        log.info("ws id: {} hashCode: {}", wsSessionId, hashCode);
         // get extensions
         List<Extension> extList = wsSession.getNegotiatedExtensions();
         if (extList != null) {
@@ -121,10 +129,14 @@ public class WebSocketConnection extends AttributeStore {
                 extensions.put(extension.getName(), extension);
             });
         }
-        log.debug("extensions: {}", extensions);
+        if (isDebug) {
+            log.debug("extensions: {}", extensions);
+        }
         // get querystring
         String queryString = wsSession.getQueryString();
-        log.debug("queryString: {}", queryString);
+        if (isDebug) {
+            log.debug("queryString: {}", queryString);
+        }
         if (StringUtils.isNotBlank(queryString)) {
             // bust it up by ampersand
             String[] qsParams = queryString.split("&");
