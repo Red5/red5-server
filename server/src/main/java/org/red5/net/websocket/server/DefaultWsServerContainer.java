@@ -10,6 +10,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -65,6 +66,8 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
 
     private volatile boolean endpointsRegistered;
 
+    private volatile CopyOnWriteArraySet<String> registeredEndpointPaths = new CopyOnWriteArraySet<>();
+
     public DefaultWsServerContainer(ServletContext servletContext) {
         log.debug("ctor - context: {}", servletContext);
         this.servletContext = servletContext;
@@ -82,10 +85,6 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         if (value != null) {
             setEnforceNoAddAfterHandshake(Boolean.parseBoolean(value));
         }
-        //FilterRegistration.Dynamic fr = servletContext.addFilter("Tomcat WebSocket (JSR356) Filter", new WsFilter());
-        //fr.setAsyncSupported(true);
-        //EnumSet<DispatcherType> types = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
-        //fr.addMappingForUrlPatterns(types, true, "/*");
     }
 
     /**
@@ -108,7 +107,7 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         }
         String path = sec.getPath();
         // Add method mapping to user properties
-        PojoMethodMapping methodMapping = new PojoMethodMapping(sec.getEndpointClass(), sec.getDecoders(), path);
+        PojoMethodMapping methodMapping = new PojoMethodMapping(sec.getEndpointClass(), sec.getDecoders(), path, null); // null for instance manager
         if (methodMapping.getOnClose() != null || methodMapping.getOnOpen() != null || methodMapping.getOnError() != null || methodMapping.hasMessageHandlers()) {
             sec.getUserProperties().put(org.apache.tomcat.websocket.pojo.Constants.POJO_METHOD_MAPPING_KEY, methodMapping);
         }
@@ -134,6 +133,8 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
                 throw new DeploymentException(sm.getString("serverContainer.duplicatePaths", path, old.getEndpointClass(), sec.getEndpointClass()));
             }
         }
+        // save a reference so we can kill any zombies
+        registeredEndpointPaths.add(path);
         endpointsRegistered = true;
     }
 
@@ -248,6 +249,10 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
 
     public void setEnforceNoAddAfterHandshake(boolean enforceNoAddAfterHandshake) {
         this.enforceNoAddAfterHandshake = enforceNoAddAfterHandshake;
+    }
+
+    public Set<String> getRegisteredEndpointPaths() {
+        return Collections.unmodifiableSet(registeredEndpointPaths);
     }
 
     /**

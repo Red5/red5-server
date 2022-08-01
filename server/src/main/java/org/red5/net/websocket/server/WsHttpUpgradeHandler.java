@@ -12,6 +12,7 @@ import javax.websocket.DeploymentException;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Extension;
+import javax.websocket.server.ServerEndpointConfig;
 
 import org.apache.coyote.http11.upgrade.InternalHttpUpgradeHandler;
 import org.apache.coyote.http11.upgrade.UpgradeInfo;
@@ -175,7 +176,9 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             if (isDebug) {
                 log.debug("New connection 9: endpoint opened");
             }
-            webSocketContainer.registerSession(ep, wsSession);
+            // get the endpoint path to use in registration since we're a server
+            String path = ((ServerEndpointConfig) endpointConfig).getPath();
+            webSocketContainer.registerSession(path, wsSession);
             if (isDebug) {
                 log.debug("New connection 10: session registered");
             }

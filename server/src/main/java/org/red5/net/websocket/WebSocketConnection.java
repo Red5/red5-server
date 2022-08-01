@@ -24,8 +24,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
+import javax.websocket.CloseReason;
 import javax.websocket.Extension;
 import javax.websocket.Session;
+import javax.websocket.CloseReason.CloseCodes;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.Constants;
@@ -53,7 +55,7 @@ public class WebSocketConnection extends AttributeStore {
     // Sending async on windows times out
     private static boolean useAsync = !System.getProperty("os.name").contains("Windows");
 
-    private static long sendTimeout = 20000L;
+    private static long sendTimeout = 10000L;
 
     private AtomicBoolean connected = new AtomicBoolean(false);
 
@@ -297,12 +299,21 @@ public class WebSocketConnection extends AttributeStore {
             if (wsSession.isOpen()) {
                 try {
                     synchronized (wsSession) {
+                        // this doesnt close the socket
                         wsSession.close();
                     }
                 } catch (Throwable e) {
                     log.debug("Exception during close", e);
                 }
             }
+            // ensure the endpoint is closed
+            if (wsSession.isOpen()) {
+                CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
+                // close the socket, don't wait for the browser to respond or we could hang
+                wsSession.onClose(reason);
+            }
+            // clean up our attributes
+            attributes.clear();
         }
     }
 

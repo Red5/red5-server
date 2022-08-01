@@ -11,7 +11,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
@@ -24,7 +23,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.net.websocket.WSConstants;
 import org.red5.net.websocket.WebSocketConnection;
 import org.red5.net.websocket.WebSocketScope;
-import org.red5.net.websocket.WebSocketScopeManager;
 import org.red5.net.websocket.model.WSMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +36,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     private final Logger log = LoggerFactory.getLogger(DefaultWebSocketEndpoint.class);
 
+    @SuppressWarnings("unused")
     private final boolean isDebug = log.isDebugEnabled();
 
     private final boolean isTrace = log.isTraceEnabled();
