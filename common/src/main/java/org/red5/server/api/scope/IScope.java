@@ -16,6 +16,7 @@ import org.red5.server.api.IConnection;
 import org.red5.server.api.IContext;
 import org.red5.server.api.service.IServiceHandlerProvider;
 import org.red5.server.api.statistics.IScopeStatistics;
+import org.red5.server.api.stream.IBroadcastStream;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
@@ -272,5 +273,12 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
      * @return attributes
      */
     public Map<String, Object> getAttributes();
+
+    /**
+     * Returns all the broadcast streams in the current scope.
+     *
+     * @return set of IBroadcastStream if any exist or empty if none exist
+     */
+    public Set<IBroadcastStream> getBroadcastStreams();
 
 }

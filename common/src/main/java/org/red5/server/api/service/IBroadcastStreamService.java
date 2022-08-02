@@ -25,7 +25,7 @@ public interface IBroadcastStreamService {
      *            name of the broadcast
      * @return true is a stream exists, otherwise false
      */
-    public boolean hasBroadcastStream(IScope scope, String name);
+    boolean hasBroadcastStream(IScope scope, String name);
 
     /**
      * Get a broadcast stream by name
@@ -36,7 +36,7 @@ public interface IBroadcastStreamService {
      *            the name of the broadcast
      * @return broadcast stream object
      */
-    public IBroadcastStream getBroadcastStream(IScope scope, String name);
+    IBroadcastStream getBroadcastStream(IScope scope, String name);
 
     /**
      * Get a set containing the names of all the broadcasts
@@ -45,6 +45,14 @@ public interface IBroadcastStreamService {
      *            the scope to search for streams
      * @return set containing all broadcast names
      */
-    public Set<String> getBroadcastStreamNames(IScope scope);
+    Set<String> getBroadcastStreamNames(IScope scope);
+
+    /**
+     * Returns broadcast streams registered on the scope.
+     *
+     * @param scope
+     * @return set of broadcast streams or empty if none exist
+     */
+    Set<IBroadcastStream> getBroadcastStreams(IScope scope);
 
 }

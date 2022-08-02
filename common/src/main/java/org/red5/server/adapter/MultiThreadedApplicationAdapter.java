@@ -882,6 +882,11 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         return null;
     }
 
+    /** {@inheritDoc} */
+    public Set<IBroadcastStream> getBroadcastStreams(IScope scope) {
+        return scope.getBroadcastStreams();
+    }
+
     /**
      * Returns list of stream names broadcasted in scope. Broadcast stream name is somewhat different from server stream name. Server stream
      * name is just an ID assigned by Red5 to every created stream. Broadcast stream name is the name that is being used to subscribe to the

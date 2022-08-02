@@ -46,6 +46,7 @@ import org.red5.server.api.scope.IScopeHandler;
 import org.red5.server.api.scope.ScopeType;
 import org.red5.server.api.statistics.IScopeStatistics;
 import org.red5.server.api.statistics.support.StatisticsCounter;
+import org.red5.server.api.stream.IBroadcastStream;
 import org.red5.server.api.stream.IClientBroadcastStream;
 import org.red5.server.exception.ScopeException;
 import org.red5.server.jmx.mxbeans.ScopeMXBean;
@@ -447,6 +448,18 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      */
     public IBroadcastScope getBroadcastScope(String name) {
         return (IBroadcastScope) children.getBasicScope(ScopeType.BROADCAST, name);
+    }
+
+    /**
+     * Return the broadcast streams for this scope.
+     *
+     * @return broadcast streams or empty if not found
+     */
+    @Override
+    public Set<IBroadcastStream> getBroadcastStreams() {
+        Set<IBroadcastStream> streams = new HashSet<>();
+        children.getBasicScopes(ScopeType.BROADCAST).stream().filter(bs -> ((IBroadcastScope) bs).getClientBroadcastStream() != null).forEach(bs -> streams.add(((IBroadcastScope) bs).getClientBroadcastStream()));
+        return streams;
     }
 
     /**
@@ -1426,6 +1439,17 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 log.info("Invalid scope name, null is not allowed");
             }
             return false;
+        }
+
+        /**
+         * Returns child scopes for a given type.
+         *
+         * @param type
+         *            Scope type
+         * @return set of scopes matching type
+         */
+        public Set<IBasicScope> getBasicScopes(ScopeType type) {
+            return stream().filter(child -> child.getType().equals(type)).collect(Collectors.toUnmodifiableSet());
         }
 
         /**
