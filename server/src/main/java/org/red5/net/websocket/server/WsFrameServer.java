@@ -86,7 +86,7 @@ public class WsFrameServer extends WsFrameBase {
             processInputBuffer();
         }
         // clear thread local
-        ////((DefaultWebSocketEndpoint) wsSession.getLocal()).setConnectionLocal(null);
+        ((DefaultWebSocketEndpoint) wsSession.getLocal()).setConnectionLocal(null);
     }
 
     @Override

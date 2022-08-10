@@ -9,6 +9,7 @@ package org.red5.net.websocket;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,9 +26,9 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
 import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Extension;
 import javax.websocket.Session;
-import javax.websocket.CloseReason.CloseCodes;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.Constants;
@@ -60,9 +61,9 @@ public class WebSocketConnection extends AttributeStore {
     private AtomicBoolean connected = new AtomicBoolean(false);
 
     // associated websocket session
-    private final WsSession wsSession;
+    private WeakReference<WsSession> wsSession;
 
-    private final WebSocketScope scope;
+    private WeakReference<WebSocketScope> scope;
 
     // unique identifier for the session
     private final String wsSessionId;
@@ -103,29 +104,32 @@ public class WebSocketConnection extends AttributeStore {
 
     private final static AtomicLongFieldUpdater<WebSocketConnection> writeUpdater = AtomicLongFieldUpdater.newUpdater(WebSocketConnection.class, "writtenBytes");
 
+    // send future for when async is enabled
+    private Future<Void> sendFuture;
+
     public WebSocketConnection(WebSocketScope scope, Session session) {
         log.debug("New WebSocket - scope: {} session: {}", scope, session);
         // set the scope for ease of use later
-        this.scope = scope;
+        this.scope = new WeakReference<>(scope);
         // set our path
         path = scope.getPath();
         if (isDebug) {
             log.debug("path: {}", path);
         }
         // cast ws session
-        this.wsSession = (WsSession) session;
+        this.wsSession = new WeakReference<>((WsSession) session);
         if (isDebug) {
-            log.debug("ws session: {}", wsSession);
+            log.debug("ws session: {}", wsSession.get());
         }
         // the websocket session id will be used for hash code comparison, its the only usable value currently
-        wsSessionId = wsSession.getId();
+        wsSessionId = session.getId();
         if (isDebug) {
             log.debug("wsSessionId: {}", wsSessionId);
         }
         hashCode = wsSessionId.hashCode();
         log.info("ws id: {} hashCode: {}", wsSessionId, hashCode);
         // get extensions
-        List<Extension> extList = wsSession.getNegotiatedExtensions();
+        List<Extension> extList = session.getNegotiatedExtensions();
         if (extList != null) {
             extList.forEach(extension -> {
                 extensions.put(extension.getName(), extension);
@@ -135,7 +139,7 @@ public class WebSocketConnection extends AttributeStore {
             log.debug("extensions: {}", extensions);
         }
         // get querystring
-        String queryString = wsSession.getQueryString();
+        String queryString = session.getQueryString();
         if (isDebug) {
             log.debug("queryString: {}", queryString);
         }
@@ -153,12 +157,12 @@ public class WebSocketConnection extends AttributeStore {
             });
         }
         // get request parameters
-        Map<String, String> pathParameters = wsSession.getPathParameters();
+        Map<String, String> pathParameters = session.getPathParameters();
         if (isDebug) {
             log.debug("pathParameters: {}", pathParameters);
         }
         // get user props
-        Map<String, Object> userProps = wsSession.getUserProperties();
+        Map<String, Object> userProps = session.getUserProperties();
         if (isDebug) {
             log.debug("userProps: {}", userProps);
         }
@@ -178,22 +182,34 @@ public class WebSocketConnection extends AttributeStore {
         }
         // process the incoming string
         if (StringUtils.isNotBlank(data)) {
-            if (wsSession.isOpen()) {
+            WsSession session = wsSession.get();
+            if (session != null && session.isOpen()) {
                 if (isConnected()) {
                     try {
-                        synchronized (wsSession) {
-                            int lengthToWrite = data.getBytes().length;
-                            if (useAsync) {
-                                // a new future is returned on each call
-                                Future<Void> sendFuture = wsSession.getAsyncRemote().sendText(data);
-                                sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
-                            } else {
-                                wsSession.getBasicRemote().sendText(data);
+                        if (useAsync) {
+                            if (sendFuture != null && !sendFuture.isDone()) {
+                                try {
+                                    sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
+                                } catch (TimeoutException e) {
+                                    log.warn("Send timed out {}", wsSessionId);
+                                    if (!isConnected()) {
+                                        sendFuture.cancel(true);
+                                        return;
+                                    }
+                                }
                             }
-                            writeUpdater.addAndGet(this, lengthToWrite);
+                            synchronized (session) {
+                                int lengthToWrite = data.getBytes().length;
+                                sendFuture = session.getAsyncRemote().sendText(data);
+                                writeUpdater.addAndGet(this, lengthToWrite);
+                            }
+                        } else {
+                            synchronized (session) {
+                                int lengthToWrite = data.getBytes().length;
+                                session.getBasicRemote().sendText(data);
+                                writeUpdater.addAndGet(this, lengthToWrite);
+                            }
                         }
-                    } catch (TimeoutException e) {
-                        log.warn("Send timed out");
                     } catch (Exception e) {
                         if (isConnected()) {
                             log.warn("Send text exception", e);
@@ -220,19 +236,33 @@ public class WebSocketConnection extends AttributeStore {
         if (isDebug) {
             log.debug("send binary: {}", Arrays.toString(buf));
         }
-        if (wsSession.isOpen()) {
+        WsSession session = wsSession.get();
+        if (session != null && session.isOpen()) {
             try {
-                synchronized (wsSession) {
+                synchronized (session) {
                     // send the bytes
                     if (useAsync) {
-                        Future<Void> sendFuture = wsSession.getAsyncRemote().sendBinary(ByteBuffer.wrap(buf));
-                        // wait up-to ws timeout
-                        sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
+                        if (sendFuture != null && !sendFuture.isDone()) {
+                            try {
+                                sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
+                            } catch (TimeoutException e) {
+                                log.warn("Send timed out {}", wsSessionId);
+                                if (!isConnected()) {
+                                    sendFuture.cancel(true);
+                                    return;
+                                }
+                            }
+                        }
+                        synchronized (session) {
+                            sendFuture = session.getAsyncRemote().sendBinary(ByteBuffer.wrap(buf));
+                            writeUpdater.addAndGet(this, buf.length);
+                        }
                     } else {
-                        wsSession.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
+                        synchronized (session) {
+                            session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
+                            writeUpdater.addAndGet(this, buf.length);
+                        }
                     }
-                    // update counter
-                    writeUpdater.addAndGet(this, buf.length);
                 }
             } catch (Exception e) {
                 log.warn("Send bytes exception", e);
@@ -253,10 +283,11 @@ public class WebSocketConnection extends AttributeStore {
         if (isTrace) {
             log.trace("send ping: {}", buf);
         }
-        if (wsSession.isOpen()) {
-            synchronized (wsSession) {
+        WsSession session = wsSession.get();
+        if (session != null && session.isOpen()) {
+            synchronized (session) {
                 // send the bytes
-                wsSession.getBasicRemote().sendPing(ByteBuffer.wrap(buf));
+                session.getBasicRemote().sendPing(ByteBuffer.wrap(buf));
                 // update counter
                 writeUpdater.addAndGet(this, buf.length);
             }
@@ -276,10 +307,11 @@ public class WebSocketConnection extends AttributeStore {
         if (isTrace) {
             log.trace("send pong: {}", buf);
         }
-        if (wsSession.isOpen()) {
-            synchronized (wsSession) {
+        WsSession session = wsSession.get();
+        if (session != null && session.isOpen()) {
+            synchronized (session) {
                 // send the bytes
-                wsSession.getBasicRemote().sendPong(ByteBuffer.wrap(buf));
+                session.getBasicRemote().sendPong(ByteBuffer.wrap(buf));
                 // update counter
                 writeUpdater.addAndGet(this, buf.length);
             }
@@ -293,27 +325,33 @@ public class WebSocketConnection extends AttributeStore {
      */
     public void close() {
         if (connected.compareAndSet(true, false)) {
-            // TODO disconnect from scope etc...
-            scope.removeConnection(this);
-            // normal close
-            if (wsSession.isOpen()) {
-                try {
-                    synchronized (wsSession) {
-                        // this doesnt close the socket
-                        wsSession.close();
-                    }
-                } catch (Throwable e) {
-                    log.debug("Exception during close", e);
+            log.info("close: {}", wsSessionId);
+            WsSession session = wsSession != null ? wsSession.get() : null;
+            if (session != null && session.isOpen()) {
+                // clean up internal ws session maps since close doesnt
+                if (session.isOpen()) {
+                    session.getPathParameters().clear();
+                    session.getUserProperties().clear();
                 }
-            }
-            // ensure the endpoint is closed
-            if (wsSession.isOpen()) {
+                // ensure the endpoint is closed
                 CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
                 // close the socket, don't wait for the browser to respond or we could hang
-                wsSession.onClose(reason);
+                session.onClose(reason);
+                // clean up our props
+                attributes.clear();
+                querystringParameters.clear();
+                querystringParameters = null;
+                extensions.clear();
+                extensions = null;
+                if (headers != null) {
+                    headers = null;
+                }
+                // disconnect from scope
+                scope.get().removeConnection(this);
+                // clear weak refs
+                wsSession.clear();
+                scope.clear();
             }
-            // clean up our attributes
-            attributes.clear();
         }
     }
 
@@ -323,7 +361,7 @@ public class WebSocketConnection extends AttributeStore {
      * @return WebSocketScope
      */
     public WebSocketScope getScope() {
-        return scope;
+        return scope != null ? scope.get() : null;
     }
 
     /**
@@ -377,7 +415,7 @@ public class WebSocketConnection extends AttributeStore {
      * @return true if secure and false if unsecure or unconnected
      */
     public boolean isSecure() {
-        return (wsSession != null) ? wsSession.isSecure() : false;
+        return (wsSession != null) ? wsSession.get().isSecure() : false;
     }
 
     public String getPath() {
@@ -568,11 +606,13 @@ public class WebSocketConnection extends AttributeStore {
     }
 
     public void setWsSessionTimeout(long idleTimeout) {
-        wsSession.setMaxIdleTimeout(idleTimeout);
+        if (wsSession != null) {
+            wsSession.get().setMaxIdleTimeout(idleTimeout);
+        }
     }
 
     public WsSession getWsSession() {
-        return wsSession;
+        return wsSession != null ? wsSession.get() : null;
     }
 
     public long getReadBytes() {
