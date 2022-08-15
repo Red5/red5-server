@@ -1,6 +1,8 @@
 package org.red5.net.websocket.server;
 
 import java.io.IOException;
+import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +25,9 @@ import org.apache.tomcat.util.net.SocketWrapperBase;
 import org.apache.tomcat.util.res.StringManager;
 import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsIOException;
+import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
 import org.apache.tomcat.websocket.WsSession;
+import org.apache.tomcat.websocket.WsWebSocketContainer;
 import org.red5.net.websocket.WSConstants;
 import org.red5.net.websocket.WebSocketConnection;
 import org.red5.net.websocket.WebSocketScope;
@@ -51,7 +55,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     private Endpoint ep;
 
-    private EndpointConfig endpointConfig;
+    private ServerEndpointConfig endpointConfig;
 
     private DefaultWsServerContainer webSocketContainer;
 
@@ -86,7 +90,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     public void preInit(Endpoint ep, EndpointConfig endpointConfig, DefaultWsServerContainer wsc, WsHandshakeRequest handshakeRequest, List<Extension> negotiatedExtensionsPhase2, String subProtocol, Transformation transformation, Map<String, String> pathParameters, boolean secure) {
         this.ep = ep;
-        this.endpointConfig = endpointConfig;
+        this.endpointConfig = (ServerEndpointConfig) endpointConfig;
         this.webSocketContainer = wsc;
         this.handshakeRequest = handshakeRequest;
         this.negotiatedExtensions = negotiatedExtensionsPhase2;
@@ -98,8 +102,10 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         Object session = handshakeRequest.getHttpSession();
         if (session != null) {
             httpSessionId = ((HttpSession) session).getId();
+            log.debug("pre-init with http session id: {}", httpSessionId);
+        } else {
+            log.debug("pre-init without http session");
         }
-        log.debug("pre-init with http session id: {}", httpSessionId);
     }
 
     @Override
@@ -111,8 +117,10 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         Object session = handshakeRequest.getHttpSession();
         if (session != null) {
             httpSessionId = ((HttpSession) session).getId();
+            log.debug("init with http session id: {}", httpSessionId);
+        } else {
+            log.debug("init without http session");
         }
-        log.debug("init with http session id: {}", httpSessionId);
         // Need to call onOpen using the web application's class loader
         // Create the frame using the application's class loader so it can pick up application specific config from the ServerContainerImpl
         Thread t = Thread.currentThread();
@@ -125,10 +133,13 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                 log.debug("New connection 1 {}", wsRemoteEndpointServer);
             }
             if (isDebug) {
-                log.debug("WS session pre-ctor - ep: {}, wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", ep, wsRemoteEndpointServer,
-                        webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
+                log.debug("WS session pre-ctor - wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", wsRemoteEndpointServer, webSocketContainer,
+                        handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
             }
+            // deprecated version
             wsSession = new WsSession(ep, wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
+            // newest ctor
+            //wsSession = new WsSession(wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
             if (isDebug) {
                 log.debug("New connection 2 {}", wsSession);
             }

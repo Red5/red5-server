@@ -50,8 +50,9 @@ public class WsFrameServer extends WsFrameBase {
      */
     private void onDataAvailable() throws IOException {
         if (log.isDebugEnabled()) {
-            log.debug("wsFrameServer.onDataAvailable - session {}", wsSession);
+            log.debug("wsFrameServer.onDataAvailable - session {}", wsSession.getId());
         }
+        /*
         // set connection local to the message handler so WSMessage will contain the connection
         DefaultWebSocketEndpoint ep = (DefaultWebSocketEndpoint) wsSession.getLocal();
         if (ep.getConnectionLocal() == null) {
@@ -61,10 +62,10 @@ public class WsFrameServer extends WsFrameBase {
             WebSocketConnection conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
             ep.setConnectionLocal(conn);
         }
+        */
         // handle input
         if (isOpen() && inputBuffer.hasRemaining() && !isSuspended()) {
-            // There might be a data that was left in the buffer when
-            // the read has been suspended.
+            // There might be a data that was left in the buffer when the read has been suspended.
             // Consume this data before reading from the socket.
             processInputBuffer();
         }
@@ -85,8 +86,10 @@ public class WsFrameServer extends WsFrameBase {
             }
             processInputBuffer();
         }
+        /*
         // clear thread local
         ((DefaultWebSocketEndpoint) wsSession.getLocal()).setConnectionLocal(null);
+        */
     }
 
     @Override

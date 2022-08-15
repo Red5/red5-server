@@ -52,46 +52,44 @@ public class DefaultWebSocketEndpoint extends Endpoint {
      * onMessage, onClose methods to ensure the room thread always gets the correct instance of the variable holder.
      */
 
-    private ThreadLocal<WebSocketConnection> connectionLocal = new ThreadLocal<>();
+    //private ThreadLocal<WebSocketConnection> connectionLocal = new ThreadLocal<>();
 
     @Override
     public void onOpen(Session session, EndpointConfig config) {
         log.debug("Session opened: {}\n{}", session.getId(), session.getRequestParameterMap());
-        // Set maximum messages size to 10,000 bytes
-        session.setMaxTextMessageBufferSize(10000);
-        session.addMessageHandler(stringHandler);
-        session.addMessageHandler(binaryHandler);
-        session.addMessageHandler(pongHandler);
         // get ws scope from user props
         scope = (WebSocketScope) config.getUserProperties().get(WSConstants.WS_SCOPE);
         // get ws connection from session user props
         WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
-        if (conn != null) {
-            connectionLocal.set(conn);
-        } else {
+        if (conn == null) {
             log.warn("WebSocketConnection null at onOpen for {}", session.getId());
         }
+        // Set maximum messages size to 10,000 bytes
+        session.setMaxTextMessageBufferSize(10000);
+        session.addMessageHandler(new WholeMessageHandler(conn));
+        session.addMessageHandler(new WholeBinaryHandler(conn));
+        session.addMessageHandler(new WholePongHandler(conn));
     }
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
         final String sessionId = session.getId();
         log.debug("Session closed: {}", sessionId);
-        // get the connection
+        // get ws connection from session user props
         WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
         // if we don't get it from the session, try the scope lookup
         if (conn == null) {
-            log.trace("Connection for id: {} was not found in the session onClose", sessionId);
+            log.warn("Connection for id: {} was not found in the session onClose", sessionId);
             conn = scope.getConnectionBySessionId(sessionId);
         }
         if (conn != null) {
             // close the ws conn which removes it from the scope
-            conn.close();
+            if (conn.isConnected()) {
+                conn.close();
+            }
         } else {
             log.debug("Connection for id: {} was not found in the scope or session: {}", sessionId, scope.getPath());
         }
-        // clear the local
-        connectionLocal.set(null);
     }
 
     @Override
@@ -116,22 +114,19 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         }
     }
 
-    public WebSocketConnection getConnectionLocal() {
-        return connectionLocal.get();
-    }
+    private class WholeMessageHandler implements MessageHandler.Whole<String> {
 
-    public void setConnectionLocal(WebSocketConnection connection) {
-        connectionLocal.set(connection);
-    }
+        final WebSocketConnection conn;
 
-    private final MessageHandler.Whole<String> stringHandler = new MessageHandler.Whole<String>() {
+        WholeMessageHandler(WebSocketConnection conn) {
+            this.conn = conn;
+        }
 
         @Override
-        public void onMessage(final String message) {
+        public void onMessage(String message) {
             if (isTrace) {
                 log.trace("Message received {}", message);
             }
-            final WebSocketConnection conn = connectionLocal.get();
             if (conn != null && conn.isConnected()) {
                 try {
                     // update the byte received counter
@@ -149,16 +144,21 @@ public class DefaultWebSocketEndpoint extends Endpoint {
             }
         }
 
-    };
+    }
 
-    private final MessageHandler.Whole<ByteBuffer> binaryHandler = new MessageHandler.Whole<ByteBuffer>() {
+    private class WholeBinaryHandler implements MessageHandler.Whole<ByteBuffer> {
+
+        final WebSocketConnection conn;
+
+        WholeBinaryHandler(WebSocketConnection conn) {
+            this.conn = conn;
+        }
 
         @Override
         public void onMessage(ByteBuffer message) {
             if (isTrace) {
                 log.trace("Message received {}", message);
             }
-            final WebSocketConnection conn = connectionLocal.get();
             if (conn != null && conn.isConnected()) {
                 // update the byte received counter
                 conn.updateReadBytes(message.limit());
@@ -175,7 +175,13 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     };
 
-    private final MessageHandler.Whole<PongMessage> pongHandler = new MessageHandler.Whole<PongMessage>() {
+    private class WholePongHandler implements MessageHandler.Whole<PongMessage> {
+
+        final WebSocketConnection conn;
+
+        WholePongHandler(WebSocketConnection conn) {
+            this.conn = conn;
+        }
 
         @Override
         public void onMessage(PongMessage message) {
@@ -183,7 +189,6 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 log.trace("Pong received {}", message);
             }
             // update the byte received counter
-            final WebSocketConnection conn = connectionLocal.get();
             if (conn != null && conn.isConnected()) {
                 conn.updateReadBytes(1);
             }

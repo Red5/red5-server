@@ -329,10 +329,10 @@ public class WebSocketConnection extends AttributeStore {
             WsSession session = wsSession != null ? wsSession.get() : null;
             if (session != null && session.isOpen()) {
                 // clean up internal ws session maps since close doesnt
-                if (session.isOpen()) {
-                    session.getPathParameters().clear();
-                    session.getUserProperties().clear();
-                }
+                //if (session.isOpen()) {
+                //    session.getPathParameters().clear();
+                //    session.getUserProperties().clear();
+                //}
                 // ensure the endpoint is closed
                 CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
                 // close the socket, don't wait for the browser to respond or we could hang
@@ -415,7 +415,7 @@ public class WebSocketConnection extends AttributeStore {
      * @return true if secure and false if unsecure or unconnected
      */
     public boolean isSecure() {
-        return (wsSession != null) ? wsSession.get().isSecure() : false;
+        return (wsSession != null && wsSession.get().isOpen()) ? wsSession.get().isSecure() : false;
     }
 
     public String getPath() {

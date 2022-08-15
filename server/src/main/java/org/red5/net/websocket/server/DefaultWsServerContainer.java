@@ -267,8 +267,9 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         super.registerSession(endpoint, wsSession);
         if (wsSession.isOpen() && wsSession.getUserPrincipal() != null && wsSession.getHttpSessionId() != null) {
             registerAuthenticatedSession(wsSession, wsSession.getHttpSessionId());
+            log.debug("registerSession - registerAuthenticatedSession: {}", wsSession.getId());
         }
-        log.debug("registerSession: {} endpoint: {}", wsSession, endpoint);
+        log.debug("registerSession: {} endpoint: {}", wsSession.getId(), endpoint);
     }
 
     /**
@@ -280,6 +281,7 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
     protected void unregisterSession(Object endpoint, WsSession wsSession) {
         if (wsSession.getUserPrincipal() != null && wsSession.getHttpSessionId() != null) {
             unregisterAuthenticatedSession(wsSession, wsSession.getHttpSessionId());
+            log.debug("unregisterSession - unregisterAuthenticatedSession: {}", wsSession.getId());
         }
         super.unregisterSession(endpoint, wsSession);
         log.debug("unregisterSession: {} endpoint: {}", wsSession.getId(), endpoint);
