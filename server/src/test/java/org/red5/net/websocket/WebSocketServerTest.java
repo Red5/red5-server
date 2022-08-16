@@ -534,6 +534,7 @@ public class WebSocketServerTest {
             this(null, null, null, null, null, null, null, RandomStringUtils.randomAlphanumeric(8), null, null, null, false, null);
         }
 
+        @SuppressWarnings("deprecation")
         public DummySession(Endpoint localEndpoint, WsRemoteEndpointImplBase wsRemoteEndpoint, WsWebSocketContainer wsWebSocketContainer, URI requestUri, Map<String, List<String>> requestParameterMap, String queryString, Principal userPrincipal, String httpSessionId, List<Extension> negotiatedExtensions, String subProtocol, Map<String, String> pathParameters, boolean secure, EndpointConfig endpointConfig)
                 throws DeploymentException {
             super(localEndpoint, wsRemoteEndpoint, wsWebSocketContainer, requestUri, requestParameterMap, queryString, userPrincipal, httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);

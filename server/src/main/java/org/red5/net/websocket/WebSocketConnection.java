@@ -22,7 +22,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
 import javax.websocket.CloseReason;
@@ -98,11 +97,6 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
 
     // stats
     private volatile long readBytes, writtenBytes;
-
-    // atomic field updaters
-    private final static AtomicLongFieldUpdater<WebSocketConnection> readUpdater = AtomicLongFieldUpdater.newUpdater(WebSocketConnection.class, "readBytes");
-
-    private final static AtomicLongFieldUpdater<WebSocketConnection> writeUpdater = AtomicLongFieldUpdater.newUpdater(WebSocketConnection.class, "writtenBytes");
 
     // send future for when async is enabled
     private Future<Void> sendFuture;
@@ -198,16 +192,16 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                                     }
                                 }
                             }
-                            synchronized (session) {
+                            synchronized (wsSessionId) {
                                 int lengthToWrite = data.getBytes().length;
                                 sendFuture = session.getAsyncRemote().sendText(data);
-                                writeUpdater.addAndGet(this, lengthToWrite);
+                                writtenBytes += lengthToWrite;
                             }
                         } else {
-                            synchronized (session) {
+                            synchronized (wsSessionId) {
                                 int lengthToWrite = data.getBytes().length;
                                 session.getBasicRemote().sendText(data);
-                                writeUpdater.addAndGet(this, lengthToWrite);
+                                writtenBytes += lengthToWrite;
                             }
                         }
                     } catch (Exception e) {
@@ -239,29 +233,27 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         WsSession session = wsSession.get();
         if (session != null && session.isOpen()) {
             try {
-                synchronized (session) {
-                    // send the bytes
-                    if (useAsync) {
-                        if (sendFuture != null && !sendFuture.isDone()) {
-                            try {
-                                sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
-                            } catch (TimeoutException e) {
-                                log.warn("Send timed out {}", wsSessionId);
-                                if (!isConnected()) {
-                                    sendFuture.cancel(true);
-                                    return;
-                                }
+                // send the bytes
+                if (useAsync) {
+                    if (sendFuture != null && !sendFuture.isDone()) {
+                        try {
+                            sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
+                        } catch (TimeoutException e) {
+                            log.warn("Send timed out {}", wsSessionId);
+                            if (!isConnected()) {
+                                sendFuture.cancel(true);
+                                return;
                             }
                         }
-                        synchronized (session) {
-                            sendFuture = session.getAsyncRemote().sendBinary(ByteBuffer.wrap(buf));
-                            writeUpdater.addAndGet(this, buf.length);
-                        }
-                    } else {
-                        synchronized (session) {
-                            session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
-                            writeUpdater.addAndGet(this, buf.length);
-                        }
+                    }
+                    synchronized (wsSessionId) {
+                        sendFuture = session.getAsyncRemote().sendBinary(ByteBuffer.wrap(buf));
+                        writtenBytes += buf.length;
+                    }
+                } else {
+                    synchronized (wsSessionId) {
+                        session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
+                        writtenBytes += buf.length;
                     }
                 }
             } catch (Exception e) {
@@ -285,11 +277,11 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
         WsSession session = wsSession.get();
         if (session != null && session.isOpen()) {
-            synchronized (session) {
+            synchronized (wsSessionId) {
                 // send the bytes
                 session.getBasicRemote().sendPing(ByteBuffer.wrap(buf));
                 // update counter
-                writeUpdater.addAndGet(this, buf.length);
+                writtenBytes += buf.length;
             }
         } else {
             throw new IOException("WS session closed");
@@ -309,11 +301,11 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
         WsSession session = wsSession.get();
         if (session != null && session.isOpen()) {
-            synchronized (session) {
+            synchronized (wsSessionId) {
                 // send the bytes
                 session.getBasicRemote().sendPong(ByteBuffer.wrap(buf));
                 // update counter
-                writeUpdater.addAndGet(this, buf.length);
+                writtenBytes += buf.length;
             }
         } else {
             throw new IOException("WS session closed");
@@ -632,14 +624,14 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     public void updateReadBytes(long read) {
-        readUpdater.addAndGet(this, read);
+        readBytes += read;
     }
 
     public long getWrittenBytes() {
         return writtenBytes;
     }
 
-    private String getWsSessionId() {
+    public String getWsSessionId() {
         return wsSessionId;
     }
 

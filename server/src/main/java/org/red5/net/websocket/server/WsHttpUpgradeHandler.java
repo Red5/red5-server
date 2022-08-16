@@ -1,8 +1,6 @@
 package org.red5.net.websocket.server;
 
 import java.io.IOException;
-import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -25,9 +23,7 @@ import org.apache.tomcat.util.net.SocketWrapperBase;
 import org.apache.tomcat.util.res.StringManager;
 import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsIOException;
-import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
 import org.apache.tomcat.websocket.WsSession;
-import org.apache.tomcat.websocket.WsWebSocketContainer;
 import org.red5.net.websocket.WSConstants;
 import org.red5.net.websocket.WebSocketConnection;
 import org.red5.net.websocket.WebSocketScope;

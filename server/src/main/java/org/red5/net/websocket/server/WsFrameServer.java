@@ -15,8 +15,6 @@ import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsFrameBase;
 import org.apache.tomcat.websocket.WsIOException;
 import org.apache.tomcat.websocket.WsSession;
-import org.red5.net.websocket.WSConstants;
-import org.red5.net.websocket.WebSocketConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
