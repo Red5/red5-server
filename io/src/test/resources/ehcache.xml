@@ -1,0 +1,49 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    dynamicConfig="false"
+    monitoring="off"
+    updateCheck="false"
+    xsi:noNamespaceSchemaLocation="ehcache.xsd" >
+
+    <!--
+    Mandatory Default Cache configuration. These settings will be applied to caches
+    created programmatically using CacheManager.add(String cacheName)
+    -->
+    <defaultCache
+        diskExpiryThreadIntervalSeconds="120"
+        diskPersistent="false"
+        eternal="false"
+        maxElementsInMemory="4"
+        memoryStoreEvictionPolicy="LFU"
+        overflowToDisk="false"
+        timeToIdleSeconds="120"
+        timeToLiveSeconds="120" />
+    <!--
+         org.red5.io.amf.Output.stringCache
+            Caches strings for output via AMF serialization. Keeps up to 1000 elements in memory,
+            does not overflow to disk, is not eternal, and expires elements after 20 minutes of inactivity.
+    -->
+    <cache
+        name="org.red5.io.amf.Output.stringCache"
+        eternal="false"
+        maxElementsInMemory="1000"
+        overflowToDisk="false"
+        timeToIdleSeconds="1200" />
+    <cache
+        name="org.red5.io.amf.Output.serializeCache"
+        eternal="false"
+        maxElementsInMemory="200"
+        overflowToDisk="false"
+        timeToIdleSeconds="1200" />
+    <cache
+        name="org.red5.io.amf.Output.fieldCache"
+        eternal="false"
+        maxElementsInMemory="200"
+        overflowToDisk="false"
+        timeToIdleSeconds="1200" />
+    <cache
+        name="org.red5.io.amf.Output.getterCache"
+        eternal="false"
+        maxElementsInMemory="200"
+        overflowToDisk="false"
+        timeToIdleSeconds="1200" />
+</ehcache>

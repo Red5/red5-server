@@ -1,0 +1,9 @@
+[Unit]
+Description=Red5
+
+[Service]
+Type=simple
+ExecStart=/etc/init.d/red5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,7 +1,6 @@
 red5-server - Red5 server core
 ===========
 
-![TravisCI](https://travis-ci.org/Red5/red5-server.svg?branch=master) 
 [![Maven Central](https://img.shields.io/maven-central/v/org.red5/red5-server.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.red5%22)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
@@ -100,6 +99,7 @@ Features supported via plugin (These are mostly deprecated):
 # Older Releases
 The artifacts for the following releases are no longer available; if your project requires them, you'll have to build them from source. The listings are here only for historical purposes.
 
+ * [Red5 1.2.25 Release](https://github.com/Red5/red5-server/releases/tag/v1.2.25-RELEASE) (28 June 2022)
  * [Red5 1.2.2 Release](https://github.com/Red5/red5-server/releases/tag/v1.2.2-RELEASE) (5 September 2019)
  * [Red5 1.1.1 Release](https://github.com/Red5/red5-server/releases/tag/v1.1.1-RELEASE) (29 May 2019)
  * [Red5 1.1.0 Release](https://github.com/Red5/red5-server/releases/tag/v1.1.0-RELEASE) (22 April 2019)
@@ -123,7 +123,7 @@ The artifacts for the following releases are no longer available; if your projec
 Donate to the cause using
 <table>
   <tr><td>BTC</td><td>19AUgJuVzC8jg16bSLJDcM6Nfouh9JvwKA</td></tr>
-  <tr><td>ETH</td><td>0x5115e085937ba5B4AEc0FF5C3cAbF6eE523B7D97</td></tr>
+  <tr><td>ETH</td><td>0x5115e085937ba5B4AEc0FF5C3cAbF6eE523B7D97</td></tr>
 </table>
 <i>Donations are used for beer and snacks</i>
 

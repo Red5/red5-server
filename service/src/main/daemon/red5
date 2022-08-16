@@ -1,0 +1,116 @@
+#!/bin/sh
+#  /etc/init.d/red5
+
+### BEGIN INIT INFO
+# Provides:          Red5
+# Required-Start:    $remote_fs $syslog $network
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts the red5 service
+# Description:       This file is used to start the daemon and should be placed in /etc/init.d
+# chkconfig: 2345 85 85
+# processname: red5
+### END INIT INFO
+
+# Author:   Sheldon Neilson <sheldon[AT]neilson.co.za>
+# Url:      www.neilson.co.za
+# Date:     25/04/2013
+# Modified by Paul Gregoire <mondain[AT]gmail.com> on 18 May 2016
+
+NAME="red5"
+DESC="Red5 service"
+
+# The path to Jsvc
+EXEC="/usr/bin/jsvc"
+
+# The path to the folder containing daemon jar
+FILE_PATH="/usr/local/$NAME"
+# If red5 home is set, use it
+if [ ! -z "$RED5_HOME" ]; then 
+  echo "Setting file path using RED5_HOME"
+  FILE_PATH=$RED5_HOME;
+fi
+export RED5_HOME=$FILE_PATH;
+echo "Path $FILE_PATH";
+
+# The path to the folder containing the java runtime
+JAVA_HOME="/usr/lib/jvm/default-java"
+
+# Our classpath including our jar file and the Apache Commons Daemon library
+CLASS_PATH="$FILE_PATH/commons-daemon-1.0.15.jar:$FILE_PATH/red5-service.jar:$FILE_PATH/conf"
+
+# The fully qualified name of the class to execute
+CLASS="org.red5.daemon.EngineLauncher"
+
+# Any command line arguments to be passed to the our Java Daemon implementations init() method 
+ARGS="9999"
+
+# The file that will contain our process identification number (pid) for other scripts/programs that need to access it.
+PID="/tmp/$NAME.pid"
+
+# System.out writes to this file...
+LOG_OUT="$FILE_PATH/log/$NAME-service.log"
+
+# System.err writes to this file...
+LOG_ERR="$FILE_PATH/log/$NAME-error.log"
+
+# JAVA options
+# You can set JVM additional options here if you want
+if [ -z "$JVM_OPTS" ]; then 
+    JVM_OPTS="-Xverify:none -XX:+TieredCompilation -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:ReservedCodeCacheSize=32m -Dorg.terracotta.quartz.skipUpdateCheck=true"
+fi
+# Set up logging options
+LOGGING_OPTS="-Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector -Dcatalina.useNaming=true"
+# Set up security options
+SECURITY_OPTS="-Djava.security.debug=failure"
+# Set up tomcat options
+TOMCAT_OPTS="-Dcatalina.home=$RED5_HOME"
+
+JAVA_OPTS="$LOGGING_OPTS $SECURITY_OPTS $JAVA_OPTS $JVM_OPTS $TOMCAT_OPTS"
+
+jsvc_exec()
+{   
+    cd $FILE_PATH
+    $EXEC -home $JAVA_HOME -cp $CLASS_PATH -cwd $RED5_HOME $JAVA_OPTS -outfile $LOG_OUT -errfile $LOG_ERR -pidfile $PID $1 $CLASS $ARGS
+}
+
+case "$1" in
+    start)  
+        echo "Starting the $DESC..."        
+        
+        # Start the service
+        jsvc_exec
+        
+        echo "The $DESC has started."
+    ;;
+    stop)
+        echo "Stopping the $DESC..."
+        
+        # Stop the service
+        jsvc_exec "-stop"       
+        
+        echo "The $DESC has stopped."
+    ;;
+    restart)
+        if [ -f "$PID" ]; then
+            
+            echo "Restarting the $DESC..."
+            
+            # Stop the service
+            jsvc_exec "-stop"
+            
+            # Start the service
+            jsvc_exec
+            
+            echo "The $DESC has restarted."
+        else
+            echo "Daemon not running, no action taken"
+            exit 1
+        fi
+            ;;
+    *)
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart}" >&2
+    exit 3
+    ;;
+esac
