@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.red5.net.websocket.listener.IWebSocketDataListener;
 import org.red5.net.websocket.model.WSMessage;
@@ -34,9 +34,9 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     private WebSocketScopeManager manager;
 
-    protected CopyOnWriteArraySet<WebSocketConnection> conns = new CopyOnWriteArraySet<>();
+    protected ConcurrentSkipListSet<WebSocketConnection> conns = new ConcurrentSkipListSet<>();
 
-    protected CopyOnWriteArraySet<IWebSocketDataListener> listeners = new CopyOnWriteArraySet<>();
+    protected ConcurrentSkipListSet<IWebSocketDataListener> listeners = new ConcurrentSkipListSet<>();
 
     protected IScope scope;
 
@@ -88,13 +88,15 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         manager.removeWebSocketScope(this);
         // clean up the connections by first closing them
         conns.forEach(conn -> {
-            conn.close();
-            conns.remove(conn);
+            if (conns.remove(conn)) {
+                conn.close();
+            }
         });
         // clean up the listeners by first stopping them
         listeners.forEach(listener -> {
-            listener.stop();
-            listeners.remove(listener);
+            if (listeners.remove(listener)) {
+                listener.stop();
+            }
         });
     }
 
@@ -176,14 +178,10 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      */
     public void addConnection(WebSocketConnection conn) {
         // prevent false failed logging when a connection is already registered
-        if (!conns.contains(conn)) {
-            if (conns.add(conn)) {
-                log.debug("Added connection: {}", conn);
-                for (IWebSocketDataListener listener : listeners) {
-                    listener.onWSConnect(conn);
-                }
-            } else {
-                log.warn("Add connection failed for: {}", conn);
+        if (conns.add(conn)) {
+            log.debug("Added connection: {}", conn);
+            for (IWebSocketDataListener listener : listeners) {
+                listener.onWSConnect(conn);
             }
         } else {
             log.debug("Add connection skipped, already registered: {}", conn);
@@ -197,14 +195,10 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      */
     public void removeConnection(WebSocketConnection conn) {
         // prevent false failed logging when a connection isnt registered
-        if (conns.contains(conn)) {
-            if (conns.remove(conn)) {
-                log.debug("Removed connection: {}", conn);
-                for (IWebSocketDataListener listener : listeners) {
-                    listener.onWSDisconnect(conn);
-                }
-            } else {
-                log.warn("Remove connection failed for: {}", conn);
+        if (conns.remove(conn)) {
+            log.debug("Removed connection: {}", conn);
+            for (IWebSocketDataListener listener : listeners) {
+                listener.onWSDisconnect(conn);
             }
         } else {
             log.debug("Remove connection skipped, not registered: {}", conn);

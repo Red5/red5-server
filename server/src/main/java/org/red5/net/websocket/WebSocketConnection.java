@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Paul Gregoire
  */
-public class WebSocketConnection extends AttributeStore {
+public class WebSocketConnection extends AttributeStore implements Comparable<WebSocketConnection> {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
 
@@ -356,6 +356,18 @@ public class WebSocketConnection extends AttributeStore {
     }
 
     /**
+     * Async send is enabled in non-Windows based systems; this provides a means to override it.
+     *
+     * @param useAsync
+     */
+    public static void setUseAsync(boolean useAsync) {
+        if (!useAsync) {
+            log.debug("Async websocket sends are disabled");
+        }
+        WebSocketConnection.useAsync = useAsync;
+    }
+
+    /**
      * Return the WebSocketScope to which we're connected/connecting.
      *
      * @return WebSocketScope
@@ -625,6 +637,15 @@ public class WebSocketConnection extends AttributeStore {
 
     public long getWrittenBytes() {
         return writtenBytes;
+    }
+
+    private String getWsSessionId() {
+        return wsSessionId;
+    }
+
+    @Override
+    public int compareTo(WebSocketConnection that) {
+        return Integer.compare(hashCode, that.hashCode);
     }
 
     @Override
