@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.red5.net.websocket.listener.DefaultWebSocketDataListener;
@@ -32,6 +34,15 @@ public class WebSocketScopeManager {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketScopeManager.class);
 
+    // used to ping WS connections
+    private static final byte[] PING_BYTES = "PING!".getBytes();
+
+    // one executor per scope manager
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
+
+    // future for the ws pinger
+    private Future<?> pingFuture;
+
     // reference to the owning application scope
     private IScope appScope;
 
@@ -46,6 +57,9 @@ public class WebSocketScopeManager {
 
     // whether or not to copy listeners from parent to child on create
     protected boolean copyListeners = true;
+
+    // value for the websocket ping period/interval
+    public static long websocketPingInterval = 5000L;
 
     public void addListener(IWebSocketScopeListener listener) {
         scopeListeners.add(listener);
@@ -136,6 +150,37 @@ public class WebSocketScopeManager {
         if (scopes.putIfAbsent(path, webSocketScope) == null) {
             log.info("addWebSocketScope: {}", webSocketScope);
             notifyListeners(WebSocketEvent.SCOPE_ADDED, webSocketScope);
+            // ensure the ping future exists, if not spawn it
+            if (pingFuture == null || pingFuture.isDone()) {
+                pingFuture = executor.submit(() -> {
+                    final String oldName = Thread.currentThread().getName();
+                    Thread.currentThread().setName("WebSocketPinger");
+                    do {
+                        scopes.forEach((sName, wsScope) -> {
+                            log.trace("start pinging scope: {}", sName);
+                            wsScope.getConns().forEach(wsConn -> {
+                                // ping connected websocket
+                                if (wsConn.isConnected()) {
+                                    log.debug("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
+                                    try {
+                                        wsConn.sendPing(PING_BYTES);
+                                    } catch (Exception e) {
+                                    }
+                                }
+                            });
+                            log.trace("finished pinging scope: {}", sName);
+                        });
+                        // sleep for interval
+                        try {
+                            Thread.sleep(websocketPingInterval);
+                        } catch (InterruptedException e1) {
+                        }
+                    } while (!scopes.isEmpty());
+                    // reset ping future
+                    pingFuture = null;
+                    Thread.currentThread().setName(oldName);
+                });
+            }
             return true;
         }
         return false;
@@ -165,7 +210,9 @@ public class WebSocketScopeManager {
      */
     public void addConnection(WebSocketConnection conn) {
         WebSocketScope scope = getScope(conn);
-        scope.addConnection(conn);
+        if (scope != null) {
+            scope.addConnection(conn);
+        }
     }
 
     /**
@@ -180,7 +227,7 @@ public class WebSocketScopeManager {
             if (scope != null) {
                 scope.removeConnection(conn);
                 if (!scope.isValid()) {
-                    // scope is not valid. delete this.
+                    // scope is not valid, delete it
                     removeWebSocketScope(scope);
                 }
             }
@@ -346,6 +393,9 @@ public class WebSocketScopeManager {
      * Stops this manager and the scopes contained within.
      */
     public void stop() {
+        if (pingFuture != null && !pingFuture.isCancelled()) {
+            pingFuture.cancel(true);
+        }
         for (WebSocketScope scope : scopes.values()) {
             scope.unregister();
         }

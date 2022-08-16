@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.red5.net.websocket.listener.IWebSocketDataListener;
 import org.red5.net.websocket.model.WSMessage;
@@ -36,7 +37,8 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     protected ConcurrentSkipListSet<WebSocketConnection> conns = new ConcurrentSkipListSet<>();
 
-    protected ConcurrentSkipListSet<IWebSocketDataListener> listeners = new ConcurrentSkipListSet<>();
+    // this has very few entries, possibly only one, COWAS is fine here and won't incur Comparable requirements
+    protected CopyOnWriteArraySet<IWebSocketDataListener> listeners = new CopyOnWriteArraySet<>();
 
     protected IScope scope;
 
@@ -180,9 +182,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         // prevent false failed logging when a connection is already registered
         if (conns.add(conn)) {
             log.debug("Added connection: {}", conn);
-            for (IWebSocketDataListener listener : listeners) {
-                listener.onWSConnect(conn);
-            }
+            listeners.forEach(listener -> listener.onWSConnect(conn));
         } else {
             log.debug("Add connection skipped, already registered: {}", conn);
         }
@@ -197,9 +197,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         // prevent false failed logging when a connection isnt registered
         if (conns.remove(conn)) {
             log.debug("Removed connection: {}", conn);
-            for (IWebSocketDataListener listener : listeners) {
-                listener.onWSDisconnect(conn);
-            }
+            listeners.forEach(listener -> listener.onWSDisconnect(conn));
         } else {
             log.debug("Remove connection skipped, not registered: {}", conn);
         }

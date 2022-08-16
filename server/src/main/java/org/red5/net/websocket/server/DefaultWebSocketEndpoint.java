@@ -52,8 +52,6 @@ public class DefaultWebSocketEndpoint extends Endpoint {
      * onMessage, onClose methods to ensure the room thread always gets the correct instance of the variable holder.
      */
 
-    //private ThreadLocal<WebSocketConnection> connectionLocal = new ThreadLocal<>();
-
     @Override
     public void onOpen(Session session, EndpointConfig config) {
         log.debug("Session opened: {}\n{}", session.getId(), session.getRequestParameterMap());
