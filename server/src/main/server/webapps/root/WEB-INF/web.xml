@@ -4,20 +4,24 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
          http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     <display-name>root</display-name>
+    <!-- XXX(paul) disabled due to issue and lack-of-use; re-enable at your own risk
     <servlet>
         <servlet-name>gateway</servlet-name>
         <servlet-class>org.red5.server.net.servlet.AMFGatewayServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    -->
     <servlet>
         <servlet-name>rtmpt</servlet-name>
         <servlet-class>org.red5.server.net.rtmpt.RTMPTServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
+    <!-- XXX(paul) disabled due to issue and lack-of-use; re-enable at your own risk
     <servlet-mapping>
         <servlet-name>gateway</servlet-name>
         <url-pattern>/gateway</url-pattern>
     </servlet-mapping>
+    -->
     <servlet-mapping>
         <servlet-name>rtmpt</servlet-name>
         <url-pattern>/open/*</url-pattern>
