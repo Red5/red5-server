@@ -156,8 +156,8 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
             }
             // create a new header for the consumer if the message.body doesnt already have one
             final Header header = Optional.ofNullable(msg.getHeader()).orElse(new Header());
-            // XXX sets the timerbase, but should we do this if there's already a timerbase?
-            header.setTimerBase(eventTime);
+            //reset header times. 
+            header.setTimer(eventTime);
             // data buffer
             IoBuffer buf = null;
             switch (dataType) {
