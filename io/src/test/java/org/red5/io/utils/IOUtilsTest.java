@@ -68,7 +68,7 @@ public class IOUtilsTest {
         value += bytes[0];
         System.out.printf("Results #1 - result: %d\n", value);
         assertTrue(ok == value);
-        // optimized 
+        // optimized
         in.flip();
         value = in.getInt();
         value = ((value & 0xFF) << 24 | ((value >> 8) & 0x00FF) << 16 | ((value >>> 16) & 0x000000FF) << 8 | ((value >>> 24) & 0x000000FF));

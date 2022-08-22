@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation for public methods that should be protected by a named permission when called through RTMP, RTMPT or Remoting.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -24,7 +24,7 @@ public @interface DeclareProtected {
 
     /**
      * Permission required to execute method.
-     * 
+     *
      * @return permission required
      */
     String permission();

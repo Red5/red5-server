@@ -27,7 +27,7 @@ public class Bootstrap {
 
     /**
      * BootStrapping entry point
-     * 
+     *
      * @param args
      *            command line arguments
      * @throws Exception
@@ -49,7 +49,7 @@ public class Bootstrap {
 
     /**
      * Loads classloader with dependencies
-     * 
+     *
      * @throws InstantiationException
      * @throws IllegalAccessException
      * @throws ClassNotFoundException
@@ -114,7 +114,7 @@ public class Bootstrap {
 
     /**
      * Gets the configuration root
-     * 
+     *
      * @param root
      * @return
      */
@@ -136,7 +136,7 @@ public class Bootstrap {
 
     /**
      * Gets the Red5 root
-     * 
+     *
      * @return
      * @throws IOException
      */

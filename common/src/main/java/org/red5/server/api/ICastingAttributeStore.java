@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * Attribute storage with automatic object casting support.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -21,7 +21,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get Boolean attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -30,7 +30,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get Byte attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -39,7 +39,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get Double attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -48,7 +48,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get Integer attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -57,7 +57,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get List attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -66,7 +66,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get boolean attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -75,7 +75,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get Long attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -84,7 +84,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get Set attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -93,7 +93,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get Short attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute
@@ -102,7 +102,7 @@ public interface ICastingAttributeStore extends IAttributeStore {
 
     /**
      * Get String attribute by name
-     * 
+     *
      * @param name
      *            Attribute name
      * @return Attribute

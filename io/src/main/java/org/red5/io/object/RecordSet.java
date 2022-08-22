@@ -27,7 +27,7 @@ import org.red5.io.client.IRemotingClient;
  * <p>
  * For last mode, use page size property to specify maximum number of rows on one page
  * </p>
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -99,7 +99,7 @@ public class RecordSet {
 
     /**
      * Creates recordset from Input object
-     * 
+     *
      * @param input
      *            input
      */
@@ -131,7 +131,7 @@ public class RecordSet {
 
     /**
      * Set the remoting client to use for retrieving of paged results.
-     * 
+     *
      * @param client
      *            Remoting client that works with this Recordset
      */
@@ -141,7 +141,7 @@ public class RecordSet {
 
     /**
      * Set the mode for fetching paged results.
-     * 
+     *
      * @param mode
      *            Mode for fetching of results
      */
@@ -151,7 +151,7 @@ public class RecordSet {
 
     /**
      * Set the mode for fetching paged results with given max page size.
-     * 
+     *
      * @param mode
      *            Mode for fetching of results
      * @param pageSize
@@ -163,7 +163,7 @@ public class RecordSet {
 
     /**
      * Set the mode for fetching paged results with given max page size and number of prefetched pages.
-     * 
+     *
      * @param mode
      *            Mode for fetching of results
      * @param pageSize
@@ -178,7 +178,7 @@ public class RecordSet {
 
     /**
      * Return a list containing the names of the columns in the recordset.
-     * 
+     *
      * @return Column names set
      */
     public List<String> getColumnNames() {
@@ -187,7 +187,7 @@ public class RecordSet {
 
     /**
      * Make sure the passed item has been fetched from the server.
-     * 
+     *
      * @param index
      *            Item index
      */
@@ -245,7 +245,7 @@ public class RecordSet {
 
     /**
      * Return a specified item from the recordset. If the item is not available yet, it will be received from the server.
-     * 
+     *
      * @param index
      *            Item index
      * @return Item from recordset
@@ -262,7 +262,7 @@ public class RecordSet {
 
     /**
      * Get the total number of items.
-     * 
+     *
      * @return Number of items
      */
     public int getLength() {
@@ -271,7 +271,7 @@ public class RecordSet {
 
     /**
      * Get the number of items already received from the server.
-     * 
+     *
      * @return Nsumber of received items
      */
     public int getNumberAvailable() {
@@ -286,7 +286,7 @@ public class RecordSet {
 
     /**
      * Check if all items are available on the client.
-     * 
+     *
      * @return number of available items
      */
     public boolean isFullyPopulated() {
@@ -295,7 +295,7 @@ public class RecordSet {
 
     /**
      * Return Map that can be serialized as result.
-     * 
+     *
      * @return serializable informations
      */
     public Map<String, Object> serialize() {

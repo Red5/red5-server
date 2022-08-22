@@ -63,7 +63,7 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
 
     /**
      * Create new notification event with given byte buffer
-     * 
+     *
      * @param data
      *            Byte buffer
      */
@@ -74,7 +74,7 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
 
     /**
      * Create new notification event with given byte buffer and action.
-     * 
+     *
      * @param data Byte buffer
      * @param action Action / method
      */
@@ -86,7 +86,7 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
 
     /**
      * Create new notification event with given service call
-     * 
+     *
      * @param call
      *            Service call
      */
@@ -262,7 +262,7 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
 
     /**
      * Duplicate this Notify message to future injection Serialize to memory and deserialize, safe way.
-     * 
+     *
      * @return duplicated Notify event
      */
     public Notify duplicate() throws IOException, ClassNotFoundException {

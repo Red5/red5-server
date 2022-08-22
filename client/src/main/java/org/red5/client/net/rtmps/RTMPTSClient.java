@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMPT/S client object
- * 
+ *
  * @author Paul Gregoire
  */
 public class RTMPTSClient extends RTMPTClient {

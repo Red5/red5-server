@@ -34,7 +34,7 @@ public class ScopeResolver implements IScopeResolver {
 
     /**
      * Getter for global scope
-     * 
+     *
      * @return Global scope
      */
     public IGlobalScope getGlobalScope() {
@@ -43,7 +43,7 @@ public class ScopeResolver implements IScopeResolver {
 
     /**
      * Setter for global scope
-     * 
+     *
      * @param root
      *            Global scope
      */

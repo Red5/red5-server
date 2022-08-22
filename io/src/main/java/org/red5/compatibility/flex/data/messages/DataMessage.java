@@ -11,7 +11,7 @@ import org.red5.compatibility.flex.messaging.messages.AsyncMessage;
 
 /**
  * Message containing data update requests.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

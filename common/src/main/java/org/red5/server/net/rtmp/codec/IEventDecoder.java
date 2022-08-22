@@ -25,7 +25,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes event of Unknown type.
-     * 
+     *
      * @param dataType
      *            Data type
      * @param in
@@ -36,7 +36,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes chunk size event.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return ChunkSize event
@@ -45,7 +45,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes shared object message event.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return ISharedObjectMessage event
@@ -54,7 +54,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes shared object message event from AMF3 encoding.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return ISharedObjectMessage event
@@ -63,7 +63,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes ping event.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return Ping event
@@ -72,7 +72,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes BytesRead event.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return BytesRead event
@@ -81,7 +81,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes the aggregated data.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return Aggregate event
@@ -90,7 +90,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes audio data event.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return AudioData event
@@ -99,7 +99,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes video data event.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return VideoData event
@@ -108,7 +108,7 @@ public interface IEventDecoder {
 
     /**
      * Decodes Flex message event.
-     * 
+     *
      * @param in
      *            Byte buffer to decode
      * @return FlexMessage event

@@ -49,7 +49,7 @@ public class RTMPUtils implements Constants {
 
     /**
      * Read unsigned 24 bit integer.
-     * 
+     *
      * @param in input
      * @return unsigned int
      */
@@ -105,7 +105,7 @@ public class RTMPUtils implements Constants {
 
     /**
      * Encodes header size marker and channel id into header marker.
-     * 
+     *
      * @param out output buffer
      * @param headerSize Header size marker
      * @param channelId Channel used
@@ -184,7 +184,7 @@ public class RTMPUtils implements Constants {
 
     /**
      * Compares two RTMP time stamps, accounting for time stamp wrapping.
-     * 
+     *
      * @param a
      *            First time stamp
      * @param b
@@ -198,7 +198,7 @@ public class RTMPUtils implements Constants {
 
     /**
      * Calculates the delta between two time stamps, adjusting for time stamp wrapping.
-     * 
+     *
      * @param a
      *            First time stamp
      * @param b

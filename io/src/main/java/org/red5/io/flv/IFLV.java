@@ -25,14 +25,14 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Returns a boolean stating whether the flv has metadata
-     * 
+     *
      * @return boolean <code>true</code> if file has injected metadata, <code>false</code> otherwise
      */
     public boolean hasMetaData();
 
     /**
      * Sets the metadata
-     * 
+     *
      * @param metadata
      *            Metadata object
      * @throws FileNotFoundException
@@ -45,7 +45,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Sets the MetaService through Spring
-     * 
+     *
      * @param service
      *            Metadata service
      */
@@ -53,7 +53,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Returns a map of the metadata
-     * 
+     *
      * @return metadata File metadata
      * @throws FileNotFoundException
      *             File not found
@@ -63,14 +63,14 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Returns a boolean stating whether a flv has keyframedata
-     * 
+     *
      * @return boolean <code>true</code> if file has keyframe metadata, <code>false</code> otherwise
      */
     public boolean hasKeyFrameData();
 
     /**
      * Sets the keyframe data of a flv file
-     * 
+     *
      * @param keyframedata
      *            Keyframe metadata
      */
@@ -79,7 +79,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Gets the keyframe data
-     * 
+     *
      * @return keyframedata Keyframe metadata
      */
     @SuppressWarnings({ "rawtypes" })
@@ -87,7 +87,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Refreshes the headers. Usually used after data is added to the flv file
-     * 
+     *
      * @throws IOException
      *             Any I/O exception
      */
@@ -95,7 +95,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Flushes Header
-     * 
+     *
      * @throws IOException
      *             Any I/O exception
      */
@@ -103,7 +103,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Returns a Reader closest to the nearest keyframe
-     * 
+     *
      * @param seekPoint
      *            Point in file we are seeking around
      * @return reader Tag reader closest to that point
@@ -112,7 +112,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Returns a Writer based on the nearest key frame
-     * 
+     *
      * @param seekPoint
      *            Point in file we are seeking around
      * @return writer Tag writer closest to that point
@@ -121,7 +121,7 @@ public interface IFLV extends IStreamableFile {
 
     /**
      * Sets the caching implemenation
-     * 
+     *
      * @param cache
      *            cache
      */

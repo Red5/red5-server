@@ -11,7 +11,7 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Interface for handlers that control access to stream publishing.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -19,7 +19,7 @@ public interface IStreamPublishSecurity {
 
     /**
      * Check if publishing a stream with the given name is allowed.
-     * 
+     *
      * @param scope
      *            Scope the stream is about to be published in.
      * @param name
@@ -29,9 +29,9 @@ public interface IStreamPublishSecurity {
      * @return <pre>
      * True
      * </pre>
-     * 
+     *
      *         if publishing is allowed, otherwise
-     * 
+     *
      *         <pre>
      * False
      * </pre>

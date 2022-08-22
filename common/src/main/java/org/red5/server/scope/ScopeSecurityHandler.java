@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 
 /**
  * Scope security handler providing positive results to any allow request.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class ScopeSecurityHandler implements IScopeSecurityHandler {

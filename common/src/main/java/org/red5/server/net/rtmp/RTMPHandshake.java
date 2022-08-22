@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Generates and validates the RTMP handshake response for Flash Players. Client versions equal to or greater than Flash 9,0,124,0 require a
  * nonzero value as the fifth byte of the handshake request.
- * 
+ *
  * @author Jacinto Shy II (jacinto.m.shy@ieee.org)
  * @author Steven Zimmer (stevenlzimmer@gmail.com)
  * @author Gavriloaie Eugen-Andrei
@@ -173,7 +173,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Prepare the ciphers.
-     * 
+     *
      * @param sharedSecret
      *            shared secret byte sequence
      */
@@ -217,7 +217,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Creates a Diffie-Hellman key pair.
-     * 
+     *
      * @return dh keypair
      */
     protected KeyPair generateKeyPair() {
@@ -238,7 +238,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the public key for a given key pair.
-     * 
+     *
      * @param keyPair
      *            key pair
      * @return public key
@@ -254,7 +254,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Determines the validation scheme for given input.
-     * 
+     *
      * @param publicKeyBytes
      *            public key bytes
      * @param agreement
@@ -283,7 +283,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Determines the validation scheme for given input.
-     * 
+     *
      * @param handshake
      *            handshake byte sequence
      * @return true if its a supported validation scheme, false if unsupported
@@ -292,7 +292,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Calculates the digest given the its offset in the handshake data.
-     * 
+     *
      * @param digestPos
      *            digest position
      * @param handshakeMessage
@@ -324,7 +324,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Verifies the digest.
-     * 
+     *
      * @param digestPos
      *            digest position
      * @param handshakeMessage
@@ -349,7 +349,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Calculates an HMAC SHA256 hash into the digest at the given offset.
-     * 
+     *
      * @param message
      *            incoming bytes
      * @param messageOffset
@@ -391,7 +391,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Calculates the swf verification token.
-     * 
+     *
      * @param handshakeMessage
      *            servers handshake bytes
      * @param swfHash
@@ -420,7 +420,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the DH offset from an array of bytes.
-     * 
+     *
      * @param algorithm
      *            validation algorithm
      * @param handshake
@@ -441,7 +441,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the DH byte offset.
-     * 
+     *
      * @param handshake
      *            handshake sequence
      * @param bufferOffset
@@ -466,7 +466,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the DH byte offset.
-     * 
+     *
      * @param handshake
      *            handshake sequence
      * @param bufferOffset
@@ -491,7 +491,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the digest offset using current validation scheme.
-     * 
+     *
      * @param algorithm
      *            validation algorithm
      * @param handshake
@@ -512,7 +512,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns a digest byte offset.
-     * 
+     *
      * @param handshake
      *            handshake sequence
      * @param bufferOffset
@@ -537,7 +537,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns a digest byte offset.
-     * 
+     *
      * @param handshake
      *            handshake sequence
      * @param bufferOffset
@@ -562,7 +562,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * RTMPE type 8 uses XTEA on the regular signature http://en.wikipedia.org/wiki/XTEA
-     * 
+     *
      * @param array
      *            array to get signature
      * @param offset
@@ -593,7 +593,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * RTMPE type 9 uses Blowfish on the regular signature http://en.wikipedia.org/wiki/Blowfish_(cipher)
-     * 
+     *
      * @param array
      *            array to get signature
      * @param offset
@@ -612,7 +612,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns whether or not a given handshake type is valid.
-     * 
+     *
      * @param handshakeType
      *            the type of handshake
      * @return true if valid and supported, false otherwise
@@ -631,7 +631,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Whether or not encryptions is in use.
-     * 
+     *
      * @return true if handshake type is an encrypted type, false otherwise
      */
     public boolean useEncryption() {
@@ -646,7 +646,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Sets the handshake type. Currently only two types are supported, plain and encrypted.
-     * 
+     *
      * @param handshakeType
      *            handshake type
      */
@@ -663,7 +663,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the handshake type.
-     * 
+     *
      * @return handshakeType
      */
     public byte getHandshakeType() {
@@ -672,7 +672,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Gets the DH offset in the handshake bytes array based on validation scheme Generates DH keypair Adds public key to handshake bytes
-     * 
+     *
      * @return cipher
      */
     public Cipher getCipherOut() {
@@ -681,7 +681,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the contained handshake bytes. These are just random bytes if the player is using an non-versioned player.
-     * 
+     *
      * @return cipher
      */
     public Cipher getCipherIn() {
@@ -690,7 +690,7 @@ public abstract class RTMPHandshake implements IHandshake {
 
     /**
      * Returns the SWF verification bytes.
-     * 
+     *
      * @return swf verification bytes
      */
     public byte[] getSwfVerificationBytes() {

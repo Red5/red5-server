@@ -13,7 +13,7 @@ public interface IConnectionManager<T> {
 
     /**
      * Returns a connection matching the given client id.
-     * 
+     *
      * @param clientId
      *            client id
      * @return connection
@@ -22,7 +22,7 @@ public interface IConnectionManager<T> {
 
     /**
      * Adds a connection.
-     * 
+     *
      * @param conn
      *            connection
      */
@@ -30,7 +30,7 @@ public interface IConnectionManager<T> {
 
     /**
      * Returns a connection matching the given session id.
-     * 
+     *
      * @param sessionId
      *            session id
      * @return connection
@@ -39,14 +39,14 @@ public interface IConnectionManager<T> {
 
     /**
      * Returns all the current connections. It doesn't remove anything.
-     * 
+     *
      * @return list of connections
      */
     Collection<T> getAllConnections();
 
     /**
      * Creates a connection based on the given type class.
-     * 
+     *
      * @param connCls
      *            class
      * @return connection
@@ -55,7 +55,7 @@ public interface IConnectionManager<T> {
 
     /**
      * Creates a connection of the type specified with associated session id.
-     * 
+     *
      * @param connCls
      *            class
      * @param sessionId
@@ -66,7 +66,7 @@ public interface IConnectionManager<T> {
 
     /**
      * Removes a connection matching the client id specified. If found, the connection will be returned.
-     * 
+     *
      * @param clientId
      *            client id
      * @return connection
@@ -75,7 +75,7 @@ public interface IConnectionManager<T> {
 
     /**
      * Removes a connection by the given sessionId.
-     * 
+     *
      * @param sessionId
      *            session id
      * @return connection that was removed
@@ -84,7 +84,7 @@ public interface IConnectionManager<T> {
 
     /**
      * Removes all the connections from the set.
-     * 
+     *
      * @return connections
      */
     Collection<T> removeConnections();

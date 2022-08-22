@@ -15,7 +15,7 @@ import org.red5.net.websocket.WebSocketConnection;
 
 /**
  * Represents WebSocket message data.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class WSMessage {
@@ -49,7 +49,7 @@ public class WSMessage {
 
     /**
      * Returns the payload data as a UTF8 string.
-     * 
+     *
      * @return string
      * @throws UnsupportedEncodingException
      */
@@ -77,7 +77,7 @@ public class WSMessage {
 
     /**
      * Returns the payload.
-     * 
+     *
      * @return payload
      */
     public IoBuffer getPayload() {
@@ -90,7 +90,7 @@ public class WSMessage {
 
     /**
      * Adds additional payload data.
-     * 
+     *
      * @param additionalPayload
      */
     public void addPayload(IoBuffer additionalPayload) {
@@ -103,7 +103,7 @@ public class WSMessage {
 
     /**
      * Adds additional payload data.
-     * 
+     *
      * @param additionalPayload
      */
     public void addPayload(byte[] additionalPayload) {

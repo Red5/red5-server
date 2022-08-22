@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 /**
  * Represents an notify to be executed on a connected client.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class ClientNotifyEvent extends BaseEvent {

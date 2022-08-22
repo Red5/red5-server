@@ -20,7 +20,7 @@ import org.apache.tika.parser.mp3.AudioFrame;
  * <p>
  * Instances of this class are constructed with an underlying stream which should point to an audio file. Read operations are possible in the usual way. However, there are special methods for searching and extracting headers of MPEG frames. Some meta information of frames can be queried.
  * </p>
- * 
+ *
  * This class was copied from Apache Tika and modified for Red5.
  */
 public class MP3Stream extends PushbackInputStream {
@@ -72,7 +72,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Creates a new instance of {@code MpegStream} and initializes it with the underlying stream.
-     * 
+     *
      * @param in
      *            the underlying audio stream
      */
@@ -87,7 +87,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Searches for the next MPEG frame header from the current stream position on. This method advances the underlying input stream until it finds a valid frame header or the end of the stream is reached. In the former case a corresponding {@code AudioFrame} object is created. In the latter case there are no more headers, so the end of the stream is probably reached.
-     * 
+     *
      * @return the next {@code AudioFrame} or <b>null</b>
      * @throws IOException
      *             if an IO error occurs
@@ -114,7 +114,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Skips the current MPEG frame. This method can be called after a valid MPEG header has been retrieved using {@code nextFrame()}. In this case the underlying stream is advanced to the end of the associated MPEG frame. Otherwise, this method has no effect. The return value indicates whether a frame could be skipped.
-     * 
+     *
      * @return <b>true</b> if a frame could be skipped, <b>false</b> otherwise
      * @throws IOException
      *             if an IO error occurs
@@ -130,7 +130,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Advances the underlying stream until the first byte of frame sync is found.
-     * 
+     *
      * @throws IOException
      *             if an error occurs
      */
@@ -145,7 +145,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Creates a bit field for the MPEG frame header.
-     * 
+     *
      * @return the bit field
      * @throws IOException
      *             if an error occurs
@@ -160,7 +160,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Creates an {@code AudioFrame} object based on the given header field. If the header field contains invalid values, result is <b>null</b>.
-     * 
+     *
      * @param bits
      *            the header bit field
      * @return the {@code AudioFrame}
@@ -188,7 +188,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Reads the next byte.
-     * 
+     *
      * @return the next byte
      * @throws IOException
      *             if an error occurs
@@ -206,7 +206,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Pushes the given header field back in the stream so that the bytes are read again. This method is called if an invalid header was detected. Then search has to continue at the next byte after the frame sync byte.
-     * 
+     *
      * @param field
      *            the header bit field with the invalid frame header
      * @throws IOException
@@ -218,7 +218,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Skips the given number of bytes from the specified input stream.
-     * 
+     *
      * @param in
      *            the input stream
      * @param count
@@ -239,7 +239,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Calculates the bit rate based on the given parameters.
-     * 
+     *
      * @param mpegVer
      *            the MPEG version
      * @param layer
@@ -274,7 +274,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Calculates the sample rate based on the given parameters.
-     * 
+     *
      * @param mpegVer
      *            the MPEG version
      * @param code
@@ -287,7 +287,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Calculates the length of an MPEG frame based on the given parameters.
-     * 
+     *
      * @param layer
      *            the layer
      * @param bitRate
@@ -308,7 +308,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Calculates the duration of a MPEG frame based on the given parameters.
-     * 
+     *
      * @param layer
      *            the layer
      * @param sampleRate
@@ -322,7 +322,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Calculates the number of channels based on the given parameters.
-     * 
+     *
      * @param chan
      *            the code for the channels
      * @return the number of channels
@@ -333,7 +333,7 @@ public class MP3Stream extends PushbackInputStream {
 
     /**
      * Creates the complete array for the sample rate mapping.
-     * 
+     *
      * @return the table for the sample rates
      */
     private static int[][] createSampleRateTable() {
@@ -353,7 +353,7 @@ public class MP3Stream extends PushbackInputStream {
 
         /**
          * Adds a byte to this field.
-         * 
+         *
          * @param b
          *            the byte to be added
          */
@@ -364,7 +364,7 @@ public class MP3Stream extends PushbackInputStream {
 
         /**
          * Returns the value of the bit group from the given start and end index. E.g. ''from'' = 0, ''to'' = 3 will return the value of the first 4 bits.
-         * 
+         *
          * @param the
          *            from index
          * @param to
@@ -379,7 +379,7 @@ public class MP3Stream extends PushbackInputStream {
 
         /**
          * Returns the value of the bit with the given index. The bit index is 0-based. Result is either 0 or 1, depending on the value of this bit.
-         * 
+         *
          * @param bit
          *            the bit index
          * @return the value of this bit
@@ -390,7 +390,7 @@ public class MP3Stream extends PushbackInputStream {
 
         /**
          * Returns the internal value of this field as an array. The array contains 3 bytes.
-         * 
+         *
          * @return the internal value of this field as int array
          */
         public byte[] toArray() {

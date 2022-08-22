@@ -11,7 +11,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * Base interface for Handshake classes.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IHandshake {

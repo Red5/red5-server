@@ -8,7 +8,7 @@ import org.red5.io.ITag;
 
 /**
  * Comparator for queued media data in file consumers.
- * 
+ *
  * @author mondain
  */
 public class QueuedMediaDataComparator implements Comparator<QueuedMediaData> {

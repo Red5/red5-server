@@ -11,7 +11,7 @@ public interface IStreamHandler {
 
     /**
      * Called when the client begins publishing
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -19,7 +19,7 @@ public interface IStreamHandler {
 
     /**
      * Called when the client stops publishing
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -27,7 +27,7 @@ public interface IStreamHandler {
 
     /**
      * Called when the broadcast starts
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -35,7 +35,7 @@ public interface IStreamHandler {
 
     /**
      * Called when a recording starts
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -43,7 +43,7 @@ public interface IStreamHandler {
 
     /**
      * Called when a recording stops
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -51,7 +51,7 @@ public interface IStreamHandler {
 
     /**
      * Called when a client subscribes to a broadcast
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -59,7 +59,7 @@ public interface IStreamHandler {
 
     /**
      * Called when a client unsubscribes from a broadcast
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -67,7 +67,7 @@ public interface IStreamHandler {
 
     /**
      * Called when a client connects to an on demand stream
-     * 
+     *
      * @param stream
      *            the stream object
      */
@@ -75,7 +75,7 @@ public interface IStreamHandler {
 
     /**
      * Called when a client disconnects from an on demand stream
-     * 
+     *
      * @param stream
      *            the stream object
      */

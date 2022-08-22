@@ -56,7 +56,7 @@ public class WebSocketScopeManager {
 
     /**
      * Returns the enable state of a given path.
-     * 
+     *
      * @param path
      *            scope / context path
      * @return enabled if registered as active and false otherwise
@@ -80,7 +80,7 @@ public class WebSocketScopeManager {
 
     /**
      * Adds a scope to the enabled applications.
-     * 
+     *
      * @param scope
      *            the application scope
      */
@@ -116,7 +116,7 @@ public class WebSocketScopeManager {
 
     /**
      * Removes the application scope.
-     * 
+     *
      * @param scope
      *            the application scope
      */
@@ -126,7 +126,7 @@ public class WebSocketScopeManager {
 
     /**
      * Adds a websocket scope.
-     * 
+     *
      * @param webSocketScope
      * @return true if added and false otherwise
      */
@@ -142,7 +142,7 @@ public class WebSocketScopeManager {
 
     /**
      * Removes a websocket scope.
-     * 
+     *
      * @param webSocketScope
      * @return true if removed and false otherwise
      */
@@ -158,7 +158,7 @@ public class WebSocketScopeManager {
 
     /**
      * Add the connection on scope.
-     * 
+     *
      * @param conn
      *            WebSocketConnection
      */
@@ -169,7 +169,7 @@ public class WebSocketScopeManager {
 
     /**
      * Remove connection from scope.
-     * 
+     *
      * @param conn
      *            WebSocketConnection
      */
@@ -188,7 +188,7 @@ public class WebSocketScopeManager {
 
     /**
      * Add the listener on scope via its path.
-     * 
+     *
      * @param listener
      *            IWebSocketDataListener
      * @param path
@@ -205,7 +205,7 @@ public class WebSocketScopeManager {
 
     /**
      * Remove listener from scope via its path.
-     * 
+     *
      * @param listener
      *            IWebSocketDataListener
      * @param path
@@ -226,7 +226,7 @@ public class WebSocketScopeManager {
 
     /**
      * Create a web socket scope. Use the IWebSocketScopeListener interface to configure the created scope.
-     * 
+     *
      * @param path
      */
     public void makeScope(String path) {
@@ -246,7 +246,7 @@ public class WebSocketScopeManager {
 
     /**
      * Create a web socket scope from a server IScope. Use the IWebSocketScopeListener interface to configure the created scope.
-     * 
+     *
      * @param scope
      */
     public void makeScope(IScope scope) {
@@ -270,7 +270,7 @@ public class WebSocketScopeManager {
 
     /**
      * Get the corresponding scope.
-     * 
+     *
      * @param path
      *            scope path
      * @return scope
@@ -288,7 +288,7 @@ public class WebSocketScopeManager {
 
     /**
      * Notifies listeners of scope lifecycle events.
-     * 
+     *
      * @param event
      * @param wsScope
      */
@@ -313,7 +313,7 @@ public class WebSocketScopeManager {
 
     /**
      * Get the corresponding scope, if none exists, make new one.
-     * 
+     *
      * @param conn
      * @return wsScope
      */
@@ -352,7 +352,7 @@ public class WebSocketScopeManager {
 
     /**
      * Set the application scope for this manager.
-     * 
+     *
      * @param appScope
      * @return true if added and false otherwise
      */

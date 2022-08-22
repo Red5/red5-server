@@ -11,7 +11,7 @@ import org.red5.server.messaging.AbstractMessage;
 
 /**
  * To notify the client to reset the playing state.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */

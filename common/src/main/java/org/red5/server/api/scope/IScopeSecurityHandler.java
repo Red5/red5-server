@@ -11,14 +11,14 @@ import org.red5.server.api.IConnection;
 
 /**
  * Provides an interface for scope security handling.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IScopeSecurityHandler {
 
     /**
      * Determines whether or not a given connection is allowed.
-     * 
+     *
      * @param conn connection
      * @return true if allowed and false otherwise
      */
@@ -26,7 +26,7 @@ public interface IScopeSecurityHandler {
 
     /**
      * Determines whether or not a given scope is allowed.
-     * 
+     *
      * @param conn connection
      * @return true if allowed and false otherwise
      */

@@ -31,7 +31,7 @@ public class TagCrawler {
 
     /**
      * Constructor
-     * 
+     *
      */
     public TagCrawler() {
         skipHandler = createSkipHandler();
@@ -39,7 +39,7 @@ public class TagCrawler {
 
     /**
      * Method to add {@link TagHandler}
-     * 
+     *
      * @param name
      *            - unique name of tag handler
      * @param handler
@@ -53,7 +53,7 @@ public class TagCrawler {
 
     /**
      * Method to remove {@link TagHandler}
-     * 
+     *
      * @param name
      *            - unique name of tag handler
      * @return - this for chaining
@@ -67,7 +67,7 @@ public class TagCrawler {
 
     /**
      * Method to get {@link TagHandler} by tag, can be overridden to change the logic of handler searching
-     * 
+     *
      * @param tag
      *            - tag to be handled
      * @return - this for chaining
@@ -81,7 +81,7 @@ public class TagCrawler {
 
     /**
      * Method to create "default" handler (the one will be used if none other handlers were found) can be overridden to change the logic
-     * 
+     *
      * @return - this for chaining
      */
     public TagHandler createSkipHandler() {
@@ -99,7 +99,7 @@ public class TagCrawler {
 
     /**
      * Method to process the input stream given, will stop as soon as input stream will be empty
-     * 
+     *
      * @param input
      *            - input stream to process
      * @throws IOException

@@ -18,13 +18,13 @@ import java.util.Arrays;
 public class MethodNotFoundException extends RuntimeException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7559230924102506068L;
 
     /**
      * Creates exception with given method name
-     * 
+     *
      * @param methodName
      *            Service method name that can't be found
      */
@@ -34,7 +34,7 @@ public class MethodNotFoundException extends RuntimeException {
 
     /**
      * Creates exception with given method name and arguments
-     * 
+     *
      * @param methodName
      *            Service method name that can't be found
      * @param args

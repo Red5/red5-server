@@ -25,7 +25,7 @@ import ch.qos.logback.core.status.ErrorStatus;
 
 /**
  * Logback appender for the Extended W3C format.
- * 
+ *
  * @see "http://www.w3.org/TR/WD-logfile.html"
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -122,23 +122,23 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         }
         //Events					Categories
         //connect-pending			session
-        //connect					session                     
-        //disconnect                session                     
-        //publish                   stream                         
-        //unpublish                 stream                  
-        //play                      stream                       
-        //pause                     stream                     
-        //unpause                   stream                      
-        //seek                      stream                              
-        //stop                      stream                       
-        //record                    stream                              
-        //recordstop                stream                              
-        //server-start              server                              
-        //server-stop               server                              
-        //vhost-start               vhost                               
-        //vhost-stop                vhost                               
-        //app-start                 application                         
-        //app-stop                  application    
+        //connect					session
+        //disconnect                session
+        //publish                   stream
+        //unpublish                 stream
+        //play                      stream
+        //pause                     stream
+        //unpause                   stream
+        //seek                      stream
+        //stop                      stream
+        //record                    stream
+        //recordstop                stream
+        //server-start              server
+        //server-stop               server
+        //vhost-start               vhost
+        //vhost-stop                vhost
+        //app-start                 application
+        //app-stop                  application
         //filter based on event type - asterik allows all events
         if (!events.equals("*")) {
             if (!eventsList.contains(elements.get("x-event"))) {
@@ -148,46 +148,46 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
                 return;
             }
         }
-        //x-category		event category		
+        //x-category		event category
         //x-event			type of event
         //date				date at which the event occurred
         //time				time at which the event occurred
-        //tz               	time zone information                           
-        //x-ctx            	event dependant context information             
-        //s-ip		        ip address[es] of the server                    
-        //x-pid            	server process id                               
-        //x-cpu-load       	cpu load                                        
-        //x-mem-load       	memory load (as reported in getServerStats)     
-        //x-adaptor        	adaptor name                                    
-        //x-vhost          	vhost name                                      
-        //x-app	          	application name                                
-        //x-appinst        	application instance name                       
-        //x-duration	    duration of an event/session                    
-        //x-status		    status code					                            
-        //c-ip             	client ip address                               
-        //c-proto          	connection protocol - rtmp or rtmpt             
-        //s-uri            	uri of the fms application                      
-        //cs-uri-stem      	stem of s-uri                                   
-        //cs-uri-query     	query portion of s-uri                          
-        //c-referrer       	uri of the referrer                             
-        //c-user-agent     	user agent                                      
-        //c-client-id      	client id                                       
-        //cs-bytes         	bytes transferred from client to server         
-        //sc-bytes         	bytes transferred from server to client         
-        //c-connect-type   	type of connection received by the server       
-        //x-sname          	stream name                                     
-        //x-sname-query    	query portion of stream uri                     
-        //x-suri-query		same as x-sname-query              	
-        //x-suri-stem		cs-uri-stem + x-sname + x-file-ext       	
-        //x-suri			x-suri-stem + x-suri-query         
-        //x-file-name      	full file path of recorded stream               
-        //x-file-ext       	stream type (flv or mp3)                        
-        //x-file-size      	stream size in bytes                            
-        //x-file-length    	stream length in seconds                        
-        //x-spos           	stream position                                 
-        //cs-stream-bytes  	stream bytes transferred from client to server  
-        //sc-stream-bytes  	stream bytes transferred from server to client  
-        //x-service-name   	name of the service providing the connection    
+        //tz               	time zone information
+        //x-ctx            	event dependant context information
+        //s-ip		        ip address[es] of the server
+        //x-pid            	server process id
+        //x-cpu-load       	cpu load
+        //x-mem-load       	memory load (as reported in getServerStats)
+        //x-adaptor        	adaptor name
+        //x-vhost          	vhost name
+        //x-app	          	application name
+        //x-appinst        	application instance name
+        //x-duration	    duration of an event/session
+        //x-status		    status code
+        //c-ip             	client ip address
+        //c-proto          	connection protocol - rtmp or rtmpt
+        //s-uri            	uri of the fms application
+        //cs-uri-stem      	stem of s-uri
+        //cs-uri-query     	query portion of s-uri
+        //c-referrer       	uri of the referrer
+        //c-user-agent     	user agent
+        //c-client-id      	client id
+        //cs-bytes         	bytes transferred from client to server
+        //sc-bytes         	bytes transferred from server to client
+        //c-connect-type   	type of connection received by the server
+        //x-sname          	stream name
+        //x-sname-query    	query portion of stream uri
+        //x-suri-query		same as x-sname-query
+        //x-suri-stem		cs-uri-stem + x-sname + x-file-ext
+        //x-suri			x-suri-stem + x-suri-query
+        //x-file-name      	full file path of recorded stream
+        //x-file-ext       	stream type (flv or mp3)
+        //x-file-size      	stream size in bytes
+        //x-file-length    	stream length in seconds
+        //x-spos           	stream position
+        //cs-stream-bytes  	stream bytes transferred from client to server
+        //sc-stream-bytes  	stream bytes transferred from server to client
+        //x-service-name   	name of the service providing the connection
         //x-sc-qos-bytes	bytes transferred from server to client for quality of service
         //x-comment	      	comments
         //we may need date and/or time

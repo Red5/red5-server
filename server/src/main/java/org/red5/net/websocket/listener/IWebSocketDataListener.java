@@ -17,28 +17,28 @@ public interface IWebSocketDataListener {
 
     /**
      * Returns the protocol for which this listener is interested.
-     * 
+     *
      * @return protocol
      */
     public String getProtocol();
 
     /**
      * Sets the protocol for which this listener is interested.
-     * 
+     *
      * @param protocol
      */
     public void setProtocol(String protocol);
 
     /**
      * Dispatch message.
-     * 
+     *
      * @param message
      */
     public void onWSMessage(WSMessage message);
 
     /**
      * Connect a WebSocket client.
-     * 
+     *
      * @param conn
      *            WebSocketConnection
      */
@@ -46,7 +46,7 @@ public interface IWebSocketDataListener {
 
     /**
      * Disconnect WebSocket client.
-     * 
+     *
      * @param conn
      *            WebSocketConnection
      */

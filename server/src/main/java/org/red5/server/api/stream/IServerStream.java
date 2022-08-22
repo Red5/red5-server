@@ -19,7 +19,7 @@ public interface IServerStream extends IPlaylist, IBroadcastStream {
 
     /**
      * Seek to a given position in the stream.
-     * 
+     *
      * @param position
      *            new playback position in milliseconds
      */

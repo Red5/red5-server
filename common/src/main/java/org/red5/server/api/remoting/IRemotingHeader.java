@@ -9,7 +9,7 @@ package org.red5.server.api.remoting;
 
 /**
  * A Remoting header.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -32,21 +32,21 @@ public interface IRemotingHeader {
 
     /**
      * Return name of header.
-     * 
+     *
      * @return name of header
      */
     public String getName();
 
     /**
      * Return value of header.
-     * 
+     *
      * @return value of header
      */
     public Object getValue();
 
     /**
      * Return boolean flag if receiver must process header before handling other headers or messages.
-     * 
+     *
      * @return must understand
      */
     public boolean getMustUnderstand();

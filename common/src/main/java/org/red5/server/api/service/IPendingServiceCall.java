@@ -11,14 +11,14 @@ import java.util.Set;
 
 /**
  * IPendingServiceCall is a call that have a list of callbacks.
- * 
+ *
  *
  */
 public interface IPendingServiceCall extends IServiceCall {
 
     /**
      * Returns service call result
-     * 
+     *
      * @return Remote call result
      */
     public abstract Object getResult();
@@ -33,7 +33,7 @@ public interface IPendingServiceCall extends IServiceCall {
 
     /**
      * Registers callback object usually represented as an anonymous class instance that implements IPendingServiceCallback interface.
-     * 
+     *
      * @param callback
      *            Callback object
      */
@@ -41,7 +41,7 @@ public interface IPendingServiceCall extends IServiceCall {
 
     /**
      * Unregisters callback object usually represented as an anonymous class instance that implements IPendingServiceCallback interface.
-     * 
+     *
      * @param callback
      *            Callback object
      */
@@ -49,7 +49,7 @@ public interface IPendingServiceCall extends IServiceCall {
 
     /**
      * Returns list of callback objects, usually callback object represented as an anonymous class instance that implements IPendingServiceCallback interface.
-     * 
+     *
      * @return Set of pending operations callbacks
      */
     public Set<IPendingServiceCallback> getCallbacks();

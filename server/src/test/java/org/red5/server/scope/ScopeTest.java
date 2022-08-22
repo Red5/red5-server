@@ -143,7 +143,7 @@ public class ScopeTest extends AbstractJUnit4SpringContextTests {
             }
         }
         assertTrue(appScope.getBasicScopeNames(ScopeType.ROOM).size() == 1);
-         * 
+         *
          */
         log.info("testScopeCreation-end");
     }

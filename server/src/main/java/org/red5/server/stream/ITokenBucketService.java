@@ -9,7 +9,7 @@ package org.red5.server.stream;
 
 /**
  * A service used to create and manage token buckets.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
@@ -18,7 +18,7 @@ public interface ITokenBucketService {
 
     /**
      * Create a token bucket.
-     * 
+     *
      * @param capacity
      *            Capacity of the bucket.
      * @param speed
@@ -29,7 +29,7 @@ public interface ITokenBucketService {
 
     /**
      * Remove this bucket.
-     * 
+     *
      * @param bucket
      *            Bucket to remove
      */

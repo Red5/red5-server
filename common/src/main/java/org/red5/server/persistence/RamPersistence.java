@@ -20,7 +20,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Persistence implementation that stores the objects in memory. This serves as default persistence if nothing has been configured.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Michael Klishin (michael@novemberain.com)
@@ -29,7 +29,7 @@ public class RamPersistence implements IPersistenceStore {
 
     /**
      * This is used in the id for objects that have a name of
-     * 
+     *
      * <pre>
      * null
      * </pre>
@@ -48,7 +48,7 @@ public class RamPersistence implements IPersistenceStore {
 
     /**
      * Creates RAM persistence object from resource pattern resolvers
-     * 
+     *
      * @param resources
      *            Resource pattern resolver and loader
      */
@@ -58,7 +58,7 @@ public class RamPersistence implements IPersistenceStore {
 
     /**
      * Creates RAM persistence object from scope
-     * 
+     *
      * @param scope
      *            Scope
      */
@@ -68,11 +68,11 @@ public class RamPersistence implements IPersistenceStore {
 
     /**
      * Get resource name from path. The format of the object id is
-     * 
+     *
      * <pre>
      * type / path / objectName
      * </pre>
-     * 
+     *
      * @param id
      *            object id
      * @return resource name
@@ -88,11 +88,11 @@ public class RamPersistence implements IPersistenceStore {
 
     /**
      * Get object path for given id and name. The format of the object id is
-     * 
+     *
      * <pre>
      * type / path / objectName
      * </pre>
-     * 
+     *
      * @param id
      *            object id
      * @param name
@@ -113,7 +113,7 @@ public class RamPersistence implements IPersistenceStore {
 
     /**
      * Get object id
-     * 
+     *
      * @param object
      *            Persistable object whose id is asked for
      * @return Given persistable object id

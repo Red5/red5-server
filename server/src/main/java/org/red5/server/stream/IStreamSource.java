@@ -15,24 +15,24 @@ import org.red5.server.api.event.IEvent;
 public interface IStreamSource {
     /**
      * Is there something more to stream?
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if there's streamable data,
-     * 
+     *
      *         <pre>
      * false
      * </pre>
-     * 
+     *
      *         otherwise
      */
     public abstract boolean hasMore();
 
     /**
      * Double ended queue of event objects
-     * 
+     *
      * @return Event from queue
      */
     public abstract IEvent dequeue();

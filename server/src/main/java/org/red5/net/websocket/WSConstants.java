@@ -9,7 +9,7 @@ package org.red5.net.websocket;
 
 /**
  * Convenience class for holding constants.
- * 
+ *
  * @author Paul Gregoire
  */
 public class WSConstants {

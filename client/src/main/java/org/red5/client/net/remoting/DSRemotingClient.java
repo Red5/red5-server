@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Client interface for remoting calls directed at an LCDS or BlazeDS style service.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -59,7 +59,7 @@ public class DSRemotingClient extends RemotingClient {
 
     /**
      * Create new remoting client for the given url.
-     * 
+     *
      * @param url
      *            URL to connect to
      */
@@ -78,7 +78,7 @@ public class DSRemotingClient extends RemotingClient {
 
     /**
      * Encode the method call.
-     * 
+     *
      * @param method
      *            Remote method being called
      * @param params
@@ -116,7 +116,7 @@ public class DSRemotingClient extends RemotingClient {
         Output.putString(result, method);
         // Client callback for response
         //Output.putString(result, "");
-        //responseURI 
+        //responseURI
         Output.putString(result, "/" + sequenceCounter++);
         // Serialize parameters
         IoBuffer tmp = IoBuffer.allocate(1024);
@@ -142,7 +142,7 @@ public class DSRemotingClient extends RemotingClient {
 
     /**
      * Process any headers sent in the response.
-     * 
+     *
      * @param in
      *            Byte buffer with response data
      */
@@ -199,7 +199,7 @@ public class DSRemotingClient extends RemotingClient {
 
     /**
      * Decode response received from remoting server.
-     * 
+     *
      * @param data
      *            Result data to decode
      * @return Object deserialized from byte buffer data
@@ -217,7 +217,7 @@ public class DSRemotingClient extends RemotingClient {
             log.debug("NUL: {}", b); //0
             log.debug("SOH: {}", data.get()); //1
         } else if (b == 1) {
-            log.debug("SOH: {}", b); //1			
+            log.debug("SOH: {}", b); //1
         }
 
         int targetUriLength = data.getShort();
@@ -261,7 +261,7 @@ public class DSRemotingClient extends RemotingClient {
 
     /**
      * Invoke a method synchronously on the remoting server.
-     * 
+     *
      * @param method
      *            Method name
      * @param params
@@ -322,7 +322,7 @@ public class DSRemotingClient extends RemotingClient {
 
     /**
      * Used for debugging byte stream.
-     * 
+     *
      * @param data
      *            IoBuffer
      */
@@ -392,7 +392,7 @@ public class DSRemotingClient extends RemotingClient {
             do {
                 Thread.sleep(5000);
                 log.info("Done with sleeping");
-                //send poll 
+                //send poll
                 //0 messages - returns DSK
                 //n messages - CommandMessage with internal DSA
                 msg = new CommandMessage();

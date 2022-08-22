@@ -13,7 +13,7 @@ public interface IRTMPConnManager {
 
     /**
      * Returns a connection matching the given client id.
-     * 
+     *
      * @param clientId
      *            client id
      * @return connection
@@ -22,7 +22,7 @@ public interface IRTMPConnManager {
 
     /**
      * Returns a connection matching the given session id.
-     * 
+     *
      * @param sessionId
      *            session id
      * @return connection
@@ -31,7 +31,7 @@ public interface IRTMPConnManager {
 
     /**
      * Creates a connection based on the given RTMPConnection class.
-     * 
+     *
      * @param connCls
      *            class
      * @return connection
@@ -40,7 +40,7 @@ public interface IRTMPConnManager {
 
     /**
      * Removes a connection matching the client id specified. If found, the connection will be returned.
-     * 
+     *
      * @param clientId
      *            client id
      * @return connection
@@ -49,7 +49,7 @@ public interface IRTMPConnManager {
 
     /**
      * Removes all the connections from the set.
-     * 
+     *
      * @return connections
      */
     Collection<RTMPConnection> removeConnections();

@@ -25,7 +25,7 @@ public class MP3 implements IMP3 {
 
     /**
      * Creates MP3 object using given file
-     * 
+     *
      * @param file
      *            File object to use
      */

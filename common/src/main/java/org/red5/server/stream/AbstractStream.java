@@ -106,7 +106,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Return stream name.
-     * 
+     *
      * @return Stream name
      */
     public String getName() {
@@ -115,7 +115,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Return codec information.
-     * 
+     *
      * @return Stream codec information
      */
     public IStreamCodecInfo getCodecInfo() {
@@ -124,7 +124,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Returns a copy of the metadata for the associated stream, if it exists.
-     * 
+     *
      * @return stream meta data
      */
     public Notify getMetaData() {
@@ -140,7 +140,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Set the metadata.
-     * 
+     *
      * @param metaData
      *            stream meta data
      */
@@ -150,7 +150,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Return scope.
-     * 
+     *
      * @return Scope
      */
     public IScope getScope() {
@@ -159,7 +159,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Returns timestamp at which the stream was created.
-     * 
+     *
      * @return creation timestamp
      */
     public long getCreationTime() {
@@ -168,7 +168,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Returns timestamp at which the stream was started.
-     * 
+     *
      * @return started timestamp
      */
     public long getStartTime() {
@@ -177,7 +177,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Setter for name.
-     * 
+     *
      * @param name
      *            Stream name
      */
@@ -187,7 +187,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Setter for codec info.
-     * 
+     *
      * @param codecInfo
      *            Codec info
      */
@@ -197,7 +197,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Setter for scope.
-     * 
+     *
      * @param scope
      *            Scope
      */
@@ -207,7 +207,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Return stream state.
-     * 
+     *
      * @return StreamState
      */
     public StreamState getState() {
@@ -216,7 +216,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Sets the stream state.
-     * 
+     *
      * @param newState stream state
      */
     public void setState(StreamState newState) {
@@ -228,7 +228,7 @@ public abstract class AbstractStream implements IStream {
 
     /**
      * Return stream aware scope handler or null if scope is null.
-     * 
+     *
      * @return IStreamAwareScopeHandler implementation
      */
     protected IStreamAwareScopeHandler getStreamAwareHandler() {

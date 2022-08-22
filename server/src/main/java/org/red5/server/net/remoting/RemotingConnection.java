@@ -38,7 +38,7 @@ import org.red5.server.net.servlet.ServletUtils;
 /**
  * Connection class so the Red5 object works in methods invoked through remoting. Attributes are stored in the session of the implementing
  * servlet container.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -110,7 +110,7 @@ public class RemotingConnection implements IRemotingConnection {
 
     /**
      * Return string representation of the connection.
-     * 
+     *
      * @return string
      */
     public String toString() {
@@ -119,7 +119,7 @@ public class RemotingConnection implements IRemotingConnection {
 
     /**
      * Update the current packet.
-     * 
+     *
      * @param packet
      *            remoting packet
      */
@@ -399,7 +399,7 @@ public class RemotingConnection implements IRemotingConnection {
         if (name == null) {
             return null;
         }
-        // Synchronize so default value doesn't override other default value 
+        // Synchronize so default value doesn't override other default value
         synchronized (session) {
             Object result = session.getAttribute(name);
             if (result == null && defaultValue != null) {

@@ -11,7 +11,7 @@ import org.red5.server.api.IServer;
 
 /**
  * The global scope that acts as root for all applications in a host.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  *
@@ -25,7 +25,7 @@ public interface IGlobalScope extends IScope {
 
     /**
      * Return the server this global scope runs in.
-     * 
+     *
      * @return the server
      */
     public IServer getServer();

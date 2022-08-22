@@ -71,7 +71,7 @@ import org.slf4j.Logger;
 
 /**
  * A play engine for playing a IPlayItem.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong
  * @author Paul Gregoire (mondain@gmail.com)
@@ -305,7 +305,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Play stream
-     * 
+     *
      * @param item
      *            Playlist item
      * @throws StreamNotFoundException
@@ -321,9 +321,9 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Play stream
-     * 
+     *
      * See: https://www.adobe.com/devnet/adobe-media-server/articles/dynstream_actionscript.html
-     * 
+     *
      * @param item
      *            Playlist item
      * @param withReset
@@ -351,10 +351,10 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         }
         // Play type determination
         // https://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/NetStream.html#play()
-        // The start time, in seconds. Allowed values are -2, -1, 0, or a positive number. 
-        // The default value is -2, which looks for a live stream, then a recorded stream, 
-        // and if it finds neither, opens a live stream. 
-        // If -1, plays only a live stream. 
+        // The start time, in seconds. Allowed values are -2, -1, 0, or a positive number.
+        // The default value is -2, which looks for a live stream, then a recorded stream,
+        // and if it finds neither, opens a live stream.
+        // If -1, plays only a live stream.
         // If 0 or a positive number, plays a recorded stream, beginning start seconds in.
         //
         // -2: live then recorded, -1: live, >=0: recorded
@@ -520,7 +520,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      * <li>Decoder configurations (ie. AVC codec)</li>
      * <li>Most recent keyframe</li>
      * </ul>
-     * 
+     *
      * @throws IOException
      */
     private final void playLive() throws IOException {
@@ -596,7 +596,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Performs the processes needed for VOD / pre-recorded streams.
-     * 
+     *
      * @param withReset
      *            whether or not to perform reset on the stream
      * @param itemLength
@@ -646,7 +646,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Connects to the data provider.
-     * 
+     *
      * @param itemName
      *            name of the item to play
      */
@@ -678,7 +678,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Pause at position
-     * 
+     *
      * @param position
      *            Position in file
      * @throws IllegalStateException
@@ -702,7 +702,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Resume playback
-     * 
+     *
      * @param position
      *            Resumes playback
      * @throws IllegalStateException
@@ -738,7 +738,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Seek to a given position
-     * 
+     *
      * @param position
      *            Position
      * @throws IllegalStateException
@@ -755,7 +755,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Stop playback
-     * 
+     *
      * @throws IllegalStateException
      *             If stream is in stopped state
      */
@@ -846,7 +846,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     /**
      * Check if it's okay to send the client more data. This takes the configured bandwidth as well as the requested client buffer into
      * account.
-     * 
+     *
      * @param message
      * @return true if it is ok to send more, false otherwise
      */
@@ -885,7 +885,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Estimate client buffer fill.
-     * 
+     *
      * @param now
      *            The current timestamp being used.
      * @return True if it appears that the client buffer is full, otherwise false.
@@ -953,7 +953,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Sends a status message.
-     * 
+     *
      * @param status
      */
     private void doPushMessage(Status status) {
@@ -964,7 +964,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send message to output stream and handle exceptions.
-     * 
+     *
      * @param message
      *            The message to send.
      */
@@ -996,7 +996,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send an RTMP message
-     * 
+     *
      * @param messageIn
      *            incoming RTMP message
      */
@@ -1071,7 +1071,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         Ping eof = new Ping();
         eof.setEventType(Ping.STREAM_PLAYBUFFER_CLEAR);
         eof.setValue2(streamId);
-        // eos 
+        // eos
         RTMPMessage eofMsg = RTMPMessage.build(eof);
         doPushMessage(eofMsg);
     }
@@ -1084,14 +1084,14 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             Ping recorded = new Ping();
             recorded.setEventType(Ping.RECORDED_STREAM);
             recorded.setValue2(streamId);
-            // recorded 
+            // recorded
             RTMPMessage recordedMsg = RTMPMessage.build(recorded);
             doPushMessage(recordedMsg);
         }
         Ping begin = new Ping();
         begin.setEventType(Ping.STREAM_BEGIN);
         begin.setValue2(streamId);
-        // begin 
+        // begin
         RTMPMessage beginMsg = RTMPMessage.build(begin);
         doPushMessage(beginMsg);
         // reset
@@ -1101,7 +1101,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send reset status for item
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1116,7 +1116,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send playback start status notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1131,7 +1131,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send playback stoppage status notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1146,9 +1146,9 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Sends an onPlayStatus message.
-     * 
+     *
      * http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/NetDataEvent.html
-     * 
+     *
      * @param code
      * @param duration
      * @param bytes
@@ -1216,7 +1216,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send seek status notification
-     * 
+     *
      * @param item
      *            Playlist item
      * @param position
@@ -1233,7 +1233,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send pause status notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1247,7 +1247,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send resume status notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1261,7 +1261,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send published status notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1275,7 +1275,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send unpublished status notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1289,7 +1289,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Stream not found status notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1304,7 +1304,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Insufficient bandwidth notification
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1320,7 +1320,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send VOD init control message
-     * 
+     *
      * @param item
      *            Playlist item
      */
@@ -1336,7 +1336,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send VOD seek control message
-     * 
+     *
      * @param msgIn
      *            Message input
      * @param position
@@ -1360,7 +1360,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Send VOD check video control message
-     * 
+     *
      * @return result of oob control message
      */
     private boolean sendCheckVideoCM() {
@@ -1452,7 +1452,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             IRTMPEvent body = rtmpMessage.getBody();
             if (body instanceof IStreamData) {
                 final String subscribedStreamName = subscriberStream.getBroadcastStreamPublishName();
-                // the subscriber paused 
+                // the subscriber paused
                 if (subscriberStream.getState() == StreamState.PAUSED) {
                     if (log.isInfoEnabled() && shouldLogPacketDrop()) {
                         log.info("Dropping packet because we are paused. sessionId={} stream={} count={}", sessionId, subscribedStreamName, droppedPacketsCount);
@@ -1561,7 +1561,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Get number of pending video messages
-     * 
+     *
      * @return Number of pending video messages
      */
     private long pendingVideoMessages() {
@@ -1580,7 +1580,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Get number of pending messages to be sent
-     * 
+     *
      * @return Number of pending messages
      */
     private long pendingMessages() {
@@ -1597,7 +1597,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Returns the timestamp of the last message sent.
-     * 
+     *
      * @return last message timestamp
      */
     public int getLastMessageTimestamp() {
@@ -1614,7 +1614,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Returns true if the engine currently receives audio.
-     * 
+     *
      * @return receive audio
      */
     public boolean receiveAudio() {
@@ -1623,7 +1623,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Returns true if the engine currently receives audio and sets the new value.
-     * 
+     *
      * @param receive
      *            new value
      * @return old value
@@ -1639,7 +1639,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Returns true if the engine currently receives video.
-     * 
+     *
      * @return receive video
      */
     public boolean receiveVideo() {
@@ -1648,7 +1648,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Returns true if the engine currently receives video and sets the new value.
-     * 
+     *
      * @param receive
      *            new value
      * @return old value
@@ -1677,7 +1677,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     /**
      * Check if sending the given message was enabled by the client.
-     * 
+     *
      * @param message
      *            the message to check
      * @return true if the message should be sent, false otherwise (and the message is discarded)
@@ -1718,7 +1718,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         // Schedule deferred stop executor.
         log.trace("Ran deferred stop");
         if (deferredStop == null) {
-            // set deferred stop if we get a job name returned 
+            // set deferred stop if we get a job name returned
             deferredStop = subscriberStream.scheduleWithFixedDelay(new DeferredStopRunnable(), 100);
         }
     }
@@ -1886,7 +1886,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                     Runnable worker = null;
                     while (!pendingOperations.isEmpty()) {
                         log.debug("Pending operations: {}", pendingOperations.size());
-                        // remove the first operation and execute it 
+                        // remove the first operation and execute it
                         worker = pendingOperations.remove();
                         log.debug("Worker: {}", worker);
                         // if the operation is seek, ensure it is the last request in the set

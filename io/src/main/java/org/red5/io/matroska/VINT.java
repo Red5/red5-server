@@ -34,7 +34,7 @@ public class VINT {
 
     /**
      * Constructor
-     * 
+     *
      * @param binary
      *            - binary value of this {@link VINT}, calculated from value if not specified
      * @param length
@@ -56,7 +56,7 @@ public class VINT {
 
     /**
      * getter for length
-     * 
+     *
      * @return - length
      */
     public byte getLength() {
@@ -65,7 +65,7 @@ public class VINT {
 
     /**
      * getter for binary
-     * 
+     *
      * @return - binary
      */
     public long getBinary() {
@@ -74,7 +74,7 @@ public class VINT {
 
     /**
      * getter for value
-     * 
+     *
      * @return - value
      */
     public long getValue() {
@@ -83,7 +83,7 @@ public class VINT {
 
     /**
      * method to encode {@link VINT} as sequence of bytes
-     * 
+     *
      * @return - encoded {@link VINT}
      */
     public byte[] encode() {
@@ -100,7 +100,7 @@ public class VINT {
 
     /**
      * method to construct {@link VINT} based on its binary representation
-     * 
+     *
      * @param binary
      *            - binary value of {@link VINT}
      * @return {@link VINT} corresponding to this binary
@@ -125,7 +125,7 @@ public class VINT {
 
     /**
      * method to construct {@link VINT} based on its value
-     * 
+     *
      * @param value
      *            - value of {@link VINT}
      * @return {@link VINT} corresponding to this value

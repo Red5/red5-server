@@ -71,7 +71,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
         /**
          * Create new information about a class.
-         * 
+         *
          * @param className
          *            class name
          * @param type
@@ -175,7 +175,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Creates Input object for AMF3 from byte buffer
-     * 
+     *
      * @param buf
      *            Byte buffer
      */
@@ -185,7 +185,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Creates Input object for AMF3 from byte buffer and initializes references from passed RefStorage
-     * 
+     *
      * @param buf
      *            buffer
      * @param refStorage
@@ -206,7 +206,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Provide access to raw data.
-     * 
+     *
      * @return IoBuffer
      */
     protected IoBuffer getBuffer() {
@@ -215,7 +215,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Reads the data type
-     * 
+     *
      * @return byte Data type
      */
     @Override
@@ -329,7 +329,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Reads a null (value)
-     * 
+     *
      * @return Object null
      */
     @Override
@@ -339,7 +339,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Reads a boolean
-     * 
+     *
      * @return boolean Boolean value
      */
     @Override
@@ -349,7 +349,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Reads a Number
-     * 
+     *
      * @return Number Number
      */
     @Override
@@ -383,7 +383,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Reads a string
-     * 
+     *
      * @return String String
      */
     @Override
@@ -427,7 +427,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Reads a string of a set length. This does not use the string reference table.
-     * 
+     *
      * @param length the length of the string
      * @return String
      */
@@ -458,7 +458,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Returns a date
-     * 
+     *
      * @return Date Date object
      */
     @Override
@@ -478,7 +478,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Returns an array
-     * 
+     *
      * @return int Length of array
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -1014,7 +1014,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Reads Custom
-     * 
+     *
      * @return Object Custom type object
      */
     @Override
@@ -1031,7 +1031,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
 
     /**
      * Parser of AMF3 "compressed" integer data type
-     * 
+     *
      * @return a converted integer value
      */
     private int readInteger() {

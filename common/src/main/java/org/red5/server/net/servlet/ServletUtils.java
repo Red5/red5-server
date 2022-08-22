@@ -31,12 +31,12 @@ public class ServletUtils {
 
     /**
      * Copies information from the input stream to the output stream using a default buffer size of 2048 bytes.
-     * 
+     *
      * @param input
      *            input
      * @param output
      *            output
-     * 
+     *
      * @throws java.io.IOException
      *             on error
      */
@@ -46,7 +46,7 @@ public class ServletUtils {
 
     /**
      * Copies information from the input stream to the output stream using the specified buffer size
-     * 
+     *
      * @param input
      *            input
      * @param bufferSize
@@ -88,7 +88,7 @@ public class ServletUtils {
 
     /**
      * Copies information from the http request to the output stream using the specified content length.
-     * 
+     *
      * @param req
      *            Request
      * @param output
@@ -116,7 +116,7 @@ public class ServletUtils {
 
     /**
      * Copies information between specified streams and then closes both of the streams.
-     * 
+     *
      * @param output
      *            output
      * @param input
@@ -146,7 +146,7 @@ public class ServletUtils {
 
     /**
      * Return all remote addresses that were involved in the passed request.
-     * 
+     *
      * @param request
      *            request
      * @return remote addresses
@@ -155,7 +155,7 @@ public class ServletUtils {
         List<String> addresses = new ArrayList<String>();
         addresses.add(request.getRemoteHost());
         if (!request.getRemoteAddr().equals(request.getRemoteHost())) {
-            // Store both remote host and remote address 
+            // Store both remote host and remote address
             addresses.add(request.getRemoteAddr());
         }
         final String forwardedFor = request.getHeader("X-Forwarded-For");

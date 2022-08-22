@@ -18,7 +18,7 @@ import ch.qos.logback.core.CoreConstants;
 /**
  * LoggerFactory to simplify requests for Logger instances within Red5 applications. This class is expected to be run only once per logger
  * request and is optimized as such.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class Red5LoggerFactory {

@@ -11,7 +11,7 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Interface for handlers that control access to stream playback.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -19,7 +19,7 @@ public interface IStreamPlaybackSecurity {
 
     /**
      * Check if playback of a stream with the given name is allowed.
-     * 
+     *
      * @param scope
      *            Scope the stream is about to be played back from.
      * @param name
@@ -33,9 +33,9 @@ public interface IStreamPlaybackSecurity {
      * @return <pre>
      * True
      * </pre>
-     * 
+     *
      *         if playback is allowed, otherwise
-     * 
+     *
      *         <pre>
      * False
      * </pre>

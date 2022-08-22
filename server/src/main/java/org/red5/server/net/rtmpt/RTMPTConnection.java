@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 
 /**
  * A RTMPT client / session.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -84,7 +84,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /**
      * Returns the IoSession. Note that this is a compatibility item and is not constructed by Mina.
-     * 
+     *
      * @return ioSession
      */
     @Override
@@ -127,7 +127,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /**
      * Received message object router.
-     * 
+     *
      * @param message
      *            an IoBuffer or Packet
      */
@@ -197,7 +197,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /**
      * Set the servlet that created the connection.
-     * 
+     *
      * @param servlet
      *            rtmp servlet
      */
@@ -207,7 +207,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /**
      * Setter for servlet request.
-     * 
+     *
      * @param request
      *            Servlet request
      */
@@ -224,7 +224,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /**
      * Return the polling delay to use.
-     * 
+     *
      * @return the polling delay
      */
     public byte getPollingDelay() {
@@ -271,7 +271,7 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /**
      * Get the timestamp of last data received
-     * 
+     *
      * @return time when last data received
      */
     public Long getLastDataReceived() {

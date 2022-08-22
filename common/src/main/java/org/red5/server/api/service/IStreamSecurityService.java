@@ -15,7 +15,7 @@ import org.red5.server.api.stream.IStreamPublishSecurity;
 
 /**
  * Service that supports protecting access to streams.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -28,7 +28,7 @@ public interface IStreamSecurityService extends IScopeService {
 
     /**
      * Add handler that protects stream publishing.
-     * 
+     *
      * @param handler
      *            Handler to add.
      */
@@ -36,7 +36,7 @@ public interface IStreamSecurityService extends IScopeService {
 
     /**
      * Remove handler that protects stream publishing.
-     * 
+     *
      * @param handler
      *            Handler to remove.
      */
@@ -44,14 +44,14 @@ public interface IStreamSecurityService extends IScopeService {
 
     /**
      * Get handlers that protect stream publishing.
-     * 
+     *
      * @return list of handlers
      */
     public Set<IStreamPublishSecurity> getStreamPublishSecurity();
 
     /**
      * Add handler that protects stream playback.
-     * 
+     *
      * @param handler
      *            Handler to add.
      */
@@ -59,7 +59,7 @@ public interface IStreamSecurityService extends IScopeService {
 
     /**
      * Remove handler that protects stream playback.
-     * 
+     *
      * @param handler
      *            Handler to remove.
      */
@@ -67,7 +67,7 @@ public interface IStreamSecurityService extends IScopeService {
 
     /**
      * Get handlers that protect stream plaback.
-     * 
+     *
      * @return list of handlers
      */
     public Set<IStreamPlaybackSecurity> getStreamPlaybackSecurity();

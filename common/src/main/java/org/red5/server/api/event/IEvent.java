@@ -14,38 +14,38 @@ public interface IEvent {
 
     /**
      * Returns even type
-     * 
+     *
      * @return Event type enumeration
      */
     public Type getType();
 
     /**
      * Returns event context object
-     * 
+     *
      * @return Event context object
      */
     public Object getObject();
 
     /**
      * Whether event has source (event listener(s))
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if so,
-     * 
+     *
      *         <pre>
      * false
      * </pre>
-     * 
+     *
      *         otherwise
      */
     public boolean hasSource();
 
     /**
      * Returns event listener
-     * 
+     *
      * @return Event listener object
      */
     public IEventListener getSource();

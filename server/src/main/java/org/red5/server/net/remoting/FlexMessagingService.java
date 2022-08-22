@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Service that can execute compatibility Flex messages.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -70,7 +70,7 @@ public class FlexMessagingService {
 
     /**
      * Setup available end points.
-     * 
+     *
      * @param endpoints
      *            end points
      */
@@ -81,7 +81,7 @@ public class FlexMessagingService {
 
     /**
      * Set the service invoker to use.
-     * 
+     *
      * @param serviceInvoker
      *            service invoker
      */
@@ -91,7 +91,7 @@ public class FlexMessagingService {
 
     /**
      * Construct error message.
-     * 
+     *
      * @param request
      *            request
      * @param faultCode
@@ -116,7 +116,7 @@ public class FlexMessagingService {
 
     /**
      * Construct error message from exception.
-     * 
+     *
      * @param request
      *            request
      * @param faultCode
@@ -145,13 +145,13 @@ public class FlexMessagingService {
 
     /**
      * Handle request coming from
-     * 
+     *
      * <pre>
      * mx:RemoteObject
      * </pre>
-     * 
+     *
      * tags.
-     * 
+     *
      * @see <a href="http://livedocs.adobe.com/flex/2/langref/mx/rpc/remoting/mxml/RemoteObject.html">Adobe Livedocs (external)</a>
      *
      * @param msg
@@ -233,7 +233,7 @@ public class FlexMessagingService {
 
     /**
      * Handle command message (external) request.
-     * 
+     *
      * @param msg
      *            message
      * @return message
@@ -290,7 +290,7 @@ public class FlexMessagingService {
 
     /**
      * Handle command message request.
-     * 
+     *
      * @param msg
      *            message
      * @return message
@@ -405,7 +405,7 @@ public class FlexMessagingService {
 
     /**
      * Evaluate update requests sent by a client.
-     * 
+     *
      * @param msg
      * @param event
      */
@@ -433,7 +433,7 @@ public class FlexMessagingService {
 
     /**
      * Handle messages related to shared objects.
-     * 
+     *
      * @param msg
      *            message
      * @return async message
@@ -477,7 +477,7 @@ public class FlexMessagingService {
 
     /**
      * Fallback method to handle arbitrary messages.
-     * 
+     *
      * @param msg
      *            message
      * @return error message
@@ -517,7 +517,7 @@ public class FlexMessagingService {
             ServiceAdapter adapter = (ServiceAdapter) endpoint;
             //log.debug("Invoke: {}", adapter.invoke(msg));
             Object o = adapter.invoke(msg);
-            //the result of the invocation will make up the message body		
+            //the result of the invocation will make up the message body
             //AsyncMessage ext = new AsyncMessage();
             //ext.setClientId(msg.getClientId());
             //ext.setCorrelationId(result.getMessageId());
@@ -534,7 +534,7 @@ public class FlexMessagingService {
 
     /**
      * This is mandatory for client built from Flex 3 or later, or client will hang with concurrent accesses.
-     * 
+     *
      * @param msg
      */
     private void setClientId(AbstractMessage msg) {
@@ -555,7 +555,7 @@ public class FlexMessagingService {
 
     /**
      * Maps a client to an adapter for lookups on messages that do not contain a destination.
-     * 
+     *
      * @param clientId
      *            a subscribed client id
      * @param adapter
@@ -570,7 +570,7 @@ public class FlexMessagingService {
 
     /**
      * Removes a mapping for a client with an adapter.
-     * 
+     *
      * @param clientId
      *            a subscribed client id
      */

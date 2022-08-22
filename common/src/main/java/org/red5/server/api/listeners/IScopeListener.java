@@ -11,7 +11,7 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Interface for listeners to scope events.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (bauch@struktur.de)
  */
@@ -19,7 +19,7 @@ public interface IScopeListener {
 
     /**
      * A scope has been created.
-     * 
+     *
      * @param scope
      *            the new scope
      */
@@ -27,7 +27,7 @@ public interface IScopeListener {
 
     /**
      * A scope has been removed.
-     * 
+     *
      * @param scope
      *            the removed scope
      */

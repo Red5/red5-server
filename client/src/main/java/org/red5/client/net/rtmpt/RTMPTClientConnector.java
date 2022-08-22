@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Client connector for RTMPT
- * 
+ *
  * @author Anton Lebedevich (mabrek@gmail.com)
  * @author Paul Gregoire (mondain@gmail.com)
  */

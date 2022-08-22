@@ -10,14 +10,14 @@ package org.red5.server.stream;
 /**
  * Basically token bucket is used to control the bandwidth used by a stream or a connection or a client. There's a background thread that distributes tokens to the buckets in the system according to the configuration of the bucket. The configuration includes how fast the tokens are distributed. When a stream, for example, needs to send out a packet, the packet's byte count is calculated and each byte corresponds to a
  * token in the bucket. The stream is assigned a bucket and the tokens in the bucket are acquired before the packet can be sent out. So if the speed(or bandwidth) in configuration is low, the stream can't send out packets fast.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface ITokenBucket {
     /**
      * Acquire tokens amount of tokenCount waiting wait milliseconds if token not available.
-     * 
+     *
      * @param tokenCount
      *            The count of tokens to acquire.
      * @param wait
@@ -28,7 +28,7 @@ public interface ITokenBucket {
 
     /**
      * Nonblockingly acquire token. If the token is not available and task is not null, the callback will be executed when the token is available. The tokens are not consumed automatically before callback, so it's recommended to acquire token again in callback function.
-     * 
+     *
      * @param tokenCount
      *            Number of tokens
      * @param callback
@@ -39,7 +39,7 @@ public interface ITokenBucket {
 
     /**
      * Nonblockingly acquire token. The upper limit is specified. If not enough tokens are left in bucket, all remaining will be returned.
-     * 
+     *
      * @param upperLimitCount
      *            Upper limit of aquisition
      * @return Remaining tokens from bucket
@@ -48,14 +48,14 @@ public interface ITokenBucket {
 
     /**
      * Get the capacity of this bucket in Byte.
-     * 
+     *
      * @return Capacity of this bucket in bytes
      */
     long getCapacity();
 
     /**
      * The amount of tokens increased per millisecond.
-     * 
+     *
      * @return Amount of tokens increased per millisecond.
      */
     double getSpeed();
@@ -71,7 +71,7 @@ public interface ITokenBucket {
     public interface ITokenBucketCallback {
         /**
          * Being called when the tokens requested are available.
-         * 
+         *
          * @param bucket
          *            Bucket
          * @param tokenCount
@@ -81,7 +81,7 @@ public interface ITokenBucket {
 
         /**
          * Resets tokens in bucket
-         * 
+         *
          * @param bucket
          *            Bucket
          * @param tokenCount

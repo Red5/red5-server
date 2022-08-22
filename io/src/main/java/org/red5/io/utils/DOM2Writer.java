@@ -19,7 +19,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * This class is a utility to serialize a DOM node as XML. This class uses the <code>DOM Level 2</code> APIs. The main difference between this class and DOMWriter is that this class generates and prints out namespace declarations.
- * 
+ *
  * @author Matthew J. Duftler (duftler@us.ibm.com)
  * @author Joseph Kesselman
  */
@@ -29,7 +29,7 @@ public class DOM2Writer {
 
     /**
      * Serialize this node into the writer as XML.
-     * 
+     *
      * @param writer
      *            Writer object
      * @param node
@@ -43,7 +43,7 @@ public class DOM2Writer {
 
     /**
      * Dumps DOM node
-     * 
+     *
      * @param node
      *            Node to dump
      * @param out

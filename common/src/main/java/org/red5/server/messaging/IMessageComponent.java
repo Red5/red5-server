@@ -12,7 +12,7 @@ package org.red5.server.messaging;
  */
 public interface IMessageComponent {
     /**
-     * 
+     *
      * @param source
      *            Message component source
      * @param pipe

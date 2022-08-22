@@ -12,12 +12,12 @@ import java.util.Iterator;
 
 /**
  * Storage for cacheable objects. Selected cache engines must implement this interface.
- * 
+ *
  * @see <a href="http://www-128.ibm.com/developerworks/java/library/j-jtp01246.html">Soft references provide for quick-and-dirty caching</a>
  * @see <a href="http://java.sun.com/developer/technicalArticles/ALT/RefObj/">Reference Objects and Garbage Collection</a>
  * @see <a href="http://www.onjava.com/pub/a/onjava/2002/10/02/javanio.html?page=3">Top Ten New Things You Can Do with NIO</a>
  * @see <a href="http://csci.csusb.edu/turner/archive/courses/aiit2004/proxy_cache_solution.html">Proxy Cache Solution</a>
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -25,7 +25,7 @@ public interface ICacheStore {
 
     /**
      * Offer an object to the cache with an associated key. If the named object exists in cache, it will not be accepted.
-     * 
+     *
      * @param name
      *            string name representing the object
      * @param obj
@@ -36,7 +36,7 @@ public interface ICacheStore {
 
     /**
      * Puts an object in the cache with the associated key.
-     * 
+     *
      * @param name
      *            string name representing the object
      * @param obj
@@ -46,7 +46,7 @@ public interface ICacheStore {
 
     /**
      * Return a cached object with the given name.
-     * 
+     *
      * @param name
      *            the name of the object to return
      * @return the object or <code>null</code> if no such object was found
@@ -55,7 +55,7 @@ public interface ICacheStore {
 
     /**
      * Delete the passed cached object.
-     * 
+     *
      * @param obj
      *            the object to delete
      * @return true if was removed; false it wasn't in cache to begin with
@@ -64,7 +64,7 @@ public interface ICacheStore {
 
     /**
      * Delete the cached object with the given name.
-     * 
+     *
      * @param name
      *            the name of the object to delete
      * @return true if was removed; false it wasn't in cache to begin with
@@ -73,21 +73,21 @@ public interface ICacheStore {
 
     /**
      * Return iterator over the names of all already loaded objects in the storage.
-     * 
+     *
      * @return iterator over all objects names
      */
     public Iterator<String> getObjectNames();
 
     /**
      * Return iterator over the already loaded objects in the storage.
-     * 
+     *
      * @return iterator over all objects
      */
     public Iterator<SoftReference<? extends ICacheable>> getObjects();
 
     /**
      * Sets the maximum number of entries for the cache.
-     * 
+     *
      * @param max
      *            upper-limit of the cache
      */

@@ -76,7 +76,7 @@ public class Proxy implements IClientListener {
 
     /**
      * Starts the process of proxying data.
-     * 
+     *
      * @param publishName
      * @param publishMode
      */
@@ -116,7 +116,7 @@ public class Proxy implements IClientListener {
 
     /**
      * Sets the host to proxy to.
-     * 
+     *
      * @param host
      */
     public void setHost(String host) {
@@ -125,7 +125,7 @@ public class Proxy implements IClientListener {
 
     /**
      * Sets the port to proxy to.
-     * 
+     *
      * @param port
      */
     public void setPort(int port) {
@@ -134,7 +134,7 @@ public class Proxy implements IClientListener {
 
     /**
      * Sets the applicaiton to proxy to.
-     * 
+     *
      * @param app
      */
     public void setApp(String app) {

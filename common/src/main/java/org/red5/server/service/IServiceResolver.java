@@ -11,9 +11,9 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Interface for objects that resolve service names to services.
- * 
+ *
  * This is used by the ServiceInvoker to lookup the service to invoke a method on.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -21,17 +21,17 @@ public interface IServiceResolver {
 
     /**
      * Search for a service with the given name in the scope.
-     * 
+     *
      * @param scope
      *            the scope to search in
      * @param serviceName
      *            the name of the service
      * @return the object implementing the service or
-     * 
+     *
      *         <pre>
      * null
      * </pre>
-     * 
+     *
      *         if service doesn't exist
      */
     public Object resolveService(IScope scope, String serviceName);

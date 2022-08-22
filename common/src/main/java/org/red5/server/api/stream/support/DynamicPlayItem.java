@@ -60,7 +60,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Returns play item length in milliseconds
-     * 
+     *
      * @return Play item length in milliseconds
      */
     public long getLength() {
@@ -69,7 +69,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Returns IMessageInput object. IMessageInput is an endpoint for a consumer to connect.
-     * 
+     *
      * @return IMessageInput object
      */
     public IMessageInput getMessageInput() {
@@ -78,7 +78,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Returns item name
-     * 
+     *
      * @return item name
      */
     public String getName() {
@@ -94,7 +94,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Alias for getMessageInput
-     * 
+     *
      * @return Message input source
      */
     public IMessageInput getMsgInput() {
@@ -113,7 +113,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Returns size in bytes
-     * 
+     *
      * @return size
      */
     public long getSize() {
@@ -122,7 +122,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Set the size in bytes
-     * 
+     *
      * @param size
      *            size in bytes
      */
@@ -163,7 +163,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Builder for DynamicPlayItem
-     * 
+     *
      * @param name
      *            name
      * @param start
@@ -179,7 +179,7 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Builder for DynamicPlayItem
-     * 
+     *
      * @param name
      *            name
      * @param start

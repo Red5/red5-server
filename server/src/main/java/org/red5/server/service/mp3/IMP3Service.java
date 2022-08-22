@@ -11,7 +11,7 @@ import org.red5.server.api.service.IStreamableFileService;
 
 /**
  * Provide access to MP3 objects. Marker interface.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

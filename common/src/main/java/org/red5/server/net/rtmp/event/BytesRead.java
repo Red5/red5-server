@@ -29,7 +29,7 @@ public class BytesRead extends BaseEvent {
 
     /**
      * Creates new event with given bytes number
-     * 
+     *
      * @param bytesRead
      *            Number of bytes read
      */

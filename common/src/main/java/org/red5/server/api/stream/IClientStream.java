@@ -9,7 +9,7 @@ package org.red5.server.api.stream;
 
 /**
  * A stream that is bound to a client.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
@@ -27,28 +27,28 @@ public interface IClientStream extends IStream {
 
     /**
      * Get stream id allocated in a connection.
-     * 
+     *
      * @return the stream id
      */
     Number getStreamId();
 
     /**
      * Get connection containing the stream.
-     * 
+     *
      * @return the connection object or null if the connection is no longer active
      */
     IStreamCapableConnection getConnection();
 
     /**
      * Set the buffer duration for this stream as requested by the client.
-     * 
+     *
      * @param bufferTime duration in ms the client wants to buffer
      */
     void setClientBufferDuration(int bufferTime);
 
     /**
      * Get the buffer duration for this stream as requested by the client.
-     * 
+     *
      * @return bufferTime duration in ms the client wants to buffer
      */
     int getClientBufferDuration();
@@ -62,7 +62,7 @@ public interface IClientStream extends IStream {
 
     /**
      * Returns the published stream name that this client is consuming.
-     * 
+     *
      * @return stream name of stream being consumed
      */
     String getBroadcastStreamPublishName();

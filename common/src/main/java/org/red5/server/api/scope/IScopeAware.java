@@ -9,7 +9,7 @@ package org.red5.server.api.scope;
 
 /**
  * Maker interface for all objects that are aware of the scope they are located in.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  */
@@ -17,7 +17,7 @@ public interface IScopeAware {
 
     /**
      * Set the scope the object is located in.
-     * 
+     *
      * @param scope
      *            Scope for this object
      */

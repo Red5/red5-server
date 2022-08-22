@@ -19,7 +19,7 @@ public interface IStreamableFileService {
 
     /**
      * Sets the prefix.
-     * 
+     *
      * @param prefix
      *            prefix
      */
@@ -34,7 +34,7 @@ public interface IStreamableFileService {
 
     /**
      * Sets the file extensions serviced. If there are more than one, they are separated by commas.
-     * 
+     *
      * @param extension
      *            extension
      */
@@ -49,7 +49,7 @@ public interface IStreamableFileService {
 
     /**
      * Prepair given string to conform filename requirements, for example, add extension to the end if missing.
-     * 
+     *
      * @param name
      *            String to format
      * @return Correct filename
@@ -58,7 +58,7 @@ public interface IStreamableFileService {
 
     /**
      * Check whether file can be used by file service, that is, it does exist and have valid extension
-     * 
+     *
      * @param file
      *            File object
      * @return true if file exist and has valid extension, false otherwise

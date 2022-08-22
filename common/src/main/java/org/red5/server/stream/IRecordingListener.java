@@ -9,14 +9,14 @@ import org.red5.server.stream.consumer.FileConsumer;
 
 /**
  * Recording listener interface.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IRecordingListener extends IStreamListener {
 
     /**
      * Initialize the listener.
-     * 
+     *
      * @param conn
      *            Stream source connection
      * @param name
@@ -29,7 +29,7 @@ public interface IRecordingListener extends IStreamListener {
 
     /**
      * Initialize the listener.
-     * 
+     *
      * @param scope
      *            Stream source scope
      * @param name

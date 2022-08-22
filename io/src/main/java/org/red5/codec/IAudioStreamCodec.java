@@ -11,7 +11,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * Represents an Audio codec and its associated decoder configuration.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IAudioStreamCodec {
@@ -28,7 +28,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Returns true if the codec knows how to handle the passed stream data.
-     * 
+     *
      * @param data
      *            some sample data to see if this codec can handle it.
      * @return can this code handle the data.
@@ -37,7 +37,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Update the state of the codec with the passed data.
-     * 
+     *
      * @param data
      *            data to tell the codec we're adding
      * @return true for success. false for error.
@@ -46,7 +46,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Add audio data with a time stamp and a flag identifying the content as AMF or not.
-     * 
+     *
      * @param data
      * @param timestamp
      * @param amf if true, data is in AMF format otherwise its most likely from non-AMF source like RTP
@@ -56,7 +56,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Returns information used to configure the decoder.
-     * 
+     *
      * @return the data for decoder setup.
      */
     public IoBuffer getDecoderConfiguration();

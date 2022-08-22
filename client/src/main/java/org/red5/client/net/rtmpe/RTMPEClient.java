@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMPE client object based on the original RTMP client.
- * 
+ *
  * @author Paul Gregoire
  * @author Gavriloaie Eugen-Andrei
  */
@@ -91,7 +91,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Adds a listener for receiving rtmp events.
-     * 
+     *
      * @param clientListener
      */
     public void addClientListener(IClientListener clientListener) {
@@ -100,7 +100,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Returns the name of the stream being utilized.
-     * 
+     *
      * @return the streamName
      */
     public String getStreamName() {
@@ -109,7 +109,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Sets the name of the stream being utilized.
-     * 
+     *
      * @param streamName the streamName to set
      */
     public void setStreamName(String streamName) {
@@ -131,7 +131,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Returns the filename if vod is being used.
-     * 
+     *
      * @return the fileName
      */
     public String getFileName() {
@@ -140,7 +140,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Sets the filename for vod.
-     * 
+     *
      * @param fileName the fileName to set
      */
     public void setFileName(String fileName) {
@@ -179,7 +179,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Callback method fired when a NetStatusEvent is detected.
-     * 
+     *
      * {@link http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/NetStatusEvent.html}
      * @param status
      */
@@ -213,7 +213,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Callback method fired when a Notify or other stream event is detected.
-     * 
+     *
      * @param notify
      */
     @Override
@@ -223,7 +223,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Callback method fired when a MetadataEvent is detected.
-     * 
+     *
      * {@link http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/events/MetadataEvent.html}
      * {@link http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/controls/VideoDisplay.html#metadata}
      * @param object metadata from a stream.
@@ -269,10 +269,10 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
                         int streamId = ((Number) result).intValue();
                         log.debug("CreateStream result stream id: {}", streamId);
                         // http://www.adobe.com/livedocs/flash/9.0/ActionScriptLangRefV3/flash/net/NetStream.html#play()
-                        // start: The default value is -2, which looks for a live stream, then a recorded stream, and if it finds neither, opens a live stream. 
+                        // start: The default value is -2, which looks for a live stream, then a recorded stream, and if it finds neither, opens a live stream.
                         // If -1, plays only a live stream. If 0 or a positive number, plays a recorded stream, beginning start seconds in.
                         int start = -2;
-                        // duration: The default value is -1, which plays a live or recorded stream until it ends. If 0, plays a single frame that is start seconds 
+                        // duration: The default value is -1, which plays a live or recorded stream until it ends. If 0, plays a single frame that is start seconds
                         // from the beginning of a recorded stream. If a positive number, plays a live or recorded stream for len seconds.
                         int duration = -1;
                         //play(streamId, fileName, start, duration);
@@ -289,7 +289,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Creates a proxy.
-     * 
+     *
      * @param client
      * @param host destination host
      * @param port destination port
@@ -311,7 +311,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
 
     /**
      * Creates a writer.
-     * 
+     *
      * @param client
      * @return writer
      */

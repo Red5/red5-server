@@ -13,14 +13,14 @@ import java.util.Map;
 
 /**
  * Output Endpoint for a provider to connect.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface IMessageOutput {
     /**
      * Push a message to this output endpoint. May block the pusher when output can't handle the message at the time.
-     * 
+     *
      * @param message
      *            Message to be pushed.
      * @throws IOException
@@ -30,7 +30,7 @@ public interface IMessageOutput {
 
     /**
      * Connect to a provider. Note that params passed has nothing to do with NetConnection.connect in client-side Flex/Flash RIA.
-     * 
+     *
      * @param provider
      *            Provider
      * @param paramMap
@@ -41,7 +41,7 @@ public interface IMessageOutput {
 
     /**
      * Disconnect from a provider.
-     * 
+     *
      * @param provider
      *            Provider
      * @return true when successfully unsubscribed, false otherwise.
@@ -57,7 +57,7 @@ public interface IMessageOutput {
 
     /**
      * Send OOB Control Message to all consumers on the other side of pipe.
-     * 
+     *
      * @param provider
      *            The provider that sends the message
      * @param oobCtrlMsg

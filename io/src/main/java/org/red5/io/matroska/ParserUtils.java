@@ -30,7 +30,7 @@ public class ParserUtils {
 
     /**
      * method used to parse : int, uint and date
-     * 
+     *
      * @param inputStream
      *            - stream to get value
      * @param size
@@ -54,7 +54,7 @@ public class ParserUtils {
 
     /**
      * method used to parse string
-     * 
+     *
      * @param inputStream
      *            - stream to get value
      * @param size
@@ -77,7 +77,7 @@ public class ParserUtils {
 
     /**
      * method used to parse float and double
-     * 
+     *
      * @param inputStream
      *            - stream to get value
      * @param size
@@ -101,7 +101,7 @@ public class ParserUtils {
 
     /**
      * method used to parse subelements of {@link CompoundTag}
-     * 
+     *
      * @param inputStream
      *            - stream to get value
      * @param size
@@ -128,7 +128,7 @@ public class ParserUtils {
 
     /**
      * method to parse byte array
-     * 
+     *
      * @param inputStream
      *            - stream to get value
      * @param size
@@ -149,7 +149,7 @@ public class ParserUtils {
 
     /**
      * method to parse {@link VINT}
-     * 
+     *
      * @param inputStream
      *            - stream to get value
      * @return - parsed value
@@ -201,9 +201,9 @@ public class ParserUtils {
 
     /**
      * parsing tag by matroska specification <a href="http://matroska.org/technical/specs/index.html">matroska spec</a>
-     * 
+     *
      * tag = VINT id, VINT size, data
-     * 
+     *
      * @param inputStream
      *            - stream to get value
      * @return tag, without parsing tag data, because it delegate to an tag itself
@@ -221,7 +221,7 @@ public class ParserUtils {
 
     /**
      * method to encode long as byte array of given size
-     * 
+     *
      * @param val
      *            - value to encode
      * @param size
@@ -240,7 +240,7 @@ public class ParserUtils {
 
     /**
      * method to skip given amount of bytes in stream
-     * 
+     *
      * @param size
      *            - size to skip
      * @param input

@@ -17,7 +17,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * Red5 version of the Flex ByteArray class.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -34,7 +34,7 @@ public class ByteArray implements IDataInput, IDataOutput {
 
     /**
      * Internal constructor used to create ByteArray during deserialization.
-     * 
+     *
      * @param buffer
      *            io buffer
      * @param length
@@ -74,7 +74,7 @@ public class ByteArray implements IDataInput, IDataOutput {
 
     /**
      * Get internal data.
-     * 
+     *
      * @return byte buffer
      */
     protected IoBuffer getData() {
@@ -83,7 +83,7 @@ public class ByteArray implements IDataInput, IDataOutput {
 
     /**
      * Get the current position in the data.
-     * 
+     *
      * @return current position
      */
     public int position() {
@@ -92,7 +92,7 @@ public class ByteArray implements IDataInput, IDataOutput {
 
     /**
      * Set the current position in the data.
-     * 
+     *
      * @param position
      *            position to set
      */
@@ -102,7 +102,7 @@ public class ByteArray implements IDataInput, IDataOutput {
 
     /**
      * Return number of bytes available for reading.
-     * 
+     *
      * @return bytes available
      */
     public int bytesAvailable() {
@@ -111,7 +111,7 @@ public class ByteArray implements IDataInput, IDataOutput {
 
     /**
      * Return total number of bytes in array.
-     * 
+     *
      * @return number of bytes in array
      */
     public int length() {
@@ -232,7 +232,7 @@ public class ByteArray implements IDataInput, IDataOutput {
     @Override
     public Object readObject() {
         // according to AMF3 spec, each object should have its own "reference" tables,
-        // so we must recreate Input object before reading each object 
+        // so we must recreate Input object before reading each object
         prepareIO();
         return dataInput.readObject();
     }
@@ -338,7 +338,7 @@ public class ByteArray implements IDataInput, IDataOutput {
     @Override
     public void writeObject(Object value) {
         // according to AMF3 spec, each object should have its own "reference" tables,
-        // so we must recreate Input object before writing each object 
+        // so we must recreate Input object before writing each object
         prepareIO();
         dataOutput.writeObject(value);
     }
@@ -400,7 +400,7 @@ public class ByteArray implements IDataInput, IDataOutput {
 
     /**
      * Return string representation of the array's contents.
-     * 
+     *
      * @return string representation of array's contents.
      */
     @Override

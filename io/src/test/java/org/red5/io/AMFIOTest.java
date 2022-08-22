@@ -26,7 +26,7 @@ import org.red5.io.utils.ObjectMap;
 
 /**
  * AMF I/O test
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -78,7 +78,7 @@ public class AMFIOTest extends AbstractIOTest {
 
     /**
      * Sample data from https://en.wikipedia.org/wiki/Action_Message_Format
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testAMF0Wiki2() throws Exception {

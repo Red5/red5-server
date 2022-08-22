@@ -17,7 +17,7 @@ import org.red5.server.api.scheduling.IScheduledJob;
 public interface ISubscriberStream extends IClientStream {
     /**
      * Start playing.
-     * 
+     *
      * @throws IOException
      *             if an IO error occurred while starting to play the stream
      */
@@ -25,7 +25,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Pause at a position for current playing item.
-     * 
+     *
      * @param position
      *            Position for pause in millisecond.
      */
@@ -33,7 +33,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Resume from a position for current playing item.
-     * 
+     *
      * @param position
      *            Position for resume in millisecond.
      */
@@ -46,7 +46,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Seek into a position for current playing item.
-     * 
+     *
      * @param position
      *            Position for seek in millisecond.
      * @throws OperationNotSupportedException
@@ -56,14 +56,14 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Check if the stream is currently paused.
-     * 
+     *
      * @return stream is paused
      */
     boolean isPaused();
 
     /**
      * Should the stream send video to the client?
-     * 
+     *
      * @param receive
      *            toggle
      */
@@ -71,7 +71,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Should the stream send audio to the client?
-     * 
+     *
      * @param receive
      *            toggle
      */
@@ -79,14 +79,14 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Return the streams state enum.
-     * 
+     *
      * @return current state
      */
     public StreamState getState();
 
     /**
      * Sets the streams state enum.
-     * 
+     *
      * @param state
      *            sets current state
      */
@@ -94,7 +94,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Notification of state change and associated parameters.
-     * 
+     *
      * @param state
      *            new state
      * @param changed
@@ -104,7 +104,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Schedule a job to be executed only once after a 10ms delay.
-     * 
+     *
      * @param job
      *            scheduled job
      * @return jobName
@@ -113,7 +113,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Schedule a job to be executed regularly at the given interval.
-     * 
+     *
      * @param job
      *            scheduled job
      * @param interval
@@ -124,7 +124,7 @@ public interface ISubscriberStream extends IClientStream {
 
     /**
      * Cancels a scheduled job by name.
-     * 
+     *
      * @param jobName
      *            job name
      */

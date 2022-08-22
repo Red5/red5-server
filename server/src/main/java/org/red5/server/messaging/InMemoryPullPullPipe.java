@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A simple in-memory version of pull-pull pipe. It is triggered by an active consumer that pulls messages through it from a pullable provider.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */

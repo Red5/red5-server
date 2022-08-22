@@ -153,7 +153,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Start network connection to server
-     * 
+     *
      * @param server
      *            Server
      * @param port
@@ -163,7 +163,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Connect RTMP client to server's application via given port
-     * 
+     *
      * @param server
      *            Server
      * @param port
@@ -179,7 +179,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Connect RTMP client to server's application via given port with given connection callback
-     * 
+     *
      * @param server
      *            Server
      * @param port
@@ -198,7 +198,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     /**
      * Creates the default connection parameters collection. Many implementations of this handler will create a tcUrl if not found, it is
      * created with the current server url.
-     * 
+     *
      * @param server
      *            the server location
      * @param port
@@ -226,7 +226,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Connect RTMP client to server via given port and with given connection parameters
-     * 
+     *
      * @param server
      *            Server
      * @param port
@@ -242,7 +242,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Connect RTMP client to server's application via given port
-     * 
+     *
      * @param server
      *            Server
      * @param port
@@ -259,7 +259,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Connect RTMP client to server's application via given port
-     * 
+     *
      * @param server
      *            Server
      * @param port
@@ -286,7 +286,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Register object that provides methods that can be called by the server.
-     * 
+     *
      * @param serviceProvider
      *            Service provider
      */
@@ -297,7 +297,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Sets a handler for connection close.
-     * 
+     *
      * @param connectionClosedHandler
      *            close handler
      */
@@ -309,7 +309,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Sets a handler for exceptions.
-     * 
+     *
      * @param exceptionHandler
      *            exception handler
      */
@@ -321,7 +321,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Connect to client shared object.
-     * 
+     *
      * @param name
      *            Client shared object name
      * @param persistent
@@ -462,7 +462,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Called when negotiating bandwidth.
-     * 
+     *
      * @param params
      *            bw parameters
      */
@@ -472,7 +472,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Called when bandwidth has been configured.
-     * 
+     *
      * @param params
      *            bw parameters
      */
@@ -491,7 +491,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Invoke a method on the server.
-     * 
+     *
      * @param method
      *            Method name
      * @param callback
@@ -513,7 +513,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Invoke a method on the server and pass parameters.
-     * 
+     *
      * @param method
      *            Method
      * @param params
@@ -642,15 +642,15 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Dynamic streaming play method.
-     * 
+     *
      * The following properties are supported on the play options:
-     * 
+     *
      * <pre>
      *         streamName: String. The name of the stream to play or the new stream to switch to.
-     *         oldStreamName: String. The name of the initial stream that needs to be switched out. This is not needed and ignored 
+     *         oldStreamName: String. The name of the initial stream that needs to be switched out. This is not needed and ignored
      *                        when play2 is used for just playing the stream and not switching to a new stream.
-     *         start: Number. The start time of the new stream to play, just as supported by the existing play API. and it has the 
-     *                        same defaults. This is ignored when the method is called for switching (in other words, the transition 
+     *         start: Number. The start time of the new stream to play, just as supported by the existing play API. and it has the
+     *                        same defaults. This is ignored when the method is called for switching (in other words, the transition
      *                        is either NetStreamPlayTransition.SWITCH or NetStreamPlayTransitions.SWAP)
      *         len: Number. The duration of the playback, just as supported by the existing play API and has the same defaults.
      *         transition: String. The transition mode for the playback command. It could be one of the following:
@@ -659,9 +659,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      *                             NetStreamPlayTransitions.SWITCH
      *                             NetStreamPlayTransitions.SWAP
      * </pre>
-     * 
+     *
      * NetStreamPlayTransitions:
-     * 
+     *
      * <pre>
      *             APPEND : String = "append" - Adds the stream to a playlist and begins playback with the first stream.
      *             APPEND_AND_WAIT : String = "appendAndWait" - Builds a playlist without starting to play it from the first stream.
@@ -671,7 +671,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      *             SWAP : String = "swap" - Replaces a content stream with a different content stream and maintains the rest of the playlist.
      *             SWITCH : String = "switch" - Switches from playing one stream to another stream, typically with streams of the same content.
      * </pre>
-     * 
+     *
      * @see <a href="http://www.adobe.com/devnet/flashmediaserver/articles/dynstream_actionscript.html">ActionScript guide to dynamic
      *      streaming</a>
      * @see <a href=
@@ -714,7 +714,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Sends a ping.
-     * 
+     *
      * @param pingType
      *            the type of ping
      * @param streamId
@@ -868,7 +868,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Handle any exceptions that occur.
-     * 
+     *
      * @param throwable
      *            Exception thrown
      */
@@ -884,7 +884,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Returns a channel based on the given stream id.
-     * 
+     *
      * @param streamId
      *            stream id
      * @return the channel for this stream id
@@ -895,7 +895,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Sets the protocol.
-     * 
+     *
      * @param protocol
      *            the data protocol to use.
      * @throws Exception
@@ -907,7 +907,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Sets a reference to the connection associated with this client handler.
-     * 
+     *
      * @param conn
      *            connection
      */
@@ -918,7 +918,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Returns the connection associated with this client.
-     * 
+     *
      * @return conn connection
      */
     @Override
@@ -928,7 +928,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Enables or disables SWF verification.
-     * 
+     *
      * @param enabled
      *            state of SWF verification
      */
@@ -938,7 +938,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Returns true if swf verification is enabled
-     * 
+     *
      * @return the swfVerification
      */
     public boolean isSwfVerification() {
@@ -947,7 +947,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Returns true if bandwidth done has been invoked
-     * 
+     *
      * @return the bandwidthCheckDone
      */
     public boolean isBandwidthCheckDone() {
@@ -956,7 +956,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Returns true if this client is subscribed
-     * 
+     *
      * @return subscribed state
      */
     public boolean isSubscribed() {
@@ -972,7 +972,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Setter for stream event dispatcher (useful for saving playing stream to file)
-     * 
+     *
      * @param streamEventDispatcher
      *            event dispatcher
      */
@@ -983,7 +983,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
     /**
      * Setter for the stream event handler.
-     * 
+     *
      * @param streamEventHandler
      *            event handler
      */

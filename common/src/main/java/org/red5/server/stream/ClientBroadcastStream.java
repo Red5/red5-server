@@ -86,7 +86,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  * Note that recorded streams are recorded as FLV files.
  *
  * This type of stream uses two different pipes for live streaming and recording.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong
  * @author Paul Gregoire (mondain@gmail.com)
@@ -196,7 +196,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Check and send notification if necessary
-     * 
+     *
      * @param event
      *            Event
      */
@@ -253,7 +253,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Dispatches event
-     * 
+     *
      * @param event
      *            Event to dispatch
      */
@@ -417,7 +417,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Getter for provider
-     * 
+     *
      * @return Provider
      */
     public IProvider getProvider() {
@@ -426,7 +426,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Setter for stream published name
-     * 
+     *
      * @param name
      *            Name that used for publishing. Set at client side when begin to broadcast with NetStream#publish.
      */
@@ -441,7 +441,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Getter for published name
-     * 
+     *
      * @return Stream published name
      */
     public String getPublishedName() {
@@ -607,7 +607,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Pipe connection event handler
-     * 
+     *
      * @param event
      *            Pipe connection event
      */
@@ -816,7 +816,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Pushes a message out to a consumer.
-     * 
+     *
      * @param msg
      *            StatusMessage
      */
@@ -956,7 +956,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Get the file we'd be recording to based on scope and given name.
-     * 
+     *
      * @param scope
      *            scope
      * @param name

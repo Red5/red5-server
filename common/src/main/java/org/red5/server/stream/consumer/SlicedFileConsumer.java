@@ -58,7 +58,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 /**
  * Consumer that pushes messages to file. Used when recording live streams.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  * @author Vladimir Hmelyoff (vlhm@splitmedialabs.com)
@@ -170,7 +170,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Creates file consumer
-     * 
+     *
      * @param scope
      *            Scope of consumer
      * @param file
@@ -184,7 +184,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Creates file consumer
-     * 
+     *
      * @param scope
      *            Scope of consumer
      * @param fileName
@@ -201,7 +201,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Push message through pipe
-     * 
+     *
      * @param pipe
      *            Pipe
      * @param message
@@ -358,7 +358,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Get the WriteFuture with a timeout based on the length of the slice to write.
-     * 
+     *
      * @param sliceLength
      * @return true if successful and false otherwise
      */
@@ -385,7 +385,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Out-of-band control message handler
-     * 
+     *
      * @param source
      *            Source of message
      * @param pipe
@@ -398,7 +398,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Pipe connection event handler
-     * 
+     *
      * @param event
      *            Pipe connection event
      */
@@ -418,7 +418,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Initialization
-     * 
+     *
      * @throws IOException
      *             I/O exception
      */
@@ -536,7 +536,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Write a slice of the queued items to the writer.
-     * 
+     *
      * @param slice
      *            set of queued data
      */
@@ -567,7 +567,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Write incoming data to the file.
-     * 
+     *
      * @param timestamp
      *            adjusted timestamp
      * @param msg
@@ -613,7 +613,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Adjust timestamp and write to the file.
-     * 
+     *
      * @param queued
      *            queued data for write
      */
@@ -691,7 +691,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Sets a video decoder configuration; some codecs require this, such as AVC.
-     * 
+     *
      * @param decoderConfig
      *            video codec configuration
      */
@@ -704,7 +704,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Sets a audio decoder configuration; some codecs require this, such as AAC.
-     * 
+     *
      * @param decoderConfig
      *            audio codec configuration
      */
@@ -717,7 +717,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Sets the scope for this consumer.
-     * 
+     *
      * @param scope
      *            scope
      */
@@ -727,7 +727,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Sets the file we're writing to.
-     * 
+     *
      * @param file
      *            file
      */
@@ -737,7 +737,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Returns the file.
-     * 
+     *
      * @return file
      */
     public File getFile() {
@@ -746,7 +746,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Sets the threshold for the queue. When the threshold is met a worker is spawned to empty the sorted queue to the writer.
-     * 
+     *
      * @param queueThreshold
      *            number of items to queue before spawning worker
      */
@@ -756,7 +756,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Returns the size of the delayed writing queue.
-     * 
+     *
      * @return queue length
      */
     public int getQueueThreshold() {
@@ -765,7 +765,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Whether or not the queue should be utilized.
-     * 
+     *
      * @return true if using the queue, false if sending directly to the writer
      */
     @Deprecated
@@ -775,7 +775,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Sets whether or not to use the queue.
-     * 
+     *
      * @param delayWrite
      *            true to use the queue, false if not
      */
@@ -785,7 +785,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Whether or not to wait for the first keyframe before processing video frames.
-     * 
+     *
      * @param waitForVideoKeyframe wait for a key frame or not
      */
     public void setWaitForVideoKeyframe(boolean waitForVideoKeyframe) {
@@ -810,7 +810,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
 
     /**
      * Sets the recording mode.
-     * 
+     *
      * @param mode
      *            either "record" or "append" depending on the type of action to perform
      */

@@ -42,12 +42,12 @@ public class TestRTMPConnection {
     //	public void testNewPlaylistSubscriberStream() {
     //		System.out.println("\n testNewPlaylistSubscriberStream");
     //		RTMPConnection conn = new RTMPMinaConnection();
-    //		
+    //
     //		Number streamId = 0;
-    //		
+    //
     //		IPlaylistSubscriberStream stream = conn.newPlaylistSubscriberStream(streamId);
     //		System.out.printf("PlaylistSubscriberStream for stream id 0: %s\n", stream);
-    //		
+    //
     //	}
     //
     //	@Test
@@ -64,13 +64,13 @@ public class TestRTMPConnection {
     //	public void testGetStreamById() {
     //		System.out.println("\n testGetStreamById");
     //		RTMPConnection conn = new RTMPMinaConnection();
-    //		
+    //
     //		IClientStream stream = conn.getStreamById(0);
     //		System.out.printf("Stream for stream id 0: %s\n", stream);
     //		assertNull(stream);
     //		stream = conn.getStreamById(1);
     //		System.out.printf("Stream for stream id 1: %s\n", stream);
-    //		
+    //
     //	}
 
     @Test
@@ -98,7 +98,7 @@ public class TestRTMPConnection {
     //		System.out.println("\n testGetStreamByChannelId");
     //		RTMPConnection conn = new RTMPMinaConnection();
     //		// any channel less than 4 should be null
-    //		assertNull(conn.getStreamByChannelId(3));		
+    //		assertNull(conn.getStreamByChannelId(3));
     //		// stream id 0
     //		assertNotNull(conn.getStreamByChannelId(4));
     //		assertNotNull(conn.getStreamByChannelId(5));

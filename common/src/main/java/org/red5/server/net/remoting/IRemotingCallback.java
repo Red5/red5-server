@@ -9,7 +9,7 @@ package org.red5.server.net.remoting;
 
 /**
  * Callback for asynchronous remoting calls.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -17,7 +17,7 @@ public interface IRemotingCallback {
 
     /**
      * The result of a remoting call has been received.
-     * 
+     *
      * @param client
      *            Remoting client
      * @param method
@@ -31,7 +31,7 @@ public interface IRemotingCallback {
 
     /**
      * An error occured while performing the remoting call.
-     * 
+     *
      * @param client
      *            Remoting client
      * @param method

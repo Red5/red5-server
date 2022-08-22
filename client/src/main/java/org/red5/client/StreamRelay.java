@@ -28,7 +28,7 @@ import org.red5.server.stream.message.RTMPMessage;
 
 /**
  * Relay a stream from one location to another via RTMP.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class StreamRelay {
@@ -47,7 +47,7 @@ public class StreamRelay {
 
     /**
      * Creates a stream client to consume a stream from an end point and a proxy to relay the stream to another end point.
-     * 
+     *
      * @param args
      *            application arguments
      */

@@ -30,7 +30,7 @@ public class RecordSetPage {
 
     /**
      * Creates recordset page from Input object
-     * 
+     *
      * @param input
      *            Input object to use as source for data that has to be deserialized
      */

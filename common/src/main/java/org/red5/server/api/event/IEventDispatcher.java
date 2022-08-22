@@ -14,7 +14,7 @@ public interface IEventDispatcher {
 
     /**
      * Dispatches event
-     * 
+     *
      * @param event
      *            Event object
      */

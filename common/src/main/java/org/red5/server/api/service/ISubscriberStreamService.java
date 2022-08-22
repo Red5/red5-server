@@ -17,7 +17,7 @@ public interface ISubscriberStreamService extends IScopeService {
 
     /**
      * Returns a stream that can subscribe a broadcast stream with the given name using "IBroadcastStream.subscribe".
-     * 
+     *
      * @param scope
      *            the scope to return the stream from
      * @param name

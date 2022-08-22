@@ -9,7 +9,7 @@ package org.red5.io.mp4;
 
 /**
  * Represents an MP4 frame / chunk sample
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class MP4Frame implements Comparable<MP4Frame> {
@@ -29,7 +29,7 @@ public class MP4Frame implements Comparable<MP4Frame> {
 
     /**
      * Returns the data type, being audio or video.
-     * 
+     *
      * @return the data type
      */
     public byte getType() {
@@ -42,7 +42,7 @@ public class MP4Frame implements Comparable<MP4Frame> {
 
     /**
      * Returns the offset of the data chunk in the media source.
-     * 
+     *
      * @return the offset in bytes
      */
     public long getOffset() {
@@ -55,7 +55,7 @@ public class MP4Frame implements Comparable<MP4Frame> {
 
     /**
      * Returns the size of the data chunk.
-     * 
+     *
      * @return the size in bytes
      */
     public int getSize() {
@@ -68,7 +68,7 @@ public class MP4Frame implements Comparable<MP4Frame> {
 
     /**
      * Returns the timestamp.
-     * 
+     *
      * @return the timestamp
      */
     public double getTime() {
@@ -96,7 +96,7 @@ public class MP4Frame implements Comparable<MP4Frame> {
 
     /**
      * Returns whether or not this chunk represents a key frame.
-     * 
+     *
      * @return true if a key frame
      */
     public boolean isKeyFrame() {

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Example post-processor implementation which counts data types in a given file.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class GenericWriterPostProcessor implements IPostProcessor {

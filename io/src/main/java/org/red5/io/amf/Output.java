@@ -68,7 +68,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
                     cacheManager = constructDefault();
                 }
             } else {
-                // not a server, maybe running tests? 
+                // not a server, maybe running tests?
                 cacheManager = constructDefault();
             }
         }
@@ -91,7 +91,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
 
     /**
      * Creates output with given byte buffer
-     * 
+     *
      * @param buf
      *            Byte buffer
      */
@@ -526,7 +526,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
 
     /**
      * Write out string
-     * 
+     *
      * @param buf
      *            Byte buffer to write to
      * @param string
@@ -559,7 +559,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
 
     /**
      * Convenience method to allow XML text to be used, instead of requiring an XML Document.
-     * 
+     *
      * @param xml
      *            xml to write
      */
@@ -570,7 +570,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
 
     /**
      * Return buffer of this Output object
-     * 
+     *
      * @return Byte buffer of this Output object
      */
     public IoBuffer buf() {

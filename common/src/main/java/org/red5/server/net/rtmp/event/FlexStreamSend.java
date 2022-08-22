@@ -11,7 +11,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * AMF3 stream send message.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -26,7 +26,7 @@ public class FlexStreamSend extends Notify {
 
     /**
      * Create new stream send object.
-     * 
+     *
      * @param data
      *            data
      */

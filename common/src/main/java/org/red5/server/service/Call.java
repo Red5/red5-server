@@ -120,7 +120,7 @@ public class Call implements IServiceCall, Externalizable {
 
     /**
      * Creates call from method name
-     * 
+     *
      * @param method
      *            Method name
      */
@@ -130,7 +130,7 @@ public class Call implements IServiceCall, Externalizable {
 
     /**
      * Creates call from method name and array of call parameters
-     * 
+     *
      * @param method
      *            Method name
      * @param args
@@ -143,7 +143,7 @@ public class Call implements IServiceCall, Externalizable {
 
     /**
      * Creates call from given service name, method name and array of call parameters
-     * 
+     *
      * @param name
      *            Service name
      * @param method

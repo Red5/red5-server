@@ -13,14 +13,14 @@ import java.util.Map;
 
 /**
  * Input Endpoint for a consumer to connect.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface IMessageInput {
     /**
      * Pull message from this input endpoint. Return w/o waiting.
-     * 
+     *
      * @return The pulled message or null if message is not available.
      * @throws IOException
      *             on error
@@ -29,7 +29,7 @@ public interface IMessageInput {
 
     /**
      * Pull message from this input endpoint. Wait wait milliseconds if message is not available.
-     * 
+     *
      * @param wait
      *            milliseconds to wait when message is not available.
      * @return The pulled message or null if message is not available.
@@ -38,7 +38,7 @@ public interface IMessageInput {
 
     /**
      * Connect to a consumer.
-     * 
+     *
      * @param consumer
      *            Consumer
      * @param paramMap
@@ -49,7 +49,7 @@ public interface IMessageInput {
 
     /**
      * Disconnect from a consumer.
-     * 
+     *
      * @param consumer
      *            Consumer to disconnect
      * @return true when successfully unsubscribed, false otherwise.
@@ -65,7 +65,7 @@ public interface IMessageInput {
 
     /**
      * Send OOB Control Message to all providers on the other side of pipe.
-     * 
+     *
      * @param consumer
      *            The consumer that sends the message
      * @param oobCtrlMsg

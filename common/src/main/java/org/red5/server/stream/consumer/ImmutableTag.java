@@ -5,7 +5,7 @@ import org.red5.io.ITag;
 
 /**
  * An ImmutableTag represents immutable encapsulation of flash media data. The timestamp is the only mutable field.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class ImmutableTag implements ITag {
@@ -32,7 +32,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * ImmutableTag Constructor
-     * 
+     *
      * @param dataType
      *            Tag data type
      * @param timestamp
@@ -49,7 +49,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * ImmutableTag Constructor
-     * 
+     *
      * @param dataType
      *            Tag data type
      * @param timestamp
@@ -68,7 +68,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * Get the data type
-     * 
+     *
      * @return Tag data type
      */
     public byte getDataType() {
@@ -77,7 +77,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * Return the timestamp
-     * 
+     *
      * @return Tag timestamp
      */
     public int getTimestamp() {
@@ -96,7 +96,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * Return the body IoBuffer
-     * 
+     *
      * @return Tag body
      */
     public IoBuffer getBody() {
@@ -105,7 +105,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * Return the size of the body
-     * 
+     *
      * @return Tag body size
      */
     public int getBodySize() {
@@ -114,7 +114,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * Return previous tag size
-     * 
+     *
      * @return Previous tag size
      */
     public int getPreviousTagSize() {
@@ -139,7 +139,7 @@ public class ImmutableTag implements ITag {
 
     /**
      * Prints out the contents of the tag
-     * 
+     *
      * @return Tag contents
      */
     @Override

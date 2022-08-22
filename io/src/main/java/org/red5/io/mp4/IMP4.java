@@ -19,21 +19,21 @@ import org.red5.io.flv.meta.IMetaService;
 
 /**
  * Represents MP4 file
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IMP4 extends IStreamableFile {
 
     /**
      * Returns a boolean stating whether the mp4 has metadata
-     * 
+     *
      * @return boolean <code>true</code> if file has injected metadata, <code>false</code> otherwise
      */
     public boolean hasMetaData();
 
     /**
      * Sets the metadata
-     * 
+     *
      * @param metadata
      *            Metadata object
      * @throws FileNotFoundException
@@ -45,7 +45,7 @@ public interface IMP4 extends IStreamableFile {
 
     /**
      * Sets the MetaService through Spring
-     * 
+     *
      * @param service
      *            Metadata service
      */
@@ -53,7 +53,7 @@ public interface IMP4 extends IStreamableFile {
 
     /**
      * Returns a map of the metadata
-     * 
+     *
      * @return metadata File metadata
      * @throws FileNotFoundException
      *             File not found
@@ -62,14 +62,14 @@ public interface IMP4 extends IStreamableFile {
 
     /**
      * Returns a boolean stating whether a mp4 has keyframedata
-     * 
+     *
      * @return boolean <code>true</code> if file has keyframe metadata, <code>false</code> otherwise
      */
     public boolean hasKeyFrameData();
 
     /**
      * Sets the keyframe data of a mp4 file
-     * 
+     *
      * @param keyframedata
      *            Keyframe metadata
      */
@@ -77,14 +77,14 @@ public interface IMP4 extends IStreamableFile {
 
     /**
      * Gets the keyframe data
-     * 
+     *
      * @return keyframedata Keyframe metadata
      */
     public Map<?, ?> getKeyFrameData();
 
     /**
      * Refreshes the headers. Usually used after data is added to the mp4 file
-     * 
+     *
      * @throws IOException
      *             Any I/O exception
      */
@@ -92,7 +92,7 @@ public interface IMP4 extends IStreamableFile {
 
     /**
      * Flushes Header
-     * 
+     *
      * @throws IOException
      *             Any I/O exception
      */
@@ -100,7 +100,7 @@ public interface IMP4 extends IStreamableFile {
 
     /**
      * Returns a Reader closest to the nearest keyframe
-     * 
+     *
      * @param seekPoint
      *            Point in file we are seeking around
      * @return reader Tag reader closest to that point
@@ -109,7 +109,7 @@ public interface IMP4 extends IStreamableFile {
 
     /**
      * Returns a Writer based on the nearest key frame
-     * 
+     *
      * @param seekPoint
      *            Point in file we are seeking around
      * @return writer Tag writer closest to that point

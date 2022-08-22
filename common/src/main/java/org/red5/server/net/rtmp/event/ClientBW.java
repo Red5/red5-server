@@ -25,7 +25,7 @@ public class ClientBW extends BaseEvent {
 
     /**
      * Enforcement level or limit type of the bandwidth value based on three values.
-     * 
+     *
      * <pre>
      * TYPE_HARD 0
      * TYPE_SOFT 1

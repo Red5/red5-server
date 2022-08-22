@@ -50,7 +50,7 @@ public class SharedObjectService implements ISharedObjectService {
 
     /**
      * Pushes a task to the scheduler for single execution.
-     * 
+     *
      * @param task
      *            runnable
      */
@@ -68,7 +68,7 @@ public class SharedObjectService implements ISharedObjectService {
 
     /**
      * Setter for persistence class name.
-     * 
+     *
      * @param name
      *            Setter for persistence class name
      */
@@ -86,7 +86,7 @@ public class SharedObjectService implements ISharedObjectService {
 
     /**
      * Return scope store
-     * 
+     *
      * @param scope
      *            Scope
      * @param persistent
@@ -166,7 +166,7 @@ public class SharedObjectService implements ISharedObjectService {
         if (hasSharedObject(scope, name)) {
             // '/' clears all local and persistent shared objects associated with the instance
             // /foo/bar clears the shared object /foo/bar; if bar is a directory name, no shared objects are deleted.
-            // /foo/bar/* clears all shared objects stored under the instance directory /foo/bar. 
+            // /foo/bar/* clears all shared objects stored under the instance directory /foo/bar.
             // The bar directory is also deleted if no persistent shared objects are in use within this namespace.
             // /foo/bar/XX?? clears all shared objects that begin with XX, followed by any two characters. If a directory name matches
             // this specification, all the shared objects within this directory are cleared.

@@ -100,7 +100,7 @@ public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
 
     /**
      * Setter for server object.
-     * 
+     *
      * @param server
      *            Red5 server instance
      */
@@ -110,7 +110,7 @@ public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
 
     /**
      * Setter for status object service.
-     * 
+     *
      * @param statusObjectService
      *            Status object service.
      */
@@ -174,7 +174,7 @@ public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
 
     /**
      * Remoting call invocation handler.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param call
@@ -202,7 +202,7 @@ public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
 
     /**
      * Remoting call invocation handler.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param call
@@ -547,7 +547,7 @@ public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
 
     /**
      * Create and send SO message stating that a SO could not be created.
-     * 
+     *
      * @param conn
      * @param message
      *            Shared object message that incurred the failure

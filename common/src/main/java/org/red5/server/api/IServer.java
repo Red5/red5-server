@@ -16,10 +16,10 @@ import org.red5.server.api.scope.IGlobalScope;
 
 /**
  * The interface that represents the Red5 server.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
- * 
+ *
  */
 public interface IServer {
     /**
@@ -29,7 +29,7 @@ public interface IServer {
 
     /**
      * Get the global scope with given name.
-     * 
+     *
      * @param name
      *            Name of the global scope
      * @return the global scope
@@ -38,7 +38,7 @@ public interface IServer {
 
     /**
      * Register a global scope.
-     * 
+     *
      * @param scope
      *            The global scope to register
      */
@@ -46,13 +46,13 @@ public interface IServer {
 
     /**
      * Lookup the global scope for a host.
-     * 
+     *
      * @param hostName
      *            The name of the host
      * @param contextPath
      *            The path in the host
      * @return The found global scope or
-     * 
+     *
      *         <pre>
      * null
      * </pre>
@@ -61,7 +61,7 @@ public interface IServer {
 
     /**
      * Map a virtual hostname and a path to the name of a global scope.
-     * 
+     *
      * @param hostName
      *            The name of the host to map
      * @param contextPath
@@ -71,9 +71,9 @@ public interface IServer {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the name was mapped, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -82,7 +82,7 @@ public interface IServer {
 
     /**
      * Unregister a previously mapped global scope.
-     * 
+     *
      * @param hostName
      *            The name of the host to unmap
      * @param contextPath
@@ -90,9 +90,9 @@ public interface IServer {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the global scope was unmapped, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -101,28 +101,28 @@ public interface IServer {
 
     /**
      * Query informations about the global scope mappings.
-     * 
+     *
      * @return Map containing informations about the mappings
      */
     public Map<String, String> getMappingTable();
 
     /**
      * Get list of global scope names.
-     * 
+     *
      * @return Iterator for names of global scopes
      */
     public Iterator<String> getGlobalNames();
 
     /**
      * Get list of global scopes.
-     * 
+     *
      * @return Iterator for global scopes objects
      */
     public Iterator<IGlobalScope> getGlobalScopes();
 
     /**
      * Add listener to get notified about scope events.
-     * 
+     *
      * @param listener
      *            the listener to add
      */
@@ -130,7 +130,7 @@ public interface IServer {
 
     /**
      * Add listener to get notified about connection events.
-     * 
+     *
      * @param listener
      *            the listener to add
      */
@@ -138,7 +138,7 @@ public interface IServer {
 
     /**
      * Remove listener that got notified about scope events.
-     * 
+     *
      * @param listener
      *            the listener to remove
      */
@@ -146,7 +146,7 @@ public interface IServer {
 
     /**
      * Remove listener that got notified about connection events.
-     * 
+     *
      * @param listener
      *            the listener to remove
      */

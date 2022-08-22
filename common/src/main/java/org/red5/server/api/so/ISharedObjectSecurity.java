@@ -13,7 +13,7 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Interface for handlers that control access to shared objects.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -21,7 +21,7 @@ public interface ISharedObjectSecurity {
 
     /**
      * Check if the a shared object may be created in the given scope.
-     * 
+     *
      * @param scope
      *            scope
      * @param name
@@ -34,7 +34,7 @@ public interface ISharedObjectSecurity {
 
     /**
      * Check if a connection to the given existing shared object is allowed.
-     * 
+     *
      * @param so
      *            shared ojbect
      * @return is connection alowed
@@ -43,7 +43,7 @@ public interface ISharedObjectSecurity {
 
     /**
      * Check if a modification is allowed on the given shared object.
-     * 
+     *
      * @param so
      *            shared object
      * @param key
@@ -56,7 +56,7 @@ public interface ISharedObjectSecurity {
 
     /**
      * Check if the deletion of a property is allowed on the given shared object.
-     * 
+     *
      * @param so
      *            shared object
      * @param key
@@ -67,7 +67,7 @@ public interface ISharedObjectSecurity {
 
     /**
      * Check if sending a message to the shared object is allowed.
-     * 
+     *
      * @param so
      *            shared object
      * @param message

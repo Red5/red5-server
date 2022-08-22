@@ -16,7 +16,7 @@ public class RTMPClientProtocolDecoder extends RTMPProtocolDecoder {
 
     /**
      * Decode first server response S1.
-     * 
+     *
      * @param conn connection
      * @param state decode state
      * @param in incoming data
@@ -28,7 +28,7 @@ public class RTMPClientProtocolDecoder extends RTMPProtocolDecoder {
 
     /**
      * Decode second server response S2.
-     * 
+     *
      * @param conn connection
      * @param state decode state
      * @param in incoming data

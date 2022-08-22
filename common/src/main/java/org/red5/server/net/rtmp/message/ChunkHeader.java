@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMP chunk header
- * 
+ *
  * <pre>
  * rtmp_specification_1.0.pdf (5.3.1.1 page 12)
  * </pre>
@@ -102,7 +102,7 @@ public class ChunkHeader implements Constants, Cloneable, Externalizable {
 
     /**
      * Read chunk header from the buffer.
-     * 
+     *
      * @param in
      *            buffer
      * @return ChunkHeader instance

@@ -13,7 +13,7 @@ import org.red5.server.api.scope.IScopeHandler;
 
 /**
  * Base interface for handlers originating from plug-ins.
- * 
+ *
  * @author Paul Gregoire
  */
 public interface IRed5PluginHandler {
@@ -25,7 +25,7 @@ public interface IRed5PluginHandler {
 
     /**
      * Set the application making use of this plug-in handler.
-     * 
+     *
      * @param application
      *            application adapter
      */
@@ -33,7 +33,7 @@ public interface IRed5PluginHandler {
 
     /**
      * Set properties to be used by this handler.
-     * 
+     *
      * @param props
      *            plugin properties map
      */

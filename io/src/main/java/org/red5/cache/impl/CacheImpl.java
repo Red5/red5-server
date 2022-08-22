@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * Provides an implementation of an object cache.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -83,7 +83,7 @@ public class CacheImpl implements ICacheStore, ApplicationContextAware {
 
     /**
      * Returns the instance of this class.
-     * 
+     *
      * @return instance of this class
      */
     public static CacheImpl getInstance() {

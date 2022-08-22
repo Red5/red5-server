@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A Reader is used to read the contents of a M4A file. NOTE: This class is not implemented as threading-safe. The caller should make sure
  * the threading-safety.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire, (mondain@gmail.com)
  */
@@ -113,7 +113,7 @@ public class M4AReader implements IoConstants, ITagReader {
     //samples to chunk mappings
     private List<SampleToChunkBox.Entry> audioSamplesToChunks;
 
-    //samples 
+    //samples
     private long[] audioSamples;
 
     private long audioSampleSize;
@@ -295,7 +295,7 @@ public class M4AReader implements IoConstants, ITagReader {
 
     /**
      * Process the audio information contained in the atoms.
-     * 
+     *
      * @param stbl
      * @param ase
      *            AudioSampleEntry
@@ -488,7 +488,7 @@ public class M4AReader implements IoConstants, ITagReader {
 
     /**
      * Returns the file buffer.
-     * 
+     *
      * @return File contents as byte buffer
      */
     public IoBuffer getFileData() {
@@ -574,12 +574,12 @@ public class M4AReader implements IoConstants, ITagReader {
 
     /**
      * Tag sequence MetaData, Audio config, remaining audio
-     * 
+     *
      * Packet prefixes: af 00 ... 06 = Audio extra data (first audio packet) af 01 = Audio frame
-     * 
+     *
      * Audio extra data(s): af 00 = Prefix 11 90 4f 14 = AAC Main = aottype 0 12 10 = AAC LC = aottype 1 13 90 56 e5 a5 48 00 = HE-AAC SBR =
      * aottype 2 06 = Suffix
-     * 
+     *
      * Still not absolutely certain about this order or the bytes - need to verify later
      */
     private void createPreStreamingTags() {
@@ -679,7 +679,7 @@ public class M4AReader implements IoConstants, ITagReader {
             int sample = 1;
             // position
             Long pos = null;
-            //add the audio frames / samples / chunks		
+            //add the audio frames / samples / chunks
             for (int i = 0; i < audioSamplesToChunks.size(); i++) {
                 SampleToChunkBox.Entry record = audioSamplesToChunks.get(i);
                 long firstChunk = record.getFirstChunk();
@@ -698,7 +698,7 @@ public class M4AReader implements IoConstants, ITagReader {
                         int size = 0;
                         // if we have no samples, skip size check as its probably not aac
                         if (audioSamples.length > 0) {
-                            //update sample size 
+                            //update sample size
                             size = (int) audioSamples[sample - 1];
                             // skip empty AAC data which is 6 bytes long
                             log.trace("Audio sample - size: {} pos: {}", size, pos);
@@ -777,7 +777,7 @@ public class M4AReader implements IoConstants, ITagReader {
 
     /**
      * Search through the frames by offset / position to find the sample.
-     * 
+     *
      * @param pos
      * @return frame index
      */

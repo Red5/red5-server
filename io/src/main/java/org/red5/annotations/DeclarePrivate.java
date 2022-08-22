@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation for public methods that should not be callable through RTMP, RTMPT or Remoting.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

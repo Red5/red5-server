@@ -21,7 +21,7 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * Provides an implementation of an object cache which actually does not provide a cache.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -40,7 +40,7 @@ public class NoCacheImpl implements ICacheStore, ApplicationContextAware {
 
     /**
      * Returns the instance of this class.
-     * 
+     *
      * @return class instance
      */
     public static NoCacheImpl getInstance() {

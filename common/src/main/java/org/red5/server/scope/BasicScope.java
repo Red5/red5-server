@@ -182,7 +182,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Sets the amount of time to keep the scope available after the last disconnect.
-     * 
+     *
      * @param keepDelay delay
      */
     public void setKeepDelay(int keepDelay) {
@@ -191,7 +191,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Validates a scope based on its name and type
-     * 
+     *
      * @return true if both name and type are valid, false otherwise
      */
     public boolean isValid() {
@@ -264,7 +264,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Add event listener to list of notified objects
-     * 
+     *
      * @param listener Listening object
      * @return true if listener is added and false otherwise
      */
@@ -275,7 +275,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Remove event listener from list of listeners
-     * 
+     *
      * @param listener
      *            Listener to remove
      * @return true if listener is removed and false otherwise
@@ -315,7 +315,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Returns true if there are event listeners attached to this scope.
-     * 
+     *
      * @return true if it has listeners; else false.
      */
     public boolean hasEventListeners() {
@@ -334,7 +334,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Notifies listeners on event. Current implementation is empty. To be implemented in subclass realization
-     * 
+     *
      * @param event Event to broadcast
      */
     public void notifyEvent(IEvent event) {
@@ -356,7 +356,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Hash code is based on the scope's name and type
-     * 
+     *
      * @return hash code
      */
     public int hashCode() {
@@ -369,7 +369,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * Equality is based on the scope's name and type.
-     * 
+     *
      * @param obj
      *            object
      */

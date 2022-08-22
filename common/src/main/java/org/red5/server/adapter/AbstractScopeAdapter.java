@@ -27,102 +27,102 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
 
     /**
      * Can start flag.
-     * 
+     *
      * <code>
      * true
      * </code>
-     * 
+     *
      * if scope is ready to be activated,
-     * 
+     *
      * <code>
      * false
      * </code>
-     * 
+     *
      * otherwise
      */
     private boolean canStart = true;
 
     /**
      * Can connect flag.
-     * 
+     *
      * <code>
      * true
      * </code>
-     * 
+     *
      * if connections to scope are allowed,
-     * 
+     *
      * <code>
      * false
      * </code>
-     * 
+     *
      * otherwise
      */
     private boolean canConnect;
 
     /**
      * Can join flag.
-     * 
+     *
      * <code>
      * true
      * </code>
-     * 
+     *
      * if scope may be joined by users,
-     * 
+     *
      * <code>
      * false
      * </code>
-     * 
+     *
      * otherwise
      */
     private boolean canJoin = true;
 
     /**
      * Can call service flag.
-     * 
+     *
      * <code>
      * true
      * </code>
-     * 
+     *
      * if remote service calls are allowed for the scope,
-     * 
+     *
      * <code>
      * false
      * </code>
-     * 
+     *
      * otherwise
      */
     private boolean canCallService = true;
 
     /**
      * Can add child scope flag.
-     * 
+     *
      * <code>
      * true
      * </code>
-     * 
+     *
      * if scope is allowed to add child scopes,
-     * 
+     *
      * <code>
      * false
      * </code>
-     * 
+     *
      * otherwise
      */
     private boolean canAddChildScope = true;
 
     /**
      * Can handle event flag.
-     * 
+     *
      * <code>
      * true
      * </code>
-     * 
+     *
      * if events handling is allowed,
-     * 
+     *
      * <code>
      * false
      * </code>
-     * 
+     *
      * otherwise
      */
     private boolean canHandleEvent = true;
@@ -134,13 +134,13 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
      *            <code>
      * true
      * </code>
-     * 
+     *
      *            if scope is ready to be activated,
-     * 
+     *
      *            <code>
      * false
      * </code>
-     * 
+     *
      *            otherwise
      */
     public void setCanStart(boolean canStart) {
@@ -154,13 +154,13 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
      *            <code>
      * true
      * </code>
-     * 
+     *
      *            if remote service calls are allowed for the scope,
-     * 
+     *
      *            <code>
      * false
      * </code>
-     * 
+     *
      *            otherwise
      */
     public void setCanCallService(boolean canCallService) {
@@ -175,13 +175,13 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
      *            <code>
      * true
      * </code>
-     * 
+     *
      *            if connections to scope are allowed,
-     * 
+     *
      *            <code>
      * false
      * </code>
-     * 
+     *
      *            otherwise
      */
     public void setCanConnect(boolean canConnect) {
@@ -195,13 +195,13 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
      *            <code>
      * true
      * </code>
-     * 
+     *
      *            if scope may be joined by users,
-     * 
+     *
      *            <code>
      * false
      * </code>
-     * 
+     *
      *            otherwise
      */
     public void setJoin(boolean canJoin) {
@@ -260,7 +260,7 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
 
     /**
      * Calls the checkBandwidth method on the current client.
-     * 
+     *
      * @param o
      *            Object passed from Flash, not used at the moment
      */
@@ -274,7 +274,7 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
 
     /**
      * Calls the checkBandwidthUp method on the current client.
-     * 
+     *
      * @param params
      *            Object passed from Flash
      * @return bandwidth results map

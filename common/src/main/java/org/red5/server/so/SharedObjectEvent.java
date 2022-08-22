@@ -40,7 +40,7 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
     }
 
     /**
-     * 
+     *
      * @param type
      *            type
      * @param key

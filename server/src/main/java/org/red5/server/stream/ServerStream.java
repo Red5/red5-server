@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An implementation for server side stream.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -611,7 +611,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
 
     /**
      * Push message
-     * 
+     *
      * @param message
      *            Message
      */
@@ -809,7 +809,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
 
     /**
      * Send VOD initialization control message
-     * 
+     *
      * @param msgIn
      *            Message input
      * @param start
@@ -835,7 +835,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
 
     /**
      * Send VOD seek control message
-     * 
+     *
      * @param msgIn
      *            Message input
      * @param position

@@ -18,7 +18,7 @@ import org.red5.io.matroska.dtd.Tag;
 public interface TagConsumer {
     /**
      * Method will be called as soon as webm Tag is available
-     * 
+     *
      * @param tag
      *            - tag to be processed
      * @throws IOException

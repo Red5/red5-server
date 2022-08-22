@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Default WebSocket endpoint.
- * 
+ *
  * @author Paul Gregoire
  */
 public class DefaultWebSocketEndpoint extends Endpoint {

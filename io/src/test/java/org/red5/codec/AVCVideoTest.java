@@ -37,7 +37,7 @@ public class AVCVideoTest {
         IoBuffer data = IoBuffer.allocate(8);
         data.put((byte) 0x17);
         data.flip();
-        // 
+        //
         IoBuffer badData = IoBuffer.allocate(8);
         badData.put((byte) 0x44);
         badData.flip();

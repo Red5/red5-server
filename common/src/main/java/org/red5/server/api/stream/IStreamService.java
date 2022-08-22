@@ -19,14 +19,14 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Create a stream and return a corresponding id.
-     * 
+     *
      * @return ID of created stream
      */
     public Number createStream();
 
     /**
      * Create a stream and return a corresponding id.
-     * 
+     *
      * @param streamId
      *            Stream id
      * @return ID of created stream
@@ -35,7 +35,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Close the stream but not deallocate the resources.
-     * 
+     *
      * @param connection
      *            Connection
      * @param streamId
@@ -45,7 +45,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Close the stream if not been closed. Deallocate the related resources.
-     * 
+     *
      * @param streamId
      *            Stream id
      */
@@ -53,7 +53,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Called by FMS.
-     * 
+     *
      * @param streamId
      *            Stream id
      */
@@ -61,7 +61,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Called by FMS.
-     * 
+     *
      * @param streamId
      *            Stream id
      * @param idk
@@ -71,7 +71,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Called by FME.
-     * 
+     *
      * @param streamName
      *            stream name
      */
@@ -79,7 +79,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Delete stream
-     * 
+     *
      * @param conn
      *            Stream capable connection
      * @param streamId
@@ -89,7 +89,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Play stream without initial stop
-     * 
+     *
      * @param dontStop
      *            Stoppage flag
      */
@@ -97,7 +97,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Play stream with name
-     * 
+     *
      * @param name
      *            Stream name
      */
@@ -105,7 +105,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Play stream with name from start position
-     * 
+     *
      * @param name
      *            Stream name
      * @param start
@@ -115,7 +115,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Play stream with name from start position and for given amount if time
-     * 
+     *
      * @param name
      *            Stream name
      * @param start
@@ -127,7 +127,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Publishes stream from given position for given amount of time
-     * 
+     *
      * @param name
      *            Stream published name
      * @param start
@@ -141,7 +141,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Publishes stream with given name
-     * 
+     *
      * @param name
      *            Stream published name
      */
@@ -149,7 +149,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Publishes stream with given name and mode
-     * 
+     *
      * @param name
      *            Stream published name
      * @param mode
@@ -159,7 +159,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Publish
-     * 
+     *
      * @param dontStop
      *            Whether need to stop first
      */
@@ -167,7 +167,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Seek to position
-     * 
+     *
      * @param position
      *            Seek position
      */
@@ -175,7 +175,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Pauses playback
-     * 
+     *
      * @param pausePlayback
      *            Pause or resume flash
      * @param position
@@ -185,7 +185,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Undocumented Flash Plugin 10 call, assuming to be the alias to pause(boolean, int)
-     * 
+     *
      * @param pausePlayback
      *            Pause or resume flash
      * @param position
@@ -195,7 +195,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Can recieve video?
-     * 
+     *
      * @param receive
      *            Boolean flag
      */
@@ -203,7 +203,7 @@ public interface IStreamService extends IScopeService {
 
     /**
      * Can recieve audio?
-     * 
+     *
      * @param receive
      *            Boolean flag
      */
