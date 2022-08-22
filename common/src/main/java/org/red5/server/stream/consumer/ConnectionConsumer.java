@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.server.api.stream.IClientStream;
 import org.red5.server.messaging.IMessage;
 import org.red5.server.messaging.IMessageComponent;
 import org.red5.server.messaging.IPipe;
@@ -46,7 +47,6 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
 
     private static final boolean isTrace = log.isTraceEnabled();
 
-    @SuppressWarnings("unused")
     private static final boolean isDebug = log.isDebugEnabled();
 
     /**
@@ -86,7 +86,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
 
     /**
      * Create RTMP connection consumer for given connection and channels.
-     *
+     * 
      * @param conn
      *            RTMP connection
      * @param videoChannel
@@ -106,7 +106,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
 
     /**
      * Create connection consumer without an RTMP connection.
-     *
+     * 
      * @param videoChannel
      *            video channel
      * @param audioChannel
@@ -149,15 +149,16 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
                 log.debug("Message has negative timestamp, flipping it to positive: {}", Integer.MIN_VALUE, eventTime);
                 msg.setTimestamp(eventTime);
             }
-            // get the data type (AMF)
+            // get the data type
             byte dataType = msg.getDataType();
             if (isTrace) {
                 log.trace("Data type: {} source type: {}", dataType, ((BaseEvent) msg).getSourceType());
             }
             // create a new header for the consumer if the message.body doesnt already have one
             final Header header = Optional.ofNullable(msg.getHeader()).orElse(new Header());
-            // XXX sets the timerbase, but should we do this if there's already a timerbase?
-            header.setTimerBase(eventTime);
+            
+            // 'setTimer' clears timer delta and sets timer base with current resolved value. Removes residual timing artifacts from any previous network transmission.
+            header.setTimer(eventTime);
             // data buffer
             IoBuffer buf = null;
             switch (dataType) {
@@ -190,7 +191,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
                         videoData.setHeader(header);
                         videoData.setTimestamp(header.getTimer());
                         videoData.setSourceType(((VideoData) msg).getSourceType());
-                        video.write(videoData);
+                        video.write(videoData);                        
                     } else {
                         log.warn("Video data was not found");
                     }
@@ -247,7 +248,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
                         log.warn("Channel data is null, data type: {} was not written", dataType);
                     }
             }
-        } else {
+        } else if(isDebug){
             log.debug("Unhandled push message: {}", message);
             if (isTrace) {
                 Class<? extends IMessage> clazz = message.getClass();
@@ -272,22 +273,12 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
             if ("pendingCount".equals(serviceName)) {
                 oobCtrlMsg.setResult(conn.getPendingMessages());
             } else if ("pendingVideoCount".equals(serviceName)) {
-                /*
-                 * This section relies on the messageSent call-back from Mina to update the pending counter
-                 * the logic does not work if RTMPE is used due to the marshalling. For now we will simply return 0
-                 * and the caller sending the oob will proceed. The pending video check was implemented to handle
-                 * flash player connections on slow links and is most likely irrelevant at this point.
-                 *
                 IClientStream stream = conn.getStreamByChannelId(video.getId());
-                log.trace("pending video count for video id: {} stream: {}", video.getId(), stream);
                 if (stream != null) {
                     oobCtrlMsg.setResult(conn.getPendingVideoMessages(stream.getStreamId()));
                 } else {
                     oobCtrlMsg.setResult(0L);
                 }
-                */
-                // always return 0 if the connection is encrypted
-                oobCtrlMsg.setResult(0L);
             } else if ("writeDelta".equals(serviceName)) {
                 //TODO: Revisit the max stream value later
                 long maxStream = 120 * 1024;
