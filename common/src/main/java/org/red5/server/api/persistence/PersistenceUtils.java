@@ -13,7 +13,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * Helper class for persistence.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -21,7 +21,7 @@ public class PersistenceUtils {
 
     /**
      * Returns persistence store object class constructor
-     * 
+     *
      * @param theClass
      *            Persistence store class
      * @param interfaces
@@ -50,7 +50,7 @@ public class PersistenceUtils {
 
     /**
      * Returns persistence store object. Persistence store is a special object that stores persistence objects and provides methods to manipulate them (save, load, remove, list).
-     * 
+     *
      * @param resolver
      *            Resolves connection pattern into Resource object
      * @param className

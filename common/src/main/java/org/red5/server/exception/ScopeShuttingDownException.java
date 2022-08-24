@@ -18,7 +18,7 @@ public class ScopeShuttingDownException extends RuntimeException {
 
     /**
      * Create exception from given scope object
-     * 
+     *
      * @param scope
      *            Scope
      */

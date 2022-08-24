@@ -9,7 +9,7 @@ package org.red5.server.exception;
 
 /**
  * Exception class than contains additional parameters to return to the client.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -29,7 +29,7 @@ public class ClientDetailsException extends RuntimeException {
 
     /**
      * Create new exception object from message and parameters. By default, no stacktrace is returned to the client.
-     * 
+     *
      * @param message
      *            message
      * @param params
@@ -41,7 +41,7 @@ public class ClientDetailsException extends RuntimeException {
 
     /**
      * Create new exception object from message and parameters with optional stacktrace.
-     * 
+     *
      * @param message
      *            message
      * @param params
@@ -57,7 +57,7 @@ public class ClientDetailsException extends RuntimeException {
 
     /**
      * Get parameters to return to the client.
-     * 
+     *
      * @return parameters
      */
     public Object getParameters() {
@@ -66,7 +66,7 @@ public class ClientDetailsException extends RuntimeException {
 
     /**
      * Should the stacktrace returned to the client?
-     * 
+     *
      * @return stacktrace
      */
     public boolean includeStacktrace() {

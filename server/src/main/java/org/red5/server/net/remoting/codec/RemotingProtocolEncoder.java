@@ -41,7 +41,7 @@ public class RemotingProtocolEncoder {
 
     /**
      * Encodes the given buffer.
-     * 
+     *
      * @param message
      *            message
      * @return buffer
@@ -124,7 +124,7 @@ public class RemotingProtocolEncoder {
 
     /**
      * Generate error object to return for given exception.
-     * 
+     *
      * @param code
      *            call
      * @param error

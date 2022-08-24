@@ -188,7 +188,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Connection channels
-     * 
+     *
      * @see org.red5.server.net.rtmp.Channel
      */
     protected transient ConcurrentMap<Integer, Channel> channels = new ConcurrentHashMap<>(channelsInitalCapacity, 0.9f, channelsConcurrencyLevel);
@@ -202,7 +202,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Client streams
-     * 
+     *
      * @see org.red5.server.api.stream.IClientStream
      */
     protected transient ConcurrentMap<Number, IClientStream> streams = new ConcurrentHashMap<>(streamsInitalCapacity, 0.9f, streamsConcurrencyLevel);
@@ -224,7 +224,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Deferred results set.
-     * 
+     *
      * @see org.red5.server.net.rtmp.DeferredResult
      */
     protected transient CopyOnWriteArraySet<DeferredResult> deferredResults = new CopyOnWriteArraySet<>();
@@ -390,7 +390,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Creates anonymous RTMP connection without scope.
-     * 
+     *
      * @param type
      *            Connection type
      */
@@ -433,7 +433,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Sets the state by code and fires property chanage notifications.
-     * 
+     *
      * @param stateCode
      */
     public void setStateCode(byte stateCode) {
@@ -497,7 +497,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Returns a usable timestamp for written packets.
-     * 
+     *
      * @return timestamp
      */
     public int getTimer() {
@@ -609,7 +609,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Initialize connection.
-     * 
+     *
      * @param host
      *            Connection host
      * @param path
@@ -631,7 +631,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Return AMF protocol encoding used by this connection.
-     * 
+     *
      * @return AMF encoding used by connection
      */
     public Encoding getEncoding() {
@@ -640,7 +640,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Getter for next available channel id.
-     * 
+     *
      * @return Next available channel id
      */
     public int getNextAvailableChannelId() {
@@ -653,7 +653,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Checks whether channel is used.
-     * 
+     *
      * @param channelId
      *            Channel id
      * @return true if channel is in use, false otherwise
@@ -664,7 +664,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Return channel by id.
-     * 
+     *
      * @param channelId
      *            Channel id
      * @return Channel by id
@@ -685,7 +685,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Closes channel.
-     * 
+     *
      * @param channelId
      *            Channel id
      */
@@ -710,7 +710,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Getter for client streams.
-     * 
+     *
      * @return Client streams as array
      */
     protected Collection<IClientStream> getStreams() {
@@ -748,7 +748,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Returns whether or not a given stream id is valid.
-     * 
+     *
      * @param streamId
      *            stream id
      * @return true if its valid, false if its invalid
@@ -776,7 +776,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Returns whether or not the connection has been idle for a maximum period.
-     * 
+     *
      * @return true if max idle period has been exceeded, false otherwise
      */
     public boolean isIdle() {
@@ -791,7 +791,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Returns whether or not the connection is disconnected.
-     * 
+     *
      * @return true if connection state is RTMP.STATE_DISCONNECTED, false otherwise
      */
     public boolean isDisconnected() {
@@ -856,7 +856,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Getter for used stream count.
-     * 
+     *
      * @return Value for property 'usedStreamCount'.
      */
     protected int getUsedStreamCount() {
@@ -870,7 +870,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Return stream id for given channel id.
-     * 
+     *
      * @param channelId
      *            Channel id
      * @return ID of stream that channel belongs to
@@ -888,7 +888,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Return stream by given channel id.
-     * 
+     *
      * @param channelId
      *            Channel id
      * @return Stream that channel belongs to
@@ -907,7 +907,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Return channel id for given stream id.
-     * 
+     *
      * @param streamId
      *            Stream id
      * @return ID of channel that belongs to the stream
@@ -922,7 +922,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Creates output stream object from stream id. Output stream consists of audio, video, and data channels.
-     * 
+     *
      * @see org.red5.server.stream.OutputStream
      * @param streamId
      *            Stream id
@@ -963,7 +963,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Store a stream in the connection.
-     * 
+     *
      * @param stream
      */
     private boolean registerStream(IClientStream stream) {
@@ -977,7 +977,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Remove a stream from the connection.
-     * 
+     *
      * @param stream
      */
     @SuppressWarnings("unused")
@@ -1052,7 +1052,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Dispatches event
-     * 
+     *
      * @param event
      *            Event
      */
@@ -1136,7 +1136,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Handler for ping event.
-     * 
+     *
      * @param ping
      *            Ping event context
      */
@@ -1146,7 +1146,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Write packet.
-     * 
+     *
      * @param out
      *            Packet
      */
@@ -1154,7 +1154,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Write raw byte buffer.
-     * 
+     *
      * @param out
      *            IoBuffer
      */
@@ -1177,7 +1177,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Read number of received bytes.
-     * 
+     *
      * @param bytes
      *            Number of bytes
      */
@@ -1190,7 +1190,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Get number of bytes the client reported to have received.
-     * 
+     *
      * @return Number of bytes
      */
     public long getClientBytesRead() {
@@ -1204,7 +1204,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Generate next invoke id.
-     * 
+     *
      * @return Next invoke id for RPC
      */
     public int getTransactionId() {
@@ -1213,7 +1213,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Register pending call (remote function call that is yet to finish).
-     * 
+     *
      * @param invokeId
      *            Deferred operation id
      * @param call
@@ -1323,7 +1323,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Get pending call service by id.
-     * 
+     *
      * @param invokeId
      *            Pending call service id
      * @return Pending call service object
@@ -1334,7 +1334,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Retrieves and removes the pending call service by id.
-     * 
+     *
      * @param invokeId
      *            Pending call service id
      * @return Pending call service object
@@ -1345,7 +1345,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Generates new stream name.
-     * 
+     *
      * @return New stream name
      */
     protected String createStreamName() {
@@ -1354,7 +1354,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Mark message as being written.
-     * 
+     *
      * @param message
      *            Message to mark
      */
@@ -1430,7 +1430,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Handle the incoming message.
-     * 
+     *
      * @param packet
      *            incoming message packet
      */
@@ -1603,7 +1603,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Mark message as sent.
-     * 
+     *
      * @param message
      *            Message to mark
      */
@@ -1639,7 +1639,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Returns the current received message queue size.
-     * 
+     *
      * @return current message queue size
      */
     protected int currentQueueSize() {
@@ -1658,7 +1658,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Send a shared object message.
-     * 
+     *
      * @param name
      *            shared object name
      * @param currentVersion
@@ -1699,7 +1699,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Marks that ping back was received.
-     * 
+     *
      * @param pong
      *            Ping object
      */
@@ -1728,7 +1728,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Difference between when the last ping was sent and when the last pong was received.
-     * 
+     *
      * @return last interval of ping minus pong
      */
     public int getLastPingSentAndLastPongReceivedInterval() {
@@ -1742,7 +1742,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Setter for ping interval.
-     * 
+     *
      * @param pingInterval
      *            Interval in ms to ping clients. Set to 0 to disable ghost detection code.
      */
@@ -1752,7 +1752,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Setter for maximum inactivity.
-     * 
+     *
      * @param maxInactivity
      *            Maximum time in ms after which a client is disconnected in case of inactivity.
      */
@@ -1767,7 +1767,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Sets the scheduler.
-     * 
+     *
      * @param scheduler
      *            scheduling service / thread executor
      */
@@ -1801,7 +1801,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Thread pool for guarding deadlocks
-     * 
+     *
      * @param deadlockGuardScheduler
      *            the deadlockGuardScheduler to set
      */
@@ -1811,7 +1811,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Registers deferred result.
-     * 
+     *
      * @param result
      *            Result to register
      */
@@ -1821,7 +1821,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Unregister deferred result
-     * 
+     *
      * @param result
      *            Result to unregister
      */
@@ -1835,7 +1835,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Set maximum time to wait for valid handshake in milliseconds.
-     * 
+     *
      * @param maxHandshakeTimeout
      *            Maximum time in milliseconds
      */
@@ -1917,7 +1917,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     /**
      * Specify the size of queue that will trigger audio packet dropping, disabled if it's 0
-     * 
+     *
      * @param executorQueueSizeToDropAudioPackets
      *            queue size
      */

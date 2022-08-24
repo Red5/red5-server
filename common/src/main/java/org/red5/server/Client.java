@@ -180,7 +180,7 @@ public class Client extends AttributeStore implements IClient {
 
     /**
      * Returns the time at which the client was created.
-     * 
+     *
      * @return creation time
      */
     public long getCreationTime() {
@@ -189,7 +189,7 @@ public class Client extends AttributeStore implements IClient {
 
     /**
      * Returns the client id.
-     * 
+     *
      * @return client id
      */
     public String getId() {
@@ -232,7 +232,7 @@ public class Client extends AttributeStore implements IClient {
 
     /**
      * Returns registration status of given connection.
-     * 
+     *
      * @param conn
      *            connection
      * @return true if registered and false otherwise
@@ -243,7 +243,7 @@ public class Client extends AttributeStore implements IClient {
 
     /**
      * Associate connection with client
-     * 
+     *
      * @param conn
      *            Connection object
      */
@@ -270,7 +270,7 @@ public class Client extends AttributeStore implements IClient {
 
     /**
      * Removes client-connection association for given connection
-     * 
+     *
      * @param conn
      *            Connection object
      */
@@ -280,7 +280,7 @@ public class Client extends AttributeStore implements IClient {
 
     /**
      * Removes client-connection association for given connection
-     * 
+     *
      * @param conn
      *            Connection object
      * @param deleteIfNoConns

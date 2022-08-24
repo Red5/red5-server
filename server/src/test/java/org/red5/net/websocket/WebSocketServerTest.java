@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests for websocket operations.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class WebSocketServerTest {

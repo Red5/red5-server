@@ -190,7 +190,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Creates writer implementation with for a given file
-     * 
+     *
      * @param filePath
      *            path to existing file
      */
@@ -394,7 +394,7 @@ public class FLVWriter implements ITagWriter {
                 }
                 // get the data type
                 byte dataType = tag.getDataType();
-                // when tag is ImmutableTag which is in red5-server-common.jar, tag.getBody().reset() will throw InvalidMarkException because 
+                // when tag is ImmutableTag which is in red5-server-common.jar, tag.getBody().reset() will throw InvalidMarkException because
                 // ImmutableTag.getBody() returns a new IoBuffer instance everytime.
                 IoBuffer tagBody = tag.getBody();
                 // set a var holding the entire tag size including the previous tag length
@@ -541,8 +541,8 @@ public class FLVWriter implements ITagWriter {
                 }
                 // Data Type
                 IOUtils.writeUnsignedByte(tagBuffer, dataType); //1
-                // Body Size - Length of the message. Number of bytes after StreamID to end of tag 
-                // (Equal to length of the tag - 11) 
+                // Body Size - Length of the message. Number of bytes after StreamID to end of tag
+                // (Equal to length of the tag - 11)
                 IOUtils.writeMediumInt(tagBuffer, bodySize); //3
                 // Timestamp
                 IOUtils.writeExtendedMediumInt(tagBuffer, timestamp); //4
@@ -625,8 +625,8 @@ public class FLVWriter implements ITagWriter {
                 ByteBuffer tagBuffer = ByteBuffer.allocate(totalTagSize);
                 // Data Type
                 IOUtils.writeUnsignedByte(tagBuffer, dataType); //1
-                // Body Size - Length of the message. Number of bytes after StreamID to end of tag 
-                // (Equal to length of the tag - 11) 
+                // Body Size - Length of the message. Number of bytes after StreamID to end of tag
+                // (Equal to length of the tag - 11)
                 IOUtils.writeMediumInt(tagBuffer, bodySize); //3
                 // Timestamp
                 int timestamp = (int) (System.currentTimeMillis() - timeOffset);
@@ -695,7 +695,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Create the stream output file; the flv itself.
-     * 
+     *
      * @throws IOException
      */
     private void createOutputFile() throws IOException {
@@ -704,7 +704,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Create the stream data file.
-     * 
+     *
      * @throws IOException
      */
     private void createDataFile() throws IOException {
@@ -782,7 +782,7 @@ public class FLVWriter implements ITagWriter {
             }
             params.put("stereo", soundType);
             if (audioDataSize > 0) {
-                params.put("audiodatarate", 8 * audioDataSize / 1024 / duration); //from bytes to kilobits		
+                params.put("audiodatarate", 8 * audioDataSize / 1024 / duration); //from bytes to kilobits
             }
         } else {
             // place holder
@@ -806,8 +806,8 @@ public class FLVWriter implements ITagWriter {
         buf.get(bodyBuf);
         // Data Type
         IOUtils.writeUnsignedByte(tagBuffer, ITag.TYPE_METADATA); //1
-        // Body Size - Length of the message. Number of bytes after StreamID to end of tag 
-        // (Equal to length of the tag - 11) 
+        // Body Size - Length of the message. Number of bytes after StreamID to end of tag
+        // (Equal to length of the tag - 11)
         IOUtils.writeMediumInt(tagBuffer, bodySize); //3
         // Timestamp
         IOUtils.writeExtendedMediumInt(tagBuffer, timestamp); //4
@@ -843,7 +843,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Finalizes the FLV file.
-     * 
+     *
      * @return bytes transferred
      */
     private long finalizeFlv() {
@@ -931,7 +931,7 @@ public class FLVWriter implements ITagWriter {
                 // get starting position of the channel where latest stream data was written
                 long pos = dataChannel.position();
                 log.trace("Data available: {} bytes", pos);
-                // set the data file the beginning 
+                // set the data file the beginning
                 dataChannel.position(0L);
                 // transfer / write data file into final flv
                 int read = -1, wrote;
@@ -1005,7 +1005,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Read flv file information from pre-finalization file.
-     * 
+     *
      * @param tmpFile
      * @return array containing audio codec id, video codec id, and duration
      */
@@ -1186,7 +1186,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Allows repair of flv files if .info and .ser files still exist.
-     * 
+     *
      * @param path
      *            path to .ser file
      * @param audioId
@@ -1253,7 +1253,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Submits a finalizer internally.
-     * 
+     *
      * @param flvFinalizer
      * @return Future representing task
      */
@@ -1266,7 +1266,7 @@ public class FLVWriter implements ITagWriter {
 
     /**
      * Exposed to allow repair of flv files if .info and .ser files still exist.
-     * 
+     *
      * @param args
      *            0: path to .ser file 1: audio codec id 2: video codec id
      * @throws InterruptedException

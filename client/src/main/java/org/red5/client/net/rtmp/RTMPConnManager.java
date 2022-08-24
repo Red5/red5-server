@@ -24,7 +24,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Responsible for management and creation of RTMP based connections.
- * 
+ *
  * @author The Red5 Project
  */
 public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
@@ -95,7 +95,7 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
 
     /**
      * Adds a connection.
-     * 
+     *
      * @param conn connection
      */
     @Override
@@ -111,7 +111,7 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
 
     /**
      * Returns a connection for a given client id.
-     * 
+     *
      * @param clientId client id
      * @return connection if found and null otherwise
      */
@@ -128,7 +128,7 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
 
     /**
      * Returns a connection for a given session id.
-     * 
+     *
      * @param sessionId session id
      * @return connection if found and null otherwise
      */
@@ -197,7 +197,7 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
 
     /**
      * Creates a connection instance based on the supplied type.
-     * 
+     *
      * @param cls class
      * @return connection
      * @throws Exception thrown

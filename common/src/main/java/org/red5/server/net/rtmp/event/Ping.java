@@ -175,7 +175,7 @@ public class Ping extends BaseEvent {
 
     /**
      * Returns the events sub-type
-     * 
+     *
      * @return the event type
      */
     public short getEventType() {
@@ -184,7 +184,7 @@ public class Ping extends BaseEvent {
 
     /**
      * Sets the events sub-type
-     * 
+     *
      * @param eventType
      *            event type
      */

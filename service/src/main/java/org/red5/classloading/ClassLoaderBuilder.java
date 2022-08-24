@@ -32,10 +32,10 @@ import java.util.regex.Pattern;
 
 /**
  * Class used to get the Servlet Class loader. The class loader returned is a child first class loader.
- * 
+ *
  * <br>
  * <i>This class is based on original code from the XINS project, by Anthony Goubard (anthony.goubard@japplis.com)</i>
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public final class ClassLoaderBuilder {
@@ -62,7 +62,7 @@ public final class ClassLoaderBuilder {
 
     /**
      * Default build uses Red5 common lib without a parent classloader.
-     * 
+     *
      * @return the class loader
      */
     public static ClassLoader build() {
@@ -71,12 +71,12 @@ public final class ClassLoaderBuilder {
 
     /**
      * Gets a class loader based on mode.
-     * 
+     *
      * @param path
      *            the directory or file containing classes
      * @param mode
      *            the mode in which the servlet should be loaded. The possible values are
-     * 
+     *
      *            <pre>
      * USE_CURRENT_CLASSPATH, USE_CLASSPATH_LIB, USE_WAR_LIB
      * </pre>
@@ -285,7 +285,7 @@ public final class ClassLoaderBuilder {
 
     /**
      * Unpack the specified entry from the JAR file.
-     * 
+     *
      * @param jarStream
      *            The input stream of the JAR file positioned at the entry
      * @param entryName
@@ -310,7 +310,7 @@ public final class ClassLoaderBuilder {
 
     /**
      * Removes older versions of libraries from a given list based on their version numbers.
-     * 
+     *
      * @param list
      */
     private final static void scrubURLList(Collection<URL> list) {
@@ -532,7 +532,7 @@ public final class ClassLoaderBuilder {
 
     /**
      * Parses url and returns the jar filename stripped of the ending .jar
-     * 
+     *
      * @param url
      * @return
      */

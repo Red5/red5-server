@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 
 /**
  * Stream of a single play item for a subscriber
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class SingleItemSubscriberStream extends AbstractClientStream implements ISingleItemSubscriberStream {
@@ -51,11 +51,11 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
 
     /**
      * Number of pending messages at which a
-     * 
+     *
      * <pre>
      * NetStream.Play.InsufficientBW
      * </pre>
-     * 
+     *
      * message is generated for VOD streams.
      */
     protected int underrunTrigger = 10;
@@ -141,7 +141,7 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
             //send a blank audio packet to reset the player
             engine.sendBlankAudio(true);
         } else if (!receiveAudio && receive) {
-            //do a seek	
+            //do a seek
             seekToCurrentPlayback();
         }
     }
@@ -156,13 +156,13 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
 
     /**
      * Set interval to check for buffer underruns. Set to
-     * 
+     *
      * <pre>
      * 0
      * </pre>
-     * 
+     *
      * to disable.
-     * 
+     *
      * @param bufferCheckInterval
      *            interval in ms
      */
@@ -172,13 +172,13 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
 
     /**
      * Set maximum number of pending messages at which a
-     * 
+     *
      * <pre>
      * NetStream.Play.InsufficientBW
      * </pre>
-     * 
+     *
      * message will be generated for VOD streams
-     * 
+     *
      * @param underrunTrigger
      *            the maximum number of pending messages
      */

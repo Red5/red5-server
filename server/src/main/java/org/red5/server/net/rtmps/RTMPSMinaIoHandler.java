@@ -33,20 +33,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handles Native RTMPS protocol events fired by the MINA framework.
- * 
+ *
  * <pre>
  * var nc:NetConnection = new NetConnection();
  * nc.proxyType = "best";
  * nc.connect("rtmps:\\localhost\app");
  * </pre>
- * 
+ *
  * https://issues.apache.org/jira/browse/DIRMINA-272 https://issues.apache.org/jira/browse/DIRMINA-997
- * 
+ *
  * Transport Layer Security (TLS) Renegotiation Issue http://www.oracle.com/technetwork/java/javase/documentation/tlsreadme2-176330.html
  * Secure renegotiation https://jce.iaik.tugraz.at/sic/Products/Communication-Messaging-Security/iSaSiLk/documentation/Secure-Renegotiation
  * Troubleshooting a HTTPS TLSv1 handshake http://integr8consulting.blogspot.com/2012/02/troubleshooting-https-tlsv1-handshake.html
  * How to analyze Java SSL errors http://www.smartjava.org/content/how-analyze-java-ssl-errors
- * 
+ *
  * @author Kevin Green (kevygreen@gmail.com)
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -158,7 +158,7 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
                         log.debug("SSL context supported protocol: {}", protocol);
                     }
                 }
-                // compatibility: remove the SSLv2Hello message in the available protocols - some systems will fail 
+                // compatibility: remove the SSLv2Hello message in the available protocols - some systems will fail
                 // to handshake if TSLv1 messages are enwrapped with SSLv2 messages, Java 6 tries to send TSLv1 embedded in SSLv2
             } else {
                 log.warn("Keystore or Truststore file does not exist");
@@ -210,7 +210,7 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
 
     /**
      * Password used to access the keystore file.
-     * 
+     *
      * @param password
      *            keystore password
      */
@@ -220,7 +220,7 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
 
     /**
      * Password used to access the truststore file.
-     * 
+     *
      * @param password
      *            truststore password
      */
@@ -230,7 +230,7 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
 
     /**
      * Set keystore data from a file.
-     * 
+     *
      * @param path
      *            contains keystore
      */
@@ -240,7 +240,7 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
 
     /**
      * Set truststore file path.
-     * 
+     *
      * @param path
      *            contains truststore
      */

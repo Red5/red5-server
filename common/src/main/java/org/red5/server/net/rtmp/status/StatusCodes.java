@@ -168,7 +168,7 @@ public interface StatusCodes {
 
     /**
      * Transition to another stream has been forced.
-     * 
+     *
      * If streams that are being switched do not have aligned content/timelines, or if the keyframes are not aligned between the two streams, it is possible that the server will have to force a hard transition. This can also happen with broadcast (live) dynamic streaming if the server cannot find a synchronization point within the two streams. This is set as the "reason" property of the NetStatusEvent.
      */
     public static final String NS_TRANSITION_FORCED = "NetStream.Transition.Forced";
@@ -217,7 +217,7 @@ public interface StatusCodes {
 
     /**
      * The ActionScript engine has encountered a runtime warning. In addition to the standard infoObject properties, the following properties are set:
-     * 
+     *
      * filename: name of the offending ASC file. lineno: line number where the error occurred. linebuf: source code of the offending line
      */
     public static final String APP_SCRIPT_WARNING = "Application.Script.Warning";

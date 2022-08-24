@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMP client implementation supporting "rtmp" and "rtmpe" protocols.
- * 
+ *
  * @author The Red5 Project
  * @author Christian Eckerle (ce@publishing-etc.de)
  * @author Joachim Bauch (jojo@struktur.de)
@@ -124,7 +124,7 @@ public class RTMPClient extends BaseRTMPClientHandler {
 
     /**
      * Sets the RTMP protocol, the default is "rtmp". If "rtmps" or "rtmpt" are required, the appropriate client type should be selected.
-     * 
+     *
      * @param protocol
      *            the protocol to set
      * @throws Exception thrown

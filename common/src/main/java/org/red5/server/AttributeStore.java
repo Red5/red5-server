@@ -41,7 +41,7 @@ public class AttributeStore implements ICastingAttributeStore {
 
     /**
      * Creates attribute store with initial values. Object is not associated with a persistence storage.
-     * 
+     *
      * @param values
      *            map
      */
@@ -51,7 +51,7 @@ public class AttributeStore implements ICastingAttributeStore {
 
     /**
      * Creates attribute store with initial values. Object is not associated with a persistence storage.
-     * 
+     *
      * @param values
      *            map
      */
@@ -61,13 +61,13 @@ public class AttributeStore implements ICastingAttributeStore {
 
     /**
      * Filter
-     * 
+     *
      * <pre>
      * null
      * </pre>
-     * 
+     *
      * keys and values from given map.
-     * 
+     *
      * @param values
      *            the map to filter
      * @return filtered map
@@ -365,7 +365,7 @@ public class AttributeStore implements ICastingAttributeStore {
 
     /**
      * Allows for reconstruction via CompositeData.
-     * 
+     *
      * @param cd
      *            composite data
      * @return AttributeStore class instance

@@ -9,7 +9,7 @@ package org.red5.server.messaging;
 
 /**
  * Signature for message provider.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */

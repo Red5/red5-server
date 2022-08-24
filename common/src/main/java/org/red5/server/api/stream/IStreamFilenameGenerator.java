@@ -12,7 +12,7 @@ import org.red5.server.api.scope.IScopeService;
 
 /**
  * A class that can generate filenames for streams.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (bauch@struktur.de)
  */
@@ -28,7 +28,7 @@ public interface IStreamFilenameGenerator extends IScopeService {
 
     /**
      * Generate a filename without an extension.
-     * 
+     *
      * @param scope
      *            Scope to use
      * @param name
@@ -56,21 +56,21 @@ public interface IStreamFilenameGenerator extends IScopeService {
 
     /**
      * True if returned filename is an absolute path, else relative to application.
-     * 
+     *
      * If relative to application, you need to use
-     * 
+     *
      * <pre>
      * scope.getContext().getResources(fileName)[0].getFile()
      * </pre>
-     * 
+     *
      * to resolve this to a file.
-     * 
+     *
      * If absolute (ie returns true) simply use
-     * 
+     *
      * <pre>
      * new File(generateFilename(scope, name))
      * </pre>
-     * 
+     *
      * @return true if an absolute path; else false
      */
     public boolean resolvesToAbsolutePath();

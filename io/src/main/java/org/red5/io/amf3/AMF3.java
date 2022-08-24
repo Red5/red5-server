@@ -11,10 +11,10 @@ package org.red5.io.amf3;
  * AMF3 data type definitions.
  *
  * For detailed specification please see the link below.
- * 
+ *
  * @see <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a>
  * @see <a href="http://download.macromedia.com/pub/labs/amf/amf3_spec_121207.pdf">Official Adobe AMF3 Specification</a>
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  * @author Joachim Bauch (jojo@struktur.de)
@@ -131,21 +131,21 @@ public class AMF3 {
 
     /**
      * Property list encoding.
-     * 
+     *
      * The remaining integer-data represents the number of class members that exist. The property names are read as string-data. The values are then read as AMF3-data.
      */
     public static final byte TYPE_OBJECT_PROPERTY = 0x00;
 
     /**
      * Externalizable object.
-     * 
+     *
      * What follows is the value of the "inner" object, including type code. This value appears for objects that implement IExternalizable, such as ArrayCollection and ObjectProxy.
      */
     public static final byte TYPE_OBJECT_EXTERNALIZABLE = 0x01;
 
     /**
      * Name-value encoding.
-     * 
+     *
      * The property names and values are encoded as string-data followed by AMF3-data until there is an empty string property name. If there is a class-def reference there are no property names and the number of values is equal to the number of properties in the class-def.
      */
     public static final byte TYPE_OBJECT_VALUE = 0x02;

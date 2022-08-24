@@ -11,7 +11,7 @@ import java.io.IOException;
 
 /**
  * A provider that supports passive pulling of messages.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */

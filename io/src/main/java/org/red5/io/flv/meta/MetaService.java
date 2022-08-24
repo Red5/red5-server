@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * MetaService represents a MetaData service in Spring
- * 
+ *
  * @author The Red5 Project
  * @author Dominick Accattato (daccattato@gmail.com)
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
@@ -129,7 +129,7 @@ public class MetaService implements IMetaService {
 
     /**
      * Merges the two Meta objects
-     * 
+     *
      * @param metaData1
      *            First metadata object
      * @param metaData2
@@ -190,7 +190,7 @@ public class MetaService implements IMetaService {
 
     /**
      * Injects metadata (other than Cue points) into a tag
-     * 
+     *
      * @param meta
      *            Metadata
      * @param tag
@@ -211,7 +211,7 @@ public class MetaService implements IMetaService {
 
     /**
      * Injects metadata (Cue Points) into a tag
-     * 
+     *
      * @param meta
      *            Metadata (cue points)
      * @param tag
@@ -234,7 +234,7 @@ public class MetaService implements IMetaService {
 
     /**
      * Returns a timestamp of cue point in milliseconds
-     * 
+     *
      * @param metaCue
      *            Cue point
      * @return int time Timestamp of given cue point (in milliseconds)

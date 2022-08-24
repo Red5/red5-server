@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Counts numbers used by the statistics. Keeps track of current and total numbers.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -43,7 +43,7 @@ public class StatisticsCounter {
 
     /**
      * Get current number.
-     * 
+     *
      * @return current number
      */
     public int getCurrent() {
@@ -52,7 +52,7 @@ public class StatisticsCounter {
 
     /**
      * Get total number.
-     * 
+     *
      * @return total
      */
     public int getTotal() {
@@ -61,7 +61,7 @@ public class StatisticsCounter {
 
     /**
      * Get maximum number. Use total instead.
-     * 
+     *
      * @return max
      */
     public int getMax() {

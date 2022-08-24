@@ -11,7 +11,7 @@ import java.nio.ByteOrder;
 
 /**
  * Interface implemented by classes that provide a way to store custom objects.
- * 
+ *
  * @see IExternalizable#writeExternal(IDataOutput)
  * @see <a href="http://livedocs.adobe.com/flex/2/langref/flash/utils/IDataOutput.html">Adobe Livedocs (external)</a>
  */
@@ -19,14 +19,14 @@ public interface IDataOutput {
 
     /**
      * Return the byteorder used when storing values.
-     * 
+     *
      * @return the byteorder
      */
     public ByteOrder getEndian();
 
     /**
      * Set the byteorder to use when storing values.
-     * 
+     *
      * @param endian
      *            the byteorder to use
      */
@@ -34,7 +34,7 @@ public interface IDataOutput {
 
     /**
      * Write boolean value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -42,7 +42,7 @@ public interface IDataOutput {
 
     /**
      * Write signed byte value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -50,7 +50,7 @@ public interface IDataOutput {
 
     /**
      * Write multiple bytes.
-     * 
+     *
      * @param bytes
      *            the bytes
      */
@@ -58,7 +58,7 @@ public interface IDataOutput {
 
     /**
      * Write multiple bytes from given offset.
-     * 
+     *
      * @param bytes
      *            the bytes
      * @param offset
@@ -68,7 +68,7 @@ public interface IDataOutput {
 
     /**
      * Write given number of bytes from given offset.
-     * 
+     *
      * @param bytes
      *            the bytes
      * @param offset
@@ -80,7 +80,7 @@ public interface IDataOutput {
 
     /**
      * Write double-precision floating point value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -88,7 +88,7 @@ public interface IDataOutput {
 
     /**
      * Write single-precision floating point value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -96,7 +96,7 @@ public interface IDataOutput {
 
     /**
      * Write signed integer value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -104,7 +104,7 @@ public interface IDataOutput {
 
     /**
      * Write string in given character set.
-     * 
+     *
      * @param value
      *            the string
      * @param encoding
@@ -114,7 +114,7 @@ public interface IDataOutput {
 
     /**
      * Write arbitrary object.
-     * 
+     *
      * @param value
      *            the object
      */
@@ -122,7 +122,7 @@ public interface IDataOutput {
 
     /**
      * Write signed short value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -130,7 +130,7 @@ public interface IDataOutput {
 
     /**
      * Write unsigned integer value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -138,7 +138,7 @@ public interface IDataOutput {
 
     /**
      * Write UTF-8 encoded string.
-     * 
+     *
      * @param value
      *            the string
      */
@@ -146,7 +146,7 @@ public interface IDataOutput {
 
     /**
      * Write UTF-8 encoded string as byte array. This string is stored without informations about its length, so {@link IDataInput#readUTFBytes(int)} must be used to load it.
-     * 
+     *
      * @param value
      *            the string
      */

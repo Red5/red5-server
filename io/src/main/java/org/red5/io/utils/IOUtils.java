@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 
 /**
  * Miscellaneous I/O utility methods
- * 
+ *
  * @see <a href="http://www.cs.utsa.edu/~wagner/laws/Abytes.html">Unsigned bytes in Java</a>
  */
 public class IOUtils {
@@ -27,7 +27,7 @@ public class IOUtils {
 
     /**
      * Writes integer in reverse order
-     * 
+     *
      * @param out
      *            Data buffer to fill
      * @param value
@@ -39,7 +39,7 @@ public class IOUtils {
 
     /**
      * Writes medium integer
-     * 
+     *
      * @param out
      *            Output buffer
      * @param value
@@ -55,7 +55,7 @@ public class IOUtils {
 
     /**
      * Writes medium integer
-     * 
+     *
      * @param out
      *            Output buffer
      * @param value
@@ -69,7 +69,7 @@ public class IOUtils {
 
     /**
      * Writes extended medium integer (equivalent to a regular integer whose most significant byte has been moved to its end, past its least significant byte)
-     * 
+     *
      * @param out
      *            Output buffer
      * @param value
@@ -82,7 +82,7 @@ public class IOUtils {
 
     /**
      * Writes extended medium integer (equivalent to a regular integer whose most significant byte has been moved to its end, past its least significant byte)
-     * 
+     *
      * @param out
      *            Output buffer
      * @param value
@@ -95,7 +95,7 @@ public class IOUtils {
 
     /**
      * Writes an unsigned byte value to the supplied buffer.
-     * 
+     *
      * @param out
      *            Output buffer
      * @param value
@@ -107,7 +107,7 @@ public class IOUtils {
 
     /**
      * Reads unsigned medium integer (3 bytes)
-     * 
+     *
      * @param in
      *            Unsigned medium int source
      * @return int value
@@ -118,7 +118,7 @@ public class IOUtils {
 
     /**
      * Reads unsigned medium integer (3 bytes)
-     * 
+     *
      * @param in
      *            Unsigned medium int source
      * @return int value
@@ -129,7 +129,7 @@ public class IOUtils {
 
     /**
      * Reads medium int
-     * 
+     *
      * @param in
      *            Source
      * @return int value
@@ -140,7 +140,7 @@ public class IOUtils {
 
     /**
      * Reads medium int
-     * 
+     *
      * @param in
      *            Source
      * @return int value
@@ -151,7 +151,7 @@ public class IOUtils {
 
     /**
      * Reads extended medium int
-     * 
+     *
      * @param in
      *            Source
      * @return int value
@@ -164,7 +164,7 @@ public class IOUtils {
 
     /**
      * Reads extended medium int
-     * 
+     *
      * @param in
      *            Source
      * @return int value
@@ -177,7 +177,7 @@ public class IOUtils {
 
     /**
      * Reads reverse int
-     * 
+     *
      * @param in
      *            Source
      * @return int
@@ -190,7 +190,7 @@ public class IOUtils {
 
     /**
      * Format debug message
-     * 
+     *
      * @param log
      *            Logger
      * @param msg
@@ -209,7 +209,7 @@ public class IOUtils {
 
     /**
      * String representation of byte buffer
-     * 
+     *
      * @param buf Byte buffer
      * @return String representation
      */
@@ -225,7 +225,7 @@ public class IOUtils {
 
     /**
      * Returns a byte array for the given hex encoded string.
-     * 
+     *
      * @param s encoded hex string
      * @return byte array
      */

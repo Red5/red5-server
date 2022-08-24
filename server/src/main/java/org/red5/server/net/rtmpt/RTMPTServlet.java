@@ -42,7 +42,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Servlet that handles all RTMPT requests.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -99,7 +99,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Return an error message to the client.
-     * 
+     *
      * @param message
      *            Message
      * @param resp
@@ -145,7 +145,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Return a single byte to the client.
-     * 
+     *
      * @param message
      *            Message
      * @param resp
@@ -166,7 +166,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Return a message to the client.
-     * 
+     *
      * @param message
      *            Message
      * @param resp
@@ -187,7 +187,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Return raw data to the client.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param buffer
@@ -241,7 +241,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Skip data sent by the client.
-     * 
+     *
      * @param req
      *            Servlet request
      * @throws IOException
@@ -261,7 +261,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Send pending messages to client.
-     * 
+     *
      * @param conn
      *            RTMP connection
      * @param resp
@@ -302,7 +302,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Start a new RTMPT session.
-     * 
+     *
      * @param req
      *            Servlet request
      * @param resp
@@ -323,7 +323,7 @@ public class RTMPTServlet extends HttpServlet {
             conn.setServletRequest(req);
             // add the connection to the manager
             manager.setConnection(conn);
-            // set handler 
+            // set handler
             conn.setHandler(handler);
             conn.setDecoder(handler.getCodecFactory().getRTMPDecoder());
             conn.setEncoder(handler.getCodecFactory().getRTMPEncoder());
@@ -349,7 +349,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Close a RTMPT session.
-     * 
+     *
      * @param req
      *            Servlet request
      * @param resp
@@ -374,7 +374,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Add data for an established session.
-     * 
+     *
      * @param req
      *            Servlet request
      * @param resp
@@ -485,7 +485,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Poll RTMPT session for updates.
-     * 
+     *
      * @param req
      *            Servlet request
      * @param resp
@@ -511,7 +511,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Main entry point for the servlet.
-     * 
+     *
      * @param req
      *            Request object
      * @param resp
@@ -582,7 +582,7 @@ public class RTMPTServlet extends HttpServlet {
                 break;
             case 'f': // HTTPIdent request (ident and ident2)
                 //if HTTPIdent is requested send back some Red5 info
-                //http://livedocs.adobe.com/flashmediaserver/3.0/docs/help.html?content=08_xmlref_011.html			
+                //http://livedocs.adobe.com/flashmediaserver/3.0/docs/help.html?content=08_xmlref_011.html
                 String ident = "<fcs><Company>Red5</Company><Team>Red5 Server</Team></fcs>";
                 // handle ident2 slightly different to appease osx clients
                 if (uri.charAt(uri.length() - 1) == '2') {
@@ -629,7 +629,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Returns a connection based on the current client session id.
-     * 
+     *
      * @return RTMPTConnection
      */
     protected RTMPTConnection getConnection() {
@@ -651,7 +651,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Removes a connection matching the given session id from the connection manager.
-     * 
+     *
      * @param sessionId
      *            session id
      */
@@ -676,7 +676,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Set the RTMPTHandler to use in this servlet.
-     * 
+     *
      * @param handler
      *            handler
      */
@@ -687,7 +687,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Set the fcs/ident2 string
-     * 
+     *
      * @param ident2
      *            ident2 string
      */
@@ -697,7 +697,7 @@ public class RTMPTServlet extends HttpServlet {
 
     /**
      * Sets the target size for responses
-     * 
+     *
      * @param targetResponseSize
      *            the targetResponseSize to set
      */

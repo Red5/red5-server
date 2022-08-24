@@ -31,14 +31,14 @@ public interface IVideoStreamCodec {
 
     /**
      * Check if the codec supports frame dropping.
-     * 
+     *
      * @return if the codec supports frame dropping.
      */
     public boolean canDropFrames();
 
     /**
      * Returns true if the codec knows how to handle the passed stream data.
-     * 
+     *
      * @param data
      *            some sample data to see if this codec can handle it
      * @return can this code handle the data.
@@ -47,7 +47,7 @@ public interface IVideoStreamCodec {
 
     /**
      * Update the state of the codec with the passed data.
-     * 
+     *
      * @param data
      *            data to tell the codec we're adding
      * @return true for success. false for error
@@ -56,7 +56,7 @@ public interface IVideoStreamCodec {
 
     /**
      * Update the state of the codec with the passed data.
-     * 
+     *
      * @param data
      *            data to tell the codec we're adding
      * @param timestamp time associated with the data
@@ -66,7 +66,7 @@ public interface IVideoStreamCodec {
 
     /**
      * Add video data with a time stamp and a flag identifying the content as AMF or not.
-     * 
+     *
      * @param data
      * @param timestamp
      * @param amf if true, data is in AMF format otherwise its most likely from non-AMF source like RTP
@@ -76,28 +76,28 @@ public interface IVideoStreamCodec {
 
     /**
      * Returns keyframe data.
-     * 
+     *
      * @return the data for a keyframe
      */
     public IoBuffer getKeyframe();
 
     /**
      * Returns all the keyframe data.
-     * 
+     *
      * @return array of keyframe data
      */
     public FrameData[] getKeyframes();
 
     /**
      * Returns information used to configure the decoder.
-     * 
+     *
      * @return the data for decoder setup
      */
     public IoBuffer getDecoderConfiguration();
 
     /**
      * Returns the number of interframes collected from last keyframe.
-     * 
+     *
      * @return number of interframes
      */
     public int getNumInterframes();
@@ -127,7 +127,7 @@ public interface IVideoStreamCodec {
 
         /**
          * Makes a copy of the incoming bytes and places them in an IoBuffer. No flip or rewind is performed on the source data.
-         * 
+         *
          * @param data
          *            data
          */

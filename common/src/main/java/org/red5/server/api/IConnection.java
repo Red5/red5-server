@@ -17,9 +17,9 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * The connection object.
- * 
+ *
  * Each connection has an associated client and scope. Connections may be persistent, polling, or transient. The aim of this interface is to provide basic connection methods shared between different types of connections.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -52,7 +52,7 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
 
     /**
      * Get the connection type.
-     * 
+     *
      * @return string containing one of connection types
      */
     @Deprecated
@@ -60,35 +60,35 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
 
     /**
      * Get the connection type.
-     * 
+     *
      * @return connection type containing one of connection types
      */
     //public Type getType(); // PERSISTENT | POLLING | TRANSIENT
 
     /**
      * Get the object encoding in use for this connection.
-     * 
+     *
      * @return encoding type
      */
     public Encoding getEncoding();
 
     /**
      * Get the duty for this connection; this is not meant nor expected to remain static.
-     * 
+     *
      * @return duty type
      */
     public Duty getDuty();
 
     /**
      * Initialize the connection.
-     * 
+     *
      * @param client Client object associated with connection
      */
     public void initialize(IClient client);
 
     /**
      * Try to connect to the scope.
-     * 
+     *
      * @return true on success, false otherwise
      * @param scope Scope object
      */
@@ -96,7 +96,7 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
 
     /**
      * Try to connect to the scope with a list of connection parameters.
-     * 
+     *
      * @param params Connections parameters
      * @return true on success, false otherwise
      * @param scope Scope object
@@ -106,7 +106,7 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
     /**
      * Is the client connected to the scope. Result depends on connection type, true for persistent and polling connections,
      * false for transient.
-     * 
+     *
      * @return true if the connection is persistent or polling, otherwise false
      */
     public boolean isConnected();
@@ -118,112 +118,112 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
 
     /**
      * Return the parameters that were given in the call to "connect".
-     * 
+     *
      * @return Connection parameters passed from client-side (Flex/Flash application)
      */
     public Map<String, Object> getConnectParams();
 
     /**
      * Sets the Client.
-     * 
+     *
      * @param client client
      */
     public void setClient(IClient client);
 
     /**
      * Get the client object associated with this connection.
-     * 
+     *
      * @return Client object
      */
     public IClient getClient();
 
     /**
      * Get the hostname that the client is connected to. If they are connected to an IP, the IP address will be returned as a String.
-     * 
+     *
      * @return String containing the hostname
      */
     public String getHost();
 
     /**
      * Get the IP address the client is connected from.
-     * 
+     *
      * @return The IP address of the client
      */
     public String getRemoteAddress();
 
     /**
      * Get the IP addresses the client is connected from. If a client is connected through RTMPT and uses a proxy to connect, this will contain all hosts the client used to connect to the server.
-     * 
+     *
      * @return The IP addresses of the client
      */
     public List<String> getRemoteAddresses();
 
     /**
      * Get the port the client is connected from.
-     * 
+     *
      * @return The port of the client
      */
     public int getRemotePort();
 
     /**
      * Get the path for this connection. This is not updated if you switch scope.
-     * 
+     *
      * @return path Connection path
      */
     public String getPath();
 
     /**
      * Get the session id, this may be null.
-     * 
+     *
      * @return Session id
      */
     public String getSessionId();
 
     /**
      * Total number of bytes read from the connection.
-     * 
+     *
      * @return Number of read bytes
      */
     public long getReadBytes();
 
     /**
      * Total number of bytes written to the connection.
-     * 
+     *
      * @return Number of written bytes
      */
     public long getWrittenBytes();
 
     /**
      * Total number of messages read from the connection.
-     * 
+     *
      * @return Number of read messages
      */
     public long getReadMessages();
 
     /**
      * Total number of messages written to the connection.
-     * 
+     *
      * @return Number of written messages
      */
     public long getWrittenMessages();
 
     /**
      * Total number of messages that have been dropped.
-     * 
+     *
      * @return Number of dropped messages
      */
     public long getDroppedMessages();
 
     /**
      * Total number of messages that are pending to be sent to the connection.
-     * 
+     *
      * @return Number of pending messages
      */
     public long getPendingMessages();
 
     /**
      * Return number of written bytes the client reports to have received. This is the last value of the BytesRead message received from a client.
-     * 
+     *
      * @see org.red5.server.net.rtmp.event.BytesRead
      * @return number of written bytes received by the client
      */
@@ -236,63 +236,63 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
 
     /**
      * Return round-trip time of last ping command.
-     * 
+     *
      * @return round-trip time in milliseconds
      */
     public int getLastPingTime();
 
     /**
      * Get the scope this is connected to.
-     * 
+     *
      * @return The connected scope
      */
     public IScope getScope();
 
     /**
      * Get the basic scopes this connection has subscribed. This list will contain the shared objects and broadcast streams the connection connected to.
-     * 
+     *
      * @return List of basic scopes
      */
     public Iterator<IBasicScope> getBasicScopes();
 
     /**
      * Sets the bandwidth using a mbit/s value.
-     * 
+     *
      * @param mbits target
      */
     public void setBandwidth(int mbits);
 
     /**
      * Adds a listener to this object
-     * 
+     *
      * @param listener connection listener
      */
     public void addListener(IConnectionListener listener);
 
     /**
      * Removes the listener from this object
-     * 
+     *
      * @param listener connection listener
      */
     public void removeListener(IConnectionListener listener);
 
     /**
      * Returns the current stream id.
-     * 
+     *
      * @return stream id
      */
     public Number getStreamId();
 
     /**
      * Sets the current stream id.
-     * 
+     *
      * @param id stream id
      */
     public void setStreamId(Number id);
 
     /**
      * Returns the protocol type for this connection. eg. rtmp, rtmpt, http
-     * 
+     *
      * @return protocol type
      */
     public String getProtocol();

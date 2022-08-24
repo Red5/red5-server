@@ -14,7 +14,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Provides more features to the plug-in system.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public abstract class Red5Plugin implements IRed5Plugin {
@@ -49,7 +49,7 @@ public abstract class Red5Plugin implements IRed5Plugin {
 
     /**
      * Return the server reference.
-     * 
+     *
      * @return server
      */
     public Server getServer() {
@@ -63,7 +63,7 @@ public abstract class Red5Plugin implements IRed5Plugin {
 
     /**
      * Set the application making use of this plug-in.
-     * 
+     *
      * @param application
      *            application
      */

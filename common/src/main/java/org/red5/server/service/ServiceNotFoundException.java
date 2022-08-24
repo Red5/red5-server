@@ -16,7 +16,7 @@ package org.red5.server.service;
 public class ServiceNotFoundException extends RuntimeException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7543755414829244027L;
 
@@ -25,7 +25,7 @@ public class ServiceNotFoundException extends RuntimeException {
 
     /**
      * Creates new exception with service name
-     * 
+     *
      * @param serviceName
      *            Name of service that couldn't been found
      */
@@ -36,7 +36,7 @@ public class ServiceNotFoundException extends RuntimeException {
 
     /**
      * Get the name of the service that doesn't exist.
-     * 
+     *
      * @return name of the service
      */
     public String getServiceName() {

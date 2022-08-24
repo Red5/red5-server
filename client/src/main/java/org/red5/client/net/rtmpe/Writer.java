@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A tag writer that may be used to write stream data to disk.
- * 
+ *
  * @author Paul Gregoire
  */
 public class Writer implements IClientListener {
@@ -38,7 +38,7 @@ public class Writer implements IClientListener {
 
     /**
      * Instantiates a writer for the given path.
-     * 
+     *
      * @param filePath
      */
     public Writer(String filePath) {
@@ -53,7 +53,7 @@ public class Writer implements IClientListener {
 
     /**
      * Instantiates a writer for the given path.
-     * 
+     *
      * @param filePath
      */
     public Writer(Path filePath) {

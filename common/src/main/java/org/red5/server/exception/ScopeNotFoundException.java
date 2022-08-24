@@ -18,7 +18,7 @@ public class ScopeNotFoundException extends RuntimeException {
 
     /**
      * Create exception from given scope object and given child subscope
-     * 
+     *
      * @param scope
      *            Scope
      * @param childName

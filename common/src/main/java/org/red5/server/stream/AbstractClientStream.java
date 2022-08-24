@@ -39,7 +39,7 @@ public abstract class AbstractClientStream extends AbstractStream implements ICl
 
     /**
      * Setter for stream id
-     * 
+     *
      * @param streamId
      *            Stream id
      */
@@ -49,7 +49,7 @@ public abstract class AbstractClientStream extends AbstractStream implements ICl
 
     /**
      * Return stream id
-     * 
+     *
      * @return Stream id
      */
     public Number getStreamId() {
@@ -58,7 +58,7 @@ public abstract class AbstractClientStream extends AbstractStream implements ICl
 
     /**
      * Setter for stream capable connection
-     * 
+     *
      * @param conn
      *            IStreamCapableConnection object
      */
@@ -68,7 +68,7 @@ public abstract class AbstractClientStream extends AbstractStream implements ICl
 
     /**
      * Return connection associated with stream
-     * 
+     *
      * @return Stream capable connection object
      */
     public IStreamCapableConnection getConnection() {
@@ -91,7 +91,7 @@ public abstract class AbstractClientStream extends AbstractStream implements ICl
 
     /**
      * Sets the broadcasting streams name.
-     * 
+     *
      * @param broadcastStreamPublishName
      *            name of the broadcasting stream
      */

@@ -34,7 +34,7 @@ public class NetworkDumpFilter extends IoFilterAdapter {
 
     /**
      * Create network dump filter from given dump channels
-     * 
+     *
      * @param headers
      *            Channel to dump headers
      * @param raw

@@ -41,7 +41,7 @@ public class MetaServiceTest extends TestCase {
 
     /**
      * Test writing meta data
-     * 
+     *
      * @throws IOException
      *             if io exception
      */

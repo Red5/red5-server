@@ -11,7 +11,7 @@ import org.red5.server.api.IConnection;
 
 /**
  * Clientside access to shared objects.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -19,7 +19,7 @@ public interface IClientSharedObject extends ISharedObjectBase {
 
     /**
      * Connect the shared object using the passed connection.
-     * 
+     *
      * @param conn
      *            connect to connect to
      */
@@ -27,7 +27,7 @@ public interface IClientSharedObject extends ISharedObjectBase {
 
     /**
      * Check if the shared object is connected to the server.
-     * 
+     *
      * @return is connected
      */
     public boolean isConnected();

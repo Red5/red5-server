@@ -13,7 +13,7 @@ import org.red5.server.api.scope.IScopeService;
 
 /**
  * Service that supports protecting access to shared objects.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -26,7 +26,7 @@ public interface ISharedObjectSecurityService extends IScopeService {
 
     /**
      * Add handler that protects shared objects.
-     * 
+     *
      * @param handler
      *            Handler to add.
      */
@@ -34,7 +34,7 @@ public interface ISharedObjectSecurityService extends IScopeService {
 
     /**
      * Remove handler that protects shared objects.
-     * 
+     *
      * @param handler
      *            Handler to remove.
      */
@@ -42,7 +42,7 @@ public interface ISharedObjectSecurityService extends IScopeService {
 
     /**
      * Get handlers that protect shared objects.
-     * 
+     *
      * @return list of handlers
      */
     public Set<ISharedObjectSecurity> getSharedObjectSecurity();

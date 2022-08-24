@@ -12,7 +12,7 @@ import org.red5.io.amf3.IExternalizable;
 
 /**
  * An externalizable version of a given AsyncMessage. The class alias for this class within flex is "DSA".
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class AsyncMessageExt extends AsyncMessage implements IExternalizable {

@@ -89,7 +89,7 @@ public class FileProvider implements IPassive, ISeekableProvider, IPullableProvi
 
     /**
      * Create file provider for given file and scope
-     * 
+     *
      * @param scope
      *            Scope
      * @param file

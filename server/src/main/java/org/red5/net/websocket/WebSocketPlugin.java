@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * WebSocketPlugin - centralized WebSocket configuration and locator. <br>
  * This plugin will be called by Red5 plugin launcher to associate application components with WebSockets.
- * 
+ *
  * @author Paul Gregoire
  */
 public class WebSocketPlugin extends Red5Plugin {
@@ -139,7 +139,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Configures a websocket scope for a given application scope.
-     * 
+     *
      * @param scope
      *            Server application scope
      */
@@ -169,7 +169,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Configures a websocket scope for a given room scope.
-     * 
+     *
      * @param scope
      *            Server room scope
      */
@@ -205,7 +205,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Submit a task for execution.
-     * 
+     *
      * @param task
      * @return Future
      */
@@ -227,7 +227,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Returns the application scope for a given path.
-     * 
+     *
      * @param path
      * @return IScope
      */
@@ -240,7 +240,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Returns a WebSocketScopeManager for a given scope.
-     * 
+     *
      * @param scope
      * @return WebSocketScopeManager if registered for the given scope and null otherwise
      */
@@ -250,7 +250,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Returns a WebSocketScopeManager for a given path.
-     * 
+     *
      * @param path
      * @return WebSocketScopeManager if registered for the given path and null otherwise
      */
@@ -293,7 +293,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Returns a DefaultWsServerContainer for a given path.
-     * 
+     *
      * @param path
      * @return DefaultWsServerContainer
      */
@@ -342,7 +342,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Returns an new instance of the configurator.
-     * 
+     *
      * @return configurator
      */
     public static Configurator getWsConfiguratorInstance() {
@@ -352,7 +352,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Returns a new instance of WsServerContainer if one does not already exist.
-     * 
+     *
      * @param servletContext
      * @return WsServerContainer
      */

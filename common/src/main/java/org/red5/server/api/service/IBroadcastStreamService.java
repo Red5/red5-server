@@ -18,7 +18,7 @@ public interface IBroadcastStreamService {
 
     /**
      * Does the scope have a broadcast stream registered with a given name
-     * 
+     *
      * @param scope
      *            the scope to check for the stream
      * @param name
@@ -29,7 +29,7 @@ public interface IBroadcastStreamService {
 
     /**
      * Get a broadcast stream by name
-     * 
+     *
      * @param scope
      *            the scope to return the stream from
      * @param name
@@ -40,7 +40,7 @@ public interface IBroadcastStreamService {
 
     /**
      * Get a set containing the names of all the broadcasts
-     * 
+     *
      * @param scope
      *            the scope to search for streams
      * @return set containing all broadcast names

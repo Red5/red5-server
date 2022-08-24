@@ -39,28 +39,28 @@ public interface Message {
 
     /**
      * Returns the body of the message.
-     * 
+     *
      * @return message body
      */
     Object getBody();
 
     /**
      * Returns the client id indicating the client that sent the message.
-     * 
+     *
      * @return client id
      */
     String getClientId();
 
     /**
      * Returns the destination that the message targets.
-     * 
+     *
      * @return destination
      */
     String getDestination();
 
     /**
      * Returns a header value corresponding to the passed header name.
-     * 
+     *
      * @param name
      *            header name
      * @return header value
@@ -69,35 +69,35 @@ public interface Message {
 
     /**
      * Returns the headers for the message.
-     * 
+     *
      * @return headers
      */
     Map<String, Object> getHeaders();
 
     /**
      * Returns the unique message id.
-     * 
+     *
      * @return message id
      */
     String getMessageId();
 
     /**
      * Returns the timestamp for the message.
-     * 
+     *
      * @return timestamp
      */
     long getTimestamp();
 
     /**
      * Returns the time to live for the message.
-     * 
+     *
      * @return time to live
      */
     long getTimeToLive();
 
     /**
      * Tests whether a header with the passed name exists.
-     * 
+     *
      * @param name
      *            header name
      * @return true if header exists, false otherwise
@@ -106,7 +106,7 @@ public interface Message {
 
     /**
      * Sets the body of the message.
-     * 
+     *
      * @param value
      *            body
      */
@@ -114,7 +114,7 @@ public interface Message {
 
     /**
      * Sets the client id indicating the client that sent the message.
-     * 
+     *
      * @param value
      *            client id
      */
@@ -122,7 +122,7 @@ public interface Message {
 
     /**
      * Sets the destination that the message targets.
-     * 
+     *
      * @param value
      *            destination
      */
@@ -130,7 +130,7 @@ public interface Message {
 
     /**
      * Sets a header on the message.
-     * 
+     *
      * @param name
      *            header name
      * @param value
@@ -140,7 +140,7 @@ public interface Message {
 
     /**
      * Sets the headers for the message.
-     * 
+     *
      * @param values
      *            header values
      */
@@ -148,7 +148,7 @@ public interface Message {
 
     /**
      * Sets the unique message id.
-     * 
+     *
      * @param value
      *            message id
      */
@@ -156,7 +156,7 @@ public interface Message {
 
     /**
      * Sets the timestamp for the message.
-     * 
+     *
      * @param value
      *            timestamp
      */
@@ -164,7 +164,7 @@ public interface Message {
 
     /**
      * Sets the time to live for the message.
-     * 
+     *
      * @param value
      *            ttl
      */

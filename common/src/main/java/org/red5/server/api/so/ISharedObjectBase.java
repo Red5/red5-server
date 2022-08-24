@@ -15,9 +15,9 @@ import org.red5.server.api.event.IEventListener;
 
 /**
  * Base interface for shared objects. Changes to the shared objects are propagated to all subscribed clients.
- * 
+ *
  * If you want to modify multiple attributes and notify the clients about all changes at once, you can use code like this:
- * 
+ *
  * <pre>
  * SharedObject.beginUpdate();
  * SharedObject.setAttribute(&quot;One&quot;, '1');
@@ -25,9 +25,9 @@ import org.red5.server.api.event.IEventListener;
  * SharedObject.removeAttribute(&quot;Three&quot;);
  * SharedObject.endUpdate();
  * </pre>
- * 
+ *
  * All changes between "beginUpdate" and "endUpdate" will be sent to the clients using one notification event.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -35,14 +35,14 @@ public interface ISharedObjectBase extends ISharedObjectHandlerProvider, ICastin
 
     /**
      * Returns the version of the shared object. The version is incremented automatically on each modification.
-     * 
+     *
      * @return the version of the shared object
      */
     public int getVersion();
 
     /**
      * Check if the object has been created as persistent shared object by the client.
-     * 
+     *
      * @return true if the shared object is persistent, false otherwise
      */
     public boolean isPersistent();
@@ -50,14 +50,14 @@ public interface ISharedObjectBase extends ISharedObjectHandlerProvider, ICastin
     /**
      * Return a map containing all attributes of the shared object. <br>
      * NOTE: The returned map will be read-only.
-     * 
+     *
      * @return a map containing all attributes of the shared object
      */
     public Map<String, Object> getData();
 
     /**
      * Send a message to a handler of the shared object.
-     * 
+     *
      * @param handler
      *            the name of the handler to call
      * @param arguments
@@ -72,7 +72,7 @@ public interface ISharedObjectBase extends ISharedObjectHandlerProvider, ICastin
 
     /**
      * Start performing multiple updates to the shared object from a connected client.
-     * 
+     *
      * @param source
      *            Update events listener
      */
@@ -85,7 +85,7 @@ public interface ISharedObjectBase extends ISharedObjectHandlerProvider, ICastin
 
     /**
      * Register object that will be notified about update events.
-     * 
+     *
      * @param listener
      *            the object to notify
      */
@@ -93,7 +93,7 @@ public interface ISharedObjectBase extends ISharedObjectHandlerProvider, ICastin
 
     /**
      * Unregister object to not longer receive update events.
-     * 
+     *
      * @param listener
      *            the object to unregister
      */
@@ -101,7 +101,7 @@ public interface ISharedObjectBase extends ISharedObjectHandlerProvider, ICastin
 
     /**
      * Deletes all the attributes and sends a clear event to all listeners. The persistent data object is also removed from a persistent shared object.
-     * 
+     *
      * @return true if successful; false otherwise
      */
     public boolean clear();

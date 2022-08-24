@@ -42,7 +42,7 @@ public class FileStreamSource implements ISeekableStreamSource, Constants {
 
     /**
      * Creates file stream source with tag reader
-     * 
+     *
      * @param reader
      *            Tag reader
      */
@@ -59,7 +59,7 @@ public class FileStreamSource implements ISeekableStreamSource, Constants {
 
     /**
      * Get tag from queue and convert to message
-     * 
+     *
      * @return RTMP event
      */
     public IRTMPEvent dequeue() {

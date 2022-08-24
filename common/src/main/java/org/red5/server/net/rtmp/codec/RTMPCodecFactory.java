@@ -47,7 +47,7 @@ public class RTMPCodecFactory implements ProtocolCodecFactory {
 
     /**
      * Returns the RTMP decoder.
-     * 
+     *
      * @return decoder
      */
     public RTMPProtocolDecoder getRTMPDecoder() {
@@ -56,7 +56,7 @@ public class RTMPCodecFactory implements ProtocolCodecFactory {
 
     /**
      * Returns the RTMP encoder.
-     * 
+     *
      * @return encoder
      */
     public RTMPProtocolEncoder getRTMPEncoder() {

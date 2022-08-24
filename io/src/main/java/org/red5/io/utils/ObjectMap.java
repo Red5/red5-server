@@ -11,7 +11,7 @@ import java.util.LinkedHashMap;
 
 /**
  * Map that should be transmitted as object through RTMP.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @param <K>

@@ -11,7 +11,7 @@ import org.red5.server.api.remoting.IRemotingHeader;
 
 /**
  * Remoting header to be sent to a server.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -34,7 +34,7 @@ public class RemotingHeader implements IRemotingHeader {
 
     /**
      * Create a new header to be sent through remoting.
-     * 
+     *
      * @param name
      *            Header name
      * @param required

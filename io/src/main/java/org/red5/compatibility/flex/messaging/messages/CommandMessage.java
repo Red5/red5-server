@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Command message as sent by the <code>mx:RemoteObject</code> tag.
- * 
+ *
  * @see <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a>
  * @see <a href="http://flex.apache.org/asdoc/mx/messaging/messages/CommandMessage.html">Apache Flex</a>
  *

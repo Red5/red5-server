@@ -37,7 +37,7 @@ import org.springframework.web.context.ServletContextAware;
  * <p>
  * Then it loads virtual hosts configuration, adds mappings of paths to global scope that is injected thru Spring IoC context file and runs initialization process.
  * </p>
- * 
+ *
  * Red5 server implementation instance and ServletContext are injected as well.
  */
 @ManagedResource
@@ -110,7 +110,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Setter for global scope. Sets persistence class.
-     * 
+     *
      * @param globalScope
      *            Red5 global scope
      */
@@ -141,7 +141,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Setter for server
-     * 
+     *
      * @param server
      *            Server instance
      */
@@ -152,7 +152,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Servlet context
-     * 
+     *
      * @param servletContext
      *            Servlet context
      */
@@ -162,7 +162,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Setter for context path
-     * 
+     *
      * @param contextPath
      *            Context path
      */
@@ -173,7 +173,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Return scope context path
-     * 
+     *
      * @return Scope context path
      */
     @Override
@@ -183,7 +183,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Setter for virtual hosts. Creates array of hostnames.
-     * 
+     *
      * @param virtualHosts
      *            Virtual hosts list as string
      */
@@ -278,7 +278,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Return object that can be used to load new applications.
-     * 
+     *
      * @return the application loader
      */
     public IApplicationLoader getApplicationLoader() {
@@ -308,7 +308,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
 
     /**
      * Is the scope currently shutting down?
-     * 
+     *
      * @return is shutting down
      */
     public boolean isShuttingDown() {

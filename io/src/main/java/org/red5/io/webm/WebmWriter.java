@@ -44,7 +44,7 @@ public class WebmWriter implements Closeable, TagConsumer {
 
     /**
      * Constructor
-     * 
+     *
      * @param file
      *            - file the data need to written to
      * @param append
@@ -82,7 +82,7 @@ public class WebmWriter implements Closeable, TagConsumer {
 
     /**
      * method to write webm header to the new file
-     * 
+     *
      * @throws IOException
      *             - in case of IO errors
      * @throws ConverterException
@@ -106,7 +106,7 @@ public class WebmWriter implements Closeable, TagConsumer {
 
     /**
      * will write tag bytesWritten counter will be increased by the number of bytes actually written
-     * 
+     *
      * @param tag
      *            - tag to be written
      * @throws IOException

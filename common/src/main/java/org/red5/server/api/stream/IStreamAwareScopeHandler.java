@@ -11,14 +11,14 @@ import org.red5.server.api.scope.IScopeHandler;
 
 /**
  * A scope handler that is stream aware.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface IStreamAwareScopeHandler extends IScopeHandler {
     /**
      * A broadcast stream starts being published. This will be called when the first video packet has been received.
-     * 
+     *
      * @param stream
      *            stream
      */
@@ -26,7 +26,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * A broadcast stream starts being recorded. This will be called when the first video packet has been received.
-     * 
+     *
      * @param stream
      *            stream
      */
@@ -42,7 +42,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a broadcaster starts.
-     * 
+     *
      * @param stream
      *            stream
      */
@@ -50,7 +50,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a broadcaster closes.
-     * 
+     *
      * @param stream
      *            stream
      */
@@ -58,7 +58,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a subscriber starts.
-     * 
+     *
      * @param stream
      *            stream
      */
@@ -66,7 +66,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a subscriber closes.
-     * 
+     *
      * @param stream
      *            stream
      */
@@ -74,7 +74,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a play item plays.
-     * 
+     *
      * @param stream
      *            stream
      * @param item
@@ -86,7 +86,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a play item stops.
-     * 
+     *
      * @param stream
      *            stream
      * @param item
@@ -96,7 +96,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a play item pauses.
-     * 
+     *
      * @param stream
      *            stream
      * @param item
@@ -108,7 +108,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a play item resumes.
-     * 
+     *
      * @param stream
      *            stream
      * @param item
@@ -120,7 +120,7 @@ public interface IStreamAwareScopeHandler extends IScopeHandler {
 
     /**
      * Notified when a play item seeks.
-     * 
+     *
      * @param stream
      *            stream
      * @param item

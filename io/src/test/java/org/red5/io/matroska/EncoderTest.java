@@ -30,7 +30,7 @@ import org.red5.io.matroska.dtd.UnsignedIntegerTag;
 public class EncoderTest {
     /**
      * tests if created and parsed {@link Tag}s have same IDs
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -56,7 +56,7 @@ public class EncoderTest {
 
     /**
      * tests if manually created and encoded "master" {@link Tag} can be parsed successfully
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -80,7 +80,7 @@ public class EncoderTest {
 
     /**
      * tests if manually created and encoded "uint" {@link Tag} can be parsed successfully
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -102,7 +102,7 @@ public class EncoderTest {
 
     /**
      * tests if manually created and encoded "string" {@link Tag} can be parsed successfully
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -124,7 +124,7 @@ public class EncoderTest {
 
     /**
      * tests if manually created and encoded "double" {@link Tag} can be parsed successfully
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -146,7 +146,7 @@ public class EncoderTest {
 
     /**
      * tests if manually created and encoded "date" {@link Tag} can be parsed successfully
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException

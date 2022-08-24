@@ -52,7 +52,7 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
 
     /**
      * Create new client SO with
-     * 
+     *
      * @param name
      *            Shared Object name
      * @param persistent
@@ -66,7 +66,7 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
 
     /**
      * Connect the shared object using the passed connection.
-     * 
+     *
      * @param conn
      *            Attach SO to given connection
      */
@@ -184,7 +184,7 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
 
     /**
      * Notify listeners on update
-     * 
+     *
      * @param key
      *            Updated attribute key
      * @param value
@@ -198,7 +198,7 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
 
     /**
      * Notify listeners on map attribute update
-     * 
+     *
      * @param key
      *            Updated attribute key
      * @param value
@@ -217,7 +217,7 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
 
     /**
      * Notify listeners on attribute delete
-     * 
+     *
      * @param key
      *            Attribute name
      */
@@ -238,7 +238,7 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
 
     /**
      * Broadcast send event to listeners
-     * 
+     *
      * @param method
      *            Method name
      * @param params

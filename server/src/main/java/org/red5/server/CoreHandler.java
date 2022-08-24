@@ -62,7 +62,7 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
      */
     public boolean connect(IConnection conn, IScope scope, Object[] params) {
         log.debug("connect - conn: {} scope: {}", conn, scope);
-        // this is where we create the Client object that consolidates connections from a single client/FP. 
+        // this is where we create the Client object that consolidates connections from a single client/FP.
         // Now for more strangeness, I've only been looking at RTMPConnection derivatives, but it's setup() method
         // seems the only way that the session id is passed in to the newly established connection and this is currently *always* passed in
         // as null. I'm guessing that either the Flash Player passes some kind of unique id to us that is not being used, or that the idea

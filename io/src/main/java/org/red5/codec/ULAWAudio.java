@@ -12,7 +12,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  * Red5 audio codec for the PCM uLaw audio format.
  *
  * Stores the decoder configuration
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class ULAWAudio extends AbstractAudio {

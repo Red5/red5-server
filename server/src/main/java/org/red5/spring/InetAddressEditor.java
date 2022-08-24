@@ -28,7 +28,7 @@ public class InetAddressEditor extends PropertyEditorSupport {
     private static Pattern ipv6 = Pattern.compile("([0-9a-fA-F]{4}:){7}[0-9a-fA-F]{4}");
 
     @Override
-    /** 
+    /**
      * Converts String IP address to InetAddress object.
      *
      * @param textValue ex. "255.255.222.255"

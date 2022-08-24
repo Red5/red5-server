@@ -75,25 +75,25 @@ import org.slf4j.Logger;
  * methods added in subclasses can be called from client side with NetConnection.call method. Unlike to Flash Media server which requires
  * you to keep methods on Client object at server side, Red5 offers much more convenient way to add methods <br>
  * <strong>EXAMPLE:</strong> <br>
- * 
+ *
  * <code>
  * public List&lt;String&gt; getLiveStreams() {
  *     // Implementation goes here, say, use Red5 object to obtain scope and all it's streams
  * }
  * </code>
- * 
+ *
  * <br>
  * This method added to ApplicationAdapter subclass can be called from client side with the following code: <br>
- * 
+ *
  * <code>
  * var nc:NetConnection = new NetConnection();
  * nc.connect(...);
  * nc.call("getLiveStreams", resultHandlerObj);
  * </code>
- * 
+ *
  * <br>
  * If you want to build a server-side framework this is a place to start and wrap it around ApplicationAdapter subclass.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -138,7 +138,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Register a listener that will get notified about application events.
-     * 
+     *
      * @param listener
      *            object to register
      */
@@ -148,7 +148,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Unregister handler that will not get notified about application events any longer.
-     * 
+     *
      * @param listener
      *            object to unregister
      */
@@ -158,7 +158,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Return handlers that get notified about application events.
-     * 
+     *
      * @return list of handlers
      */
     public Set<IApplication> getListeners() {
@@ -212,7 +212,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Reject the currently connecting client without a special error message. This method throws {@link ClientRejectedException} exception.
-     * 
+     *
      * @return never returns
      * @throws org.red5.server.exception.ClientRejectedException
      *             Thrown when client connection must be rejected by application logic
@@ -223,13 +223,13 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Reject the currently connecting client with an error message.
-     * 
+     *
      * The passed object will be available as "application" property of the information object that is returned to the caller.
-     * 
+     *
      * @param reason
      *            Additional error message to return to client-side Flex/Flash application
      * @return never returns
-     * 
+     *
      * @throws org.red5.server.exception.ClientRejectedException
      *             Thrown when client connection must be rejected by application logic
      */
@@ -241,7 +241,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * Returns connection result for given scope and parameters. Whether the scope is room or app level scope, this method distinguishes it
      * and acts accordingly. You override {@link ApplicationAdapter#appConnect(IConnection, Object[])} or
      * {@link ApplicationAdapter#roomConnect(IConnection, Object[])} in your application to make it act the way you want.
-     * 
+     *
      * @param conn
      *            Connection object
      * @return <code>true</code> if connect is successful, <code>false</code> otherwise
@@ -261,7 +261,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * Returns connection result for given scope and parameters. Whether the scope is room or app level scope, this method distinguishes it
      * and acts accordingly. You override {@link ApplicationAdapter#appConnect(IConnection, Object[])} or
      * {@link ApplicationAdapter#roomConnect(IConnection, Object[])} in your application to make it act the way you want.
-     * 
+     *
      * @param conn
      *            Connection object
      * @param scope
@@ -271,13 +271,13 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return <code>
      * true
      * </code>
-     * 
+     *
      *         if connect is successful,
-     * 
+     *
      *         <code>
      * false
      * </code>
-     * 
+     *
      *         otherwise
      */
     @Override
@@ -312,19 +312,19 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Starts scope. Scope can be both application or room level.
-     * 
+     *
      * @param scope
      *            Scope object
      * @return <code>
      * true
      * </code>
-     * 
+     *
      *         if scope can be started,
-     * 
+     *
      *         <code>
      * false
      * </code>
-     * 
+     *
      *         otherwise. See {@link AbstractScopeAdapter#start(IScope)} for details.
      */
     @Override
@@ -411,7 +411,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Returns disconnection result for given scope and parameters. Whether the scope is room or app level scope, this method distinguishes
      * it and acts accordingly.
-     * 
+     *
      * @param conn
      *            Connection object
      * @param scope
@@ -443,7 +443,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * Stops scope handling (that is, stops application if given scope is app level scope and stops room handling if given scope has lower
      * scope level). This method calls {@link ApplicationAdapter#appStop(IScope)} or {@link ApplicationAdapter#roomStop(IScope)} handlers
      * respectively.
-     * 
+     *
      * @param scope
      *            Scope to stop
      */
@@ -454,7 +454,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         if (ScopeUtils.isApp(scope)) {
             // we don't allow connections after we stop
             super.setCanConnect(false);
-            // we also don't allow service calls 
+            // we also don't allow service calls
             super.setCanCallService(false);
             // stop the app
             appStop(scope);
@@ -468,7 +468,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * Adds client to scope. Scope can be both application or room. Can be applied to both application scope and scopes of lower level. This
      * method calls {@link ApplicationAdapter#appJoin(IClient, IScope)} or {@link ApplicationAdapter#roomJoin(IClient, IScope)} handlers
      * respectively.
-     * 
+     *
      * @param client
      *            Client object
      * @param scope
@@ -489,7 +489,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Disconnects client from scope. Can be applied to both application scope and scopes of lower level. This method calls
      * {@link ApplicationAdapter#appLeave(IClient, IScope)} or {@link ApplicationAdapter#roomLeave(IClient, IScope)} handlers respectively.
-     * 
+     *
      * @param client
      *            Client object
      * @param scope
@@ -509,19 +509,19 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Called once on scope (that is, application or application room) start. You override {@link ApplicationAdapter#appStart(IScope)} or
      * {@link ApplicationAdapter#roomStart(IScope)} in your application to make it act the way you want.
-     * 
+     *
      * @param app
      *            Application scope object
      * @return <code>
      * true
      * </code>
-     * 
+     *
      *         if scope can be started,
-     * 
+     *
      *         <code>
      * false
      * </code>
-     * 
+     *
      *         otherwise
      */
     public boolean appStart(IScope app) {
@@ -536,7 +536,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Handler method. Called when application is stopped.
-     * 
+     *
      * @param app
      *            Scope object
      */
@@ -549,7 +549,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Handler method. Called when room scope is started.
-     * 
+     *
      * @param room
      *            Room scope
      * @return Boolean value
@@ -567,7 +567,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Handler method. Called when room scope is stopped.
-     * 
+     *
      * @param room
      *            Room scope.
      */
@@ -582,37 +582,37 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * Handler method. Called every time new client connects (that is, new IConnection object is created after call from a SWF movie) to the
      * application. <br>
      * You override this method to pass additional data from client to server application using
-     * 
+     *
      * <code>
      * NetConnection.connect
      * </code>
-     * 
+     *
      * method. <br>
      * <strong>EXAMPLE:</strong> <br>
      * In this simple example we pass user's skin of choice identifier from client to the server. <br>
      * <strong>Client-side:</strong> <br>
-     * 
+     *
      * <code>
      * NetConnection.connect(&quot;rtmp://localhost/killerred5app&quot;, &quot;silver&quot;);
      * </code>
-     * 
+     *
      * <br>
      * <strong>Server-side:</strong> <br>
-     * 
+     *
      * <code>
      * if (params.length &gt; 0)
      *     log.debug(&quot;Theme selected: {}&quot;, params[0]);
      * </code>
-     * 
+     *
      * @param conn
      *            Connection object
      * @param params
      *            List of parameters after connection URL passed to
-     * 
+     *
      *            <code>
      * NetConnection.connect
      * </code>
-     * 
+     *
      *            method.
      * @return Boolean value
      */
@@ -629,17 +629,17 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Handler method. Called every time new client connects (that is, new IConnection object is created after call from a SWF movie) to the
      * application.
-     * 
+     *
      * You override this method to pass additional data from client to server application using
-     * 
+     *
      * <code>
      * NetConnection.connect
      * </code>
-     * 
+     *
      * method.
-     * 
+     *
      * See {@link ApplicationAdapter#appConnect(IConnection, Object[])} for code example.
-     * 
+     *
      * @param conn
      *            Connection object
      * @param params
@@ -658,7 +658,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Handler method. Called every time client disconnects from the application.
-     * 
+     *
      * @param conn
      *            Disconnected connection object
      */
@@ -671,7 +671,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Handler method. Called every time client disconnects from the room.
-     * 
+     *
      * @param conn
      *            Disconnected connection object
      */
@@ -694,7 +694,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Handler method. Called every time client leaves application scope.
-     * 
+     *
      * @param client
      *            Client object that left
      * @param app
@@ -719,7 +719,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Handler method. Called every time client leaves room scope.
-     * 
+     *
      * @param client
      *            Disconnected client object
      * @param room
@@ -734,7 +734,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Try to measure bandwidth of current connection.
-     * 
+     *
      * This is required for some FLV player to work because they require the "onBWDone" method to be called on the connection.
      */
     public void measureBandwidth() {
@@ -743,9 +743,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Try to measure bandwidth of given connection.
-     * 
+     *
      * This is required for some FLV player to work because they require the "onBWDone" method to be called on the connection.
-     * 
+     *
      * @param conn
      *            the connection to measure the bandwidth for
      */
@@ -759,20 +759,20 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Creates a new shared object for given scope. Server-side shared objects (also known as Remote SO) are special kind of objects those
      * variable are synchronized between clients. To get an instance of RSO at client-side, use
-     * 
+     *
      * <code>
      * SharedObject.getRemote()
      * </code>
-     * 
+     *
      * . SharedObjects can be persistent and transient. Persistent RSO are stateful, i.e. store their data between sessions. If you need to
      * store some data on server while clients go back and forth use persistent SO (just use
-     * 
+     *
      * <code>
      * true
      * </code>
-     * 
+     *
      * ), otherwise prefer usage of transient for extra performance.
-     * 
+     *
      * @param scope
      *            Scope that shared object belongs to
      * @param name
@@ -788,7 +788,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns shared object from given scope by name.
-     * 
+     *
      * @param scope
      *            Scope that shared object belongs to
      * @param name
@@ -802,7 +802,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns shared object from given scope by name.
-     * 
+     *
      * @param scope
      *            Scope that shared object belongs to
      * @param name
@@ -818,7 +818,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns available SharedObject names as List
-     * 
+     *
      * @param scope
      *            Scope that SO belong to
      */
@@ -829,7 +829,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Checks whether there's a SO with given scope and name
-     * 
+     *
      * @param scope
      *            Scope that SO belong to
      * @param name
@@ -850,7 +850,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns the registered "provider" scope service.
-     * 
+     *
      * @return IProviderService
      */
     private IProviderService getProviderService() {
@@ -886,13 +886,13 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * Returns list of stream names broadcasted in scope. Broadcast stream name is somewhat different from server stream name. Server stream
      * name is just an ID assigned by Red5 to every created stream. Broadcast stream name is the name that is being used to subscribe to the
      * stream at client side, that is, in
-     * 
+     *
      * <code>
      * NetStream.play
      * </code>
-     * 
+     *
      * call.
-     * 
+     *
      * @param scope
      *            Scope to retrieve broadcasted stream names
      * @return List of broadcasted stream names.
@@ -903,12 +903,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Check whether scope has VOD stream with given name or not
-     * 
+     *
      * @param scope
      *            Scope
      * @param name
      *            VOD stream name
-     * 
+     *
      * @return true if scope has VOD stream with given name, false otherwise.
      */
     public boolean hasOnDemandStream(IScope scope, String name) {
@@ -921,12 +921,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns VOD stream with given name from specified scope.
-     * 
+     *
      * @param scope
      *            Scope object
      * @param name
      *            VOD stream name
-     * 
+     *
      * @return IOnDemandStream object that represents stream that can be played on demand, seekable and so forth. See
      *         {@link IOnDemandStream} for details.
      */
@@ -938,12 +938,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns subscriber stream with given name from specified scope. Subscriber stream is a stream that clients can subscribe to.
-     * 
+     *
      * @param scope
      *            Scope
      * @param name
      *            Stream name
-     * 
+     *
      * @return ISubscriberStream object
      */
     public ISubscriberStream getSubscriberStream(IScope scope, String name) {
@@ -955,12 +955,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Wrapper around ISchedulingService, adds a scheduled job to be run periodically. We store this service in the scope as it can be
      * shared across all rooms of the applications.
-     * 
+     *
      * @param interval
      *            Time interval to run the scheduled job
      * @param job
      *            Scheduled job object
-     * 
+     *
      * @return Name of the scheduled job
      */
     public String addScheduledJob(int interval, IScheduledJob job) {
@@ -972,12 +972,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Adds a scheduled job that's gonna be executed once. Please note that the jobs are not saved if Red5 is restarted in the meantime.
-     * 
+     *
      * @param timeDelta
      *            Time offset in milliseconds from the current date when given job should be run
      * @param job
      *            Scheduled job object
-     * 
+     *
      * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(long timeDelta, IScheduledJob job) {
@@ -990,12 +990,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Adds a scheduled job that's gonna be executed once on given date. Please note that the jobs are not saved if Red5 is restarted in the
      * meantime.
-     * 
+     *
      * @param date
      *            When to run scheduled job
      * @param job
      *            Scheduled job object
-     * 
+     *
      * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(Date date, IScheduledJob job) {
@@ -1007,7 +1007,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Adds a scheduled job which starts after the specified delay period and fires periodically.
-     * 
+     *
      * @param interval
      *            time in milliseconds between two notifications of the job
      * @param job
@@ -1025,7 +1025,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Pauses a scheduled job
-     * 
+     *
      * @param name
      *            Scheduled job name
      */
@@ -1038,7 +1038,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Resumes a scheduled job
-     * 
+     *
      * @param name
      *            Scheduled job name
      */
@@ -1051,7 +1051,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Removes scheduled job from scheduling service list
-     * 
+     *
      * @param name
      *            Scheduled job name
      */
@@ -1064,7 +1064,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns list of scheduled job names
-     * 
+     *
      * @return List of scheduled job names as list of Strings.
      */
     public List<String> getScheduledJobNames() {
@@ -1076,7 +1076,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns stream length. This is a hook so it may be removed.
-     * 
+     *
      * @param name
      *            Stream name
      * @return Stream length in seconds (?)
@@ -1110,7 +1110,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Client time to live is max allowed connection ping return time in seconds
-     * 
+     *
      * @return TTL value used in seconds
      */
     @Deprecated
@@ -1120,7 +1120,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Client time to live is max allowed connection ping return time in seconds
-     * 
+     *
      * @param clientTTL
      *            New TTL value in seconds
      */
@@ -1130,7 +1130,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Return period of ghost connections cleanup task call
-     * 
+     *
      * @return Ghost connections cleanup period
      */
     @Deprecated
@@ -1140,7 +1140,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Set new ghost connections cleanup period
-     * 
+     *
      * @param ghostConnsCleanupPeriod
      *            New ghost connections cleanup period
      */
@@ -1151,9 +1151,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Start transmission notification from Flash Player 11.1+. This command asks the server to transmit more data because the buffer is
      * running low.
-     * 
+     *
      * http://help.adobe.com/en_US/flashmediaserver/devguide/WSd391de4d9c7bd609-569139412a3743e78e-8000.html
-     * 
+     *
      * @param bool
      *            boolean
      * @param num
@@ -1172,7 +1172,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * Stop transmission notification from Flash Player 11.1+. This command asks the server to suspend transmission until the client sends a
      * startTransmit event because there is enough data in the buffer.
-     * 
+     *
      * @param bool
      *            boolean
      * @param num
@@ -1183,7 +1183,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Notification method that is sent by FME just before publishing starts.
-     * 
+     *
      * @param streamName
      *            Name of stream that is about to be published.
      */
@@ -1198,7 +1198,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Notification method that is sent by FME when publishing of a stream ends.
-     * 
+     *
      * @param streamName
      *            Name of stream that is about to be un-published.
      */
@@ -1207,7 +1207,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Notification method that is sent by some clients just before playback starts.
-     * 
+     *
      * @param streamName
      *            Name of stream that is about to be played.
      */
@@ -1216,7 +1216,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Notification that a broadcasting stream is closing.
-     * 
+     *
      * @param stream
      *            stream
      */

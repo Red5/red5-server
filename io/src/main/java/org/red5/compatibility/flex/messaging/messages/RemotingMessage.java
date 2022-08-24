@@ -9,10 +9,10 @@ package org.red5.compatibility.flex.messaging.messages;
 
 /**
  * Flex compatibility message that is sent by the <code>mx:RemoteObject</code> mxml tag.
- * 
+ *
  * @see <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a>
  * @see <a href="http://flex.apache.org/asdoc/mx/messaging/messages/RemotingMessage.html">Apache Flex</a>
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */

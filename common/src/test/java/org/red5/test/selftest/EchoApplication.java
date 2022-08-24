@@ -11,7 +11,7 @@ import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 
 /**
  * Echo sample application.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -19,7 +19,7 @@ public class EchoApplication extends MultiThreadedApplicationAdapter {
 
     /**
      * Return passed parameter back to client.
-     * 
+     *
      * @param param		Parameter to return.
      * @return			Passed parameter.
      */

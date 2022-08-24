@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Client interface for remoting calls.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -75,7 +75,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Create new remoting client for the given url.
-     * 
+     *
      * @param url
      *            URL to connect to
      */
@@ -86,7 +86,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Create new remoting client for the given url and given timeout.
-     * 
+     *
      * @param url
      *            URL to connect to
      * @param timeout
@@ -109,7 +109,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Encode the method call.
-     * 
+     *
      * @param method
      *            Remote method being called
      * @param params
@@ -173,7 +173,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Process any headers sent in the response.
-     * 
+     *
      * @param in
      *            Byte buffer with response data
      */
@@ -222,7 +222,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Decode response received from remoting server.
-     * 
+     *
      * @param data
      *            Result data to decode
      * @return Object deserialized from byte buffer data
@@ -245,7 +245,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Send authentication data with each remoting request.
-     * 
+     *
      * @param userid
      *            User identifier
      * @param password
@@ -268,7 +268,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Send an additional header to the server.
-     * 
+     *
      * @param name
      *            Header name
      * @param required
@@ -283,7 +283,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Stop sending a given header.
-     * 
+     *
      * @param name
      *            Header name
      */
@@ -293,7 +293,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Invoke a method synchronously on the remoting server.
-     * 
+     *
      * @param method
      *            Method name
      * @param params
@@ -352,7 +352,7 @@ public class RemotingClient implements IRemotingClient {
 
     /**
      * Invoke a method asynchronously on the remoting server.
-     * 
+     *
      * @param method
      *            Method name
      * @param methodParams
@@ -384,7 +384,7 @@ public class RemotingClient implements IRemotingClient {
 
         /**
          * Execute task.
-         * 
+         *
          * @param client
          *            Remoting client
          * @param method

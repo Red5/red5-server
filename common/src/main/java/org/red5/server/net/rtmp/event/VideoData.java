@@ -73,7 +73,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
 
     /**
      * Create video data event with given data buffer
-     * 
+     *
      * @param data
      *            Video data
      */
@@ -84,7 +84,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
 
     /**
      * Create video data event with given data buffer
-     * 
+     *
      * @param data
      *            Video data
      * @param copy
@@ -213,7 +213,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
 
     /**
      * Duplicate this message / event.
-     * 
+     *
      * @return duplicated event
      */
     public VideoData duplicate() throws IOException, ClassNotFoundException {

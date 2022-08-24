@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A simple in-memory version of push-push pipe. It is triggered by an active provider to push messages through it to an event-driven consumer.
- * 
+ *
  * @author Steven Gong (steven.gong@gmail.com)
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -74,7 +74,7 @@ public class InMemoryPushPushPipe extends AbstractPipe {
 
     /**
      * Pushes a message out to all the PushableConsumers.
-     * 
+     *
      * @param message
      *            the message to be pushed to consumers
      * @throws IOException

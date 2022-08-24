@@ -19,7 +19,7 @@ import org.red5.io.amf3.IExternalizable;
 
 /**
  * Flex <code>ObjectProxy</code> compatibility class.
- * 
+ *
  * @see <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/utils/ObjectProxy.html">ObjectProxy</a>
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
@@ -44,7 +44,7 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
 
     /**
      * Create proxy for given object.
-     * 
+     *
      * @param item
      *            object to proxy
      */
@@ -67,7 +67,7 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
 
     /**
      * Return string representation of the proxied object.
-     * 
+     *
      * @return string
      */
     @Override
@@ -82,7 +82,7 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
 
     /**
      * Check if proxied object has a given property.
-     * 
+     *
      * @param name
      *            name
      * @return boolean
@@ -104,7 +104,7 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
 
     /**
      * Return the value of a property.
-     * 
+     *
      * @param name
      *            name
      * @return value
@@ -126,7 +126,7 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
 
     /**
      * Change a property of the proxied object.
-     * 
+     *
      * @param name
      *            name
      * @param value
@@ -146,7 +146,7 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
 
     /**
      * Remove a property from the proxied object.
-     * 
+     *
      * @param name
      *            name
      * @return old value

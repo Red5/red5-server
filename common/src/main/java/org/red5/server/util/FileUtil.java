@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Generic file utility containing useful file or directory manipulation functions.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  * @author Dominick Accattato (daccattato@gmail.com)
  */
@@ -96,7 +96,7 @@ public class FileUtil {
 
     /**
      * Deletes a directory and its contents. This will fail if there are any file locks or if the directory cannot be emptied.
-     * 
+     *
      * @param directory
      *            directory to delete
      * @throws IOException
@@ -109,7 +109,7 @@ public class FileUtil {
 
     /**
      * Deletes a directory and its contents. This will fail if there are any file locks or if the directory cannot be emptied.
-     * 
+     *
      * @param directory
      *            directory to delete
      * @param useOSNativeDelete
@@ -152,7 +152,7 @@ public class FileUtil {
                     //we are windows
                     p = runTime.exec("CMD /D /C \"RMDIR /Q /S " + directory.replace('/', '\\') + "\"");
                 } else {
-                    //we are unix variant 
+                    //we are unix variant
                     p = runTime.exec("rm -rf " + directory.replace('\\', File.separatorChar));
                 }
                 // observe std out
@@ -182,7 +182,7 @@ public class FileUtil {
 
     /**
      * Rename a file natively; using REN on Windows and mv on *nix.
-     * 
+     *
      * @param from
      *            old name
      * @param to
@@ -198,7 +198,7 @@ public class FileUtil {
 
     /**
      * Special method for capture of StdOut.
-     * 
+     *
      * @return stdOut thread
      */
     private final static Thread stdOut(final Process p) {
@@ -232,7 +232,7 @@ public class FileUtil {
 
     /**
      * Create a directory.
-     * 
+     *
      * @param directory
      *            directory to make
      * @return whether a new directory was made
@@ -245,7 +245,7 @@ public class FileUtil {
 
     /**
      * Create a directory. The parent directories will be created if <i>createParents</i> is passed as true.
-     * 
+     *
      * @param directory
      *            directory
      * @param createParents
@@ -253,7 +253,7 @@ public class FileUtil {
      * @return true if directory was created; false if it already existed
      * @throws IOException
      *             if we cannot create directory
-     * 
+     *
      */
     public static boolean makeDirectory(String directory, boolean createParents) throws IOException {
         boolean created = false;
@@ -279,7 +279,7 @@ public class FileUtil {
 
     /**
      * Unzips a war file to an application located under the webapps directory
-     * 
+     *
      * @param compressedFileName
      *            The String name of the war file
      * @param destinationDir
@@ -288,7 +288,7 @@ public class FileUtil {
     public static void unzip(String compressedFileName, String destinationDir) {
         //strip everything except the applications name
         String dirName = null;
-        // checks to see if there is a dash "-" in the filename of the war. 
+        // checks to see if there is a dash "-" in the filename of the war.
         String applicationName = compressedFileName.substring(compressedFileName.lastIndexOf("/"));
         int dashIndex = applicationName.indexOf('-');
         if (dashIndex != -1) {
@@ -374,7 +374,7 @@ public class FileUtil {
 
     /**
      * Quick-n-dirty directory formatting to support launching in windows, specifically from ant.
-     * 
+     *
      * @param absWebappsPath
      *            abs webapps path
      * @param contextDirName
@@ -425,7 +425,7 @@ public class FileUtil {
 
     /**
      * Generates a custom name containing numbers and an underscore ex. 282818_00023. The name contains current seconds and a random number component.
-     * 
+     *
      * @return custom name
      */
     public static String generateCustomName() {
@@ -449,7 +449,7 @@ public class FileUtil {
 
     /**
      * Reads all the bytes of a given file into an array. If the file size exceeds Integer.MAX_VALUE, it will be truncated.
-     * 
+     *
      * @param localSwfFile
      *            swf file
      * @return file bytes

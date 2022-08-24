@@ -38,7 +38,7 @@ public class RuntimeStatusObject extends StatusObject {
 
     /**
      * Create runtime status object with given code, level and description
-     * 
+     *
      * @param code
      *            Status code
      * @param level
@@ -52,7 +52,7 @@ public class RuntimeStatusObject extends StatusObject {
 
     /**
      * Create runtime status object with given code, level, description, details and client id
-     * 
+     *
      * @param code
      *            Status code
      * @param level

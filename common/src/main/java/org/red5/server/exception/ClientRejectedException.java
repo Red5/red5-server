@@ -25,7 +25,7 @@ public class ClientRejectedException extends RuntimeException {
 
     /**
      * Create new exception with given rejection reason
-     * 
+     *
      * @param reason
      *            Rejection reason
      */

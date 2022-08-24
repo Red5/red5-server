@@ -161,7 +161,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Constructs new SO from Input object
-     * 
+     *
      * @param input
      *            Input source
      * @throws IOException
@@ -195,7 +195,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Creates new SO from given data map, name, path, storage object and persistence option
-     * 
+     *
      * @param name
      *            SO name
      * @param path
@@ -229,7 +229,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Creates new SO from given data map, name, path, storage object and persistence option
-     * 
+     *
      * @param data
      *            Data
      * @param name
@@ -332,7 +332,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
                 if (log.isTraceEnabled()) {
                     log.trace("Listeners: {}", listeners);
                 }
-                // get all current sync events 
+                // get all current sync events
                 final TreeSet<ISharedObjectEvent> events = new TreeSet<>(syncEvents);
                 syncEvents.removeAll(events);
                 // updates all registered clients of this shared object
@@ -378,7 +378,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Return an error message to the client.
-     * 
+     *
      * @param message
      *            message
      */
@@ -549,7 +549,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Broadcast event to event handler
-     * 
+     *
      * @param handler
      *            Event handler
      * @param arguments
@@ -586,7 +586,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Register event listener
-     * 
+     *
      * @param listener
      *            Event listener
      * @return true if listener was added
@@ -612,7 +612,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Unregister event listener
-     * 
+     *
      * @param listener
      *            Event listener
      */
@@ -657,7 +657,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Begin update of this Shared Object and setting listener
-     * 
+     *
      * @param listener
      *            Update with listener
      */
@@ -721,7 +721,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
     /**
      * Deletes all the attributes and sends a clear event to all listeners. The persistent data object is also removed from a persistent
      * shared object.
-     * 
+     *
      * @return true on success, false otherwise
      */
     protected boolean clear() {
@@ -759,7 +759,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Check if shared object currently is acquired.
-     * 
+     *
      * @return true if the SO is acquired, false otherwise
      */
     public boolean isAcquired() {

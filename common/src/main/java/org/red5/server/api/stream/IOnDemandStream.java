@@ -9,7 +9,7 @@ package org.red5.server.api.stream;
 
 /**
  * Extends stream to add methods for on demand access.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  */
@@ -22,7 +22,7 @@ public interface IOnDemandStream extends IStream {
 
     /**
      * Start playback with a given maximum duration.
-     * 
+     *
      * @param length
      *            maximum duration in milliseconds
      */
@@ -30,7 +30,7 @@ public interface IOnDemandStream extends IStream {
 
     /**
      * Seek to the keyframe nearest to position
-     * 
+     *
      * @param position
      *            position in milliseconds
      */
@@ -53,21 +53,21 @@ public interface IOnDemandStream extends IStream {
 
     /**
      * Is the stream paused
-     * 
+     *
      * @return true if the stream is paused
      */
     public boolean isPaused();
 
     /**
      * Is the stream stopped
-     * 
+     *
      * @return true if the stream is stopped
      */
     public boolean isStopped();
 
     /**
      * Is the stream playing
-     * 
+     *
      * @return true if the stream is playing
      */
     public boolean isPlaying();

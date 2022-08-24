@@ -35,7 +35,7 @@ public class Unknown extends BaseEvent {
 
     /**
      * Create new unknown event with given data and data type
-     * 
+     *
      * @param dataType
      *            Data type
      * @param data

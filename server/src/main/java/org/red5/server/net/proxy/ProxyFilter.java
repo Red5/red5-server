@@ -34,7 +34,7 @@ public class ProxyFilter extends IoFilterAdapter {
 
     /**
      * Create proxy filter with given name
-     * 
+     *
      * @param name
      *            name
      */

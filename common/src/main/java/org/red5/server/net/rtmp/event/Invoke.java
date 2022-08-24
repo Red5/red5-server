@@ -31,7 +31,7 @@ public class Invoke extends Notify {
 
     /**
      * Create new invocation event with given data
-     * 
+     *
      * @param data
      *            Event data
      */
@@ -42,7 +42,7 @@ public class Invoke extends Notify {
 
     /**
      * Create new invocation event with given pending service call
-     * 
+     *
      * @param call
      *            Pending call
      */
@@ -53,7 +53,7 @@ public class Invoke extends Notify {
 
     /**
      * Setter for transaction id
-     * 
+     *
      * @param transactionId
      *            the transactionId to set
      */
@@ -87,7 +87,7 @@ public class Invoke extends Notify {
 
     /**
      * Duplicate this Invoke message to future injection. Serialize to memory and deserialize, safe way.
-     * 
+     *
      * @return duplicated Invoke event
      */
     @Override

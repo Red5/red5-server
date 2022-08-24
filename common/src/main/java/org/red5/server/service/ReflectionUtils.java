@@ -28,7 +28,7 @@ public class ReflectionUtils {
 
     /**
      * Returns (method, params) for the given service or (null, null) if no method was found.
-     * 
+     *
      * @param service
      *            Service
      * @param methodName
@@ -48,7 +48,7 @@ public class ReflectionUtils {
     /**
      * Returns (method, params) for the given service or (null, null) if not method was found. XXX use ranking for method matching rather
      * than exact type matching plus type conversion.
-     * 
+     *
      * @param service
      *            Service
      * @param methodName
@@ -119,7 +119,7 @@ public class ReflectionUtils {
 
     /**
      * Returns (method, params) for the given service or (null, null) if no method was found.
-     * 
+     *
      * @param service
      *            Service
      * @param methodName
@@ -138,7 +138,7 @@ public class ReflectionUtils {
 
     /**
      * Returns (method, params) for the given service or (null, null) if not method was found.
-     * 
+     *
      * @param service
      *            Service
      * @param methodName

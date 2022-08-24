@@ -17,11 +17,11 @@ public class LocalNetworkUtil {
 
     /**
      * Returns a loopback IP address.
-     * 
+     *
      * @return the current environment's IP address, taking into account the Internet connection to any of the available machine's Network interfaces.
-     * 
+     *
      * Examples of the outputs:
-     * 
+     *
      * fec0:0:0:9:213:e8ff:fef1:b717%4 siteLocal: true isLoopback: false isIPV6: true
      * ============================================
      * 130.212.150.216                 siteLocal: false isLoopback: false isIPV6: false

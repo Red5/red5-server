@@ -104,7 +104,7 @@ public class RTMP {
 
     /**
      * Returns channel information for a given channel id.
-     * 
+     *
      * @param channelId
      * @return channel info
      */
@@ -317,7 +317,7 @@ public class RTMP {
 
     /**
      * Getter for encoding version.
-     * 
+     *
      * @return Encoding version
      */
     public Encoding getEncoding() {
@@ -326,7 +326,7 @@ public class RTMP {
 
     /**
      * Setter for encoding version.
-     * 
+     *
      * @param encoding
      *            Encoding version
      */
@@ -344,7 +344,7 @@ public class RTMP {
 
     /**
      * Sets the last "read" packet header for the given channel.
-     * 
+     *
      * @param channelId channel id
      * @param header header
      */
@@ -354,7 +354,7 @@ public class RTMP {
 
     /**
      * Returns the last "read" packet header for the given channel.
-     * 
+     *
      * @param channelId channel id
      * @return Header
      */

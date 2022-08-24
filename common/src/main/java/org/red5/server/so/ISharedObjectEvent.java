@@ -18,14 +18,14 @@ public interface ISharedObjectEvent {
 
     /**
      * Returns the type of the event.
-     * 
+     *
      * @return the type of the event
      */
     public Type getType();
 
     /**
      * Returns the key of the event.
-     * 
+     *
      * Depending on the type this contains:
      * <ul>
      * <li>the attribute name to set for SET_ATTRIBUTE</li>
@@ -33,21 +33,21 @@ public interface ISharedObjectEvent {
      * <li>the handler name to call for SEND_MESSAGE</li>
      * </ul>
      * In all other cases the key is null
-     * 
+     *
      * @return the key of the event
      */
     public String getKey();
 
     /**
      * Returns the value of the event.
-     * 
+     *
      * Depending on the type this contains:
      * <ul>
      * <li>the attribute value to set for SET_ATTRIBUTE</li>
      * <li>a list of parameters to pass to the handler for SEND_MESSAGE</li>
      * </ul>
      * In all other cases the value is null
-     * 
+     *
      * @return the value of the event
      */
     public Object getValue();

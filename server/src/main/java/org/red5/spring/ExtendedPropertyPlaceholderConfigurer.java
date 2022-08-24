@@ -25,13 +25,13 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * An extension of {@link PropertyPlaceholderConfigurer}. Provides runtime additions of properties and wildcard location lookups.
- * 
+ *
  * Properties can be added at runtime by using the static {@link #addGlobalProperty} before* the bean definition is instantiated in the ApplicationContext. A property added by {@link #addGlobalProperty} will get merged into properties specified by the bean definition, overriding keys that overlap.
- * 
+ *
  * wildcard locations can be used instead of locations, if both are declared the last will override. Wildcard locations are handled by {@link #setWildcardLocations(String[])}, using {@link PathMatchingResourcePatternResolver} for matching locations. For wildcard locations that matches multiple Properties files, they are merged in by alphabetical filename order.
- * 
+ *
  * @author Michael Guymon (michael.guymon@gmail.com)
- * 
+ *
  */
 @SuppressWarnings("deprecation")
 public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer {
@@ -55,7 +55,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
     /**
      * Merged {@link Properties} created by {@link #processProperties}
-     * 
+     *
      * @return {@link Properties}
      */
     public Properties getMergedProperties() {
@@ -64,7 +64,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
     /**
      * String[] of wildcard locations of properties that are converted to Resource[] using using {@link PathMatchingResourcePatternResolver}
-     * 
+     *
      * @param locations
      *            String[]
      * @throws IOException
@@ -104,7 +104,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
     /**
      * Add a global property to be merged
-     * 
+     *
      * @param key
      *            String
      * @param val
@@ -116,7 +116,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
     /**
      * Copy of the manual properties
-     * 
+     *
      * @return {@link Properties}
      */
     private static synchronized Properties copyOfGlobalProperties() {

@@ -11,7 +11,7 @@ import org.red5.io.IStreamableFile;
 
 /**
  * Represents M4A / AAC file
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IM4A extends IStreamableFile {

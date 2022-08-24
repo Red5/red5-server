@@ -13,9 +13,9 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * Base interface for objects that can be made cacheable.
- * 
+ *
  * @see ICacheStore
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -23,14 +23,14 @@ public interface ICacheable extends Serializable {
 
     /**
      * Returns <code>true</code> if the object is cached, <code>false</code> otherwise.
-     * 
+     *
      * @return <code>true</code> if object is cached, <code>false</code> otherwise
      */
     public boolean isCached();
 
     /**
      * Sets a flag to represent the cached status of a cacheable object.
-     * 
+     *
      * @param cached
      *            <code>true</code> if object is cached, <code>false</code> otherwise
      */
@@ -38,14 +38,14 @@ public interface ICacheable extends Serializable {
 
     /**
      * Returns the name of the cached object.
-     * 
+     *
      * @return Object name
      */
     public String getName();
 
     /**
      * Set the name of the cached object.
-     * 
+     *
      * @param name
      *            New object name
      */
@@ -53,14 +53,14 @@ public interface ICacheable extends Serializable {
 
     /**
      * Returns the object contained within the cacheable reference.
-     * 
+     *
      * @return Cached representation of object
      */
     public byte[] getBytes();
 
     /**
      * Returns a readonly byte buffer.
-     * 
+     *
      * @return Read-only IoBuffer with cached data
      */
     public IoBuffer getByteBuffer();

@@ -18,10 +18,10 @@ import org.red5.io.object.Serializer;
 
 /**
  * Implementation of the IDataOutput interface. Can be used to store an IExternalizable object.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
- * 
+ *
  */
 public class DataOutput implements IDataOutput {
 
@@ -33,7 +33,7 @@ public class DataOutput implements IDataOutput {
 
     /**
      * Create a new DataOutput.
-     * 
+     *
      * @param output
      *            destination to write to
      */

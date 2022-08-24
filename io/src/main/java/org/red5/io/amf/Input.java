@@ -180,7 +180,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
 
     /**
      * Reads string from buffer
-     * 
+     *
      * @return String
      */
     @Override
@@ -230,7 +230,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
 
     /**
      * Converts the bytes into a string.
-     * 
+     *
      * @param str
      *            string bytes
      * @return decoded String
@@ -305,7 +305,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
 
     /**
      * Read key - value pairs into Map object
-     * 
+     *
      * @param result
      *            Map to put resulting pair to
      */

@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Client list, implemented using weak references to prevent memory leaks.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  * @param <E>
  *            type of class

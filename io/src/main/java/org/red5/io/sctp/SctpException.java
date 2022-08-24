@@ -10,7 +10,7 @@ package org.red5.io.sctp;
 public class SctpException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
 

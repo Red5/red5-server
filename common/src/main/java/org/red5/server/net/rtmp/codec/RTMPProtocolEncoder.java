@@ -87,7 +87,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /**
      * Encodes object with given protocol state to byte buffer
-     * 
+     *
      * @param message
      *            Object to encode
      * @return IoBuffer with encoded data
@@ -191,12 +191,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /**
      * Determine if this message should be dropped. If the traffic from server to client is congested, then drop LIVE messages to help alleviate congestion.
-     * 
+     *
      * - determine latency between server and client using ping
      * - ping timestamp is unsigned int (4 bytes) and is set from value on sender
-     * 
+     *
      * 1st drop disposable frames - lowest mark 2nd drop interframes - middle 3rd drop key frames - high mark
-     * 
+     *
      * @param channelId
      *            the channel ID
      * @param message
@@ -337,7 +337,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /**
      * Determine type of header to use.
-     * 
+     *
      * @param header RTMP message header
      * @param lastHeader Previous header
      * @return Header type to use
@@ -360,7 +360,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /**
      * Calculate number of bytes necessary to encode the header.
-     * 
+     *
      * @param header
      *            RTMP message header
      * @param lastHeader
@@ -381,7 +381,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /**
      * Encode RTMP header.
-     * 
+     *
      * @param header
      *            RTMP message header
      * @param lastHeader
@@ -422,7 +422,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         switch (headerType) {
             case HEADER_NEW: // type 0 - 11 bytes
                 timeBase = header.getTimerBase();
-                // absolute time - unsigned 24-bit (3 bytes) (chop at max 24bit time) 
+                // absolute time - unsigned 24-bit (3 bytes) (chop at max 24bit time)
                 RTMPUtils.writeMediumInt(buf, Math.min(timeBase, MEDIUM_INT_MAX));
                 // header size 24-bit (3 bytes)
                 RTMPUtils.writeMediumInt(buf, headerSize);
@@ -953,7 +953,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /**
      * Generate error object to return for given exception.
-     * 
+     *
      * @param code
      *            call
      * @param error
@@ -1025,7 +1025,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /**
      * Setter for dropLiveFuture
-     * 
+     *
      * @param dropLiveFuture
      *            drop live data with future times
      */

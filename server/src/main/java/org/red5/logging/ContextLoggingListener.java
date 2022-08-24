@@ -24,7 +24,7 @@ import ch.qos.logback.classic.selector.ContextSelector;
 
 /**
  * A servlet context listener that puts this contexts LoggerContext into a static map of logger contexts within an overall singleton log context selector.
- * 
+ *
  * To use it, add the following line to a web.xml file
  *
  * <pre>

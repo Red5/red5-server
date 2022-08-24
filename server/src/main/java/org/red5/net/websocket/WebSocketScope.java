@@ -24,7 +24,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * WebSocketScope contains an IScope and keeps track of WebSocketConnection and IWebSocketDataListener instances.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class WebSocketScope implements InitializingBean, DisposableBean {
@@ -90,7 +90,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Returns a connection matching the given HttpSession id.
-     * 
+     *
      * @param id
      * @return WebSocketConnection for the given id or null if not found
      */
@@ -104,7 +104,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Returns the set of connections.
-     * 
+     *
      * @return conns
      */
     public Set<WebSocketConnection> getConns() {
@@ -113,7 +113,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Returns the associated scope.
-     * 
+     *
      * @return scope
      */
     public IScope getScope() {
@@ -122,7 +122,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Sets the associated scope.
-     * 
+     *
      * @param scope
      */
     public void setScope(IScope scope) {
@@ -133,7 +133,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Sets the path.
-     * 
+     *
      * @param path
      */
     public void setPath(String path) {
@@ -142,7 +142,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Returns the path of the scope.
-     * 
+     *
      * @return path
      */
     public String getPath() {
@@ -151,7 +151,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Add new connection on scope.
-     * 
+     *
      * @param conn WebSocketConnection
      */
     public void addConnection(WebSocketConnection conn) {
@@ -166,7 +166,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Remove connection from scope.
-     * 
+     *
      * @param conn WebSocketConnection
      */
     public void removeConnection(WebSocketConnection conn) {
@@ -181,7 +181,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Add new listener on scope.
-     * 
+     *
      * @param listener IWebSocketDataListener
      */
     public void addListener(IWebSocketDataListener listener) {
@@ -191,7 +191,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Remove listener from scope.
-     * 
+     *
      * @param listener IWebSocketDataListener
      */
     public void removeListener(IWebSocketDataListener listener) {
@@ -201,7 +201,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Add new listeners on scope.
-     * 
+     *
      * @param listeners
      *            list of IWebSocketDataListener
      */
@@ -212,7 +212,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Returns the listeners in an unmodifiable set.
-     * 
+     *
      * @return listeners
      */
     public Set<IWebSocketDataListener> getListeners() {
@@ -221,7 +221,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Checks for a listener by class type.
-     * 
+     *
      * @param clazz
      * @return true if one exists and false otherwise
      */
@@ -231,7 +231,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Check the scope state.
-     * 
+     *
      * @return true:still have relation
      */
     public boolean isValid() {
@@ -240,7 +240,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     /**
      * Message received from client and passed on to the listeners.
-     * 
+     *
      * @param message
      */
     public void onMessage(WSMessage message) {

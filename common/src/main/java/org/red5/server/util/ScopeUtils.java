@@ -99,11 +99,11 @@ public class ScopeUtils {
      * Returns the application scope for specified scope. Application scope has depth of 1 and has no parent.
      *
      * See
-     * 
+     *
      * <pre>
      * isApp
      * </pre>
-     * 
+     *
      * method for details.
      *
      * @param from
@@ -126,17 +126,17 @@ public class ScopeUtils {
      * @param ancestor
      *            Scope to check
      * @return
-     * 
+     *
      *         <pre>
      *         true
      *         </pre>
-     * 
+     *
      *         if ancestor scope is really an ancestor of scope passed as from parameter,
-     * 
+     *
      *         <pre>
      *         false
      *         </pre>
-     * 
+     *
      *         otherwise.
      */
     public static boolean isAncestor(IBasicScope from, IBasicScope ancestor) {
@@ -156,17 +156,17 @@ public class ScopeUtils {
      * @param scope
      *            Scope to check
      * @return
-     * 
+     *
      *         <pre>
      *         true
      *         </pre>
-     * 
+     *
      *         if scope is root scope (top level scope),
-     * 
+     *
      *         <pre>
      *         false
      *         </pre>
-     * 
+     *
      *         otherwise.
      */
     public static boolean isRoot(IBasicScope scope) {
@@ -182,17 +182,17 @@ public class ScopeUtils {
      * @param scope
      *            Scope to check
      * @return
-     * 
+     *
      *         <pre>
      *         true
      *         </pre>
-     * 
+     *
      *         if scope is the global scope,
-     * 
+     *
      *         <pre>
      *         false
      *         </pre>
-     * 
+     *
      *         otherwise.
      */
     public static boolean isGlobal(IBasicScope scope) {
@@ -205,17 +205,17 @@ public class ScopeUtils {
      * @param scope
      *            Scope to check
      * @return
-     * 
+     *
      *         <pre>
      *         true
      *         </pre>
-     * 
+     *
      *         if scope is an application scope,
-     * 
+     *
      *         <pre>
      *         false
      *         </pre>
-     * 
+     *
      *         otherwise.
      */
     public static boolean isApp(IBasicScope scope) {
@@ -228,17 +228,17 @@ public class ScopeUtils {
      * @param scope
      *            Scope to check
      * @return
-     * 
+     *
      *         <pre>
      *         true
      *         </pre>
-     * 
+     *
      *         if scope is a room scope,
-     * 
+     *
      *         <pre>
      *         false
      *         </pre>
-     * 
+     *
      *         otherwise.
      */
     public static boolean isRoom(IBasicScope scope) {

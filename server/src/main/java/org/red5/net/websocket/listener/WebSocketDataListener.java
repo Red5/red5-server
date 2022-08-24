@@ -9,7 +9,7 @@ package org.red5.net.websocket.listener;
 
 /**
  * Adapter class for WebSocket data listener interface.
- * 
+ *
  * @author Paul Gregoire
  */
 public abstract class WebSocketDataListener implements IWebSocketDataListener {

@@ -60,7 +60,7 @@ public class Packet implements Externalizable {
 
     /**
      * Create packet with given header.
-     * 
+     *
      * @param header
      *            Packet header
      */
@@ -74,7 +74,7 @@ public class Packet implements Externalizable {
 
     /**
      * Create packet with given header and event context.
-     * 
+     *
      * @param header
      *            RTMP header
      * @param event
@@ -154,7 +154,7 @@ public class Packet implements Externalizable {
 
     /**
      * Returns whether or not the packet has a data buffer.
-     * 
+     *
      * @return true if data buffer exists and false otherwise
      */
     public boolean hasData() {
@@ -174,7 +174,7 @@ public class Packet implements Externalizable {
 
     /**
      * Return the expiration time.
-     * 
+     *
      * @return expirationTime
      */
     public long getExpirationTime() {
@@ -183,7 +183,7 @@ public class Packet implements Externalizable {
 
     /**
      * Set the expiration time.
-     * 
+     *
      * @param expirationTime new expiration time to set
      */
     public void setExpirationTime(long expirationTime) {
@@ -192,7 +192,7 @@ public class Packet implements Externalizable {
 
     /**
      * Returns true if expiration time has been reached and false otherwise.
-     * 
+     *
      * @return expired or not
      */
     public boolean isExpired() {
@@ -202,7 +202,7 @@ public class Packet implements Externalizable {
 
     /**
      * Sets the processed flag.
-     * 
+     *
      * @param isProcessed
      *            true if processed and false otherwise
      */
@@ -212,7 +212,7 @@ public class Packet implements Externalizable {
 
     /**
      * Gets the processed flag.
-     * 
+     *
      * @return true if processed and false otherwise
      */
     public boolean isProcessed() {

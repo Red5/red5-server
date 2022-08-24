@@ -86,7 +86,7 @@ public interface ITagWriter {
 
     /**
      * Adds a post-process for execution once the instance completes.
-     * 
+     *
      * @param postProcessor an implementation instance of IPostProcessor
      */
     public void addPostProcessor(IPostProcessor postProcessor);

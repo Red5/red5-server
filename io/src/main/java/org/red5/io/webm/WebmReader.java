@@ -39,7 +39,7 @@ public class WebmReader implements Closeable {
 
     /**
      * Constructor
-     * 
+     *
      * @param file
      *            - file to be read
      * @param processor
@@ -115,7 +115,7 @@ public class WebmReader implements Closeable {
 
     /**
      * will process given file and send all tags found to the consumer
-     * 
+     *
      * @throws IOException
      *             - in case of any exception during reading and/or consumeng
      * @throws ConverterException

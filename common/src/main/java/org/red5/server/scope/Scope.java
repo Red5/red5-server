@@ -60,7 +60,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  * scope always has a parent unless its a "global" scope. If a client is connected to a scope then they are also connected to its parent
  * scope. The scope object is used to access resources, shared object, streams, etc. <br>
  * Scope layout:
- * 
+ *
  * <pre>
  *  /Global scope - Contains application scopes
  *      /Application scope - Contains room, shared object, and stream scopes
@@ -68,7 +68,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  *              /Shared object scope - Contains shared object
  *              /Broadcast stream scope - Contains a broadcast stream
  * </pre>
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  * @author Nathan Smith (nathgs@gmail.com)
@@ -169,7 +169,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Creates scope via parameters.
-     * 
+     *
      * @param parent scope parent
      * @param type scope type
      * @param name scope name
@@ -183,7 +183,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Add child scope to this scope
-     * 
+     *
      * @param scope
      *            Child scope
      * @return true on success (if scope has handler and it accepts child scope addition), false otherwise
@@ -220,7 +220,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Connect to scope
-     * 
+     *
      * @param conn
      *            Connection object
      * @return true on success, false otherwise
@@ -232,7 +232,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /**
      * Connect to scope with parameters. To successfully connect to scope it must have handler that will accept this connection with given
      * set of parameters. Client associated with connection is added to scope clients set, connection is registered as scope event listener.
-     * 
+     *
      * @param conn
      *            Connection object
      * @param params
@@ -289,7 +289,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Create child scope of room type, with the given name.
-     * 
+     *
      * @param name
      *            child scope name
      * @return true on success, false otherwise
@@ -307,7 +307,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Destroys scope
-     * 
+     *
      * @throws Exception
      *             on error
      */
@@ -331,7 +331,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Disconnect connection from scope
-     * 
+     *
      * @param conn
      *            Connection object
      */
@@ -440,7 +440,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return the broadcast scope for a given name.
-     * 
+     *
      * @param name
      *            name
      * @return broadcast scope or null if not found
@@ -451,7 +451,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return base scope with given name.
-     * 
+     *
      * @param name
      *            Scope name
      * @return Basic scope object
@@ -462,7 +462,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return base scope of given type with given name.
-     * 
+     *
      * @param type
      *            Scope type
      * @param name
@@ -475,7 +475,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return basic scope names matching given type.
-     * 
+     *
      * @param type
      *            Scope type
      * @return set of scope names
@@ -513,7 +513,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return current thread context classloader.
-     * 
+     *
      * @return Classloader for thread context
      */
     public ClassLoader getClassLoader() {
@@ -522,7 +522,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return set of clients.
-     * 
+     *
      * @return Set of clients bound to scope
      */
     public Set<IClient> getClients() {
@@ -589,7 +589,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return scope context. If scope doesn't have context, parent's context is returns, and so forth.
-     * 
+     *
      * @return Scope context or parent context
      */
     public IContext getContext() {
@@ -604,7 +604,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return scope context path
-     * 
+     *
      * @return Scope context path
      */
     public String getContextPath() {
@@ -624,7 +624,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * return scope depth
-     * 
+     *
      * @return Scope depth
      */
     @Override
@@ -641,7 +641,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return scope handler or parent's scope handler if this scope doesn't have one.
-     * 
+     *
      * @return Scope handler (or parent's one)
      */
     public IScopeHandler getHandler() {
@@ -672,7 +672,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return parent scope
-     * 
+     *
      * @return Parent scope
      */
     @Override
@@ -682,7 +682,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return scope path calculated from parent path and parent scope name
-     * 
+     *
      * @return Scope path
      */
     @Override
@@ -696,7 +696,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return resource located at given path
-     * 
+     *
      * @param path
      *            Resource path
      * @return Resource
@@ -710,7 +710,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return array of resources from path string, usually used with pattern path
-     * 
+     *
      * @param path
      *            Resources path
      * @return Resources
@@ -726,7 +726,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return child scope by name
-     * 
+     *
      * @param name
      *            Scope name
      * @return Child scope with given name
@@ -745,7 +745,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return child scope names iterator
-     * 
+     *
      * @return Child scope names iterator
      */
     public Set<String> getScopeNames() {
@@ -755,7 +755,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return service handler by name
-     * 
+     *
      * @param name
      *            Handler name
      * @return Service handler with given name
@@ -770,7 +770,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return set of service handler names. Removing entries from the set unregisters the corresponding service handler.
-     * 
+     *
      * @return Set of service handler names
      */
     @SuppressWarnings("unchecked")
@@ -784,7 +784,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return map of service handlers. The map is created if it doesn't exist yet.
-     * 
+     *
      * @return Map of service handlers
      */
     protected Map<String, Object> getServiceHandlers() {
@@ -793,7 +793,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return map of service handlers and optionally created it if it doesn't exist.
-     * 
+     *
      * @param allowCreate
      *            Should the map be created if it doesn't exist?
      * @return Map of service handlers
@@ -830,7 +830,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Handles event. To be implemented in subclasses.
-     * 
+     *
      * @param event
      *            Event to handle
      * @return true on success, false otherwise
@@ -842,7 +842,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Check whether scope has child scope with given name
-     * 
+     *
      * @param name
      *            Child scope name
      * @return true if scope has child node with given name, false otherwise
@@ -854,7 +854,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Check whether scope has child scope with given name and type
-     * 
+     *
      * @param type
      *            Child scope type
      * @param name
@@ -868,7 +868,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Check if scope has a context
-     * 
+     *
      * @return true if scope has context, false otherwise
      */
     public boolean hasContext() {
@@ -877,7 +877,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Check if scope or it's parent has handler
-     * 
+     *
      * @return true if scope or it's parent scope has a handler, false otherwise
      */
     public boolean hasHandler() {
@@ -886,7 +886,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Check if scope has parent scope
-     * 
+     *
      * @return true if scope has parent scope, false otherwise`
      */
     @Override
@@ -940,7 +940,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Check if scope is enabled
-     * 
+     *
      * @return true if scope is enabled, false otherwise
      */
     public boolean isEnabled() {
@@ -956,7 +956,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Check if scope is in running state
-     * 
+     *
      * @return true if scope is in running state, false otherwise
      */
     public boolean isRunning() {
@@ -972,7 +972,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Register service handler by name
-     * 
+     *
      * @param name
      *            Service handler name
      * @param handler
@@ -985,7 +985,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Removes child scope
-     * 
+     *
      * @param scope
      *            Child scope to remove
      */
@@ -1009,7 +1009,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Setter for autostart flag
-     * 
+     *
      * @param autoStart
      *            Autostart flag value
      */
@@ -1019,7 +1019,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Setter for child load path. Should be implemented in subclasses?
-     * 
+     *
      * @param pattern
      *            Load path pattern
      */
@@ -1029,7 +1029,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Setter for context
-     * 
+     *
      * @param context
      *            Context object
      */
@@ -1040,7 +1040,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Set scope depth
-     * 
+     *
      * @param depth
      *            Scope depth
      */
@@ -1050,7 +1050,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Enable or disable scope by setting enable flag
-     * 
+     *
      * @param enabled
      *            Enable flag value
      */
@@ -1060,7 +1060,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Setter for scope event handler
-     * 
+     *
      * @param handler
      *            Event handler
      */
@@ -1074,7 +1074,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Setter for scope name
-     * 
+     *
      * @param name
      *            Scope name
      */
@@ -1097,7 +1097,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Setter for parent scope
-     * 
+     *
      * @param parent
      *            Parent scope
      */
@@ -1108,7 +1108,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Set scope persistence class
-     * 
+     *
      * @param persistenceClass
      *            Scope's persistence class
      * @throws Exception
@@ -1123,7 +1123,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Starts scope
-     * 
+     *
      * @return true if scope has handler and it's start method returned true, false otherwise
      */
     public boolean start() {
@@ -1189,7 +1189,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Unregisters service handler by name
-     * 
+     *
      * @param name
      *            Service handler name
      */
@@ -1202,7 +1202,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Return the server instance connected to this scope.
-     * 
+     *
      * @return the server instance
      */
     public IServer getServer() {
@@ -1271,7 +1271,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Allows for reconstruction via CompositeData.
-     * 
+     *
      * @param cd
      *            composite data
      * @return Scope class instance
@@ -1334,7 +1334,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
             if (!contains(scope)) {
                 log.debug("Adding child scope: {} to {}", (((IBasicScope) scope).getName()), this);
                 if (hasHandler()) {
-                    // get the handler for the scope to which we are adding this new scope 
+                    // get the handler for the scope to which we are adding this new scope
                     IScopeHandler hdlr = getHandler();
                     // add the scope to the handler
                     if (!hdlr.addChildScope(scope)) {
@@ -1402,7 +1402,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
         /**
          * Returns the scope names.
-         * 
+         *
          * @return names
          */
         public Set<String> getNames() {
@@ -1413,7 +1413,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
         /**
          * Returns whether or not a named scope exists.
-         * 
+         *
          * @return true if a matching scope is found, false otherwise
          */
         public boolean hasName(String name) {
@@ -1430,7 +1430,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
         /**
          * Returns a child scope for a given name and type.
-         * 
+         *
          * @param type
          *            Scope type
          * @param name

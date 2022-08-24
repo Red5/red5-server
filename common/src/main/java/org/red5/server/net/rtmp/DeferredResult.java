@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Can be returned to delay returning the result of invoked methods.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -48,7 +48,7 @@ public class DeferredResult {
 
     /**
      * Set the result of a method call and send to the caller.
-     * 
+     *
      * @param result
      *            deferred result of the method call
      */
@@ -72,13 +72,13 @@ public class DeferredResult {
 
     /**
      * Check if the result has been sent to the client.
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the result has been sent, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>

@@ -13,7 +13,7 @@ package org.red5.server.exception;
 public class AccessDeniedException extends RuntimeException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2023603817704741161L;
 

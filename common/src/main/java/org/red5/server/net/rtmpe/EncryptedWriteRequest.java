@@ -6,7 +6,7 @@ import org.apache.mina.core.write.WriteRequestWrapper;
 
 /**
  * Used to parcel encrypted content for RTMPE.
- * 
+ *
  * @author Paul Gregoire
  */
 public class EncryptedWriteRequest extends WriteRequestWrapper {

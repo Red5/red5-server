@@ -35,7 +35,7 @@ public abstract class Tag {
 
     /**
      * Constructor, internally calls {@link Tag#Tag(String, VINT, VINT, InputStream)} to create tag with 0 size
-     * 
+     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -49,7 +49,7 @@ public abstract class Tag {
 
     /**
      * Constructor
-     * 
+     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -70,7 +70,7 @@ public abstract class Tag {
 
     /**
      * method to read and to parse tag from inputStream given
-     * 
+     *
      * @param inputStream
      *            - stream to parse tag data from
      * @throws IOException
@@ -82,7 +82,7 @@ public abstract class Tag {
 
     /**
      * method to parse tag from inner bytes array - data
-     * 
+     *
      * @throws IOException
      *             - in case of any IO errors
      * @throws ConverterException
@@ -94,7 +94,7 @@ public abstract class Tag {
 
     /**
      * method to read tag data from inputStream given
-     * 
+     *
      * @param inputStream InputStream
      * @throws IOException
      *             - in case of any IO errors
@@ -109,7 +109,7 @@ public abstract class Tag {
 
     /**
      * method to store tag value to {@link ByteBuffer} given
-     * 
+     *
      * @param bb
      *            - {@link ByteBuffer} to store value
      * @throws IOException
@@ -119,7 +119,7 @@ public abstract class Tag {
 
     /**
      * getter for name
-     * 
+     *
      * @return name of this {@link Tag}
      */
     public String getName() {
@@ -128,7 +128,7 @@ public abstract class Tag {
 
     /**
      * getter for id
-     * 
+     *
      * @return id of this {@link Tag} as binary value of correspondent {@link VINT}
      */
     public long getId() {
@@ -137,7 +137,7 @@ public abstract class Tag {
 
     /**
      * getter for size
-     * 
+     *
      * @return size of this {@link Tag} as value of correspondent {@link VINT}
      */
     public long getSize() {
@@ -146,7 +146,7 @@ public abstract class Tag {
 
     /**
      * method to get total size of this tag: "header" + "contents"
-     * 
+     *
      * @return - total size as int
      */
     public int totalSize() {
@@ -155,7 +155,7 @@ public abstract class Tag {
 
     /**
      * method to encode {@link Tag} as sequence of bytes
-     * 
+     *
      * @return - encoded {@link Tag}
      * @throws IOException
      *             - in case of any IO errors

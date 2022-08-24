@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Factory for video codecs. Creates and returns video codecs
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -49,7 +49,7 @@ public class VideoCodecFactory {
 
     /**
      * Create and return new video codec applicable for byte buffer data
-     * 
+     *
      * @param data
      *            Byte buffer data
      * @return Video codec
@@ -60,7 +60,7 @@ public class VideoCodecFactory {
         int codecId = data.get() & 0x0f;
         try {
             switch (codecId) {
-                case 2: // sorenson 
+                case 2: // sorenson
                     result = (IVideoStreamCodec) Class.forName("org.red5.codec.SorensonVideo").getDeclaredConstructor().newInstance();
                     break;
                 case 3: // screen video
@@ -118,7 +118,7 @@ public class VideoCodecFactory {
     //		boolean result = ((first & 0x0f) == 3);
     //		return result;
     //	}
-    //	
+    //
     //	private boolean isSorenson(byte first) {
     //    	log.debug("Trying Sorenson");
     //		boolean result = ((first & 0x0f) == 2);

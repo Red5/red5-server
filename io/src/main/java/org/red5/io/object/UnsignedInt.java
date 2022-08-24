@@ -9,7 +9,7 @@ package org.red5.io.object;
 
 /**
  * The UnsignedInt class wraps a value of an unsigned 32 bits number.
- * 
+ *
  * @author Matteo Merli (matteo.merli@gmail.com)
  */
 public final class UnsignedInt extends UnsignedNumber {

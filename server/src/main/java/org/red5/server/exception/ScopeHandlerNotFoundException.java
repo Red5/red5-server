@@ -16,7 +16,7 @@ public class ScopeHandlerNotFoundException extends RuntimeException {
 
     /**
      * Create exception from given scope handler name
-     * 
+     *
      * @param handlerName
      *            Scope handler name
      */

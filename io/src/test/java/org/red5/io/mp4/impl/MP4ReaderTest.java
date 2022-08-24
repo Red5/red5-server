@@ -56,7 +56,7 @@ public class MP4ReaderTest extends TestCase {
 
     @Test
     public void testBytes() throws Exception {
-        //00 40 94 00 00 00 00 00 00 00 06 == 
+        //00 40 94 00 00 00 00 00 00 00 06 ==
         byte width[] = { (byte) 0x00, (byte) 0x40, (byte) 0x94, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
         System.out.println("width: {}" + bytesToLong(width));
 
@@ -92,10 +92,10 @@ public class MP4ReaderTest extends TestCase {
         //				(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
         //		System.out.println("moovposition: {}" + bytesToLong(moovposition));
         //
-        //		
+        //
         //byte[] arr = {(byte) 0x0f};
         //System.out.println("bbb: {}" + bytesToByte(arr));
-        //byte[] arr = {(byte) 0xE5, (byte) 0x88, (byte) 0x80, (byte) 0x00, 
+        //byte[] arr = {(byte) 0xE5, (byte) 0x88, (byte) 0x80, (byte) 0x00,
         //(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
         //System.out.println("bbb: {}" + bytesToLong(arr));
         byte[] arr = { (byte) 0, (byte) 0, (byte) 0x10, (byte) 0 };

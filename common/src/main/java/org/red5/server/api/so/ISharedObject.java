@@ -12,7 +12,7 @@ import org.red5.server.api.statistics.ISharedObjectStatistics;
 
 /**
  * Serverside access to shared objects.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -20,32 +20,32 @@ public interface ISharedObject extends IBasicScope, ISharedObjectBase, ISharedOb
 
     /**
      * Prevent shared object from being released. Each call to
-     * 
+     *
      * <pre>
      * acquire
      * </pre>
-     * 
+     *
      * must be paired with a call to
-     * 
+     *
      * <pre>
      * release
      * </pre>
-     * 
+     *
      * so the SO isn't held forever.
-     * 
+     *
      * This method basically is a no-op for persistent SOs as their data is stored and they can be released without losing their contents.
      */
     public void acquire();
 
     /**
      * Check if shared object currently is acquired.
-     * 
+     *
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the SO is acquired, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -59,14 +59,14 @@ public interface ISharedObject extends IBasicScope, ISharedObjectBase, ISharedOb
 
     /**
      * Return statistics about the shared object.
-     * 
+     *
      * @return statistics
      */
     public ISharedObjectStatistics getStatistics();
 
     /**
      * Sets a "dirty" flag to indicate that the attributes have been modified.
-     * 
+     *
      * @param dirty if dirty / modified
      */
     @Deprecated
@@ -74,7 +74,7 @@ public interface ISharedObject extends IBasicScope, ISharedObjectBase, ISharedOb
 
     /**
      * Sets a "dirty" flag to indicate that the named attribute has been modified.
-     * 
+     *
      * @param name attribute key which is now dirty
      */
     void setDirty(String name);

@@ -13,7 +13,7 @@ import java.io.ObjectOutput;
 
 /**
  * RTMP Abort event.
- * 
+ *
  * @author aclarke@xuggle.com
  */
 public class Abort extends BaseEvent {

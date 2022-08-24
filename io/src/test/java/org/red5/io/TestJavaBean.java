@@ -31,7 +31,7 @@ public class TestJavaBean {
 
     /**
      * Getter for property 'testByte'.
-     * 
+     *
      * @return Value for property 'testByte'.
      */
     public byte getTestByte() {
@@ -40,7 +40,7 @@ public class TestJavaBean {
 
     /**
      * Setter for property 'testByte'.
-     * 
+     *
      * @param testByte
      *            Value to set for property 'testByte'.
      */
@@ -50,7 +50,7 @@ public class TestJavaBean {
 
     /**
      * Getter for property 'testBoolean'.
-     * 
+     *
      * @return Value for property 'testBoolean'.
      */
     public boolean isTestBoolean() {
@@ -59,7 +59,7 @@ public class TestJavaBean {
 
     /**
      * Setter for property 'testBoolean'.
-     * 
+     *
      * @param testBoolean
      *            Value to set for property 'testBoolean'.
      */
@@ -69,7 +69,7 @@ public class TestJavaBean {
 
     /**
      * Getter for property 'testBooleanObject'.
-     * 
+     *
      * @return Value for property 'testBooleanObject'.
      */
     public Boolean getTestBooleanObject() {
@@ -78,7 +78,7 @@ public class TestJavaBean {
 
     /**
      * Setter for property 'testBooleanObject'.
-     * 
+     *
      * @param testBooleanObject
      *            Value to set for property 'testBooleanObject'.
      */
@@ -88,7 +88,7 @@ public class TestJavaBean {
 
     /**
      * Getter for property 'testDate'.
-     * 
+     *
      * @return Value for property 'testDate'.
      */
     public Date getTestDate() {
@@ -97,7 +97,7 @@ public class TestJavaBean {
 
     /**
      * Setter for property 'testDate'.
-     * 
+     *
      * @param testDate
      *            Value to set for property 'testDate'.
      */
@@ -107,7 +107,7 @@ public class TestJavaBean {
 
     /**
      * Getter for property 'testNumberObject'.
-     * 
+     *
      * @return Value for property 'testNumberObject'.
      */
     public Integer getTestNumberObject() {
@@ -116,7 +116,7 @@ public class TestJavaBean {
 
     /**
      * Setter for property 'testNumberObject'.
-     * 
+     *
      * @param testNumberObject
      *            Value to set for property 'testNumberObject'.
      */
@@ -126,7 +126,7 @@ public class TestJavaBean {
 
     /**
      * Getter for property 'testPrimitiveNumber'.
-     * 
+     *
      * @return Value for property 'testPrimitiveNumber'.
      */
     public int getTestPrimitiveNumber() {
@@ -135,7 +135,7 @@ public class TestJavaBean {
 
     /**
      * Setter for property 'testPrimitiveNumber'.
-     * 
+     *
      * @param testPrimitiveNumber
      *            Value to set for property 'testPrimitiveNumber'.
      */
@@ -145,7 +145,7 @@ public class TestJavaBean {
 
     /**
      * Getter for property 'testString'.
-     * 
+     *
      * @return Value for property 'testString'.
      */
     public String getTestString() {
@@ -154,7 +154,7 @@ public class TestJavaBean {
 
     /**
      * Setter for property 'testString'.
-     * 
+     *
      * @param testString
      *            Value to set for property 'testString'.
      */

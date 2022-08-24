@@ -32,7 +32,7 @@ public class RemotingCodecFactory {
 
     /**
      * Returns the remoting decoder.
-     * 
+     *
      * @return decoder
      */
     public RemotingProtocolDecoder getRemotingDecoder() {
@@ -41,7 +41,7 @@ public class RemotingCodecFactory {
 
     /**
      * Returns the remoting encoder.
-     * 
+     *
      * @return encoder
      */
     public RemotingProtocolEncoder getRemotingEncoder() {

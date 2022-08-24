@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Utility functions to invoke methods on connections.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -29,7 +29,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on the current connection.
-     * 
+     *
      * @param method
      *            name of the method to invoke
      * @param params
@@ -42,7 +42,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on the current connection and handle result.
-     * 
+     *
      * @param method
      *            name of the method to invoke
      * @param params
@@ -64,7 +64,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on a given connection.
-     * 
+     *
      * @param conn
      *            connection to invoke method on
      * @param method
@@ -79,7 +79,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on a given connection and handle result.
-     * 
+     *
      * @param conn
      *            connection to invoke method on
      * @param method
@@ -105,7 +105,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on all connections to the current scope.
-     * 
+     *
      * @param method
      *            name of the method to invoke
      * @param params
@@ -117,7 +117,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on all connections to the current scope and handle result.
-     * 
+     *
      * @param method
      *            name of the method to invoke
      * @param params
@@ -139,7 +139,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on all connections to a given scope.
-     * 
+     *
      * @param scope
      *            scope to get connections for
      * @param method
@@ -155,7 +155,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on all connections to a given scope and handle result.
-     * 
+     *
      * @param scope
      *            scope to get connections for
      * @param method
@@ -171,7 +171,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on all connections of a scope and handle result.
-     * 
+     *
      * @param scope
      *            scope to get connections from
      * @param method
@@ -188,7 +188,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on all connections of a client to a given scope.
-     * 
+     *
      * @param client
      *            client to get connections for
      * @param scope
@@ -204,7 +204,7 @@ public class ServiceUtils {
 
     /**
      * Invoke a method on all connections of a client to a given scope and handle result.
-     * 
+     *
      * @param client
      *            client to get connections for
      * @param scope
@@ -235,7 +235,7 @@ public class ServiceUtils {
 
     /**
      * Notify a method on the current connection.
-     * 
+     *
      * @param method
      *            name of the method to notify
      * @param params
@@ -243,9 +243,9 @@ public class ServiceUtils {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the connection supports method calls, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -263,7 +263,7 @@ public class ServiceUtils {
 
     /**
      * Notify a method on a given connection.
-     * 
+     *
      * @param conn
      *            connection to notify method on
      * @param method
@@ -273,9 +273,9 @@ public class ServiceUtils {
      * @return <pre>
      * true
      * </pre>
-     * 
+     *
      *         if the connection supports method calls, otherwise
-     * 
+     *
      *         <pre>
      * false
      * </pre>
@@ -291,7 +291,7 @@ public class ServiceUtils {
 
     /**
      * Notify a method on all connections to the current scope.
-     * 
+     *
      * @param method
      *            name of the method to notify
      * @param params
@@ -311,7 +311,7 @@ public class ServiceUtils {
 
     /**
      * Notify a method on all connections to a given scope.
-     * 
+     *
      * @param scope
      *            scope to get connections for
      * @param method
@@ -327,7 +327,7 @@ public class ServiceUtils {
 
     /**
      * Notify a method on all connections of a scope.
-     * 
+     *
      * @param scope
      *            scope to dispatch event
      * @param method
@@ -342,7 +342,7 @@ public class ServiceUtils {
 
     /**
      * Notify a method on all connections of a client to a given scope.
-     * 
+     *
      * @param client
      *            client to get connections for
      * @param scope

@@ -25,7 +25,7 @@ import ch.qos.logback.classic.selector.ContextSelector;
 
 /**
  * A servlet filter that puts this contexts LoggerContext into a Threadlocal variable.
- * 
+ *
  * It removes it after the request is processed.
  *
  * To use it, add the following lines to a web.xml file

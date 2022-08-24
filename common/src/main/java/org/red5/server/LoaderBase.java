@@ -21,7 +21,7 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * Base class for all JEE application loaders.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -52,7 +52,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Getter for the application loader.
-     * 
+     *
      * @return Application loader
      */
     public static IApplicationLoader getApplicationLoader() {
@@ -62,7 +62,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Setter for the application loader.
-     * 
+     *
      * @param loader
      *            Application loader
      */
@@ -73,7 +73,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Returns the map containing all of the registered Red5 application contexts.
-     * 
+     *
      * @return a map
      */
     public static Map<String, IApplicationContext> getRed5ApplicationContexts() {
@@ -83,10 +83,10 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Getter for a Red5 application context.
-     * 
+     *
      * @param path
      *            path
-     * 
+     *
      * @return Red5 application context
      */
     public static IApplicationContext getRed5ApplicationContext(String path) {
@@ -97,10 +97,10 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Setter for a Red5 application context.
-     * 
+     *
      * @param path
      *            path
-     * 
+     *
      * @param context
      *            Red5 application context
      */
@@ -117,10 +117,10 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Remover for a Red5 application context.
-     * 
+     *
      * @param path
      *            path
-     * 
+     *
      * @return Red5 application context
      */
     public static IApplicationContext removeRed5ApplicationContext(String path) {
@@ -130,7 +130,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Getter for application context
-     * 
+     *
      * @return Application context
      */
     public static ApplicationContext getApplicationContext() {
@@ -140,7 +140,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Setter for application context.
-     * 
+     *
      * @param context
      *            Application context
      * @throws BeansException
@@ -153,7 +153,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Set the folder containing webapps.
-     * 
+     *
      * @param webappFolder
      *            web app folder
      */
@@ -171,7 +171,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
 
     /**
      * Remove context from the current host.
-     * 
+     *
      * @param path
      *            Path
      */

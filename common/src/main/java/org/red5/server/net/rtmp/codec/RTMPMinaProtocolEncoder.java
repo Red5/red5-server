@@ -93,7 +93,7 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
 
     /**
      * Sets an RTMP protocol encoder
-     * 
+     *
      * @param encoder
      *            the RTMP encoder
      */
@@ -103,7 +103,7 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
 
     /**
      * Returns an RTMP encoder
-     * 
+     *
      * @return RTMP encoder
      */
     public RTMPProtocolEncoder getEncoder() {
@@ -112,7 +112,7 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
 
     /**
      * Setter for baseTolerance
-     * 
+     *
      * @param baseTolerance
      *            base tolerance
      */
@@ -122,7 +122,7 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
 
     /**
      * Setter for dropLiveFuture
-     * 
+     *
      * @param dropLiveFuture
      *            drop live future
      */

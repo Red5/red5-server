@@ -9,14 +9,14 @@ package org.red5.server.service;
 
 /**
  * Thrown when a client is not allowed to execute a method.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
 public class NotAllowedException extends RuntimeException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7552833324276839926L;
 

@@ -14,7 +14,7 @@ import org.red5.server.jmx.mxbeans.AttributeStoreMXBean;
 
 /**
  * Base interface for all API objects with attributes
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  */
@@ -22,21 +22,21 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Get the attribute names. The resulting set will be read-only.
-     * 
+     *
      * @return set containing all attribute names
      */
     public Set<String> getAttributeNames();
 
     /**
      * Get the attributes. The resulting map will be read-only.
-     * 
+     *
      * @return map containing all attributes
      */
     public Map<String, Object> getAttributes();
 
     /**
      * Set an attribute on this object.
-     * 
+     *
      * @param name
      *            the name of the attribute to change
      * @param value
@@ -58,7 +58,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Set multiple attributes on this object.
-     * 
+     *
      * @param values
      *            the attributes to set
      * @return true if the attribute values changed otherwise false
@@ -67,7 +67,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Set multiple attributes on this object.
-     * 
+     *
      * @param values
      *            the attributes to set
      * @return true if the attribute values changed otherwise false
@@ -76,7 +76,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Return the value for a given attribute.
-     * 
+     *
      * @param name
      *            the name of the attribute to get
      * @return the attribute value or null if the attribute doesn't exist
@@ -94,15 +94,15 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Return the value for a given attribute and set it if it doesn't exist.
-     * 
+     *
      * This is a utility function that internally performs the following code: <br>
-     * 
+     *
      * <pre>
      * if (!hasAttribute(name))
      *     setAttribute(name, defaultValue);
      * return getAttribute(name);
      * </pre>
-     * 
+     *
      * @param name
      *            the name of the attribute to get
      * @param defaultValue
@@ -113,7 +113,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Check the object has an attribute.
-     * 
+     *
      * @param name
      *            the name of the attribute to check
      * @return true if the attribute exists otherwise false
@@ -131,7 +131,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Remove an attribute.
-     * 
+     *
      * @param name
      *            the name of the attribute to remove
      * @return true if the attribute was found and removed otherwise false
@@ -154,7 +154,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
 
     /**
      * Size of the attribute store.
-     * 
+     *
      * @return count of attributes
      */
     public int size();

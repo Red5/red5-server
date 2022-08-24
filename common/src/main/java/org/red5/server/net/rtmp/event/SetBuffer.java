@@ -6,7 +6,7 @@ import java.io.ObjectOutput;
 
 /**
  * Control message used to set a buffer.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class SetBuffer extends Ping {

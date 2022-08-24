@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Default WebSocket data listener. In this default implementation, all messages are echoed back to every connection in the current scope.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class DefaultWebSocketDataListener extends WebSocketDataListener {
@@ -44,7 +44,7 @@ public class DefaultWebSocketDataListener extends WebSocketDataListener {
         // assume we have text
         String msg = new String(message.getPayload().array());
         log.info("onWSMessage: {}", msg);
-        // get the path 
+        // get the path
         String path = message.getPath();
         // just echo back the message
         WebSocketScopeManager manager = ((WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME)).getManager(path);

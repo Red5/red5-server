@@ -13,7 +13,7 @@ package org.red5.server.exception;
 public class StreamControlException extends RuntimeException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -8396541091694329882L;
 

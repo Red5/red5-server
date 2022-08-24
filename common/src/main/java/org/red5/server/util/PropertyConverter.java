@@ -12,14 +12,14 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Converter for properties originating from properties files. Predetermined string formats are converted into other usable types such as timestamps.
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class PropertyConverter {
 
     /**
      * Converts a string denoting an amount of time into milliseconds and adds it to the current date. Strings are expected to follow this form where # equals a digit: #M The following are permitted for denoting time: H = hours, M = minutes, S = seconds
-     * 
+     *
      * @param time
      *            time
      * @return time in milliseconds
@@ -38,7 +38,7 @@ public class PropertyConverter {
 
     /**
      * Converts a string denoting an amount of time into seconds. Strings are expected to follow this form where # equals a digit: #M The following are permitted for denoting time: H = hours, M = minutes, S = seconds
-     * 
+     *
      * @param time
      *            time
      * @return time in seconds
@@ -60,7 +60,7 @@ public class PropertyConverter {
 
     /**
      * Converts a string denoting an amount of time into milliseconds. Strings are expected to follow this form where # equals a digit: #M The following are permitted for denoting time: H = hours, M = minutes, S = seconds
-     * 
+     *
      * @param time
      *            time
      * @return time in milliseconds
@@ -82,7 +82,7 @@ public class PropertyConverter {
 
     /**
      * Converts a string denoting an amount of bytes into an integer value. Strings are expected to follow this form where # equals a digit: #M The following are permitted for denoting binary size: K = kilobytes, M = megabytes, G = gigabytes
-     * 
+     *
      * @param memSize
      *            memory
      * @return size as an integer
@@ -101,7 +101,7 @@ public class PropertyConverter {
 
     /**
      * Converts a string denoting an amount of bytes into an long value. Strings are expected to follow this form where # equals a digit: #M The following are permitted for denoting binary size: K = kilobytes, M = megabytes, G = gigabytes
-     * 
+     *
      * @param memSize
      *            memory size
      * @return size as an long
@@ -120,7 +120,7 @@ public class PropertyConverter {
 
     /**
      * Quick time converter to keep our timestamps compatible with PHP's time() (seconds)
-     * 
+     *
      * @return time in seconds
      */
     public static Integer getCurrentTimeSeconds() {
@@ -129,7 +129,7 @@ public class PropertyConverter {
 
     /**
      * Quick time converter to keep our timestamps compatible with PHP's time() (seconds)
-     * 
+     *
      * @param millis
      *            milliseconds
      * @return seconds

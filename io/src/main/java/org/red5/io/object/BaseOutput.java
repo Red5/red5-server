@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  * BaseOutput represents a way to map input to a HashMap. This class is meant to be extended.
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  */
@@ -26,7 +26,7 @@ public class BaseOutput {
 
         /**
          * Creates wrapper for object
-         * 
+         *
          * @param object
          *            Object to wrap
          */
@@ -71,7 +71,7 @@ public class BaseOutput {
 
     /**
      * Store an object into a map
-     * 
+     *
      * @param obj
      *            Object to store
      */
@@ -81,7 +81,7 @@ public class BaseOutput {
 
     /**
      * Returns a boolean stating whether the map contains an object with that key
-     * 
+     *
      * @param obj
      *            Object
      * @return boolean <code>true</code> if it does contain it, <code>false</code> otherwise
@@ -100,7 +100,7 @@ public class BaseOutput {
 
     /**
      * Returns the reference id based on the parameter obj
-     * 
+     *
      * @param obj
      *            Object
      * @return short Reference id

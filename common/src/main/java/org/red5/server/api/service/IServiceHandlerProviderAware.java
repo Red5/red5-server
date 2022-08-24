@@ -9,7 +9,7 @@ package org.red5.server.api.service;
 
 /**
  * Class that knows about objects which can provide service handlers.
- * 
+ *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -17,7 +17,7 @@ public interface IServiceHandlerProviderAware {
 
     /**
      * Return object that knows about service handlers.
-     * 
+     *
      * @return service handler provider
      */
     public IServiceHandlerProvider getServiceHandlerProvider();

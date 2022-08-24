@@ -41,9 +41,9 @@ import ch.qos.logback.classic.LoggerContext;
 
 /**
  * Entry point from which the server config file is loaded while running within a J2EE application container.
- * 
+ *
  * This listener should be registered after Log4jConfigListener in web.xml, if the latter is used.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */

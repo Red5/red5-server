@@ -18,7 +18,7 @@ package org.red5.client;
  * recording it. If a file with a name that matches the value passed to the name parameter exists, it is deleted.
  *
  * @author Stoian Ivanov (s.ivanov_at_teracomm.bg)
- * 
+ *
  */
 public final class PublishModes {
 

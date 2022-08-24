@@ -25,7 +25,7 @@ public interface IStreamData<T> {
 
     /**
      * Creates a byte accurate copy.
-     * 
+     *
      * @return duplicate of the current data item
      * @throws IOException
      *             on error

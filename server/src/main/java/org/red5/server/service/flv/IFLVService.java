@@ -11,7 +11,7 @@ import org.red5.server.api.service.IStreamableFileService;
 
 /**
  * A FLVService sets up the service and hands out FLV objects to its callers
- * 
+ *
  * @author The Red5 Project
  * @author Dominick Accattato (daccattato@gmail.com)
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)

@@ -40,7 +40,7 @@ public class WebmTest {
 
     /**
      * This test checks if test webm file can be read till the end with no exceptions
-     * 
+     *
      * @throws IOException
      *             - in case of any IO exception
      * @throws ConverterException
@@ -71,7 +71,7 @@ public class WebmTest {
 
     /**
      * This test checks if test webm file can be read and then be written with no exceptions
-     * 
+     *
      * @throws IOException
      *             - in case of any IO exception
      * @throws ConverterException

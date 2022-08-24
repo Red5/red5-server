@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Misc utils for conversions
- * 
+ *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -76,7 +76,7 @@ public class ConversionUtils {
 
     /**
      * Returns true for base types or arrays of base type.
-     * 
+     *
      * @param obj Object
      * @return true if base-type or array and false otherwise
      */
@@ -92,7 +92,7 @@ public class ConversionUtils {
 
     /**
      * Convert source to given class
-     * 
+     *
      * @param source
      *            Source object
      * @param target
@@ -157,7 +157,7 @@ public class ConversionUtils {
 
     /**
      * Convert to array
-     * 
+     *
      * @param source
      *            Source object
      * @param target
@@ -200,7 +200,7 @@ public class ConversionUtils {
 
     /**
      * Convert to wrapped primitive
-     * 
+     *
      * @param source
      *            Source object
      * @param wrapper
@@ -233,7 +233,7 @@ public class ConversionUtils {
 
     /**
      * Convert string to primitive wrapper like Boolean or Float
-     * 
+     *
      * @param str
      *            String to convert
      * @param wrapper
@@ -264,7 +264,7 @@ public class ConversionUtils {
 
     /**
      * Convert number to primitive wrapper like Boolean or Float
-     * 
+     *
      * @param num
      *            Number to conver
      * @param wrapper
@@ -295,7 +295,7 @@ public class ConversionUtils {
 
     /**
      * Find method by name and number of parameters
-     * 
+     *
      * @param object
      *            Object to find method on
      * @param method
@@ -337,7 +337,7 @@ public class ConversionUtils {
 
     /**
      * Convert parameters using methods of this utility class
-     * 
+     *
      * @param source
      *            Array of source object
      * @param target
@@ -356,7 +356,7 @@ public class ConversionUtils {
 
     /**
      * Convert parameters using methods of this utility class. Special handling is afforded to classes that implement IConnection.
-     * 
+     *
      * @param source
      *            Array of source object
      * @return Array of converted objects
@@ -405,7 +405,7 @@ public class ConversionUtils {
 
     /**
      * Convert map to bean
-     * 
+     *
      * @param source
      *            Source map
      * @param target
@@ -433,7 +433,7 @@ public class ConversionUtils {
 
     /**
      * Convert bean to map
-     * 
+     *
      * @param source
      *            Source bean
      * @return Converted map
@@ -444,7 +444,7 @@ public class ConversionUtils {
 
     /**
      * Convert array to set, removing duplicates
-     * 
+     *
      * @param source
      *            Source array
      * @return Set
@@ -459,7 +459,7 @@ public class ConversionUtils {
 
     /**
      * Create new class instance
-     * 
+     *
      * @param className
      *            Class name; may not be loaded by JVM yet
      * @return Instance of given class
@@ -479,7 +479,7 @@ public class ConversionUtils {
 
     /**
      * Create new class instance
-     * 
+     *
      * @param clazz
      *            Class; may not be loaded by JVM yet
      * @return Instance of given class

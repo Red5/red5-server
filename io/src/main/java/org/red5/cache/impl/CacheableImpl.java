@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides an implementation of a cacheable object.
- * 
+ *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */

@@ -15,7 +15,7 @@ import org.red5.server.stream.message.RTMPMessage;
 
 /**
  * A Play buffer for sending VOD. The implementation is not synchronized.
- * 
+ *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
  */
@@ -38,7 +38,7 @@ public class PlayBuffer {
 
     /**
      * Create play buffer with given capacity
-     * 
+     *
      * @param capacity
      *            Capacity of buffer
      */
@@ -48,7 +48,7 @@ public class PlayBuffer {
 
     /**
      * Buffer capacity in bytes.
-     * 
+     *
      * @return Buffer capacity in bytes
      */
     public long getCapacity() {
@@ -67,7 +67,7 @@ public class PlayBuffer {
 
     /**
      * Number of messages in buffer.
-     * 
+     *
      * @return Number of messages in buffer
      */
     public int getMessageCount() {
@@ -76,7 +76,7 @@ public class PlayBuffer {
 
     /**
      * Total message size in bytes.
-     * 
+     *
      * @return Total message size in bytes
      */
     public long getMessageSize() {
@@ -85,7 +85,7 @@ public class PlayBuffer {
 
     /**
      * Put a message into this buffer.
-     * 
+     *
      * @param message
      *            RTMP message
      * @return true indicates success and false indicates buffer is full.
@@ -106,7 +106,7 @@ public class PlayBuffer {
 
     /**
      * Take a message from this buffer. The message count decreases.
-     * 
+     *
      * @return null if buffer is empty.
      */
     public RTMPMessage takeMessage() {
@@ -123,7 +123,7 @@ public class PlayBuffer {
 
     /**
      * Peek a message but not take it from the buffer. The message count doesn't change.
-     * 
+     *
      * @return null if buffer is empty.
      */
     public RTMPMessage peekMessage() {

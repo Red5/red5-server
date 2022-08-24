@@ -12,7 +12,7 @@ import java.net.URLClassLoader;
 
 /**
  * An almost trivial no-fuss implementation of a class loader following the child-first delegation model. <i>Based on code from Ceki Gulcu</i>
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public final class ChildFirstClassLoader extends URLClassLoader {
@@ -57,7 +57,7 @@ public final class ChildFirstClassLoader extends URLClassLoader {
      * We override the parent-first behavior established by java.lang.Classloader.
      * <p>
      * The implementation is surprisingly straightforward.
-     * 
+     *
      * @param name the name of the class to load, should not be null
      * @param resolve flag that indicates whether the class should be resolved
      * @return the loaded class, never null
@@ -119,7 +119,7 @@ public final class ChildFirstClassLoader extends URLClassLoader {
 
     /**
      * Override the parent-first resource loading model established by java.lang.Classloader with child-first behavior.
-     * 
+     *
      * @param name the name of the resource to load, should not be null
      * @return a {@link URL} for the resource, or null if it could not be found
      */

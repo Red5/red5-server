@@ -51,7 +51,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
     /**
      * Returns play item length in milliseconds
-     * 
+     *
      * @return Play item length in milliseconds
      */
     public long getLength() {
@@ -60,7 +60,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
     /**
      * Returns IMessageInput object. IMessageInput is an endpoint for a consumer to connect.
-     * 
+     *
      * @return IMessageInput object
      */
     public IMessageInput getMessageInput() {
@@ -69,7 +69,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
     /**
      * Returns item name
-     * 
+     *
      * @return item name
      */
     public String getName() {
@@ -85,7 +85,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
     /**
      * Alias for getMessageInput
-     * 
+     *
      * @return Message input source
      */
     public IMessageInput getMsgInput() {
@@ -157,7 +157,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
     /**
      * Builder for SimplePlayItem
-     * 
+     *
      * @param name
      *            name
      * @return play item instance
@@ -169,7 +169,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
     /**
      * Builder for SimplePlayItem
-     * 
+     *
      * @param name
      *            name
      * @param start

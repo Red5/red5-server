@@ -72,7 +72,7 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
 
     /**
      * Add client to registry
-     * 
+     *
      * @param client
      *            Client to add
      */
@@ -117,9 +117,9 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
      * @return <pre>
      * True
      * </pre>
-     * 
+     *
      *         if clients exist, otherwise
-     * 
+     *
      *         <pre>
      * False
      * </pre>
@@ -130,7 +130,7 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
 
     /**
      * Return collection of clients
-     * 
+     *
      * @return Collection of clients
      */
     @SuppressWarnings("unchecked")
@@ -191,7 +191,7 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
 
     /**
      * Return next client id
-     * 
+     *
      * @return Next client id
      */
     public String nextId() {
@@ -208,7 +208,7 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
 
     /**
      * Return previous client id
-     * 
+     *
      * @return Previous client id
      */
     public String previousId() {
@@ -217,7 +217,7 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
 
     /**
      * Removes client from registry
-     * 
+     *
      * @param client
      *            Client to remove
      */

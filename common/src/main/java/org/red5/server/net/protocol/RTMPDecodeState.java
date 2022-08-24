@@ -50,7 +50,7 @@ public class RTMPDecodeState {
 
     /**
      * Specifies buffer decoding amount needed.
-     * 
+     *
      * @param amount Buffer decoding amount
      */
     public void bufferDecoding(int amount) {
@@ -67,7 +67,7 @@ public class RTMPDecodeState {
 
     /**
      * Checks whether remaining buffer size is greater or equal than buffer amount and so if it makes sense to start decoding.
-     * 
+     *
      * @param remaining Remaining buffer size
      * @return true if there is data to decode, false otherwise
      */

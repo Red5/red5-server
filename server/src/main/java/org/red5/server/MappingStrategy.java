@@ -40,7 +40,7 @@ public class MappingStrategy implements IMappingStrategy {
 
     /**
      * Setter for default application name ('default' by default).
-     * 
+     *
      * @param defaultApp
      *            Default application
      */
@@ -50,7 +50,7 @@ public class MappingStrategy implements IMappingStrategy {
 
     /**
      * Resolves resource prefix from path. Default application used as root when path is specified.
-     * 
+     *
      * @param path
      *            Path
      * @return Resource prefix according to this naming strategy
@@ -65,7 +65,7 @@ public class MappingStrategy implements IMappingStrategy {
 
     /**
      * Resolves scope handler name for path. Default application used as root when path is specified.
-     * 
+     *
      * @param path
      *            Path
      * @return Scope handler name according to this naming strategy
@@ -80,7 +80,7 @@ public class MappingStrategy implements IMappingStrategy {
 
     /**
      * Resolves service filename name from name
-     * 
+     *
      * @param name
      *            Service name
      * @return Service filename according to this naming strategy

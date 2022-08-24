@@ -20,7 +20,7 @@ public class RTMPMessage extends AbstractMessage {
 
     /**
      * Creates a new rtmp message.
-     * 
+     *
      * @param body
      *            value to set for property 'body'
      */
@@ -32,7 +32,7 @@ public class RTMPMessage extends AbstractMessage {
 
     /**
      * Creates a new rtmp message.
-     * 
+     *
      * @param body
      *            value to set for property 'body'
      * @param eventTime
@@ -56,7 +56,7 @@ public class RTMPMessage extends AbstractMessage {
 
     /**
      * Builder for RTMPMessage.
-     * 
+     *
      * @param body
      *            event data
      * @return Immutable RTMPMessage
@@ -67,7 +67,7 @@ public class RTMPMessage extends AbstractMessage {
 
     /**
      * Builder for RTMPMessage.
-     * 
+     *
      * @param body
      *            event data
      * @param eventTime

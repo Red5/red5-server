@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 
 /**
  * This LoginModule authenticates a user with a password. This module comes pre-loaded with one user / password pair and the ability for implementers to add additional pairs. The pre-loaded user is "red5" and their password is "password".
- * 
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class SimpleLoginModule implements LoginModule {
@@ -150,7 +150,7 @@ public class SimpleLoginModule implements LoginModule {
 
     /**
      * Adds a new Principal, given a user name and password.
-     * 
+     *
      * @param userName
      * @param password
      */

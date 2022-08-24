@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 /**
  * The UnsignedByte class wraps a value of an unsigned 16 bits number.
- * 
+ *
  * @author Matteo Merli (matteo.merli@gmail.com)
  */
 public final class UnsignedShort extends UnsignedNumber {

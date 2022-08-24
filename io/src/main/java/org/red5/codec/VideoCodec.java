@@ -13,7 +13,7 @@ import java.util.Map;
 
 /**
  * Video codecs that Red5 supports.
- * 
+ *
  * @author Art Clarke
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -42,7 +42,7 @@ public enum VideoCodec {
 
     /**
      * Returns back a numeric id for this codec, that happens to correspond to the numeric identifier that FLV will use for this codec.
-     * 
+     *
      * @return the codec id
      */
     public byte getId() {
