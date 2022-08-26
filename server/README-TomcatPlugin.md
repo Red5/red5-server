@@ -43,6 +43,7 @@ The previous Red5 WebSocket plugin was developed with assistence from Takahiko T
 Update the `conf/jee-container.xml` file to suit your needs.
 
 *Non-secure* - http and ws:
+
 ```xml
    <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader,warDeployer" lazy-init="true">
         <property name="websocketEnabled" value="true" />
@@ -70,7 +71,9 @@ Update the `conf/jee-container.xml` file to suit your needs.
         </property>
     </bean>
 ```
+
 *Secure* - https and wss:
+
 ```xml
    <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
         <property name="websocketEnabled" value="true" />
@@ -121,7 +124,9 @@ Update the `conf/jee-container.xml` file to suit your needs.
     </bean>
 
 ```
+
 To bind to more than one IP address / port, add additional `httpConnector` or `httpsConnector` entries:
+
 ```xml
     <property name="connectors">
         <list>

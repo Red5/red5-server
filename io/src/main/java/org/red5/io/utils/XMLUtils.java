@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import org.xml.sax.EntityResolver;
+
 /**
  * Misc XML utils
  *
@@ -53,8 +55,9 @@ public class XMLUtils {
         if (StringUtils.isNotEmpty(str)) {
             try (Reader reader = new StringReader(str)) {
                 DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                EntityResolver noop = (publicId, systemId) -> new InputSource(new StringReader(""));
+                db.setEntityResolver(noop);
                 Document doc = db.parse(new InputSource(reader));
-
                 return doc;
             } catch (Exception ex) {
                 log.debug("String: {}", str);
