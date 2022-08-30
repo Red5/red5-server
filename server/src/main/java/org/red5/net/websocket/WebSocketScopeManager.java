@@ -165,7 +165,14 @@ public class WebSocketScopeManager {
                                     try {
                                         wsConn.sendPing(PING_BYTES);
                                     } catch (Exception e) {
+                                        log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
+                                        // if the ping fails, consider them gone
+                                        wsConn.close();
                                     }
+                                } else {
+                                    log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
+                                    // if the connection isn't connected, remove them
+                                    wsScope.removeConnection(wsConn);
                                 }
                             });
                             log.trace("finished pinging scope: {}", sName);

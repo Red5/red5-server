@@ -85,9 +85,8 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
         Map<String, Object> jobData = new HashMap<>();
         jobData.put(ISchedulingService.SCHEDULING_SERVICE, this);
         jobData.put(ISchedulingService.SCHEDULED_JOB, job);
-        // runnable task
-        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob();
-        schedJob.setJobDataMap(jobData);
+        // runnable task with false to prevent removal after it runs, since this job is meant to iterate
+        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob(name, jobData, false);
         // schedule it to run at interval
         ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(schedJob, interval, interval, TimeUnit.MILLISECONDS);
         // add to the key map
@@ -103,8 +102,7 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
         jobData.put(ISchedulingService.SCHEDULING_SERVICE, this);
         jobData.put(ISchedulingService.SCHEDULED_JOB, job);
         // runnable task
-        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob();
-        schedJob.setJobDataMap(jobData);
+        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob(name, jobData);
         // calculate the delay
         long delay = date.getTime() - System.currentTimeMillis();
         // schedule it to run once after the specified delay
@@ -123,8 +121,7 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
         jobData.put(ISchedulingService.SCHEDULING_SERVICE, this);
         jobData.put(ISchedulingService.SCHEDULED_JOB, job);
         // runnable task
-        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob();
-        schedJob.setJobDataMap(jobData);
+        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob(name, jobData);
         // schedule it to run once after the specified delay
         ScheduledFuture<?> future = scheduler.schedule(schedJob, timeDelta, TimeUnit.MILLISECONDS);
         // add to the key map
@@ -139,9 +136,8 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
         Map<String, Object> jobData = new HashMap<>();
         jobData.put(ISchedulingService.SCHEDULING_SERVICE, this);
         jobData.put(ISchedulingService.SCHEDULED_JOB, job);
-        // runnable task
-        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob();
-        schedJob.setJobDataMap(jobData);
+        // runnable task with false to prevent removal after it runs, since this job is meant to iterate
+        JDKSchedulingServiceJob schedJob = new JDKSchedulingServiceJob(name, jobData, false);
         // schedule it to run at interval
         ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(schedJob, delay, interval, TimeUnit.MILLISECONDS);
         // add to the key map
@@ -182,10 +178,11 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
     public void removeScheduledJob(String name) {
         try {
             ScheduledFuture<?> future = keyMap.remove(name);
-            if (future != null) {
+            // check done before we attempt cancelling
+            if (future != null && !future.isDone()) {
                 future.cancel(interruptOnRemove);
             } else {
-                log.debug("No key found for job: {}", name);
+                log.debug("No key found for job: {} or the job was done", name);
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);

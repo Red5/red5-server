@@ -22,23 +22,37 @@ import org.slf4j.LoggerFactory;
  */
 public class JDKSchedulingServiceJob implements Runnable {
 
-    private Logger log = LoggerFactory.getLogger(JDKSchedulingServiceJob.class);
+    private final static Logger log = LoggerFactory.getLogger(JDKSchedulingServiceJob.class);
 
     /**
      * Job data map
      */
-    private Map<String, Object> jobDataMap;
+    private final Map<String, Object> jobDataMap;
 
-    public void setJobDataMap(Map<String, Object> jobDataMap) {
+    private final String jobName;
+
+    // set this flag to prevent removal within the internal run() of the scheduled job
+    private final boolean autoRemove;
+
+    public JDKSchedulingServiceJob(String name, Map<String, Object> dataMap) {
+        this.jobDataMap = dataMap;
         log.debug("Set job data map: {}", jobDataMap);
-        this.jobDataMap = jobDataMap;
+        this.jobName = name;
+        this.autoRemove = true;
+    }
+
+    public JDKSchedulingServiceJob(String name, Map<String, Object> dataMap, boolean autoRemove) {
+        this.jobDataMap = dataMap;
+        log.debug("Set job data map: {}", jobDataMap);
+        this.jobName = name;
+        this.autoRemove = autoRemove;
     }
 
     public void run() {
         //log.debug("execute");
+        ISchedulingService service = (ISchedulingService) jobDataMap.get(ISchedulingService.SCHEDULING_SERVICE);
         IScheduledJob job = null;
         try {
-            ISchedulingService service = (ISchedulingService) jobDataMap.get(ISchedulingService.SCHEDULING_SERVICE);
             job = (IScheduledJob) jobDataMap.get(ISchedulingService.SCHEDULED_JOB);
             job.execute(service);
         } catch (Throwable e) {
@@ -47,6 +61,13 @@ public class JDKSchedulingServiceJob implements Runnable {
             } else {
                 log.warn("Job {} execution failed", job.toString(), e);
             }
+        } finally {
+            // remove the job
+            if (autoRemove) {
+                service.removeScheduledJob(jobName);
+            }
+            // clear the map
+            jobDataMap.clear();
         }
     }
 

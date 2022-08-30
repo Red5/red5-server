@@ -72,6 +72,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     public Set<IConnectionListener> connectionListeners = new CopyOnWriteArraySet<IConnectionListener>();
 
+    // delay between posting a notification and informing any listeners
+    public long notificationDelay = 5L;
+
     /**
      * Setter for Spring application context
      *
@@ -297,7 +300,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the scope that was created
      */
     public void notifyScopeCreated(IScope scope) {
-        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.CREATED, scope));
+        schedulingService.addScheduledOnceJob(notificationDelay, new ScheduledNotificationJob(JobAction.CREATED, scope));
     }
 
     /**
@@ -307,7 +310,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the scope that was removed
      */
     public void notifyScopeRemoved(IScope scope) {
-        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.REMOVED, scope));
+        schedulingService.addScheduledOnceJob(notificationDelay, new ScheduledNotificationJob(JobAction.REMOVED, scope));
     }
 
     /**
@@ -317,7 +320,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the scope that was added
      */
     public void notifyBasicScopeAdded(IBasicScope scope) {
-        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.BASIC_ADD, scope));
+        schedulingService.addScheduledOnceJob(notificationDelay, new ScheduledNotificationJob(JobAction.BASIC_ADD, scope));
     }
 
     /**
@@ -327,7 +330,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the scope that was removed
      */
     public void notifyBasicScopeRemoved(IBasicScope scope) {
-        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.BASIC_REMOVE, scope));
+        schedulingService.addScheduledOnceJob(notificationDelay, new ScheduledNotificationJob(JobAction.BASIC_REMOVE, scope));
     }
 
     /**
@@ -337,7 +340,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the new connection
      */
     public void notifyConnected(IConnection conn) {
-        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.CONNECTED, conn));
+        schedulingService.addScheduledOnceJob(notificationDelay, new ScheduledNotificationJob(JobAction.CONNECTED, conn));
     }
 
     /**
@@ -347,7 +350,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the disconnected connection
      */
     public void notifyDisconnected(final IConnection conn) {
-        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.DISCONNECTED, conn));
+        schedulingService.addScheduledOnceJob(notificationDelay, new ScheduledNotificationJob(JobAction.DISCONNECTED, conn));
     }
 
     // job actions for scope notifications

@@ -972,6 +972,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         if (schedulingService == null) {
             schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         }
+        // the caller is requred to call removal one they have finished with this job
         return schedulingService.addScheduledJob(interval, job);
     }
 
@@ -1025,6 +1026,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         if (schedulingService == null) {
             schedulingService = (ISchedulingService) ScopeUtils.getScopeService(scope, ISchedulingService.class, JDKSchedulingService.class, false);
         }
+        // the caller is requred to call removal one they have finished with this job
         return schedulingService.addScheduledJobAfterDelay(interval, job, delay);
     }
 
