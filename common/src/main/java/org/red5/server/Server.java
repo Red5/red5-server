@@ -20,6 +20,7 @@ import org.red5.server.api.listeners.IConnectionListener;
 import org.red5.server.api.listeners.IScopeListener;
 import org.red5.server.api.scheduling.IScheduledJob;
 import org.red5.server.api.scheduling.ISchedulingService;
+import org.red5.server.api.scope.IBasicScope;
 import org.red5.server.api.scope.IGlobalScope;
 import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
@@ -296,7 +297,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the scope that was created
      */
     public void notifyScopeCreated(IScope scope) {
-        schedulingService.addScheduledOnceJob(10, new ScopeCreatedJob(scope));
+        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.CREATED, scope));
     }
 
     /**
@@ -306,7 +307,27 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the scope that was removed
      */
     public void notifyScopeRemoved(IScope scope) {
-        schedulingService.addScheduledOnceJob(10, new ScopeRemovedJob(scope));
+        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.REMOVED, scope));
+    }
+
+    /**
+     * Notify listeners about an added basic scope.
+     *
+     * @param scope
+     *            the scope that was added
+     */
+    public void notifyBasicScopeAdded(IBasicScope scope) {
+        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.BASIC_ADD, scope));
+    }
+
+    /**
+     * Notify listeners that a basic scope was removed.
+     *
+     * @param scope
+     *            the scope that was removed
+     */
+    public void notifyBasicScopeRemoved(IBasicScope scope) {
+        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.BASIC_REMOVE, scope));
     }
 
     /**
@@ -316,7 +337,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the new connection
      */
     public void notifyConnected(IConnection conn) {
-        schedulingService.addScheduledOnceJob(10, new ConnectedJob(conn));
+        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.CONNECTED, conn));
     }
 
     /**
@@ -326,74 +347,59 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *            the disconnected connection
      */
     public void notifyDisconnected(final IConnection conn) {
-        schedulingService.addScheduledOnceJob(10, new DisconnectedJob(conn));
+        schedulingService.addScheduledOnceJob(10, new ScheduledNotificationJob(JobAction.DISCONNECTED, conn));
     }
 
-    /**
-     * Used to indicate a scope was created.
-     */
-    private final class ScopeCreatedJob implements IScheduledJob {
+    // job actions for scope notifications
+    private enum JobAction {
+        CREATED, REMOVED, CONNECTED, DISCONNECTED, BASIC_ADD, BASIC_REMOVE;
+    }
 
-        private IScope scope;
+    private class ScheduledNotificationJob implements IScheduledJob {
 
-        ScopeCreatedJob(IScope scope) {
-            this.scope = scope;
+        private final JobAction action;
+
+        private final Object target;
+
+        ScheduledNotificationJob(JobAction action, Object target) {
+            this.action = action;
+            this.target = target;
         }
 
         public void execute(ISchedulingService service) {
-            for (IScopeListener listener : scopeListeners) {
-                listener.notifyScopeCreated(scope);
-            }
-        }
-
-    }
-
-    /**
-     * Used to indicate a scope was removed.
-     */
-    private final class ScopeRemovedJob implements IScheduledJob {
-
-        private IScope scope;
-
-        ScopeRemovedJob(IScope scope) {
-            this.scope = scope;
-        }
-
-        public void execute(ISchedulingService service) {
-            for (IScopeListener listener : scopeListeners) {
-                listener.notifyScopeRemoved(scope);
-            }
-        }
-
-    }
-
-    private final class ConnectedJob implements IScheduledJob {
-
-        private IConnection conn;
-
-        ConnectedJob(IConnection conn) {
-            this.conn = conn;
-        }
-
-        public void execute(ISchedulingService service) {
-            for (IConnectionListener listener : connectionListeners) {
-                listener.notifyConnected(conn);
-            }
-        }
-
-    }
-
-    private final class DisconnectedJob implements IScheduledJob {
-
-        private IConnection conn;
-
-        DisconnectedJob(IConnection conn) {
-            this.conn = conn;
-        }
-
-        public void execute(ISchedulingService service) {
-            for (IConnectionListener listener : connectionListeners) {
-                listener.notifyDisconnected(conn);
+            switch (action) {
+                case CREATED:
+                    // Used to indicate a scope was created
+                    for (IScopeListener listener : scopeListeners) {
+                        listener.notifyScopeCreated((IScope) target);
+                    }
+                    break;
+                case REMOVED:
+                    // Used to indicate a scope was removed
+                    for (IScopeListener listener : scopeListeners) {
+                        listener.notifyScopeRemoved((IScope) target);
+                    }
+                    break;
+                case BASIC_ADD:
+                    for (IScopeListener listener : scopeListeners) {
+                        listener.notifyBasicScopeAdded((IBasicScope) target);
+                    }
+                    break;
+                case BASIC_REMOVE:
+                    for (IScopeListener listener : scopeListeners) {
+                        listener.notifyBasicScopeRemoved((IBasicScope) target);
+                    }
+                    break;
+                case CONNECTED:
+                    for (IConnectionListener listener : connectionListeners) {
+                        listener.notifyConnected((IConnection) target);
+                    }
+                    break;
+                case DISCONNECTED:
+                    for (IConnectionListener listener : connectionListeners) {
+                        listener.notifyDisconnected((IConnection) target);
+                    }
+                    break;
             }
         }
 

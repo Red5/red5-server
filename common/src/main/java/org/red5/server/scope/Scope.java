@@ -197,6 +197,10 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 if (!children.contains(scope)) {
                     log.debug("Adding child scope: {} to {}", scope, this);
                     added = children.add(scope);
+                    if (added) {
+                        // post notification
+                        ((Server) getServer()).notifyBasicScopeAdded(scope);
+                    }
                 } else {
                     log.warn("Child scope already exists");
                 }
@@ -1006,6 +1010,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         log.debug("removeChildScope: {}", scope);
         // remove from parent
         if (children.remove(scope)) {
+            // post notification
+            ((Server) getServer()).notifyBasicScopeRemoved(scope);
             if (scope instanceof Scope) {
                 unregisterJMX();
             }

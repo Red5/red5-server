@@ -34,7 +34,7 @@ import org.red5.net.websocket.server.DefaultServerEndpointConfigurator;
 import org.red5.net.websocket.server.DefaultWsServerContainer;
 import org.red5.server.Server;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
-import org.red5.server.api.listeners.IScopeListener;
+import org.red5.server.api.listeners.ScopeListenerAdapter;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.ScopeType;
 import org.red5.server.plugin.PluginRegistry;
@@ -73,7 +73,7 @@ public class WebSocketPlugin extends Red5Plugin {
     // holds DefaultWsServerContainer instances keyed by their servlet context path
     private static ConcurrentMap<String, DefaultWsServerContainer> containerMap = new ConcurrentHashMap<>();
 
-    private IScopeListener scopeListener;
+    private ScopeListenerAdapter scopeListener;
 
     public WebSocketPlugin() {
         log.trace("WebSocketPlugin ctor");
@@ -85,7 +85,7 @@ public class WebSocketPlugin extends Red5Plugin {
         super.doStart();
         log.trace("WebSocketPlugin start");
         // add scope listener to allow creation of websocket scopes
-        scopeListener = new IScopeListener() {
+        scopeListener = new ScopeListenerAdapter() {
 
             @Override
             public void notifyScopeCreated(IScope scope) {

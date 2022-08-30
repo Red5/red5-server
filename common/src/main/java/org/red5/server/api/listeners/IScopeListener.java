@@ -7,6 +7,7 @@
 
 package org.red5.server.api.listeners;
 
+import org.red5.server.api.scope.IBasicScope;
 import org.red5.server.api.scope.IScope;
 
 /**
@@ -32,5 +33,21 @@ public interface IScopeListener {
      *            the removed scope
      */
     public void notifyScopeRemoved(IScope scope);
+
+    /**
+     * A basic scope has been added.
+     *
+     * @param scope
+     *            the added scope
+     */
+    public void notifyBasicScopeAdded(IBasicScope scope);
+
+    /**
+     * A basic scope has been removed.
+     *
+     * @param scope
+     *            the removed scope
+     */
+    public void notifyBasicScopeRemoved(IBasicScope scope);
 
 }
