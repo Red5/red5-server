@@ -35,8 +35,10 @@
         <property name="dropLiveFuture" value="${rtmpt.encoder_drop_live_future}" />
     </bean>
 
-    <!-- Remoting calls codec factory -->
+    <!-- Remoting calls codec factory; requires remoting package from "servlet" module -->
+    <!-- 
     <bean id="remotingCodecFactory" class="org.red5.server.net.remoting.codec.RemotingCodecFactory" autowire="byType" init-method="init"/>
+    -->
 
     <!-- Streamable file factory -->
     <bean id="streamableFileFactory" class="org.red5.server.stream.StreamableFileFactory">
@@ -88,10 +90,12 @@
     <!-- Scheduling service -->
     <bean id="schedulingService" class="org.red5.server.scheduling.JDKSchedulingService"/>
 
-    <!-- Use injection to setup thread pool for remoting clients -->
+    <!-- Use injection to setup thread pool for remoting clients; requires remoting package from "servlet" module -->
+    <!-- 
     <bean id="remotingClient" class="org.red5.server.net.remoting.RemotingClient">
         <property name="poolSize" value="1"/>
     </bean>
+    -->
 
     <!--
     Now we can load the cache engine, only one may be enabled at a time. If no-caching is required select the
