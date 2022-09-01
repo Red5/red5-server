@@ -73,20 +73,31 @@ public class DefaultWebSocketEndpoint extends Endpoint {
     public void onClose(Session session, CloseReason closeReason) {
         final String sessionId = session.getId();
         log.debug("Session closed: {}", sessionId);
-        // get ws connection from session user props
-        WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
-        // if we don't get it from the session, try the scope lookup
-        if (conn == null) {
-            log.warn("Connection for id: {} was not found in the session onClose", sessionId);
-            conn = scope.getConnectionBySessionId(sessionId);
-        }
-        if (conn != null) {
-            // close the ws conn which removes it from the scope
-            if (conn.isConnected()) {
+        WebSocketConnection conn = null;
+        // getting the sessions user properties on a closed connection will throw an exception when it checks state
+        try {
+            // get ws connection from session user props
+            conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
+            // if we don't get it from the session, try the scope lookup
+            if (conn == null) {
+                log.warn("Connection for id: {} was not found in the session onClose", sessionId);
+                conn = scope.getConnectionBySessionId(sessionId);
+            }
+            if (conn != null) {
+                // close the ws conn which removes it from the scope
+                if (conn.isConnected()) {
+                    conn.close();
+                }
+            } else {
+                log.debug("Connection for id: {} was not found in the scope or session: {}", sessionId, scope.getPath());
+            }
+        } catch (Exception e) {
+            if (conn != null) {
+                // force remove on exception
+                scope.removeConnection(conn);
+                // fire close, to be sure
                 conn.close();
             }
-        } else {
-            log.debug("Connection for id: {} was not found in the scope or session: {}", sessionId, scope.getPath());
         }
     }
 

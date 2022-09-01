@@ -159,20 +159,26 @@ public class WebSocketScopeManager {
                         scopes.forEach((sName, wsScope) -> {
                             log.trace("start pinging scope: {}", sName);
                             wsScope.getConns().forEach(wsConn -> {
-                                // ping connected websocket
-                                if (wsConn.isConnected()) {
-                                    log.debug("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
-                                    try {
-                                        wsConn.sendPing(PING_BYTES);
-                                    } catch (Exception e) {
-                                        log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
-                                        // if the ping fails, consider them gone
-                                        wsConn.close();
+                                try {
+                                    // ping connected websocket
+                                    if (wsConn.isConnected()) {
+                                        log.debug("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
+                                        try {
+                                            wsConn.sendPing(PING_BYTES);
+                                        } catch (Exception e) {
+                                            log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
+                                            // if the connection isn't connected, remove them
+                                            wsScope.removeConnection(wsConn);
+                                            // if the ping fails, consider them gone
+                                            wsConn.close();
+                                        }
+                                    } else {
+                                        log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
+                                        // if the connection isn't connected, remove them
+                                        wsScope.removeConnection(wsConn);
                                     }
-                                } else {
-                                    log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
-                                    // if the connection isn't connected, remove them
-                                    wsScope.removeConnection(wsConn);
+                                } catch (Exception e) {
+                                    log.warn("Exception in WS pinger", e);
                                 }
                             });
                             log.trace("finished pinging scope: {}", sName);
@@ -180,7 +186,7 @@ public class WebSocketScopeManager {
                         // sleep for interval
                         try {
                             Thread.sleep(websocketPingInterval);
-                        } catch (InterruptedException e1) {
+                        } catch (InterruptedException e) {
                         }
                     } while (!scopes.isEmpty());
                     // reset ping future

@@ -54,11 +54,11 @@ public class JDKSchedulingServiceJob implements Runnable {
         IScheduledJob job = null;
         try {
             job = (IScheduledJob) jobDataMap.get(ISchedulingService.SCHEDULED_JOB);
-            job.execute(service);
+            if (job != null) {
+                job.execute(service);
+            }
         } catch (Throwable e) {
-            if (job == null) {
-                log.warn("Job not found");
-            } else {
+            if (job != null) {
                 log.warn("Job {} execution failed", job.toString(), e);
             }
         } finally {

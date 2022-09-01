@@ -329,15 +329,21 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                 CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
                 // close the socket, don't wait for the browser to respond or we could hang
                 session.onClose(reason);
-                // clean up our props
-                attributes.clear();
+            }
+            // clean up our props
+            attributes.clear();
+            if (querystringParameters != null) {
                 querystringParameters.clear();
                 querystringParameters = null;
+            }
+            if (extensions != null) {
                 extensions.clear();
                 extensions = null;
-                if (headers != null) {
-                    headers = null;
-                }
+            }
+            if (headers != null) {
+                headers = null;
+            }
+            if (scope.get() != null) {
                 // disconnect from scope
                 scope.get().removeConnection(this);
                 // clear weak refs
@@ -419,7 +425,11 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      * @return true if secure and false if unsecure or unconnected
      */
     public boolean isSecure() {
-        return (wsSession != null && wsSession.get().isOpen()) ? wsSession.get().isSecure() : false;
+        Optional<WsSession> opt = Optional.ofNullable(wsSession.get());
+        if (opt.isPresent()) {
+            return (opt.get().isOpen() ? opt.get().isSecure() : false);
+        }
+        return false;
     }
 
     public String getPath() {
