@@ -1932,11 +1932,13 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                                                 if (data != null) {
                                                     data.free();
                                                 }
+                                                // continue to pull and feed
                                             } else {
+                                                // ensure p/p executable scheduled and break to exit
                                                 pendingMessage = rtmpMessage;
+                                                ensurePullAndPushRunning();
+                                                break;
                                             }
-                                            ensurePullAndPushRunning();
-                                            break;
                                         }
                                     }
                                 } else {
