@@ -156,6 +156,8 @@ public class WebSocketScopeManager {
                     final String oldName = Thread.currentThread().getName();
                     Thread.currentThread().setName("WebSocketPinger");
                     do {
+                        // whats the time now
+                        final long now = System.currentTimeMillis();
                         scopes.forEach((sName, wsScope) -> {
                             log.trace("start pinging scope: {}", sName);
                             wsScope.getConns().forEach(wsConn -> {
@@ -165,7 +167,8 @@ public class WebSocketScopeManager {
                                         log.debug("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
                                         try {
                                             // get read stat to ensure liveness of the websocket
-                                            if (wsConn.getLastReadTime() > WebSocketConnection.getReadTimeout()) {
+                                            long wsLastReadTime = wsConn.getLastReadTime();
+                                            if (wsLastReadTime > 0 && (now - wsLastReadTime) > WebSocketConnection.getReadTimeout()) {
                                                 log.warn("Closing connection: {}, read time out", wsConn.getSessionId());
                                                 wsConn.close();
                                             } else {
