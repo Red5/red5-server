@@ -18,7 +18,7 @@ public final class Red5Client {
     /**
      * Current server version with revision
      */
-    public static final String VERSION = "Red5 Client 1.3.1";
+    public static final String VERSION = "Red5 Client 1.3.2";
 
     /**
      * Create a new Red5Client object using the connection local to the current thread A bit of magic that lets you access the red5 scope

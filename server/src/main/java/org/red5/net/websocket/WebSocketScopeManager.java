@@ -164,7 +164,13 @@ public class WebSocketScopeManager {
                                     if (wsConn.isConnected()) {
                                         log.debug("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
                                         try {
-                                            wsConn.sendPing(PING_BYTES);
+                                            // get read stat to ensure liveness of the websocket
+                                            if (wsConn.getLastReadTime() > WebSocketConnection.getReadTimeout()) {
+                                                log.warn("Closing connection: {}, read time out", wsConn.getSessionId());
+                                                wsConn.close();
+                                            } else {
+                                                wsConn.sendPing(PING_BYTES);
+                                            }
                                         } catch (Exception e) {
                                             log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
                                             // if the connection isn't connected, remove them
@@ -429,6 +435,10 @@ public class WebSocketScopeManager {
 
     public void setCopyListeners(boolean copy) {
         this.copyListeners = copy;
+    }
+
+    public static void setWebsocketPingInterval(long websocketPingInterval) {
+        WebSocketScopeManager.websocketPingInterval = websocketPingInterval;
     }
 
     @Override

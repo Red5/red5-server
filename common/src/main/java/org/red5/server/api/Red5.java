@@ -55,12 +55,12 @@ public final class Red5 {
     /**
      * Server version with revision
      */
-    public static final String VERSION = "Red5 Server 1.3.1";
+    public static final String VERSION = "Red5 Server 1.3.2";
 
     /**
      * Server version for fmsVer requests
      */
-    public static final String FMS_VERSION = "RED5/1,3,1,0";
+    public static final String FMS_VERSION = "RED5/1,3,2,0";
 
     /**
      * Server capabilities

@@ -55,7 +55,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     // Sending async on windows times out
     private static boolean useAsync = !System.getProperty("os.name").contains("Windows");
 
-    private static long sendTimeout = 10000L;
+    private static long sendTimeout = 3000L, readTimeout = 5000L;
 
     private AtomicBoolean connected = new AtomicBoolean(false);
 
@@ -97,6 +97,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
 
     // stats
     private volatile long readBytes, writtenBytes;
+
+    // last read time will be set when we've received; last write will be on any write, not just ping
+    private long lastReadTime, lastWriteTime;
 
     // send future for when async is enabled
     private Future<Void> sendFuture;
@@ -195,13 +198,13 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                             synchronized (wsSessionId) {
                                 int lengthToWrite = data.getBytes().length;
                                 sendFuture = session.getAsyncRemote().sendText(data);
-                                writtenBytes += lengthToWrite;
+                                updateWriteBytes(lengthToWrite);
                             }
                         } else {
                             synchronized (wsSessionId) {
                                 int lengthToWrite = data.getBytes().length;
                                 session.getBasicRemote().sendText(data);
-                                writtenBytes += lengthToWrite;
+                                updateWriteBytes(lengthToWrite);
                             }
                         }
                     } catch (Exception e) {
@@ -248,12 +251,12 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                     }
                     synchronized (wsSessionId) {
                         sendFuture = session.getAsyncRemote().sendBinary(ByteBuffer.wrap(buf));
-                        writtenBytes += buf.length;
+                        updateWriteBytes(buf.length);
                     }
                 } else {
                     synchronized (wsSessionId) {
                         session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
-                        writtenBytes += buf.length;
+                        updateWriteBytes(buf.length);
                     }
                 }
             } catch (Exception e) {
@@ -281,7 +284,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                 // send the bytes
                 session.getBasicRemote().sendPing(ByteBuffer.wrap(buf));
                 // update counter
-                writtenBytes += buf.length;
+                updateWriteBytes(buf.length);
             }
         } else {
             throw new IOException("WS session closed");
@@ -305,7 +308,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                 // send the bytes
                 session.getBasicRemote().sendPong(ByteBuffer.wrap(buf));
                 // update counter
-                writtenBytes += buf.length;
+                updateWriteBytes(buf.length);
             }
         } else {
             throw new IOException("WS session closed");
@@ -619,6 +622,14 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         WebSocketConnection.sendTimeout = sendTimeout;
     }
 
+    public static long getReadTimeout() {
+        return readTimeout;
+    }
+
+    public static void setReadTimeout(long readTimeout) {
+        WebSocketConnection.readTimeout = readTimeout;
+    }
+
     public void setWsSessionTimeout(long idleTimeout) {
         if (wsSession != null) {
             wsSession.get().setMaxIdleTimeout(idleTimeout);
@@ -635,10 +646,24 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
 
     public void updateReadBytes(long read) {
         readBytes += read;
+        lastReadTime = System.currentTimeMillis();
     }
 
     public long getWrittenBytes() {
         return writtenBytes;
+    }
+
+    public void updateWriteBytes(long wrote) {
+        writtenBytes += wrote;
+        lastWriteTime = System.currentTimeMillis();
+    }
+
+    public long getLastReadTime() {
+        return lastReadTime;
+    }
+
+    public long getLastWriteTime() {
+        return lastWriteTime;
     }
 
     public String getWsSessionId() {
