@@ -14,6 +14,6 @@ package org.red5.net.websocket.model;
  */
 public enum WebSocketEvent {
 
-    SCOPE_CREATED, SCOPE_ADDED, SCOPE_REMOVED;
+    SCOPE_CREATED, SCOPE_ADDED, SCOPE_REMOVED, CONNECTION_ADDED, CONNECTION_REMOVED;
 
 }

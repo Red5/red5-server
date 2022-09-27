@@ -320,7 +320,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      */
     public void close() {
         if (connected.compareAndSet(true, false)) {
-            log.info("close: {}", wsSessionId);
+            log.debug("close: {}", wsSessionId);
             WsSession session = wsSession != null ? wsSession.get() : null;
             if (session != null && session.isOpen()) {
                 // clean up internal ws session maps since close doesnt

@@ -7,6 +7,7 @@
 
 package org.red5.net.websocket.listener;
 
+import org.red5.net.websocket.WebSocketConnection;
 import org.red5.net.websocket.WebSocketScope;
 
 public interface IWebSocketScopeListener {
@@ -16,5 +17,9 @@ public interface IWebSocketScopeListener {
     void scopeAdded(WebSocketScope wsScope);
 
     void scopeRemoved(WebSocketScope wsScope);
+
+    void connectionAdded(WebSocketScope wsScope, WebSocketConnection wsConn);
+
+    void connectionRemoved(WebSocketScope wsScope, WebSocketConnection wsConn);
 
 }

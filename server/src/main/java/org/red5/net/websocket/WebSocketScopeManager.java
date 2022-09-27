@@ -38,7 +38,7 @@ public class WebSocketScopeManager {
     private static final byte[] PING_BYTES = "PING!".getBytes();
 
     // one executor per scope manager
-    private ExecutorService executor = Executors.newFixedThreadPool(1);
+    private ExecutorService executor = Executors.newFixedThreadPool(2);
 
     // future for the ws pinger
     private Future<?> pingFuture;
@@ -123,7 +123,7 @@ public class WebSocketScopeManager {
                 log.debug("adding default listener");
                 wsScope.addListener(new DefaultWebSocketDataListener());
             }
-            notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope);
+            notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope, null);
             // add to scopes
             addWebSocketScope(wsScope);
         }
@@ -149,15 +149,14 @@ public class WebSocketScopeManager {
         String path = webSocketScope.getPath();
         if (scopes.putIfAbsent(path, webSocketScope) == null) {
             log.info("addWebSocketScope: {}", webSocketScope);
-            notifyListeners(WebSocketEvent.SCOPE_ADDED, webSocketScope);
+            notifyListeners(WebSocketEvent.SCOPE_ADDED, webSocketScope, null);
             // ensure the ping future exists, if not spawn it
             if (pingFuture == null || pingFuture.isDone()) {
+                final String appScopeName = appScope != null ? appScope.getName() : "default";
                 pingFuture = executor.submit(() -> {
                     final String oldName = Thread.currentThread().getName();
-                    Thread.currentThread().setName("WebSocketPinger");
+                    Thread.currentThread().setName(String.format("WebSocketPinger@%s", appScopeName));
                     do {
-                        // whats the time now
-                        final long now = System.currentTimeMillis();
                         scopes.forEach((sName, wsScope) -> {
                             log.trace("start pinging scope: {}", sName);
                             wsScope.getConns().forEach(wsConn -> {
@@ -166,14 +165,7 @@ public class WebSocketScopeManager {
                                     if (wsConn.isConnected()) {
                                         log.debug("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
                                         try {
-                                            // get read stat to ensure liveness of the websocket
-                                            long wsLastReadTime = wsConn.getLastReadTime();
-                                            if (wsLastReadTime > 0 && (now - wsLastReadTime) > WebSocketConnection.getReadTimeout()) {
-                                                log.warn("Closing connection: {}, read time out", wsConn.getSessionId());
-                                                wsConn.close();
-                                            } else {
-                                                wsConn.sendPing(PING_BYTES);
-                                            }
+                                            wsConn.sendPing(PING_BYTES);
                                         } catch (Exception e) {
                                             log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
                                             // if the connection isn't connected, remove them
@@ -218,7 +210,7 @@ public class WebSocketScopeManager {
         log.info("removeWebSocketScope: {}", webSocketScope);
         WebSocketScope wsScope = scopes.remove(webSocketScope.getPath());
         if (wsScope != null) {
-            notifyListeners(WebSocketEvent.SCOPE_REMOVED, wsScope);
+            notifyListeners(WebSocketEvent.SCOPE_REMOVED, wsScope, null);
             return true;
         }
         return false;
@@ -234,6 +226,11 @@ public class WebSocketScopeManager {
         WebSocketScope scope = getScope(conn);
         if (scope != null) {
             scope.addConnection(conn);
+            notifyListeners(WebSocketEvent.CONNECTION_ADDED, scope, conn);
+            // check for pinger and log it
+            if (pingFuture == null) {
+                log.debug("Pinger is absent for {}", appScope);
+            }
         }
     }
 
@@ -248,6 +245,7 @@ public class WebSocketScopeManager {
             WebSocketScope scope = getScope(conn);
             if (scope != null) {
                 scope.removeConnection(conn);
+                notifyListeners(WebSocketEvent.CONNECTION_REMOVED, scope, conn);
                 if (!scope.isValid()) {
                     // scope is not valid, delete it
                     removeWebSocketScope(scope);
@@ -306,7 +304,7 @@ public class WebSocketScopeManager {
             // new websocket scope
             wsScope = new WebSocketScope();
             wsScope.setPath(path);
-            notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope);
+            notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope, null);
             addWebSocketScope(wsScope);
             log.debug("Use the IWebSocketScopeListener interface to be notified of new scopes");
         } else {
@@ -330,7 +328,7 @@ public class WebSocketScopeManager {
             wsScope = new WebSocketScope();
             wsScope.setPath(path);
             wsScope.setScope(scope);
-            notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope);
+            notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope, null);
             addWebSocketScope(wsScope);
             log.debug("Use the IWebSocketScopeListener interface to be notified of new scopes");
         } else {
@@ -361,10 +359,10 @@ public class WebSocketScopeManager {
      *
      * @param event
      * @param wsScope
+     * @param wsConn associated connection or null
      */
-    private void notifyListeners(WebSocketEvent event, WebSocketScope wsScope) {
-        @SuppressWarnings("unused")
-        Future<?> notifier = WebSocketPlugin.submit(() -> {
+    private void notifyListeners(WebSocketEvent event, WebSocketScope wsScope, WebSocketConnection wsConn) {
+        executor.execute(() -> {
             scopeListeners.forEach(listener -> {
                 switch (event) {
                     case SCOPE_CREATED:
@@ -375,6 +373,12 @@ public class WebSocketScopeManager {
                         break;
                     case SCOPE_REMOVED:
                         listener.scopeRemoved(wsScope);
+                        break;
+                    case CONNECTION_ADDED:
+                        listener.connectionAdded(wsScope, wsConn);
+                        break;
+                    case CONNECTION_REMOVED:
+                        listener.connectionRemoved(wsScope, wsConn);
                         break;
                 }
             });
@@ -399,7 +403,7 @@ public class WebSocketScopeManager {
             if (!scopes.containsKey("default")) {
                 WebSocketScope defaultWSScope = new WebSocketScope();
                 defaultWSScope.setPath(path);
-                notifyListeners(WebSocketEvent.SCOPE_CREATED, defaultWSScope);
+                notifyListeners(WebSocketEvent.SCOPE_CREATED, defaultWSScope, null);
                 addWebSocketScope(defaultWSScope);
                 //log.debug("Use the IWebSocketScopeListener interface to be notified of new scopes");
             } else {

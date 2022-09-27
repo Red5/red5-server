@@ -59,7 +59,11 @@ public class WsFilter implements Filter {
             StatefulScopeWrappingAdapter app = (StatefulScopeWrappingAdapter) appCtx.getBean("web.handler");
             // applications scope
             IScope appScope = app.getScope();
-            log.debug("Application scope: {} ws scope: {}", appScope.getName(), appScope.getAttribute(WSConstants.WS_SCOPE));
+            if (appScope != null) {
+                log.debug("Application scope: {} ws scope: {}", appScope.getName(), appScope.getAttribute(WSConstants.WS_SCOPE));
+            } else {
+                log.warn("Application scope is null for {}", appCtx);
+            }
         } else {
             log.warn("Application context was not found in the servlet context for {}", contextPath);
         }
