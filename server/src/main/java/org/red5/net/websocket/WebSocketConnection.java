@@ -322,16 +322,15 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (connected.compareAndSet(true, false)) {
             log.debug("close: {}", wsSessionId);
             WsSession session = wsSession != null ? wsSession.get() : null;
-            if (session != null && session.isOpen()) {
-                // clean up internal ws session maps since close doesnt
-                //if (session.isOpen()) {
-                //    session.getPathParameters().clear();
-                //    session.getUserProperties().clear();
-                //}
-                // ensure the endpoint is closed
-                CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
-                // close the socket, don't wait for the browser to respond or we could hang
-                session.onClose(reason);
+            WebSocketScopeManager manager = null;
+            if (session != null) {
+                manager = (WebSocketScopeManager) session.getUserProperties().get(WSConstants.WS_MANAGER);
+                if (session.isOpen()) {
+                    // ensure the endpoint is closed
+                    CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
+                    // close the socket, don't wait for the browser to respond or we could hang
+                    session.onClose(reason);
+                }
             }
             // clean up our props
             attributes.clear();
@@ -345,6 +344,10 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
             }
             if (headers != null) {
                 headers = null;
+            }
+            // fire callback for manager
+            if (manager != null) {
+                manager.removeConnection(this);
             }
             if (scope.get() != null) {
                 // disconnect from scope
