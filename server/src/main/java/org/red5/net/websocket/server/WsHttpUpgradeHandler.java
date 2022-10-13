@@ -38,6 +38,9 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     private Logger log = LoggerFactory.getLogger(WsHttpUpgradeHandler.class); // must not be static
 
+    private final boolean isTrace = log.isTraceEnabled();
+
+    @SuppressWarnings("unused")
     private final boolean isDebug = log.isDebugEnabled();
 
     private static final StringManager sm = StringManager.getManager(WsHttpUpgradeHandler.class);
@@ -104,6 +107,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void init(WebConnection connection) {
         if (ep == null) {
@@ -125,52 +129,52 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         try {
             // instance a remote endpoint server
             wsRemoteEndpointServer = new WsRemoteEndpointImplServer(socketWrapper, upgradeInfo);
-            if (isDebug) {
-                log.debug("New connection 1 {}", wsRemoteEndpointServer);
+            if (isTrace) {
+                log.trace("New connection 1 {}", wsRemoteEndpointServer);
             }
-            if (isDebug) {
-                log.debug("WS session pre-ctor - wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", wsRemoteEndpointServer, webSocketContainer,
+            if (isTrace) {
+                log.trace("WS session pre-ctor - wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", wsRemoteEndpointServer, webSocketContainer,
                         handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
             }
             // deprecated version
             wsSession = new WsSession(ep, wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
             // newest ctor
             //wsSession = new WsSession(wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
-            if (isDebug) {
-                log.debug("New connection 2 {}", wsSession);
+            if (isTrace) {
+                log.trace("New connection 2 {}", wsSession);
             }
             wsFrame = new WsFrameServer(socketWrapper, upgradeInfo, wsSession, transformation, applicationClassLoader);
-            if (isDebug) {
-                log.debug("New connection 3 {}", wsFrame);
+            if (isTrace) {
+                log.trace("New connection 3 {}", wsFrame);
             }
             // WsFrame adds the necessary final transformations. Copy the completed transformation chain to the remote end point.
             wsRemoteEndpointServer.setTransformation(wsFrame.getTransformation());
-            if (isDebug) {
-                log.debug("New connection 4");
+            if (isTrace) {
+                log.trace("New connection 4");
             }
             // get the ws scope manager from user props
             WebSocketScopeManager manager = (WebSocketScopeManager) endpointConfig.getUserProperties().get(WSConstants.WS_MANAGER);
-            if (isDebug) {
-                log.debug("New connection 5");
+            if (isTrace) {
+                log.trace("New connection 5");
             }
             // get ws scope from user props
             WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
-            if (isDebug) {
-                log.debug("New connection 6 - Scope: {} WS session: {}", scope, wsSession);
+            if (isTrace) {
+                log.trace("New connection 6 - Scope: {} WS session: {}", scope, wsSession);
             }
             // create a ws connection instance
             WebSocketConnection conn = new WebSocketConnection(scope, wsSession);
             // in debug check since WebSocketConnection.toString is a tiny bit expensive
-            if (isDebug) {
-                log.debug("New connection 7: {}", conn);
+            if (isTrace) {
+                log.trace("New connection 7: {}", conn);
             }
             // set ip and port
             conn.setAttribute(WSConstants.WS_HEADER_REMOTE_IP, socketWrapper.getRemoteAddr());
             conn.setAttribute(WSConstants.WS_HEADER_REMOTE_PORT, socketWrapper.getRemotePort());
             // add the request headers
             conn.setHeaders(handshakeRequest.getHeaders());
-            if (isDebug) {
-                log.debug("New connection 8: {}", conn);
+            if (isTrace) {
+                log.trace("New connection 8: {}", conn);
             }
             // add the connection to the user props
             endpointConfig.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
@@ -180,14 +184,14 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             conn.setConnected();
             // fire endpoint handler
             ep.onOpen(wsSession, endpointConfig);
-            if (isDebug) {
-                log.debug("New connection 9: endpoint opened");
+            if (isTrace) {
+                log.trace("New connection 9: endpoint opened");
             }
             // get the endpoint path to use in registration since we're a server
             String path = ((ServerEndpointConfig) endpointConfig).getPath();
             webSocketContainer.registerSession(path, wsSession);
-            if (isDebug) {
-                log.debug("New connection 10: session registered");
+            if (isTrace) {
+                log.trace("New connection 10: session registered");
             }
             // add the connection to the manager
             manager.addConnection(conn);

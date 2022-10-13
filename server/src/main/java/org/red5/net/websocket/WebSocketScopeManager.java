@@ -163,7 +163,7 @@ public class WebSocketScopeManager {
                                 try {
                                     // ping connected websocket
                                     if (wsConn.isConnected()) {
-                                        log.debug("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
+                                        log.trace("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
                                         try {
                                             wsConn.sendPing(PING_BYTES);
                                         } catch (Exception e) {

@@ -142,11 +142,9 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
             int eventTime = msg.getTimestamp();
             log.debug("Message timestamp: {}", eventTime);
             if (eventTime < 0) {
-                //eventTime += Integer.MIN_VALUE;
-                //log.debug("Message has negative timestamp, applying {} offset: {}", Integer.MIN_VALUE, eventTime);
-                // everyone seems to prefer positive timestamps
-                eventTime += (eventTime * -1);
-                log.debug("Message has negative timestamp, flipping it to positive: {}", Integer.MIN_VALUE, eventTime);
+                // handle roll-over -1 is top of the range when keeping things positive
+                eventTime ^= Integer.MIN_VALUE;
+                log.debug("Message has negative timestamp, applying {} ts: {}", Integer.MIN_VALUE, eventTime);
                 msg.setTimestamp(eventTime);
             }
             // get the data type (AMF)
