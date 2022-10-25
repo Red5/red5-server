@@ -21,7 +21,7 @@ The IP addresses and ports identified for `ws` and `wss` in the `conf/jee-contai
 
 ### Building for JDK8
 
-Use this command to build for JDK8 since we are currently moving over to JDK11 builds: `mvn clean install -Djava.release.level=8 -Dmaven.compiler.source=1.8 -Dmaven.compiler.target=1.8`
+Use this command to build for JDK8 since we've moved to JDK11: `mvn clean install -Djava.release.level=8 -Dmaven.compiler.source=1.8 -Dmaven.compiler.target=1.8`
 
 ## Tomcat Server
 
@@ -33,8 +33,6 @@ Development is based on version 8.5.x of Tomcat.
 Websocket plug-in is integrated into the Tomcat plugin as of this latest release. The primary reasoning behind this is the maintenance aspect; Tomcat has a team and we do not. This change also means a move away from Mina for the I/O layer for WebSockets; the previous plugin will continue to live on [here](https://github.com/Red5/red5-websocket).
 
 This plugin is meant to provide websocket functionality for applications running in red5. The code is constructed to comply with [rfc6455](http://tools.ietf.org/html/rfc6455) and [JSR365](https://www.oracle.com/technetwork/articles/java/jsr356-1937161.html).
-
-
 
 The previous Red5 WebSocket plugin was developed with assistence from Takahiko Toda and Dhruv Chopra.
 
@@ -128,30 +126,30 @@ Update the `conf/jee-container.xml` file to suit your needs.
 To bind to more than one IP address / port, add additional `httpConnector` or `httpsConnector` entries:
 
 ```xml
-    <property name="connectors">
-        <list>
-	    <bean name="httpConnector" class="org.red5.server.tomcat.TomcatConnector">
-	        <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
-	        <property name="address" value="${http.host}:${http.port}" />
-	        <property name="redirectPort" value="${https.port}" />
-	    </bean>
-	    <bean name="httpConnector1" class="org.red5.server.tomcat.TomcatConnector">
-	        <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
-	        <property name="address" value="192.168.1.1:5080" />
-	        <property name="redirectPort" value="${https.port}" />
-	    </bean>
-	    <bean name="httpConnector2" class="org.red5.server.tomcat.TomcatConnector">
-	        <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
-	        <property name="address" value="10.10.10.1:5080" />
-	        <property name="redirectPort" value="${https.port}" />
-	    </bean>
-	</list>
-    </property>
+<property name="connectors">
+    <list>
+    <bean name="httpConnector" class="org.red5.server.tomcat.TomcatConnector">
+        <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
+        <property name="address" value="${http.host}:${http.port}" />
+        <property name="redirectPort" value="${https.port}" />
+    </bean>
+    <bean name="httpConnector1" class="org.red5.server.tomcat.TomcatConnector">
+        <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
+        <property name="address" value="192.168.1.1:5080" />
+        <property name="redirectPort" value="${https.port}" />
+    </bean>
+    <bean name="httpConnector2" class="org.red5.server.tomcat.TomcatConnector">
+        <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
+        <property name="address" value="10.10.10.1:5080" />
+        <property name="redirectPort" value="${https.port}" />
+    </bean>
+</list>
+</property>
 ```
+
 *Note*
 
 If you are not using unlimited strength JCE (ex. you are outside the USA), your cipher suite selections will fail if any containing `AES_256` are specified.
-
 
 Adding WebSocket to an Application
 ------------------------
@@ -162,13 +160,16 @@ To enable websocket support in your application, add this to your appStart() met
   WebSocketScopeManager manager = ((WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME)).getManager(scope);
   manager.setApplication(this);
 ```
+
 For clean-up add this to appStop():
 
 ```
   WebSocketScopeManager manager = ((WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME)).getManager(scope);
   manager.stop();
 ```
+
 Lastly, the websocket filter must be added to each web application that will act as a websocket end point. In the webapp descriptor `webapps/myapp/WEB-INF/web.xml` add this entry alongside any other filters or servlets.
+
 ```xml
     <!-- WebSocket filter -->
     <filter>
@@ -183,7 +184,9 @@ Lastly, the websocket filter must be added to each web application that will act
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
 ```
+
 To support subprotocols, add them as a comma-delimited string in the `web.xml`:
+
 ```xml
     <!-- WebSocket subprotocols -->
     <context-param>
@@ -191,24 +194,26 @@ To support subprotocols, add them as a comma-delimited string in the `web.xml`:
         <param-value>chat,json</param-value>
     </context-param>
 ```
-The plugin will default to allowing any requested subprotocol if none are specified.
 
+The plugin will default to allowing any requested subprotocol if none are specified.
 
 Extending the WebSocket Endpoint
 ---------------------------
 Implementers may extend the default websocket endpoint class provided by this plugin `org.red5.net.websocket.server.DefaultWebSocketEndpoint`. The first step is to become familiar with the class and then `extend` it in your application; once that is complete, your class must be placed in the `lib` directory of your Red5 server, not the `webapps/yourapp/WEB-INF/lib` directory. Lastly, in your webapp descriptor `webapps/yourapp/WEB-INF/web.xml` file, an entry named `wsEndpointClass` will need to be made for your class:
+
 ```xml
     <context-param>
         <param-name>wsEndpointClass</param-name>
         <param-value>com.mydomain.websocket.MyWebSocketEndpoint</param-value>
     </context-param>
 ```
-One reason to extend the endpoint for your own use is because the default endpoint implementation only handles text data.
 
+One reason to extend the endpoint for your own use is because the default endpoint implementation only handles text data.
 
 Security Features
 -------------------
 Since WebSockets don't implement Same Origin Policy (SOP) nor Cross-Origin Resource Sharing (CORS), we've implemented a means to restrict access via configuration using SOP / CORS logic. To configure the security features, edit your `conf/jee-container.xml` file and locate the bean displayed below:
+
 ```xml
    <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
         <property name="websocketEnabled" value="true" />
@@ -221,19 +226,19 @@ Since WebSockets don't implement Same Origin Policy (SOP) nor Cross-Origin Resou
             </array>
         </property>
 ```
+
 Properties:
- * [sameOriginPolicy](https://www.w3.org/Security/wiki/Same_Origin_Policy) - Enables or disables SOP. The logic differs from standard web SOP by *NOT* enforcing protocol and port.
- * [crossOriginPolicy](https://www.w3.org/Security/wiki/CORS) - Enables or disables CORS. This option pairs with the `allowedOrigins` array.
- * allowedOrigins - The list or host names or fqdn which are to be permitted access. The default if none are specified is `*` which equates to any or all.
+
+* [sameOriginPolicy](https://www.w3.org/Security/wiki/Same_Origin_Policy) - Enables or disables SOP. The logic differs from standard web SOP by *NOT* enforcing protocol and port.
+* [crossOriginPolicy](https://www.w3.org/Security/wiki/CORS) - Enables or disables CORS. This option pairs with the `allowedOrigins` array.
+* allowedOrigins - The list or host names or fqdn which are to be permitted access. The default if none are specified is `*` which equates to any or all.
  
-
-
 Test Page
 -------------------
 
 Replace the wsUri variable with your applications path.
 
-```
+```xml
 <!DOCTYPE html>  
 <meta charset="utf-8" />  
 <title>WebSocket Test</title>  
@@ -250,4 +255,3 @@ https://github.com/Red5/red5-websocket-chat
 Pre-compiled JAR
 ----------------
 You can find [compiled artifacts via Maven](https://mvnrepository.com/artifact/org.red5/tomcatplugin)
-

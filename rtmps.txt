@@ -1,0 +1,32 @@
+
+Error:
+Cannot support TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 with currently installed providers
+
+Fix:
+Install the JSSE unlimited strength ciphers
+
+Error:
+javax.net.ssl.SSLProtocolException: Handshake message sequence violation, 1
+
+Fix:
+Turn off useClientMode on the rtmpsMinaIoHandler bean in red5-core.xml (off by default)
+
+
+http://ir5rtc.red5.org/demos/publisher.html
+rtmp://ir5rtc.red5.org/webrtc
+rtmps://ir5rtc.red5.org:8443/webrtc
+
+
+Unsupported extension status_request, data: 01:00:00:00:00
+Unsupported extension type_13172, data: 
+Unsupported extension type_18, data: 
+Unsupported extension type_16, data: 00:15:08:68:74:74:70:2f:31:2e:31:08:73:70:64:79:2f:33:2e:31:02:68:32
+Unsupported extension type_30032, data: 
+
+
+http://www.sans.org/reading-room/whitepapers/authentication/ssl-tls-whats-hood-34297
+http://www.moserware.com/2009/06/first-few-milliseconds-of-https.html
+
+http://stackoverflow.com/questions/26633349/disable-ssl-as-a-protocol-in-httpsurlconnection?rq=1
+http://stackoverflow.com/questions/28293068/java-7-ssl-changes-with-java-6
+

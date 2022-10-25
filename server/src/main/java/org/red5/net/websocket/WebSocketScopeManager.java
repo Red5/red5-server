@@ -299,10 +299,9 @@ public class WebSocketScopeManager {
      */
     public void makeScope(String path) {
         log.debug("makeScope: {}", path);
-        WebSocketScope wsScope = null;
         if (!scopes.containsKey(path)) {
             // new websocket scope
-            wsScope = new WebSocketScope();
+            WebSocketScope wsScope = new WebSocketScope();
             wsScope.setPath(path);
             notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope, null);
             addWebSocketScope(wsScope);
@@ -320,12 +319,11 @@ public class WebSocketScopeManager {
     public void makeScope(IScope scope) {
         log.debug("makeScope: {}", scope);
         String path = scope.getContextPath();
-        WebSocketScope wsScope = null;
         if (!scopes.containsKey(path)) {
             // add the name to the collection (no '/' prefix)
             activeRooms.add(scope.getName());
             // new websocket scope for the server scope
-            wsScope = new WebSocketScope();
+            WebSocketScope wsScope = new WebSocketScope();
             wsScope.setPath(path);
             wsScope.setScope(scope);
             notifyListeners(WebSocketEvent.SCOPE_CREATED, wsScope, null);
