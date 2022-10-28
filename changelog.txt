@@ -3,6 +3,21 @@ Red5 Changelog
 
 This file contains informations about the changes between the different versions of Red5.
 
+Version 1.3.7 (2022-10-28)
+--------------------------
+Moved from common to server:
+ ApplicationAdapter
+ MultiThreadedApplicationAdapter
+ StatefulScopeWrappingAdapter
+ PluginDescriptor
+ PluginLauncher
+ PluginRegistry
+ Red5Plugin
+
+New interface IWebSocketAwareHandler for WebSocket aware connect/disconnect on implementations of MultiThreadedApplicationAdapter.
+
+
+
 Red5 1.0.2 (2014-04-07)
 -----------------------
 Major release; improvements in threading, faster more efficient message handling, and fixes to a few memory leaks.

@@ -22,4 +22,15 @@ public interface IWebSocketScopeListener {
 
     void connectionRemoved(WebSocketScope wsScope, WebSocketConnection wsConn);
 
+    /**
+     * XXX(paul) maybe add this for recv update earlier than onMessage callback.
+     *
+     * String message received on the given connection and scope.
+     *
+     * @param wsScope
+     * @param wsConn
+     * @param message
+     */
+    // void receivedMessage(WebSocketScope wsScope, WebSocketConnection wsConn, String message);
+
 }

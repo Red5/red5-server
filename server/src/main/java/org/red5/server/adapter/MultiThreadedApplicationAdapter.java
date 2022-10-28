@@ -21,6 +21,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.red5.io.IStreamableFile;
 import org.red5.io.ITagReader;
 import org.red5.logging.Red5LoggerFactory;
+import org.red5.net.websocket.WebSocketConnection;
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
@@ -50,6 +51,7 @@ import org.red5.server.api.stream.IStreamPublishSecurity;
 import org.red5.server.api.stream.IStreamService;
 import org.red5.server.api.stream.IStreamableFileFactory;
 import org.red5.server.api.stream.ISubscriberStream;
+import org.red5.server.api.websocket.IWebSocketAwareHandler;
 import org.red5.server.exception.ClientRejectedException;
 import org.red5.server.jmx.mxbeans.ApplicationMXBean;
 import org.red5.server.messaging.AbstractPipe;
@@ -99,7 +101,7 @@ import org.slf4j.Logger;
  * @author Paul Gregoire (mondain@gmail.com)
  * @author Michael Klishin
  */
-public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapter implements ISharedObjectService, IBroadcastStreamService, IOnDemandStreamService, ISubscriberStreamService, ISchedulingService, IStreamSecurityService, ISharedObjectSecurityService, IStreamAwareScopeHandler, ApplicationMXBean {
+public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapter implements ISharedObjectService, IBroadcastStreamService, IOnDemandStreamService, ISubscriberStreamService, ISchedulingService, IStreamSecurityService, ISharedObjectSecurityService, IStreamAwareScopeHandler, IWebSocketAwareHandler, ApplicationMXBean {
 
     /**
      * Logger object
@@ -626,6 +628,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         return true;
     }
 
+    @Override
+    public boolean appConnect(WebSocketConnection wsConn, Object[] params) {
+        log.debug("appConnect: {}", wsConn);
+        return true;
+    }
+
     /**
      * Handler method. Called every time new client connects (that is, new IConnection object is created after call from a SWF movie) to the
      * application.
@@ -667,6 +675,12 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         for (IApplication listener : listeners) {
             listener.appDisconnect(conn);
         }
+    }
+
+    @Override
+    public boolean appDisconnect(WebSocketConnection wsConn) {
+        log.debug("appDisconnect: {}", wsConn);
+        return true;
     }
 
     /**
