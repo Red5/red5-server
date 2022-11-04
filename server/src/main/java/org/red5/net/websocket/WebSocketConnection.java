@@ -55,7 +55,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     // Sending async on windows times out
     private static boolean useAsync = !System.getProperty("os.name").contains("Windows");
 
-    private static long sendTimeout = 3000L, readTimeout = 5000L;
+    private static long sendTimeout = 3000L, readTimeout = 30000L;
 
     private AtomicBoolean connected = new AtomicBoolean(false);
 
@@ -355,6 +355,21 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                 // clear weak refs
                 wsSession.clear();
                 scope.clear();
+            }
+        }
+    }
+
+    public void timeoutAsync(long now) {
+        long readDelta = (now - lastReadTime), writeDelta = (now - lastWriteTime);
+        log.debug("timeoutAsync: {} on {} last read: {} last write: {}", now, wsSessionId, readDelta, writeDelta);
+        if (isConnected()) {
+            // if the delta is less than now, then the last time isn't 0
+            if (readDelta < now && readDelta > readTimeout) {
+                log.warn("Read timeout: {} on id: {}", readDelta, wsSessionId);
+                //close();
+            } else if (writeDelta < now && writeDelta > sendTimeout) {
+                log.warn("Write timeout: {} on id: {}", writeDelta, wsSessionId);
+                close();
             }
         }
     }
