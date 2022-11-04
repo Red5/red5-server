@@ -312,14 +312,17 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     @Override
     public void timeoutAsync(long now) {
         log.trace("timeoutAsync: {}", now);
-        try {
-            // if we have a timeout, inform the ws connection
-            WebSocketConnection conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
-            if (conn != null) {
-                conn.timeoutAsync(now);
+        // session methods may not be called if the session is not open
+        if (wsSession != null && wsSession.isOpen()) {
+            try {
+                // if we have a timeout, inform the ws connection
+                WebSocketConnection conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
+                if (conn != null) {
+                    conn.timeoutAsync(now);
+                }
+            } catch (Throwable t) {
+                log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
             }
-        } catch (Throwable t) {
-            log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
         }
     }
 
