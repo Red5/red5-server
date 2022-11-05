@@ -82,16 +82,13 @@ public class DefaultWebSocketEndpoint extends Endpoint {
             if (conn == null) {
                 log.warn("Connection for id: {} was not found in the session onClose", sessionId);
                 conn = scope.getConnectionBySessionId(sessionId);
-            }
-            if (conn != null) {
-                // close the ws conn which removes it from the scope
-                if (conn.isConnected()) {
-                    conn.close();
+                if (conn == null) {
+                    log.warn("Connection for id: {} was not found in the scope or session: {}", sessionId, scope.getPath());
                 }
-            } else {
-                log.debug("Connection for id: {} was not found in the scope or session: {}", sessionId, scope.getPath());
             }
         } catch (Exception e) {
+            log.warn("Exception in onClose", e);
+        } finally {
             if (conn != null) {
                 // force remove on exception
                 scope.removeConnection(conn);
@@ -103,6 +100,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     @Override
     public void onError(Session session, Throwable t) {
+        log.debug("onError: {}", t.toString(), t);
         // Most likely cause is a user closing their browser. Check to see if the root cause is EOF and if it is ignore it.
         // Protect against infinite loops.
         int count = 0;
@@ -117,10 +115,8 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         } else if (root instanceof IOException) {
             // IOException after close. Assume this is a variation of the user closing their browser (or refreshing very quickly) and ignore it.
             log.debug("IO exception when opened? {}", session.isOpen(), root);
-        } else {
-            log.debug("onError: {}", t.toString(), t);
-            onClose(session, new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, t.getMessage()));
         }
+        onClose(session, new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, t.getMessage()));
     }
 
     private class WholeMessageHandler implements MessageHandler.Whole<String> {

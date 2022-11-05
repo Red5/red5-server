@@ -85,6 +85,11 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         if (value != null) {
             setEnforceNoAddAfterHandshake(Boolean.parseBoolean(value));
         }
+        /* get the websocket filter and coordinate the async setting
+        <filter-name>WebSocketFilter</filter-name>
+        <filter-class>org.red5.net.websocket.server.WsFilter</filter-class>
+        <async-supported>false</async-supported>
+         */
     }
 
     /**

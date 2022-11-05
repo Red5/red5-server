@@ -14,6 +14,8 @@ package org.red5.net.websocket;
  */
 public class WSConstants {
 
+    public final static String WS_UPGRADE_HANDLER = "ws.upgrader";
+
     public final static String WS_MANAGER = "ws.manager";
 
     public final static String WS_SCOPE = "ws.scope";

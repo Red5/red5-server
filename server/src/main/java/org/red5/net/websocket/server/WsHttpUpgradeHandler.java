@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.WebConnection;
 import javax.websocket.CloseReason;
@@ -180,6 +182,8 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             endpointConfig.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
             // must be added to the session as well since the session ctor copies from the endpoint and doesnt update
             wsSession.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
+            // set the upgrade handler so it can be destroyed when ws conn is closed
+            wsSession.getUserProperties().put(WSConstants.WS_UPGRADE_HANDLER, this);
             // set connected flag
             conn.setConnected();
             // fire endpoint handler
@@ -263,6 +267,8 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                 connection.close();
             } catch (Exception e) {
                 log.error(sm.getString("wsHttpUpgradeHandler.destroyFailed"), e);
+            } finally {
+                connection = null;
             }
         }
     }
@@ -301,7 +307,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     }
 
     /**
-     * Check to see if the timeout has expired and process a timeout if that is that case. Note: The name of this method
+     * Check to see if the timeout has expired and process a timeout if that is the case. Note: The name of this method
      * originated with the Servlet 3.0 asynchronous processing but evolved over time to represent a timeout that is
      * triggered independently of the socket read/write timeouts.
      *
@@ -311,17 +317,24 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
      */
     @Override
     public void timeoutAsync(long now) {
-        log.trace("timeoutAsync: {}", now);
+        log.trace("timeoutAsync: {} on session: {}", now, wsSession);
         // session methods may not be called if the session is not open
-        if (wsSession != null && wsSession.isOpen()) {
-            try {
-                // if we have a timeout, inform the ws connection
-                WebSocketConnection conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
-                if (conn != null) {
-                    conn.timeoutAsync(now);
+        if (wsSession != null) {
+            if (wsSession.isOpen()) {
+                try {
+                    // if we have a timeout, inform the ws connection
+                    WebSocketConnection conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
+                    if (conn != null) {
+                        conn.timeoutAsync(now);
+                    }
+                } catch (Throwable t) {
+                    log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
                 }
-            } catch (Throwable t) {
-                log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
+            } else {
+                log.debug("timeoutAsync: session is not open, destroying");
+                // we need the processor released from the async waitingProcessors list
+                // located in abstract protocol
+                //socketWrapper.close();
             }
         }
     }

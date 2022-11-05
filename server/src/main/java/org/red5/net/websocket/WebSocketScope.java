@@ -198,6 +198,11 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         if (conns.remove(conn)) {
             log.debug("Removed connection: {}", conn);
             listeners.forEach(listener -> listener.onWSDisconnect(conn));
+            if (manager != null) {
+                manager.removeConnection(conn);
+            } else {
+                log.warn("Manager null on connection removal from scope");
+            }
         } else {
             log.debug("Remove connection skipped, not registered: {}", conn);
         }

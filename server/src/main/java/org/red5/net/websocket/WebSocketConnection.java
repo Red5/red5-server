@@ -24,8 +24,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Extension;
 import javax.websocket.Session;
 
@@ -53,7 +51,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     private static final boolean isDebug = log.isDebugEnabled();
 
     // Sending async on windows times out
-    private static boolean useAsync = !System.getProperty("os.name").contains("Windows");
+    private static boolean useAsync; // = !System.getProperty("os.name").contains("Windows");
 
     private static long sendTimeout = 3000L, readTimeout = 30000L;
 
@@ -322,15 +320,33 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (connected.compareAndSet(true, false)) {
             log.debug("close: {}", wsSessionId);
             WsSession session = wsSession != null ? wsSession.get() : null;
-            WebSocketScopeManager manager = null;
-            if (session != null) {
-                manager = (WebSocketScopeManager) session.getUserProperties().get(WSConstants.WS_MANAGER);
-                if (session.isOpen()) {
-                    // ensure the endpoint is closed
-                    CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
-                    // close the socket, don't wait for the browser to respond or we could hang
-                    session.onClose(reason);
+            //WebSocketScopeManager manager = null;
+            // session has to be open, or user props cannot be retrieved
+            if (session != null && session.isOpen()) {
+                //Map<String, Object> propsMap = session.getUserProperties();
+                // lookup the manager
+                //manager = (WebSocketScopeManager) propsMap.get(WSConstants.WS_MANAGER);
+                // trying to close the session nicely
+                try {
+                    session.close();
+                } catch (Exception e) {
+                    log.debug("Exception closing session", e);
                 }
+                /*
+                // check for upgrade handler, if its around close it
+                WsHttpUpgradeHandler upgrader = (WsHttpUpgradeHandler) propsMap.get(WSConstants.WS_UPGRADE_HANDLER);
+                // ensure the endpoint is closed
+                CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
+                // close the socket, don't wait for the browser to respond or we could hang
+                session.onClose(reason);
+                if (upgrader != null) {
+                    try {
+                        upgrader.destroy();
+                    } catch (Exception e) {
+                        log.debug("Exception destroying http upgrader", e);
+                    }
+                }
+                */
             }
             // clean up our props
             attributes.clear();
@@ -346,9 +362,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                 headers = null;
             }
             // fire callback for manager
-            if (manager != null) {
-                manager.removeConnection(this);
-            }
+            //if (manager != null) {
+            //    manager.removeConnection(this);
+            //}
             if (scope.get() != null) {
                 // disconnect from scope
                 scope.get().removeConnection(this);
