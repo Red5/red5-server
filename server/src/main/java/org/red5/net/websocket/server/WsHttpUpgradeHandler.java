@@ -331,7 +331,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                     log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
                 }
             } else {
-                log.debug("timeoutAsync: session is not open, destroying");
+                log.debug("timeoutAsync: session is not open");
                 // we need the processor released from the async waitingProcessors list
                 // located in abstract protocol
                 //socketWrapper.close();
