@@ -320,33 +320,14 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (connected.compareAndSet(true, false)) {
             log.debug("close: {}", wsSessionId);
             WsSession session = wsSession != null ? wsSession.get() : null;
-            //WebSocketScopeManager manager = null;
             // session has to be open, or user props cannot be retrieved
             if (session != null && session.isOpen()) {
-                //Map<String, Object> propsMap = session.getUserProperties();
-                // lookup the manager
-                //manager = (WebSocketScopeManager) propsMap.get(WSConstants.WS_MANAGER);
                 // trying to close the session nicely
                 try {
                     session.close();
                 } catch (Exception e) {
                     log.debug("Exception closing session", e);
                 }
-                /*
-                // check for upgrade handler, if its around close it
-                WsHttpUpgradeHandler upgrader = (WsHttpUpgradeHandler) propsMap.get(WSConstants.WS_UPGRADE_HANDLER);
-                // ensure the endpoint is closed
-                CloseReason reason = new CloseReason(CloseCodes.GOING_AWAY, "");
-                // close the socket, don't wait for the browser to respond or we could hang
-                session.onClose(reason);
-                if (upgrader != null) {
-                    try {
-                        upgrader.destroy();
-                    } catch (Exception e) {
-                        log.debug("Exception destroying http upgrader", e);
-                    }
-                }
-                */
             }
             // clean up our props
             attributes.clear();
@@ -361,10 +342,6 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
             if (headers != null) {
                 headers = null;
             }
-            // fire callback for manager
-            //if (manager != null) {
-            //    manager.removeConnection(this);
-            //}
             if (scope.get() != null) {
                 // disconnect from scope
                 scope.get().removeConnection(this);
@@ -380,10 +357,10 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         log.debug("timeoutAsync: {} on {} last read: {} last write: {}", now, wsSessionId, readDelta, writeDelta);
         if (isConnected()) {
             // if the delta is less than now, then the last time isn't 0
-            if (readDelta < now && readDelta > readTimeout) {
+            if (readDelta != now && readDelta > readTimeout) {
                 log.warn("Read timeout: {} on id: {}", readDelta, wsSessionId);
-                //close();
-            } else if (writeDelta < now && writeDelta > sendTimeout) {
+                close();
+            } else if (writeDelta != now && writeDelta > sendTimeout) {
                 log.warn("Write timeout: {} on id: {}", writeDelta, wsSessionId);
                 close();
             }

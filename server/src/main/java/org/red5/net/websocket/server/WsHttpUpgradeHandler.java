@@ -142,48 +142,24 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             wsSession = new WsSession(ep, wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
             // newest ctor
             //wsSession = new WsSession(wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
-            if (isTrace) {
-                log.trace("New connection 2 {}", wsSession);
-            }
             wsFrame = new WsFrameServer(socketWrapper, upgradeInfo, wsSession, transformation, applicationClassLoader);
-            if (isTrace) {
-                log.trace("New connection 3 {}", wsFrame);
-            }
             // WsFrame adds the necessary final transformations. Copy the completed transformation chain to the remote end point.
             wsRemoteEndpointServer.setTransformation(wsFrame.getTransformation());
-            if (isTrace) {
-                log.trace("New connection 4");
-            }
             // get the ws scope manager from user props
             WebSocketScopeManager manager = (WebSocketScopeManager) endpointConfig.getUserProperties().get(WSConstants.WS_MANAGER);
-            if (isTrace) {
-                log.trace("New connection 5");
-            }
             // get ws scope from user props
             WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
-            if (isTrace) {
-                log.trace("New connection 6 - Scope: {} WS session: {}", scope, wsSession);
-            }
             // create a ws connection instance
             WebSocketConnection conn = new WebSocketConnection(scope, wsSession);
-            // in debug check since WebSocketConnection.toString is a tiny bit expensive
-            if (isTrace) {
-                log.trace("New connection 7: {}", conn);
-            }
             // set ip and port
             conn.setAttribute(WSConstants.WS_HEADER_REMOTE_IP, socketWrapper.getRemoteAddr());
             conn.setAttribute(WSConstants.WS_HEADER_REMOTE_PORT, socketWrapper.getRemotePort());
             // add the request headers
             conn.setHeaders(handshakeRequest.getHeaders());
-            if (isTrace) {
-                log.trace("New connection 8: {}", conn);
-            }
             // add the connection to the user props
             endpointConfig.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
             // must be added to the session as well since the session ctor copies from the endpoint and doesnt update
             wsSession.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
-            // set the upgrade handler so it can be destroyed when ws conn is closed
-            wsSession.getUserProperties().put(WSConstants.WS_UPGRADE_HANDLER, this);
             // set connected flag
             conn.setConnected();
             // fire endpoint handler
