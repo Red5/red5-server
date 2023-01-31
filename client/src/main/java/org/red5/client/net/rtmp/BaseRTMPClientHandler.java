@@ -1034,7 +1034,26 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
         @Override
         public void resultReceived(IPendingServiceCall call) {
-            Number streamId = (Number) call.getResult();
+            // get the result as base object
+            Object callResult = call.getResult();
+            // we expect a number consisting of the stream id, but we'll check for an object map as well
+            Number streamId = null;
+            if (callResult instanceof Number) {
+                streamId = (Number) callResult;
+            } else if (callResult instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) callResult;
+                if (map.containsKey("streamId")) {
+                    Object tmpStreamId = map.get("streamId");
+                    if (tmpStreamId instanceof Number) {
+                        streamId = (Number) tmpStreamId;
+                    } else {
+                        log.warn("CreateStreamCallBack resultReceived - stream id is not a number: {}", tmpStreamId);
+                    }
+                }
+            } else if (callResult == null) {
+                log.warn("CreateStreamCallBack resultReceived - call result is null");
+                return;
+            }
             log.debug("CreateStreamCallBack resultReceived - stream id: {} call: {} connection: {}", streamId, call, conn);
             if (conn != null && streamId != null) {
                 log.debug("Setting new net stream");
@@ -1078,9 +1097,27 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
         @Override
         public void resultReceived(IPendingServiceCall call) {
-            Number streamId = (Number) call.getResult();
-            log.debug("Stream id: {} connection: {}", streamId, conn);
-            log.debug("DeleteStreamCallBack resultReceived - stream id: {}", streamId);
+            // get the result as base object
+            Object callResult = call.getResult();
+            // we expect a number consisting of the stream id, but we'll check for an object map as well
+            Number streamId = null;
+            if (callResult instanceof Number) {
+                streamId = (Number) callResult;
+            } else if (callResult instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) callResult;
+                if (map.containsKey("streamId")) {
+                    Object tmpStreamId = map.get("streamId");
+                    if (tmpStreamId instanceof Number) {
+                        streamId = (Number) tmpStreamId;
+                    } else {
+                        log.warn("DeleteStreamCallBack resultReceived - stream id is not a number: {}", tmpStreamId);
+                    }
+                }
+            } else if (callResult == null) {
+                log.warn("DeleteStreamCallBack resultReceived - call result is null");
+                return;
+            }
+            log.debug("DeleteStreamCallBack resultReceived - stream id: {} call: {} connection: {}", streamId, call, conn);
             if (conn != null && streamId != null) {
                 log.debug("Deleting net stream");
                 conn.removeClientStream(streamId);
