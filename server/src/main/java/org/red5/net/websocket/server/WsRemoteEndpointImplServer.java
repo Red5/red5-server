@@ -20,10 +20,6 @@ import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
  */
 public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
-    //private static final StringManager sm = StringManager.getManager(WsRemoteEndpointImplServer.class);
-
-    //private Logger log = LoggerFactory.getLogger(WsRemoteEndpointImplServer.class); // must not be static
-
     private final SocketWrapperBase<?> socketWrapper;
 
     private final UpgradeInfo upgradeInfo;
@@ -60,8 +56,8 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         } else {
             // Blocking
             try {
+                final long timeout = blockingWriteTimeoutExpiry - System.currentTimeMillis();
                 for (ByteBuffer buffer : buffers) {
-                    long timeout = blockingWriteTimeoutExpiry - System.currentTimeMillis();
                     if (timeout <= 0) {
                         SendResult sr = new SendResult(new SocketTimeoutException());
                         handler.onResult(sr);
@@ -70,7 +66,6 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
                     socketWrapper.setWriteTimeout(timeout);
                     socketWrapper.write(true, buffer);
                 }
-                long timeout = blockingWriteTimeoutExpiry - System.currentTimeMillis();
                 if (timeout <= 0) {
                     SendResult sr = new SendResult(new SocketTimeoutException());
                     handler.onResult(sr);

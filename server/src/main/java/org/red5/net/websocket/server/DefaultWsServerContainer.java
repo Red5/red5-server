@@ -260,6 +260,23 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         return Collections.unmodifiableSet(registeredEndpointPaths);
     }
 
+    @Override
+    public void backgroundProcess() {
+        // some comments say 1s others say 10s
+        //log.debug("backgroundProcess - period: {}", getProcessPeriod());
+        /*
+        This method gets called once a second (this is super class content)
+        backgroundProcessCount ++;
+        if (backgroundProcessCount >= processPeriod) {
+            backgroundProcessCount = 0;
+            for (WsSession wsSession : sessions.keySet()) {
+                wsSession.checkExpiration();
+            }
+        }
+        */
+        super.backgroundProcess();
+    }
+
     /**
      * {@inheritDoc}
      *

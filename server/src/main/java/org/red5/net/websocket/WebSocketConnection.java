@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
 import javax.websocket.Extension;
@@ -51,9 +52,13 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     private static final boolean isDebug = log.isDebugEnabled();
 
     // Sending async on windows times out
-    private static boolean useAsync; // = !System.getProperty("os.name").contains("Windows");
+    private static boolean useAsync;
 
-    private static long sendTimeout = 3000L, readTimeout = 30000L;
+    private static long sendTimeout = 8000L, readTimeout = 30000L;
+
+    private static final AtomicLongFieldUpdater<WebSocketConnection> readBytesUpdater = AtomicLongFieldUpdater.newUpdater(WebSocketConnection.class, "readBytes");
+
+    private static final AtomicLongFieldUpdater<WebSocketConnection> writeBytesUpdater = AtomicLongFieldUpdater.newUpdater(WebSocketConnection.class, "writtenBytes");
 
     private AtomicBoolean connected = new AtomicBoolean(false);
 
@@ -95,9 +100,6 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
 
     // stats
     private volatile long readBytes, writtenBytes;
-
-    // last read time will be set when we've received; last write will be on any write, not just ping
-    private long lastReadTime, lastWriteTime;
 
     // send future for when async is enabled
     private Future<Void> sendFuture;
@@ -158,9 +160,16 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
         // get user props
         Map<String, Object> userProps = session.getUserProperties();
+        // add the timeouts to the user props
+        userProps.put(Constants.READ_IDLE_TIMEOUT_MS, readTimeout);
+        userProps.put(Constants.WRITE_IDLE_TIMEOUT_MS, sendTimeout);
         if (isDebug) {
             log.debug("userProps: {}", userProps);
         }
+        // set maximum messages size to 10,000 bytes
+        session.setMaxTextMessageBufferSize(10000);
+        // set maximum idle timeout to 30 seconds (read timeout)
+        session.setMaxIdleTimeout(readTimeout);
     }
 
     /**
@@ -352,19 +361,28 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
     }
 
+    /*
+     WsSession uses these userProperties for checkExpiration along with maxIdleTimeout
+
+        configuration for read idle timeout on WebSocket session
+        READ_IDLE_TIMEOUT_MS = "org.apache.tomcat.websocket.READ_IDLE_TIMEOUT_MS";
+        configuration for write idle timeout on WebSocket session
+        WRITE_IDLE_TIMEOUT_MS = "org.apache.tomcat.websocket.WRITE_IDLE_TIMEOUT_MS";
+    */
     public void timeoutAsync(long now) {
-        long readDelta = (now - lastReadTime), writeDelta = (now - lastWriteTime);
-        log.debug("timeoutAsync: {} on {} last read: {} last write: {}", now, wsSessionId, readDelta, writeDelta);
-        if (isConnected()) {
-            // if the delta is less than now, then the last time isn't 0
-            if (readDelta != now && readDelta > readTimeout) {
-                log.warn("Read timeout: {} on id: {}", readDelta, wsSessionId);
-                close();
-            } else if (writeDelta != now && writeDelta > sendTimeout) {
-                log.warn("Write timeout: {} on id: {}", writeDelta, wsSessionId);
-                close();
-            }
-        }
+        // XXX(paul) only logging here as we should more than likely rely upon the container checking expiration
+        log.trace("timeoutAsync: {} on session id: {} read: {} written: {}", now, wsSessionId, readBytes, writtenBytes);
+        /*
+        WsSession session = wsSession.get();
+        Map<String, Object> props = session.getUserProperties();
+        log.debug("Session properties: {}", props);
+        long maxIdleTimeout = session.getMaxIdleTimeout();
+        long readTimeout = (long) props.get(Constants.READ_IDLE_TIMEOUT_MS);
+        long sendTimeout = (long) props.get(Constants.WRITE_IDLE_TIMEOUT_MS);
+        log.debug("Session timeouts - max: {} read: {} write: {}", maxIdleTimeout, readTimeout, sendTimeout);
+        //long readDelta = (now - lastReadTime), writeDelta = (now - lastWriteTime);
+        //log.debug("timeoutAsync: {} on {} last read: {} last write: {}", now, wsSessionId, readDelta, writeDelta);
+        */
     }
 
     /**
@@ -656,8 +674,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     public void updateReadBytes(long read) {
-        readBytes += read;
-        lastReadTime = System.currentTimeMillis();
+        log.debug("updateReadBytes: {} by: {}", readBytes, read);
+        readBytesUpdater.addAndGet(this, read);
+        // read time is updated on WsSession by WsFrameBase when the read is performed
     }
 
     public long getWrittenBytes() {
@@ -665,16 +684,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     public void updateWriteBytes(long wrote) {
-        writtenBytes += wrote;
-        lastWriteTime = System.currentTimeMillis();
-    }
-
-    public long getLastReadTime() {
-        return lastReadTime;
-    }
-
-    public long getLastWriteTime() {
-        return lastWriteTime;
+        log.debug("updateWriteBytes: {} by: {}", writtenBytes, wrote);
+        writeBytesUpdater.addAndGet(this, wrote);
+        // write time is updated on WsSession by WsRemoteEndpointImplBase when the write is performed
     }
 
     public String getWsSessionId() {

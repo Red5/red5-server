@@ -47,6 +47,16 @@ public class WSMessage {
         payload = IoBuffer.wrap(message.getBytes("UTF8"));
     }
 
+    public WSMessage(String message, WebSocketConnection conn) throws UnsupportedEncodingException {
+        setPayload(IoBuffer.wrap(message.getBytes("UTF8")));
+        setConnection(conn);
+    }
+
+    public WSMessage(IoBuffer payload, WebSocketConnection conn) {
+        setPayload(payload);
+        setConnection(conn);
+    }
+
     /**
      * Returns the payload data as a UTF8 string.
      *

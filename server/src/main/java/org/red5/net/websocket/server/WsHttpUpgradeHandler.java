@@ -131,8 +131,6 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             wsRemoteEndpointServer = new WsRemoteEndpointImplServer(socketWrapper, upgradeInfo);
             if (isTrace) {
                 log.trace("New connection 1 {}", wsRemoteEndpointServer);
-            }
-            if (isTrace) {
                 log.trace("WS session pre-ctor - wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", wsRemoteEndpointServer, webSocketContainer,
                         handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
             }
@@ -162,15 +160,9 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             conn.setConnected();
             // fire endpoint handler
             ep.onOpen(wsSession, endpointConfig);
-            if (isTrace) {
-                log.trace("New connection 9: endpoint opened");
-            }
             // get the endpoint path to use in registration since we're a server
             String path = ((ServerEndpointConfig) endpointConfig).getPath();
             webSocketContainer.registerSession(path, wsSession);
-            if (isTrace) {
-                log.trace("New connection 10: session registered");
-            }
             // add the connection to the manager
             manager.addConnection(conn);
         } catch (DeploymentException e) {

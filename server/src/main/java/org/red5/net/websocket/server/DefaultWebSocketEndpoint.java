@@ -62,8 +62,6 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         if (conn == null) {
             log.warn("WebSocketConnection null at onOpen for {}", session.getId());
         }
-        // Set maximum messages size to 10,000 bytes
-        session.setMaxTextMessageBufferSize(10000);
         session.addMessageHandler(new WholeMessageHandler(conn));
         session.addMessageHandler(new WholeBinaryHandler(conn));
         session.addMessageHandler(new WholePongHandler(conn));
@@ -132,13 +130,12 @@ public class DefaultWebSocketEndpoint extends Endpoint {
             if (isTrace) {
                 log.trace("Message received {}", message);
             }
-            if (conn != null && conn.isConnected()) {
+            if (conn != null) {
+                // update the byte received counter
+                conn.updateReadBytes(message.getBytes().length);
                 try {
-                    // update the byte received counter
-                    conn.updateReadBytes(message.getBytes().length);
                     // create a websocket message and add the current connection for listener access
-                    WSMessage wsMessage = new WSMessage(message);
-                    wsMessage.setConnection(conn);
+                    WSMessage wsMessage = new WSMessage(message, conn);
                     // fire the message off to the scope for handling
                     scope.onMessage(wsMessage);
                 } catch (UnsupportedEncodingException e) {
@@ -164,13 +161,11 @@ public class DefaultWebSocketEndpoint extends Endpoint {
             if (isTrace) {
                 log.trace("Message received {}", message);
             }
-            if (conn != null && conn.isConnected()) {
+            if (conn != null) {
                 // update the byte received counter
                 conn.updateReadBytes(message.limit());
                 // create a websocket message and add the current connection for listener access
-                WSMessage wsMessage = new WSMessage();
-                wsMessage.setPayload(IoBuffer.wrap(message));
-                wsMessage.setConnection(conn);
+                WSMessage wsMessage = new WSMessage(IoBuffer.wrap(message), conn);
                 // fire the message off to the scope for handling
                 scope.onMessage(wsMessage);
             } else {
@@ -194,7 +189,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 log.trace("Pong received {}", message);
             }
             // update the byte received counter
-            if (conn != null && conn.isConnected()) {
+            if (conn != null) {
                 conn.updateReadBytes(1);
             }
         }

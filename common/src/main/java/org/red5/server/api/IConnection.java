@@ -30,7 +30,7 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
      * Encoding type.
      */
     public static enum Encoding {
-        AMF0, AMF3, WEBSOCKET, SOCKETIO, RTP, SRTP, BLOB, RAW, RTSP, SRT, MPEGTS, DATACHANNEL
+        AMF0, AMF3, WEBSOCKET, SOCKETIO, RTP, SRTP, BLOB, RAW, RTSP, SRT, MPEGTS, DATACHANNEL, WEBRTC, HTTP
     };
 
     /**

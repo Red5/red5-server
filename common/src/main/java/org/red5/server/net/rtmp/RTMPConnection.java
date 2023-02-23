@@ -77,8 +77,6 @@ import org.red5.server.stream.PlaylistSubscriberStream;
 import org.red5.server.stream.SingleItemSubscriberStream;
 import org.red5.server.stream.StreamService;
 import org.red5.server.util.ScopeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -91,12 +89,6 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * encoding type (AMF0/AMF3), connection state (is alive, last ping time and ping result) and session.
  */
 public abstract class RTMPConnection extends BaseConnection implements IStreamCapableConnection, IServiceCapableConnection, IReceivedMessageTaskQueueListener {
-
-    private static Logger log = LoggerFactory.getLogger(RTMPConnection.class);
-
-    private static boolean isTrace = log.isTraceEnabled();
-
-    private static boolean isDebug = log.isDebugEnabled();
 
     public static final String RTMP_SESSION_ID = "rtmp.sessionid";
 

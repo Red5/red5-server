@@ -28,15 +28,11 @@ import org.red5.server.api.scope.IBroadcastScope;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.scope.Scope;
 import org.red5.server.so.SharedObjectScope;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base abstract class for connections. Adds connection specific functionality like work with clients to AttributeStore.
  */
 public abstract class BaseConnection extends AttributeStore implements IConnection {
-
-    private static final Logger log = LoggerFactory.getLogger(BaseConnection.class);
 
     /**
      * Connection type

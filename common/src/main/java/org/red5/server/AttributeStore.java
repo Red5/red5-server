@@ -26,7 +26,11 @@ import org.slf4j.LoggerFactory;
 
 public class AttributeStore implements ICastingAttributeStore {
 
-    protected static Logger log = LoggerFactory.getLogger(AttributeStore.class);
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
+    protected boolean isTrace = log.isTraceEnabled();
+
+    protected boolean isDebug = log.isDebugEnabled();
 
     /**
      * Map for attributes with initialCapacity = 1, loadFactor = .9, concurrencyLevel = (# of processors)
