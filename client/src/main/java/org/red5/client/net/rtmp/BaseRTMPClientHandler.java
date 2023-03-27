@@ -1042,6 +1042,8 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
                 streamId = (Number) callResult;
             } else if (callResult instanceof Map) {
                 Map<?, ?> map = (Map<?, ?>) callResult;
+                // XXX(paul) log out the map contents
+                log.warn("CreateStreamCallBack resultReceived - map: {}", map);
                 if (map.containsKey("streamId")) {
                     Object tmpStreamId = map.get("streamId");
                     if (tmpStreamId instanceof Number) {
