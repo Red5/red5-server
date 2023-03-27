@@ -37,7 +37,7 @@ public class WebSocketScopeManager {
     // used to ping WS connections
     private static final byte[] PING_BYTES = "PING!".getBytes();
 
-    // one executor per scope manager
+    // one executor per scope manager (2 slots - one for pinger, one for notifications)
     private ExecutorService executor = Executors.newFixedThreadPool(2);
 
     // future for the ws pinger
@@ -150,50 +150,55 @@ public class WebSocketScopeManager {
         if (scopes.putIfAbsent(path, webSocketScope) == null) {
             log.info("addWebSocketScope: {}", webSocketScope);
             notifyListeners(WebSocketEvent.SCOPE_ADDED, webSocketScope, null);
-            // ensure the ping future exists, if not spawn it
-            if (pingFuture == null || pingFuture.isDone()) {
-                final String appScopeName = appScope != null ? appScope.getName() : "default";
-                pingFuture = executor.submit(() -> {
-                    final String oldName = Thread.currentThread().getName();
-                    Thread.currentThread().setName(String.format("WebSocketPinger@%s", appScopeName));
-                    do {
-                        scopes.forEach((sName, wsScope) -> {
-                            log.trace("start pinging scope: {}", sName);
-                            wsScope.getConns().forEach(wsConn -> {
-                                try {
-                                    // ping connected websocket
-                                    if (wsConn.isConnected()) {
-                                        log.trace("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
-                                        try {
-                                            wsConn.sendPing(PING_BYTES);
-                                        } catch (Exception e) {
-                                            log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
+            if (websocketPingInterval < 0) {
+                log.debug("Websocket pinger is disabled");
+            } else {
+                // ensure the ping future exists, if not spawn it
+                if (pingFuture == null || pingFuture.isDone()) {
+                    log.debug("Websocket ping interval: {}", websocketPingInterval);
+                    final String appScopeName = appScope != null ? appScope.getName() : "default";
+                    pingFuture = executor.submit(() -> {
+                        final String oldName = Thread.currentThread().getName();
+                        Thread.currentThread().setName(String.format("WebSocketPinger@%s", appScopeName));
+                        do {
+                            scopes.forEach((sName, wsScope) -> {
+                                log.trace("start pinging scope: {}", sName);
+                                wsScope.getConns().forEach(wsConn -> {
+                                    try {
+                                        // ping connected websocket
+                                        if (wsConn.isConnected()) {
+                                            log.trace("pinging ws: {} on scope: {}", wsConn.getWsSessionId(), sName);
+                                            try {
+                                                wsConn.sendPing(PING_BYTES);
+                                            } catch (Exception e) {
+                                                log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
+                                                // if the connection isn't connected, remove them
+                                                wsScope.removeConnection(wsConn);
+                                                // if the ping fails, consider them gone
+                                                wsConn.close();
+                                            }
+                                        } else {
+                                            log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
                                             // if the connection isn't connected, remove them
                                             wsScope.removeConnection(wsConn);
-                                            // if the ping fails, consider them gone
-                                            wsConn.close();
                                         }
-                                    } else {
-                                        log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
-                                        // if the connection isn't connected, remove them
-                                        wsScope.removeConnection(wsConn);
+                                    } catch (Exception e) {
+                                        log.warn("Exception in WS pinger", e);
                                     }
-                                } catch (Exception e) {
-                                    log.warn("Exception in WS pinger", e);
-                                }
+                                });
+                                log.trace("finished pinging scope: {}", sName);
                             });
-                            log.trace("finished pinging scope: {}", sName);
-                        });
-                        // sleep for interval
-                        try {
-                            Thread.sleep(websocketPingInterval);
-                        } catch (InterruptedException e) {
-                        }
-                    } while (!scopes.isEmpty());
-                    // reset ping future
-                    pingFuture = null;
-                    Thread.currentThread().setName(oldName);
-                });
+                            // sleep for interval
+                            try {
+                                Thread.sleep(websocketPingInterval);
+                            } catch (InterruptedException e) {
+                            }
+                        } while (!scopes.isEmpty());
+                        // reset ping future
+                        pingFuture = null;
+                        Thread.currentThread().setName(oldName);
+                    });
+                }
             }
             return true;
         }
@@ -443,6 +448,9 @@ public class WebSocketScopeManager {
     }
 
     public static void setWebsocketPingInterval(long websocketPingInterval) {
+        if (websocketPingInterval < 0) {
+            log.warn("Setting the ping interval to a negative value will disable the internal ping worker");
+        }
         WebSocketScopeManager.websocketPingInterval = websocketPingInterval;
     }
 
