@@ -233,6 +233,18 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             state.bufferDecoding(headerLength - in.remaining());
             in.position(position);
             return null;
+        } else {
+            int currentPostition = in.position();
+            int timeBase = RTMPUtils.readUnsignedMediumInt(in);
+            in.position(currentPostition);
+            if (timeBase >= MEDIUM_INT_MAX) {
+                headerLength += 4;
+                if (in.remaining() < headerLength) {
+                    state.bufferDecoding(headerLength - in.remaining());
+                    in.position(position);
+                    return null;
+                }
+            }
         }
         final Header header = decodeHeader(chunkHeader, state, in, rtmp);
         // get the channel id
@@ -251,6 +263,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         rtmp.setLastReadHeader(channelId, header);
         // ensure that we dont exceed maximum packet size
         int size = header.getSize();
+        log.debug("Packet size: {}", size);
+        /* XXX(paul): This is a hack to prevent OOM when decoding has failed in some way
         if (size > MAX_PACKET_SIZE) {
             // Reject packets that are too big, to protect against OOM when decoding has failed in some way
             log.warn("Packet size exceeded. size={}, max={}, connId={}", size, MAX_PACKET_SIZE, conn.getSessionId());
@@ -258,6 +272,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             StreamService.sendNetStreamStatus(conn, StatusCodes.NS_FAILED, "Data exceeded maximum allowed by " + (size - MAX_PACKET_SIZE) + " bytes", "no-name", Status.ERROR, conn.getStreamIdForChannelId(channelId));
             throw new ProtocolException(String.format("Packet size exceeded. size: %s", header.getSize()));
         }
+        */
         // get the size of our chunks
         int readChunkSize = rtmp.getReadChunkSize();
         // check to see if this is a new packet or continue decoding an existing one
