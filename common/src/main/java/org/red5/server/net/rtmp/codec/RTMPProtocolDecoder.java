@@ -406,8 +406,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setStreamId(RTMPUtils.readReverseInt(in));
                 // read the extended timestamp if we have the indication that it exists
                 if (timeBase >= MEDIUM_INT_MAX) {
-                	headerLength+=4;
-                	log.info("{}", in.remaining());
+                	headerLength+=4;                	
                 	if (in.remaining() < 4 ) {
                         state.bufferDecoding(headerLength - in.remaining());
                         in.position(startPostion);
