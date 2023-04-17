@@ -226,31 +226,16 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         RTMP rtmp = conn.getState();
         // read the chunk header (variable from 1-3 bytes)
         final ChunkHeader chunkHeader = ChunkHeader.read(in);
-        // represents "packet" header length via "format" only 1 byte in the chunk header is needed here
-        int headerLength = RTMPUtils.getHeaderLength(chunkHeader.getFormat());
-        headerLength += chunkHeader.getSize() - 1;
-        if (in.remaining() < headerLength || in.remaining() < 3) {
-            state.bufferDecoding(headerLength - in.remaining());
-            in.position(position);
+        final Header header = decodeHeader(chunkHeader, state, in, rtmp, position);
+        // header is null if we were unable to decode it, we may just need more data
+        if (header == null) {
+            // we were unable to decode the header, return null
             return null;
-        } else {
-            int currentPostition = in.position();
-            // medium int is 3 bytes
-            int timeBase = RTMPUtils.readUnsignedMediumInt(in);
-            in.position(currentPostition);
-            if (timeBase >= MEDIUM_INT_MAX) {
-                headerLength += 4;
-                if (in.remaining() < headerLength) {
-                    state.bufferDecoding(headerLength - in.remaining());
-                    in.position(position);
-                    return null;
-                }
-            }
         }
-        final Header header = decodeHeader(chunkHeader, state, in, rtmp);
         // get the channel id
         final int channelId = header != null ? header.getChannelId() : chunkHeader.getChannelId();
-        if (header == null || header.isEmpty()) {
+        // header empty vs header null will return the NS_FAILED message
+        if (header.isEmpty()) {
             if (log.isTraceEnabled()) {
                 log.trace("Header was null or empty - chh: {}", chunkHeader);
             }
@@ -366,7 +351,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
      *            RTMP object to get last header
      * @return Decoded header
      */
-    public Header decodeHeader(ChunkHeader chh, RTMPDecodeState state, IoBuffer in, RTMP rtmp) {
+    public Header decodeHeader(ChunkHeader chh, RTMPDecodeState state, IoBuffer in, RTMP rtmp, int startPostion) {
         //if (log.isTraceEnabled()) {
         //log.trace("decodeHeader - chh: {} input: {}", chh, Hex.encodeHexString(Arrays.copyOfRange(in.array(), in.position(), in.limit())));
         //log.trace("decodeHeader - chh: {}", chh);
@@ -374,6 +359,27 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         final int channelId = chh.getChannelId();
         // identifies the header type of the four types
         final byte headerSize = chh.getFormat();
+        // represents "packet" header length via "format" only 1 byte in the chunk header is needed here
+        int headerLength = RTMPUtils.getHeaderLength(headerSize);
+        headerLength += chh.getSize() - 1;
+        if (in.remaining() < headerLength || in.remaining() < 3) {
+            state.bufferDecoding(headerLength - in.remaining());
+            in.position(startPostion);
+            return null;
+        } else {
+            int currentPostition = in.position();
+            // medium int is 3 bytes
+            int timeBase = RTMPUtils.readUnsignedMediumInt(in);
+            in.position(currentPostition);
+            if (timeBase >= MEDIUM_INT_MAX) {
+                headerLength += 4;
+                if (in.remaining() < headerLength) {
+                    state.bufferDecoding(headerLength - in.remaining());
+                    in.position(startPostion);
+                    return null;
+                }
+            }
+        }
         Header lastHeader = rtmp.getLastReadHeader(channelId);
         if (log.isTraceEnabled()) {
             log.trace("{} lastHeader: {}", Header.HeaderType.values()[headerSize], lastHeader);
@@ -392,8 +398,6 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 return null;
             }
         }
-        int headerLength = RTMPUtils.getHeaderLength(headerSize);
-        headerLength += chh.getSize() - 1;
         //        if (log.isTraceEnabled()) {
         //            log.trace("headerLength: {}", headerLength);
         //        }
