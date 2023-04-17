@@ -229,12 +229,13 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // represents "packet" header length via "format" only 1 byte in the chunk header is needed here
         int headerLength = RTMPUtils.getHeaderLength(chunkHeader.getFormat());
         headerLength += chunkHeader.getSize() - 1;
-        if (in.remaining() < headerLength) {
+        if (in.remaining() < headerLength || in.remaining() < 3) {
             state.bufferDecoding(headerLength - in.remaining());
             in.position(position);
             return null;
         } else {
             int currentPostition = in.position();
+            // medium int is 3 bytes
             int timeBase = RTMPUtils.readUnsignedMediumInt(in);
             in.position(currentPostition);
             if (timeBase >= MEDIUM_INT_MAX) {
