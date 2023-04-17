@@ -349,6 +349,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
      *            Input IoBuffer
      * @param rtmp
      *            RTMP object to get last header
+     * @param startPostion
+     *           Start position of the header in the input buffer from decodePacket
      * @return Decoded header
      */
     public Header decodeHeader(ChunkHeader chh, RTMPDecodeState state, IoBuffer in, RTMP rtmp, int startPostion) {
