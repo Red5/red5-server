@@ -364,24 +364,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // represents "packet" header length via "format" only 1 byte in the chunk header is needed here
         int headerLength = RTMPUtils.getHeaderLength(headerSize);
         headerLength += chh.getSize() - 1;
-        if (in.remaining() < headerLength || in.remaining() < 3) {
+        //If remaining bytes is less than known headerLength return null and set decoder state.
+        //This length does not include 4-byte extended timestamp field if present.
+        if (in.remaining() < headerLength) {
             state.bufferDecoding(headerLength - in.remaining());
             in.position(startPostion);
             return null;
-        } else {
-            int currentPostition = in.position();
-            // medium int is 3 bytes
-            int timeBase = RTMPUtils.readUnsignedMediumInt(in);
-            in.position(currentPostition);
-            if (timeBase >= MEDIUM_INT_MAX) {
-                headerLength += 4;
-                if (in.remaining() < headerLength) {
-                    state.bufferDecoding(headerLength - in.remaining());
-                    in.position(startPostion);
-                    return null;
-                }
-            }
         }
+
         Header lastHeader = rtmp.getLastReadHeader(channelId);
         if (log.isTraceEnabled()) {
             log.trace("{} lastHeader: {}", Header.HeaderType.values()[headerSize], lastHeader);
@@ -403,11 +393,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         //        if (log.isTraceEnabled()) {
         //            log.trace("headerLength: {}", headerLength);
         //        }
-        if (in.remaining() < headerLength) {
-            //log.trace("Header too small (hlen: {}), buffering. remaining: {}", headerLength, remaining);
-            state.bufferDecoding(headerLength);
-            return null;
-        }
+
         int timeBase = 0, timeDelta = 0;
         Header header = new Header();
         header.setChannelId(channelId);
@@ -420,6 +406,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setStreamId(RTMPUtils.readReverseInt(in));
                 // read the extended timestamp if we have the indication that it exists
                 if (timeBase >= MEDIUM_INT_MAX) {
+                    headerLength += 4;
+                    if (in.remaining() < 4) {
+                        state.bufferDecoding(headerLength - in.remaining());
+                        in.position(startPostion);
+                        return null;
+                    }
                     long ext = in.getUnsignedInt();
                     timeBase = (int) (ext ^ (ext >>> 32));
                     if (log.isTraceEnabled()) {
@@ -440,6 +432,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
+                    headerLength += 4;
+                    if (in.remaining() < 4) {
+                        state.bufferDecoding(headerLength - in.remaining());
+                        in.position(startPostion);
+                        return null;
+                    }
                     long ext = in.getUnsignedInt();
                     timeDelta = (int) (ext ^ (ext >>> 32));
                     header.setExtended(true);
@@ -457,6 +455,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
+                    headerLength += 4;
+                    if (in.remaining() < 4) {
+                        state.bufferDecoding(headerLength - in.remaining());
+                        in.position(startPostion);
+                        return null;
+                    }
                     long ext = in.getUnsignedInt();
                     timeDelta = (int) (ext ^ (ext >>> 32));
                     header.setExtended(true);
@@ -475,6 +479,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID
                 // indicated the presence of an extended timestamp field
                 if (lastHeader.isExtended()) {
+                    headerLength += 4;
+                    if (in.remaining() < 4) {
+                        state.bufferDecoding(headerLength - in.remaining());
+                        in.position(startPostion);
+                        return null;
+                    }
                     long ext = in.getUnsignedInt();
                     int timeExt = (int) (ext ^ (ext >>> 32));
                     if (log.isTraceEnabled()) {

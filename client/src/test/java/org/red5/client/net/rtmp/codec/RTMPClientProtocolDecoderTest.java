@@ -2,6 +2,8 @@ package org.red5.client.net.rtmp.codec;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.After;
 import org.junit.Before;
@@ -89,4 +91,16 @@ public class RTMPClientProtocolDecoderTest {
         assertTrue(packet.getMessage() instanceof AudioData);
     }
 
+    @Test
+    public void testExtendedTImestampPartialPacket() {
+        //Buffer contains 2 complete objects and 1 incomplete object.
+        byte[] buf = IOUtils.hexStringToByteArray("03ffffff00004b090100000005584fce270100002800000042419e1e45152c236f0000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000049c03ffffff000008080100000005584fd1af01211004608c1c03ffffff000049090100000005");
+        RTMPConnection conn = RTMPConnManager.getInstance().createConnection(RTMPMinaConnection.class);
+        conn.setStateCode(RTMP.STATE_CONNECTED);
+        RTMPClientProtocolDecoder decoder = new RTMPClientProtocolDecoder();
+        List<Object> objects = decoder.decodeBuffer(conn, IoBuffer.wrap(buf));
+        //RTMPDecodeState state = conn.getDecoderState();
+        assertTrue(objects.size() == 2);
+
+    }
 }
