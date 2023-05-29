@@ -262,6 +262,17 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         }
     }
 
+    /**
+     * Uninitializes client
+     */
+    public void uninitialize() {
+        // unregister client
+        if (log.isTraceEnabled()) {
+            log.trace("Unregistering previous client: {}", this.client);
+        }
+        ((Client) this.client).unregister(this, true);
+    }
+
     /** {@inheritDoc} */
     public String getType() {
         return type.name().toLowerCase();

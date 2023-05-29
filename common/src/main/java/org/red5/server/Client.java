@@ -52,7 +52,7 @@ public class Client extends AttributeStore implements IClient {
     /**
      * Connections this client is associated with.
      */
-    protected transient CopyOnWriteArraySet<IConnection> connections = new CopyOnWriteArraySet<IConnection>();
+    protected transient CopyOnWriteArraySet<IConnection> connections = new CopyOnWriteArraySet<>();
 
     /**
      * Creation time as Timestamp
