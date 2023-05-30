@@ -344,58 +344,56 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         log.debug("Disconnect: {}", conn);
         // call disconnect handlers in reverse order of connection. ie. roomDisconnect is called before appDisconnect.
         final IClient client = conn.getClient();
-        if (client == null) {
-            // early bail out
-            removeEventListener(conn);
-            connectionStats.decrement();
-            if (hasParent()) {
-                parent.disconnect(conn);
-            }
-            return;
-        }
-        // remove it if it exists
-        if (clients.remove(client)) {
-            IScopeHandler handler = getHandler();
-            if (handler != null) {
-                try {
-                    handler.disconnect(conn, this);
-                } catch (Exception e) {
-                    log.error("Error while executing \"disconnect\" for connection {} on handler {}. {}", new Object[] { conn, handler, e });
+        // null client can happen if connection didn't fully connect to the scope or its been nulled out
+        if (client != null) {
+            // remove it if it exists
+            if (clients.remove(client)) {
+                log.debug("Removed client");
+                // get connected scope
+                IScope connScope = conn.getScope();
+                log.trace("Disconnection scope: {}", connScope);
+                IScopeHandler handler = getHandler();
+                if (handler != null) {
+                    try {
+                        handler.disconnect(conn, this);
+                    } catch (Exception e) {
+                        log.warn("Error while executing \"disconnect\" for connection {} on handler {}. {}", new Object[] { conn, handler, e });
+                    }
+                    try {
+                        // there may be a timeout here ?
+                        handler.leave(client, this);
+                    } catch (Exception e) {
+                        log.warn("Error while executing \"leave\" for client {} on handler {}. {}", new Object[] { conn, handler, e });
+                    }
                 }
-                try {
-                    // there may be a timeout here ?
-                    handler.leave(client, this);
-                } catch (Exception e) {
-                    log.error("Error while executing \"leave\" for client {} on handler {}. {}", new Object[] { conn, handler, e });
-                }
-            }
-            // remove listener
-            removeEventListener(conn);
-            // decrement if there was a set of connections
-            connectionStats.decrement();
-            if (this.equals(conn.getScope())) {
-                final IServer server = getServer();
-                if (server instanceof Server) {
-                    ((Server) server).notifyDisconnected(conn);
+                if (this.equals(connScope)) {
+                    final IServer server = getServer();
+                    if (server instanceof Server) {
+                        ((Server) server).notifyDisconnected(conn);
+                    }
                 }
             }
         }
+        // remove listener
+        removeEventListener(conn);
+        // disconnect from parent
         if (hasParent()) {
             parent.disconnect(conn);
         }
+        // decrement conn stats
+        connectionStats.decrement();
     }
 
     /** {@inheritDoc} */
     @Override
     public void dispatchEvent(IEvent event) {
-        Set<IConnection> conns = getClientConnections();
-        for (IConnection conn : conns) {
+        getClientConnections().forEach(conn -> {
             try {
                 conn.dispatchEvent(event);
             } catch (RuntimeException e) {
                 log.error("Exception during dispatching event: {}", event, e);
             }
-        }
+        });
     }
 
     /** {@inheritDoc} */

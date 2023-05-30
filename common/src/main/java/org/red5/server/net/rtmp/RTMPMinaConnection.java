@@ -283,13 +283,35 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     /** {@inheritDoc} */
     @Override
     public boolean isIdle() {
-        if (ioSession != null) {
+        // expect an io session if there isnt one, we're idle
+        boolean idle = super.isIdle() && (ioSession != null ? ioSession.isBothIdle() : true);
+        if (!idle) {
+            // get io time
+            long ioTime = System.currentTimeMillis() - ioSession.getLastIoTime();
             if (log.isDebugEnabled()) {
+                log.debug("Session last io time: {} ms", ioTime);
                 log.debug("Connection idle - read: {} write: {}", ioSession.isReaderIdle(), ioSession.isWriterIdle());
+                if (log.isTraceEnabled()) {
+                    log.trace("Session - write queue: {} session count: {}", ioSession.getWriteRequestQueue().size(), ioSession.getService().getManagedSessionCount());
+                }
             }
-            return super.isIdle() && ioSession.isBothIdle();
+            // if exceeds max inactivity kill and clean up
+            if (ioTime >= maxInactivity) {
+                log.warn("Connection {} has exceeded the max inactivity threshold of {} ms", getSessionId(), maxInactivity);
+                log.debug("Prepared to clear write queue, if session is connected: {}; closing? {}", ioSession.isConnected(), ioSession.isClosing());
+                if (ioSession.isConnected()) {
+                    // clear the write queue
+                    ioSession.getWriteRequestQueue().clear(ioSession);
+                }
+                idle = true;
+            }
         }
-        return super.isIdle();
+        if (idle) {
+            log.debug("Connection is idle");
+            // fire inactive event
+            onInactive();
+        }
+        return idle;
     }
 
     /** {@inheritDoc} */
@@ -435,6 +457,19 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
             }
             oName = null;
         }
+    }
+
+    public void dumpInfo() {
+        log.trace("{} session: {} state: {} keep-alive running: {}", new Object[] { getClass().getSimpleName(), getSessionId(), RTMP.states[getStateCode()], running });
+        log.trace("Decoder lock - permits: {} queue length: {}", decoderLock.availablePermits(), decoderLock.getQueueLength());
+        log.trace("Encoder lock - permits: {} queue length: {}", encoderLock.availablePermits(), encoderLock.getQueueLength());
+        log.trace("Client streams: {} used: {}", getStreams().size(), getUsedStreamCount());
+        if (!getAttributes().isEmpty()) {
+            log.trace("Attributes: {}", getAttributes());
+        }
+        getBasicScopes().forEachRemaining(scope -> {
+            log.trace("Scope: {}", scope);
+        });
     }
 
 }

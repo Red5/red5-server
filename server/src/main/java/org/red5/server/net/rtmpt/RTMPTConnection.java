@@ -141,19 +141,6 @@ public class RTMPTConnection extends BaseRTMPTConnection {
 
     /** {@inheritDoc} */
     @Override
-    public boolean isIdle() {
-        boolean inActivityExceeded = false;
-        long lastTS = getLastDataReceived();
-        long now = System.currentTimeMillis();
-        long tsDelta = now - lastTS;
-        if (lastTS > 0 && tsDelta > maxInactivity) {
-            inActivityExceeded = true;
-        }
-        return inActivityExceeded || (isReaderIdle() && isWriterIdle());
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean isReaderIdle() {
         // get the current bytes read on the connection
         long currentBytes = getReadBytes();
@@ -185,6 +172,19 @@ public class RTMPTConnection extends BaseRTMPTConnection {
             }
         }
         return true;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isIdle() {
+        boolean inActivityExceeded = false;
+        long lastTS = getLastDataReceived();
+        long now = System.currentTimeMillis();
+        long tsDelta = now - lastTS;
+        if (lastTS > 0 && tsDelta > maxInactivity) {
+            inActivityExceeded = true;
+        }
+        return inActivityExceeded || (isReaderIdle() && isWriterIdle());
     }
 
     public void setRemoteAddress(String remoteAddress) {

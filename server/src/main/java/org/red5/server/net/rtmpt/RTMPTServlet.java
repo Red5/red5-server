@@ -9,7 +9,8 @@ package org.red5.server.net.rtmpt;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
@@ -21,6 +22,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.red5.logging.Red5LoggerFactory;
+import org.red5.server.BaseConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.InboundHandshake;
@@ -66,7 +68,7 @@ public class RTMPTServlet extends HttpServlet {
     /**
      * Connection manager.
      */
-    private static IConnectionManager<RTMPConnection> manager;
+    private static RTMPConnManager manager;
 
     /**
      * Try to generate responses that contain at least 32768 bytes data. Increasing this value results in better stream performance, but
@@ -129,7 +131,7 @@ public class RTMPTServlet extends HttpServlet {
         RTMPConnection conn = (RTMPConnection) Red5.getConnectionLocal();
         if (conn == null) {
             try {
-                conn = ((RTMPConnManager) manager).createConnectionInstance(RTMPTConnection.class);
+                conn = manager.createConnectionInstance(RTMPTConnection.class);
                 Red5.setConnectionLocal(conn);
             } catch (Exception e) {
             }
@@ -321,8 +323,6 @@ public class RTMPTServlet extends HttpServlet {
             // set properties
             conn.setServlet(this);
             conn.setServletRequest(req);
-            // add the connection to the manager
-            manager.setConnection(conn);
             // set handler
             conn.setHandler(handler);
             conn.setDecoder(handler.getCodecFactory().getRTMPDecoder());
@@ -534,7 +534,7 @@ public class RTMPTServlet extends HttpServlet {
                 manager = (RTMPConnManager) applicationContext.getBean("rtmpConnManager");
                 if (manager == null) {
                     log.warn("Connection manager was null in context, getting class instance");
-                    manager = RTMPConnManager.getInstance();
+                    manager = ((RTMPConnManager) RTMPConnManager.getInstance());
                     if (manager == null) {
                         log.error("Connection manager is still null, this is bad");
                     }
@@ -617,13 +617,11 @@ public class RTMPTServlet extends HttpServlet {
     @Override
     public void destroy() {
         // Cleanup connections
-        Collection<RTMPConnection> conns = manager.getAllConnections();
-        for (RTMPConnection conn : conns) {
-            if (conn instanceof RTMPTConnection) {
-                log.debug("Connection scope on destroy: {}", conn.getScope());
-                conn.close();
-            }
-        }
+        List<BaseConnection> conns = manager.getAllConnections().stream().filter(c -> (c instanceof RTMPTConnection)).collect(Collectors.toList());
+        log.debug("Connections destroy: {}", conns);
+        conns.forEach(conn -> {
+            conn.close();
+        });
         super.destroy();
     }
 
@@ -663,15 +661,6 @@ public class RTMPTServlet extends HttpServlet {
         } else {
             log.warn("Remove failed, null connection for session id: {}", sessionId);
         }
-    }
-
-    /**
-     * @param manager
-     *            the manager to set
-     */
-    public void setManager(IConnectionManager<RTMPConnection> manager) {
-        log.trace("Set connection manager: {}", manager);
-        RTMPTServlet.manager = manager;
     }
 
     /**

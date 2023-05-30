@@ -23,7 +23,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.client.net.rtmp.OutboundHandshake;
-import org.red5.client.net.rtmp.RTMPConnManager;
+import org.red5.client.net.rtmp.RTMPClientConnManager;
 import org.red5.server.api.Red5;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.codec.RTMP;
@@ -170,7 +170,7 @@ public class RTMPTClientConnector extends Thread {
             sessionId = responseStr.substring(0, responseStr.length() - 1);
             log.debug("Got an id {}", sessionId);
             // create a new connection
-            conn = (RTMPTClientConnection) RTMPConnManager.getInstance().createConnection(RTMPTClientConnection.class, sessionId);
+            conn = (RTMPTClientConnection) RTMPClientConnManager.getInstance().createConnection(RTMPTClientConnection.class, sessionId);
             log.debug("Got session id {} from connection", conn.getSessionId());
             // client state
             conn.setHandler(client);

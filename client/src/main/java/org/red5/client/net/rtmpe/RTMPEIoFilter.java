@@ -18,7 +18,7 @@ import org.apache.mina.core.write.WriteRequest;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.red5.client.net.rtmp.BaseRTMPClientHandler;
 import org.red5.client.net.rtmp.OutboundHandshake;
-import org.red5.client.net.rtmp.RTMPConnManager;
+import org.red5.client.net.rtmp.RTMPClientConnManager;
 import org.red5.client.net.rtmp.codec.RTMPMinaCodecFactory;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
@@ -43,7 +43,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
     public void messageReceived(NextFilter nextFilter, IoSession session, Object obj) throws Exception {
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
         log.trace("Session id: {}", sessionId);
-        RTMPMinaConnection conn = (RTMPMinaConnection) RTMPConnManager.getInstance().getConnectionBySessionId(sessionId);
+        RTMPMinaConnection conn = (RTMPMinaConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
         if (conn == null) {
             throw new Exception("Receive on unavailable connection - session id: " + sessionId);
         }

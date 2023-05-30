@@ -397,16 +397,6 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         running = new AtomicBoolean(false);
     }
 
-    public int getId() {
-        // handle the fact that a client id is a String
-        return client != null ? client.getId().hashCode() : -1;
-    }
-
-    @Deprecated
-    public void setId(int clientId) {
-        log.warn("Setting of a client id is deprecated, use IClient to manipulate the id", new Exception("RTMPConnection.setId is deprecated"));
-    }
-
     public void setHandler(IRTMPHandler handler) {
         this.handler = handler;
     }
@@ -771,6 +761,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      *
      * @return true if max idle period has been exceeded, false otherwise
      */
+    @Override
     public boolean isIdle() {
         long lastPingTime = lastPingSentOn.get();
         long lastPongTime = lastPongReceivedOn.get();
@@ -778,16 +769,31 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         if (isTrace) {
             log.trace("Connection {} {} idle", getSessionId(), (idle ? "is" : "is not"));
         }
+        if (idle) {
+            // fire event
+            onInactive();
+        }
         return idle;
+    }
+
+    /**
+     * Check whether connection is alive
+     *
+     * @return true if connection is scope bound and state is not DISCONNECTED, false otherwise
+     */
+    @Override
+    public boolean isConnected() {
+        return scope != null && state.getState() != RTMP.STATE_DISCONNECTED;
     }
 
     /**
      * Returns whether or not the connection is disconnected.
      *
-     * @return true if connection state is RTMP.STATE_DISCONNECTED, false otherwise
+     * @return true if connection is not scope bound and state is DISCONNECTED, false otherwise
      */
+    @Override
     public boolean isDisconnected() {
-        return state.getState() == RTMP.STATE_DISCONNECTED;
+        return scope == null && state.getState() == RTMP.STATE_DISCONNECTED;
     }
 
     /** {@inheritDoc} */
@@ -1764,7 +1770,10 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      *            scheduling service / thread executor
      */
     public void setScheduler(ThreadPoolTaskScheduler scheduler) {
-        this.scheduler = scheduler;
+        // not allowing reset on the scheduler
+        if (this.scheduler == null) {
+            this.scheduler = scheduler;
+        }
     }
 
     /**

@@ -235,12 +235,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         streamLocal.set(id);
     }
 
-    /**
-     * Initializes client
-     *
-     * @param client
-     *            Client bound to connection
-     */
+    /** {@inheritDoc} */
     public void initialize(IClient client) {
         if (log.isDebugEnabled()) {
             log.debug("initialize - client: {}", client);
@@ -262,15 +257,17 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         }
     }
 
-    /**
-     * Uninitializes client
-     */
+    /** {@inheritDoc} */
     public void uninitialize() {
         // unregister client
         if (log.isTraceEnabled()) {
             log.trace("Unregistering previous client: {}", this.client);
         }
-        ((Client) this.client).unregister(this, true);
+        if (client != null && client instanceof Client) {
+            ((Client) this.client).unregister(this, true);
+        } else {
+            log.warn("Client is null or type is unexpected for: {}", sessionId);
+        }
     }
 
     /** {@inheritDoc} */
@@ -338,6 +335,21 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
+     * Returns the client id.
+     *
+     * @return client id as an int
+     */
+    public int getId() {
+        // handle the fact that a client id is a String
+        return client != null ? client.getId().hashCode() : -1;
+    }
+
+    @Deprecated
+    public void setId(int clientId) {
+        log.warn("Setting of a client id is deprecated, use IClient to manipulate the id", new Exception("RTMPConnection.setId is deprecated"));
+    }
+
+    /**
      * Check whether connection is alive
      *
      * @return true if connection is bound to scope, false otherwise
@@ -381,6 +393,43 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
+     * Returns whether or not the connection is disconnected.
+     *
+     * @return true if connection is not bound to scope, false otherwise
+     */
+    public boolean isDisconnected() {
+        return scope == null;
+    }
+
+    /**
+     * Disconnects connection from scope
+     */
+    public void disconnect() {
+        if (scope != null) {
+            log.debug("Close, disconnect from scope, and children");
+            try {
+                // unregister all child scopes first
+                for (IBasicScope basicScope : basicScopes) {
+                    unregisterBasicScope(basicScope);
+                }
+            } catch (Exception err) {
+                log.warn("Error while unregistering basic scopes", err);
+            }
+            try {
+                // disconnect
+                scope.disconnect(this);
+                // unregister client
+                uninitialize();
+            } catch (Exception err) {
+                log.warn("Error while disconnecting from scope: {}. {}", scope, err);
+            } finally {
+                // clear scope reference
+                scope = null;
+            }
+        }
+    }
+
+    /**
      * Return the current scope.
      *
      * @return scope
@@ -398,30 +447,8 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
             return;
         }
         closed = true;
-        if (scope != null) {
-            log.debug("Close, disconnect from scope, and children");
-            try {
-                // unregister all child scopes first
-                for (IBasicScope basicScope : basicScopes) {
-                    unregisterBasicScope(basicScope);
-                }
-            } catch (Exception err) {
-                log.error("Error while unregistering basic scopes", err);
-            }
-            // disconnect
-            if (scope != null) {
-                try {
-                    scope.disconnect(this);
-                } catch (Exception err) {
-                    log.error("Error while disconnecting from scope: {}. {}", scope, err);
-                }
-                scope = null;
-            }
-        }
-        // unregister client
-        if (client != null && client instanceof Client) {
-            ((Client) client).unregister(this);
-        }
+        // disconnect
+        disconnect();
         // alert our listeners
         if (connectionListeners != null) {
             for (IConnectionListener listener : connectionListeners) {
@@ -558,6 +585,15 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
      */
     public boolean isWriterIdle() {
         return false;
+    }
+
+    /**
+     * Returns whether or not the connection is idle.
+     *
+     * @return true if both read and write are idle and false otherwise
+     */
+    public boolean isIdle() {
+        return isReaderIdle() && isWriterIdle();
     }
 
     /**

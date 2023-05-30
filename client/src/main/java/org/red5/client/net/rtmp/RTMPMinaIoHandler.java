@@ -15,6 +15,7 @@ import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.red5.client.net.rtmpe.RTMPEClient;
 import org.red5.client.net.rtmpe.RTMPEIoFilter;
+import org.red5.server.BaseConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -75,8 +76,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         // set a reference to the connection on the client
         handler.setConnection((RTMPConnection) conn);
         // set a connection manager for any required handling and to prevent memory leaking
-        RTMPConnManager connManager = (RTMPConnManager) RTMPConnManager.getInstance();
-        session.setAttribute(RTMPConnection.RTMP_CONN_MANAGER, new WeakReference<IConnectionManager<RTMPConnection>>(connManager));
+        session.setAttribute(RTMPConnection.RTMP_CONN_MANAGER, new WeakReference<IConnectionManager<BaseConnection>>(RTMPClientConnManager.getInstance()));
     }
 
     /** {@inheritDoc} */
@@ -175,12 +175,12 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     }
 
     protected RTMPMinaConnection createRTMPMinaConnection() {
-        return (RTMPMinaConnection) RTMPConnManager.getInstance().createConnection(RTMPMinaConnection.class);
+        return (RTMPMinaConnection) RTMPClientConnManager.getInstance().createConnection(RTMPMinaConnection.class);
     }
 
     @SuppressWarnings("unchecked")
-    private RTMPConnManager getConnectionManager(IoSession session) {
-        return (RTMPConnManager) ((WeakReference<IConnectionManager<RTMPConnection>>) session.getAttribute(RTMPConnection.RTMP_CONN_MANAGER)).get();
+    private IConnectionManager<RTMPConnection> getConnectionManager(IoSession session) {
+        return (IConnectionManager<RTMPConnection>) ((WeakReference<IConnectionManager<RTMPConnection>>) session.getAttribute(RTMPConnection.RTMP_CONN_MANAGER)).get();
     }
 
 }

@@ -17,8 +17,6 @@ import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.IScopeHandler;
 import org.red5.server.api.service.IServiceCall;
 import org.red5.server.jmx.mxbeans.CoreHandlerMXBean;
-import org.red5.server.net.IConnectionManager;
-import org.red5.server.net.rtmp.RTMPConnManager;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmpt.RTMPTConnection;
 import org.slf4j.Logger;
@@ -106,24 +104,15 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
                     // set the client on the connection
                     conn.setClient(client);
                 }
-                // add any rtmp connections to the manager
-                IConnectionManager<RTMPConnection> connManager = RTMPConnManager.getInstance();
-                if (conn instanceof RTMPTConnection) {
-                    connManager.setConnection((RTMPTConnection) conn);
-                } else if (conn instanceof RTMPConnection) {
-                    connManager.setConnection((RTMPConnection) conn);
-                } else {
-                    log.warn("Connection was not added to manager: {}", conn);
-                }
                 // assign connection to client
                 conn.initialize(client);
                 // we could checked for banned clients here
                 connect = true;
             } else {
-                log.error("No client registry was found, clients cannot be looked-up or created");
+                log.warn("No client registry was found, clients cannot be looked-up or created");
             }
         } else {
-            log.error("No connection scope was found");
+            log.warn("No connection scope was found");
         }
         return connect;
     }

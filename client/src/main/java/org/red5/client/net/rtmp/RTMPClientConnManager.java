@@ -9,11 +9,13 @@ package org.red5.client.net.rtmp;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.red5.client.net.rtmpt.RTMPTClientConnection;
+import org.red5.server.BaseConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -27,9 +29,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  *
  * @author The Red5 Project
  */
-public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
+public class RTMPClientConnManager implements IConnectionManager<BaseConnection> {
 
-    private static final Logger log = LoggerFactory.getLogger(RTMPConnManager.class);
+    private static final Logger log = LoggerFactory.getLogger(RTMPClientConnManager.class);
 
     private static int maxHandshakeTimeout = 7000;
 
@@ -42,21 +44,24 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
     // whether or not to use the ThreadPoolTaskExecutor for incoming messages
     protected static boolean enableTaskExecutor;
 
-    protected static IConnectionManager<RTMPConnection> instance = new RTMPConnManager();
+    protected static IConnectionManager<BaseConnection> instance;
 
-    protected ConcurrentMap<String, RTMPConnection> connMap = new ConcurrentHashMap<>();
+    protected ConcurrentMap<String, BaseConnection> connMap = new ConcurrentHashMap<>();
 
     protected AtomicInteger conns = new AtomicInteger();
 
-    public static IConnectionManager<RTMPConnection> getInstance() {
+    public static IConnectionManager<BaseConnection> getInstance() {
+        if (instance == null) {
+            instance = new RTMPClientConnManager();
+        }
         return instance;
     }
 
     /** {@inheritDoc} */
     @Override
-    public RTMPConnection createConnection(Class<?> connCls) {
-        RTMPConnection conn = null;
-        if (RTMPConnection.class.isAssignableFrom(connCls)) {
+    public BaseConnection createConnection(Class<?> connCls) {
+        BaseConnection conn = null;
+        if (BaseConnection.class.isAssignableFrom(connCls)) {
             try {
                 // create connection
                 conn = createConnectionInstance(connCls);
@@ -73,9 +78,9 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
 
     /** {@inheritDoc} */
     @Override
-    public RTMPConnection createConnection(Class<?> connCls, String sessionId) {
-        RTMPConnection conn = null;
-        if (RTMPConnection.class.isAssignableFrom(connCls)) {
+    public BaseConnection createConnection(Class<?> connCls, String sessionId) {
+        BaseConnection conn = null;
+        if (BaseConnection.class.isAssignableFrom(connCls)) {
             try {
                 // create connection
                 conn = createConnectionInstance(connCls);
@@ -94,46 +99,13 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
     }
 
     /**
-     * Adds a connection.
-     *
-     * @param conn connection
-     */
-    @Override
-    public void setConnection(RTMPConnection conn) {
-        log.trace("Adding connection: {}", conn);
-        int id = conn.getId();
-        if (id == -1) {
-            log.debug("Connection has unsupported id, using session id hash");
-            id = conn.getSessionId().hashCode();
-        }
-        log.debug("Connection id: {} session id hash: {}", conn.getId(), conn.getSessionId().hashCode());
-    }
-
-    /**
-     * Returns a connection for a given client id.
-     *
-     * @param clientId client id
-     * @return connection if found and null otherwise
-     */
-    @Override
-    public RTMPConnection getConnection(int clientId) {
-        log.trace("Getting connection by client id: {}", clientId);
-        for (RTMPConnection conn : connMap.values()) {
-            if (conn.getId() == clientId) {
-                return connMap.get(conn.getSessionId());
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns a connection for a given session id.
      *
      * @param sessionId session id
      * @return connection if found and null otherwise
      */
     @Override
-    public RTMPConnection getConnectionBySessionId(String sessionId) {
+    public BaseConnection getConnectionBySessionId(String sessionId) {
         log.debug("Getting connection by session id: {}", sessionId);
         if (connMap.containsKey(sessionId)) {
             return connMap.get(sessionId);
@@ -148,28 +120,20 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
 
     /** {@inheritDoc} */
     @Override
-    public RTMPConnection removeConnection(int clientId) {
-        log.trace("Removing connection with id: {}", clientId);
-        // remove from map
-        for (RTMPConnection conn : connMap.values()) {
-            if (conn.getId() == clientId) {
-                // remove the conn
-                return removeConnection(conn.getSessionId());
-            }
-        }
-        log.warn("Connection was not removed by id: {}", clientId);
-        return null;
+    public BaseConnection removeConnection(BaseConnection conn) {
+        log.trace("Removing connection: {}", conn);
+        return removeConnection(conn.getSessionId());
     }
 
     /** {@inheritDoc} */
     @Override
-    public RTMPConnection removeConnection(String sessionId) {
+    public BaseConnection removeConnection(String sessionId) {
         log.debug("Removing connection with session id: {}", sessionId);
         if (log.isTraceEnabled()) {
             log.trace("Connections ({}) at pre-remove: {}", connMap.size(), connMap.values());
         }
         // remove from map
-        RTMPConnection conn = connMap.remove(sessionId);
+        BaseConnection conn = connMap.remove(sessionId);
         if (conn != null) {
             log.trace("Connections: {}", conns.decrementAndGet());
             Red5.setConnectionLocal(null);
@@ -179,19 +143,20 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
 
     /** {@inheritDoc} */
     @Override
-    public Collection<RTMPConnection> getAllConnections() {
-        ArrayList<RTMPConnection> list = new ArrayList<RTMPConnection>(connMap.size());
+    public Collection<BaseConnection> getAllConnections() {
+        ArrayList<BaseConnection> list = new ArrayList<>(connMap.size());
         list.addAll(connMap.values());
         return list;
     }
 
     /** {@inheritDoc} */
     @Override
-    public Collection<RTMPConnection> removeConnections() {
-        ArrayList<RTMPConnection> list = new ArrayList<RTMPConnection>(connMap.size());
-        list.addAll(connMap.values());
-        connMap.clear();
-        conns.set(0);
+    public Collection<BaseConnection> removeConnections() {
+        final List<BaseConnection> list = new ArrayList<>(connMap.size());
+        connMap.values().forEach(conn -> {
+            removeConnection(conn.getSessionId());
+            list.add(conn);
+        });
         return list;
     }
 
@@ -228,23 +193,23 @@ public class RTMPConnManager implements IConnectionManager<RTMPConnection> {
     }
 
     public static void setMaxHandshakeTimeout(int maxHandshakeTimeout) {
-        RTMPConnManager.maxHandshakeTimeout = maxHandshakeTimeout;
+        RTMPClientConnManager.maxHandshakeTimeout = maxHandshakeTimeout;
     }
 
     public static void setMaxInactivity(int maxInactivity) {
-        RTMPConnManager.maxInactivity = maxInactivity;
+        RTMPClientConnManager.maxInactivity = maxInactivity;
     }
 
     public static void setPingInterval(int pingInterval) {
-        RTMPConnManager.pingInterval = pingInterval;
+        RTMPClientConnManager.pingInterval = pingInterval;
     }
 
     public static void setExecutorQueueCapacity(int executorQueueCapacity) {
-        RTMPConnManager.executorQueueCapacity = executorQueueCapacity;
+        RTMPClientConnManager.executorQueueCapacity = executorQueueCapacity;
     }
 
     public static void setEnableTaskExecutor(boolean enableTaskExecutor) {
-        RTMPConnManager.enableTaskExecutor = enableTaskExecutor;
+        RTMPClientConnManager.enableTaskExecutor = enableTaskExecutor;
     }
 
 }

@@ -22,6 +22,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.write.WriteRequestQueue;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.red5.server.BaseConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.codec.RTMP;
@@ -105,7 +106,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
         log.debug("Session opened: {} id: {}", session.getId(), sessionId);
         RTMPConnManager connManager = (RTMPConnManager) RTMPConnManager.getInstance();
-        session.setAttribute(RTMPConnection.RTMP_CONN_MANAGER, new WeakReference<IConnectionManager<RTMPConnection>>(connManager));
+        session.setAttribute(RTMPConnection.RTMP_CONN_MANAGER, new WeakReference<IConnectionManager<BaseConnection>>(connManager));
         RTMPMinaConnection conn = (RTMPMinaConnection) connManager.getConnectionBySessionId(sessionId);
         handler.connectionOpened(conn);
     }

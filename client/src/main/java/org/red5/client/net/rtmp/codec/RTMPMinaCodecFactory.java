@@ -12,7 +12,7 @@ import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.red5.client.net.rtmp.RTMPConnManager;
+import org.red5.client.net.rtmp.RTMPClientConnManager;
 import org.red5.server.api.Red5;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.codec.RTMPMinaProtocolDecoder;
@@ -35,7 +35,7 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                 // get the connection from the session
                 String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
                 log.trace("Session id: {}", sessionId);
-                RTMPConnection conn = (RTMPConnection) RTMPConnManager.getInstance().getConnectionBySessionId(sessionId);
+                RTMPConnection conn = (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
                 Red5.setConnectionLocal(conn);
                 byte[] arr = new byte[in.remaining()];
                 in.get(arr);
@@ -83,7 +83,7 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                 // get the connection from the session
                 String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
                 log.trace("Session id: {}", sessionId);
-                RTMPConnection conn = (RTMPConnection) RTMPConnManager.getInstance().getConnectionBySessionId(sessionId);
+                RTMPConnection conn = (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
                 if (conn != null) {
                     Red5.setConnectionLocal(conn);
                     final Semaphore lock = conn.getEncoderLock();

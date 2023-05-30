@@ -12,23 +12,6 @@ import java.util.Collection;
 public interface IConnectionManager<T> {
 
     /**
-     * Returns a connection matching the given client id.
-     *
-     * @param clientId
-     *            client id
-     * @return connection
-     */
-    T getConnection(int clientId);
-
-    /**
-     * Adds a connection.
-     *
-     * @param conn
-     *            connection
-     */
-    void setConnection(T conn);
-
-    /**
      * Returns a connection matching the given session id.
      *
      * @param sessionId
@@ -67,11 +50,10 @@ public interface IConnectionManager<T> {
     /**
      * Removes a connection matching the client id specified. If found, the connection will be returned.
      *
-     * @param clientId
-     *            client id
+     * @param conn the connection to be removed
      * @return connection
      */
-    T removeConnection(int clientId);
+    T removeConnection(T conn);
 
     /**
      * Removes a connection by the given sessionId.

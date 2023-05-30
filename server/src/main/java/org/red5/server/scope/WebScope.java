@@ -7,7 +7,6 @@
 
 package org.red5.server.scope;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.ServletContext;
@@ -207,9 +206,9 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
             log.debug("Webscope registering: {}", contextPath);
             getAppContext();
             appLoader = LoaderBase.getApplicationLoader();
-            //get the parent name
+            // get the parent name
             String parentName = getParent().getName();
-            //add host name mappings
+            // add host name mappings
             if (hostnames != null && hostnames.length > 0) {
                 for (String hostName : hostnames) {
                     server.addMapping(hostName, getName(), parentName);
@@ -236,23 +235,19 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
             keepOnDisconnect = false;
             uninit();
             // disconnect all clients before unregistering
-            Set<IConnection> conns = getClientConnections();
-            for (IConnection conn : conns) {
-                conn.close();
-            }
-            conns.clear();
-            //
+            getClientConnections().forEach(IConnection::close);
+            // remove host name mappings
             if (hostnames != null && hostnames.length > 0) {
                 for (String element : hostnames) {
                     server.removeMapping(element, getName());
                 }
             }
-            //check for null
+            // check for null
             if (appContext == null) {
                 log.debug("Application context is null, trying retrieve from loader");
                 getAppContext();
             }
-            //try to stop the app context
+            // try to stop the app context
             if (appContext != null) {
                 log.debug("Stopping app context");
                 appContext.stop();
