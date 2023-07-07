@@ -214,8 +214,9 @@
                         <release>${java.release.level}</release>
                     </configuration>
                 </plugin>
+                <!-- https://maven.apache.org/guides/mini/guide-using-toolchains.html -->
+                <!--
                 <plugin>
-                    <!-- https://maven.apache.org/guides/mini/guide-using-toolchains.html -->
                     <artifactId>maven-toolchains-plugin</artifactId>
                     <version>3.0.0</version>
                     <executions>
@@ -233,6 +234,7 @@
                         </toolchains>
                     </configuration>
                 </plugin>
+                -->
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>3.1.0</version>

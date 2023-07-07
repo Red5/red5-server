@@ -227,11 +227,6 @@ public class StreamService implements IStreamService {
         IClientStream stream = conn.getStreamById(streamId);
         if (stream != null) {
             log.debug("Delete id: {} stream: {}", streamId, stream);
-            if (!IConnection.Duty.PUBLISHER.equals(conn.getDuty())) {
-                // this is a subscriber dont close / delete the stream
-                log.warn("Connection is not a publisher, not closing stream");
-                return;
-            }
             if (stream instanceof IClientBroadcastStream) {
                 IClientBroadcastStream bs = (IClientBroadcastStream) stream;
                 IBroadcastScope bsScope = getBroadcastScope(conn.getScope(), bs.getPublishedName());
