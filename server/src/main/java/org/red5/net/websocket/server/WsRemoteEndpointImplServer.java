@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
+import java.util.concurrent.locks.Lock;
 
 import javax.websocket.SendHandler;
 import javax.websocket.SendResult;
@@ -145,6 +146,13 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         // no ex thrown here anymore, handled elsewhere in lib
         socketWrapper.close();
         wsWriteTimeout.unregister(this);
+    }
+
+    // XXX(paul) new method after tomcat 8.5.87
+    @Override
+    protected Lock getLock() {
+        // for a lack of better implementation, we use the socket wrapper lock
+        return socketWrapper.getLock();
     }
 
     protected long getTimeoutExpiry() {
