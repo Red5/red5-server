@@ -659,6 +659,21 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         WebSocketConnection.readTimeout = readTimeout;
     }
 
+    public void setUserProperty(String key, Object value) {
+        WsSession wsSession = getWsSession();
+        if (wsSession != null) {
+            wsSession.getUserProperties().put(key, value);
+        }
+    }
+
+    public Object getUserProperty(String key) {
+        WsSession wsSession = getWsSession();
+        if (wsSession.getUserProperties().get(key) != null) {
+            return wsSession.getUserProperties().get(key);
+        }
+        return null;
+    }
+
     public void setWsSessionTimeout(long idleTimeout) {
         if (wsSession != null) {
             wsSession.get().setMaxIdleTimeout(idleTimeout);
