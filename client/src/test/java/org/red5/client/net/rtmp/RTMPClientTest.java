@@ -21,7 +21,7 @@ public class RTMPClientTest {
     private static Timer timer = new Timer();
 
     // application name
-    private static String app = "oflaDemo"; //"vod";
+    private static String app = "live"; //oflaDemo, vod;
 
     // AMS sample
     //    private static String sourceStreamName = "mp4:sample1_1500kbps.f4v";

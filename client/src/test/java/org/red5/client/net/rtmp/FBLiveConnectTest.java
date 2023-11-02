@@ -57,6 +57,14 @@ public class FBLiveConnectTest {
 
     private double streamId = 1.0d;
 
+    private String host = "localhost"; //"rtmp-api.facebook.com";
+
+    private int port = 1935; // 80;
+
+    private String app = "live"; //"rtmp";
+
+    private String publishName = "stream1"; //"1567066673326082?ds=1&s_l=1&a=ATiBCGoo4bLDTa4c";
+
     static {
         System.setProperty("red5.deployment.type", "junit");
     }
@@ -65,40 +73,37 @@ public class FBLiveConnectTest {
     public void setUp() throws Exception {
         executor = Executors.newCachedThreadPool();
         reader = new FLVReader(new File(System.getProperty("user.dir") + "/src/test/resources/fixtures", "rotations.flv"));
-        Runnable run = new Runnable() {
-            public void run() {
-                while (reader.hasMoreTags()) {
-                    ITag tag = reader.readTag();
-                    if (tag != null) {
-                        IRTMPEvent msg;
-                        switch (tag.getDataType()) {
-                            case Constants.TYPE_AUDIO_DATA:
-                                msg = new AudioData(tag.getBody());
-                                break;
-                            case Constants.TYPE_VIDEO_DATA:
-                                msg = new VideoData(tag.getBody());
-                                break;
-                            case Constants.TYPE_INVOKE:
-                                msg = new Invoke(tag.getBody());
-                                break;
-                            case Constants.TYPE_NOTIFY:
-                                msg = new Notify(tag.getBody());
-                                break;
-                            default:
-                                log.warn("Unexpected type? {}", tag.getDataType());
-                                msg = new Unknown(tag.getDataType(), tag.getBody());
-                                break;
-                        }
-                        msg.setTimestamp(tag.getTimestamp());
-                        que.add(RTMPMessage.build(msg));
-                    } else {
-                        break;
+        executor.submit(() -> {
+            while (reader.hasMoreTags()) {
+                ITag tag = reader.readTag();
+                if (tag != null) {
+                    IRTMPEvent msg;
+                    switch (tag.getDataType()) {
+                        case Constants.TYPE_AUDIO_DATA:
+                            msg = new AudioData(tag.getBody());
+                            break;
+                        case Constants.TYPE_VIDEO_DATA:
+                            msg = new VideoData(tag.getBody());
+                            break;
+                        case Constants.TYPE_INVOKE:
+                            msg = new Invoke(tag.getBody());
+                            break;
+                        case Constants.TYPE_NOTIFY:
+                            msg = new Notify(tag.getBody());
+                            break;
+                        default:
+                            log.warn("Unexpected type? {}", tag.getDataType());
+                            msg = new Unknown(tag.getDataType(), tag.getBody());
+                            break;
                     }
+                    msg.setTimestamp(tag.getTimestamp());
+                    que.add(RTMPMessage.build(msg));
+                } else {
+                    break;
                 }
-                log.info("Queue fill completed: {}", que.size());
             }
-        };
-        executor.submit(run);
+            log.info("Queue fill completed: {}", que.size());
+        });
     }
 
     @After
@@ -111,18 +116,10 @@ public class FBLiveConnectTest {
     @Test
     public void testFBLivePublish() throws InterruptedException {
         log.info("\n testFBLivePublish");
-        String host = "rtmp-api.facebook.com";
-        int port = 80;
-        String app = "rtmp";
-        final String publishName = "1567066673326082?ds=1&s_l=1&a=ATiBCGoo4bLDTa4c";
         log.info("PublishName: {}", publishName);
-
         final RTMPClient client = new RTMPClient();
-        client.setConnectionClosedHandler(new Runnable() {
-            @Override
-            public void run() {
-                log.info("Test - exit");
-            }
+        client.setConnectionClosedHandler(() -> {
+            log.info("Test - exit");
         });
         client.setExceptionHandler(new ClientExceptionHandler() {
             @Override
@@ -189,37 +186,41 @@ public class FBLiveConnectTest {
         };
         // connect
         client.connect(host, port, app, connectCallback);
-
-        Runnable pusher = new Runnable() {
-
-            public void run() {
-                while (!publishing) {
-                    try {
-                        Thread.sleep(100L);
-                    } catch (InterruptedException e) {
-                    }
+        executor.submit(() -> {
+            while (!publishing) {
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException e) {
                 }
-                do {
-                    try {
-                        RTMPMessage message = que.poll();
-                        if (message != null && client != null) {
-                            client.publishStreamData(streamId, message);
-                        } else {
-                            Thread.sleep(3L);
-                        }
-                    } catch (Exception e1) {
-                        log.warn("streaming error {}", e1);
-                    }
-                } while (!que.isEmpty());
-                client.unpublish(streamId);
             }
-
-        };
-        executor.submit(pusher);
-
+            do {
+                try {
+                    RTMPMessage message = que.poll();
+                    if (message != null && client != null) {
+                        client.publishStreamData(streamId, message);
+                    } else {
+                        Thread.sleep(3L);
+                    }
+                } catch (Exception e1) {
+                    log.warn("streaming error {}", e1);
+                }
+            } while (!que.isEmpty());
+            client.unpublish(streamId);
+        });
         Thread.currentThread().join(30000L);
         client.disconnect();
         log.info("Test - end");
+    }
+
+    public static void main(String[] args) {
+        FBLiveConnectTest test = new FBLiveConnectTest();
+        try {
+            test.setUp();
+            test.testFBLivePublish();
+            test.tearDown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
