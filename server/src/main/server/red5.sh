@@ -5,7 +5,12 @@ if [ -z "$RED5_HOME" ]; then
 fi
 
 # Java 11
-export JAVA_HOME=/usr/lib/jvm/java-11-amazon-corretto
+# Set JavaHome if it exists
+if [ -f "${JAVA_HOME}/bin/java" ]; then
+   JAVA_HOME=${JAVA_HOME}
+else
+   echo "Please set JAVA_HOME in your current path. Preferably use JDK 11."
+fi
 
 P=":" # The default classpath separator
 OS=`uname`
