@@ -177,7 +177,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     /**
      * Whether or not to register with JMX.
      */
-    protected boolean registerJMX = true;
+    protected boolean registerJMX;
 
     /**
      * Stream name aliases for the entire server instance.
@@ -968,7 +968,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     protected void registerJMX() {
-        if (registerJMX) {
+        if (registerJMX && StringUtils.isNotEmpty(publishedName) && !"false".equals(publishedName)) {
             // register with jmx
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             try {

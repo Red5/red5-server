@@ -79,6 +79,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     protected static Logger log = LoggerFactory.getLogger(Scope.class);
 
+    protected static boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
+
     /**
      * Unset flag constant
      */
@@ -1236,7 +1238,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     //for debugging
     public void dump() {
-        if (log.isTraceEnabled()) {
+        if (isTrace) {
             log.trace("Scope: {} {}", this.getClass().getName(), this);
             log.trace("Running: {}", running);
             if (hasParent()) {
@@ -1434,11 +1436,11 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
          * @return true if a matching scope is found, false otherwise
          */
         public boolean hasName(String name) {
-            if (log.isDebugEnabled()) {
+            if (isDebug) {
                 log.debug("hasName: {}", name);
             }
             if (name != null) {
-                return stream().filter(child -> name.equals(child.getName())).findFirst().isPresent();
+                return stream().filter(child -> child.getName().equals(name)).findFirst().isPresent();
             } else {
                 log.info("Invalid scope name, null is not allowed");
             }
@@ -1469,7 +1471,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
             Optional<IBasicScope> scope = null;
             // skip type check?
             if (ScopeType.UNDEFINED.equals(type)) {
-                scope = stream().filter(child -> name.equals(child.getName())).findFirst();
+                scope = stream().filter(child -> child.getName().equals(name)).findFirst();
             } else {
                 // if its broadcast type then allow an alias match in addition to the name match
                 if (ScopeType.BROADCAST.equals(type)) {
@@ -1477,10 +1479,11 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                     for (IBasicScope child : this) {
                         // ensure type is broadcast type, since we'll pull out a cbs
                         if (child.getType().equals(type)) {
+                            String childName = child.getName();
                             IClientBroadcastStream cbs = ((IBroadcastScope) child).getClientBroadcastStream();
                             if (cbs != null) {
                                 String pubName = cbs.getPublishedName();
-                                if (name.equals(child.getName())) {
+                                if (childName.equals(name)) {
                                     log.debug("Scope found by name: {} on {}", name, pubName);
                                     return child;
                                 } else if (cbs.containsAlias(name)) {
@@ -1491,7 +1494,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                                 }
                             } else {
                                 //log.debug("Broadcast scope: {} has no stream attached", name);
-                                if (name.equals(child.getName())) {
+                                if (childName.equals(name)) {
                                     log.debug("Scope found by name: {} but has no stream", name);
                                     return child;
                                 }
@@ -1499,7 +1502,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                         }
                     }
                 } else {
-                    scope = stream().filter(child -> child.getType().equals(type) && name.equals(child.getName())).findFirst();
+                    scope = stream().filter(child -> child.getType().equals(type) && child.getName().equals(name)).findFirst();
                 }
             }
             if (scope != null && scope.isPresent()) {

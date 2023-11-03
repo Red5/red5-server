@@ -849,7 +849,10 @@ public class StreamService implements IStreamService {
      * @return Broadcast scope
      */
     public IBroadcastScope getBroadcastScope(IScope scope, String name) {
-        return scope.getBroadcastScope(name);
+        if (scope != null) {
+            return scope.getBroadcastScope(name);
+        }
+        return null;
     }
 
     /**
