@@ -143,7 +143,7 @@ public class FBLiveConnectTest {
                     ObjectMap status = ((ObjectMap) call.getArguments()[0]);
                     String code = (String) status.get("code");
                     switch (code) {
-                        case "NetStream.Publish.Success":
+                        case "NetStream.Publish.Start":
                             publishing = true;
                             break;
                         case "NetStream.UnPublish.Success":

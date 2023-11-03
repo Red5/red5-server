@@ -7,6 +7,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 import org.red5.client.net.rtmp.ClientExceptionHandler;
 import org.red5.client.net.rtmp.INetStreamEventHandler;
@@ -15,13 +17,12 @@ import org.red5.io.ITag;
 import org.red5.io.ITagReader;
 import org.red5.io.flv.impl.FLVReader;
 import org.red5.io.utils.ObjectMap;
-import org.red5.server.api.IConnection;
 import org.red5.server.api.event.IEvent;
 import org.red5.server.api.event.IEventDispatcher;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IPendingServiceCallback;
 import org.red5.server.api.service.IServiceCall;
-import org.red5.server.messaging.IMessage;
+import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.event.AudioData;
 import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
@@ -44,13 +45,20 @@ public class PublisherConnectLoadTest {
 
     private static Logger log = LoggerFactory.getLogger(PublisherConnectLoadTest.class);
 
+    private static Random rnd = new Random();
+
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
-    public static int publishers = 100;
+    public static int publishers = 30;
 
     private static CountDownLatch latch = new CountDownLatch(publishers);
 
     private static CopyOnWriteArrayList<RTMPClient> publisherList = new CopyOnWriteArrayList<>();
+
+    private static AtomicIntegerFieldUpdater<PublisherConnectLoadTest> AtomicPublishCounter = AtomicIntegerFieldUpdater.newUpdater(PublisherConnectLoadTest.class, "publishCount");
+
+    // updated atomically as a counter since the publish list is weakly consistent in terms of size
+    private volatile int publishCount;
 
     private ITagReader reader;
 
@@ -99,8 +107,8 @@ public class PublisherConnectLoadTest {
         log.info("Queue fill completed: {}", que.size());
     }
 
-    public void testLivePublish() throws InterruptedException {
-        final String publishName = String.format("stream%d", System.nanoTime());
+    public void testLivePublish(int i) throws InterruptedException {
+        final String publishName = String.format("stream%d", i);
         log.info("Publisher load test: {}", publishName);
         final RTMPClient client = new RTMPClient();
         client.setConnectionClosedHandler(() -> {
@@ -130,8 +138,12 @@ public class PublisherConnectLoadTest {
                     ObjectMap status = ((ObjectMap) call.getArguments()[0]);
                     String code = (String) status.get("code");
                     switch (code) {
-                        case "NetStream.Publish.Success":
+                        case "NetStream.Publish.Start":
                             log.info("Publish success: {}", publishName);
+                            // do publishing
+                            startPublish(client, publishName);
+                            // randomly decide if a publisher should be killed
+                            maybeKillPublisher();
                             break;
                         case "NetStream.UnPublish.Success":
                             log.info("Unpublish success: {}", publishName);
@@ -141,56 +153,105 @@ public class PublisherConnectLoadTest {
                     }
                 }
             }
+
         };
         // set the handler
         client.setStreamEventHandler(handler);
         // connect
-        client.connect(host, port, app, new IPendingServiceCallback() {
-            @Override
-            public void resultReceived(IPendingServiceCall call) {
-                ObjectMap<?, ?> map = (ObjectMap<?, ?>) call.getResult();
-                String code = (String) map.get("code");
-                log.info("Response code: {} for {}", code, publishName);
-                if ("NetConnection.Connect.Rejected".equals(code)) {
-                    log.warn("Rejected: {} detail: {}", publishName, map.get("description"));
-                    disconnect(client);
-                } else if ("NetConnection.Connect.Success".equals(code)) {
-                    client.createStream(new IPendingServiceCallback() {
-                        @Override
-                        public void resultReceived(IPendingServiceCall call) {
-                            double streamId = (Double) call.getResult();
-                            // live buffer 0.5s
-                            client.publish(streamId, publishName, "live", handler);
-                            // add to list
-                            publisherList.add(client);
-                            // publishing thread
-                            executor.submit(() -> {
-                                // get the underlying connection
-                                IConnection conn = client.getConnection();
-                                // publish stream data
-                                for (IMessage message : que) {
-                                    if (message != null) {
-                                        log.info("Publishing: {}", message);
-                                        client.publishStreamData(streamId, message);
-                                    }
-                                    if (!conn.isConnected()) {
-                                        log.warn("Connection closed for: {} while publishing", publishName);
-                                        break;
-                                    }
-                                }
-                                client.unpublish(streamId);
-                                disconnect(client);
-                                log.info("publish - end: {}", publishName);
-                            });
-                        }
-                    });
+        executor.submit(() -> {
+            client.connect(host, port, app, new IPendingServiceCallback() {
+                @Override
+                public void resultReceived(IPendingServiceCall call) {
+                    ObjectMap<?, ?> map = (ObjectMap<?, ?>) call.getResult();
+                    String code = (String) map.get("code");
+                    log.info("Response code: {} for {}", code, publishName);
+                    if ("NetConnection.Connect.Rejected".equals(code)) {
+                        log.warn("Rejected: {} detail: {}", publishName, map.get("description"));
+                        disconnect(client);
+                    } else if ("NetConnection.Connect.Success".equals(code)) {
+                        client.createStream(new IPendingServiceCallback() {
+                            @Override
+                            public void resultReceived(IPendingServiceCall call) {
+                                Number streamId = (Number) call.getResult();
+                                log.info("Create for publish: {} with stream id: {}", publishName, streamId);
+                                client.publish(streamId, publishName, "live", handler);
+                            }
+                        });
+                    }
                 }
-            }
+            });
         });
     }
 
-    public static void disconnect(RTMPClient client) {
+    public void startPublish(RTMPClient client, String publishName) {
+        log.info("Start publish: {} name: {}", client, publishName);
+        // add to list
+        if (publisherList.add(client)) {
+            // increment the counter
+            AtomicPublishCounter.incrementAndGet(this);
+        }
+        // publishing thread
+        executor.submit(() -> {
+            // get the underlying connection
+            final RTMPConnection conn = client.getConnection();
+            final Number streamId = conn.getStreamId() == null ? 1.0d : conn.getStreamId();
+            log.info("Publishing: {} stream id: {}", publishName, streamId);
+            AtomicInteger messageCounter = new AtomicInteger();
+            // publish stream data
+            que.spliterator().forEachRemaining(msg -> {
+                if (msg != null) {
+                    log.trace("Publishing: {}", msg);
+                    client.publishStreamData(streamId, msg);
+                    messageCounter.incrementAndGet();
+                } else {
+                    log.warn("Null message for: {}", publishName);
+                }
+                try {
+                    Thread.sleep(13L);
+                } catch (InterruptedException e) {
+                }
+                // TODO(paul) looking to why its always disconnected
+                /*
+                // check for disconnect
+                if (conn.isDisconnected()) {
+                    log.warn("Connection is disconnected for: {} while publishing", publishName);
+                    return;
+                }
+                */
+            });
+            // unpublish
+            client.unpublish(streamId);
+            disconnect(client);
+            log.info("Publishing completed: {} with {} messages published", publishName, messageCounter.get());
+        });
+    }
+
+    public void maybeKillPublisher() {
+        // our current publisher count of those with publish-success
+        log.info("Publisher count: {}", publishCount);
+        // for every few publishers, kill one off randomly
+        if (publishCount > (publishers / 3)) {
+            int index = rnd.nextInt(publishCount);
+            if (index % 3 == 0) {
+                log.info("Killing publisher at index: {} of {}", index, publishCount);
+                RTMPClient client = publisherList.get(index);
+                if (client != null) {
+                    Number streamId = client.getConnection().getStreamId();
+                    log.info("Unpublishing: {} stream id: {}", client, streamId);
+                    client.unpublish(streamId);
+                }
+            }
+        }
+    }
+
+    public void disconnect(RTMPClient client) {
         log.info("Disconnecting: {}", client);
+        // ensure the client is removed from the list
+        if (publisherList.remove(client)) {
+            AtomicPublishCounter.decrementAndGet(this);
+        } else {
+            log.info("Publisher already removed or was not publishing: {}", client);
+        }
         client.disconnect();
         latch.countDown();
     }
@@ -199,10 +260,14 @@ public class PublisherConnectLoadTest {
         reader.close();
         que.clear();
         ExecutorServiceUtil.shutdown(executor);
+        publisherList.clear();
+    }
+
+    public int getPublishCount() {
+        return publishCount;
     }
 
     public static void main(String[] args) {
-        Random rnd = new Random();
         PublisherConnectLoadTest test = new PublisherConnectLoadTest();
         try {
             // set up
@@ -210,19 +275,7 @@ public class PublisherConnectLoadTest {
             // launch publishers
             for (int i = 0; i < publishers; i++) {
                 // launch a publisher test
-                test.testLivePublish();
-                // our current publisher count of those with publish-success
-                int publisherCount = publisherList.size();
-                log.info("Publisher count: {} index: {}", publisherCount, i);
-                // for every few publishers, kill one off randomly
-                if (i % 3 == 0 && publisherCount > 10) {
-                    int index = rnd.nextInt(publisherCount);
-                    log.info("Killing publisher at index: {} of {}", index, publisherCount);
-                    RTMPClient client = publisherList.remove(index);
-                    if (client != null) {
-                        disconnect(client);
-                    }
-                }
+                test.testLivePublish(i);
             }
             // wait for all to finish
             latch.await();
@@ -230,6 +283,8 @@ public class PublisherConnectLoadTest {
             test.tearDown();
         } catch (Exception e) {
             log.warn("Exception", e);
+        } finally {
+            log.info("Done");
         }
     }
 
