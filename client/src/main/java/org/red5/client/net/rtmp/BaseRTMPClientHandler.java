@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -98,7 +98,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     /**
      * Net stream handling
      */
-    private volatile CopyOnWriteArrayList<NetStreamPrivateData> streamDataList = new CopyOnWriteArrayList<>();
+    private volatile CopyOnWriteArraySet<NetStreamPrivateData> streamDataList = new CopyOnWriteArraySet<>();
 
     /**
      * Task to start on connection close
@@ -577,7 +577,8 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         log.debug("publish - stream id: {}, name: {}, mode: {}", streamId, name, mode);
         // setup the netstream handler
         if (handler != null) {
-            NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId().equals(streamId.doubleValue())).findFirst().orElse(null);
+            final int sid = streamId.intValue();
+            NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId() == sid).findFirst().orElse(null);
             if (streamData != null) {
                 log.debug("Setting handler on stream data - handler: {}", handler);
                 streamData.handler = handler;
@@ -608,7 +609,8 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     @Override
     public void publishStreamData(Number streamId, IMessage message) {
         // get the stream data by index of the list
-        NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId().equals(streamId.doubleValue())).findFirst().orElse(null);
+        final int sid = streamId.intValue();
+        NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId() == sid).findFirst().orElse(null);
         if (streamData != null) {
             if (streamData.connConsumer != null) {
                 streamData.connConsumer.pushMessage(null, message);
@@ -808,9 +810,10 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
             }
             if (streamId != null) {
                 // try lookup by stream id, if null return the first one
-                NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId().equals(streamId)).findFirst().orElse(streamDataList.get(0));
+                final int sid = streamId.intValue();
+                NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId() == sid).findFirst().orElse(null);
                 if (streamData == null) {
-                    log.warn("Stream data was null for id: {}", streamId);
+                    log.warn("Stream data was null for id: {} entry count: {}", streamId, streamDataList.size());
                 } else if (streamData.handler != null) {
                     log.debug("Got stream data and handler");
                     streamData.handler.onStreamEvent((Notify) command);
@@ -1028,9 +1031,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
             Object callResult = call.getResult();
             if (callResult != null) {
                 // we expect a number consisting of the stream id, but we'll check for an object map as well
-                Number streamId = null;
+                int streamId = -1;
                 if (callResult instanceof Number) {
-                    streamId = (Number) callResult;
+                    streamId = ((Number) callResult).intValue();
                 } else if (callResult instanceof Map) {
                     Map<?, ?> map = (Map<?, ?>) callResult;
                     // XXX(paul) log out the map contents
@@ -1038,14 +1041,14 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
                     if (map.containsKey("streamId")) {
                         Object tmpStreamId = map.get("streamId");
                         if (tmpStreamId instanceof Number) {
-                            streamId = (Number) tmpStreamId;
+                            streamId = ((Number) tmpStreamId).intValue();
                         } else {
                             log.warn("CreateStreamCallBack resultReceived - stream id is not a number: {}", tmpStreamId);
                         }
                     }
                 }
                 log.debug("CreateStreamCallBack resultReceived - stream id: {} call: {} connection: {}", streamId, call, conn);
-                if (conn != null && streamId != null) {
+                if (conn != null && streamId != -1) {
                     log.debug("Setting new net stream");
                     NetStream stream = new NetStream(streamEventDispatcher);
                     stream.setConnection(conn);
@@ -1100,7 +1103,8 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
                     log.debug("Deleting net stream");
                     conn.removeClientStream(streamId);
                     // send a delete notify?
-                    NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId().equals(streamId)).findFirst().orElse(null);
+                    final int sid = streamId.intValue();
+                    NetStreamPrivateData streamData = streamDataList.stream().filter(s -> s.getStreamId() == sid).findFirst().orElse(null);
                     if (streamData != null) {
                         streamDataList.remove(streamData);
                     } else {
@@ -1148,22 +1152,22 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
         public volatile ConnectionConsumer connConsumer;
 
-        final Number streamId;
+        private final int streamId;
 
-        NetStreamPrivateData(Number streamId) {
+        NetStreamPrivateData(int streamId) {
             this.streamId = streamId;
             if (streamEventHandler != null) {
                 handler = streamEventHandler;
             }
         }
 
-        public Number getStreamId() {
+        public int getStreamId() {
             return streamId;
         }
 
         @Override
         public int hashCode() {
-            return streamId.hashCode();
+            return streamId;
         }
 
     }

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <jmxConfigurator />
+
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
+        <encoder>
+            <pattern>[%p] [%thread] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="org.red5.server.service.ReflectionUtils" level="TRACE" />
+    <logger name="org.red5.server.service.ServiceInvoker" level="TRACE" />
+    <logger name="org.red5.server.net.rtmp.RTMPHandler" level="TRACE" />
+    
+    <logger name="org.red5.client.net.rtmp.BaseRTMPClientHandler" level="TRACE" />
+    <logger name="org.red5.client.test" level="DEBUG" />
+
+</configuration>
