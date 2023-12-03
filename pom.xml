@@ -367,7 +367,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <configFile>${project.parent.basedir}/red5-eclipse-format.xml</configFile>
+                        <configFile>${project.basedir}/../red5-eclipse-format.xml</configFile>
                         <!-- Enforce line-feed (linux,mac) line endings att -->
                         <lineEnding>LF</lineEnding>
                         <!-- Exclude xml and props files -->

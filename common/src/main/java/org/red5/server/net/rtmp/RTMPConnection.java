@@ -1569,7 +1569,8 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                         currentStreamTasks.removeTask(task);
                     }
 
-                    public void onSuccess(@Nullable Packet packet) {
+                    public void onSuccess(@Nullable
+                    Packet packet) {
                         log.debug("ReceivedMessageTask success");
                         if (isDebug) {
                             log.debug("onSuccess - session: {}, msgType: {}, processingTime: {}, packetNum: {}", sessionId, messageType, getProcessingTime(), task.getPacketNumber());

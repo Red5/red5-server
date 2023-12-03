@@ -12,7 +12,6 @@
     <properties>
         <build.dir>target</build.dir>
         <finalName>${project.artifactId}-${project.version}</finalName>
-        <cors-filter.version>2.6</cors-filter.version>
     </properties>
     <build>
         <defaultGoal>install</defaultGoal>
@@ -173,13 +172,6 @@
                     <artifactId>tomcat-juli</artifactId>
                 </exclusion>
              </exclusions>
-        </dependency>
-        <!-- Provides CORS functionality http://software.dzhuvinov.com/cors-filter.html -->
-        <dependency>
-            <groupId>com.thetransactioncompany</groupId>
-            <artifactId>cors-filter</artifactId>
-            <version>${cors-filter.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
