@@ -1,6 +1,7 @@
 package org.red5.client.net.rtmp.codec;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -8,7 +9,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.red5.client.net.rtmp.RTMPConnManager;
+import org.red5.client.net.rtmp.RTMPClientConnManager;
 import org.red5.io.utils.IOUtils;
 import org.red5.server.api.Red5;
 import org.red5.server.net.protocol.RTMPDecodeState;
@@ -57,7 +58,7 @@ public class RTMPClientProtocolDecoderTest {
         // this test data is from a flash forum
         byte[] buf = IOUtils.hexStringToByteArray(
                 "06FFFFFF00BC48090100000001643DD012 00 00 84 02 80 9E FE 25 2A 2E F8 30 3F 99 FC 4C AB 6E B7 2F CB CB E2 DE 62 A7 86 9E BC 3E 04 05 73 C3 D1 F0 FB 70 45 12 80 32 CE 4C B3 44 6E 76 37 66 62 C7 A5 84 A0 60 12 C1 80 51 55 E9 41 80 D5 06 01 69 55 53 EB 70 18 06 10 60 1A FC C2 BF 4C B0 03 65 1D E5 FA 6B 57 AE 91 80 C0 25 03 00 A9 E2 EB F0 60 36 01 80 61 B6 65 1D 83 00 D0 0C 03 82 B1 16 C0 52 89 35 7A D3 18 C2 88 F6 CD C601 64 3D D000 FE 03 02 F7 28 19 50 AF F8 55 7D 8C 35 1A 33 0E 3D EE DC F2 75 3B 10 E4 CC 21 7B CF C1 80 11 06 00 64 BF 41 0C 18 00 F0 0C F9 7F F2 DA AC 18 01 10 40 56 3B C5 17 3F 4B BE AD AC B6 E5 DC C1 DC 91 EF 60 C0 4F 03 00 3E 5F B6 83 00 36 0C 00 99 7C A0 C1 88 80 62 A5 3C C0 60 9E 81 80 10 CD 9B 59 83 BE B0 E8 F5 40 C0 22 03 00 A9 00 D8 30 0C 00 C0 36 97 F2 D0 60 5E 02 1D 08 39 F1 EE 03C6 01 64 3D D0 04 F2 07 FB 67 07 6D F6 5B B6 9F 8E A0 C0 20 83 00 B3 E5 14 18 0F 00 84 AF 6A AD A2 58 30 02 A0 C0 0C 04 39 F8 A6 A9 D0 60 3E 41 80 10 2F 6B 16 98 C0 8A E6 AF 2A 12 44 75 73 CA F6 62 90 3F FA 58 08 52 6C 63 AB 64 E1 D8 70 43 FC 9C 2F 2F F5 9B 66 5A 0A AD FB 48 0C 3D E8 18 0A 60 60 09 2D 55 FF 03 00 3A 0C 00 CA 8B C5 70 4B 06 00 60 18 00 F2 FA 8F EA 84 88 5D F9 19 6B E0 59 EF 5E 06");
-        RTMPConnection conn = RTMPConnManager.getInstance().createConnection(RTMPMinaConnection.class);
+        RTMPMinaConnection conn = (RTMPMinaConnection) RTMPClientConnManager.getInstance().createConnection(RTMPMinaConnection.class);
         conn.setStateCode(RTMP.STATE_CONNECTED);
 
         RTMPClientProtocolDecoder decoder = new RTMPClientProtocolDecoder();
@@ -95,7 +96,7 @@ public class RTMPClientProtocolDecoderTest {
     public void testExtendedTImestampPartialPacket() {
         //Buffer contains 2 complete objects and 1 incomplete object.
         byte[] buf = IOUtils.hexStringToByteArray("03ffffff00004b090100000005584fce270100002800000042419e1e45152c236f0000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000030000049c03ffffff000008080100000005584fd1af01211004608c1c03ffffff000049090100000005");
-        RTMPConnection conn = RTMPConnManager.getInstance().createConnection(RTMPMinaConnection.class);
+        RTMPMinaConnection conn = (RTMPMinaConnection) RTMPClientConnManager.getInstance().createConnection(RTMPMinaConnection.class);
         conn.setStateCode(RTMP.STATE_CONNECTED);
         RTMPClientProtocolDecoder decoder = new RTMPClientProtocolDecoder();
         List<Object> objects = decoder.decodeBuffer(conn, IoBuffer.wrap(buf));

@@ -86,7 +86,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- to run unit tests use -Dmaven.test.skip=false -->
-        <maven.test.skip>true</maven.test.skip>
+        <!-- <maven.test.skip>true</maven.test.skip> -->
         <maven.compiler.source>1.11</maven.compiler.source>
         <maven.compiler.target>1.11</maven.compiler.target>
         <java.release.level>11</java.release.level>

@@ -257,7 +257,9 @@ public class ReflectionUtils {
         for (Method m : methods) {
             String methodName = m.getName();
             if (ignoredMethodNames.indexOf(methodName) > -1) {
-                log.debug("Skipping method: {}", methodName);
+                if (isTrace) {
+                    log.trace("Skipping method: {}", methodName);
+                }
                 continue;
             }
             if (isDebug) {
@@ -269,7 +271,9 @@ public class ReflectionUtils {
             }
             // check the name
             if (!methodName.equals(method)) {
-                log.trace("Method name not the same");
+                if (isTrace) {
+                    log.trace("Method name not the same");
+                }
                 continue;
             }
             // check parameters length

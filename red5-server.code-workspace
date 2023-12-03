@@ -5,11 +5,17 @@
 		}
 	],
 	"settings": {
-		"java.configuration.updateBuildConfiguration": "automatic",
-		"java.compile.nullAnalysis.mode": "automatic"
-	},
-	"launch": {
-		"version": "0.2.0",
-		"configurations": []
+		"java.configuration.updateBuildConfiguration": "interactive",
+		"java.compile.nullAnalysis.mode": "automatic",
+		"java.project.sourcePaths": [
+			"io",
+			"server-common",
+			"server",
+			"service",
+			"client",
+		],
+		"java.jdt.ls.androidSupport.enabled": "off",
+		"java.maven.updateSnapshots": true,
+		"java.maven.downloadSources": true
 	}
 }

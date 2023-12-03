@@ -27,5 +27,4 @@
     <logger name="org.springframework" level="INFO" />
     <logger name="org.apache" level="INFO" />
 -->
-    <logger name="org.quartz" level="OFF" />
 </configuration>
