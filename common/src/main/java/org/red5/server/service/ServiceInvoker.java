@@ -12,8 +12,6 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.red5.annotations.DeclarePrivate;
-import org.red5.annotations.DeclareProtected;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.api.scope.IScope;
@@ -123,6 +121,7 @@ public class ServiceInvoker implements IServiceInvoker {
             // get the parameters; the value at index 1 can be null, but the methodResult array will never be null
             Object[] params = (Object[]) methodResult[1];
             try {
+                /* XXX(paul) legacy flash logic for restricting access to methods
                 if (method.isAnnotationPresent(DeclarePrivate.class)) {
                     // Method may not be called by clients.
                     log.debug("Method {} is declared private.", method);
@@ -134,6 +133,7 @@ public class ServiceInvoker implements IServiceInvoker {
                     log.debug("Client {} doesn't have required permission {} to call {}", new Object[] { conn.getClient(), annotation.permission(), method });
                     throw new NotAllowedException("Access denied, method is protected");
                 }
+                */
                 Object result = null;
                 log.debug("Invoking method: {}", method.toString());
                 if (method.getReturnType().equals(Void.TYPE)) {
@@ -149,13 +149,10 @@ public class ServiceInvoker implements IServiceInvoker {
                     ((IPendingServiceCall) call).setResult(result);
                 }
                 invoked = true;
-            } catch (NotAllowedException e) {
+            } catch (NotAllowedException | IllegalAccessException e) {
                 call.setException(e);
                 call.setStatus(Call.STATUS_ACCESS_DENIED);
-            } catch (IllegalAccessException accessEx) {
-                call.setException(accessEx);
-                call.setStatus(Call.STATUS_ACCESS_DENIED);
-                log.error("Error executing call: {}", call, accessEx);
+                log.error("Error executing call: {}", call, e);
             } catch (InvocationTargetException invocationEx) {
                 call.setException(invocationEx);
                 call.setStatus(Call.STATUS_INVOCATION_EXCEPTION);

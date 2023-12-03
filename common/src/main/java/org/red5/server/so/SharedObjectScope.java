@@ -265,11 +265,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
             // Once handler is found, find matching method
             if (soHandler != null) {
                 // With exact params...
-                Object[] methodResult = ReflectionUtils.findMethodWithExactParameters(soHandler, serviceMethod, arguments);
-                // Or at least with suitable list params
-                if (methodResult.length == 0 || methodResult[0] == null) {
-                    methodResult = ReflectionUtils.findMethodWithListParameters(soHandler, serviceMethod, arguments);
-                }
+                Object[] methodResult = ReflectionUtils.findMethod(soHandler, serviceMethod, arguments);
                 // If method is found...
                 if (methodResult.length > 0 && methodResult[0] != null) {
                     Method method = (Method) methodResult[0];

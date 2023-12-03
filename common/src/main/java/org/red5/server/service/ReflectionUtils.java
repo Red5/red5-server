@@ -8,8 +8,8 @@
 package org.red5.server.service;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.red5.io.utils.ConversionUtils;
@@ -27,8 +27,43 @@ public class ReflectionUtils {
 
     private static final boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
 
-    //used to prevent extra object creation when a method with a set of params is not found
+    // used to prevent extra object creation when a method with a set of params is not found
     private static final Object[] NULL_RETURN = new Object[] { null, null };
+
+    /**
+     * Method names to skip when scanning for usable application methods.
+     */
+    private static String ignoredMethodNames = new String("equals,hashCode,toString,wait,notifyAll,getClass,clone,compareTo,finalize,notify");
+
+    // Note for .26 update is to ensure other service methods don't fail when a method is not found
+    // See https://github.com/Red5/red5-server/commit/d4096a4d7b35b2b92905154a9e18edea04268fb4
+
+    /**
+     * Returns (method, params) for the given service or method name if found on a service or scope handler. There is
+     * no connection argument for these calls.
+     *
+     * SharedObjectScope uses this method to find methods on the handler.
+     *
+     * @param service service to search for the method, if given
+     * @param methodName method name to find
+     * @param args arguments
+     * @return Method/params pairs or null if not found
+     */
+    public static Object[] findMethod(Object service, String methodName, List<?> args) {
+        if (isDebug) {
+            log.debug("Find method: {} in service: {} args: {}", methodName, service, args);
+        }
+        // First, search for method with list parameter
+        Object[] methodResult = findMethodWithListParameters(service, methodName, args);
+        if (methodResult[0] == null) {
+            // Second, search for method with array parameter
+            methodResult = findMethodWithExactParameters(service, methodName, args.toArray());
+            if (methodResult[0] == null) {
+                log.warn("Method {} not found in {} with parameters {}", methodName, service, args);
+            }
+        }
+        return methodResult;
+    }
 
     /**
      * Returns (method, params) for the given service or method name if found on a service or scope handler.
@@ -84,25 +119,6 @@ public class ReflectionUtils {
     }
 
     /**
-     * Returns (method, params) for the given service or (null, null) if no method was found.
-     *
-     * @param service
-     *            Service
-     * @param methodName
-     *            Method name
-     * @param args
-     *            Arguments
-     * @return Method/params pairs
-     */
-    public static Object[] findMethodWithExactParameters(Object service, String methodName, List<?> args) {
-        Object[] arguments = new Object[args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            arguments[i] = args.get(i);
-        }
-        return findMethodWithExactParameters(service, methodName, arguments);
-    }
-
-    /**
      * Returns (method, params) for the given service or (null, null) if not method was found. XXX use ranking for method matching rather
      * than exact type matching plus type conversion.
      *
@@ -136,7 +152,7 @@ public class ReflectionUtils {
         } catch (NoSuchMethodException nsme) {
             log.debug("Method not found using exact parameter types", nsme);
         }
-        List<Method> methods = ConversionUtils.findMethodsByNameAndNumParams(service, methodName, numParams);
+        List<Method> methods = findMethodsByNameAndNumParams(service, methodName, numParams);
         if (isTrace) {
             log.trace("Found {} methods", methods.size());
         }
@@ -175,11 +191,7 @@ public class ReflectionUtils {
      * @return Method/params pairs
      */
     public static Object[] findMethodWithListParameters(Object service, String methodName, List<?> args) {
-        Object[] arguments = new Object[args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            arguments[i] = args.get(i);
-        }
-        return findMethodWithListParameters(service, methodName, arguments);
+        return findMethodWithListParameters(service, methodName, args.toArray());
     }
 
     /**
@@ -204,25 +216,18 @@ public class ReflectionUtils {
         } catch (NoSuchMethodException nsme) {
             log.debug("Method not found using exact parameter types", nsme);
         }
-        List<Method> methods = ConversionUtils.findMethodsByNameAndNumParams(service, methodName, 1);
+        List<Method> methods = findMethodsByNameAndNumParams(service, methodName, 1);
         if (isTrace) {
             log.trace("Found {} methods", methods.size());
         }
         if (!methods.isEmpty()) {
             log.debug("Multiple methods found with same name and parameter count; parameter conversion will be attempted in order");
-            ArrayList<Object> argsList = new ArrayList<Object>();
-            if (args != null) {
-                for (Object element : args) {
-                    argsList.add(element);
-                }
-            }
-            args = new Object[] { argsList };
             Object[] params = null;
             for (int i = 0; i < methods.size(); i++) {
                 try {
                     method = methods.get(i);
                     params = ConversionUtils.convertParams(args, method.getParameterTypes());
-                    if (argsList.size() > 0 && (argsList.get(0) instanceof IConnection) && (!(params[0] instanceof IConnection))) {
+                    if (args.length > 0 && (args[0] instanceof IConnection) && (!(params[0] instanceof IConnection))) {
                         // Don't convert first IConnection parameter
                         continue;
                     }
@@ -233,6 +238,48 @@ public class ReflectionUtils {
             }
         }
         return NULL_RETURN;
+    }
+
+    /**
+     * Find method by name and number of parameters
+     *
+     * @param object
+     *            Object to find method on
+     * @param method
+     *            Method name
+     * @param numParam
+     *            Number of parameters
+     * @return List of methods that match by name and number of parameters
+     */
+    public static List<Method> findMethodsByNameAndNumParams(Object object, String method, int numParam) {
+        LinkedList<Method> list = new LinkedList<>();
+        Method[] methods = object.getClass().getMethods();
+        for (Method m : methods) {
+            String methodName = m.getName();
+            if (ignoredMethodNames.indexOf(methodName) > -1) {
+                log.debug("Skipping method: {}", methodName);
+                continue;
+            }
+            if (isDebug) {
+                Class<?>[] params = m.getParameterTypes();
+                log.debug("Method name: {} parameter count: {}", methodName, params.length);
+                for (Class<?> param : params) {
+                    log.debug("Parameter: {}", param);
+                }
+            }
+            // check the name
+            if (!methodName.equals(method)) {
+                log.trace("Method name not the same");
+                continue;
+            }
+            // check parameters length
+            if (m.getParameterTypes().length != numParam) {
+                log.debug("Param length not the same");
+                continue;
+            }
+            list.add(m);
+        }
+        return list;
     }
 
 }

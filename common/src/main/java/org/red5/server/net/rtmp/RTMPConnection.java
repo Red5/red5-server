@@ -78,6 +78,7 @@ import org.red5.server.stream.SingleItemSubscriberStream;
 import org.red5.server.stream.StreamService;
 import org.red5.server.util.ScopeUtils;
 import org.springframework.core.task.TaskRejectedException;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -1568,7 +1569,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                         currentStreamTasks.removeTask(task);
                     }
 
-                    public void onSuccess(Packet packet) {
+                    public void onSuccess(@Nullable Packet packet) {
                         log.debug("ReceivedMessageTask success");
                         if (isDebug) {
                             log.debug("onSuccess - session: {}, msgType: {}, processingTime: {}, packetNum: {}", sessionId, messageType, getProcessingTime(), task.getPacketNumber());

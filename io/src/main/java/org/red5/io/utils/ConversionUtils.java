@@ -8,7 +8,6 @@
 package org.red5.io.utils;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,18 +58,12 @@ public class ConversionUtils {
      */
     private static Map<Class<?>, Class<?>[]> parameterMap = new HashMap<Class<?>, Class<?>[]>();
 
-    /**
-     * Method names to skip when scanning for usable application methods.
-     */
-    private static String ignoredMethodNames;
-
     static {
         for (int i = 0; i < PRIMITIVES.length; i++) {
             primitiveMap.put(PRIMITIVES[i], WRAPPERS[i]);
             wrapperMap.put(WRAPPERS[i], PRIMITIVES[i]);
             parameterMap.put(WRAPPERS[i], PARAMETER_CHAINS[i]);
         }
-        ignoredMethodNames = new String("equals,hashCode,toString,wait,notifyAll,getClass,clone,compareTo");
     }
 
     /**
@@ -291,48 +283,6 @@ public class ConversionUtils {
             return Byte.valueOf(num.byteValue());
         }
         throw new ConversionException(String.format("Unable to convert number to: %s", wrapper));
-    }
-
-    /**
-     * Find method by name and number of parameters
-     *
-     * @param object
-     *            Object to find method on
-     * @param method
-     *            Method name
-     * @param numParam
-     *            Number of parameters
-     * @return List of methods that match by name and number of parameters
-     */
-    public static List<Method> findMethodsByNameAndNumParams(Object object, String method, int numParam) {
-        LinkedList<Method> list = new LinkedList<Method>();
-        Method[] methods = object.getClass().getMethods();
-        for (Method m : methods) {
-            String methodName = m.getName();
-            if (ignoredMethodNames.indexOf(methodName) > -1) {
-                log.debug("Skipping method: {}", methodName);
-                continue;
-            }
-            if (log.isDebugEnabled()) {
-                Class<?>[] params = m.getParameterTypes();
-                log.debug("Method name: {} parameter count: {}", methodName, params.length);
-                for (Class<?> param : params) {
-                    log.debug("Parameter: {}", param);
-                }
-            }
-            //check parameter length first since this should speed things up
-            if (m.getParameterTypes().length != numParam) {
-                log.debug("Param length not the same");
-                continue;
-            }
-            //now try to match the name
-            if (!methodName.equals(method)) {
-                log.trace("Method name not the same");
-                continue;
-            }
-            list.add(m);
-        }
-        return list;
     }
 
     /**
