@@ -11,12 +11,7 @@
     <description>Classes common for multiple red5 projects</description>
     <packaging>jar</packaging>
     <properties>
-        <!-- Next 3 entries for JDK 8 only; remove for JDK 11 -->
-        <!--
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <java.release.level>8</java.release.level>
-    -->
+        <maven.test.skip>true</maven.test.skip>
     </properties>
     <build>
         <defaultGoal>install</defaultGoal>

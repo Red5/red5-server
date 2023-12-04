@@ -6,7 +6,7 @@
                            http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd" >
     <!-- Server bean -->
     <bean id="red5.server" class="org.red5.server.Server" />
-    <bean id="schedulingService" class="org.red5.server.scheduling.QuartzSchedulingService" />
+    <bean id="schedulingService" class="org.red5.server.scheduling.JDKSchedulingService" />
     <!-- Streamable file factory -->
     <bean id="streamableFileFactory" class="org.red5.server.stream.StreamableFileFactory">
         <property name="services">

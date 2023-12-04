@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.mp3.AudioFrame;
 import org.apache.tika.parser.mp3.Mp3Parser;
@@ -125,6 +126,10 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
      *             on IO error
      */
     public MP3Reader(File file) throws IOException {
+        // XXX(paul) check for IOUtils before proceeding as tika libs may not be available
+        // import org.apache.tika.io.IOUtils;
+        // "org.apache.tika.io.IOUtils"
+        // "org.apache.poi.util.IOUtils"
         this.file = file;
         fis = new FileInputStream(file);
         try {

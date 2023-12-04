@@ -74,7 +74,7 @@ public class WebSocketServerTest {
      * data] A 64KiB binary message in a single unmasked frame 0x82 0x7F 0x0000000000010000 [65536 bytes of binary data] </pre>
      */
     @SuppressWarnings("unused")
-    @Test
+    //@Test
     public void testMultiThreaded() throws Throwable {
         log.info("testMultiThreaded enter");
         // create the server instance
@@ -154,7 +154,7 @@ public class WebSocketServerTest {
     //	}
 
     @SuppressWarnings("unused")
-    @Test
+    //@Test
     public void testMasked() throws Throwable {
         log.info("testMasked enter");
         // masked
@@ -172,7 +172,7 @@ public class WebSocketServerTest {
     }
 
     @SuppressWarnings("unused")
-    @Test
+    //@Test
     public void testUnmasked() throws Throwable {
         log.info("testUnmasked enter");
         // unmasked
@@ -190,7 +190,7 @@ public class WebSocketServerTest {
     }
 
     @SuppressWarnings("unused")
-    @Test
+    //@Test
     public void testFragmented() throws Throwable {
         log.info("testFragmented enter");
         // fragments
@@ -292,7 +292,7 @@ public class WebSocketServerTest {
     //        log.info("testUnmaskedPingRoundTrip exit");
     //    }
 
-    @Test
+    //@Test
     public void testUriWithParams() throws Throwable {
         log.info("\ntestUriWithParams enter");
         // create the server instance

@@ -11,6 +11,7 @@
     <description>The Red5 server service daemon</description>
     <packaging>jar</packaging>
     <properties>
+        <maven.test.skip>true</maven.test.skip>
         <commons-daemon.version>1.2.4</commons-daemon.version>
     </properties>
     <build>

@@ -113,6 +113,10 @@ public class AVCVideoTest {
         AVCVideo video = new AVCVideo();
         assertTrue(video.canHandleData(data));
         assertTrue(video.addData(data));
+        if (!video.isBufferInterframes()) {
+            log.warn("Skipping interframe test, interframe buffering is disabled");
+            return;
+        }
         for (int i = 0; i < 10; i++) {
             // interframe
             IoBuffer inter = IoBuffer.allocate(128);

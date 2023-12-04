@@ -57,7 +57,7 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
 
     private boolean interruptOnRemove = true;
 
-    /** Constructs a new QuartzSchedulingService. */
+    /** Constructs a new JDKSchedulingService. */
     public void afterPropertiesSet() throws Exception {
         log.debug("Initializing...");
         scheduler = Executors.newScheduledThreadPool(threadCount);

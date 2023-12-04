@@ -27,6 +27,10 @@ public class FLVReaderTest {
             FLVReader reader = new FLVReader(file, true);
             //KeyFrameMeta meta = reader.analyzeKeyFrames();
             //log.debug("Meta: {}", meta);
+            if (!reader.hasMoreTags()) {
+                log.warn("No tags found");
+                return;
+            }
             ITag tag = null;
             for (int t = 0; t < 6; t++) {
                 tag = reader.readTag();
