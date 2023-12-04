@@ -130,7 +130,7 @@ public class ReflectionUtils {
      *            Arguments
      * @return Method/params pairs
      */
-    public static Object[] findMethodWithExactParameters(Object service, String methodName, Object[] args) {
+    private static Object[] findMethodWithExactParameters(Object service, String methodName, Object[] args) {
         int numParams = (args == null) ? 0 : args.length;
         if (isTrace) {
             log.trace("Args / parameters count: {}", numParams);
@@ -192,7 +192,7 @@ public class ReflectionUtils {
      *            Arguments
      * @return Method/params pairs
      */
-    public static Object[] findMethodWithListParameters(Object service, String methodName, List<?> args) {
+    private static Object[] findMethodWithListParameters(Object service, String methodName, List<?> args) {
         return findMethodWithListParameters(service, methodName, args.toArray());
     }
 
@@ -207,7 +207,7 @@ public class ReflectionUtils {
      *            Arguments
      * @return Method/params pairs
      */
-    public static Object[] findMethodWithListParameters(Object service, String methodName, Object[] args) {
+    private static Object[] findMethodWithListParameters(Object service, String methodName, Object[] args) {
         Method method = null;
         try {
             // convert the args first
@@ -253,7 +253,7 @@ public class ReflectionUtils {
      *            Number of parameters
      * @return List of methods that match by name and number of parameters
      */
-    public static List<Method> findMethodsByNameAndNumParams(Object object, String method, int numParam) {
+    private static List<Method> findMethodsByNameAndNumParams(Object object, String method, int numParam) {
         LinkedList<Method> list = new LinkedList<>();
         Method[] methods = object.getClass().getMethods();
         for (Method m : methods) {

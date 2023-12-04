@@ -54,11 +54,10 @@ public class ReflectionUtilsTest {
         }
         assertNotEquals(NULL_RETURN, result);
 
-        
     }
 
     private class DummyConnection extends RTMPMinaConnection {
-            
+
     }
 
     public class TestService {
@@ -66,7 +65,7 @@ public class ReflectionUtilsTest {
         public void doTest(String param) {
             log.info("doTest: {}", param);
         }
-        
+
         public void doTestWithConn(IConnection conn, String param0, Integer param1) {
             log.info("doTestWithConn: {} {} {}", conn, param0, param1);
         }
