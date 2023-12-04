@@ -312,24 +312,16 @@ public class ConversionUtils {
      * @return Array of converted objects
      */
     public static Class<?>[] convertParams(Object[] source) {
-        Class<?>[] converted = null;
+        Class<?>[] converted = new Class<?>[0];
         if (source != null) {
             converted = new Class<?>[source.length];
             for (int i = 0; i < source.length; i++) {
                 if (source[i] != null) {
-                    // if the class is not an instance of IConnection use its class
-                    //if (!IConnection.class.isInstance(source[i])) {
                     converted[i] = source[i].getClass();
-                    //} else {
-                    // if it does implement IConnection use the interface
-                    //converted[i] = IConnection.class;
-                    //}
                 } else {
                     converted[i] = null;
                 }
             }
-        } else {
-            converted = new Class<?>[0];
         }
         if (log.isTraceEnabled()) {
             log.trace("Converted parameters: {}", Arrays.toString(converted));

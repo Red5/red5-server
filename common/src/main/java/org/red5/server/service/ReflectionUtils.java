@@ -136,15 +136,17 @@ public class ReflectionUtils {
             log.trace("Args / parameters count: {}", numParams);
         }
         // convert the args first
-        Object[] params = ConversionUtils.convertParams(args);
+        Class<?>[] params = ConversionUtils.convertParams(args);
+        if (params[0] != null && IConnection.class.isInstance(params[0])) {
+            // if it does implement IConnection use the interface
+            params[0] = IConnection.class;
+        }
         if (isDebug) {
-            for (Object clazz : params) {
-                log.debug("Parameter: {}", clazz);
-            }
+            Arrays.asList(params).forEach(param -> log.debug("Parameter: {}", param));
         }
         // try to skip the listing of all the methods by checking for exactly what we want first
         try {
-            Method method = service.getClass().getMethod(methodName, (Class<?>[]) params);
+            Method method = service.getClass().getMethod(methodName, params);
             if (isDebug) {
                 log.debug("Exact method found, skipping list: {}", methodName);
             }
@@ -208,29 +210,29 @@ public class ReflectionUtils {
     public static Object[] findMethodWithListParameters(Object service, String methodName, Object[] args) {
         Method method = null;
         try {
-            //try to skip the listing of all the methods by checking for exactly what
-            //we want first
-            method = service.getClass().getMethod(methodName, ConversionUtils.convertParams(args));
+            // convert the args first
+            Class<?>[] params = ConversionUtils.convertParams(args);
+            if (params[0] != null && IConnection.class.isInstance(params[0])) {
+                // if it does implement IConnection use the interface
+                params[0] = IConnection.class;
+            }
+            // try to skip the listing of all the methods by checking for exactly what we want first
+            method = service.getClass().getMethod(methodName, params);
             log.debug("Exact method found (skipping list): {}", methodName);
             return new Object[] { method, args };
         } catch (NoSuchMethodException nsme) {
             log.debug("Method not found using exact parameter types", nsme);
         }
-        List<Method> methods = findMethodsByNameAndNumParams(service, methodName, 1);
+        List<Method> methods = findMethodsByNameAndNumParams(service, methodName, args.length);
         if (isTrace) {
             log.trace("Found {} methods", methods.size());
         }
         if (!methods.isEmpty()) {
             log.debug("Multiple methods found with same name and parameter count; parameter conversion will be attempted in order");
-            Object[] params = null;
             for (int i = 0; i < methods.size(); i++) {
                 try {
                     method = methods.get(i);
-                    params = ConversionUtils.convertParams(args, method.getParameterTypes());
-                    if (args.length > 0 && (args[0] instanceof IConnection) && (!(params[0] instanceof IConnection))) {
-                        // Don't convert first IConnection parameter
-                        continue;
-                    }
+                    Object[] params = ConversionUtils.convertParams(args, method.getParameterTypes());
                     return new Object[] { method, params };
                 } catch (Exception ex) {
                     log.debug("Parameter conversion failed", ex);

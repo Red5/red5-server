@@ -32,7 +32,7 @@ public class ReflectionUtilsTest {
             log.info("Result: {}", Arrays.asList(result));
         }
         assertNotEquals(NULL_RETURN, result);
-        //
+        // call with two parameters string and int
         call = new PendingCall("TestService.doTest", new Object[] { "test", 42 });
         result = ReflectionUtils.findMethod(conn, call, service, methodName);
         if (result == null) {
@@ -42,6 +42,19 @@ public class ReflectionUtilsTest {
             log.info("Result 2: {}", Arrays.asList(result));
         }
         assertNotEquals(NULL_RETURN, result);
+        // call with two parameters string and int but expecting Connection as first parameter to hit on 2nd call
+        methodName = "doTestWithConn";
+        call = new PendingCall("TestService.doTestWithConn", new Object[] { "test", 42 });
+        result = ReflectionUtils.findMethod(conn, call, service, methodName);
+        if (result == null) {
+            log.info("Result is null");
+            fail("Result is null, method not found");
+        } else {
+            log.info("Result 2: {}", Arrays.asList(result));
+        }
+        assertNotEquals(NULL_RETURN, result);
+
+        
     }
 
     private class DummyConnection extends RTMPMinaConnection {
@@ -54,9 +67,8 @@ public class ReflectionUtilsTest {
             log.info("doTest: {}", param);
         }
         
-        // method with IConnection as first parameter isn't found
-        public void doTest(IConnection conn, String param) {
-            log.info("doTest: {} {}", conn, param);
+        public void doTestWithConn(IConnection conn, String param0, Integer param1) {
+            log.info("doTestWithConn: {} {} {}", conn, param0, param1);
         }
 
         public void doTest(String param0, Integer param1) {
