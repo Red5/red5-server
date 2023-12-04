@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>org.red5</groupId>
         <artifactId>red5-parent</artifactId>
@@ -126,7 +126,7 @@
                     <artifactId>*</artifactId>
                     <groupId>*</groupId>
                 </exclusion>
-             </exclusions>
+            </exclusions>
         </dependency>
         <dependency>
             <artifactId>mina-integration-beans</artifactId>
@@ -171,7 +171,7 @@
                     <groupId>org.apache.tomcat</groupId>
                     <artifactId>tomcat-juli</artifactId>
                 </exclusion>
-             </exclusions>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -184,10 +184,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-          <version>${gson.version}</version>
-          <scope>test</scope>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <profiles>
@@ -232,19 +232,19 @@
                                 <configuration>
                                     <artifactItems>
                                         <artifactItem>
-                                          <groupId>org.red5</groupId>
-                                          <artifactId>red5-service</artifactId>
-                                          <version>${project.version}</version>
-                                          <type>tar.gz</type>
-                                          <classifier>daemon</classifier>
-                                          <overWrite>true</overWrite>
-                                          <outputDirectory>${project.build.directory}</outputDirectory>
+                                            <groupId>org.red5</groupId>
+                                            <artifactId>red5-service</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>tar.gz</type>
+                                            <classifier>daemon</classifier>
+                                            <overWrite>true</overWrite>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>
                                 </configuration>
                             </execution>
                         </executions>
-                   </plugin>
+                    </plugin>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <configuration>

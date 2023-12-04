@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-<!-- <![CDATA[
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <!-- <![CDATA[
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
   distributed with this work for additional information
@@ -116,7 +117,7 @@
         <cglib.version>3.2.7</cglib.version>
         <xerces.version>2.12.1</xerces.version>
         <gson.version>[2.9.0,)</gson.version>
-    </properties>    
+    </properties>
     <modules>
         <module>io</module>
         <module>common</module>
@@ -160,7 +161,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0-M2</version>
+                    <version>3.4.1</version>
                     <executions>
                         <execution>
                             <id>enforce-maven</id>
@@ -182,7 +183,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.11.0</version>
                     <executions>
                         <execution>
                             <id>default-compile</id>
@@ -237,7 +238,7 @@
                 -->
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.3.0</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -249,7 +250,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.6.3</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -263,6 +264,7 @@
                         <failOnError>false</failOnError>
                         <sourcepath>${basedir}/src/main/java</sourcepath>
                         <includeDependencySources>false</includeDependencySources>
+                        <!--
                         <dependencySourceIncludes>
                             <dependencySourceInclude>org.red5:*</dependencySourceInclude>
                         </dependencySourceIncludes>
@@ -270,6 +272,7 @@
                         <links>
                             <link>http://docs.spring.io/spring/docs/${spring.version}/javadoc-api</link>
                         </links>
+                        -->
                         <tags>
                             <tag>
                                 <name>todo</name>
@@ -278,11 +281,19 @@
                                 <head>To do:</head>
                             </tag>
                         </tags>
+                    <reportSets>
+                        <reportSet>
+                            <reports>
+                                <report>aggregate-no-fork</report>
+                                <report>test-aggregate-no-fork</report>
+                            </reports>
+                        </reportSet>
+                    </reportSets>
                     </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.3.0</version>
                     <executions>
                         <execution>
                             <configuration>
@@ -301,7 +312,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.6.1</version>
                     <executions>
                         <execution>
                             <id>copy-dependencies</id>
@@ -360,11 +371,19 @@
                         <lineEnding>LF</lineEnding>
                         <!-- Exclude xml and props files -->
                         <excludes>
-                          <exclude>**/*.xml</exclude>
-                          <exclude>**/*.html</exclude>
-                          <exclude>**/*.properties</exclude>
+                            <exclude>**/*.xml</exclude>
+                            <exclude>**/*.html</exclude>
+                            <exclude>**/*.properties</exclude>
                         </excludes>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.6.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -380,7 +399,7 @@
                         <artifactId>*</artifactId>
                         <groupId>*</groupId>
                     </exclusion>
-                 </exclusions>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.red5</groupId>
