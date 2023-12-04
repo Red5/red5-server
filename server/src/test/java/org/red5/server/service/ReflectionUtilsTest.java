@@ -50,7 +50,7 @@ public class ReflectionUtilsTest {
             log.info("Result is null");
             fail("Result is null, method not found");
         } else {
-            log.info("Result 2: {}", Arrays.asList(result));
+            log.info("Result 3: {}", Arrays.asList(result));
         }
         assertNotEquals(NULL_RETURN, result);
 
