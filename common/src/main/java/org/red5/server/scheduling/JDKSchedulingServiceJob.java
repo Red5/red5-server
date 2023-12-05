@@ -65,9 +65,10 @@ public class JDKSchedulingServiceJob implements Runnable {
             // remove the job
             if (autoRemove) {
                 service.removeScheduledJob(jobName);
+                // clear the map
+                jobDataMap.clear();
             }
-            // clear the map
-            jobDataMap.clear();
+
         }
     }
 
