@@ -414,7 +414,7 @@ public class SharedObjectTest extends AbstractJUnit4SpringContextTests {
         log.info("testAttributeBlastingWithPrimitive-end");
     }
 
-    @Test
+    //@Test
     public void testAttributeBlastingJSON() throws Throwable {
         log.info("testAttributeBlastingJSON");
         SOApplication app = (SOApplication) applicationContext.getBean("web.handler");

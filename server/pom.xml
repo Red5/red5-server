@@ -207,7 +207,6 @@
                                 <configuration>
                                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
                                     <includeScope>compile</includeScope>
-                                    <excludeScope>test</excludeScope>
                                     <excludeTransitive>false</excludeTransitive>
                                 </configuration>
                             </execution>

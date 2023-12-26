@@ -125,6 +125,10 @@ public interface IStreamService extends IScopeService {
      */
     public void play(String name, int start, int length);
 
+    default void play(String name, Double start, Double length) {
+        play(name, start.intValue(), length.intValue());
+    }
+
     /**
      * Publishes stream from given position for given amount of time
      *
@@ -138,6 +142,10 @@ public interface IStreamService extends IScopeService {
      *            Flush playlist?
      */
     public void play(String name, int start, int length, boolean flushPlaylist);
+
+    default void play(String name, Double start, Double length, boolean flushPlaylist) {
+        play(name, start.intValue(), length.intValue(), flushPlaylist);
+    }
 
     /**
      * Publishes stream with given name
@@ -194,7 +202,7 @@ public interface IStreamService extends IScopeService {
     public void pauseRaw(Boolean pausePlayback, int position);
 
     /**
-     * Can recieve video?
+     * Can receive video?
      *
      * @param receive
      *            Boolean flag
@@ -202,11 +210,25 @@ public interface IStreamService extends IScopeService {
     public void receiveVideo(boolean receive);
 
     /**
-     * Can recieve audio?
+     * If called without parameter imply it is true.
+     */
+    default void receiveVideo() {
+        receiveVideo(true);
+    }
+
+    /**
+     * Can receive audio?
      *
      * @param receive
      *            Boolean flag
      */
     public void receiveAudio(boolean receive);
+
+    /**
+     * If called without parameter imply it is true.
+     */
+    default void receiveAudio() {
+        receiveAudio(true);
+    }
 
 }
