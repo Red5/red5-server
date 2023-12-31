@@ -679,10 +679,10 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      *             SWITCH : String = "switch" - Switches from playing one stream to another stream, typically with streams of the same content.
      * </pre>
      *
-     * @see <a href="http://www.adobe.com/devnet/flashmediaserver/articles/dynstream_actionscript.html">ActionScript guide to dynamic
+     * @see <a href="https://web.archive.org/web/20150911224454/http://www.adobe.com/devnet/adobe-media-server/articles/dynstream_actionscript.html">ActionScript guide to dynamic
      *      streaming</a>
      * @see <a href=
-     *      "http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/NetStreamPlayTransitions.html">NetStreamPlayTransitions</a>
+     *      "https://web.archive.org/web/20150908085221/http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/NetStreamPlayTransitions.html">NetStreamPlayTransitions</a>
      */
     @Override
     public void play2(Number streamId, Map<String, ?> playOptions) {
