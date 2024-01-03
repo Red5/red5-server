@@ -122,10 +122,7 @@ public class ConversionUtilsTest {
 
     @Test
     public void testConvertArrayListToSet() {
-        List<String> source = new ArrayList<String>(3);
-        source.add("a");
-        source.add("b");
-        source.add("c");
+        List<String> source = List.of("a", "b", "c");
         Object result = ConversionUtils.convert(source, Set.class);
         if (!(result instanceof Set<?>)) {
             fail("Should be a set");

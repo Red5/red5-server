@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
@@ -107,13 +108,14 @@ public class ConversionUtils {
             // Don't convert NaN values
             return source;
         }
-        if (target.isInstance(source)) {
-            return source;
-        }
-        if (target.isAssignableFrom(source.getClass())) {
+        final Class<?> sourceClass = source.getClass();
+        log.info("Source: {} target: {}", sourceClass, target);
+        if (target.isInstance(source) || target.isAssignableFrom(sourceClass)) {
+            log.info("Source: {} is already an instance of: {}", source, target);
             return source;
         }
         if (target.isArray()) {
+            log.info("Source: {} to target array: {}", source, target);
             return convertToArray(source, target);
         }
         if (target.equals(String.class)) {
@@ -128,20 +130,37 @@ public class ConversionUtils {
         if (target.equals(Map.class)) {
             return convertBeanToMap(source);
         }
-        if (target.equals(List.class) || target.equals(Collection.class)) {
-            if (source.getClass().equals(LinkedHashMap.class)) {
-                return convertMapToList((LinkedHashMap<?, ?>) source);
-            } else if (source.getClass().isArray()) {
-                return convertArrayToList((Object[]) source);
+        if (sourceClass.equals(LinkedHashMap.class)) {
+            return convertMapToList((LinkedHashMap<?, ?>) source);
+        } else if (sourceClass.isArray()) {
+            if (List.class.isAssignableFrom(target)) {
+                log.info("Source: {} to target list: {}", source, target);
+                return Arrays.stream((Object[]) source).collect(Collectors.toCollection(ArrayList::new));
+            } else if (Set.class.isAssignableFrom(target)) {
+                log.info("Source: {} to target set: {}", source, target);
+                // special handling for sets when the source is a list
+                if (source instanceof List) {
+                    return ((List<?>) source).stream().collect(Collectors.toCollection(HashSet::new));
+                }
+                return Arrays.stream((Object[]) source).collect(Collectors.toCollection(HashSet::new));
             }
         }
-        if (target.equals(Set.class) && source.getClass().isArray()) {
-            return convertArrayToSet((Object[]) source);
+        if (Map.class.isAssignableFrom(sourceClass)) {
+            return convertMapToBean((Map) source, target);
         }
-        if (target.equals(Set.class) && source instanceof List) {
-            return new HashSet((List) source);
-        }
-        if (source instanceof Map) {
+        // handle immutable collections
+        final String sourceClassName = sourceClass.getName();
+        if (sourceClassName.equals("java.util.ImmutableCollections$ListN")) {
+            if (Set.class.isAssignableFrom(target)) {
+                return ((List<?>) source).stream().collect(Collectors.toCollection(HashSet::new));
+            }
+            return ((List<?>) source).stream().collect(Collectors.toCollection(ArrayList::new));
+        } else if (sourceClassName.equals("java.util.ImmutableCollections$SetN")) {
+            if (Set.class.isAssignableFrom(target)) {
+                return ((Set<?>) source).stream().collect(Collectors.toCollection(HashSet::new));
+            }
+            return ((Set<?>) source).stream().collect(Collectors.toCollection(ArrayList::new));
+        } else if (sourceClassName.equals("java.util.ImmutableCollections$MapN")) {
             return convertMapToBean((Map) source, target);
         }
         throw new ConversionException(String.format("Unable to preform conversion from %s to %s", source, target));
@@ -185,9 +204,7 @@ public class ConversionUtils {
     }
 
     public static List<Object> convertMapToList(Map<?, ?> map) {
-        List<Object> list = new ArrayList<Object>(map.size());
-        list.addAll(map.values());
-        return list;
+        return List.of(map.values());
     }
 
     /**
@@ -333,11 +350,7 @@ public class ConversionUtils {
      *             on failure
      */
     public static List<?> convertArrayToList(Object[] source) throws ConversionException {
-        List<Object> list = new ArrayList<Object>(source.length);
-        for (Object element : source) {
-            list.add(element);
-        }
-        return list;
+        return Arrays.stream(source).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -387,11 +400,7 @@ public class ConversionUtils {
      * @return Set
      */
     public static Set<?> convertArrayToSet(Object[] source) {
-        Set<Object> set = new HashSet<Object>();
-        for (Object element : source) {
-            set.add(element);
-        }
-        return set;
+        return Arrays.stream(source).collect(Collectors.toCollection(HashSet::new));
     }
 
     /**
