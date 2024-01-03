@@ -7,22 +7,16 @@
 
 package org.red5.server.net.rtmp.status;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
 import org.red5.annotations.Anonymous;
-import org.red5.io.object.ICustomSerializable;
-import org.red5.io.object.Output;
+import org.red5.io.amf3.IDataInput;
+import org.red5.io.amf3.IDataOutput;
+import org.red5.io.amf3.IExternalizable;
 
 /**
  * Represents status object that are transferred between server and client
  */
 @Anonymous
-public class Status implements StatusCodes, ICustomSerializable, Externalizable {
-
-    private static final long serialVersionUID = -5501563718489586136L;
+public class Status implements StatusCodes, IExternalizable {
 
     /**
      * Error constant
@@ -206,36 +200,22 @@ public class Status implements StatusCodes, ICustomSerializable, Externalizable 
         return "Status: code: " + getCode() + " desc: " + getDescription() + " level: " + getLevel();
     }
 
-    public void serialize(Output output) {
-        output.putString("level");
-        output.writeString(getLevel());
-        output.putString("code");
-        output.writeString(getCode());
-        output.putString("description");
-        output.writeString(getDescription());
-        output.putString("details");
-        if (getDetails() != null) {
-            output.writeString(getDetails());
-        } else {
-            output.writeNull();
-        }
-        output.putString("clientid");
-        output.writeNumber(getClientid());
-    }
-
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    @Override
+    public void readExternal(IDataInput in) {
         clientid = (Number) in.readDouble();
-        code = (String) in.readObject();
-        description = (String) in.readObject();
-        details = (String) in.readObject();
-        level = (String) in.readObject();
+        code = (String) in.readUTF();
+        description = (String) in.readUTF();
+        details = (String) in.readUTF();
+        level = (String) in.readUTF();
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    @Override
+    public void writeExternal(IDataOutput out) {
         out.writeDouble(clientid.doubleValue());
-        out.writeObject(code);
-        out.writeObject(description);
-        out.writeObject(details);
-        out.writeObject(level);
+        out.writeUTF(code);
+        out.writeUTF(description);
+        out.writeUTF(details);
+        out.writeUTF(level);
     }
+
 }

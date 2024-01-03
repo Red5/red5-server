@@ -7,12 +7,11 @@
 
 package org.red5.server.service;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.red5.io.amf3.IDataInput;
+import org.red5.io.amf3.IDataOutput;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IPendingServiceCallback;
 
@@ -20,8 +19,6 @@ import org.red5.server.api.service.IPendingServiceCallback;
  * Pending call is remote call operation that is in pending state. Remote calls to services are asynchronous, that is, after call but before result callback remote calls are in pending state.
  */
 public class PendingCall extends Call implements IPendingServiceCall {
-
-    private static final long serialVersionUID = 3219267601240355335L;
 
     /**
      * Result object
@@ -105,13 +102,13 @@ public class PendingCall extends Call implements IPendingServiceCall {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(IDataInput in) {
         super.readExternal(in);
         result = in.readObject();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(IDataOutput out) {
         super.writeExternal(out);
         out.writeObject(result);
     }

@@ -7,18 +7,13 @@
 
 package org.red5.server.net.rtmp.status;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.red5.annotations.Anonymous;
-import org.red5.io.object.ICustomSerializable;
-import org.red5.io.object.Output;
-import org.red5.io.object.Serializer;
+import org.red5.io.amf3.IDataInput;
+import org.red5.io.amf3.IDataOutput;
+import org.red5.io.amf3.IExternalizable;
 
 /**
  * Status object that is sent to client with every status event
@@ -27,9 +22,7 @@ import org.red5.io.object.Serializer;
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  */
 @Anonymous
-public class StatusObject implements Serializable, ICustomSerializable, Externalizable {
-
-    private static final long serialVersionUID = 8817297676191096283L;
+public class StatusObject implements IExternalizable {
 
     public static final String ERROR = "error";
 
@@ -139,10 +132,14 @@ public class StatusObject implements Serializable, ICustomSerializable, External
         return application;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public String toString() {
-        return String.format("Status code: %s level: %s description: %s", code, level, description);
+    public void setAdditional(String name, Object value) {
+        if ("code,level,description,application".indexOf(name) != -1) {
+            throw new RuntimeException("the name \"" + name + "\" is reserved");
+        }
+        if (additional == null) {
+            additional = new HashMap<>();
+        }
+        additional.put(name, value);
     }
 
     /**
@@ -154,54 +151,37 @@ public class StatusObject implements Serializable, ICustomSerializable, External
         return new Status(getCode(), getLevel(), getDescription());
     }
 
-    public void setAdditional(String name, Object value) {
-        if ("code,level,description,application".indexOf(name) != -1) {
-            throw new RuntimeException("the name \"" + name + "\" is reserved");
-        }
-        if (additional == null) {
-            additional = new HashMap<String, Object>();
-        }
-        additional.put(name, value);
-    }
-
-    public void serialize(Output output) {
-        output.putString("level");
-        output.writeString(getLevel());
-        output.putString("code");
-        output.writeString(getCode());
-        output.putString("description");
-        output.writeString(getDescription());
-        if (application != null) {
-            output.putString("application");
-            Serializer.serialize(output, application);
-        }
-        if (additional != null) {
-            // Add additional parameters
-            for (Map.Entry<String, Object> entry : additional.entrySet()) {
-                output.putString(entry.getKey());
-                Serializer.serialize(output, entry.getValue());
-            }
-        }
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return String.format("Status code: %s level: %s description: %s", code, level, description);
     }
 
     @SuppressWarnings("unchecked")
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        code = (String) in.readObject();
-        description = (String) in.readObject();
-        level = (String) in.readObject();
-        additional = (Map<String, Object>) in.readObject();
+    @Override
+    public void readExternal(IDataInput in) {
+        code = (String) in.readUTF();
+        description = (String) in.readUTF();
+        level = (String) in.readUTF();
         application = in.readObject();
+        additional = (Map<String, Object>) in.readObject();
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeObject(code);
-        out.writeObject(description);
-        out.writeObject(level);
+    @Override
+    public void writeExternal(IDataOutput out) {
+        out.writeUTF(code);
+        out.writeUTF(description);
+        out.writeUTF(level);
         if (application != null) {
-            out.writeObject(additional);
+            out.writeObject(application);
+        } else {
+            out.writeObject(null);
         }
         if (additional != null) {
-            out.writeObject(application);
+            out.writeObject(additional);
+        } else {
+            out.writeObject(null);
         }
     }
+
 }

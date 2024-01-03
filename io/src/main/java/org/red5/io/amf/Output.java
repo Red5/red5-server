@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.annotations.Anonymous;
 import org.red5.io.amf3.ByteArray;
 import org.red5.io.object.BaseOutput;
-import org.red5.io.object.ICustomSerializable;
 import org.red5.io.object.RecordSet;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.XMLUtils;
@@ -110,13 +110,14 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         if (hasReference(obj)) {
             writeReference(obj);
             return true;
-        } else
-            return false;
+        }
+        return false;
     }
 
     /** {@inheritDoc} */
     @Override
     public void writeArray(Collection<?> array) {
+        log.debug("writeArray - (collection source) array: {}", array);
         if (!checkWriteReference(array)) {
             storeReference(array);
             buf.put(AMF.TYPE_ARRAY);
@@ -130,7 +131,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     /** {@inheritDoc} */
     @Override
     public void writeArray(Object[] array) {
-        log.debug("writeArray - array: {}", array);
+        log.debug("writeArray - (array source) array: {}", Arrays.asList(array));
         if (array != null) {
             if (!checkWriteReference(array)) {
                 storeReference(array);
@@ -148,12 +149,14 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     /** {@inheritDoc} */
     @Override
     public void writeArray(Object array) {
+        log.debug("writeArray - (object source) array: {}", array);
         if (array != null) {
             if (!checkWriteReference(array)) {
                 storeReference(array);
                 buf.put(AMF.TYPE_ARRAY);
-                buf.putInt(Array.getLength(array));
-                for (int i = 0; i < Array.getLength(array); i++) {
+                final int length = Array.getLength(array);
+                buf.putInt(length);
+                for (int i = 0; i < length; i++) {
                     Serializer.serialize(this, Array.get(array, i));
                 }
             }
@@ -307,11 +310,11 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
             } else {
                 buf.put(AMF.TYPE_OBJECT);
             }
-            if (object instanceof ICustomSerializable) {
-                ((ICustomSerializable) object).serialize(this);
-                buf.put(AMF.END_OF_OBJECT_SEQUENCE);
-                return;
-            }
+            // if (object instanceof ICustomSerializable) {
+            //     ((ICustomSerializable) object).serialize(this);
+            //     buf.put(AMF.END_OF_OBJECT_SEQUENCE);
+            //     return;
+            // }
             // Iterate thru entries and write out property names with separators
             for (Object key : attrs) {
                 String fieldName = key.toString();
@@ -405,6 +408,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
             buf.put(AMF.TYPE_OBJECT);
             boolean isBeanMap = (map instanceof BeanMap);
             for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                log.debug("Key: {} item: {}", entry.getKey(), entry.getValue());
                 if (isBeanMap && "class".equals(entry.getKey())) {
                     continue;
                 }

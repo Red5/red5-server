@@ -312,19 +312,14 @@ public class ConversionUtils {
      * @return Array of converted objects
      */
     public static Class<?>[] convertParams(Object[] source) {
-        Class<?>[] converted = new Class<?>[0];
+        Class<?>[] converted = source != null ? new Class<?>[source.length] : new Class<?>[0];
         if (source != null) {
-            converted = new Class<?>[source.length];
             for (int i = 0; i < source.length; i++) {
-                if (source[i] != null) {
-                    converted[i] = source[i].getClass();
-                } else {
-                    converted[i] = null;
-                }
+                converted[i] = source[i] != null ? source[i].getClass() : null;
             }
-        }
-        if (log.isTraceEnabled()) {
-            log.trace("Converted parameters: {}", Arrays.toString(converted));
+            if (log.isTraceEnabled()) {
+                log.trace("Converted parameters: {}", Arrays.toString(converted));
+            }
         }
         return converted;
     }

@@ -51,16 +51,6 @@ public class ReflectionUtilsTest {
             log.info("Result with no-args: {}", Arrays.asList(result));
         }
 
-        // call with two parameters string and int
-        call = new PendingCall("TestService.doTestObjectArray", new Object[] { "test", 42 });
-        methodName = "doTestObjectArray";
-        result = ReflectionUtils.findMethod(conn, call, service, methodName);
-        if (result[0] == null) {
-            log.info("Result is null");
-            fail("Result is null, method not found");
-        } else {
-            log.info("Result with Object array of string and int: {}", Arrays.asList(result));
-        }
         // call with two parameters string and int but expecting Connection as first parameter to hit on 2nd call
         methodName = "doTest";
         call = new PendingCall("TestService.doTest", new Object[] { "test", 42 });
@@ -82,6 +72,28 @@ public class ReflectionUtilsTest {
             fail("Result is null, method not found");
         } else {
             log.info("Result with list: {}", Arrays.asList(result));
+        }
+
+        // call with two parameters string and int
+        call = new PendingCall("TestService.doTestObjectArray", new Object[] { "test", 42 });
+        methodName = "doTestObjectArray";
+        result = ReflectionUtils.findMethod(conn, call, service, methodName);
+        if (result[0] == null) {
+            log.info("Result is null");
+            fail("Result is null, method not found");
+        } else {
+            log.info("Result with Object array of string and int: {}", Arrays.asList(result));
+        }
+
+        // call with two parameters string and int
+        call = new PendingCall("TestService.doTestObjectArray", new Object[] { new Object[] { "test", 42 }, new Object[] { "blllllaaahhh" } });
+        methodName = "doTestObjectArray";
+        result = ReflectionUtils.findMethod(conn, call, service, methodName);
+        if (result[0] == null) {
+            log.info("Result is null");
+            fail("Result is null, method not found");
+        } else {
+            log.info("Result with Object array of string and int: {}", Arrays.asList(result));
         }
     }
 
@@ -124,6 +136,11 @@ public class ReflectionUtilsTest {
         // simple method generically taking an object array
         public void doTestObjectArray(Object[] param) {
             log.info("doTestObjectArray - Object array: {}", Arrays.asList(param));
+        }
+
+        // simple method generically taking an object array
+        public void doTestObjectArray(Object[] param0, Object[] param1) {
+            log.info("doTestObjectArray - Object array(s): {} {}", Arrays.asList(param0), Arrays.asList(param1));
         }
 
     }

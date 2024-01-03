@@ -48,11 +48,11 @@ public class Serializer {
      *
      * @param out
      *            Output writer
-     * @param any
+     * @param obj
      *            Object to serialize
      */
-    public static void serialize(Output out, Object any) {
-        Serializer.serialize(out, null, null, null, any);
+    public static void serialize(Output out, Object obj) {
+        Serializer.serialize(out, null, null, null, obj);
     }
 
     /**
@@ -64,60 +64,85 @@ public class Serializer {
      *            The field to serialize
      * @param getter
      *            The getter method if not a field
-     * @param object
+     * @param parent
      *            Parent object
-     * @param value
+     * @param obj
      *            Object to serialize
      */
     @SuppressWarnings("unchecked")
-    public static void serialize(Output out, Field field, Method getter, Object object, Object value) {
-        log.trace("serialize");
-        if (value instanceof IExternalizable) {
+    public static void serialize(Output out, Field field, Method getter, Object parent, Object obj) {
+        log.trace("serialize: {}", obj);
+        if (obj == null) {
+            out.writeNull();
+        } else if (IExternalizable.class.isAssignableFrom(obj.getClass())) {
             // make sure all IExternalizable objects are serialized as objects
-            out.writeObject(value);
-        } else if (value instanceof ByteArray) {
+            log.trace("write externalizable: {}", obj);
+            out.writeObject(obj);
+        } else if (obj instanceof ByteArray) {
             // write ByteArray objects directly
-            out.writeByteArray((ByteArray) value);
-        } else if (value instanceof Vector) {
-            log.trace("Serialize Vector");
-            // scan the vector to determine the generic type
-            Vector<?> vector = (Vector<?>) value;
-            int ints = 0;
-            int longs = 0;
-            int dubs = 0;
-            int nans = 0;
-            for (Object o : vector) {
-                if (o instanceof Integer) {
-                    ints++;
-                } else if (o instanceof Long) {
-                    longs++;
-                } else if (o instanceof Number || o instanceof Double) {
-                    dubs++;
-                } else {
-                    nans++;
-                }
-            }
-            // look at the type counts
-            if (nans > 0) {
-                // if we have non-number types, use object
-                ((org.red5.io.amf3.Output) out).enforceAMF3();
-                out.writeVectorObject((Vector<Object>) value);
-            } else if (dubs == 0 && longs == 0) {
-                // no doubles or longs
-                out.writeVectorInt((Vector<Integer>) value);
-            } else if (dubs == 0 && ints == 0) {
-                // no doubles or ints
-                out.writeVectorUInt((Vector<Long>) value);
-            } else {
-                // handle any other types of numbers
-                ((org.red5.io.amf3.Output) out).enforceAMF3();
-                out.writeVectorNumber((Vector<Double>) value);
-            }
+            out.writeByteArray((ByteArray) obj);
+        } else if (out.isCustom(obj)) {
+            log.trace("write custom: {}", obj);
+            // Write custom data
+            out.writeCustom(obj);
         } else {
-            if (writeBasic(out, value)) {
+            if (writeBasic(out, obj)) {
                 log.trace("Wrote as basic");
-            } else if (!writeComplex(out, value)) {
-                log.trace("Unable to serialize: {}", value);
+            } else if (obj.getClass().isArray() && obj.getClass().getComponentType().isPrimitive()) {
+                log.trace("write array: {}", obj);
+                out.writeArray(obj);
+            } else if (obj instanceof Object[]) {
+                log.trace("write object array: {}", obj);
+                out.writeArray((Object[]) obj);
+            } else if (obj instanceof Collection) {
+                log.trace("write collection");
+                out.writeArray((Collection<Object>) obj);
+            } else if (obj instanceof List<?>) {
+                log.trace("write list");
+                writeList(out, (List<?>) obj);
+            } else if (obj instanceof Document) {
+                writeDocument(out, (Document) obj);
+            } else if (obj instanceof Vector) {
+                log.trace("write vector");
+                // scan the vector to determine the generic type
+                Vector<?> vector = (Vector<?>) obj;
+                int ints = 0;
+                int longs = 0;
+                int dubs = 0;
+                int nans = 0;
+                for (Object o : vector) {
+                    if (o instanceof Integer) {
+                        ints++;
+                    } else if (o instanceof Long) {
+                        longs++;
+                    } else if (o instanceof Number || o instanceof Double) {
+                        dubs++;
+                    } else {
+                        nans++;
+                    }
+                }
+                // look at the type counts
+                if (nans > 0) {
+                    // if we have non-number types, use object
+                    ((org.red5.io.amf3.Output) out).enforceAMF3();
+                    out.writeVectorObject((Vector<Object>) obj);
+                } else if (dubs == 0 && longs == 0) {
+                    // no doubles or longs
+                    out.writeVectorInt((Vector<Integer>) obj);
+                } else if (dubs == 0 && ints == 0) {
+                    // no doubles or ints
+                    out.writeVectorUInt((Vector<Long>) obj);
+                } else {
+                    // handle any other types of numbers
+                    ((org.red5.io.amf3.Output) out).enforceAMF3();
+                    out.writeVectorNumber((Vector<Double>) obj);
+                }
+            } else if (obj instanceof Iterator) {
+                writeIterator(out, (Iterator<Object>) obj);
+            } else if (writeObjectType(out, obj)) {
+                log.trace("Wrote as object type");
+            } else {
+                log.trace("Unable to serialize: {}", obj);
             }
         }
     }
@@ -149,32 +174,6 @@ public class Serializer {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Writes a complex type object out
-     *
-     * @param out
-     *            Output writer
-     * @param complex
-     *            Complex datatype object
-     * @return boolean true if object was successfully serialized, false otherwise
-     */
-    public static boolean writeComplex(Output out, Object complex) {
-        log.trace("writeComplex");
-        if (writeListType(out, complex)) {
-            return true;
-        } else if (writeArrayType(out, complex)) {
-            return true;
-        } else if (writeXMLType(out, complex)) {
-            return true;
-        } else if (writeCustomType(out, complex)) {
-            return true;
-        } else if (writeObjectType(out, complex)) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -241,15 +240,15 @@ public class Serializer {
      */
     @SuppressWarnings("all")
     protected static boolean writeArrayType(Output out, Object arrType) {
-        log.trace("writeArrayType");
-        if (arrType instanceof Collection) {
-            out.writeArray((Collection<Object>) arrType);
-        } else if (arrType instanceof Iterator) {
-            writeIterator(out, (Iterator<Object>) arrType);
-        } else if (arrType.getClass().isArray() && arrType.getClass().getComponentType().isPrimitive()) {
+        log.trace("writeArrayType: {}", arrType);
+        if (arrType.getClass().isArray() && arrType.getClass().getComponentType().isPrimitive()) {
             out.writeArray(arrType);
         } else if (arrType instanceof Object[]) {
             out.writeArray((Object[]) arrType);
+        } else if (arrType instanceof Collection) {
+            out.writeArray((Collection<Object>) arrType);
+        } else if (arrType instanceof Iterator) {
+            writeIterator(out, (Iterator<Object>) arrType);
         } else {
             return false;
         }
@@ -318,6 +317,7 @@ public class Serializer {
      */
     @SuppressWarnings("all")
     protected static boolean writeObjectType(Output out, Object obj) {
+        log.trace("writeObjectType: {} {}", obj.getClass().getName(), obj);
         if (obj instanceof ObjectMap || obj instanceof BeanMap) {
             out.writeObject((Map) obj);
         } else if (obj instanceof Map) {
@@ -328,25 +328,6 @@ public class Serializer {
             out.writeObject(obj);
         }
         return true;
-    }
-
-    /**
-     * Writes a custom data to the output
-     *
-     * @param out
-     *            Output writer
-     * @param obj
-     *            Custom data
-     * @return true if the object has been written, otherwise false
-     */
-    protected static boolean writeCustomType(Output out, Object obj) {
-        if (out.isCustom(obj)) {
-            // Write custom data
-            out.writeCustom(obj);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**

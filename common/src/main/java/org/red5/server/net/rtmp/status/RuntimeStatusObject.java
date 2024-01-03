@@ -7,19 +7,13 @@
 
 package org.red5.server.net.rtmp.status;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import org.red5.io.amf3.IDataInput;
+import org.red5.io.amf3.IDataOutput;
 
 /**
  * Runtime status object
  */
 public class RuntimeStatusObject extends StatusObject {
-
-    /**
-     * Serializable
-     */
-    private static final long serialVersionUID = 6990998992583246039L;
 
     /**
      * Status event details
@@ -109,14 +103,14 @@ public class RuntimeStatusObject extends StatusObject {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(IDataInput in) {
         super.readExternal(in);
         clientid = in.readInt();
         details = (String) in.readObject();
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(IDataOutput out) {
         super.writeExternal(out);
         out.writeInt(clientid);
         out.writeObject(details);

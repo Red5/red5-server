@@ -92,7 +92,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
             do {
                 // get the data type
                 currentDataType = buf.get();
-                log.trace("Data type: {}", currentDataType);
+                log.trace("Data type {}: {}", currentDataType, DataTypes.toStringValue(currentDataType));
                 switch (currentDataType) {
                     case AMF.TYPE_NULL:
                     case AMF.TYPE_UNDEFINED:

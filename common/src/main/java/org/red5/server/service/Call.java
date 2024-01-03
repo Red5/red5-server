@@ -7,12 +7,12 @@
 
 package org.red5.server.service;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
+import org.red5.io.amf3.IDataInput;
+import org.red5.io.amf3.IDataOutput;
+import org.red5.io.amf3.IExternalizable;
 import org.red5.server.api.service.IServiceCall;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Basic service call (remote call) implementation
@@ -20,9 +20,9 @@ import org.red5.server.api.service.IServiceCall;
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  */
-public class Call implements IServiceCall, Externalizable {
+public class Call implements IServiceCall, IExternalizable {
 
-    private static final long serialVersionUID = -3699712251588013875L;
+    private static final Logger log = LoggerFactory.getLogger(Call.class);
 
     /**
      * Pending status constant
@@ -279,25 +279,37 @@ public class Call implements IServiceCall, Externalizable {
         return sb.toString();
     }
 
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    @Override
+    public void readExternal(IDataInput in) {
         // keep a time of receipt
         readTime = System.currentTimeMillis();
         // read-in properties
-        serviceName = (String) in.readObject();
-        serviceMethodName = (String) in.readObject();
-        arguments = (Object[]) in.readObject();
         status = in.readByte();
+        serviceName = (String) in.readUTF();
+        serviceMethodName = (String) in.readUTF();
+        arguments = (Object[]) in.readObject();
+        if (log.isDebugEnabled()) {
+            for (int i = 0; i < arguments.length; i++) {
+                log.debug("ReadExt - Arg: {} type: {} => {}", i, (arguments[i] != null ? arguments[i].getClass().getName() : null), arguments[i]);
+            }
+        }
         exception = (Exception) in.readObject();
     }
 
-    public void writeExternal(ObjectOutput out) throws IOException {
+    @Override
+    public void writeExternal(IDataOutput out) {
         // keep a time of receipt
         writeTime = System.currentTimeMillis();
         // write-out properties
-        out.writeObject(serviceName);
-        out.writeObject(serviceMethodName);
-        out.writeObject(arguments);
         out.writeByte(status);
+        out.writeUTF(serviceName);
+        out.writeUTF(serviceMethodName);
+        if (log.isDebugEnabled()) {
+            for (int i = 0; i < arguments.length; i++) {
+                log.debug("WriteExt - Arg: {} type: {} => {}", i, (arguments[i] != null ? arguments[i].getClass().getName() : null), arguments[i]);
+            }
+        }
+        out.writeObject(arguments);
         out.writeObject(exception);
     }
 }

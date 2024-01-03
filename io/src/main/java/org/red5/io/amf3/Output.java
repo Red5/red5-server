@@ -44,7 +44,7 @@ import org.w3c.dom.Document;
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Harald Radi (harald.radi@nme.at)
  */
-public class Output extends org.red5.io.amf.Output implements org.red5.io.object.Output {
+public class Output extends org.red5.io.amf.Output {
 
     protected static Logger log = LoggerFactory.getLogger(Output.class);
 
@@ -271,7 +271,6 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
     private void writePrimitiveByteArray(byte[] bytes) {
         writeAMF3();
         this.buf.put(AMF3.TYPE_BYTEARRAY);
-
         if (hasReference(bytes)) {
             putInteger(getReferenceId(bytes) << 1);
             return;
@@ -279,7 +278,6 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
         storeReference(bytes);
         int length = bytes.length;
         putInteger(length << 1 | 0x1);
-
         this.buf.put(bytes);
     }
 
@@ -436,7 +434,8 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
         }
         log.debug("Storing object reference");
         storeReference(object);
-        if (object instanceof IExternalizable) {
+        Class<?> objectClass = object.getClass();
+        if (IExternalizable.class.isAssignableFrom(objectClass)) {
             log.debug("Object is IExternalizable");
             // the object knows how to serialize itself
             int type = 1 << 1 | 1;
@@ -446,7 +445,7 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
                 type |= AMF3.TYPE_OBJECT_EXTERNALIZABLE << 2;
             }
             putInteger(type);
-            putString(Serializer.getClassName(object.getClass()));
+            putString(Serializer.getClassName(objectClass));
             amf3_mode += 1;
             ((IExternalizable) object).writeExternal(new DataOutput(this));
             amf3_mode -= 1;
@@ -467,10 +466,9 @@ public class Output extends org.red5.io.amf.Output implements org.red5.io.object
             return;
         }
         // write out either start of object marker for class name or "empty" start of object marker
-        Class<?> objectClass = object.getClass();
         if (!objectClass.isAnnotationPresent(Anonymous.class)) {
             log.debug("Object is annotated as Anonymous");
-            putString(Serializer.getClassName(object.getClass()));
+            putString(Serializer.getClassName(objectClass));
         } else {
             putString("");
         }

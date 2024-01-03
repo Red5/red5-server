@@ -46,17 +46,15 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
      * Initialization
      */
     public void afterPropertiesSet() throws Exception {
-        log.trace("Loading status objects");
-        loadStatusObjects();
-        log.trace("Caching status objects");
-        cacheStatusObjects();
+        log.trace("Loading and caching status objects");
+        loadAndCacheStatusObjects();
         log.debug("Status service ready");
     }
 
     /**
-     * Creates all status objects and adds them to status objects map
+     * Creates all status objects and adds them to status objects map; then caches them.
      */
-    public void loadStatusObjects() {
+    public void loadAndCacheStatusObjects() {
         statusObjects = new HashMap<>();
 
         statusObjects.put(NC_CALL_FAILED, new StatusObject(NC_CALL_FAILED, StatusObject.ERROR, ""));
@@ -103,23 +101,15 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
         statusObjects.put(NS_PLAY_FILE_STRUCTURE_INVALID, new StatusObject(NS_PLAY_FILE_STRUCTURE_INVALID, StatusObject.ERROR, ""));
         statusObjects.put(NS_PLAY_NO_SUPPORTED_TRACK_FOUND, new StatusObject(NS_PLAY_NO_SUPPORTED_TRACK_FOUND, StatusObject.ERROR, ""));
 
-    }
-
-    /**
-     * Cache status objects
-     */
-    public void cacheStatusObjects() {
-
-        cachedStatusObjects = new HashMap<String, byte[]>();
-
+        cachedStatusObjects = new HashMap<>();
         String statusCode;
         IoBuffer out = IoBuffer.allocate(256);
         out.setAutoExpand(true);
-
         for (String s : statusObjects.keySet()) {
             statusCode = s;
             StatusObject statusObject = statusObjects.get(statusCode);
-            if (statusObject instanceof RuntimeStatusObject) {
+            if (RuntimeStatusObject.class.isAssignableFrom(statusObject.getClass())) {
+                log.debug("Skip caching runtime status object: {}", statusCode);
                 continue;
             }
             serializeStatusObject(out, statusObject);
@@ -127,7 +117,7 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
             if (log.isTraceEnabled()) {
                 log.trace(HexDump.formatHexDump(out.getHexDump()));
             }
-            byte[] cachedBytes = new byte[out.limit()];
+            byte[] cachedBytes = new byte[out.remaining()];
             out.get(cachedBytes);
             out.clear();
             cachedStatusObjects.put(statusCode, cachedBytes);

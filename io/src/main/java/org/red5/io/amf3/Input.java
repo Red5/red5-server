@@ -51,7 +51,7 @@ import org.w3c.dom.Document;
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  * @author Joachim Bauch (jojo@struktur.de)
  */
-public class Input extends org.red5.io.amf.Input implements org.red5.io.object.Input {
+public class Input extends org.red5.io.amf.Input {
 
     /**
      * Holds informations about already deserialized classes.
@@ -513,6 +513,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
                 collection = (Class) target;
             }
             if (collection.isArray()) {
+                log.debug("Using an array for key: {} count: {}", key, count);
                 nested = ArrayUtils.getGenericType(collection.getComponentType());
                 result = Array.newInstance(nested, count);
                 storeReference(result);
@@ -526,6 +527,7 @@ public class Input extends org.red5.io.amf.Input implements org.red5.io.object.I
                 } else if (Set.class.isAssignableFrom(collection)) {
                     resultCollection = new HashSet(count);
                 } else {
+                    log.debug("Using an ArrayList for key: {} count: {}", key, count);
                     resultCollection = new ArrayList(count);
                 }
                 result = resultCollection;
