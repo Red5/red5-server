@@ -62,6 +62,17 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
     }
 
     /**
+     * Create new notification event with given service call
+     *
+     * @param call
+     *            Service call
+     */
+    public Notify(IServiceCall call) {
+        super(Type.SERVICE_CALL);
+        this.call = call;
+    }
+
+    /**
      * Create new notification event with given byte buffer
      *
      * @param data
@@ -82,17 +93,6 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
         super(Type.STREAM_DATA);
         this.data = data;
         this.action = action;
-    }
-
-    /**
-     * Create new notification event with given service call
-     *
-     * @param call
-     *            Service call
-     */
-    public Notify(IServiceCall call) {
-        super(Type.SERVICE_CALL);
-        this.call = call;
     }
 
     /** {@inheritDoc} */
@@ -193,6 +193,15 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
             return false;
         }
         Notify other = (Notify) obj;
+        if (getType() != other.getType()) {
+            return false;
+        }
+        if (getTimestamp() != other.getTimestamp()) {
+            return false;
+        }
+        if (getTransactionId() != other.getTransactionId()) {
+            return false;
+        }
         if (getConnectionParams() == null && other.getConnectionParams() != null) {
             return false;
         }
@@ -200,9 +209,6 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
             return false;
         }
         if (getConnectionParams() != null && !getConnectionParams().equals(other.getConnectionParams())) {
-            return false;
-        }
-        if (getTransactionId() != other.getTransactionId()) {
             return false;
         }
         if (getCall() == null && other.getCall() != null) {

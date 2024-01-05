@@ -49,7 +49,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
     /**
      * Event listener
      */
-    protected IEventListener source;
+    protected transient IEventListener source;
 
     /**
      * Event timestamp
@@ -102,8 +102,10 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         return type;
     }
 
+    @Deprecated(since = "1.3.26")
     public void setType(Type type) {
-        this.type = type;
+        //this.type = type;
+        throw new UnsupportedOperationException("Type is immutable");
     }
 
     public byte getSourceType() {
@@ -188,6 +190,35 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
      */
     protected abstract void releaseInternal();
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + sourceType;
+        result = prime * result + timestamp;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BaseEvent other = (BaseEvent) obj;
+        if (type != other.type)
+            return false;
+        if (sourceType != other.sourceType)
+            return false;
+        if (timestamp != other.timestamp)
+            return false;
+        return true;
+    }
+
+    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = Type.valueOf(in.readUTF());
         sourceType = in.readByte();
@@ -197,6 +228,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         }
     }
 
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         if (log.isTraceEnabled()) {
             log.trace("writeExternal - type: {} sourceType: {} timestamp: {}", type, sourceType, timestamp);

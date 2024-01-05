@@ -23,10 +23,12 @@ public class Invoke extends Notify {
 
     private static final long serialVersionUID = -769677790148010729L;
 
+    {
+        dataType = TYPE_INVOKE;
+    }
+
     /** Constructs a new Invoke. */
     public Invoke() {
-        super();
-        dataType = TYPE_INVOKE;
     }
 
     /**
@@ -37,7 +39,6 @@ public class Invoke extends Notify {
      */
     public Invoke(IoBuffer data) {
         super(data);
-        dataType = TYPE_INVOKE;
     }
 
     /**
@@ -48,7 +49,6 @@ public class Invoke extends Notify {
      */
     public Invoke(IPendingServiceCall call) {
         super(call);
-        dataType = TYPE_INVOKE;
     }
 
     /**
@@ -69,12 +69,6 @@ public class Invoke extends Notify {
 
     /** {@inheritDoc} */
     @Override
-    public String toString() {
-        return String.format("Invoke #%d: %s", transactionId, (call != null ? call.toString() : "null"));
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
@@ -83,6 +77,12 @@ public class Invoke extends Notify {
             return false;
         }
         return super.equals(obj);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return String.format("Invoke #%d: %s", transactionId, (call != null ? call.toString() : "null"));
     }
 
     /**
