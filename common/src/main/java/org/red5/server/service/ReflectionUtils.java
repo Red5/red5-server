@@ -92,7 +92,7 @@ public class ReflectionUtils {
                     try {
                         Object[] convertedArgs = ConversionUtils.convertParams(args, paramTypes);
                         if (isTrace) {
-                            log.trace("Method {} matched - parameters: {}", methodName, paramTypes);
+                            log.trace("Found method {} {} - parameters: {}", methodName, method, paramTypes);
                         }
                         methodResult = new Object[] { method, convertedArgs };
                         break;
@@ -100,6 +100,9 @@ public class ReflectionUtils {
                         log.warn("Method {} not found in {} with parameters {}", methodName, service, Arrays.asList(paramTypes), e);
                     }
                 }
+            }
+            if (isTrace) {
+                log.trace("Method name: {} result: {}", methodName, methodResult[0]);
             }
         }
         return methodResult;
@@ -117,6 +120,14 @@ public class ReflectionUtils {
     public static Object[] findMethod(IConnection conn, IServiceCall call, Object service, String methodName) {
         if (isDebug) {
             log.debug("Find method: {} in service: {} for call: {} and connection: {}", methodName, service, call, conn);
+        }
+        // return value(s)
+        Object[] methodResult = NULL_RETURN;
+        // clear any previous exception from the call as it may be reused
+        if (call.getException() != null) {
+            log.debug("Clearing status and exception from call: {}", call);
+            call.setStatus(Call.STATUS_PENDING);
+            call.setException(null);
         }
         // get the arguments
         final Object[] args = call.getArguments();
@@ -138,8 +149,6 @@ public class ReflectionUtils {
         } else {
             argsWithConnection = conn != null ? new Object[] { conn } : new Object[0];
         }
-        // return value(s)
-        Object[] methodResult = NULL_RETURN;
         // get all the name matched methods once, then filter out the ones that contain a $
         final Set<Method> methods = Arrays.stream(service.getClass().getMethods()).filter(m -> (m.getName().equals(methodName) && !m.getName().contains("$"))).filter(m -> m.getParameterCount() == 1 || m.getParameterCount() == callParams.length || m.getParameterCount() == (callParams.length + 1)).collect(Collectors.toUnmodifiableSet());
         if (methods.isEmpty()) {
@@ -182,7 +191,7 @@ public class ReflectionUtils {
                     try {
                         Object[] convertedArgs = ConversionUtils.convertParams(args, paramTypes);
                         if (isTrace) {
-                            log.trace("Method {} matched - parameters: {}", methodName, paramTypes);
+                            log.trace("Found method {} {} - parameters: {}", methodName, method, paramTypes);
                         }
                         methodResult = new Object[] { method, convertedArgs };
                         break;
@@ -196,7 +205,7 @@ public class ReflectionUtils {
                     try {
                         Object[] convertedArgs = ConversionUtils.convertParams(argsWithConnection, paramTypes);
                         if (isTrace) {
-                            log.trace("Method {} matched - parameters: {}", methodName, paramTypes);
+                            log.trace("Found method {} {} - parameters: {}", methodName, method, paramTypes);
                         }
                         methodResult = new Object[] { method, convertedArgs };
                         break;
@@ -204,6 +213,9 @@ public class ReflectionUtils {
                         log.warn("Method {} not found in {} with parameters {}", methodName, service, Arrays.asList(paramTypes), e);
                     }
                 }
+            }
+            if (isTrace) {
+                log.trace("Method name: {} result: {}", methodName, methodResult[0]);
             }
             if (methodResult[0] == null) {
                 log.warn("Method {} not found in {} with parameters {}", methodName, service, Arrays.asList(callParams));

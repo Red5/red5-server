@@ -110,15 +110,20 @@ public class ServiceInvoker implements IServiceInvoker {
             log.debug("Method name contained an illegal prefix, it will be removed: {}", methodName);
             methodName = methodName.substring(1);
         }
+        if (log.isTraceEnabled()) {
+            log.trace("Method: {} call exception: ", methodName, call.getException());
+        }
         // look up the method with provided matching arguments
         Object[] methodResult = ReflectionUtils.findMethod(conn, call, service, methodName);
-        // get the method
-        Method method = (methodResult != null ? (Method) methodResult[0] : null);
-        if (method == null || call.getException() != null) {
+        // get the method from the result, methodResult itself cannot be null!
+        Method method = (Method) methodResult[0];
+        // checking  "|| call.getException() != null" here causes a reused call to fail if a previous attempt failed
+        if (method == null) {
             log.warn("Method not found: {}", methodName);
         } else {
             log.debug("Method found: {}", methodName);
             // get the parameters; the value at index 1 can be null, but the methodResult array will never be null
+            @SuppressWarnings("null")
             Object[] params = (Object[]) methodResult[1];
             try {
                 /* XXX(paul) legacy flash logic for restricting access to methods
@@ -137,13 +142,13 @@ public class ServiceInvoker implements IServiceInvoker {
                 Object result = null;
                 log.debug("Invoking method: {}", method.toString());
                 if (method.getReturnType().equals(Void.TYPE)) {
-                    log.debug("result: void");
                     method.invoke(service, params);
                     call.setStatus(Call.STATUS_SUCCESS_VOID);
+                    log.debug("result: void");
                 } else {
                     result = method.invoke(service, params);
-                    log.debug("result: {}", result);
                     call.setStatus(result == null ? Call.STATUS_SUCCESS_NULL : Call.STATUS_SUCCESS_RESULT);
+                    log.debug("result: {}", result);
                 }
                 if (call instanceof IPendingServiceCall) {
                     ((IPendingServiceCall) call).setResult(result);
