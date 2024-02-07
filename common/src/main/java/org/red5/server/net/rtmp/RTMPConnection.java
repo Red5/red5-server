@@ -102,6 +102,8 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     public static final Object RTMP_HANDLER = "rtmp.handler";
 
+    public final static String RTMP_EXECUTION_ORDERER = "rtmp.execution.orderer";
+
     /**
      * Marker byte for standard or non-encrypted RTMP data.
      */

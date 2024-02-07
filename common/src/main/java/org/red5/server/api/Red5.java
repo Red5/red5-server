@@ -42,6 +42,8 @@ public final class Red5 {
 
     private static Logger log = Red5LoggerFactory.getLogger(Red5.class);
 
+    private static boolean isDebug = log.isDebugEnabled();
+
     /**
      * Connection associated with the current thread. Each connection runs in a separate thread.
      */
@@ -118,7 +120,7 @@ public final class Red5 {
      *            Thread local connection
      */
     public static void setConnectionLocal(IConnection connection) {
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("Set connection: {} with thread: {}", (connection != null ? connection.getSessionId() : null), Thread.currentThread().getName());
             try {
                 StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
@@ -148,7 +150,9 @@ public final class Red5 {
         WeakReference<IConnection> ref = connThreadLocal.get();
         if (ref != null) {
             IConnection connection = ref.get();
-            log.debug("Get connection: {} on thread: {}", (connection != null ? connection.getSessionId() : null), Thread.currentThread().getName());
+            if (isDebug) {
+                log.debug("Get connection: {} on thread: {}", (connection != null ? connection.getSessionId() : null), Thread.currentThread().getName());
+            }
             return connection;
         } else {
             return null;

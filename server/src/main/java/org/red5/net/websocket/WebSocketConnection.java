@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 
 import javax.websocket.Extension;
 import javax.websocket.Session;
-import javax.websocket.RemoteEndpoint.Basic;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.Constants;

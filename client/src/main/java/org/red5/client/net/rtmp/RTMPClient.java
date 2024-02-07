@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Jon Valliere
  */
 public class RTMPClient extends BaseRTMPClientHandler {
+
     private static final Logger log = LoggerFactory.getLogger(RTMPClient.class);
 
     protected static final int CONNECTOR_WORKER_TIMEOUT = 7000; // milliseconds
