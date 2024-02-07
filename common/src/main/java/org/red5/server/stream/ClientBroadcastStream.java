@@ -257,6 +257,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
      * @param event
      *            Event to dispatch
      */
+    @SuppressWarnings("null")
     public void dispatchEvent(IEvent event) {
         if (event instanceof IRTMPEvent && !closed.get()) {
             switch (event.getType()) {

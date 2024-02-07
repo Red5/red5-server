@@ -87,7 +87,7 @@ public class RTMPTClientConnector extends Thread {
             while (!conn.isClosing() && !stopRequested) {
                 IoBuffer toSend = conn.getPendingMessages(SEND_TARGET_SIZE);
                 int limit = toSend != null ? toSend.limit() : 0;
-                if (limit > 0) {
+                if (limit > 0 && toSend != null) {
                     post = makePost("send");
                     post.setEntity(new InputStreamEntity(toSend.asInputStream(), limit));
                     post.addHeader("Content-Type", CONTENT_TYPE);

@@ -59,6 +59,7 @@ public class EhCacheImpl implements ICacheStore, ApplicationContextAware {
     private CacheManager cm;
 
     /** {@inheritDoc} */
+    @SuppressWarnings("null")
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         EhCacheImpl.applicationContext = context;

@@ -41,6 +41,7 @@ public class DebugProxyHandler extends IoHandlerAdapter implements ResourceLoade
     private String dumpTo = "./dumps/";
 
     /** {@inheritDoc} */
+    @SuppressWarnings("null")
     public void setResourceLoader(ResourceLoader loader) {
         this.loader = loader;
     }

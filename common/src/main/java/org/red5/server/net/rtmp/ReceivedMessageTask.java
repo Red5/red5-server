@@ -77,7 +77,7 @@ public final class ReceivedMessageTask implements Callable<Packet> {
      * @param deadlockGuardTask
      *            deadlock guard task
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     public void runDeadlockFuture(Runnable deadlockGuardTask) {
         if (deadlockFuture == null) {
             ThreadPoolTaskScheduler deadlockGuard = conn.getDeadlockGuardScheduler();

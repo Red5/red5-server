@@ -78,20 +78,25 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                         byte[] dst = buffer.getBuffer(Constants.HANDSHAKE_SIZE + 1);
                         // set handshake to match client requested type
                         byte connectionType = dst[0];
-                        handshake.setHandshakeType(connectionType);
-                        log.trace("Incoming C0 connection type: {}", connectionType);
-                        IoBuffer decBuffer = IoBuffer.wrap(dst);
-                        // skip the connection type
-                        decBuffer.get();
-                        // decode it
-                        IoBuffer s1 = handshake.decodeClientRequest1(decBuffer);
-                        if (s1 != null) {
-                            // set state to indicate we're waiting for C2
-                            ((RTMPConnection) conn).setStateCode(RTMP.STATE_HANDSHAKE);
-                            //log.trace("S1 byte order: {}", s1.order());
-                            session.write(s1);
+                        if (handshake != null) {
+                            handshake.setHandshakeType(connectionType);
+                            log.trace("Incoming C0 connection type: {}", connectionType);
+                            IoBuffer decBuffer = IoBuffer.wrap(dst);
+                            // skip the connection type
+                            decBuffer.get();
+                            // decode it
+                            IoBuffer s1 = handshake.decodeClientRequest1(decBuffer);
+                            if (s1 != null) {
+                                // set state to indicate we're waiting for C2
+                                ((RTMPConnection) conn).setStateCode(RTMP.STATE_HANDSHAKE);
+                                //log.trace("S1 byte order: {}", s1.order());
+                                session.write(s1);
+                            } else {
+                                log.warn("Client was rejected due to invalid handshake");
+                                conn.close();
+                            }
                         } else {
-                            log.warn("Client was rejected due to invalid handshake");
+                            log.warn("Handshake is null");
                             conn.close();
                         }
                     }
@@ -105,22 +110,27 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                         log.debug("decodeHandshakeC2");
                         // create array for decode containing C2
                         byte[] dst = buffer.getBuffer(Constants.HANDSHAKE_SIZE);
-                        if (handshake.decodeClientRequest2(IoBuffer.wrap(dst))) {
-                            log.debug("Connected");
-                            // set state to indicate we're connected
-                            ((RTMPConnection) conn).setStateCode(RTMP.STATE_CONNECTED);
-                            // remove handshake from session now that we are connected
-                            session.removeAttribute(RTMPConnection.RTMP_HANDSHAKE);
-                            // set encryption flag
-                            if (handshake.useEncryption()) {
-                                log.debug("Using encrypted communications, adding ciphers to the session");
-                                ((RTMPConnection) conn).setEncrypted(true);
-                                session.setAttribute(RTMPConnection.RTMPE_CIPHER_IN, handshake.getCipherIn());
-                                session.setAttribute(RTMPConnection.RTMPE_CIPHER_OUT, handshake.getCipherOut());
+                        if (handshake != null) {
+                            if (handshake.decodeClientRequest2(IoBuffer.wrap(dst))) {
+                                log.debug("Connected");
+                                // set state to indicate we're connected
+                                ((RTMPConnection) conn).setStateCode(RTMP.STATE_CONNECTED);
+                                // remove handshake from session now that we are connected
+                                session.removeAttribute(RTMPConnection.RTMP_HANDSHAKE);
+                                // set encryption flag
+                                if (handshake.useEncryption()) {
+                                    log.debug("Using encrypted communications, adding ciphers to the session");
+                                    ((RTMPConnection) conn).setEncrypted(true);
+                                    session.setAttribute(RTMPConnection.RTMPE_CIPHER_IN, handshake.getCipherIn());
+                                    session.setAttribute(RTMPConnection.RTMPE_CIPHER_OUT, handshake.getCipherOut());
+                                }
+                                // leave the remaining bytes in the buffer for the next step to handle / decrypt / decode
+                            } else {
+                                log.warn("Client was rejected due to invalid handshake");
+                                conn.close();
                             }
-                            // leave the remaining bytes in the buffer for the next step to handle / decrypt / decode
                         } else {
-                            log.warn("Client was rejected due to invalid handshake");
+                            log.warn("Handshake is null");
                             conn.close();
                         }
                     } else {

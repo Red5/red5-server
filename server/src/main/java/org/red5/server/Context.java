@@ -213,7 +213,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
      * @param context
      *            App context
      */
-    @SuppressWarnings("resource")
+    @SuppressWarnings({ "resource", "null" })
     public void setApplicationContext(ApplicationContext context) {
         this.applicationContext = context;
         String deploymentType = System.getProperty("red5.deployment.type");
@@ -291,15 +291,11 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
      * @throws NoSuchBeanDefinitionException
      *             When bean with given name doesn't exist
      */
+    @SuppressWarnings("null")
     public Object lookupService(String serviceName) {
         serviceName = getMappingStrategy().mapServiceName(serviceName);
         try {
-            Object bean = applicationContext.getBean(serviceName);
-            if (bean != null) {
-                return bean;
-            } else {
-                throw new ServiceNotFoundException(serviceName);
-            }
+            return applicationContext.getBean(serviceName);
         } catch (NoSuchBeanDefinitionException err) {
             throw new ServiceNotFoundException(serviceName);
         }
@@ -315,15 +311,21 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
      *             If there's no handler for given context path
      */
     public IScopeHandler lookupScopeHandler(String contextPath) {
+        IScopeHandler scopeHandler = null;
         // Get target scope handler name
         String scopeHandlerName = getMappingStrategy().mapScopeHandlerName(contextPath);
+        // Check if scope handler name is null
+        if (scopeHandlerName == null) {
+            throw new ScopeHandlerNotFoundException(contextPath);
+        }
         // Get bean from bean factory
         Object bean = applicationContext.getBean(scopeHandlerName);
-        if (bean != null && bean instanceof IScopeHandler) {
-            return (IScopeHandler) bean;
+        if (bean instanceof IScopeHandler) {
+            scopeHandler = (IScopeHandler) bean;
         } else {
             throw new ScopeHandlerNotFoundException(scopeHandlerName);
         }
+        return scopeHandler;
     }
 
     /**
@@ -346,6 +348,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
      *
      * @see org.springframework.core.io.Resource
      */
+    @SuppressWarnings("null")
     public Resource[] getResources(String pattern) throws IOException {
         return applicationContext.getResources(contextPath + pattern);
     }
@@ -359,6 +362,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
      *
      * @see org.springframework.core.io.Resource
      */
+    @SuppressWarnings("null")
     public Resource getResource(String path) {
         return applicationContext.getResource(contextPath + path);
     }
@@ -382,6 +386,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("null")
     public boolean hasBean(String beanId) {
         return applicationContext.containsBean(beanId);
     }
@@ -395,6 +400,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
      *
      * @see org.springframework.beans.factory.BeanFactory
      */
+    @SuppressWarnings("null")
     public Object getBean(String beanId) {
         // for war applications the "application" beans are not stored in the
         // sub-contexts, so look in the application context first and the core
@@ -420,6 +426,7 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
      *
      * @see org.springframework.beans.factory.BeanFactory
      */
+    @SuppressWarnings("null")
     public Object getCoreService(String beanId) {
         return coreContext.getBean(beanId);
     }

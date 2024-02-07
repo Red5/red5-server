@@ -718,6 +718,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      *            Resource path
      * @return Resource
      */
+    @SuppressWarnings("null")
     public Resource getResource(String path) {
         if (hasContext()) {
             return context.getResource(path);
@@ -734,6 +735,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * @throws IOException
      *             I/O exception
      */
+    @SuppressWarnings("null")
     public Resource[] getResources(String path) throws IOException {
         if (hasContext()) {
             return context.getResources(path);

@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.mp3.AudioFrame;
 import org.apache.tika.parser.mp3.Mp3Parser;

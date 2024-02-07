@@ -43,7 +43,6 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
 import org.apache.tomcat.websocket.WsSession;
 import org.apache.tomcat.websocket.WsWebSocketContainer;
-import org.junit.Test;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.plugin.PluginRegistry;

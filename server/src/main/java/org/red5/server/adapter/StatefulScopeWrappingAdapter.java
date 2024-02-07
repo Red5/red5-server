@@ -314,6 +314,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
      * @throws IOException
      *             I/O exception
      */
+    @SuppressWarnings("null")
     public Resource[] getResources(String pattern) throws IOException {
         return scope.getResources(pattern);
     }
@@ -325,6 +326,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
      *            Resource name
      * @return Resource with given name
      */
+    @SuppressWarnings("null")
     public Resource getResource(String path) {
         return scope.getResource(path);
     }

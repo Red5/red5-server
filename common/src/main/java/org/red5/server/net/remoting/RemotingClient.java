@@ -177,6 +177,7 @@ public class RemotingClient implements IRemotingClient {
      * @param in
      *            Byte buffer with response data
      */
+    @SuppressWarnings("null")
     protected void processHeaders(IoBuffer in) {
         log.debug("RemotingClient processHeaders - buffer limit: {}", (in != null ? in.limit() : 0));
         int version = in.getUnsignedShort(); // skip
@@ -227,6 +228,7 @@ public class RemotingClient implements IRemotingClient {
      *            Result data to decode
      * @return Object deserialized from byte buffer data
      */
+    @SuppressWarnings("null")
     private Object decodeResult(IoBuffer data) {
         log.debug("decodeResult - data limit: {}", (data != null ? data.limit() : 0));
         processHeaders(data);
@@ -300,6 +302,7 @@ public class RemotingClient implements IRemotingClient {
      *            Parameters passed to method
      * @return the result of the method call
      */
+    @SuppressWarnings("null")
     public Object invokeMethod(String method, Object[] params) {
         log.debug("invokeMethod url: {}", (url + appendToUrl));
         IoBuffer resultBuffer = null;

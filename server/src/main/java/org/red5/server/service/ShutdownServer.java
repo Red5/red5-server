@@ -104,9 +104,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
             // check for an embedded jee server
             jeeServer = applicationContext.getBean(LoaderBase.class);
             // lookup the jee container
-            if (jeeServer == null) {
-                log.info("JEE server was not found");
-            } else {
+            if (jeeServer != null) {
                 log.info("JEE server was found: {}", jeeServer.toString());
             }
         } catch (Exception e) {
@@ -278,6 +276,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
         this.shutdownTokenFileName = shutdownTokenFileName;
     }
 
+    @SuppressWarnings("null")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;

@@ -269,6 +269,7 @@ public class ScopeUtils {
      *            Class of service
      * @return Service object
      */
+    @SuppressWarnings("null")
     protected static Object getScopeService(IScope scope, String name, Class<?> defaultClass) {
         if (scope != null) {
             final IContext context = scope.getContext();

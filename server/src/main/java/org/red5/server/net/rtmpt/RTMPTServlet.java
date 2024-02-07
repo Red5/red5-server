@@ -518,6 +518,7 @@ public class RTMPTServlet extends HttpServlet {
      * @throws IOException
      *             I/O exception
      */
+    @SuppressWarnings("null")
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (applicationContext == null) {
@@ -531,7 +532,7 @@ public class RTMPTServlet extends HttpServlet {
             if (manager == null) {
                 log.warn("Class instance connection manager was null, looking up in application context");
                 manager = (RTMPConnManager) applicationContext.getBean("rtmpConnManager");
-                if (manager == null) {
+                if (!(manager instanceof RTMPConnManager)) {
                     log.warn("Connection manager was null in context, getting class instance");
                     manager = ((RTMPConnManager) RTMPConnManager.getInstance());
                     if (manager == null) {

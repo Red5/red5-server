@@ -177,6 +177,7 @@ public class ProviderService implements IProviderService {
         return scope.getBasicScope(ScopeType.BROADCAST, name) == null;
     }
 
+    @SuppressWarnings("null")
     private File getStreamFile(IScope scope, String name) {
         if (log.isDebugEnabled()) {
             log.debug("getStreamFile - name: {}", name);

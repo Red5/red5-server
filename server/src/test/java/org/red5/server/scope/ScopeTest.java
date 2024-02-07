@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
+@SuppressWarnings("null")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration("file:src/test/resources/org/red5/server/scope/ScopeTest.xml")
 public class ScopeTest extends AbstractJUnit4SpringContextTests {
@@ -254,13 +255,13 @@ public class ScopeTest extends AbstractJUnit4SpringContextTests {
         log.info("testScopeCreationTypes-end");
     }
 
+    @SuppressWarnings("unused")
     private class Worker implements Callable<Integer> {
 
         protected final int id;
 
         protected IScope scope;
 
-        @SuppressWarnings("unused")
         protected int loops, updates, failures;
 
         public Worker(IScope appScope, int loops) {

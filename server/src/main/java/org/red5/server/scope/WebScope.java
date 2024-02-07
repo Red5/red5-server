@@ -155,6 +155,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
      * @param servletContext
      *            Servlet context
      */
+    @SuppressWarnings("null")
     public void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
     }

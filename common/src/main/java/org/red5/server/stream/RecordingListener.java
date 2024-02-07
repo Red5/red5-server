@@ -95,6 +95,7 @@ public class RecordingListener implements IRecordingListener {
      *            name
      * @return file
      */
+    @SuppressWarnings("null")
     public static File getRecordFile(IScope scope, String name) {
         // get stream filename generator
         IStreamFilenameGenerator generator = (IStreamFilenameGenerator) ScopeUtils.getScopeService(scope, IStreamFilenameGenerator.class, DefaultStreamFilenameGenerator.class);

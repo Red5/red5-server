@@ -161,7 +161,9 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                         }
                     }
                     log.debug("Parent scope: {} room scope: {}", parentScope, roomScope);
-                    parentScope = roomScope;
+                    if (roomScope != null) {
+                        parentScope = roomScope;
+                    }
                 }
                 // create and add the websocket scope for the new room scope
                 manager.makeScope(roomScope);

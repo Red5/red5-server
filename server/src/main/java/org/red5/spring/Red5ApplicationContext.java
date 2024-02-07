@@ -37,11 +37,13 @@ public class Red5ApplicationContext extends FileSystemXmlApplicationContext impl
         }
     }
 
+    @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         log.info("setApplicationContext: {}", applicationContext);
         this.applicationContext = applicationContext;
     }
 
+    @SuppressWarnings("null")
     @Override
     public void setParent(ApplicationContext parent) {
         super.setParent(parent);

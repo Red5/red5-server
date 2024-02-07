@@ -49,6 +49,7 @@ public class DOM2Writer {
      * @param out
      *            Writer object
      */
+    @SuppressWarnings("null")
     private static void print(Node node, PrintWriter out) {
         if (node == null) {
             return;

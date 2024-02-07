@@ -652,6 +652,7 @@ public class StreamService implements IStreamService {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("null")
     public void publish(String name, String mode) {
         IConnection conn = Red5.getConnectionLocal();
         Map<String, String> params = null;

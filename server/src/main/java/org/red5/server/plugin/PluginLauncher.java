@@ -126,6 +126,7 @@ public class PluginLauncher implements ApplicationContextAware, InitializingBean
 
     }
 
+    @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         log.trace("Setting application context");
         this.applicationContext = applicationContext;

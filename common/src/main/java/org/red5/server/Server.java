@@ -81,6 +81,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      * @param applicationContext
      *            Application context
      */
+    @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) {
         log.debug("Setting application context");
         this.applicationContext = applicationContext;
@@ -268,6 +269,7 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      *
      * @return String representation of server
      */
+    @SuppressWarnings("null")
     @Override
     public String toString() {
         return new ToStringCreator(this).append(mapping).toString();

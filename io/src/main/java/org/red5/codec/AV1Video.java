@@ -8,7 +8,6 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.io.utils.LEB128;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +31,7 @@ public class AV1Video extends AbstractVideo {
     public static final byte[] AV1_FRAME_PREFIX = new byte[] { 0x2a, 0x01 };
 
     // buffer holding OBU's
+    @SuppressWarnings("unused")
     private IoBuffer obuBuffer;
 
     public AV1Video() {

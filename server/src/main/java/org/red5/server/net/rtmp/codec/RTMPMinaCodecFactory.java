@@ -48,6 +48,7 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory, ApplicationCo
         return encoder;
     }
 
+    @SuppressWarnings("null")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         appCtx = applicationContext;

@@ -171,6 +171,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      * @throws IOException
      *             on error
      */
+    @SuppressWarnings("null")
     public FLVReader(FileChannel channel) throws IOException {
         if (null == channel) {
             log.warn("Reader was passed a null channel");

@@ -269,6 +269,7 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("null")
     @Override
     public boolean setAttributes(Map<String, Object> values) {
         int successes = 0;

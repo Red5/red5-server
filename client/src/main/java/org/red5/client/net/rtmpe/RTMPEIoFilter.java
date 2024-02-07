@@ -75,36 +75,41 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                     // set handshake to match client requested type
                     byte connectionType = dst[0];
                     log.trace("Incoming S0 connection type: {}", connectionType);
-                    if (handshake.getHandshakeType() != connectionType) {
-                        log.debug("Server requested handshake type: {} client requested: {}", connectionType, handshake.getHandshakeType());
-                    }
-                    // XXX do we go ahead with what the server requested?
-                    handshake.setHandshakeType(connectionType);
-                    // wrap the buffer for decoding
-                    IoBuffer decBuffer = IoBuffer.wrap(dst);
-                    // skip the connection type; should be 1536 after
-                    decBuffer.get();
-                    //log.debug("S1 - buffer: {}", Hex.encodeHexString(dst));
-                    // keep remaining bytes in a thread local for use by S2 decoding
-                    IoBuffer c2 = handshake.decodeServerResponse1(decBuffer);
-                    if (c2 != null) {
-                        // clean up
-                        decBuffer.clear();
-                        // set state to indicate we're waiting for S2
-                        conn.setStateCode(RTMP.STATE_HANDSHAKE);
-                        //log.trace("C2 byte order: {}", c2.order());
-                        session.write(c2);
-                        // if we got S0S1+S2 continue processing
-                        if (buffer.getBufferSize() >= Constants.HANDSHAKE_SIZE) {
-                            log.debug("decodeHandshakeS2");
-                            if (handshake.decodeServerResponse2(buffer.getBuffer(Constants.HANDSHAKE_SIZE))) {
-                                log.debug("S2 decoding successful");
-                            } else {
-                                log.warn("Handshake failed on S2 processing");
+                    if (handshake != null) {
+                        if (handshake.getHandshakeType() != connectionType) {
+                            log.debug("Server requested handshake type: {} client requested: {}", connectionType, handshake.getHandshakeType());
+                        }
+                        // XXX do we go ahead with what the server requested?
+                        handshake.setHandshakeType(connectionType);
+                        // wrap the buffer for decoding
+                        IoBuffer decBuffer = IoBuffer.wrap(dst);
+                        // skip the connection type; should be 1536 after
+                        decBuffer.get();
+                        //log.debug("S1 - buffer: {}", Hex.encodeHexString(dst));
+                        // keep remaining bytes in a thread local for use by S2 decoding
+                        IoBuffer c2 = handshake.decodeServerResponse1(decBuffer);
+                        if (c2 != null) {
+                            // clean up
+                            decBuffer.clear();
+                            // set state to indicate we're waiting for S2
+                            conn.setStateCode(RTMP.STATE_HANDSHAKE);
+                            //log.trace("C2 byte order: {}", c2.order());
+                            session.write(c2);
+                            // if we got S0S1+S2 continue processing
+                            if (buffer.getBufferSize() >= Constants.HANDSHAKE_SIZE) {
+                                log.debug("decodeHandshakeS2");
+                                if (handshake.decodeServerResponse2(buffer.getBuffer(Constants.HANDSHAKE_SIZE))) {
+                                    log.debug("S2 decoding successful");
+                                } else {
+                                    log.warn("Handshake failed on S2 processing");
+                                }
+                                completeConnection(session, conn, handshake);
                             }
-                            completeConnection(session, conn, handshake);
+                        } else {
+                            conn.close();
                         }
                     } else {
+                        log.warn("Handshake is missing from the session");
                         conn.close();
                     }
                 }
@@ -115,13 +120,18 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                 log.trace("Incoming S2 size: {}", s2Size);
                 if (s2Size >= Constants.HANDSHAKE_SIZE) {
                     log.debug("decodeHandshakeS2");
-                    if (handshake.decodeServerResponse2(buffer.getBuffer(Constants.HANDSHAKE_SIZE))) {
-                        log.debug("S2 decoding successful");
+                    if (handshake != null) {
+                        if (handshake.decodeServerResponse2(buffer.getBuffer(Constants.HANDSHAKE_SIZE))) {
+                            log.debug("S2 decoding successful");
+                        } else {
+                            log.warn("Handshake failed on S2 processing");
+                        }
+                        // complete the connection regardless of the S2 success or failure
+                        completeConnection(session, conn, handshake);
                     } else {
-                        log.warn("Handshake failed on S2 processing");
+                        log.warn("Handshake is missing from the session");
+                        conn.close();
                     }
-                    // complete the connection regardless of the S2 success or failure
-                    completeConnection(session, conn, handshake);
                 } else {
                     // don't fall through to connected process if we didn't have enough for the handshake
                     break;

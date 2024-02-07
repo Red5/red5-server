@@ -76,6 +76,7 @@ public class WarLoaderServlet extends ContextLoaderListener {
      * Main entry point for the Red5 Server as a war
      */
     // Notification that the web application is ready to process requests
+    @SuppressWarnings("null")
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         if (null != servletContext) {
@@ -124,6 +125,7 @@ public class WarLoaderServlet extends ContextLoaderListener {
     /*
      * Registers a subcontext with red5
      */
+    @SuppressWarnings("null")
     public void registerSubContext(String webAppKey) {
         // get the sub contexts - servlet context
         ServletContext ctx = servletContext.getContext(webAppKey);
@@ -161,6 +163,7 @@ public class WarLoaderServlet extends ContextLoaderListener {
     /**
      * Clearing the in-memory configuration parameters, we will receive notification that the servlet context is about to be shut down
      */
+    @SuppressWarnings("null")
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         synchronized (servletContext) {

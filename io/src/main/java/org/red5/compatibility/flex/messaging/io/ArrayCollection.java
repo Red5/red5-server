@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  *            type of collection elements
  */
-public class ArrayCollection<T> implements Collection<T>, List<T>, IExternalizable {
+public class ArrayCollection<T> implements List<T>, IExternalizable {
 
     private static final Logger log = LoggerFactory.getLogger(ArrayCollection.class);
 

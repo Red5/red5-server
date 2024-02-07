@@ -170,6 +170,7 @@ public class FilePersistence extends RamPersistence {
      * @param path
      *            New path
      */
+    @SuppressWarnings("null")
     public void setPath(String path) {
         log.debug("Set path: {}", path);
         Resource rootFile = resources.getResource(path);
@@ -334,7 +335,7 @@ public class FilePersistence extends RamPersistence {
      *            Object to attach to
      * @return Persistable object
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "null" })
     private IPersistable doLoad(String name, IPersistable object) {
         log.debug("doLoad - name: {} object: {}", name, object);
         IPersistable result = object;
@@ -486,6 +487,7 @@ public class FilePersistence extends RamPersistence {
      *
      *         otherwise
      */
+    @SuppressWarnings("null")
     protected boolean saveObject(IPersistable object) {
         log.debug("saveObject - object: {}", object);
         boolean result = true;
@@ -594,6 +596,7 @@ public class FilePersistence extends RamPersistence {
      * @param base
      *            Base directory
      */
+    @SuppressWarnings("null")
     protected void checkRemoveEmptyDirectories(String base) {
         if (checkForEmptyDirectories) {
             String dir;

@@ -67,6 +67,7 @@ public class CacheImpl implements ICacheStore, ApplicationContextAware {
     private static ApplicationContext applicationContext = null;
 
     /** {@inheritDoc} */
+    @SuppressWarnings("null")
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         CacheImpl.applicationContext = context;

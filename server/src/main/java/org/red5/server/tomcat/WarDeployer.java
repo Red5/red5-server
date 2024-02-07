@@ -98,9 +98,7 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
             // check for an embedded jee server
             LoaderBase jeeServer = applicationContext.getBean(LoaderBase.class);
             // lookup the jee container
-            if (jeeServer == null) {
-                log.info("JEE server was not found");
-            } else {
+            if (jeeServer != null) {
                 log.info("JEE server was found: {}", jeeServer.toString());
             }
         } catch (Exception e) {
@@ -185,6 +183,7 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
         scheduler.shutdownNow();
     }
 
+    @SuppressWarnings("null")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;

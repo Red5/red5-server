@@ -362,7 +362,7 @@ public class Client extends AttributeStore implements IClient {
             instance = new Client(id, (Long) cd.get("creationTime"), null);
             instance.setAttribute(PERMISSIONS, cd.get(PERMISSIONS));
         }
-        if (cd.containsKey("attributes")) {
+        if (instance != null && cd.containsKey("attributes")) {
             AttributeStore attrs = (AttributeStore) cd.get("attributes");
             instance.setAttributes(attrs);
         }

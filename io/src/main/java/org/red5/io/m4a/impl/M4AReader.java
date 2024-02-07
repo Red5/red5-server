@@ -150,6 +150,7 @@ public class M4AReader implements IoConstants, ITagReader {
      * @throws IOException
      *             on IO error
      */
+    @SuppressWarnings("null")
     public M4AReader(File f) throws IOException {
         if (null == f) {
             log.warn("Reader was passed a null file");

@@ -100,6 +100,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
     /**
      * Loads context settings from ResourceBundle (.properties file)
      */
+    @SuppressWarnings("null")
     public void init() throws IOException {
         // Load properties bundle
         Properties props = new Properties();
@@ -147,6 +148,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
      * @param config
      *            Filename
      */
+    @SuppressWarnings("null")
     public void loadContext(String name, String config) {
         log.debug("Load context - name: {} config: {}", name, config);
         // check the existence of the config file
@@ -200,6 +202,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
      * @param name
      *            Context name
      */
+    @SuppressWarnings("null")
     public void unloadContext(String name) {
         log.debug("Un-load context - name: {}", name);
         ApplicationContext context = contextMap.remove(name);
@@ -332,6 +335,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
      * @throws BeansException
      *             Top level exception for app context (that is, in fact, beans factory)
      */
+    @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }

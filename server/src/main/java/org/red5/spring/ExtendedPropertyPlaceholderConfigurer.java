@@ -42,6 +42,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
     private Properties mergedProperties;
 
+    @SuppressWarnings("null")
     @Override
     protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props) throws BeansException {
 
@@ -70,6 +71,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
      * @throws IOException
      *             on IO exception
      */
+    @SuppressWarnings("null")
     public void setWildcardLocations(String[] locations) throws IOException {
 
         List<Resource> resources = new ArrayList<Resource>();
@@ -132,6 +134,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
         private static final long serialVersionUID = -6365943736917478749L;
 
+        @SuppressWarnings("null")
         public int compare(Resource resource1, Resource resource2) {
             if (resource1 != null) {
                 if (resource2 != null) {

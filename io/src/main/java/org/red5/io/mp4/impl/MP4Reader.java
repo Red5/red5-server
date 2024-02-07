@@ -249,6 +249,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      * @throws IOException
      *             on IO exception
      */
+    @SuppressWarnings("null")
     public MP4Reader(File f) throws IOException {
         if (null == f) {
             log.warn("Reader was passed a null file");

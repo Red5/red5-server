@@ -586,7 +586,7 @@ public class Input extends org.red5.io.amf.Input {
         return super.readMap();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes", "serial" })
+    @SuppressWarnings({ "unchecked", "rawtypes", "null", "serial" })
     @Override
     public Object readObject() {
         log.trace("readObject - amf3_mode: {}", amf3_mode);

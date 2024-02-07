@@ -269,6 +269,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Initialization.
      */
+    @SuppressWarnings("null")
     public void start() throws ServletException {
         log.info("Loading Tomcat");
         //get a reference to the current threads classloader
@@ -534,6 +535,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      * @return true on success
      * @throws ServletException
      */
+    @SuppressWarnings("null")
     public boolean startWebApplication(String applicationName) throws ServletException {
         log.info("Starting Tomcat - Web application");
         boolean result = false;

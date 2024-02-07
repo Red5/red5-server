@@ -50,6 +50,7 @@ import com.google.gson.Gson;
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
+@SuppressWarnings("null")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(locations = { "SharedObjectTest.xml" })
 public class SharedObjectTest extends AbstractJUnit4SpringContextTests {
@@ -318,6 +319,7 @@ public class SharedObjectTest extends AbstractJUnit4SpringContextTests {
         log.info("testMissingHandler-end");
     }
 
+    @SuppressWarnings("unused")
     @Test
     public void testAttributeBlasting() throws Throwable {
         log.info("testAttributeBlasting");
@@ -338,7 +340,6 @@ public class SharedObjectTest extends AbstractJUnit4SpringContextTests {
         // fires off threads
         long start = System.nanoTime();
         // invokeAll() blocks until all tasks have run...
-        @SuppressWarnings("unused")
         List<Future<Integer>> futures = executorService.invokeAll(workers);
         log.info("Runtime: {}ms", TimeUnit.MILLISECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
         workers.forEach(worker -> {
@@ -415,6 +416,7 @@ public class SharedObjectTest extends AbstractJUnit4SpringContextTests {
     }
 
     //@Test
+    @SuppressWarnings("unused")
     public void testAttributeBlastingJSON() throws Throwable {
         log.info("testAttributeBlastingJSON");
         SOApplication app = (SOApplication) applicationContext.getBean("web.handler");
@@ -434,7 +436,6 @@ public class SharedObjectTest extends AbstractJUnit4SpringContextTests {
         // fires off threads
         long start = System.nanoTime();
         // invokeAll() blocks until all tasks have run...
-        @SuppressWarnings("unused")
         List<Future<Integer>> futures = executorService.invokeAll(workers);
         log.info("Runtime: {}ms", TimeUnit.MILLISECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS));
         workers.forEach(worker -> {

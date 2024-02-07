@@ -1566,6 +1566,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                         return (int) (System.currentTimeMillis() - startTime);
                     }
 
+                    @SuppressWarnings("null")
                     public void onFailure(Throwable t) {
                         log.debug("ReceivedMessageTask failure: {}", t);
                         if (log.isWarnEnabled()) {

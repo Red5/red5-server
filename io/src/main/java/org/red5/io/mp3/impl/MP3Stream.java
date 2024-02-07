@@ -248,6 +248,7 @@ public class MP3Stream extends PushbackInputStream {
      *            the code for the bit rate
      * @return the bit rate in bits per second
      */
+    @SuppressWarnings("null")
     private static int calculateBitRate(int mpegVer, int layer, int code) {
         int[] arr = null;
         if (mpegVer == AudioFrame.MPEG_V1) {

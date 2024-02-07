@@ -59,6 +59,7 @@ public class MetaService implements IMetaService {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("null")
     @Override
     public void write(IMetaData<?, ?> meta) throws IOException {
         // Get cue points, FLV reader and writer

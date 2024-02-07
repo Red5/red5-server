@@ -27,6 +27,7 @@ public class FileProviderTest extends AbstractJUnit4SpringContextTests {
         System.setProperty("red5.deployment.type", "junit");
     }
 
+    @SuppressWarnings("null")
     @Test
     public void test() throws IOException {
         // get dummy scope

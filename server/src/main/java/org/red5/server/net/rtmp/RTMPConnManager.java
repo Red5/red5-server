@@ -214,6 +214,7 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
         this.debug = debug;
     }
 
+    @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         RTMPConnManager.applicationContext = applicationContext;
     }

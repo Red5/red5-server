@@ -146,6 +146,7 @@ public abstract class LoaderBase implements ApplicationContextAware {
      * @throws BeansException
      *             Abstract superclass for all exceptions thrown in the beans package and subpackages
      */
+    @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         log.debug("Set application context: {}", context);
         applicationContext = context;

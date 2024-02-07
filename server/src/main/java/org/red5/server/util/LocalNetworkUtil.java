@@ -30,6 +30,7 @@ public class LocalNetworkUtil {
      * ============================================
      * 127.0.0.1                       siteLocal: false isLoopback: true isIPV6: false
      */
+    @SuppressWarnings("null")
     public static String getCurrentEnvironmentLoopbackIp() {
         Enumeration<NetworkInterface> netInterfaces = null;
         try {
