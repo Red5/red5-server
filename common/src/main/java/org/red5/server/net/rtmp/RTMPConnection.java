@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1510,7 +1511,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                     do {
                         try {
                             // DTS appears to be off only by < 10ms
-                            Packet p = receivedPacketQueue.take();
+                            Packet p = receivedPacketQueue.poll(10000L, TimeUnit.MILLISECONDS); // wait for a packet up to 10 seconds
                             if (p != null) {
                                 if (isTrace) {
                                     log.trace("Handle received packet: {}", p);
@@ -1518,10 +1519,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                                 // pass message to the handler where any sorting or delays would need to be injected
                                 handler.messageReceived(conn, p);
                             }
+                        } catch (InterruptedException e) {
+                            log.debug("Interrupted while waiting for message {} state: {}", sessionId, RTMP.states[getStateCode()], e);
                         } catch (Exception e) {
                             log.error("Error processing received message {} state: {}", sessionId, RTMP.states[getStateCode()], e);
                         }
-                    } while (!isClosed());
+                    } while (state.getState() < RTMP.STATE_ERROR); // keep processing unless we pass the error state
                     receivedPacketFuture = null;
                     receivedPacketQueue.clear();
                 });

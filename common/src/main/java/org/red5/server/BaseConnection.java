@@ -444,18 +444,18 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     public void close() {
         if (closed) {
             log.debug("Already closed, nothing to do");
-            return;
-        }
-        closed = true;
-        // disconnect
-        disconnect();
-        // alert our listeners
-        if (connectionListeners != null) {
-            for (IConnectionListener listener : connectionListeners) {
-                listener.notifyDisconnected(this);
+        } else {
+            closed = true;
+            // disconnect
+            disconnect();
+            // alert our listeners
+            if (connectionListeners != null) {
+                for (IConnectionListener listener : connectionListeners) {
+                    listener.notifyDisconnected(this);
+                }
+                connectionListeners.clear();
+                connectionListeners = null;
             }
-            connectionListeners.clear();
-            connectionListeners = null;
         }
     }
 

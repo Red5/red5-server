@@ -124,7 +124,7 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
                         if (future.isClosed()) {
                             log.info("Connection is closed: {}", getSessionId());
                             if (log.isTraceEnabled()) {
-                                log.trace("Session id - local: {} session: {}", getSessionId(), (String) ioSession.removeAttribute(RTMPConnection.RTMP_SESSION_ID));
+                                log.trace("Session id - local: {} session: {}", getSessionId(), (String) ioSession.getAttribute(RTMPConnection.RTMP_SESSION_ID));
                             }
                             handler.connectionClosed(self);
                         } else {
@@ -352,7 +352,7 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
             //if (log.isTraceEnabled()) {
             //    log.trace("Write lock wait count: {} closed: {}", lock.getQueueLength(), isClosed());
             //}
-            while (!isClosed()) {
+            while (state.getState() < RTMP.STATE_ERROR) {
                 boolean acquired = false;
                 try {
                     acquired = lock.tryAcquire(10, TimeUnit.MILLISECONDS);
@@ -392,7 +392,7 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     public void writeRaw(IoBuffer out) {
         if (ioSession != null) {
             final Semaphore lock = getLock();
-            while (!isClosed()) {
+            while (state.getState() < RTMP.STATE_ERROR) {
                 boolean acquired = false;
                 try {
                     acquired = lock.tryAcquire(10, TimeUnit.MILLISECONDS);

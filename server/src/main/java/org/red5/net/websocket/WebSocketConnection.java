@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import javax.websocket.Extension;
 import javax.websocket.Session;
+import javax.websocket.RemoteEndpoint.Basic;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.Constants;
@@ -186,41 +187,37 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
         // process the incoming string
         if (StringUtils.isNotBlank(data)) {
-            WsSession session = wsSession.get();
-            if (session != null && session.isOpen()) {
-                if (isConnected()) {
-                    try {
-                        if (useAsync) {
-                            if (sendFuture != null && !sendFuture.isDone()) {
-                                try {
-                                    sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
-                                } catch (TimeoutException e) {
-                                    log.warn("Send timed out {}", wsSessionId);
-                                    if (!isConnected()) {
-                                        sendFuture.cancel(true);
-                                        return;
-                                    }
+            final WsSession session = wsSession.get();
+            // attempt send only if the session is not closed
+            if (session != null && !session.isClosed()) {
+                try {
+                    if (useAsync) {
+                        if (sendFuture != null && !sendFuture.isDone()) {
+                            try {
+                                sendFuture.get(sendTimeout, TimeUnit.MILLISECONDS);
+                            } catch (TimeoutException e) {
+                                log.warn("Send timed out {}", wsSessionId);
+                                // if the session is not open, cancel the future
+                                if (!session.isOpen()) {
+                                    sendFuture.cancel(true);
+                                    return;
                                 }
                             }
-                            synchronized (wsSessionId) {
-                                int lengthToWrite = data.getBytes().length;
-                                sendFuture = session.getAsyncRemote().sendText(data);
-                                updateWriteBytes(lengthToWrite);
-                            }
-                        } else {
-                            synchronized (wsSessionId) {
-                                int lengthToWrite = data.getBytes().length;
-                                session.getBasicRemote().sendText(data);
-                                updateWriteBytes(lengthToWrite);
-                            }
                         }
-                    } catch (Exception e) {
-                        if (isConnected()) {
-                            log.warn("Send text exception", e);
+                        synchronized (wsSessionId) {
+                            int lengthToWrite = data.getBytes().length;
+                            sendFuture = session.getAsyncRemote().sendText(data);
+                            updateWriteBytes(lengthToWrite);
+                        }
+                    } else {
+                        synchronized (wsSessionId) {
+                            int lengthToWrite = data.getBytes().length;
+                            session.getBasicRemote().sendText(data);
+                            updateWriteBytes(lengthToWrite);
                         }
                     }
-                } else {
-                    throw new IOException("WS connection closed");
+                } catch (Exception e) {
+                    log.warn("Send text exception", e);
                 }
             } else {
                 throw new IOException("WS session closed");
