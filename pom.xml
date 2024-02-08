@@ -90,6 +90,8 @@
         <maven.test.skip>false</maven.test.skip>
         <!-- skip running the tests -->
         <skipTests>true</skipTests>
+        <!-- to be or not to be verbose -->
+        <verbose>false</verbose>
         <maven.compiler.source>1.11</maven.compiler.source>
         <maven.compiler.target>1.11</maven.compiler.target>
         <java.release.level>11</java.release.level>
@@ -262,7 +264,8 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <verbose>true</verbose>
+                        <verbose>${verbose}</verbose>
+                        <release>${java.release.level}</release>
                         <failOnError>false</failOnError>
                         <sourcepath>${basedir}/src/main/java</sourcepath>
                         <includeDependencySources>false</includeDependencySources>
@@ -283,14 +286,14 @@
                                 <head>To do:</head>
                             </tag>
                         </tags>
-                    <reportSets>
-                        <reportSet>
-                            <reports>
-                                <report>aggregate-no-fork</report>
-                                <report>test-aggregate-no-fork</report>
-                            </reports>
-                        </reportSet>
-                    </reportSets>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>aggregate-no-fork</report>
+                                    <report>test-aggregate-no-fork</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
                     </configuration>
                 </plugin>
                 <plugin>
