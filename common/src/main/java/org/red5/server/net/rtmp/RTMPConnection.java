@@ -296,6 +296,11 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     protected long maxHandlingTimeout = 500L;
 
     /**
+     * Maximum time in milliseconds to wait for a message.
+     */
+    private long maxPollTimeout = 10000L;
+
+    /**
      * Bandwidth limit type / enforcement. (0=hard,1=soft,2=dynamic)
      */
     protected int limitType = 0;
@@ -1513,7 +1518,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                     do {
                         try {
                             // DTS appears to be off only by < 10ms
-                            Packet p = receivedPacketQueue.poll(10000L, TimeUnit.MILLISECONDS); // wait for a packet up to 10 seconds
+                            Packet p = receivedPacketQueue.poll(maxPollTimeout, TimeUnit.MILLISECONDS); // wait for a packet up to 10 seconds
                             if (p != null) {
                                 if (isTrace) {
                                     log.trace("Handle received packet: {}", p);
@@ -1858,6 +1863,14 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
     public void setMaxHandlingTimeout(long maxHandlingTimeout) {
         this.maxHandlingTimeout = maxHandlingTimeout;
+    }
+
+    public long getMaxPollTimeout() {
+        return maxPollTimeout;
+    }
+
+    public void setMaxPollTimeout(long maxPollTimeout) {
+        this.maxPollTimeout = maxPollTimeout;
     }
 
     public int getChannelsInitalCapacity() {

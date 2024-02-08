@@ -112,6 +112,8 @@
         <property name="maxInactivity" value="${rtmp.max_inactivity}" />
         <!-- Max. time in milliseconds to wait for a valid handshake. -->
         <property name="maxHandshakeTimeout" value="${rtmp.max_handshake_time}" />
+        <!-- Max. time in milliseconds to wait for a message while polling -->
+        <property name="maxPollTimeout" value="${rtmp.max_poll_time}" />
         <!-- Default server bandwidth per connection -->
         <property name="defaultServerBandwidth" value="${rtmp.default_server_bandwidth}" />
         <!-- Default client bandwidth per connection -->
