@@ -9,7 +9,7 @@ package org.red5.server.tomcat.rtmps;
 
 import java.io.File;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;

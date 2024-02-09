@@ -7,8 +7,8 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 
-import javax.websocket.SendHandler;
-import javax.websocket.SendResult;
+import jakarta.websocket.SendHandler;
+import jakarta.websocket.SendResult;
 
 import org.apache.coyote.http11.upgrade.UpgradeInfo;
 import org.apache.tomcat.util.net.AbstractEndpoint;
@@ -17,7 +17,7 @@ import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
 
 /**
- * This is the server side {@link javax.websocket.RemoteEndpoint} implementation - i.e. what the server uses to send data to the client.
+ * This is the server side {@link jakarta.websocket.RemoteEndpoint} implementation - i.e. what the server uses to send data to the client.
  */
 public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
@@ -181,7 +181,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
      * @param t
      *            The throwable associated with any error that occurred
      * @param useDispatch
-     *            Should {@link SendHandler#onResult(SendResult)} be called from a new thread, keeping in mind the requirements of {@link javax.websocket.RemoteEndpoint.Async}
+     *            Should {@link SendHandler#onResult(SendResult)} be called from a new thread, keeping in mind the requirements of {@link jakarta.websocket.RemoteEndpoint.Async}
      */
     private void clearHandler(Throwable t, boolean useDispatch) {
         // Setting the result marks this (partial) message as complete which means the next one may be sent which

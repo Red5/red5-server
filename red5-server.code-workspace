@@ -9,10 +9,10 @@
 		"java.compile.nullAnalysis.mode": "automatic",
 		"java.project.sourcePaths": [
 			"io",
-			"server-common",
+			"common",
 			"server",
 			"service",
-			"client",
+			"client"
 		],
 		"java.jdt.ls.androidSupport.enabled": "off",
 		"java.maven.updateSnapshots": true,

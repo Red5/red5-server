@@ -8,7 +8,8 @@
 package org.red5.server.jmx.mxbeans;
 
 import javax.management.MXBean;
-import javax.servlet.ServletException;
+
+import jakarta.servlet.ServletException;
 
 /**
  * Simple mbean interface for J2EE container loaders.

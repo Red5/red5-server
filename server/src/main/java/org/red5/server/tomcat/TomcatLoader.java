@@ -22,9 +22,9 @@ import java.util.concurrent.Future;
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.security.auth.message.config.AuthConfigFactory;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.security.auth.message.config.AuthConfigFactory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
@@ -53,6 +53,7 @@ import org.red5.server.jmx.mxbeans.LoaderMXBean;
 import org.red5.server.plugin.PluginRegistry;
 import org.red5.server.security.IRed5Realm;
 import org.red5.server.util.FileUtil;
+import org.red5.spring.web.context.Red5ConfigurableWebApplicationContext;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -440,10 +441,10 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
                                 // create a spring web application context
                                 final String contextClass = servletContext.getInitParameter(CONTEXT_CLASS_PARAM) == null ? XmlWebApplicationContext.class.getName() : servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
                                 // web app context (spring)
-                                ConfigurableWebApplicationContext appctx = null;
+                                Red5ConfigurableWebApplicationContext appctx = null;
                                 try {
                                     Class<?> clazz = Class.forName(contextClass, true, webClassLoader);
-                                    appctx = (ConfigurableWebApplicationContext) clazz.getDeclaredConstructor().newInstance();
+                                    appctx = (Red5ConfigurableWebApplicationContext) clazz.getDeclaredConstructor().newInstance();
                                     // set the root webapp ctx attr on the each servlet context so spring can find it later
                                     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, appctx);
                                     appctx.setConfigLocations(new String[] { contextConfigLocation });
@@ -589,7 +590,8 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
                     //set current threads classloader to the webapp classloader
                     Thread.currentThread().setContextClassLoader(webClassLoader);
                     // create a spring web application context
-                    XmlWebApplicationContext appctx = new XmlWebApplicationContext();
+                    Class<?> clazz = Class.forName(contextClass, true, webClassLoader);
+                    Red5ConfigurableWebApplicationContext appctx = (Red5ConfigurableWebApplicationContext) clazz.getDeclaredConstructor().newInstance();
                     appctx.setClassLoader(webClassLoader);
                     appctx.setConfigLocations(new String[] { contextConfigLocation });
                     // check for red5 context bean

@@ -123,8 +123,15 @@ public class FilePersistence extends RamPersistence {
         String contextPath = null;
         if (rootFile instanceof ServletContextResource) {
             ServletContextResource servletResource = (ServletContextResource) rootFile;
-            contextPath = servletResource.getServletContext().getContextPath();
-            if ("/".equals(contextPath)) {
+            try {
+                String uriPath = servletResource.getURI().getPath();
+                contextPath = uriPath.substring(uriPath.indexOf("//"), uriPath.lastIndexOf('/'));
+                // Spring 5.x doesn't have jakara.servlet package support
+                //contextPath = servletResource.getServletContext().getContextPath();
+            } catch (Exception e) {
+                log.warn("Error getting context path", e);                
+            }
+            if ("/".equals(contextPath) || contextPath == null) {
                 contextPath = "/root";
             }
         } else if (resources instanceof IScope) {

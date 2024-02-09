@@ -14,8 +14,8 @@ import java.util.Map;
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
@@ -30,6 +30,7 @@ import org.red5.server.LoaderBase;
 import org.red5.server.jmx.mxbeans.ContextLoaderMXBean;
 import org.red5.server.jmx.mxbeans.TomcatVHostLoaderMXBean;
 import org.red5.server.util.FileUtil;
+import org.red5.spring.web.context.Red5ConfigurableWebApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -155,7 +156,7 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
                         ClassLoader webClassLoader = cldr.getClassLoader();
                         log.debug("Webapp classloader: {}", webClassLoader);
                         //create a spring web application context
-                        XmlWebApplicationContext appctx = new XmlWebApplicationContext();
+                        Red5ConfigurableWebApplicationContext appctx = new Red5ConfigurableWebApplicationContext();
                         appctx.setClassLoader(webClassLoader);
                         appctx.setConfigLocations(new String[] { "/WEB-INF/red5-*.xml" });
                         //check for red5 context bean

@@ -9,8 +9,9 @@ package org.red5.server.scope;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
+import org.red5.jakarta.JakartaServletContextAware;
 import org.red5.server.LoaderBase;
 import org.red5.server.api.IApplicationContext;
 import org.red5.server.api.IApplicationLoader;
@@ -24,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.web.context.ServletContextAware;
 
 /**
  * <p>
@@ -40,7 +40,7 @@ import org.springframework.web.context.ServletContextAware;
  * Red5 server implementation instance and ServletContext are injected as well.
  */
 @ManagedResource
-public class WebScope extends Scope implements ServletContextAware, WebScopeMXBean, InitializingBean, DisposableBean {
+public class WebScope extends Scope implements JakartaServletContextAware, WebScopeMXBean, InitializingBean, DisposableBean {
 
     /**
      * Logger
