@@ -7,17 +7,12 @@
 
 package org.red5.server.net.rtmp;
 
-import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.red5.server.api.Red5;
 import org.red5.server.net.rtmp.message.Packet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.task.TaskRejectedException;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * Wraps processing of incoming messages.
@@ -26,117 +21,50 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
  */
 public final class ReceivedMessageTask implements Callable<Packet> {
 
-    private final static Logger log = LoggerFactory.getLogger(ReceivedMessageTask.class);
-
     private final RTMPConnection conn;
 
     private final IRTMPHandler handler;
 
-    private final String sessionId;
+    private final Packet packet;
 
-    private Packet packet;
+    private final int hashCode;
 
-    private long packetNumber;
+    private AtomicBoolean processing = new AtomicBoolean(false);
 
-    private final AtomicBoolean processing = new AtomicBoolean(false);
-
-    private Thread taskThread;
-
-    private ScheduledFuture<Runnable> deadlockFuture;
-
-    public ReceivedMessageTask(String sessionId, Packet packet, IRTMPHandler handler, RTMPConnection conn) {
-        this.sessionId = sessionId;
-        this.packet = packet;
-        this.handler = handler;
+    public ReceivedMessageTask(RTMPConnection conn, Packet packet) {
         this.conn = conn;
+        this.packet = packet;
+        this.handler = conn.getHandler();
+        // generate hash code
+        hashCode = Objects.hash(conn.getSessionId(), packet);
     }
 
     public Packet call() throws Exception {
-        //keep a ref for executor thread
-        taskThread = Thread.currentThread();
-        // set connection to thread local
-        Red5.setConnectionLocal(conn);
-        try {
-            // pass message to the handler
-            handler.messageReceived(conn, packet);
-            // if we get this far, set done / completed flag
-            packet.setProcessed(true);
-        } finally {
-            // clear thread local
-            Red5.setConnectionLocal(null);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Processing message for {} is processed: {} packet #{}", sessionId, packet.isProcessed(), packetNumber);
-        }
-        return packet;
-    }
-
-    /**
-     * Runs deadlock guard task
-     *
-     * @param deadlockGuardTask
-     *            deadlock guard task
-     */
-    @SuppressWarnings({ "unchecked", "null" })
-    public void runDeadlockFuture(Runnable deadlockGuardTask) {
-        if (deadlockFuture == null) {
-            ThreadPoolTaskScheduler deadlockGuard = conn.getDeadlockGuardScheduler();
-            if (deadlockGuard != null) {
-                try {
-                    deadlockFuture = (ScheduledFuture<Runnable>) deadlockGuard.schedule(deadlockGuardTask, new Date(packet.getExpirationTime()));
-                } catch (TaskRejectedException e) {
-                    log.warn("DeadlockGuard task is rejected for {}", sessionId, e);
-                }
-            } else {
-                log.debug("Deadlock guard is null for {}", sessionId);
+        if (processing.compareAndSet(false, true)) {
+            // set connection to thread local
+            Red5.setConnectionLocal(conn);
+            try {
+                // pass message to the handler
+                handler.messageReceived(conn, packet);
+                // if we get this far, set done / completed flag
+                packet.setProcessed(true);
+            } finally {
+                // clear thread local
+                Red5.setConnectionLocal(null);
             }
         } else {
-            log.warn("Deadlock future is already create for {}", sessionId);
+            throw new IllegalStateException("Task is already being processed");
         }
-    }
-
-    /**
-     * Cancels deadlock future if it was created
-     */
-    public void cancelDeadlockFuture() {
-        // kill the future for the deadlock since processing is complete
-        if (deadlockFuture != null) {
-            deadlockFuture.cancel(true);
-        }
-    }
-
-    /**
-     * Marks task as processing if it is not processing yet.
-     *
-     * @return true if successful, or false otherwise
-     */
-    public boolean setProcessing() {
-        return processing.compareAndSet(false, true);
-    }
-
-    public long getPacketNumber() {
-        return packetNumber;
-    }
-
-    public void setPacketNumber(long packetNumber) {
-        this.packetNumber = packetNumber;
+        return packet;
     }
 
     public Packet getPacket() {
         return packet;
     }
 
-    public Thread getTaskThread() {
-        return taskThread;
-    }
-
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
-        result = prime * result + packet.getHeader().hashCode();
-        return result;
+        return hashCode;
     }
 
     @Override
@@ -148,11 +76,7 @@ public final class ReceivedMessageTask implements Callable<Packet> {
         if (getClass() != obj.getClass())
             return false;
         ReceivedMessageTask other = (ReceivedMessageTask) obj;
-        if (sessionId == null) {
-            if (other.sessionId != null) {
-                return false;
-            }
-        } else if (!sessionId.equals(other.sessionId)) {
+        if (!this.equals(other)) {
             return false;
         }
         if (!packet.getHeader().equals(other.packet.getHeader())) {
@@ -163,7 +87,7 @@ public final class ReceivedMessageTask implements Callable<Packet> {
 
     @Override
     public String toString() {
-        return "[sessionId: " + sessionId + "; packetNumber: " + packetNumber + "; processing: " + processing.get() + "]";
+        return "[sessionId: " + conn.getSessionId() + ", processing: " + processing.get() + "]";
     }
 
 }

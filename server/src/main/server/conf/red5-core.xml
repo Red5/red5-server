@@ -27,7 +27,6 @@
         <property name="threadNamePrefix" value="RTMPConnectionScheduler-" />
     </bean>
     
-<!--
     <bean id="messageExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="${rtmp.executor.core_pool_size}" />
         <property name="maxPoolSize" value="${rtmp.executor.max_pool_size}" />
@@ -36,14 +35,6 @@
         <property name="waitForTasksToCompleteOnShutdown" value="true" />
         <property name="threadNamePrefix" value="RTMPConnectionExecutor-" />
     </bean>
-    
-    <bean id="deadlockGuardScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
-        <property name="poolSize" value="${rtmp.deadlockguard.sheduler.pool_size}" />
-        <property name="daemon" value="false" />
-        <property name="waitForTasksToCompleteOnShutdown" value="true" />
-        <property name="threadNamePrefix" value="DeadlockGuardScheduler-" />
-    </bean>
--->
 
     <!-- RTMP connection manager -->
     <bean id="rtmpConnManager" class="org.red5.server.net.rtmp.RTMPConnManager" />
@@ -106,6 +97,8 @@
     <bean id="rtmpMinaConnection" scope="prototype" class="org.red5.server.net.rtmp.RTMPMinaConnection">
         <!-- Executor for scheduled tasks -->
         <property name="scheduler" ref="rtmpScheduler" />
+        <!-- Executor for received tasks -->
+        <property name="executor" ref="messageExecutor" />
         <!-- Ping clients every X ms. Set to 0 to disable ghost detection code. -->
         <property name="pingInterval" value="${rtmp.ping_interval}" />
         <!-- Disconnect client after X ms of not responding. -->

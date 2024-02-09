@@ -8,7 +8,6 @@
 package org.red5.server.net.rtmp;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.red5.io.object.StreamAction;
@@ -54,12 +53,11 @@ import org.red5.server.so.SharedObjectService;
 import org.red5.server.stream.StreamService;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.DisposableBean;
 
 /**
  * RTMP events handler.
  */
-public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
+public class RTMPHandler extends BaseRTMPHandler {
 
     protected static Logger log = Red5LoggerFactory.getLogger(RTMPHandler.class);
 
@@ -86,17 +84,6 @@ public class RTMPHandler extends BaseRTMPHandler implements DisposableBean {
      * Whether or not to dispatch stream actions to the current scope.
      */
     private boolean dispatchStreamActions;
-
-    @Override
-    public void destroy() throws Exception {
-        log.info("Shutting down handling");
-        if (!recvDispatchExecutor.isTerminated()) {
-            List<Runnable> waiters = recvDispatchExecutor.shutdownNow();
-            if (isDebug) {
-                log.debug("Tasks waiting at shutdown: {}", waiters);
-            }
-        }
-    }
 
     /**
      * Setter for server object.
