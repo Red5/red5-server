@@ -541,7 +541,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      */
     @Override
     public void disconnect() {
-        log.debug("disconnect: {}", conn);
+        log.debug("disconnect - connection: {}", conn);
         if (conn != null) {
             streamDataList.clear();
             conn.close();

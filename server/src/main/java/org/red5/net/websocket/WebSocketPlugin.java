@@ -82,7 +82,6 @@ public class WebSocketPlugin extends Red5Plugin {
     /** {@inheritDoc} */
     @Override
     public void doStart() throws Exception {
-        super.doStart();
         log.trace("WebSocketPlugin start");
         // add scope listener to allow creation of websocket scopes
         scopeListener = new ScopeListenerAdapter() {
@@ -136,7 +135,6 @@ public class WebSocketPlugin extends Red5Plugin {
         });
         managerMap.clear();
         executor.shutdownNow();
-        super.doStop();
     }
 
     /**

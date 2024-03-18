@@ -181,9 +181,10 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             WebSocketPlugin plugin = new WebSocketPlugin();
             plugin.setApplicationContext(applicationContext);
             plugin.setServer(server);
-            // start it up and register it
-            plugin.doStart();
+            // register it
             PluginRegistry.register(plugin);
+            // start it
+            plugin.doStart();
         }
         start();
     }
@@ -866,14 +867,17 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         } else {
             log.error("Error getting Spring bean factory for shutdown");
         }
-        try {
+        // no need to stop the websocket plugin if it is not registered
+        if (PluginRegistry.isRegistered(WebSocketPlugin.NAME)) {
             // stop websocket
-            WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
-            if (plugin != null) {
-                plugin.doStop();
+            try {
+                WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
+                if (plugin != null) {
+                    plugin.doStop();
+                }
+            } catch (Exception e) {
+                log.warn("WebSocket plugin stop, failed", e);
             }
-        } catch (Exception e) {
-            log.warn("WebSocket plugin stop, failed", e);
         }
         try {
             // stop tomcat

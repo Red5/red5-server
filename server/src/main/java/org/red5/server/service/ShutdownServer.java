@@ -89,8 +89,12 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
     // whether the server is shutdown
     private AtomicBoolean shutdown = new AtomicBoolean(false);
 
-    // single thread executor for the internal startup / server
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    // thread executor for the internal startup and shutdown
+    private ExecutorService executor = Executors.newFixedThreadPool(2, r -> {
+        Thread t = new Thread(r, "ShutdownServer-" + r.hashCode());
+        t.setDaemon(true);
+        return t;
+    });
 
     // reference to the runnable
     private Future<?> future;
@@ -110,10 +114,8 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
         } catch (Exception e) {
         }
         // start blocks, so it must be on its own thread
-        future = executor.submit(new Runnable() {
-            public void run() {
-                start();
-            }
+        future = executor.submit(() -> {
+            start();
         });
     }
 
@@ -196,30 +198,30 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
 
     private void shutdownOrderly() {
         // shutdown internal listener
-        shutdown.compareAndSet(false, true);
-        // shutdown the plug-in launcher
-        try {
-            log.debug("Attempting to shutdown plugin registry");
-            PluginRegistry.shutdown();
-        } catch (Exception e) {
-            log.warn("Exception shutting down plugin registry", e);
-        }
-        // shutdown the context loader
-        if (contextLoader != null) {
-            log.debug("Attempting to shutdown context loader");
-            contextLoader.shutdown();
-            contextLoader = null;
-        }
-        // shutdown the jee server
-        if (jeeServer != null) {
-            // destroy is a DisposibleBean method not LoaderBase
-            // jeeServer.destroy();
-            jeeServer = null;
-        }
-        // attempt to kill the contexts
-        final CountDownLatch latch = new CountDownLatch(3);
-        new Thread(new Runnable() {
-            public void run() {
+        if (shutdown.compareAndSet(false, true)) {
+            log.info("Shutdown server shutdown");
+            // shutdown the plug-in launcher
+            try {
+                log.debug("Attempting to shutdown plugin registry");
+                PluginRegistry.shutdown();
+            } catch (Exception e) {
+                log.warn("Exception shutting down plugin registry", e);
+            }
+            // shutdown the context loader
+            if (contextLoader != null) {
+                log.debug("Attempting to shutdown context loader");
+                contextLoader.shutdown();
+                contextLoader = null;
+            }
+            // shutdown the jee server
+            if (jeeServer != null) {
+                // destroy is a DisposibleBean method not LoaderBase
+                // jeeServer.destroy();
+                jeeServer = null;
+            }
+            // attempt to kill the contexts
+            final CountDownLatch latch = new CountDownLatch(3);
+            executor.submit(() -> {
                 try {
                     log.debug("Attempting to close core context");
                     ((ConfigurableApplicationContext) coreContext).close();
@@ -227,10 +229,8 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-        }).start();
-        new Thread(new Runnable() {
-            public void run() {
+            });
+            executor.submit(() -> {
                 try {
                     log.debug("Attempting to close common context");
                     ((ConfigurableApplicationContext) commonContext).close();
@@ -238,10 +238,8 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-        }).start();
-        new Thread(new Runnable() {
-            public void run() {
+            });
+            executor.submit(() -> {
                 try {
                     log.debug("Attempting to close app context");
                     ((ConfigurableApplicationContext) applicationContext).close();
@@ -249,19 +247,22 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            });
+            try {
+                if (latch.await(shutdownDelay, TimeUnit.SECONDS)) {
+                    log.info("Application contexts are closed");
+                } else {
+                    log.info("One or more contexts didn't close in the allotted time");
+                }
+            } catch (InterruptedException e) {
+                log.error("Exception attempting to close app contexts", e);
+            } finally {
+                // shutdown the executor
+                executor.shutdown();
             }
-        }).start();
-        try {
-            if (latch.await(shutdownDelay, TimeUnit.SECONDS)) {
-                log.info("Application contexts are closed");
-            } else {
-                log.info("One or more contexts didn't close in the allotted time");
-            }
-        } catch (InterruptedException e) {
-            log.error("Exception attempting to close app contexts", e);
+            // exit
+            System.exit(0);
         }
-        // exit
-        System.exit(0);
     }
 
     public void setPort(int port) {
