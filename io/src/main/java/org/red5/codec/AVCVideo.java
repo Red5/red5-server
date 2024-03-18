@@ -7,9 +7,6 @@
 
 package org.red5.codec;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,38 +21,15 @@ public class AVCVideo extends AbstractVideo {
 
     private static Logger log = LoggerFactory.getLogger(AVCVideo.class);
 
-    /**
-     * AVC video codec constant
-     */
-    static final String CODEC_NAME = "AVC";
+    private static boolean isDebug = log.isDebugEnabled();
 
     /** Video decoder configuration data */
     private FrameData decoderConfiguration;
 
-    /**
-     * Storage for frames buffered since last key frame
-     */
-    private final CopyOnWriteArrayList<FrameData> interframes = new CopyOnWriteArrayList<>();
-
-    /**
-     * Number of frames buffered since last key frame
-     */
-    private final AtomicInteger numInterframes = new AtomicInteger(0);
-
-    /**
-     * Whether or not to buffer interframes
-     */
-    private boolean bufferInterframes = false;
-
     /** Constructs a new AVCVideo. */
     public AVCVideo() {
+        codec = VideoCodec.AVC;
         this.reset();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getName() {
-        return CODEC_NAME;
     }
 
     /** {@inheritDoc} */
@@ -109,8 +83,7 @@ public class AVCVideo extends AbstractVideo {
             if ((frameType & 0x0f) == VideoCodec.AVC.getId()) {
                 // check for keyframe
                 if ((frameType & 0xf0) == FLV_FRAME_KEY) {
-                    //log.trace("Key frame");
-                    if (log.isDebugEnabled()) {
+                    if (isDebug) {
                         log.debug("Keyframe - AVC type: {}", avcType);
                     }
                     // rewind
@@ -139,7 +112,7 @@ public class AVCVideo extends AbstractVideo {
                     //log.trace("Keyframes: {}", keyframes.size());
                 } else if (bufferInterframes) {
                     //log.trace("Interframe");
-                    if (log.isDebugEnabled()) {
+                    if (isDebug) {
                         log.debug("Interframe - AVC type: {}", avcType);
                     }
                     // rewind
@@ -153,7 +126,7 @@ public class AVCVideo extends AbstractVideo {
                             interframes.add(new FrameData(data));
                         }
                     } catch (Throwable e) {
-                        log.error("Failed to buffer interframe", e);
+                        log.warn("Failed to buffer interframe", e);
                     }
                     //log.trace("Interframes: {}", interframes.size());
                 }
@@ -174,29 +147,6 @@ public class AVCVideo extends AbstractVideo {
     @Override
     public IoBuffer getDecoderConfiguration() {
         return decoderConfiguration.getFrame();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getNumInterframes() {
-        return numInterframes.get();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public FrameData getInterframe(int index) {
-        if (index < numInterframes.get()) {
-            return interframes.get(index);
-        }
-        return null;
-    }
-
-    public boolean isBufferInterframes() {
-        return bufferInterframes;
-    }
-
-    public void setBufferInterframes(boolean bufferInterframes) {
-        this.bufferInterframes = bufferInterframes;
     }
 
 }

@@ -17,11 +17,13 @@ import org.apache.mina.core.buffer.IoBuffer;
  */
 public class MP3Audio extends AbstractAudio {
 
-    static final String CODEC_NAME = "MP3";
+    {
+        codec = AudioCodec.MP3;
+    }
 
     @Override
     public String getName() {
-        return CODEC_NAME;
+        return codec.name();
     }
 
     @Override

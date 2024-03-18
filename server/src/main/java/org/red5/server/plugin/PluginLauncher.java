@@ -88,6 +88,7 @@ public class PluginLauncher implements ApplicationContextAware, InitializingBean
                 try {
                     pluginClass = Class.forName(pluginMainClass, true, loader);
                 } catch (ClassNotFoundException e) {
+                    log.warn("Error loading plugin class: {}", pluginMainClass, e);
                     continue;
                 }
                 try {

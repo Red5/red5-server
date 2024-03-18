@@ -4,9 +4,16 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 public class AbstractAudio implements IAudioStreamCodec {
 
+    protected AudioCodec codec;
+
+    @Override
+    public AudioCodec getCodec() {
+        return codec;
+    }
+
     @Override
     public String getName() {
-        return null;
+        return codec.name();
     }
 
     @Override

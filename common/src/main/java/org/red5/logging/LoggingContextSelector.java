@@ -8,7 +8,6 @@
 package org.red5.logging;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -37,7 +36,7 @@ public class LoggingContextSelector implements ContextSelector {
 
     private static final Semaphore lock = new Semaphore(1, true);
 
-    private static final ConcurrentMap<String, LoggerContext> contextMap = new ConcurrentHashMap<>(6, 0.9f, 1);
+    private static final ConcurrentMap<String, LoggerContext> contextMap = new ConcurrentHashMap<>();
 
     private static LoggerContext DEFAULT_CONTEXT;
 
@@ -194,9 +193,7 @@ public class LoggingContextSelector implements ContextSelector {
     }
 
     public List<String> getContextNames() {
-        List<String> list = new ArrayList<>();
-        list.addAll(contextMap.keySet());
-        return list;
+        return List.copyOf(contextMap.keySet());
     }
 
     public void setContextConfigFile(String contextConfigFile) {

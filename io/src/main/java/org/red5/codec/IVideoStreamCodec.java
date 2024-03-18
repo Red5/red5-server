@@ -20,21 +20,26 @@ public interface IVideoStreamCodec {
     static final byte FLV_FRAME_KEY = 0x10;
 
     /**
+     * @return the codec type.
+     */
+    VideoCodec getCodec();
+
+    /**
      * @return the name of the video codec.
      */
-    public String getName();
+    String getName();
 
     /**
      * Reset the codec to its initial state.
      */
-    public void reset();
+    void reset();
 
     /**
      * Check if the codec supports frame dropping.
      *
      * @return if the codec supports frame dropping.
      */
-    public boolean canDropFrames();
+    boolean canDropFrames();
 
     /**
      * Returns true if the codec knows how to handle the passed stream data.
@@ -43,7 +48,7 @@ public interface IVideoStreamCodec {
      *            some sample data to see if this codec can handle it
      * @return can this code handle the data.
      */
-    public boolean canHandleData(IoBuffer data);
+    boolean canHandleData(IoBuffer data);
 
     /**
      * Update the state of the codec with the passed data.
@@ -52,7 +57,7 @@ public interface IVideoStreamCodec {
      *            data to tell the codec we're adding
      * @return true for success. false for error
      */
-    public boolean addData(IoBuffer data);
+    boolean addData(IoBuffer data);
 
     /**
      * Update the state of the codec with the passed data.
@@ -62,7 +67,7 @@ public interface IVideoStreamCodec {
      * @param timestamp time associated with the data
      * @return true for success. false for error
      */
-    public boolean addData(IoBuffer data, int timestamp);
+    boolean addData(IoBuffer data, int timestamp);
 
     /**
      * Add video data with a time stamp and a flag identifying the content as AMF or not.
@@ -72,35 +77,37 @@ public interface IVideoStreamCodec {
      * @param amf if true, data is in AMF format otherwise its most likely from non-AMF source like RTP
      * @return true if data is added and false otherwise
      */
-    public boolean addData(IoBuffer data, int timestamp, boolean amf);
+    boolean addData(IoBuffer data, int timestamp, boolean amf);
 
     /**
      * Returns keyframe data.
      *
      * @return the data for a keyframe
      */
-    public IoBuffer getKeyframe();
+    IoBuffer getKeyframe();
 
     /**
      * Returns all the keyframe data.
      *
      * @return array of keyframe data
      */
-    public FrameData[] getKeyframes();
+    FrameData[] getKeyframes();
 
     /**
      * Returns information used to configure the decoder.
      *
      * @return the data for decoder setup
      */
-    public IoBuffer getDecoderConfiguration();
+    default IoBuffer getDecoderConfiguration() {
+        return null;
+    }
 
     /**
      * Returns the number of interframes collected from last keyframe.
      *
      * @return number of interframes
      */
-    public int getNumInterframes();
+    int getNumInterframes();
 
     /**
      * Gets data of interframe with the specified index.
@@ -109,7 +116,7 @@ public interface IVideoStreamCodec {
      *            of interframe
      * @return data of the interframe or null if index is not valid
      */
-    public FrameData getInterframe(int index);
+    FrameData getInterframe(int index);
 
     /**
      * Holder for video frame data.

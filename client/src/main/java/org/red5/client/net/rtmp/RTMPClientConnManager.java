@@ -42,7 +42,7 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
     private static int executorQueueCapacity = 32;
 
     // whether or not to use the ThreadPoolTaskExecutor for incoming messages
-    protected static boolean enableTaskExecutor;
+    protected static boolean enableTaskExecutor = true;
 
     protected static IConnectionManager<BaseConnection> instance;
 

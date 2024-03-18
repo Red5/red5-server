@@ -43,6 +43,10 @@ public class OpusAudio extends AbstractAudio {
     // 48k stereo is the default configuration.
     private volatile boolean needConfig;
 
+    {
+        codec = AudioCodec.OPUS;
+    }
+
     @Override
     public String getName() {
         return CODEC_NAME;

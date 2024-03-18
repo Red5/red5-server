@@ -1483,10 +1483,9 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                                 }
                                 log.info("Rejected task: {}", task);
                             } catch (Throwable e) {
-                                log.error("Incoming message failed task: {}", task, e);
+                                log.warn("Incoming message failed task: {}", task, e);
                                 if (isDebug) {
-                                    log.debug("Execution rejected on {} - {}", getSessionId(), RTMP.states[getStateCode()]);
-                                    log.debug("Lock permits - decode: {} encode: {}", decoderLock.availablePermits(), encoderLock.availablePermits());
+                                    log.debug("Execution rejected on {} - {} lock permits - decode: {} encode: {}", getSessionId(), RTMP.states[getStateCode()], decoderLock.availablePermits(), encoderLock.availablePermits());
                                 }
                             }
                         }

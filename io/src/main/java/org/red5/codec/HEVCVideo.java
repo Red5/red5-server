@@ -7,9 +7,6 @@
 
 package org.red5.codec;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,38 +20,15 @@ public class HEVCVideo extends AbstractVideo {
 
     private static Logger log = LoggerFactory.getLogger(HEVCVideo.class);
 
-    /**
-     * HEVC video codec constant
-     */
-    static final String CODEC_NAME = "HEVC";
+    private static boolean isDebug = log.isDebugEnabled();
 
     /** Video decoder configuration data */
     private FrameData decoderConfiguration;
 
-    /**
-     * Storage for frames buffered since last key frame
-     */
-    private final CopyOnWriteArrayList<FrameData> interframes = new CopyOnWriteArrayList<>();
-
-    /**
-     * Number of frames buffered since last key frame
-     */
-    private final AtomicInteger numInterframes = new AtomicInteger(0);
-
-    /**
-     * Whether or not to buffer interframes
-     */
-    private boolean bufferInterframes = false;
-
     /** Constructs a new AVCVideo. */
     public HEVCVideo() {
+        codec = VideoCodec.HEVC;
         this.reset();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getName() {
-        return CODEC_NAME;
     }
 
     /** {@inheritDoc} */
@@ -108,8 +82,7 @@ public class HEVCVideo extends AbstractVideo {
             if ((frameType & 0x0f) == VideoCodec.HEVC.getId()) {
                 // check for keyframe
                 if ((frameType & 0xf0) == FLV_FRAME_KEY) {
-                    //log.trace("Key frame");
-                    if (log.isDebugEnabled()) {
+                    if (isDebug) {
                         log.debug("Keyframe - HEVC type: {}", avcType);
                     }
                     // rewind
@@ -129,7 +102,9 @@ public class HEVCVideo extends AbstractVideo {
                             keyframes.add(new FrameData(data));
                             break;
                         case 0: // configuration
-                            //log.trace("Decoder configuration");
+                            if (isDebug) {
+                                log.debug("Decoder configuration");
+                            }
                             // Store HEVCDecoderConfigurationRecord data
                             decoderConfiguration.setData(data);
                             softReset();
@@ -138,7 +113,7 @@ public class HEVCVideo extends AbstractVideo {
                     //log.trace("Keyframes: {}", keyframes.size());
                 } else if (bufferInterframes) {
                     //log.trace("Interframe");
-                    if (log.isDebugEnabled()) {
+                    if (isDebug) {
                         log.debug("Interframe - HEVC type: {}", avcType);
                     }
                     // rewind
@@ -152,7 +127,7 @@ public class HEVCVideo extends AbstractVideo {
                             interframes.add(new FrameData(data));
                         }
                     } catch (Throwable e) {
-                        log.error("Failed to buffer interframe", e);
+                        log.warn("Failed to buffer interframe", e);
                     }
                     //log.trace("Interframes: {}", interframes.size());
                 }
@@ -173,29 +148,6 @@ public class HEVCVideo extends AbstractVideo {
     @Override
     public IoBuffer getDecoderConfiguration() {
         return decoderConfiguration.getFrame();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getNumInterframes() {
-        return numInterframes.get();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public FrameData getInterframe(int index) {
-        if (index < numInterframes.get()) {
-            return interframes.get(index);
-        }
-        return null;
-    }
-
-    public boolean isBufferInterframes() {
-        return bufferInterframes;
-    }
-
-    public void setBufferInterframes(boolean bufferInterframes) {
-        this.bufferInterframes = bufferInterframes;
     }
 
 }

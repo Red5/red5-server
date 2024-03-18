@@ -19,6 +19,10 @@ public class ULAWAudio extends AbstractAudio {
 
     static final String CODEC_NAME = "PCM uLaw";
 
+    {
+        codec = AudioCodec.PCM_MULAW;
+    }
+
     @Override
     public String getName() {
         return CODEC_NAME;

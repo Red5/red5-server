@@ -19,6 +19,10 @@ public class SpeexAudio extends AbstractAudio {
 
     static final String CODEC_NAME = "Speex";
 
+    {
+        codec = AudioCodec.SPEEX;
+    }
+
     @Override
     public String getName() {
         return CODEC_NAME;

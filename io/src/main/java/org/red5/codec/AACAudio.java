@@ -27,24 +27,20 @@ public class AACAudio extends AbstractAudio {
     public static final int[] AAC_SAMPLERATES = { 96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350 };
 
     /**
-     * AAC audio codec constant
-     */
-    static final String CODEC_NAME = "AAC";
-
-    /**
      * Block of data (AAC DecoderConfigurationRecord)
      */
     private byte[] blockDataAACDCR;
 
     /** Constructs a new AACAudio */
     public AACAudio() {
+        codec = AudioCodec.AAC;
         this.reset();
     }
 
     /** {@inheritDoc} */
     @Override
     public String getName() {
-        return CODEC_NAME;
+        return codec.name();
     }
 
     /** {@inheritDoc} */

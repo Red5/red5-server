@@ -52,6 +52,7 @@ import org.red5.server.stream.OutputStream;
 import org.red5.server.stream.consumer.ConnectionConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Base class for clients (RTMP and RTMPT)
@@ -907,6 +908,15 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     public void setConnection(RTMPConnection conn) {
         this.conn = conn;
         this.conn.setHandler(this);
+        if (conn.getExecutor() == null) {
+            // setup executor
+            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+            executor.setCorePoolSize(1);
+            executor.setDaemon(true);
+            executor.setMaxPoolSize(1);
+            executor.initialize();
+            conn.setExecutor(executor);
+        }
     }
 
     /**

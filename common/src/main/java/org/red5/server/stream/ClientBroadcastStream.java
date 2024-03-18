@@ -7,6 +7,11 @@
 
 package org.red5.server.stream;
 
+import static org.red5.server.net.rtmp.message.Constants.TYPE_AUDIO_DATA;
+import static org.red5.server.net.rtmp.message.Constants.TYPE_INVOKE;
+import static org.red5.server.net.rtmp.message.Constants.TYPE_NOTIFY;
+import static org.red5.server.net.rtmp.message.Constants.TYPE_VIDEO_DATA;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -65,7 +70,6 @@ import org.red5.server.messaging.OOBControlMessage;
 import org.red5.server.messaging.PipeConnectionEvent;
 import org.red5.server.net.rtmp.event.AudioData;
 import org.red5.server.net.rtmp.event.IRTMPEvent;
-import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.server.net.rtmp.message.Constants;
@@ -96,6 +100,8 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 public class ClientBroadcastStream extends AbstractClientStream implements IClientBroadcastStream, IFilter, IPushableConsumer, IPipeConnectionListener, IEventDispatcher, IClientBroadcastStreamStatistics, ClientBroadcastStreamMXBean {
 
     private static final Logger log = LoggerFactory.getLogger(ClientBroadcastStream.class);
+
+    private static final boolean isDebug = log.isDebugEnabled();
 
     /**
      * Whether or not to automatically record the associated stream.
@@ -264,7 +270,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                 case STREAM_CONTROL:
                 case STREAM_DATA:
                     // create the event
-                    IRTMPEvent rtmpEvent;
+                    final IRTMPEvent rtmpEvent;
                     try {
                         rtmpEvent = (IRTMPEvent) event;
                     } catch (ClassCastException e) {
@@ -276,13 +282,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                     if (rtmpEvent.getSourceType() != Constants.SOURCE_TYPE_LIVE) {
                         rtmpEvent.setSourceType(Constants.SOURCE_TYPE_LIVE);
                     }
-                    /*
-                     * if (log.isTraceEnabled()) { // If this is first packet save its timestamp; expect it is // absolute? no matter: it's never used! if (firstPacketTime == -1) { firstPacketTime =
-                     * rtmpEvent.getTimestamp(); log.trace(String.format("CBS=@%08x: rtmpEvent=%s creation=%s firstPacketTime=%d", System.identityHashCode(this), rtmpEvent.getClass().getSimpleName(),
-                     * creationTime, firstPacketTime)); } else { log.trace(String.format("CBS=@%08x: rtmpEvent=%s creation=%s firstPacketTime=%d timestamp=%d", System.identityHashCode(this),
-                     * rtmpEvent.getClass().getSimpleName(), creationTime, firstPacketTime, eventTime)); } }
-                     */
-                    //get the buffer only once per call
+                    // get the buffer only once per call
                     IoBuffer buf = null;
                     if (rtmpEvent instanceof IStreamData && (buf = ((IStreamData<?>) rtmpEvent).getData()) != null) {
                         bytesReceived += buf.limit();
@@ -294,65 +294,71 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                         info = (StreamCodecInfo) codecInfo;
                     }
                     //log.trace("Stream codec info: {}", info);
-                    if (rtmpEvent instanceof AudioData) {
-                        //log.trace("Audio: {}", eventTime);
-                        IAudioStreamCodec audioStreamCodec = null;
-                        if (checkAudioCodec) {
-                            // dont try to read codec info from 0 length audio packets
-                            if (buf.limit() > 0) {
-                                audioStreamCodec = AudioCodecFactory.getAudioCodec(buf);
-                                if (info != null) {
-                                    info.setAudioCodec(audioStreamCodec);
+                    switch (rtmpEvent.getDataType()) {
+                        case TYPE_AUDIO_DATA: // AudioData
+                            //log.trace("Audio: {}", eventTime);
+                            IAudioStreamCodec audioStreamCodec = null;
+                            if (checkAudioCodec) {
+                                // dont try to read codec info from 0 length audio packets
+                                if (buf.limit() > 0) {
+                                    audioStreamCodec = AudioCodecFactory.getAudioCodec(buf);
+                                    if (info != null) {
+                                        info.setAudioCodec(audioStreamCodec);
+                                    }
+                                    checkAudioCodec = false;
                                 }
-                                checkAudioCodec = false;
+                            } else if (codecInfo != null) {
+                                audioStreamCodec = codecInfo.getAudioCodec();
                             }
-                        } else if (codecInfo != null) {
-                            audioStreamCodec = codecInfo.getAudioCodec();
-                        }
-                        if (audioStreamCodec != null) {
-                            audioStreamCodec.addData(buf);
-                        }
-                        if (info != null) {
-                            info.setHasAudio(true);
-                        }
-                    } else if (rtmpEvent instanceof VideoData) {
-                        //log.trace("Video: {}", eventTime);
-                        IVideoStreamCodec videoStreamCodec = null;
-                        if (checkVideoCodec) {
-                            videoStreamCodec = VideoCodecFactory.getVideoCodec(buf);
+                            if (audioStreamCodec != null) {
+                                audioStreamCodec.addData(buf);
+                            }
                             if (info != null) {
-                                info.setVideoCodec(videoStreamCodec);
+                                info.setHasAudio(true);
                             }
-                            checkVideoCodec = false;
-                        } else if (codecInfo != null) {
-                            videoStreamCodec = codecInfo.getVideoCodec();
-                        }
-                        if (videoStreamCodec != null) {
-                            videoStreamCodec.addData(buf, eventTime);
-                        }
-                        if (info != null) {
-                            info.setHasVideo(true);
-                        }
-                    } else if (rtmpEvent instanceof Invoke) {
-                        //Invoke invokeEvent = (Invoke) rtmpEvent;
-                        //log.debug("Invoke action: {}", invokeEvent.getAction());
-                        // event / stream listeners will not be notified of invokes
-                        return;
-                    } else if (rtmpEvent instanceof Notify) {
-                        Notify notifyEvent = (Notify) rtmpEvent;
-                        String action = notifyEvent.getAction();
-                        //if (log.isDebugEnabled()) {
-                        //log.debug("Notify action: {}", action);
-                        //}
-                        if ("onMetaData".equals(action)) {
-                            // store the metadata
-                            try {
-                                //log.debug("Setting metadata");
-                                setMetaData(notifyEvent.duplicate());
-                            } catch (Exception e) {
-                                log.warn("Metadata could not be duplicated for this stream", e);
+                            break;
+                        case TYPE_VIDEO_DATA: // VideoData
+                            //log.trace("Video: {}", eventTime);
+                            IVideoStreamCodec videoStreamCodec = null;
+                            if (checkVideoCodec) {
+                                videoStreamCodec = VideoCodecFactory.getVideoCodec(buf);
+                                if (info != null) {
+                                    info.setVideoCodec(videoStreamCodec);
+                                }
+                                checkVideoCodec = false;
+                            } else if (codecInfo != null) {
+                                videoStreamCodec = codecInfo.getVideoCodec();
                             }
-                        }
+                            if (videoStreamCodec != null) {
+                                videoStreamCodec.addData(buf, eventTime);
+                            }
+                            if (info != null) {
+                                info.setHasVideo(true);
+                            }
+                            break;
+                        case TYPE_NOTIFY:
+                            Notify notifyEvent = (Notify) rtmpEvent;
+                            String action = notifyEvent.getAction();
+                            //if (isDebug) {
+                            //log.debug("Notify action: {}", action);
+                            //}
+                            if ("onMetaData".equals(action)) {
+                                // store the metadata
+                                try {
+                                    //log.debug("Setting metadata");
+                                    setMetaData(notifyEvent.duplicate());
+                                } catch (Exception e) {
+                                    log.warn("Metadata could not be duplicated for this stream", e);
+                                }
+                            }
+                            break;
+                        case TYPE_INVOKE:
+                            //Invoke invokeEvent = (Invoke) rtmpEvent;
+                            //log.debug("Invoke action: {}", invokeEvent.getAction());
+                            // event / stream listeners will not be notified of invokes
+                            return;
+                        default:
+                            log.debug("Unknown: {}", rtmpEvent);
                     }
                     // update last event time
                     if (eventTime > latestTimeStamp) {
@@ -367,7 +373,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             // create new RTMP message, initialize it and push through pipe
                             RTMPMessage msg = RTMPMessage.build(rtmpEvent, eventTime);
                             livePipe.pushMessage(msg);
-                        } else if (log.isDebugEnabled()) {
+                        } else if (isDebug) {
                             log.debug("Live pipe was null, message was not pushed");
                         }
                     } catch (IOException err) {
@@ -379,7 +385,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             try {
                                 listener.packetReceived(this, (IStreamPacket) rtmpEvent);
                             } catch (Exception e) {
-                                log.error("Error while notifying listener {}", listener, e);
+                                log.warn("Error while notifying listener {}", listener, e);
                                 if (listener instanceof RecordingListener) {
                                     sendRecordFailedNotify(e.getMessage());
                                 }
@@ -389,10 +395,14 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                     break;
                 default:
                     // ignored event
-                    //log.debug("Ignoring event: {}", event.getType());
+                    if (isDebug) {
+                        log.debug("Ignoring event: {}", event.getType());
+                    }
             }
         } else {
-            log.debug("Event was of wrong type or stream is closed ({})", closed);
+            if (isDebug) {
+                log.debug("Event was of wrong type or stream is closed ({})", closed);
+            }
         }
     }
 
@@ -551,7 +561,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         params.put("creationdate", ZonedDateTime.ofInstant(cal.toInstant(), ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT));
         cal.setTimeInMillis(startTime);
         params.put("startdate", ZonedDateTime.ofInstant(cal.toInstant(), ZoneId.of("UTC")).format(DateTimeFormatter.ISO_INSTANT));
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("Params: {}", params);
         }
         out.writeMap(params);
@@ -627,7 +637,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                 break;
             case PROVIDER_DISCONNECT:
                 //log.debug("Provider disconnect");
-                //if (log.isDebugEnabled() && livePipe != null) {
+                //if (isDebug && livePipe != null) {
                 //log.debug("Provider: {}", livePipe.getClass().getName());
                 //}
                 if (livePipe == event.getSource()) {
@@ -637,7 +647,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
             case CONSUMER_CONNECT_PUSH:
                 //log.debug("Consumer connect");
                 IPipe pipe = (IPipe) event.getSource();
-                //if (log.isDebugEnabled() && pipe != null) {
+                //if (isDebug && pipe != null) {
                 //log.debug("Consumer: {}", pipe.getClass().getName());
                 //}
                 if (livePipe == pipe) {
