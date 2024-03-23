@@ -26,10 +26,12 @@ public class MP4ReaderTest extends TestCase {
     @Test
     public void testCtor() throws Exception {
         // use for the internal unit tests
-        //File file = new File("target/test-classes/fixtures/bbb.mp4");
-        File file = new File("/media/mondain/terrorbyte/Videos/bbb_sunflower_2160p_60fps_normal.mp4");
-        //File file = new File("target/test-classes/fixtures/sample.mp4");
-        //File file = new File("target/test-classes/fixtures/MOV1.MOV");
+        //File file = new File("target/test-classes/fixtures/bbb.mp4"); // non-avc1 h264 video / aac audio
+        File file = new File("target/test-classes/fixtures/mov_h264.mp4"); // avc1 h264 video / aac audio
+        //File file = new File("target/test-classes/fixtures/mov_h265.mp4"); // hev1 h265 video / aac audio
+        //File file = new File("/media/mondain/terrorbyte/Videos/bbb_sunflower_2160p_60fps_normal.mp4"); // h264 video / ac-3 audio
+        //File file = new File("target/test-classes/fixtures/sample.mp4"); // non-avc1 h264 video / aac audio
+        //File file = new File("target/test-classes/fixtures/MOV1.MOV"); // hcv1 h265 video / aac audio
         // test clips for issues/bugs
         // https://code.google.com/p/red5/issues/detail?id=141
         //File file = new File("target/test-classes/fixtures/test_480_aac.f4v");

@@ -25,16 +25,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.mina.core.buffer.IoBuffer;
+import org.jcodec.codecs.h264.mp4.AvcCBox;
 import org.jcodec.codecs.mpeg4.mp4.EsdsBox;
 import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.containers.mp4.MP4TrackType;
 import org.jcodec.containers.mp4.MP4Util;
 import org.jcodec.containers.mp4.MP4Util.Movie;
+import org.jcodec.containers.mp4.boxes.AVC1Box;
 import org.jcodec.containers.mp4.boxes.AudioSampleEntry;
 import org.jcodec.containers.mp4.boxes.Box;
 import org.jcodec.containers.mp4.boxes.ChunkOffsets64Box;
 import org.jcodec.containers.mp4.boxes.ChunkOffsetsBox;
+import org.jcodec.containers.mp4.boxes.ColorExtension;
 import org.jcodec.containers.mp4.boxes.CompositionOffsetsBox;
 import org.jcodec.containers.mp4.boxes.HandlerBox;
 import org.jcodec.containers.mp4.boxes.MediaBox;
@@ -43,17 +46,18 @@ import org.jcodec.containers.mp4.boxes.MediaInfoBox;
 import org.jcodec.containers.mp4.boxes.MovieBox;
 import org.jcodec.containers.mp4.boxes.MovieHeaderBox;
 import org.jcodec.containers.mp4.boxes.NodeBox;
+import org.jcodec.containers.mp4.boxes.PixelAspectExt;
 import org.jcodec.containers.mp4.boxes.SampleDescriptionBox;
 import org.jcodec.containers.mp4.boxes.SampleSizesBox;
 import org.jcodec.containers.mp4.boxes.SampleToChunkBox;
+import org.jcodec.containers.mp4.boxes.SampleToChunkBox.SampleToChunkEntry;
 import org.jcodec.containers.mp4.boxes.SyncSamplesBox;
 import org.jcodec.containers.mp4.boxes.TimeToSampleBox;
+import org.jcodec.containers.mp4.boxes.TimeToSampleBox.TimeToSampleEntry;
 import org.jcodec.containers.mp4.boxes.TrackHeaderBox;
 import org.jcodec.containers.mp4.boxes.TrakBox;
 import org.jcodec.containers.mp4.boxes.VideoSampleEntry;
 import org.jcodec.containers.mp4.boxes.WaveExtension;
-import org.jcodec.containers.mp4.boxes.SampleToChunkBox.SampleToChunkEntry;
-import org.jcodec.containers.mp4.boxes.TimeToSampleBox.TimeToSampleEntry;
 import org.red5.io.IStreamableFile;
 import org.red5.io.ITag;
 import org.red5.io.ITagReader;
@@ -61,6 +65,8 @@ import org.red5.io.IoConstants;
 import org.red5.io.amf.Output;
 import org.red5.io.flv.IKeyFrameDataAnalyzer;
 import org.red5.io.flv.impl.Tag;
+import org.red5.io.isobmff.atom.HVC1Box;
+import org.red5.io.isobmff.atom.ShortEsdsBox;
 import org.red5.io.mp4.MP4Frame;
 import org.red5.io.utils.HexDump;
 import org.slf4j.Logger;
@@ -343,7 +349,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                                                         "tag": "stsd",
                                                         "boxes": [
                                                             {
-                                                            "tag": "mp4a | mp4v | avc1 | hvc1",
+                                                            "tag": "mp4a | ac-3 | mp4v | avc1 | hvc1",
                                                             "boxes": [
                                                                 {
                                                                 "tag": "esds"
@@ -358,12 +364,27 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                                                             audioCodecId = "mp4a";
                                                             processAudioSampleEntry((AudioSampleEntry) stbox, scale.get());
                                                             break;
+                                                        case "ac-3":
+                                                            audioCodecId = "ac-3";
+                                                            processAudioSampleEntry((AudioSampleEntry) stbox, scale.get());
+                                                            break;
                                                         case "mp4v":
                                                             videoCodecId = "mp4v";
                                                             processVideoSampleEntry((VideoSampleEntry) stbox, scale.get());
                                                             break;
                                                         case "avc1":
                                                             videoCodecId = "avc1";
+                                                            //AVC1Box avc1 = Box.asBox(AVC1Box.class, stbox);
+                                                            processVideoSampleEntry((VideoSampleEntry) stbox, scale.get());
+                                                            break;
+                                                        case "hev1":
+                                                            videoCodecId = "hev1";
+                                                            //HEV1Box hev1 = Box.asBox(HEV1Box.class, stbox);
+                                                            //processVideoSampleEntry((VideoSampleEntry) stbox, scale.get());
+                                                            break;
+                                                        case "hvc1":
+                                                            videoCodecId = "hvc1";
+                                                            //HVC1Box hvc1 = Box.asBox(HVC1Box.class, stbox);
                                                             processVideoSampleEntry((VideoSampleEntry) stbox, scale.get());
                                                             break;
                                                         default:
@@ -488,7 +509,8 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                                             case "ctts": // ctts - (composition) time to sample
                                                 log.debug("Composition time to sample atom found");
                                                 CompositionOffsetsBox ctts = (CompositionOffsetsBox) sbox;
-                                                compositionTimes = List.of(ctts.getEntries());
+                                                compositionTimes = new LinkedList<>();
+                                                compositionTimes.addAll(List.of(ctts.getEntries()));
                                                 log.debug("Record count: {}", compositionTimes.size());
                                                 if (log.isTraceEnabled()) {
                                                     for (CompositionOffsetsBox.Entry rec : compositionTimes) {
@@ -572,13 +594,17 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
             log.debug("Audio sample entry box: {}", box);
             switch (box.getFourcc()) {
                 case "esds":
-                    if (box.estimateSize() > 0) {
-
-                    }
-                    EsdsBox esds = Box.asBox(EsdsBox.class, box);
+                    long esdsBodySize = box.getHeader().getBodySize();
+                    log.debug("esds body size: {}", esdsBodySize);
+                    // less than 28 bytes doesn't contain DecoderSpecific content
+                    ShortEsdsBox esds = Box.asBox(ShortEsdsBox.class, box);
                     log.debug("Process {} obj: {} avg bitrate: {} max bitrate: {}", esds.getFourcc(), esds.getObjectType(), esds.getAvgBitrate(), esds.getMaxBitrate());
                     // http://stackoverflow.com/questions/3987850/mp4-atom-how-to-discriminate-the-audio-codec-is-it-aac-or-mp3
-                    audioDecoderBytes = esds.getStreamInfo().array();
+                    if (esds.hasStreamInfo()) {
+                        audioDecoderBytes = esds.getStreamInfo().array();
+                    } else {
+                        audioDecoderBytes = EMPTY_AAC;
+                    }
                     log.debug("Audio config bytes: {}", HexDump.byteArrayToHexString(audioDecoderBytes));
                     // the first 5 (0-4) bits tell us about the coder used for aacaot/aottype http://wiki.multimedia.cx/index.php?title=MPEG-4_Audio 0 - NULL 1 - AAC Main (a deprecated AAC profile
                     // from MPEG-2) 2 - AAC LC or backwards compatible HE-AAC 3 - AAC Scalable Sample Rate 4 - AAC LTP (a replacement for AAC Main, rarely used) 5 - HE-AAC explicitly signaled
@@ -617,20 +643,26 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                     }
                     log.debug("Audio coder type: {} {} id: {}", audioCoderType, Integer.toBinaryString(audioCoderType), audioCodecId);
                     break;
+                case "dac3": // {"tag":"ac-3","boxes": [{"tag":"dac3"}]}
+                    //AC3SpecificBox dac3 = Box.asBox(AC3SpecificBox.class, box);
+                    break;
                 case "wave":
                     // check for decompression param atom
                     WaveExtension wave = Box.asBox(WaveExtension.class, box);
                     log.debug("wave atom found");
                     // wave/esds
-                    esds = wave.getBoxes().stream().filter(b -> b instanceof EsdsBox).map(b -> (EsdsBox) b).findFirst().orElse(null);
-                    if (esds != null) {
-                        log.debug("Process {} obj: {} avg bitrate: {} max bitrate: {}", esds.getFourcc(), esds.getObjectType(), esds.getAvgBitrate(), esds.getMaxBitrate());
+                    EsdsBox wesds = wave.getBoxes().stream().filter(b -> b instanceof EsdsBox).map(b -> (EsdsBox) b).findFirst().orElse(null);
+                    if (wesds != null) {
+                        log.debug("Process {} obj: {} avg bitrate: {} max bitrate: {}", wesds.getFourcc(), wesds.getObjectType(), wesds.getAvgBitrate(), wesds.getMaxBitrate());
                     } else {
                         log.debug("esds not found in wave");
                         // mp4a/esds
                         //AC3SpecificBox mp4a = wave.getBoxes(AC3SpecificBox.class).get(0);
                         //esds = mp4a.getBoxes(ESDescriptorBox.class).get(0);
                     }
+                    break;
+                case "btrt":
+                    //BitRateBox btrt = Box.asBox(BitRateBox.class, box);
                     break;
                 default:
                     log.warn("Unhandled sample desc extension: {}", box);
@@ -661,37 +693,34 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                     videoDecoderBytes = esds.getStreamInfo().array();
                     log.debug("Video config bytes: {}", HexDump.byteArrayToHexString(videoDecoderBytes));
                     break;
-                /*
-                stsd child: {"tag":"avc1","boxes": [{"tag":"avcC"},{"tag":"btrt"}]}
-                Compressor:  frame count: 1
-                Video sample entry box: {"tag":"avcC"}
-                Unhandled sample desc extension: {"tag":"avcC"}
-                Video sample entry box: {"tag":"btrt"}
-                Unhandled sample desc extension: {"tag":"btrt"}
-
-
-                    case "avcC": // videoCodecId = "avc1"
-                    AvcConfigurationBox avc1 = vse.getBoxes(AvcConfigurationBox.class).get(0);
-                    avcLevel = avc1.getAvcLevelIndication();
-                    log.debug("AVC level: {}", avcLevel);
-                    avcProfile = avc1.getAvcProfileIndication();
-                    log.debug("AVC Profile: {}", avcProfile);
-                    AvcDecoderConfigurationRecord avcC = avc1.getavcDecoderConfigurationRecord();
-                    if (avcC != null) {
-                        long videoConfigContentSize = avcC.getContentSize();
-                        log.debug("AVCC size: {}", videoConfigContentSize);
-                        ByteBuffer byteBuffer = ByteBuffer.allocate((int) videoConfigContentSize);
-                        avc1.avcDecoderConfigurationRecord.getContent(byteBuffer);
-                        byteBuffer.flip();
-                        videoDecoderBytes = new byte[byteBuffer.limit()];
-                        byteBuffer.get(videoDecoderBytes);
-                    } else {
-                        // quicktime and ipods use a pixel aspect atom (pasp)
-                        // since we have no avcC check for this and avcC may be a child
-                        log.warn("avcC atom not found; we may need to modify this to support pasp atom");
-                    }
+                case "avcC": // videoCodecId = "avc1"
+                    //AVC1Box avc1 = Box.asBox(AVC1Box.class, vse);
+                    AvcCBox avcC = Box.asBox(AvcCBox.class, box);
+                    avcLevel = avcC.getLevel();
+                    avcProfile = avcC.getProfile();
+                    log.debug("Process {} level: {} nal len: {} profile: {} compat: {}", avcC.getFourcc(), avcLevel, avcC.getNalLengthSize(), avcProfile, avcC.getProfileCompat());
+                    avcC.getSpsList().forEach(sps -> log.debug("SPS: {}", sps));
+                    avcC.getPpsList().forEach(pps -> log.debug("PPS: {}", pps));
                     break;
-                */
+                case "hvcC": // videoCodecId = "hvc1"
+                    // hvc1 size 682 offset 581
+                    //HVC1Box avc1 = Box.asBox(HVC1Box.class, vse);
+                    // hvcC size 574 offset 667
+                    //HvcCBox hvcC = Box.asBox(HvcCBox.class, box);
+                    //HvcCBox hvcC = Box.asBox(HvcCBox.class, box);
+                    break;
+                case "btrt":
+                    //BitRateBox btrt = Box.asBox(BitRateBox.class, box);
+                    break;
+                case "pasp":
+                    PixelAspectExt pasp = Box.asBox(PixelAspectExt.class, box);
+                    log.debug("Process {} hSpacing: {} vSpacing: {}", pasp.getFourcc(), pasp.gethSpacing(), pasp.getvSpacing());
+                    break;
+                case "colr": // color
+                    // colr size 18 offset 1241
+                    ColorExtension colr = Box.asBox(ColorExtension.class, box);
+                    log.debug("Process {} primaries: {} transfer: {} matrix: {}", colr.getFourcc(), colr.getPrimariesIndex(), colr.getTransferFunctionIndex(), colr.getMatrixIndex());
+                    break;
                 default:
                     log.warn("Unhandled sample desc extension: {}", box);
                     break;
