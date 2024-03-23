@@ -20,7 +20,9 @@ public interface IKeyFrameDataAnalyzer {
      *
      * @return Metadata object
      */
-    public KeyFrameMeta analyzeKeyFrames();
+    default KeyFrameMeta analyzeKeyFrames() {
+        return null;
+    }
 
     /**
      * Keyframe metadata.

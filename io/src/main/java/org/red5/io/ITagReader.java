@@ -12,62 +12,64 @@ public interface ITagReader {
     /**
      * Closes the reader and free any allocated memory.
      */
-    public void close();
+    void close();
 
     /**
      * Decode the header of the stream;
      *
      */
-    public void decodeHeader();
+    default void decodeHeader() {
+        // no-op
+    }
 
     /**
      * Returns the amount of bytes read
      *
      * @return long
      */
-    public long getBytesRead();
+    long getBytesRead();
 
     /**
      * Return length in seconds
      *
      * @return length in seconds
      */
-    public long getDuration();
+    long getDuration();
 
     /**
      * Return the file that is loaded.
      *
      * @return the file to be loaded
      */
-    public IStreamableFile getFile();
+    IStreamableFile getFile();
 
     /**
      * Returns the offet length
      *
      * @return int
      */
-    public int getOffset();
+    int getOffset();
 
     /**
      * Get the total readable bytes in a file or ByteBuffer
      *
      * @return Total readable bytes
      */
-    public long getTotalBytes();
+    long getTotalBytes();
 
     /**
      * Returns a boolean stating whether the FLV has more tags
      *
      * @return boolean
      */
-    public boolean hasMoreTags();
+    boolean hasMoreTags();
 
     /**
      * Check if the reader also has video tags.
      *
      * @return has video
      */
-    public boolean hasVideo();
+    boolean hasVideo();
 
     /**
      * Move the reader pointer to given position in file.
@@ -75,13 +77,13 @@ public interface ITagReader {
      * @param pos
      *            File position to move to
      */
-    public void position(long pos);
+    void position(long pos);
 
     /**
      * Returns a Tag object
      *
      * @return Tag
      */
-    public ITag readTag();
+    ITag readTag();
 
 }

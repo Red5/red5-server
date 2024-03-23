@@ -28,7 +28,7 @@
     <logger name="org.apache" level="INFO" />
     <logger name="ch.qos" level="WARN" />
  -->
-    <logger name="org.quartz" level="OFF" />
     <logger name="net.sf" level="WARN" />
     <logger name="org.red5.io.flv" level="INFO"/>
+    <logger name="org.red5.io.object" level="INFO"/>
 </configuration>

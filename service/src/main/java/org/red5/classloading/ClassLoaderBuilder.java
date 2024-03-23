@@ -235,7 +235,7 @@ public final class ClassLoaderBuilder {
                 }
             }
             if (mode == USE_WAR_LIB) {
-                if (path.toFile().isDirectory()) {
+                if (path != null && path.toFile().isDirectory()) {
                     Path libDir = path.resolve("WEB-INF").resolve("lib");
                     try {
                         Files.walkFileTree(libDir, new SimpleFileVisitor<Path>() {
