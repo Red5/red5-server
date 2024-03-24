@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.ITagReader;
 import org.red5.io.ITagWriter;
 import org.red5.io.flv.meta.IMetaData;
@@ -118,14 +117,10 @@ public class MP4 implements IMP4 {
     @Override
     public ITagReader getReader() throws IOException {
         MP4Reader reader = null;
-        IoBuffer fileData = null;
         String fileName = file.getName();
         if (file.exists()) {
             log.debug("File name: {} size: {}", fileName, file.length());
             reader = new MP4Reader(file);
-            // get a ref to the mapped byte buffer
-            fileData = reader.getFileData();
-            log.trace("File data size: {}", fileData);
         } else {
             log.info("Creating new file: {}", file);
             file.createNewFile();
@@ -146,6 +141,8 @@ public class MP4 implements IMP4 {
      */
     @Override
     public ITagWriter getWriter() throws IOException {
+        log.info("getWriter: {}", file);
+        //return new MP4Writer(file.toPath(), false);
         return null;
     }
 

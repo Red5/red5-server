@@ -18,9 +18,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * factory for creating matroska tags, it use property file - matroska_type_definition_config.properties with structure: long id = "name provided specification","java class representing tag data"
+ * https://www.matroska.org/technical/tagging.html
+ * 
+ * factory for creating matroska tags, it use property file - matroska_type_definition_config.properties with structure: 
+ *   long id = "name provided specification","java class representing tag data"
  */
 public class TagFactory {
+
     private static Logger log = LoggerFactory.getLogger(TagFactory.class);
 
     private static final Map<Long, NameTag> tagsById = new Hashtable<>();
@@ -47,17 +51,19 @@ public class TagFactory {
     }
 
     public static Tag createTag(VINT id, VINT size, InputStream inputStream) throws ConverterException {
+        Tag tag = null;
         NameTag nt = tagsById.get(id.getBinary());
-        if (null == nt) {
-            throw new ConverterException("not supported matroska tag: " + id.getBinary());
+        if (nt != null) {
+            try {
+                tag = (Tag) nt.clazz.getConstructor(String.class, VINT.class, VINT.class, InputStream.class).newInstance(nt.name, id, size, inputStream);
+            } catch (Exception e) {
+                log.error("Unexpected exception while creating tag", e);
+            }   
+        } else {
+            log.info("Unsupported matroska tag: {} {}", id, id.getBinary());
+            //throw new ConverterException("not supported matroska tag: " + id.getBinary());
         }
-        try {
-            return (Tag) nt.clazz.getConstructor(String.class, VINT.class, VINT.class, InputStream.class).newInstance(nt.name, id, size, inputStream);
-        } catch (Exception e) {
-            log.error("Unexpected exception while creating tag", e);
-        }
-
-        return null;
+        return tag;
     }
 
     public static Tag createTag(String tagName) throws ConverterException {

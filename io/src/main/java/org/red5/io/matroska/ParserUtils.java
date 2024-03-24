@@ -7,6 +7,12 @@
  */
 package org.red5.io.matroska;
 
+import static org.red5.io.matroska.VINT.MASK_BYTE_1;
+import static org.red5.io.matroska.VINT.MASK_BYTE_2;
+import static org.red5.io.matroska.VINT.MASK_BYTE_3;
+import static org.red5.io.matroska.VINT.MASK_BYTE_4;
+import static org.red5.io.matroska.VINT.MASK_BYTE_8;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,14 +23,12 @@ import java.util.ArrayList;
 import org.red5.io.matroska.dtd.CompoundTag;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.TagFactory;
-
-import static org.red5.io.matroska.VINT.MASK_BYTE_1;
-import static org.red5.io.matroska.VINT.MASK_BYTE_2;
-import static org.red5.io.matroska.VINT.MASK_BYTE_3;
-import static org.red5.io.matroska.VINT.MASK_BYTE_4;
-import static org.red5.io.matroska.VINT.MASK_BYTE_8;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParserUtils {
+ 
+    private static Logger log = LoggerFactory.getLogger(ParserUtils.class);
 
     public static final int BIT_IN_BYTE = 8;
 
@@ -40,15 +44,15 @@ public class ParserUtils {
      *             - in case of IO error
      */
     public static long parseInteger(InputStream inputStream, final int size) throws IOException {
+        log.debug("parseInteger inputStream: {} size: {}", inputStream, size);
         byte[] buffer = new byte[size];
         int numberOfReadsBytes = inputStream.read(buffer, 0, size);
-        assert numberOfReadsBytes == size;
-
+        log.debug("numberOfReadsBytes: {}", numberOfReadsBytes);
+        //assert numberOfReadsBytes == size;
         long value = buffer[0] & (long) 0xff;
         for (int i = 1; i < size; ++i) {
             value = (value << BIT_IN_BYTE) | ((long) buffer[i] & (long) 0xff);
         }
-
         return value;
     }
 

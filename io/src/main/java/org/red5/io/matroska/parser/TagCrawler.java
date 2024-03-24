@@ -73,7 +73,7 @@ public class TagCrawler {
      * @return - this for chaining
      */
     public TagHandler getHandler(Tag tag) {
-        if (handlers.containsKey(tag.getName())) {
+        if (tag != null && handlers.containsKey(tag.getName())) {
             return handlers.get(tag.getName());
         }
         return null;

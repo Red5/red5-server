@@ -26,25 +26,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WebmTest {
+
     private static Logger log = LoggerFactory.getLogger(WebmTest.class);
 
     private static final String WEBM_FILE_PROPERTY = "webm.file.path";
 
+    private static String webmTestFilePath;
+
     /**
-     * This check will cancel further tests in case there is no system property "webm.file.path" specified with path to the test web file.
+     * This check will cancel further tests in case there is no system property
+     * "webm.file.path" specified with path to the test web file.
      */
     @Before
     public void before() {
-        assumeTrue(System.getProperties().containsKey(WEBM_FILE_PROPERTY));
+        webmTestFilePath = System.getProperty(WEBM_FILE_PROPERTY, "target/webm_sample.webm");
     }
 
     /**
-     * This test checks if test webm file can be read till the end with no exceptions
+     * This test checks if test webm file can be read till the end with no
+     * exceptions
      *
      * @throws IOException
-     *             - in case of any IO exception
+     *                            - in case of any IO exception
      * @throws ConverterException
-     *             - in case of any conversion exception
+     *                            - in case of any conversion exception
      */
     @Test
     public void crawl() throws IOException, ConverterException {
@@ -60,7 +65,7 @@ public class WebmTest {
                 return logHandle;
             }
         };
-        File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));
+        File webmF = new File(webmTestFilePath);
         if (webmF.exists() && webmF.isFile()) {
             try (FileInputStream fis = new FileInputStream(webmF)) {
                 crawler.process(fis);
@@ -70,16 +75,17 @@ public class WebmTest {
     }
 
     /**
-     * This test checks if test webm file can be read and then be written with no exceptions
+     * This test checks if test webm file can be read and then be written with no
+     * exceptions
      *
      * @throws IOException
-     *             - in case of any IO exception
+     *                            - in case of any IO exception
      * @throws ConverterException
-     *             - in case of any conversion exception
+     *                            - in case of any conversion exception
      */
     @Test
     public void testReaderWriter() throws IOException, ConverterException {
-        File webmF = new File(System.getProperty(WEBM_FILE_PROPERTY));
+        File webmF = new File(webmTestFilePath);
         assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
         File out = File.createTempFile("webmwriter", ".webm");
         try (WebmWriter w = new WebmWriter(out, false); WebmReader r = new WebmReader(webmF, w);) {
@@ -88,4 +94,24 @@ public class WebmTest {
         log.debug("Temporary file was created: " + out.getAbsolutePath());
         assertEquals("", webmF.length(), out.length());
     }
+
+    @Test
+    public void testReader() throws IOException, ConverterException {
+        // https://www.matroska.org/technical/tagging.html
+        //File webmF = new File("/media/mondain/terrorbyte/Videos/bbb-fullhd.webm");
+        File webmF = new File("/media/mondain/terrorbyte/Videos/BladeRunner2049.webm");
+        assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
+        File out = File.createTempFile("webmwriter", ".webm");
+        try (WebmReader r = new WebmReader(webmF, new TagConsumer() {
+            @Override
+            public void consume(Tag tag) {
+                log.debug("Tag found: " + tag.getName());
+            }
+        });) {
+            r.process();
+        }
+        log.debug("Temporary file was created: " + out.getAbsolutePath());
+        assertEquals("", webmF.length(), out.length());
+    }
+
 }

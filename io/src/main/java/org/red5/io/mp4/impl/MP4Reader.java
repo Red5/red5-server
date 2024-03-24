@@ -32,7 +32,6 @@ import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.containers.mp4.MP4TrackType;
 import org.jcodec.containers.mp4.MP4Util;
 import org.jcodec.containers.mp4.MP4Util.Movie;
-import org.jcodec.containers.mp4.boxes.AVC1Box;
 import org.jcodec.containers.mp4.boxes.AudioSampleEntry;
 import org.jcodec.containers.mp4.boxes.Box;
 import org.jcodec.containers.mp4.boxes.ChunkOffsets64Box;
@@ -65,7 +64,6 @@ import org.red5.io.IoConstants;
 import org.red5.io.amf.Output;
 import org.red5.io.flv.IKeyFrameDataAnalyzer;
 import org.red5.io.flv.impl.Tag;
-import org.red5.io.isobmff.atom.HVC1Box;
 import org.red5.io.isobmff.atom.ShortEsdsBox;
 import org.red5.io.mp4.MP4Frame;
 import org.red5.io.utils.HexDump;
@@ -764,19 +762,6 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     }
 
     /**
-     * Returns the file buffer.
-     *
-     * @return File contents as byte buffer
-     */
-    public IoBuffer getFileData() {
-        // TODO as of now, return null will disable cache
-        // we need to redesign the cache architecture so that
-        // the cache is layered underneath FLVReader not above it,
-        // thus both tag cache and file cache are feasible.
-        return null;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -1040,20 +1025,20 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                     log.debug("Playback #{} {}", currentFrame, frame);
                     int sampleSize = frame.getSize();
                     int time = (int) Math.round(frame.getTime() * 1000.0);
-                    //log.debug("Read tag - dst: {} base: {} time: {}", new Object[]{frameTs, baseTs, time});
-                    //long samplePos = frame.getOffset();
-                    //log.debug("Read tag - samplePos {}", samplePos);
-                    //determine frame type and packet body padding
+                    log.debug("Read tag - time: {}", time);
+                    long samplePos = frame.getOffset();
+                    log.debug("Read tag - samplePos {}", samplePos);
+                    // determine frame type and packet body padding
                     byte type = frame.getType();
-                    //assume video type
+                    // assume video type
                     int pad = 5;
                     if (type == TYPE_AUDIO) {
                         pad = 2;
                     }
-                    //create a byte buffer of the size of the sample
+                    // create a byte buffer of the size of the sample
                     ByteBuffer data = ByteBuffer.allocate(sampleSize + pad);
                     try {
-                        //prefix is different for keyframes
+                        // prefix is different for keyframes
                         if (type == TYPE_VIDEO) {
                             if (frame.isKeyFrame()) {
                                 //log.debug("Writing keyframe prefix");
@@ -1085,7 +1070,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                             audioCount++;
                         }
                         // do we need to add the mdat offset to the sample position?
-                        //dataSource.position(samplePos);
+                        dataSource.setPosition(samplePos);
                         // read from the channel
                         dataSource.read(data);
                     } catch (IOException e) {
@@ -1095,7 +1080,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                     IoBuffer payload = IoBuffer.wrap(data.array());
                     // create the tag
                     tag = new Tag(type, time, payload.limit(), payload, prevFrameSize);
-                    //log.debug("Read tag - type: {} body size: {}", (type == TYPE_AUDIO ? "Audio" : "Video"), tag.getBodySize());
+                    log.debug("Read tag - type: {} body size: {}", (type == TYPE_AUDIO ? "Audio" : "Video"), tag.getBodySize());
                     // increment the frame number
                     currentFrame++;
                     // set the frame / tag size
@@ -1229,7 +1214,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                         int size = 0;
                         // if we have no samples, skip size check as its probably not aac
                         if (audioSamples.length > 0) {
-                            //update sample size
+                            // update sample size
                             size = (int) audioSamples[sample - 1];
                             // skip empty AAC data which is 6 bytes long
                             log.trace("Audio sample - size: {} pos: {}", size, pos);
@@ -1281,7 +1266,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                 }
             }
         }
-        //sort the frames
+        // sort the frames
         Collections.sort(frames);
         log.debug("Frames count: {}", frames.size());
         //log.debug("Frames: {}", frames);

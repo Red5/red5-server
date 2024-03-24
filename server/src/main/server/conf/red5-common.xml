@@ -47,9 +47,12 @@
                 <bean id="flvFileService" class="org.red5.server.service.flv.impl.FLVService">
                     <property name="generateMetadata" value="true"/>
                 </bean>
-                <bean id="mp3FileService" class="org.red5.server.service.mp3.impl.MP3Service"/>
                 <bean id="mp4FileService" class="org.red5.server.service.mp4.impl.MP4Service"/>
+                <!-- available separately as of 1.3.32 -->
+                <!--
+                <bean id="mp3FileService" class="org.red5.server.service.mp3.impl.MP3Service"/>
                 <bean id="m4aFileService" class="org.red5.server.service.m4a.impl.M4AService"/>
+                -->
             </list>
         </property>
     </bean>
@@ -156,11 +159,13 @@
     <bean id="mp4reader.impl" class="org.red5.io.mp4.impl.MP4Reader"/>
     
     <!-- Use injection to set the keyframe cache for MP3 files -->
+    <!--
     <bean id="mp3reader.impl" class="org.red5.io.mp3.impl.MP3Reader">
         <property name="frameCache">
             <ref bean="keyframe.cache"/>
         </property>
-    </bean> 
+    </bean>
+    --> 
 
     <!-- Use injection to set the buffer type for reading FLV files -->
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">

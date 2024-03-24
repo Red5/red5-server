@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 public class WebmReader implements Closeable {
 
-    @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(WebmReader.class);
 
     private FileInputStream fis = null;
@@ -54,9 +53,13 @@ public class WebmReader implements Closeable {
         final TagHandler valueTagHandler = new TagHandler() {
             @Override
             public void handle(Tag tag, InputStream input) throws IOException, ConverterException {
-                //log.debug("Tag found: " + tag.getName());
-                tag.parse();
-                WebmReader.this.processor.consume(tag);
+                if (tag != null) {
+                    log.debug("Tag found: {}", tag);
+                    tag.parse();
+                    WebmReader.this.processor.consume(tag);
+                } else {
+                    log.trace("Tag is null");
+                }
             }
         };
 
