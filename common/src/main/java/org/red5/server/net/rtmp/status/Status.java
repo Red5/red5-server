@@ -11,12 +11,15 @@ import org.red5.annotations.Anonymous;
 import org.red5.io.amf3.IDataInput;
 import org.red5.io.amf3.IDataOutput;
 import org.red5.io.amf3.IExternalizable;
+import java.io.Serializable;
 
 /**
  * Represents status object that are transferred between server and client
  */
 @Anonymous
-public class Status implements StatusCodes, IExternalizable {
+public class Status implements StatusCodes, IExternalizable, Serializable {
+
+    private static final long serialVersionUID = -4166080538209133238L;
 
     /**
      * Error constant
