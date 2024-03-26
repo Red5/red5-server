@@ -10,9 +10,6 @@
     <name>Red5 :: Server Common</name>
     <description>Classes common for multiple red5 projects</description>
     <packaging>jar</packaging>
-    <properties>
-        <maven.test.skip>true</maven.test.skip>
-    </properties>
     <build>
         <defaultGoal>install</defaultGoal>
         <plugins>

@@ -29,7 +29,7 @@ public class Deserializer {
 
     private static final Logger log = LoggerFactory.getLogger(Deserializer.class);
 
-    private static Set<String> BLACK_LIST;
+    private static Set<String> BLACK_LIST = Collections.emptySet();
 
     private Deserializer() {
     }

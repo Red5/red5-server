@@ -9,6 +9,7 @@ package org.red5.server.net.rtmp;
 
 import java.beans.ConstructorProperties;
 import java.beans.PropertyChangeEvent;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -524,7 +525,14 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         // start the handshake checker after maxHandshakeTimeout milliseconds
         if (scheduler != null) {
             try {
-                waitForHandshakeTask = scheduler.schedule(new WaitForHandshakeTask(), new Date(System.currentTimeMillis() + maxHandshakeTimeout));
+                Date endDate = Date.from(Instant.now().plusMillis(maxHandshakeTimeout));
+                if (isDebug) {
+                    log.debug("Handshake timeout at: {}", endDate);
+                }
+                if (endDate != null) {
+                    // schedule the task (if not already running
+                    waitForHandshakeTask = scheduler.schedule(new WaitForHandshakeTask(), endDate);
+                }
             } catch (TaskRejectedException e) {
                 if (isDebug) {
                     log.warn("WaitForHandshake task was rejected for {}", sessionId, e);
@@ -557,7 +565,13 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                 }
                 try {
                     // schedule with an initial delay of now + 2s to prevent ping messages during connect post processes
-                    keepAliveTask = scheduler.scheduleWithFixedDelay(new KeepAliveTask(), new Date(System.currentTimeMillis() + 2000L), pingInterval);
+                    Date delayUntilDate = Date.from(Instant.now().plusMillis(2000));
+                    if (isDebug) {
+                        log.debug("Keep alive delayed until: {}", delayUntilDate);
+                    }
+                    if (delayUntilDate != null) {
+                        keepAliveTask = scheduler.scheduleWithFixedDelay(new KeepAliveTask(), delayUntilDate, pingInterval);
+                    }
                     if (isDebug) {
                         log.debug("Keep alive scheduled for {}", sessionId);
                     }
@@ -1939,7 +1953,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
 
         public void run() {
             if (isTrace) {
-                log.trace("WaitForHandshakeTask started for {}", getSessionId());
+                log.trace("WaitForHandshakeTask started for {} at {}", getSessionId(), Instant.now());
             }
             // check for connected state before disconnecting
             if (state.getState() != RTMP.STATE_CONNECTED) {

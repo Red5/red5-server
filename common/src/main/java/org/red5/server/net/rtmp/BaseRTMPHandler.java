@@ -117,7 +117,10 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
                     case TYPE_NOTIFY:
                         // like an invoke, but does not return anything and has a invoke / transaction id of 0
                     case TYPE_FLEX_STREAM_SEND:
-                        if (((Notify) message).getData() != null && stream != null) {
+                        Notify notify = (Notify) message;
+                        if (notify.getCall() != null) {
+                            onCommand(conn, channel, header, notify);
+                        } else {
                             // Stream metadata
                             if (stream != null) {
                                 // dispatch to stream
@@ -125,8 +128,6 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
                                 // release / clean up
                                 message.release();
                             }
-                        } else {
-                            onCommand(conn, channel, header, (Notify) message);
                         }
                         break;
                     case TYPE_PING:

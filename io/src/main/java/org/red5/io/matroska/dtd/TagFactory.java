@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * https://www.matroska.org/technical/tagging.html
- * 
- * factory for creating matroska tags, it use property file - matroska_type_definition_config.properties with structure: 
+ *
+ * factory for creating matroska tags, it use property file - matroska_type_definition_config.properties with structure:
  *   long id = "name provided specification","java class representing tag data"
  */
 public class TagFactory {
@@ -58,7 +58,7 @@ public class TagFactory {
                 tag = (Tag) nt.clazz.getConstructor(String.class, VINT.class, VINT.class, InputStream.class).newInstance(nt.name, id, size, inputStream);
             } catch (Exception e) {
                 log.error("Unexpected exception while creating tag", e);
-            }   
+            }
         } else {
             log.info("Unsupported matroska tag: {} {}", id, id.getBinary());
             //throw new ConverterException("not supported matroska tag: " + id.getBinary());

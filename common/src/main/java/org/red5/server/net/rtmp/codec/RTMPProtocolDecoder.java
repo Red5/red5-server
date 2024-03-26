@@ -896,7 +896,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         if (encoding == Encoding.AMF3) {
             log.trace("Client indicates its using AMF3");
         }
-        //get the first datatype
+        // get the first datatype
         byte dataType = input.readDataType();
         log.debug("Data type: {}", dataType);
         if (dataType == DataTypes.CORE_STRING) {

@@ -15,6 +15,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.write.WriteRequest;
+import org.bouncycastle.util.encoders.Hex;
 import org.red5.server.net.rtmp.InboundHandshake;
 import org.red5.server.net.rtmp.RTMPConnManager;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -144,7 +145,10 @@ public class RTMPEIoFilter extends IoFilterAdapter {
                         IoBuffer message = buffer.getBufferAsIoBuffer();
                         // assuming majority of connections will not be encrypted
                         if (!((RTMPConnection) conn).isEncrypted()) {
-                            log.trace("Receiving message: {}", message);
+                            if (isTrace) {
+                                //log.trace("Receiving message: {}", message);
+                                log.trace(sessionId + " Receiving message: {}", Hex.toHexString(message.array(), message.arrayOffset(), message.remaining()));
+                            }
                             nextFilter.messageReceived(session, message);
                         } else {
                             Cipher cipher = (Cipher) session.getAttribute(RTMPConnection.RTMPE_CIPHER_IN);
