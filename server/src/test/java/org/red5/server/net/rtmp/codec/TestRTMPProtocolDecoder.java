@@ -21,7 +21,6 @@ import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
 import org.red5.server.net.rtmp.RTMPUtils;
 import org.red5.server.net.rtmp.event.Invoke;
-import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.message.ChunkHeader;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.message.Packet;
@@ -256,23 +255,19 @@ public class TestRTMPProtocolDecoder implements IRTMPHandler {
         log.debug("\n testNullJsonKV");
         RTMPProtocolEncoder enc = new RTMPProtocolEncoder();
         RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
-        RTMPMinaConnection conn = new RTMPMinaConnection();
-        // RTMPMinaConnection conn = new RTMPMinaConnection() {
-        //         @Override
-        //     public Encoding getEncoding() {
-        //         return Encoding.AMF3;
-        //     }
-        // };
+        //RTMPMinaConnection conn = new RTMPMinaConnection();
+        RTMPMinaConnection conn = new RTMPMinaConnection() {
+            @Override
+            public Encoding getEncoding() {
+                return Encoding.AMF3;
+            }
+        };
         conn.getState().setState(RTMP.STATE_CONNECTED);
         conn.setHandler(this);
 
         Red5.setConnectionLocal(conn);
 
         String json = "{Server=NGINX RTMP (github.com/arut/nginx-rtmp-module), width=1280.0, height=720.0, displayWidth=1280.0, displayHeight=720.0, duration=0.0, framerate=30.0, fps=30.0, videodatarate=2500.0, videocodecid=7.0, audiodatarate=160.0, audiocodecid=10.0, profile=, level=}";
-
-        Header header = new Header();
-        header.setStreamId(1);
-        header.setDataType(Notify.TYPE_STREAM_METADATA);
 
         IoBuffer bf = IoBuffer.allocate(128);
         bf.setAutoExpand(true);
@@ -283,6 +278,9 @@ public class TestRTMPProtocolDecoder implements IRTMPHandler {
         writer.buf().flip();
 
         /* using notify event using a Notify object
+        Header header = new Header();
+        header.setStreamId(1);
+        header.setDataType(Notify.TYPE_STREAM_METADATA);
         Notify notify = new Notify(writer.buf());
         notify.setSourceType(Constants.SOURCE_TYPE_LIVE);
         notify.setTimestamp(0);
@@ -292,13 +290,24 @@ public class TestRTMPProtocolDecoder implements IRTMPHandler {
         IoBuffer encoded = enc.encodeStreamMetadata(notify);
         */
 
-        IoBuffer encoded = writer.buf();
+        //IoBuffer encoded = writer.buf();
+
+        IoBuffer encoded = IoBuffer.wrap(IOUtils.hexStringToByteArray(
+                "05000000000183120100000002000a6f6e4d6574614461746103000653657276657202002e4e47494e582052544d5020286769746875622e636f6d2f617275742f6e67696e782d72746d702d6d6f64756c65290005776964746800409e0000000000000006686569676874004090e00000000000000c646973706c6179576964746800409e000000000000000d646973706c6179486569676874004090e0000000000000086475726174696f6e00000000000000000000096672616d657261746500403e000000000000000366707300403e000000000000000d766964656f64617461726174650040b1940000000000000c766964656f636f646563696400401c000000000000000d617564696f6461746172617465004064000000000000000c617564696f636f6465636964004024000000000000000770726f66696c65020020000000000000000000000000000000000000000000000000000000000000000000056c6576656c0200200000000000000000000000000000000000000000000000000000000000000000000009"));
 
         byte[] copy = Arrays.copyOfRange(encoded.array(), encoded.arrayOffset(), encoded.remaining());
         log.debug("Encoded: {}", Hex.encodeHexString(copy));
 
-        Notify event = (Notify) dec.decodeMessage(conn, header, encoded);
-        log.debug("Decoded: {}", event.toString());
+        List<?> objects = dec.decodeBuffer(conn, encoded);
+        log.info("Decoded: {}", objects);
+        if (objects != null) {
+            for (Object object : objects) {
+                log.info("Decoded object: {}", object);
+            }
+        }
+
+        //Notify event = dec.decodePacket(encoded);
+        //log.debug("Decoded: {}", event.toString());
 
         Red5.setConnectionLocal(null);
     }

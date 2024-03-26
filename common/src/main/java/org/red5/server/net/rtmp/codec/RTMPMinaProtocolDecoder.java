@@ -72,7 +72,7 @@ public class RTMPMinaProtocolDecoder extends ProtocolDecoderAdapter {
                     log.trace("Buffers info before: position {}, limit {}, remaining {}", new Object[] { buf.position(), buf.limit(), buf.remaining() });
                 }
                 try {
-                    // construct any objects from the decoded bugger
+                    // construct any objects from the decoded buffer
                     List<?> objects = decoder.decodeBuffer(conn, buf);
                     log.trace("Decoded: {}", objects);
                     if (objects != null) {
