@@ -269,7 +269,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             log.trace("Source buffer position: {}, limit: {}, packet-buf.position {}, packet size: {}", in.position(), in.limit(), buf.position(), header.getSize());
         }
         // read chunk
-        int length = Math.max(buf.remaining(), readChunkSize);
+        int length = Math.min(buf.remaining(), readChunkSize);
         if (in.remaining() < length) {
             log.debug("In buffer is too small, buffering ({},{})", in.remaining(), length);
             // how much more data we need to continue?
