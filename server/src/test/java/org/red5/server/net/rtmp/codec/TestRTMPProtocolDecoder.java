@@ -253,9 +253,9 @@ public class TestRTMPProtocolDecoder implements IRTMPHandler {
     @Test
     public void testNullJsonKV() {
         log.debug("\n testNullJsonKV");
+        @SuppressWarnings("unused")
         RTMPProtocolEncoder enc = new RTMPProtocolEncoder();
         RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
-        //RTMPMinaConnection conn = new RTMPMinaConnection();
         RTMPMinaConnection conn = new RTMPMinaConnection() {
             @Override
             public Encoding getEncoding() {
