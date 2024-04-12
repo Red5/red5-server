@@ -42,18 +42,19 @@ import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.realm.JAASRealm;
 import org.apache.catalina.realm.NullRealm;
 import org.apache.catalina.realm.RealmBase;
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.net.websocket.WebSocketPlugin;
 import org.red5.server.ContextLoader;
 import org.red5.server.LoaderBase;
 import org.red5.server.Server;
 import org.red5.server.api.IApplicationContext;
+import org.red5.server.api.Red5;
 import org.red5.server.jmx.mxbeans.ContextLoaderMXBean;
 import org.red5.server.jmx.mxbeans.LoaderMXBean;
 import org.red5.server.plugin.PluginRegistry;
 import org.red5.server.security.IRed5Realm;
 import org.red5.server.util.FileUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -115,7 +116,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     private static final String CONTEXT_CLASS_PARAM = "contextClass";
 
     // Initialize Logging
-    private static Logger log = Red5LoggerFactory.getLogger(TomcatLoader.class);
+    private static Logger log = LoggerFactory.getLogger(TomcatLoader.class);
 
     public static final String defaultSpringConfigLocation = "/WEB-INF/red5-*.xml";
 
@@ -170,23 +171,43 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      */
     protected boolean websocketEnabled = true;
 
+    /**
+     * Flag to indicate if we should await plugin loading
+     */
+    protected boolean awaitPlugins = true;
+
+    private static ExecutorService executor;
+
     @Override
     public void afterPropertiesSet() throws Exception {
-        // if websockets are enabled, ensure the websocket plugin is loaded
-        if (websocketEnabled && PluginRegistry.getPlugin(WebSocketPlugin.NAME) == null) {
-            // get common context
-            ApplicationContext common = (ApplicationContext) applicationContext.getBean("red5.common");
-            Server server = (Server) common.getBean("red5.server");
-            // instance the plugin
-            WebSocketPlugin plugin = new WebSocketPlugin();
-            plugin.setApplicationContext(applicationContext);
-            plugin.setServer(server);
-            // register it
-            PluginRegistry.register(plugin);
-            // start it
-            plugin.doStart();
+        // if we are not awaiting plugins, start immediately
+        if (awaitPlugins) {
+            log.info("Awaiting plugin loading");
+            executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                final String oldName = Thread.currentThread().getName();
+                Thread.currentThread().setName("TomcatLoader-delayed-start");
+                try {
+                    while (!Red5.isPluginsReady()) {
+                        log.debug("Waiting for plugins to load");
+                        Thread.sleep(500L);
+                    }
+                    start();
+                } catch (ServletException e) {
+                    log.error("Error starting Tomcat", e);
+                } catch (InterruptedException e) {
+                    log.error("Error waiting for plugins", e);
+                } finally {
+                    Thread.currentThread().setName(oldName);
+                }
+            });
+        } else {
+            try {
+                start();
+            } catch (ServletException e) {
+                log.error("Error starting Tomcat", e);
+            }
         }
-        start();
     }
 
     /**
@@ -273,7 +294,11 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     @SuppressWarnings("null")
     public void start() throws ServletException {
         log.info("Loading Tomcat");
-        //get a reference to the current threads classloader
+        // if websockets are enabled, ensure the websocket plugin is loaded
+        if (websocketEnabled) {
+            checkWebsocketPlugin();
+        }
+        // get a reference to the current threads classloader
         final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         // root location for servlet container
         String serverRoot = System.getProperty("red5.root");
@@ -528,6 +553,27 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             registerJMX();
         }
         log.debug("Tomcat load completed");
+    }
+
+    private void checkWebsocketPlugin() {
+        // if websockets are enabled, ensure the websocket plugin is loaded
+        if (PluginRegistry.getPlugin(WebSocketPlugin.NAME) == null) {
+            // get common context
+            ApplicationContext common = (ApplicationContext) applicationContext.getBean("red5.common");
+            Server server = (Server) common.getBean("red5.server");
+            // instance the plugin
+            WebSocketPlugin plugin = new WebSocketPlugin();
+            plugin.setApplicationContext(applicationContext);
+            plugin.setServer(server);
+            // register it
+            PluginRegistry.register(plugin);
+            // start it
+            try {
+                plugin.doStart();
+            } catch (Exception e) {
+                log.warn("WebSocket plugin start, failed", e);
+            }
+        }
     }
 
     /**
@@ -804,6 +850,15 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     }
 
     /**
+     * Returns await plugin loading state.
+     *
+     * @return true if awaiting plugin loading and false otherwise
+     */
+    public void setAwaitPlugins(boolean awaitPlugins) {
+        this.awaitPlugins = awaitPlugins;
+    }
+
+    /**
      * Returns a semi-unique id for this host based on its host values
      *
      * @return host id
@@ -846,6 +901,9 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     @Override
     public void destroy() throws Exception {
         log.info("Shutting down Tomcat context");
+        if (executor != null) {
+            executor.shutdown();
+        }
         // run through the applications and ensure that spring is told to commence shutdown / disposal
         AbstractApplicationContext absCtx = (AbstractApplicationContext) LoaderBase.getApplicationContext();
         if (absCtx != null) {

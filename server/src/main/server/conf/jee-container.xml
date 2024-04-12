@@ -22,6 +22,7 @@
      -->
     <!-- Tomcat without SSL enabled -->
     <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
+        <property name="awaitPlugins" value="false" />
         <property name="websocketEnabled" value="true" />
         <property name="webappFolder" value="${red5.root}/webapps" />
         <property name="connectors">

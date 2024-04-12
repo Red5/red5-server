@@ -97,6 +97,11 @@ public final class Red5 {
     private static boolean debug = java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("jdwp") >= 0;
 
     /**
+     * Plugins ready flag
+     */
+    private static boolean pluginsReady;
+
+    /**
      * Create a new Red5 object using given connection.
      *
      * @param conn
@@ -277,6 +282,17 @@ public final class Red5 {
      */
     public static int getTargetChunkSize() {
         return targetChunkSize;
+    }
+
+    /**
+     * Plugins ready flag. This is set to true when the PluginLauncher has completed loading all plugins.
+     */
+    public static void setPluginsReady(boolean pluginsReady) {
+        Red5.pluginsReady = pluginsReady;
+    }
+
+    public static boolean isPluginsReady() {
+        return pluginsReady;
     }
 
 }

@@ -10,6 +10,7 @@ package org.red5.server;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.Red5;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -44,7 +45,7 @@ public class Launcher {
         // log stdout and stderr to slf4j
         //SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
         // get the first logger
-        Logger log = Red5LoggerFactory.getLogger(Launcher.class);
+        Logger log = LoggerFactory.getLogger(Launcher.class);
         // version info banner
         log.info("{} (https://github.com/Red5)", Red5.getVersion());
         if (log.isDebugEnabled()) {

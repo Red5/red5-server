@@ -41,7 +41,7 @@ public class PluginLauncher implements ApplicationContextAware, InitializingBean
         // get common context
         ApplicationContext common = (ApplicationContext) applicationContext.getBean("red5.common");
         Server server = (Server) common.getBean("red5.server");
-        //server should be up and running at this point so load any plug-ins now
+        // server should be up and running at this point so load any plug-ins now
 
         // get the plugins dir
         File pluginsDir = new File(System.getProperty("red5.root"), "plugins");
@@ -117,14 +117,13 @@ public class PluginLauncher implements ApplicationContextAware, InitializingBean
                     }
                     log.info("Loaded plugin: {}", pluginMainClass);
                 } catch (Throwable t) {
-                    log.warn("Error loading plugin: {}; Method: {}", pluginMainClass, pluginMainMethod);
-                    log.error("", t);
+                    log.warn("Error loading plugin: {}; Method: {}", pluginMainClass, pluginMainMethod, t);
                 }
             }
         } else {
             log.info("Plugins directory cannot be accessed or doesnt exist");
         }
-
+        //Red5.setPluginsReady(true);
     }
 
     @SuppressWarnings("null")
