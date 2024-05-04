@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.red5</groupId>
         <artifactId>red5-parent</artifactId>
-        <version>1.3.33</version>
+        <version>1.3.34</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>red5-server</artifactId>
@@ -44,6 +44,7 @@
                     </excludes>
                     <archive>
                         <manifestEntries>
+                            <Add-Opens>java.base/java.lang jdk.management/com.sun.management.internal java.rmi/sun.rmi.transport</Add-Opens>
                             <Build-OS>${os.name} ${os.version}</Build-OS>
                             <Build-Java>Java ${java.version}</Build-Java>
                             <Build-Number>${buildNumber}</Build-Number>

@@ -101,6 +101,7 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
         statusObjects.put(NS_PLAY_FILE_STRUCTURE_INVALID, new StatusObject(NS_PLAY_FILE_STRUCTURE_INVALID, StatusObject.ERROR, ""));
         statusObjects.put(NS_PLAY_NO_SUPPORTED_TRACK_FOUND, new StatusObject(NS_PLAY_NO_SUPPORTED_TRACK_FOUND, StatusObject.ERROR, ""));
 
+        /*
         cachedStatusObjects = new HashMap<>();
         String statusCode;
         IoBuffer out = IoBuffer.allocate(256);
@@ -124,6 +125,7 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
         }
         out.free();
         out = null;
+        */
     }
 
     /**
@@ -159,7 +161,10 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
      * @return Status object with given code as byte array
      */
     public byte[] getCachedStatusObjectAsByteArray(String statusCode) {
-        return cachedStatusObjects.get(statusCode);
+        if (cachedStatusObjects != null) {
+            return cachedStatusObjects.get(statusCode);
+        }
+        return null;
     }
 
 }

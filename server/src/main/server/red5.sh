@@ -48,7 +48,7 @@ echo "Running on " $OS
 # ZGC collector https://wiki.openjdk.java.net/display/zgc
 # You can set JVM additional options here if you want
 if [ -z "$JVM_OPTS" ]; then 
-    JVM_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms256m -Xmx1g -Xverify:none -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m"
+    JVM_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms256m -Xmx1g -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m"
 fi
 # Set up security options
 SECURITY_OPTS="-Djava.security.debug=failure"
@@ -71,4 +71,4 @@ export RED5_CLASSPATH="${RED5_HOME}/red5-service.jar${P}${RED5_HOME}/conf${P}${C
 
 # start Red5
 echo "Starting Red5"
-exec "$JAVA" -Dred5.root="${RED5_HOME}" $JAVA_OPTS -cp "${RED5_CLASSPATH}" "$RED5_MAINCLASS" $RED5_OPTS
+exec "$JAVA" -Dred5.root="${RED5_HOME}" $JAVA_OPTS -cp "${RED5_CLASSPATH}" -noverify "$RED5_MAINCLASS" $RED5_OPTS

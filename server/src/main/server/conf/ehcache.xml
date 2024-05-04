@@ -1,0 +1,35 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="false" monitoring="off"
+    dynamicConfig="false">
+
+    <!-- Sets the path to the directory where cache files are created. If the path 
+        is a Java System Property it is replaced by its value in the running VM. The following 
+        properties are translated: * user.home - User's home directory * user.dir - User's 
+        current working directory * java.io.tmpdir - Default temp file path Subdirectories 
+        can be specified below the property e.g. java.io.tmpdir/one -->
+    <diskStore path="java.io.tmpdir/red5" />
+
+    <!-- Mandatory Default Cache configuration. These settings will be applied to 
+        caches created programmtically using CacheManager.add(String cacheName) -->
+    <defaultCache maxElementsInMemory="4" eternal="false"
+        timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="false"
+        diskPersistent="false" diskExpiryThreadIntervalSeconds="120"
+        memoryStoreEvictionPolicy="LFU" />
+
+    <!-- org.red5.io.amf.Output.stringCache Caches strings for output via AMF serialization. 
+        Keeps up to 1000 elements in memory, does not overflow to disk, is not eternal, and 
+        expires elements after 20 minutes of inactivity. -->
+    <cache name="org.red5.io.amf.Output.stringCache" maxElementsInMemory="1000"
+        eternal="false" timeToIdleSeconds="1200" overflowToDisk="false" />
+
+    <cache name="org.red5.io.amf.Output.serializeCache"
+        maxElementsInMemory="200" eternal="false" timeToIdleSeconds="1200"
+        overflowToDisk="false" />
+
+    <cache name="org.red5.io.amf.Output.fieldCache" maxElementsInMemory="200"
+        eternal="false" timeToIdleSeconds="1200" overflowToDisk="false" />
+
+    <cache name="org.red5.io.amf.Output.getterCache" maxElementsInMemory="200"
+        eternal="false" timeToIdleSeconds="1200" overflowToDisk="false" />
+
+</ehcache>

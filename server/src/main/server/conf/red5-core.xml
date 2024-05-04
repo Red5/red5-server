@@ -5,16 +5,6 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
     http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
     
-    <!-- DO NOT FORMAT THIS FILE IN ECLIPSE -->
-    
-    <bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer">
-        <property name="customEditors">
-            <map>
-                <entry key="java.net.SocketAddress" value="org.apache.mina.integration.beans.InetSocketAddressEditor" />
-            </map>
-        </property>
-    </bean>
-    
     <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="location" value="classpath:/red5.properties" />
     </bean>

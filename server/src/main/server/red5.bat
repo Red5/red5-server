@@ -8,7 +8,7 @@ if NOT DEFINED JAVA_HOME goto err
 
 REM JAVA options
 REM You can set JVM additional options here if you want
-if NOT DEFINED JVM_OPTS set JVM_OPTS=-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms256m -Xmx1g -Xverify:none -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m
+if NOT DEFINED JVM_OPTS set JVM_OPTS=-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms256m -Xmx1g -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m
 REM Set up logging options
 set LOGGING_OPTS=-Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector -Dcatalina.useNaming=true
 REM Set up security options
@@ -31,7 +31,7 @@ goto launchRed5
 
 :launchRed5
 echo Starting Red5
-"%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%RED5_CLASSPATH%" %RED5_MAINCLASS% %RED5_OPTS%
+"%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%RED5_CLASSPATH%" -noverify %RED5_MAINCLASS% %RED5_OPTS%
 goto finally
 
 :err

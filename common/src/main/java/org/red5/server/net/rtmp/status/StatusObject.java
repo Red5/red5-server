@@ -24,11 +24,7 @@ import org.red5.io.amf3.IExternalizable;
 @Anonymous
 public class StatusObject implements IExternalizable {
 
-    public static final String ERROR = "error";
-
-    public static final String STATUS = "status";
-
-    public static final String WARNING = "warning";
+    public static final String ERROR = "error", STATUS = "status", WARNING = "warning";
 
     protected String code;
 
