@@ -15,7 +15,7 @@ import java.security.Principal;
  * Principals may be associated with a particular <code>Subject</code> to augment it with an additional identity. Authorization decisions can be based upon the Principals associated with a <code>Subject</code>.
  *
  * @see java.security.Principal
- * @see javax.security.auth.Subject
+ * @see jakarta.security.auth.Subject
  */
 public class SimplePrincipal implements Principal, Serializable {
 

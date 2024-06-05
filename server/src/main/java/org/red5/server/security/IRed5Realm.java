@@ -7,7 +7,7 @@
 
 package org.red5.server.security;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import org.springframework.context.ApplicationContext;
 
 /**

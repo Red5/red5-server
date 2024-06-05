@@ -22,9 +22,9 @@ import java.util.concurrent.Future;
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.security.auth.message.config.AuthConfigFactory;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.security.auth.message.config.AuthConfigFactory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;

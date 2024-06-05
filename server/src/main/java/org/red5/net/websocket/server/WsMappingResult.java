@@ -2,7 +2,7 @@ package org.red5.net.websocket.server;
 
 import java.util.Map;
 
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 class WsMappingResult {
 

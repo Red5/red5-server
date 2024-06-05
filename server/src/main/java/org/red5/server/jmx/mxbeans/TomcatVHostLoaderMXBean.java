@@ -8,7 +8,7 @@
 package org.red5.server.jmx.mxbeans;
 
 import javax.management.MXBean;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.apache.catalina.Host;
 import org.apache.catalina.Valve;

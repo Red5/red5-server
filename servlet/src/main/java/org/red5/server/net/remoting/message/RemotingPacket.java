@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.red5.server.api.IConnection.Encoding;
 

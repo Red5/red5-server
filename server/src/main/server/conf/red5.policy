@@ -122,7 +122,7 @@ grant {
   permission java.util.PropertyPermission "java.io.tmpdir", "read,write";
   permission java.io.FilePermission "${java.io.tmpdir}", "read,write,delete";
   
-  permission javax.security.auth.AuthPermission "doAsPrivileged";
+  permission jakarta.security.auth.AuthPermission "doAsPrivileged";
 
   permission java.net.SocketPermission "127.0.0.1:9999", "connect,resolve";
   permission java.net.SocketPermission "github.com:80", "connect,resolve";
@@ -172,7 +172,7 @@ grant {
   // Required for OpenJMX
   permission java.lang.RuntimePermission "getAttribute";   
   // Required by MX4J implementation
-  permission javax.security.auth.AuthPermission "doAsPrivileged";
+  permission jakarta.security.auth.AuthPermission "doAsPrivileged";
 
   // Allow read of JAXP compliant XML parser debug
   permission java.util.PropertyPermission "jaxp.debug", "read";

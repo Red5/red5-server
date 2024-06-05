@@ -12,18 +12,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.DeploymentException;
-import javax.websocket.Encoder;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig;
-import javax.websocket.server.ServerEndpointConfig.Configurator;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Encoder;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
+import jakarta.websocket.server.ServerEndpointConfig.Configurator;
 
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.util.res.StringManager;
@@ -58,8 +58,6 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
 
     private final ConcurrentMap<Integer, SortedSet<TemplatePathMatch>> configTemplateMatchMap = new ConcurrentHashMap<>();
 
-    private volatile boolean enforceNoAddAfterHandshake = org.apache.tomcat.websocket.Constants.STRICT_SPEC_COMPLIANCE;
-
     private volatile boolean addAllowed = true;
 
     private final ConcurrentMap<String, Set<WsSession>> authenticatedSessions = new ConcurrentHashMap<>();
@@ -81,15 +79,6 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         if (value != null) {
             setDefaultMaxTextMessageBufferSize(Integer.parseInt(value));
         }
-        value = servletContext.getInitParameter(Constants.ENFORCE_NO_ADD_AFTER_HANDSHAKE_CONTEXT_INIT_PARAM);
-        if (value != null) {
-            setEnforceNoAddAfterHandshake(Boolean.parseBoolean(value));
-        }
-        /* get the websocket filter and coordinate the async setting
-        <filter-name>WebSocketFilter</filter-name>
-        <filter-class>org.red5.net.websocket.server.WsFilter</filter-class>
-        <async-supported>false</async-supported>
-         */
     }
 
     /**
@@ -104,7 +93,7 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
     @Override
     public void addEndpoint(ServerEndpointConfig sec) throws DeploymentException {
         log.debug("addEndpoint: {}", sec);
-        if (enforceNoAddAfterHandshake && !addAllowed) {
+        if (!addAllowed) {
             throw new DeploymentException(sm.getString("serverContainer.addNotAllowed"));
         }
         if (servletContext == null) {
@@ -193,14 +182,20 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
      * @param pathParams
      *            The path parameters associated with the upgrade request
      *
-     * @throws ServletException
-     *             If a configuration error prevents the upgrade from taking place
+     * @throws DeploymentException
+     *             If an error prevents the upgrade from taking place
      * @throws IOException
      *             If an I/O error occurs during the upgrade process
      */
-    public void doUpgrade(HttpServletRequest request, HttpServletResponse response, ServerEndpointConfig sec, Map<String, String> pathParams) throws ServletException, IOException {
+    @Override
+    public void upgradeHttpToWebSocket(Object request, Object response, ServerEndpointConfig sec,
+            Map<String, String> pathParams) throws IOException, DeploymentException {
         log.debug("doUpgrade");
-        UpgradeUtil.doUpgrade(this, request, response, sec, pathParams);
+        try {
+            UpgradeUtil.doUpgrade(this, (HttpServletRequest) request, (HttpServletResponse) response, sec, pathParams);
+        } catch (ServletException e) {
+            throw new DeploymentException("Servlet exeception, upgrade failed", e);
+        }
     }
 
     public WsMappingResult findMapping(String path) {
@@ -246,14 +241,6 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
             return null;
         }
         return new WsMappingResult(sec, pathParams);
-    }
-
-    public boolean isEnforceNoAddAfterHandshake() {
-        return enforceNoAddAfterHandshake;
-    }
-
-    public void setEnforceNoAddAfterHandshake(boolean enforceNoAddAfterHandshake) {
-        this.enforceNoAddAfterHandshake = enforceNoAddAfterHandshake;
     }
 
     public Set<String> getRegisteredEndpointPaths() {

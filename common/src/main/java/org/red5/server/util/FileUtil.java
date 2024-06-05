@@ -7,7 +7,6 @@
 
 package org.red5.server.util;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -104,79 +103,27 @@ public class FileUtil {
      * @return true if directory was successfully deleted; false if directory did not exist
      */
     public static boolean deleteDirectory(String directory) throws IOException {
-        return deleteDirectory(directory, false);
-    }
-
-    /**
-     * Deletes a directory and its contents. This will fail if there are any file locks or if the directory cannot be emptied.
-     *
-     * @param directory
-     *            directory to delete
-     * @param useOSNativeDelete
-     *            flag to signify use of operating system delete function
-     * @throws IOException
-     *             if directory cannot be deleted
-     * @return true if directory was successfully deleted; false if directory did not exist
-     */
-    public static boolean deleteDirectory(String directory, boolean useOSNativeDelete) throws IOException {
         boolean result = false;
-        if (!useOSNativeDelete) {
-            File dir = new File(directory);
-            // first all files have to be cleared out
-            for (File file : dir.listFiles()) {
-                if (file.delete()) {
-                    log.debug("{} was deleted", file.getName());
-                } else {
-                    log.debug("{} was not deleted", file.getName());
-                    file.deleteOnExit();
-                }
-                file = null;
-            }
-            // not you may remove the dir
-            if (dir.delete()) {
-                log.debug("Directory was deleted");
-                result = true;
+        File dir = new File(directory);
+        // first all files have to be cleared out
+        for (File file : dir.listFiles()) {
+            if (file.delete()) {
+                log.debug("{} was deleted", file.getName());
             } else {
-                log.debug("Directory was not deleted, it may be deleted on exit");
-                dir.deleteOnExit();
+                log.debug("{} was not deleted", file.getName());
+                file.deleteOnExit();
             }
-            dir = null;
-        } else {
-            Process p = null;
-            Thread std = null;
-            try {
-                Runtime runTime = Runtime.getRuntime();
-                log.debug("Execute runtime");
-                //determine file system type
-                if (File.separatorChar == '\\') {
-                    //we are windows
-                    p = runTime.exec("CMD /D /C \"RMDIR /Q /S " + directory.replace('/', '\\') + "\"");
-                } else {
-                    //we are unix variant
-                    p = runTime.exec("rm -rf " + directory.replace('\\', File.separatorChar));
-                }
-                // observe std out
-                std = stdOut(p);
-                // wait for the observer threads to finish
-                while (std.isAlive()) {
-                    try {
-                        Thread.sleep(250);
-                    } catch (Exception e) {
-                    }
-                }
-                log.debug("Process threads wait exited");
-                result = true;
-            } catch (Exception e) {
-                log.error("Error running delete script", e);
-            } finally {
-                if (null != p) {
-                    log.debug("Destroying process");
-                    p.destroy();
-                    p = null;
-                }
-                std = null;
-            }
+            file = null;
         }
+        // not you may remove the dir
+        if (dir.delete()) {
+            log.debug("Directory was deleted");
+            result = true;
+        } else {
+            log.debug("Directory was not deleted, it may be deleted on exit");
+            dir.deleteOnExit();
+        }
+        dir = null;
         return result;
     }
 
@@ -194,40 +141,6 @@ public class FileUtil {
         } catch (IOException e) {
             log.error("Error renaming file", e);
         }
-    }
-
-    /**
-     * Special method for capture of StdOut.
-     *
-     * @return stdOut thread
-     */
-    private final static Thread stdOut(final Process p) {
-        final byte[] empty = new byte[128];
-        for (int b = 0; b < empty.length; b++) {
-            empty[b] = (byte) 0;
-        }
-        Thread std = new Thread() {
-            public void run() {
-                StringBuilder sb = new StringBuilder(1024);
-                byte[] buf = new byte[128];
-                BufferedInputStream bis = new BufferedInputStream(p.getInputStream());
-                log.debug("Process output:");
-                try {
-                    while (bis.read(buf) != -1) {
-                        sb.append(new String(buf).trim());
-                        // clear buffer
-                        System.arraycopy(empty, 0, buf, 0, buf.length);
-                    }
-                    log.debug(sb.toString());
-                    bis.close();
-                } catch (Exception e) {
-                    log.error("{}", e);
-                }
-            }
-        };
-        std.setDaemon(true);
-        std.start();
-        return std;
     }
 
     /**

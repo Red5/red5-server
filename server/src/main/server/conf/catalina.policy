@@ -108,7 +108,7 @@ grant {
   //specifically so that tomcat can be shutdown
   permission java.lang.RuntimePermission "modifyThread";
 
-  permission javax.security.auth.AuthPermission "doAsPrivileged";
+  permission jakarta.security.auth.AuthPermission "doAsPrivileged";
 
   permission java.net.SocketPermission "127.0.0.1:9999", "connect,resolve";
 

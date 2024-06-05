@@ -11,15 +11,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.FailedLoginException;
-import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
+import jakarta.security.auth.Subject;
+import jakarta.security.auth.callback.Callback;
+import jakarta.security.auth.callback.CallbackHandler;
+import jakarta.security.auth.callback.NameCallback;
+import jakarta.security.auth.callback.PasswordCallback;
+import jakarta.security.auth.callback.UnsupportedCallbackException;
+import jakarta.security.auth.login.FailedLoginException;
+import jakarta.security.auth.login.LoginException;
+import jakarta.security.auth.spi.LoginModule;
 
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;

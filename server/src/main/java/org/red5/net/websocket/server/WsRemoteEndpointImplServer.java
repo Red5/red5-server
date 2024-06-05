@@ -6,9 +6,11 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import javax.websocket.SendHandler;
-import javax.websocket.SendResult;
+import jakarta.websocket.SendHandler;
+import jakarta.websocket.SendResult;
+import jakarta.websocket.Session;
 
 import org.apache.coyote.http11.upgrade.UpgradeInfo;
 import org.apache.tomcat.util.net.AbstractEndpoint;
@@ -17,7 +19,7 @@ import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
 
 /**
- * This is the server side {@link javax.websocket.RemoteEndpoint} implementation - i.e. what the server uses to send data to the client.
+ * This is the server side {@link jakarta.websocket.RemoteEndpoint} implementation - i.e. what the server uses to send data to the client.
  */
 public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
@@ -60,7 +62,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
                 final long timeout = blockingWriteTimeoutExpiry - System.currentTimeMillis();
                 for (ByteBuffer buffer : buffers) {
                     if (timeout <= 0) {
-                        SendResult sr = new SendResult(new SocketTimeoutException());
+                        SendResult sr = new SendResult(null, new SocketTimeoutException());
                         handler.onResult(sr);
                         return;
                     }
@@ -68,7 +70,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
                     socketWrapper.write(true, buffer);
                 }
                 if (timeout <= 0) {
-                    SendResult sr = new SendResult(new SocketTimeoutException());
+                    SendResult sr = new SendResult(null, new SocketTimeoutException());
                     handler.onResult(sr);
                     return;
                 }
@@ -76,7 +78,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
                 socketWrapper.flush(true);
                 handler.onResult(SENDRESULT_OK);
             } catch (IOException e) {
-                SendResult sr = new SendResult(e);
+                SendResult sr = new SendResult(null, e);
                 handler.onResult(sr);
             }
         }
@@ -148,9 +150,8 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         wsWriteTimeout.unregister(this);
     }
 
-    // XXX(paul) new method after tomcat 8.5.87
     @Override
-    protected Lock getLock() {
+    protected ReentrantLock getLock() {
         // for a lack of better implementation, we use the socket wrapper lock
         return socketWrapper.getLock();
     }
@@ -181,7 +182,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
      * @param t
      *            The throwable associated with any error that occurred
      * @param useDispatch
-     *            Should {@link SendHandler#onResult(SendResult)} be called from a new thread, keeping in mind the requirements of {@link javax.websocket.RemoteEndpoint.Async}
+     *            Should {@link SendHandler#onResult(SendResult)} be called from a new thread, keeping in mind the requirements of {@link jakarta.websocket.RemoteEndpoint.Async}
      */
     private void clearHandler(Throwable t, boolean useDispatch) {
         // Setting the result marks this (partial) message as complete which means the next one may be sent which
@@ -205,11 +206,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
                     r.run();
                 }
             } else {
-                if (t == null) {
-                    sh.onResult(new SendResult());
-                } else {
-                    sh.onResult(new SendResult(t));
-                }
+                sh.onResult(new SendResult(null, t));
             }
         }
     }
@@ -227,11 +224,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
         @Override
         public void run() {
-            if (t == null) {
-                sh.onResult(new SendResult());
-            } else {
-                sh.onResult(new SendResult(t));
-            }
+            sh.onResult(new SendResult(null, t));
         }
     }
 

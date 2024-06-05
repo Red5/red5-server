@@ -1,7 +1,7 @@
 package org.red5.net.websocket.server;
 
-import javax.websocket.HandshakeResponse;
-import javax.websocket.server.HandshakeRequest;
+import jakarta.websocket.HandshakeResponse;
+import jakarta.websocket.server.HandshakeRequest;
 
 /**
  * Allows for modification of a WebSocket handshake.

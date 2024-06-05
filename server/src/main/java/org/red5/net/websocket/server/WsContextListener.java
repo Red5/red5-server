@@ -1,8 +1,8 @@
 package org.red5.net.websocket.server;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 import org.red5.net.websocket.WebSocketPlugin;
 import org.slf4j.Logger;
