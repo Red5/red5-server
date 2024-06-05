@@ -11,13 +11,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.EndpointConfig;
-import jakarta.websocket.MessageHandler;
-import jakarta.websocket.PongMessage;
-import jakarta.websocket.Session;
+import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.net.websocket.WSConstants;
@@ -26,6 +20,13 @@ import org.red5.net.websocket.WebSocketScope;
 import org.red5.net.websocket.model.WSMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.MessageHandler;
+import jakarta.websocket.PongMessage;
+import jakarta.websocket.Session;
 
 /**
  * Default WebSocket endpoint.
@@ -37,28 +38,34 @@ public class DefaultWebSocketEndpoint extends Endpoint {
     private final Logger log = LoggerFactory.getLogger(DefaultWebSocketEndpoint.class);
 
     @SuppressWarnings("unused")
-    private final boolean isDebug = log.isDebugEnabled();
-
-    private final boolean isTrace = log.isTraceEnabled();
+    private final boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
 
     // websocket scope where connections connect
     private WebSocketScope scope;
 
     /**
-     * TODO: Currently, Tomcat uses an Endpoint instance once - however the java doc of endpoint says: "Each instance of a websocket endpoint is guaranteed not to be called by more
-     * than one thread at a time per active connection." This could mean that after calling onClose(), the instance could be reused for another connection so onOpen() will get
-     * called (possibly from another thread).<br>
-     * If this is the case, we would need a variable holder for the variables that are accessed by the Room thread, and read the reference to the holder at the beginning of onOpen,
+     * TODO: Currently, Tomcat uses an Endpoint instance once - however the java doc of endpoint says: "Each instance
+     * of a websocket endpoint is guaranteed not to be called by more than one thread at a time per active connection."
+     * This could mean that after calling onClose(), the instance could be reused for another connection so onOpen()
+     * will get called (possibly from another thread).<br>If this is the case, we would need a variable holder for the
+     * variables that are accessed by the Room thread, and read the reference to the holder at the beginning of onOpen,
      * onMessage, onClose methods to ensure the room thread always gets the correct instance of the variable holder.
      */
 
     @Override
     public void onOpen(Session session, EndpointConfig config) {
-        log.debug("Session opened: {}\n{}", session.getId(), session.getRequestParameterMap());
+        if (isDebug) {
+            log.debug("Session opened: {}\n{}", session.getId(), session.getRequestParameterMap());
+        }
+        Map<String, Object> confUserProps = config.getUserProperties();
+        Map<String, Object> sessionUserProps = session.getUserProperties();
+        if (isTrace) {
+            log.trace("User conf props: {}\nsession props: {}", confUserProps, sessionUserProps);
+        }
         // get ws scope from user props
-        scope = (WebSocketScope) config.getUserProperties().get(WSConstants.WS_SCOPE);
+        scope = (WebSocketScope) confUserProps.get(WSConstants.WS_SCOPE);
         // get ws connection from session user props
-        WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
+        WebSocketConnection conn = (WebSocketConnection) sessionUserProps.get(WSConstants.WS_CONNECTION);
         if (conn == null) {
             log.warn("WebSocketConnection null at onOpen for {}", session.getId());
         }
@@ -69,13 +76,24 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        final String sessionId = session.getId();
-        log.debug("Session closed: {}", sessionId);
         WebSocketConnection conn = null;
         // getting the sessions user properties on a closed connection will throw an exception when it checks state
         try {
+            Map<String, Object> sessionUserProps = session.getUserProperties();
+            if (isTrace) {
+                log.trace("User session props: {}", sessionUserProps);
+            }
+            // ensure we grab the scope from the session if its null
+            if (scope == null) {
+                scope = (WebSocketScope) sessionUserProps.get(WSConstants.WS_SCOPE);
+                log.trace("Scope pulled from session: {}", scope);
+            }
+            String sessionId = session.getId();
+            if (isDebug) {
+                log.debug("Session closed: {} on scope: {}", sessionId, scope);
+            }
             // get ws connection from session user props
-            conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
+            conn = (WebSocketConnection) sessionUserProps.get(WSConstants.WS_CONNECTION);
             // if we don't get it from the session, try the scope lookup
             if (conn == null) {
                 log.warn("Connection for id: {} was not found in the session onClose", sessionId);
@@ -88,10 +106,12 @@ public class DefaultWebSocketEndpoint extends Endpoint {
             log.warn("Exception in onClose", e);
         } finally {
             if (conn != null) {
-                // force remove on exception
-                scope.removeConnection(conn);
                 // fire close, to be sure
                 conn.close();
+                // force remove on exception
+                if (scope != null) {
+                    scope.removeConnection(conn);
+                }
             }
         }
     }

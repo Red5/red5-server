@@ -221,7 +221,9 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
         if (checkerFuture != null && !checkerFuture.isDone()) {
             checkerFuture.cancel(true);
         }
-        executor.shutdownNow();
+        if (executor != null) {
+            executor.shutdownNow();
+        }
     }
 
 }
