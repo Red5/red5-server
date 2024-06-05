@@ -20,35 +20,10 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <servlet>
-        <servlet-name>rtmpt</servlet-name>
-        <servlet-class>org.red5.server.net.rtmpt.RTMPTServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet>
         <display-name>SecurityTest</display-name>
         <servlet-name>SecurityTest</servlet-name>
         <servlet-class>org.red5.demos.oflaDemo.SecurityTest</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>rtmpt</servlet-name>
-        <url-pattern>/fcs/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>rtmpt</servlet-name>
-        <url-pattern>/open/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>rtmpt</servlet-name>
-        <url-pattern>/close/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>rtmpt</servlet-name>
-        <url-pattern>/send/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>rtmpt</servlet-name>
-        <url-pattern>/idle/*</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>SecurityTest</servlet-name>
         <url-pattern>/securitytest</url-pattern>

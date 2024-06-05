@@ -4,16 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.http.WebConnection;
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.CloseReason.CloseCodes;
-import jakarta.websocket.DeploymentException;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.EndpointConfig;
-import jakarta.websocket.Extension;
-import jakarta.websocket.server.ServerEndpointConfig;
-
 import org.apache.coyote.http11.upgrade.InternalHttpUpgradeHandler;
 import org.apache.coyote.http11.upgrade.UpgradeInfo;
 import org.apache.tomcat.util.net.AbstractEndpoint.Handler.SocketState;
@@ -30,6 +20,16 @@ import org.red5.net.websocket.WebSocketScope;
 import org.red5.net.websocket.WebSocketScopeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.WebConnection;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.Extension;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 /**
  * Servlet 3.1 HTTP upgrade handler for WebSocket connections.
@@ -107,68 +107,66 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void init(WebConnection connection) {
-        if (ep == null) {
-            throw new IllegalStateException(sm.getString("wsHttpUpgradeHandler.noPreInit"));
-        }
-        String httpSessionId = null;
-        Object session = handshakeRequest.getHttpSession();
-        if (session != null) {
-            httpSessionId = ((HttpSession) session).getId();
-            log.debug("init with http session id: {}", httpSessionId);
-        } else {
-            log.debug("init without http session");
-        }
-        // Need to call onOpen using the web application's class loader
-        // Create the frame using the application's class loader so it can pick up application specific config from the ServerContainerImpl
-        Thread t = Thread.currentThread();
-        ClassLoader cl = t.getContextClassLoader();
-        t.setContextClassLoader(applicationClassLoader);
-        try {
-            // instance a remote endpoint server
-            wsRemoteEndpointServer = new WsRemoteEndpointImplServer(socketWrapper, upgradeInfo);
-            if (isTrace) {
-                log.trace("New connection 1 {}", wsRemoteEndpointServer);
-                log.trace("WS session pre-ctor - wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", wsRemoteEndpointServer, webSocketContainer,
-                        handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
+        if (ep != null) {
+            String httpSessionId = null;
+            Object session = handshakeRequest.getHttpSession();
+            if (session != null) {
+                httpSessionId = ((HttpSession) session).getId();
+                log.debug("init with http session id: {}", httpSessionId);
+            } else {
+                log.debug("init without http session");
             }
-            // deprecated version
-            wsSession = new WsSession(ep, wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
-            // newest ctor
-            //wsSession = new WsSession(wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
-            wsFrame = new WsFrameServer(socketWrapper, upgradeInfo, wsSession, transformation, applicationClassLoader);
-            // WsFrame adds the necessary final transformations. Copy the completed transformation chain to the remote end point.
-            wsRemoteEndpointServer.setTransformation(wsFrame.getTransformation());
-            // get the ws scope manager from user props
-            WebSocketScopeManager manager = (WebSocketScopeManager) endpointConfig.getUserProperties().get(WSConstants.WS_MANAGER);
-            // get ws scope from user props
-            WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
-            // create a ws connection instance
-            WebSocketConnection conn = new WebSocketConnection(scope, wsSession);
-            // set ip and port
-            conn.setAttribute(WSConstants.WS_HEADER_REMOTE_IP, socketWrapper.getRemoteAddr());
-            conn.setAttribute(WSConstants.WS_HEADER_REMOTE_PORT, socketWrapper.getRemotePort());
-            // add the request headers
-            conn.setHeaders(handshakeRequest.getHeaders());
-            // add the connection to the user props
-            endpointConfig.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
-            // must be added to the session as well since the session ctor copies from the endpoint and doesnt update
-            wsSession.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
-            // set connected flag
-            conn.setConnected();
-            // fire endpoint handler
-            ep.onOpen(wsSession, endpointConfig);
-            // get the endpoint path to use in registration since we're a server
-            String path = ((ServerEndpointConfig) endpointConfig).getPath();
-            webSocketContainer.registerSession(path, wsSession);
-            // add the connection to the manager
-            manager.addConnection(conn);
-        } catch (DeploymentException e) {
-            throw new IllegalArgumentException(e);
-        } finally {
-            t.setContextClassLoader(cl);
+            // Need to call onOpen using the web application's class loader
+            // Create the frame using the application's class loader so it can pick up application specific config from the ServerContainerImpl
+            Thread t = Thread.currentThread();
+            ClassLoader cl = t.getContextClassLoader();
+            t.setContextClassLoader(applicationClassLoader);
+            try {
+                // instance a remote endpoint server
+                wsRemoteEndpointServer = new WsRemoteEndpointImplServer(socketWrapper, upgradeInfo);
+                if (isTrace) {
+                    log.trace("New connection 1 {}", wsRemoteEndpointServer);
+                    log.trace("WS session pre-ctor - wsRemoteEndpointServer: {}, webSocketContainer: {}, handshakeRequest.getRequestURI: {}, handshakeRequest.getParameterMap: {}, handshakeRequest.getQueryString: {}, handshakeRequest.getUserPrincipal: {}, httpSessionId: {}, negotiatedExtensions: {}, subProtocol: {}, pathParameters: {}, secure: {}, endpointConfig: {}", wsRemoteEndpointServer, webSocketContainer,
+                            handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
+                }
+                // ClientEndpointHolder clientEndpoint = new EndpointHolder(ep);
+                wsSession = new WsSession(wsRemoteEndpointServer, webSocketContainer, handshakeRequest.getRequestURI(), handshakeRequest.getParameterMap(), handshakeRequest.getQueryString(), handshakeRequest.getUserPrincipal(), httpSessionId, negotiatedExtensions, subProtocol, pathParameters, secure, endpointConfig);
+                wsFrame = new WsFrameServer(socketWrapper, upgradeInfo, wsSession, transformation, applicationClassLoader);
+                // WsFrame adds the necessary final transformations. Copy the completed transformation chain to the remote end point.
+                wsRemoteEndpointServer.setTransformation(wsFrame.getTransformation());
+                // get the ws scope manager from user props
+                WebSocketScopeManager manager = (WebSocketScopeManager) endpointConfig.getUserProperties().get(WSConstants.WS_MANAGER);
+                // get ws scope from user props
+                WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
+                // create a ws connection instance
+                WebSocketConnection conn = new WebSocketConnection(scope, wsSession);
+                // set ip and port
+                conn.setAttribute(WSConstants.WS_HEADER_REMOTE_IP, socketWrapper.getRemoteAddr());
+                conn.setAttribute(WSConstants.WS_HEADER_REMOTE_PORT, socketWrapper.getRemotePort());
+                // add the request headers
+                conn.setHeaders(handshakeRequest.getHeaders());
+                // add the connection to the user props
+                endpointConfig.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
+                // must be added to the session as well since the session ctor copies from the endpoint and doesnt update
+                wsSession.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
+                // set connected flag
+                conn.setConnected();
+                // fire endpoint handler
+                ep.onOpen(wsSession, endpointConfig);
+                // get the endpoint path to use in registration since we're a server
+                String path = ((ServerEndpointConfig) endpointConfig).getPath();
+                webSocketContainer.registerSession(path, wsSession);
+                // add the connection to the manager
+                manager.addConnection(conn);
+            } catch (DeploymentException e) {
+                throw new IllegalArgumentException(e);
+            } finally {
+                t.setContextClassLoader(cl);
+            }
+        } else {
+            throw new IllegalStateException(sm.getString("wsHttpUpgradeHandler.noPreInit"));
         }
     }
 

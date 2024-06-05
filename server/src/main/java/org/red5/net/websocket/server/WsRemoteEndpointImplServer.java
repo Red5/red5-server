@@ -4,19 +4,15 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.Executor;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import jakarta.websocket.SendHandler;
-import jakarta.websocket.SendResult;
-import jakarta.websocket.Session;
-
 import org.apache.coyote.http11.upgrade.UpgradeInfo;
-import org.apache.tomcat.util.net.AbstractEndpoint;
 import org.apache.tomcat.util.net.SocketWrapperBase;
 import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
+
+import jakarta.websocket.SendHandler;
+import jakarta.websocket.SendResult;
 
 /**
  * This is the server side {@link jakarta.websocket.RemoteEndpoint} implementation - i.e. what the server uses to send data to the client.
@@ -196,17 +192,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         if (sh != null) {
             if (useDispatch) {
                 OnResultRunnable r = new OnResultRunnable(sh, t);
-                AbstractEndpoint<?, ?> endpoint = socketWrapper.getEndpoint();
-                Executor containerExecutor = endpoint.getExecutor();
-                if (endpoint.isRunning() && containerExecutor != null) {
-                    containerExecutor.execute(r);
-                } else {
-                    // Can't use the executor so call the runnable directly.
-                    // This may not be strictly specification compliant in all cases but during shutdown only close messages are going
-                    // to be sent so there should not be the issue of nested calls leading to stack overflow as described in bug
-                    // 55715. The issues with nested calls was the reason for the separate thread requirement in the specification.
-                    r.run();
-                }
+                socketWrapper.execute(r);
             } else {
                 sh.onResult(new SendResult(null, t));
             }

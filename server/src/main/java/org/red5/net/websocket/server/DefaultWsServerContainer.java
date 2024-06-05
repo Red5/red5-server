@@ -188,8 +188,7 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
      *             If an I/O error occurs during the upgrade process
      */
     @Override
-    public void upgradeHttpToWebSocket(Object request, Object response, ServerEndpointConfig sec,
-            Map<String, String> pathParams) throws IOException, DeploymentException {
+    public void upgradeHttpToWebSocket(Object request, Object response, ServerEndpointConfig sec, Map<String, String> pathParams) throws IOException, DeploymentException {
         log.debug("doUpgrade");
         try {
             UpgradeUtil.doUpgrade(this, (HttpServletRequest) request, (HttpServletResponse) response, sec, pathParams);
