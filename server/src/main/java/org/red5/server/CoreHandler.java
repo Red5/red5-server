@@ -18,7 +18,6 @@ import org.red5.server.api.scope.IScopeHandler;
 import org.red5.server.api.service.IServiceCall;
 import org.red5.server.jmx.mxbeans.CoreHandlerMXBean;
 import org.red5.server.net.rtmp.RTMPConnection;
-import org.red5.server.net.rtmpt.RTMPTConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,19 +81,14 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
                 IClient client = conn.getClient();
                 if (client == null) {
                     if (!clientRegistry.hasClient(id)) {
-                        if (conn instanceof RTMPTConnection) {
-                            log.debug("Creating new client for RTMPT connection");
-                            // create a new client using the session id as the client's id
-                            client = new Client(id, (ClientRegistry) clientRegistry);
-                            clientRegistry.addClient(client);
-                            // set the client on the connection
-                            conn.setClient(client);
-                        } else if (conn instanceof RTMPConnection) {
-                            log.debug("Creating new client for RTMP connection");
+                        if (conn instanceof RTMPConnection) {
+                            log.debug("Creating new client for: {}", conn.getClass().getName());
                             // this is a new connection, create a new client to hold it
                             client = clientRegistry.newClient(params);
                             // set the client on the connection
                             conn.setClient(client);
+                        } else {
+                            log.warn("Connection is not of type RTMPConnection, cannot create new client");
                         }
                     } else {
                         client = clientRegistry.lookupClient(id);

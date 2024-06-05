@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.red5.server.BaseConnection;
 import org.red5.server.net.IConnectionManager;
-import org.red5.server.net.rtmpt.RTMPTConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -198,8 +197,6 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
         RTMPConnection conn = null;
         if (cls == RTMPMinaConnection.class) {
             conn = (RTMPMinaConnection) applicationContext.getBean(RTMPMinaConnection.class);
-        } else if (cls == RTMPTConnection.class) {
-            conn = (RTMPTConnection) applicationContext.getBean(RTMPTConnection.class);
         } else {
             conn = (RTMPConnection) cls.getDeclaredConstructor().newInstance();
         }

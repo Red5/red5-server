@@ -9,8 +9,6 @@ package org.red5.server.scope;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jakarta.servlet.ServletContext;
-
 import org.red5.server.LoaderBase;
 import org.red5.server.api.IApplicationContext;
 import org.red5.server.api.IApplicationLoader;
@@ -25,6 +23,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.web.context.ServletContextAware;
+
+import jakarta.servlet.ServletContext;
 
 /**
  * <p>

@@ -9,8 +9,6 @@ package org.red5.server.tomcat.rtmps;
 
 import java.io.File;
 
-import jakarta.servlet.ServletException;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
 import org.apache.catalina.Service;
@@ -27,6 +25,8 @@ import org.red5.server.tomcat.TomcatConnector;
 import org.red5.server.tomcat.rtmpt.RTMPTLoader;
 import org.red5.server.util.FileUtil;
 import org.slf4j.Logger;
+
+import jakarta.servlet.ServletException;
 
 /**
  * Loader for the RTMPS server which uses Tomcat.
@@ -60,7 +60,6 @@ public class RTMPSLoader extends RTMPTLoader {
      *
      * @throws ServletException
      */
-    @SuppressWarnings("deprecation")
     @Override
     public void start() throws ServletException {
         log.info("Loading RTMPS context");
@@ -92,8 +91,7 @@ public class RTMPSLoader extends RTMPTLoader {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             //log.debug("Classloaders - Parent {}\nTCL {}\n\n", new Object[] {classLoader.getParent(), classLoader});
             ctx.setParentClassLoader(classLoader);
-
-            WebappLoader wldr = new WebappLoader(classLoader);
+            WebappLoader wldr = new WebappLoader();
             //add the Loader to the context
             ctx.setLoader(wldr);
         }
@@ -108,10 +106,10 @@ public class RTMPSLoader extends RTMPTLoader {
         ctx.addChild(wrapper);
 
         // add servlet mappings
-        ctx.addServletMapping("/open/*", "RTMPTServlet");
-        ctx.addServletMapping("/close/*", "RTMPTServlet");
-        ctx.addServletMapping("/send/*", "RTMPTServlet");
-        ctx.addServletMapping("/idle/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/open/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/close/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/send/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/idle/*", "RTMPTServlet");
         // add the host
         rtmpsEngine.addChild(host);
         // add new Engine to set of Engine for embedded server

@@ -23,6 +23,8 @@ import org.apache.tomcat.websocket.WsRemoteEndpointImplBase;
  */
 public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
+    protected static final SendResult SENDRESULT_OK = new SendResult(null, null);
+
     private final SocketWrapperBase<?> socketWrapper;
 
     private final UpgradeInfo upgradeInfo;

@@ -77,7 +77,6 @@ public class RTMPTLoader extends TomcatLoader {
      *
      * @throws ServletException
      */
-    @SuppressWarnings("deprecation")
     @Override
     public void start() throws ServletException {
         log.info("Loading RTMPT context");
@@ -109,7 +108,7 @@ public class RTMPTLoader extends TomcatLoader {
         if (ldr == null) {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             ctx.setParentClassLoader(classLoader);
-            WebappLoader wldr = new WebappLoader(classLoader);
+            WebappLoader wldr = new WebappLoader();
             //add the Loader to the context
             ctx.setLoader(wldr);
         }
@@ -125,14 +124,14 @@ public class RTMPTLoader extends TomcatLoader {
         ctx.addChild(wrapper);
 
         // add servlet mappings
-        ctx.addServletMapping("/open/*", "RTMPTServlet");
-        ctx.addServletMapping("/close/*", "RTMPTServlet");
-        ctx.addServletMapping("/send/*", "RTMPTServlet");
-        ctx.addServletMapping("/idle/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/open/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/close/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/send/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/idle/*", "RTMPTServlet");
 
         // add any additional mappings
         for (String key : servletMappings.keySet()) {
-            context.addServletMapping(servletMappings.get(key), key);
+            context.addServletMappingDecoded(servletMappings.get(key), key);
         }
         rtmptEngine.addChild(host);
         // add new Engine to set of Engine for embedded server
