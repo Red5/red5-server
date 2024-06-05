@@ -9,7 +9,7 @@
 		"java.compile.nullAnalysis.mode": "automatic",
 		"java.project.sourcePaths": [
 			"io",
-			"server-common",
+			"common",
 			"server",
 			"service",
 			"client",

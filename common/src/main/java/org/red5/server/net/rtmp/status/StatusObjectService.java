@@ -14,7 +14,6 @@ import org.apache.commons.beanutils.BeanMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.amf.Output;
 import org.red5.io.object.Serializer;
-import org.red5.io.utils.HexDump;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

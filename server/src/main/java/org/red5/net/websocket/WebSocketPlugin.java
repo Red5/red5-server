@@ -20,12 +20,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpointConfig;
-import javax.websocket.server.ServerEndpointConfig.Configurator;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionListener;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpointConfig;
+import jakarta.websocket.server.ServerEndpointConfig.Configurator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.server.Constants;

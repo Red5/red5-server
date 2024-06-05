@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.FileVisitResult;
@@ -213,9 +214,9 @@ public final class ClassLoaderBuilder {
             if (path != null) {
                 try {
                     urlList.add(path.toUri().toURL());
-                    URL classesURL = new URL("jar:file:" + path.toFile().getAbsolutePath().replace(File.separatorChar, '/') + "!/WEB-INF/classes/");
+                    URL classesURL = URI.create("jar:file:" + path.toFile().getAbsolutePath().replace(File.separatorChar, '/') + "!/WEB-INF/classes/").toURL();
                     urlList.add(classesURL);
-                } catch (MalformedURLException e1) {
+                } catch (Exception e1) {
                     e1.printStackTrace();
                 }
             }
