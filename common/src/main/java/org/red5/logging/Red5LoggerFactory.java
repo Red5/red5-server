@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.selector.ContextSelector;
 import ch.qos.logback.classic.util.ContextSelectorStaticBinder;
 import ch.qos.logback.core.CoreConstants;
@@ -53,10 +54,6 @@ public class Red5LoggerFactory {
             System.out.printf("getLogger for: %s thread: %s%n", clazz.getName(), Thread.currentThread().getName());
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             rootLogger.debug("Class loader: {}", cl);
-            // if cl is WebappClassLoader type we can probably get the context from it
-            //if (cl instanceof WebappClassLoader) {
-            //    getContextName()
-            //}
         }
         Logger logger = null;
         if (useLogback) {
@@ -91,6 +88,8 @@ public class Red5LoggerFactory {
                 contextName = CoreConstants.DEFAULT_CONTEXT_NAME;
             }
             try {
+                // get the current names
+                System.out.printf("Context names: %s%n", contextSelector.getContextNames());
                 // get the context for the given context name or default if null
                 LoggerContext context = contextSelector.getLoggerContext(contextName);
                 // and if we get here, fall back to the default context

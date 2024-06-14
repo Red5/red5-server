@@ -71,6 +71,10 @@ public class StreamService implements IStreamService {
         }
     };
 
+    public StreamService() {
+        // default constructor to prevent verify from complaining when extended.
+    }
+
     /** {@inheritDoc} */
     public Number createStream() {
         IConnection conn = Red5.getConnectionLocal();
