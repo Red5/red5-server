@@ -7,13 +7,9 @@
 
 package org.red5.logging;
 
+import java.io.File;
+import java.net.URI;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +19,9 @@ import org.springframework.web.context.WebApplicationContext;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.CoreConstants;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 /**
  * A servlet context listener that puts this contexts LoggerContext into a static map of logger contexts within an overall singleton log context selector.
@@ -55,22 +54,27 @@ public class ContextLoggingListener implements ServletContextListener {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
             // get the logger context for this servlet / app context by name
             URL url = servletContext.getResource(String.format("/WEB-INF/classes/logback-%s.xml", contextName));
-            if (url != null && Files.exists(Paths.get(url.toURI()))) {
-                System.out.printf("Context logger config found: %s%n", url.toURI());
-            } else {
+            URI uri = url != null ? url.toURI() : null;
+            if (uri == null) {
                 url = servletContext.getResource("/WEB-INF/classes/logback.xml");
-                if (url != null && Files.exists(Paths.get(url.toURI()))) {
-                    System.out.printf("Context logger config found: %s%n", url.toURI());
-                }
+                uri = url != null ? url.toURI() : null;
             }
-            if (url != null) {
-                System.err.printf("No context logger config found for: %s%n", contextName);
-                JoranConfigurator jc = new JoranConfigurator();
-                jc.setContext(loggerContext);
-                loggerContext.reset(); // override default configuration
-                // inject the name of the current application as "application-name" property of the LoggerContext
-                loggerContext.putProperty(CoreConstants.CONTEXT_NAME_KEY, contextName);
-                jc.doConfigure(url.toURI().toString());
+            // when a logback config is not found in the webapp
+            if (uri != null) {
+                File config = new File(uri);
+                if (config.exists() && config.isFile() && config.canRead()) {
+                    System.out.printf("Context logger config found: %s%n", uri);
+                    JoranConfigurator jc = new JoranConfigurator();
+                    jc.setContext(loggerContext);
+                    loggerContext.reset(); // override default configuration
+                    // inject the name of the current application as "application-name" property of the LoggerContext
+                    loggerContext.putProperty(CoreConstants.CONTEXT_NAME_KEY, contextName);
+                    jc.doConfigure(uri.toString());
+                } else {
+                    System.err.printf("Context logger config not accessable: %s%n", contextName);
+                }
+            } else {
+                System.err.printf("Context logger config not found: %s%n", contextName);
             }
             // get the selector
             //ContextSelector selector = Red5LoggerFactory.getContextSelector();
