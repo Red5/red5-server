@@ -8,6 +8,7 @@
 package org.red5.client.net.rtmp;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -223,6 +224,10 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         params.put("capabilities", Integer.valueOf(15));
         params.put("swfUrl", null);
         params.put("videoCodecs", Integer.valueOf(252));
+        params.put("audioFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
+        //params.put("audioFourCcInfoMap", Collections.singletonMap(AudioCodec.AAC.getFourcc(), Integer.valueOf(4)));
+        params.put("videoFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
+        //params.put("videoFourCcInfoMap", Collections.singletonMap(VideoCodec.AVC.getFourcc(), Integer.valueOf(4)));
         return params;
     }
 

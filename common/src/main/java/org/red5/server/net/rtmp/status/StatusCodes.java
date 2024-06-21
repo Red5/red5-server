@@ -27,7 +27,7 @@ public interface StatusCodes {
     public static final String NC_CONNECT_APPSHUTDOWN = "NetConnection.Connect.AppShutdown";
 
     /**
-     * The connection was closed successfully
+     * The connection was closed successfully.
      */
     public static final String NC_CONNECT_CLOSED = "NetConnection.Connect.Closed";
 
@@ -50,6 +50,15 @@ public interface StatusCodes {
      * The application name specified during connect is invalid.
      */
     public static final String NC_CONNECT_INVALID_APPLICATION = "NetConnection.Connect.InvalidApp";
+
+    /**
+     * Indicates that the client should reconnect to the property value of the tcUrl element. From the RTMP-E specification:
+     *
+     * There are instances when a streaming platform may request the streaming client to reconnect, such as:
+     * 1. When live streaming servers undergo updates
+     * 2. When there’s a need to redirect the client to a different server instance, ensuring optimal load balancing and precise geolocation mapping
+     */
+    public static final String NC_CONNECT_RECONNECT_REQUEST = "NetConnection.Connect.ReconnectRequest";
 
     /**
      * Invalid arguments were passed to a NetStream method.

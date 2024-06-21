@@ -12,14 +12,60 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Video codecs that Red5 supports.
+ * Video codecs that Red5 supports; which includes some RTMP-E specific codecs.
  *
  * @author Art Clarke
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public enum VideoCodec {
 
-    JPEG((byte) 0x01), H263((byte) 0x02), SCREEN_VIDEO((byte) 0x03), VP6((byte) 0x04), VP6a((byte) 0x05), SCREEN_VIDEO2((byte) 0x06), AVC((byte) 0x07), VP8((byte) 0x08), VP9((byte) 0x09), AV1((byte) 0x0a), MPEG1((byte) 0x0b), HEVC((byte) 0x0c);
+    JPEG((byte) 0x01), // jpeg
+    H263((byte) 0x02), // h263
+    SCREEN_VIDEO((byte) 0x03), // screen video
+    VP6((byte) 0x04), VP6a((byte) 0x05), // vp6 / vp6 alpha
+    SCREEN_VIDEO2((byte) 0x06), // screen video 2
+    AVC((byte) 0x07) {
+
+        @Override
+        public int getFourcc() {
+            return 1635148593; // AVC / avc1
+        }
+
+    }, // h264
+    VP8((byte) 0x08) {
+
+        @Override
+        public int getFourcc() {
+            return 1987063864; // VP8 / vp08
+        }
+
+    }, // vp8
+    VP9((byte) 0x09) {
+
+        @Override
+        public int getFourcc() {
+            return 1987063865; // VP9 / vp09
+        }
+
+    }, // vp9
+    AVAILABLE((byte) 0x0a), // available
+    MPEG1((byte) 0x0b), // mpeg1 video
+    HEVC((byte) 0x0c) {
+
+        @Override
+        public int getFourcc() {
+            return 1752589105; // HEVC / hvc1
+        }
+
+    }, // h265
+    AV1((byte) 0x0d) {
+
+        @Override
+        public int getFourcc() {
+            return 1635135537; // AV1 / av01
+        }
+
+    }; // av1
 
     /**
      * Codecs which have private / config data or frame type identifiers included.
@@ -29,6 +75,8 @@ public enum VideoCodec {
     private final static Map<Byte, VideoCodec> map = new HashMap<>();
 
     private byte id;
+
+    private int fourcc;
 
     static {
         for (VideoCodec codec : VideoCodec.values()) {
@@ -47,6 +95,15 @@ public enum VideoCodec {
      */
     public byte getId() {
         return id;
+    }
+
+    /**
+     * Returns back a four character code for this codec.
+     *
+     * @return the four character code
+     */
+    public int getFourcc() {
+        return fourcc;
     }
 
     public static VideoCodec valueOfById(int id) {

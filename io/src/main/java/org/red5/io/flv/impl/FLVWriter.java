@@ -760,7 +760,9 @@ public class FLVWriter implements ITagWriter {
             log.debug("Stored duration: {}", params.get("duration"));
         }
         if (videoCodecId != -1) {
-            params.put("videocodecid", (videoCodecId == 7 ? "avc1" : (videoCodecId == 12 ? "hevc" : videoCodecId)));
+            VideoCodec videoCodec = VideoCodec.valueOfById(videoCodecId);
+            int vcid = VideoCodec.getConfigured().contains(videoCodec) ? videoCodec.getFourcc() : videoCodecId;
+            params.put("videocodecid", Double.valueOf(vcid));
             if (videoDataSize > 0) {
                 params.put("videodatarate", 8 * videoDataSize / 1024 / duration); //from bytes to kilobits
             }
@@ -769,7 +771,9 @@ public class FLVWriter implements ITagWriter {
             params.put("novideocodec", 0);
         }
         if (audioCodecId != -1) {
-            params.put("audiocodecid", (audioCodecId == 10 ? "mp4a" : (audioCodecId == 13 ? "opus" : audioCodecId)));
+            AudioCodec audioCodec = AudioCodec.valueOfById(audioCodecId);
+            int acid = AudioCodec.getConfigured().contains(audioCodec) ? audioCodec.getFourcc() : audioCodecId;
+            params.put("audiocodecid", Double.valueOf(acid));
             if (audioCodecId == AudioCodec.AAC.getId()) {
                 params.put("audiosamplerate", 44100);
                 params.put("audiosamplesize", 16);

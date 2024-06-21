@@ -7,6 +7,8 @@
 
 package org.red5.codec;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class HEVCVideo extends AbstractVideo {
     /** Video decoder configuration data */
     private FrameData decoderConfiguration;
 
-    /** Constructs a new AVCVideo. */
+    /** Constructs a new HEVCVideo. */
     public HEVCVideo() {
         codec = VideoCodec.HEVC;
         this.reset();
@@ -42,13 +44,6 @@ public class HEVCVideo extends AbstractVideo {
     public void reset() {
         decoderConfiguration = new FrameData();
         softReset();
-    }
-
-    // reset all except decoder configuration
-    private void softReset() {
-        keyframes.clear();
-        interframes.clear();
-        numInterframes.set(0);
     }
 
     /** {@inheritDoc} */
@@ -115,6 +110,9 @@ public class HEVCVideo extends AbstractVideo {
                     //log.trace("Interframe");
                     if (isDebug) {
                         log.debug("Interframe - HEVC type: {}", avcType);
+                    }
+                    if (interframes == null) {
+                        interframes = new CopyOnWriteArrayList<>();
                     }
                     // rewind
                     data.rewind();

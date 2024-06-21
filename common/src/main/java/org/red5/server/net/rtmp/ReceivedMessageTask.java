@@ -10,6 +10,7 @@ package org.red5.server.net.rtmp;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.red5.server.api.Red5;
 import org.red5.server.net.rtmp.message.Packet;
@@ -19,7 +20,7 @@ import org.red5.server.net.rtmp.message.Packet;
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public final class ReceivedMessageTask implements Callable<Packet> {
+public final class ReceivedMessageTask implements Callable<Packet>, Supplier<Packet> {
 
     private final RTMPConnection conn;
 
@@ -39,6 +40,10 @@ public final class ReceivedMessageTask implements Callable<Packet> {
         hashCode = Objects.hash(conn.getSessionId(), packet);
     }
 
+    /**
+     * Older versions of Red5 used the {@link #call()} method to process incoming messages.
+     */
+    @Override
     public Packet call() throws Exception {
         if (processing.compareAndSet(false, true)) {
             // set connection to thread local
@@ -54,6 +59,30 @@ public final class ReceivedMessageTask implements Callable<Packet> {
             }
         } else {
             throw new IllegalStateException("Task is already being processed");
+        }
+        return packet;
+    }
+
+    /**
+     * Newer versions of Red5 use the {@link #get()} method to process incoming messages.
+     */
+    @Override
+    public Packet get() {
+        if (processing.compareAndSet(false, true)) {
+            // set connection to thread local
+            Red5.setConnectionLocal(conn);
+            try {
+                // pass message to the handler
+                handler.messageReceived(conn, packet);
+                // if we get this far, set done / completed flag
+                packet.setProcessed(true);
+            } catch (Exception e) {
+                // track the exception
+                conn.setAttribute("exception", e);
+            } finally {
+                // clear thread local
+                Red5.setConnectionLocal(null);
+            }
         }
         return packet;
     }

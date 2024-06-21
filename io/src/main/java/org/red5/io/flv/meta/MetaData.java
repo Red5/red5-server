@@ -59,7 +59,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
      */
     @Override
     public int getVideoCodecId() {
-        return (Integer) this.get("videocodecid");
+        return ((Double) this.get("videocodecid")).intValue();
     }
 
     /**
@@ -67,17 +67,17 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
      */
     @Override
     public void setVideoCodecId(int id) {
-        this.put("videocodecid", id);
+        this.put("videocodecid", Double.valueOf(id));
     }
 
     @Override
     public int getAudioCodecId() {
-        return (Integer) this.get("audiocodecid");
+        return ((Double) this.get("audiocodecid")).intValue();
     }
 
     @Override
     public void setAudioCodecId(int id) {
-        this.put("audiocodecid", id);
+        this.put("audiocodecid", Double.valueOf(id));
     }
 
     /**

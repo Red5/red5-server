@@ -10,9 +10,6 @@
     <packaging>jar</packaging>
     <name>Red5 :: Client</name>
     <description>The Red5 client</description>
-    <properties>
-        <maven.test.skip>true</maven.test.skip>
-    </properties>
     <build>
         <defaultGoal>install</defaultGoal>
         <plugins>

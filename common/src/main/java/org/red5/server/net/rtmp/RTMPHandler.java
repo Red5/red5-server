@@ -7,9 +7,14 @@
 
 package org.red5.server.net.rtmp;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.red5.io.CapsExMask;
+import org.red5.io.FourCcInfoMask;
 import org.red5.io.object.StreamAction;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection.Encoding;
@@ -304,6 +309,29 @@ public class RTMPHandler extends BaseRTMPHandler {
                 path = path.substring(0, idx);
             }
             params.put("path", path);
+            // get enhanced properties
+            String[] fourCcList = null; // earlier impls of RTMP-E may use this style
+            if (params.containsKey("fourCcList")) {
+                log.debug("FourCC list: {}", params.get("fourCcList"));
+                //fourCcList = (String[]) params.get("fourCcList");
+            }
+            // newer style of RTMP-E codec support
+            Map<String, EnumSet<FourCcInfoMask>> audioFourCcInfoMap, videoFourCcInfoMap;
+            if (params.containsKey("audioFourCcInfoMap")) {
+                log.debug("Audio FourCC info map: {}", params.get("audioFourCcInfoMap"));
+                //audioFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("audioFourCcInfoMap");
+            }
+            if (params.containsKey("videoFourCcInfoMap")) {
+                log.debug("Video FourCC info map: {}", params.get("videoFourCcInfoMap"));
+                //videoFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("videoFourCcInfoMap");
+            }
+            // RTMP-E specific capabilities extensions
+            Map<String, EnumSet<CapsExMask>> capsEx;
+            if (params.containsKey("capsEx")) {
+                // number = CapsExMask.Reconnect | CapsExMask.Multitrack
+                log.debug("CapsEx: {}", params.get("capsEx"));
+                //capsEx = (Map<String, EnumSet<CapsExMask>>) params.get("capsEx");
+            }
             // connection setup
             conn.setup(host, path, params);
             try {
@@ -317,17 +345,17 @@ public class RTMPHandler extends BaseRTMPHandler {
                         // TODO optimize this to use Scope instead of Context
                         scope = context.resolveScope(global, path);
                         if (scope != null) {
+                            Object[] callArgs = call.getArguments();
                             if (isDebug) {
-                                log.debug("Connecting to: {}", scope.getName());
-                                log.debug("Conn {}, scope {}, call {} args {}", new Object[] { conn, scope, call, call.getArguments() });
+                                log.debug("Connecting to: {} conn: {} scope: {} call: {} args: {}", scope.getName(), conn, scope, call, Arrays.toString(callArgs));
                             }
                             // if scope connection is allowed
                             if (scope.isConnectionAllowed(conn)) {
                                 // connections connect result
                                 boolean connectSuccess;
                                 try {
-                                    if (call.getArguments() != null) {
-                                        connectSuccess = conn.connect(scope, call.getArguments());
+                                    if (callArgs != null) {
+                                        connectSuccess = conn.connect(scope, callArgs);
                                     } else {
                                         connectSuccess = conn.connect(scope);
                                     }
@@ -336,12 +364,18 @@ public class RTMPHandler extends BaseRTMPHandler {
                                         call.setStatus(Call.STATUS_SUCCESS_RESULT);
                                         if (call instanceof IPendingServiceCall) {
                                             IPendingServiceCall pc = (IPendingServiceCall) call;
-                                            //send fmsver and capabilities
+                                            // send fmsver and capabilities
                                             StatusObject result = getStatus(NC_CONNECT_SUCCESS);
                                             result.setAdditional("fmsVer", Red5.getFMSVersion());
                                             result.setAdditional("capabilities", Red5.getCapabilities());
                                             result.setAdditional("mode", Integer.valueOf(1));
                                             result.setAdditional("data", Red5.getDataVersion());
+                                            // XXX(paul) This is where the server needs to state its support for E-RTMP. The server SHOULD state
+                                            // its support via attributes such as videoFourCcInfoMap, capsEx, and similar properties.
+                                            result.setAdditional("fourCcList", new Object[] { "*" });
+                                            result.setAdditional("audioFourCcInfoMap", Collections.singletonMap("*", 4));
+                                            result.setAdditional("videoFourCcInfoMap", Collections.singletonMap("*", 4));
+                                            result.setAdditional("CapsEx", (CapsExMask.Reconnect.getMask() | CapsExMask.Multitrack.getMask()));
                                             pc.setResult(result);
                                         }
                                         // Measure initial round-trip time after connecting

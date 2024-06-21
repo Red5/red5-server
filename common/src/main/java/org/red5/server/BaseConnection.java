@@ -381,10 +381,10 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
      */
     public boolean connect(IScope newScope, Object[] params) {
         if (log.isDebugEnabled()) {
-            log.debug("Connect Params: {}", params);
+            log.debug("Connect args / params: {}", params);
             if (params != null) {
-                for (Object e : params) {
-                    log.debug("Param: {}", e);
+                for (Object p : params) {
+                    log.debug("Param: {}", p);
                 }
             }
         }

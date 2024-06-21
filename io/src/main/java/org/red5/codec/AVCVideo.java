@@ -7,6 +7,8 @@
 
 package org.red5.codec;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +45,6 @@ public class AVCVideo extends AbstractVideo {
     public void reset() {
         decoderConfiguration = new FrameData();
         softReset();
-    }
-
-    // reset all except decoder configuration
-    private void softReset() {
-        keyframes.clear();
-        interframes.clear();
-        numInterframes.set(0);
     }
 
     /** {@inheritDoc} */
@@ -114,6 +109,9 @@ public class AVCVideo extends AbstractVideo {
                     //log.trace("Interframe");
                     if (isDebug) {
                         log.debug("Interframe - AVC type: {}", avcType);
+                    }
+                    if (interframes == null) {
+                        interframes = new CopyOnWriteArrayList<>();
                     }
                     // rewind
                     data.rewind();

@@ -21,7 +21,7 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
     /**
      * Storage for frames buffered since last key frame
      */
-    protected final CopyOnWriteArrayList<FrameData> interframes = new CopyOnWriteArrayList<>();
+    protected CopyOnWriteArrayList<FrameData> interframes;
 
     /**
      * Number of frames buffered since last key frame
@@ -29,9 +29,9 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
     protected final AtomicInteger numInterframes = new AtomicInteger(0);
 
     /**
-     * Whether or not to buffer interframes
+     * Whether or not to buffer interframes. Default is false.
      */
-    protected boolean bufferInterframes = false;
+    protected boolean bufferInterframes;
 
     @Override
     public VideoCodec getCodec() {
@@ -45,6 +45,17 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
 
     @Override
     public void reset() {
+    }
+
+    /**
+     * Soft reset, clears keyframes and interframes, but does not reset the codec.
+     */
+    protected void softReset() {
+        keyframes.clear();
+        if (interframes != null) {
+            interframes.clear();
+        }
+        numInterframes.set(0);
     }
 
     @Override

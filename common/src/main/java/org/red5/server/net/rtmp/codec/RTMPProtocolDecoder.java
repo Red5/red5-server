@@ -1129,6 +1129,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             // passed to the connection object.
             @SuppressWarnings("unchecked")
             final Map<String, Object> connParams = (Map<String, Object>) obj;
+            if (isDebug) {
+                log.debug("Num connection params: {}", connParams.size());
+                for (Map.Entry<String, Object> entry : connParams.entrySet()) {
+                    log.debug(" > {}: {}", entry.getKey(), entry.getValue());
+                }
+            }
             notify.setConnectionParams(connParams);
         } else if (obj != null) {
             paramList.add(obj);

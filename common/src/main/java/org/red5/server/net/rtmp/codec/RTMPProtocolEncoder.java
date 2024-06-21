@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.object.Output;
 import org.red5.io.object.Serializer;
@@ -801,11 +802,17 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      *            Command event
      */
     protected void encodeCommand(IoBuffer out, ICommand command) {
-        // TODO: tidy up here
-        Output output = new org.red5.io.amf.Output(out);
         final IServiceCall call = command.getCall();
         final boolean isPending = (call.getStatus() == Call.STATUS_PENDING);
         log.debug("Call: {} pending: {}", call, isPending);
+        // always start with AMF0, even if the client is using AMF3
+        Output output = new org.red5.io.amf.Output(out);
+        // response to initial connect is always AMF0
+        if (!"connect".equals(call.getServiceMethodName())) {
+            if (Red5.getConnectionLocal().getEncoding() == Encoding.AMF3) {
+                output = new org.red5.io.amf3.Output(out);
+            }
+        }
         if (!isPending) {
             log.debug("Call has been executed, send result");
             Serializer.serialize(output, call.isSuccess() ? "_result" : "_error");
@@ -817,16 +824,6 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         if (command instanceof Invoke) {
             Serializer.serialize(output, Integer.valueOf(command.getTransactionId()));
             Serializer.serialize(output, command.getConnectionParams());
-        }
-        if (call.getServiceName() == null && "connect".equals(call.getServiceMethodName())) {
-            // response to initial connect, always use AMF0
-            output = new org.red5.io.amf.Output(out);
-        } else {
-            if (Red5.getConnectionLocal().getEncoding() == Encoding.AMF3) {
-                output = new org.red5.io.amf3.Output(out);
-            } else {
-                output = new org.red5.io.amf.Output(out);
-            }
         }
         if (!isPending && (command instanceof Invoke)) {
             IPendingServiceCall pendingCall = (IPendingServiceCall) call;
