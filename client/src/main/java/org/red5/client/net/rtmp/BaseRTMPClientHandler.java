@@ -216,14 +216,14 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         params.put("app", application);
         params.put("objectEncoding", Integer.valueOf(0));
         params.put("fpad", Boolean.FALSE);
-        params.put("flashVer", "WIN 11,2,202,235");
-        params.put("audioCodecs", Integer.valueOf(3575));
+        params.put("flashVer", "FMLE/3.0 (compatible; Red5Client)"); // old value WIN 11,2,202,235
+        params.put("audioCodecs", Integer.valueOf(0x0FFF)); // old value 3575 = 0x0E0F
         params.put("videoFunction", Integer.valueOf(1));
         params.put("pageUrl", null);
         params.put("path", application);
         params.put("capabilities", Integer.valueOf(15));
         params.put("swfUrl", null);
-        params.put("videoCodecs", Integer.valueOf(252));
+        params.put("videoCodecs", Integer.valueOf(0x00FF)); // old value 252 = 0x0FC
         params.put("audioFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
         //params.put("audioFourCcInfoMap", Collections.singletonMap(AudioCodec.AAC.getFourcc(), Integer.valueOf(4)));
         params.put("videoFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
