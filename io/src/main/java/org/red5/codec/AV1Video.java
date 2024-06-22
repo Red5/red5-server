@@ -26,9 +26,9 @@ public class AV1Video extends AbstractVideo {
      */
     static final String CODEC_NAME = "AV1";
 
-    public static final byte[] AV1_KEYFRAME_PREFIX = new byte[] { 0x0a, 0x01 };
+    public static final byte[] AV1_KEYFRAME_PREFIX = new byte[] { 0x0d, 0x01 };
 
-    public static final byte[] AV1_FRAME_PREFIX = new byte[] { 0x2a, 0x01 };
+    public static final byte[] AV1_FRAME_PREFIX = new byte[] { 0x2d, 0x01 };
 
     // buffer holding OBU's
     @SuppressWarnings("unused")
