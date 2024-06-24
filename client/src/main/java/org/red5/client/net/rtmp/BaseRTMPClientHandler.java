@@ -51,16 +51,12 @@ import org.red5.server.so.SharedObjectMessage;
 import org.red5.server.stream.AbstractClientStream;
 import org.red5.server.stream.OutputStream;
 import org.red5.server.stream.consumer.ConnectionConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Base class for clients (RTMP and RTMPT)
  */
 public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements IRTMPClient {
-
-    private static final Logger log = LoggerFactory.getLogger(BaseRTMPClientHandler.class);
 
     /**
      * Connection scheme / protocol
@@ -999,7 +995,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         this.streamEventHandler = streamEventHandler;
     }
 
-    private static class NetStream extends AbstractClientStream implements IEventDispatcher {
+    private class NetStream extends AbstractClientStream implements IEventDispatcher {
 
         private IEventDispatcher dispatcher;
 

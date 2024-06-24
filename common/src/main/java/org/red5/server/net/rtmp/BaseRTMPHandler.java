@@ -47,11 +47,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, StatusCodes {
 
-    private static Logger log = LoggerFactory.getLogger(BaseRTMPHandler.class);
+    // initialize the Logger upon class load, keeping it at the class level
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private static boolean isTrace = log.isTraceEnabled();
-
-    private static boolean isDebug = log.isDebugEnabled();
+    // convenience flags to prevent unnecessary calls to is*Enabled() calls which require logger lookup
+    protected boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     /** {@inheritDoc} */
     public void connectionOpened(RTMPConnection conn) {
@@ -230,10 +230,12 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
      *            Pending call result event context
      */
     protected void handlePendingCallResult(RTMPConnection conn, Invoke invoke) {
-        final IServiceCall call = invoke.getCall();
         final IPendingServiceCall pendingCall = conn.retrievePendingCall(invoke.getTransactionId());
+        log.debug("Pending call: {}", pendingCall);
         if (pendingCall != null) {
-            // The client sent a response to a previously made call.
+            // get the call
+            IServiceCall call = invoke.getCall();
+            // The client sent a response to a previously made call
             Object[] args = call.getArguments();
             if (args != null && args.length > 0) {
                 // TODO: can a client return multiple results?

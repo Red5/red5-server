@@ -11,9 +11,12 @@ import java.beans.ConstructorProperties;
 import java.beans.PropertyChangeEvent;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -36,6 +39,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.red5.io.CapsExMask;
+import org.red5.io.FourCcInfoMask;
 import org.red5.server.BaseConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.api.event.IEvent;
@@ -606,15 +611,51 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      * @param params
      *            Params passed from client
      */
+    @SuppressWarnings("unchecked")
     public void setup(String host, String path, Map<String, Object> params) {
         this.host = host;
         this.path = path;
+        // set the parameters which are passed from the client via the command object, not the args after the object
         this.params = params;
         if (Integer.valueOf(3).equals(params.get("objectEncoding"))) {
             if (isDebug) {
                 log.debug("Setting object encoding to AMF3");
             }
             state.setEncoding(Encoding.AMF3);
+        }
+        // get enhanced properties
+        List<String> fourCcList = null; // earlier impls of RTMP-E may use this style
+        if (params.containsKey("fourCcList")) {
+            log.debug("FourCC list: {}", params.get("fourCcList"));
+            fourCcList = (ArrayList<String>) params.get("fourCcList");
+        } else {
+            log.debug("FourCC list not found; either not using RTMP-E or using newer style of codec support");
+        }
+        // newer style of RTMP-E codec support
+        Map<String, EnumSet<FourCcInfoMask>> audioFourCcInfoMap = Collections.emptyMap(), videoFourCcInfoMap = Collections.emptyMap();
+        if (params.containsKey("audioFourCcInfoMap")) {
+            log.debug("Audio FourCC info map: {}", params.get("audioFourCcInfoMap"));
+            audioFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("audioFourCcInfoMap");
+        } else {
+            log.debug("Audio FourCC info map not found; either not using RTMP-E or using older style of codec support");
+        }
+        if (params.containsKey("videoFourCcInfoMap")) {
+            log.debug("Video FourCC info map: {}", params.get("videoFourCcInfoMap"));
+            videoFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("videoFourCcInfoMap");
+        } else {
+            log.debug("Video FourCC info map not found; either not using RTMP-E or using older style of codec support");
+        }
+        // RTMP-E specific capabilities extensions
+        EnumSet<CapsExMask> capsEx = EnumSet.noneOf(CapsExMask.class);
+        if (params.containsKey("capsEx")) {
+            // number = CapsExMask.Reconnect | CapsExMask.Multitrack
+            log.debug("CapsEx: {}", params.get("capsEx"));
+            capsEx = CapsExMask.fromMask(((Number) params.get("capsEx")).byteValue());
+        } else {
+            log.debug("CapsEx not found; either not using RTMP-E or using older style of codec support");
+        }
+        if (isDebug) {
+            log.debug("Setup complete - host: {} path: {} fourCcList: {} audioFourCc: {} videoFourCc: {} CapEx: {}", host, path, fourCcList, audioFourCcInfoMap, videoFourCcInfoMap, capsEx);
         }
     }
 

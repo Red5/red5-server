@@ -371,12 +371,12 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
-     * Connect to another scope on server with given parameters
+     * Connect to another scope on server with given parameters.
      *
      * @param newScope
      *            New scope
      * @param params
-     *            Parameters to connect with
+     *            Parameters to connect with outside of connect command object
      * @return true on success, false otherwise
      */
     public boolean connect(IScope newScope, Object[] params) {

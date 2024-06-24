@@ -9,14 +9,11 @@ package org.red5.server.net.rtmp;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.red5.io.CapsExMask;
-import org.red5.io.FourCcInfoMask;
 import org.red5.io.object.StreamAction;
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection.Encoding;
 import org.red5.server.api.IContext;
 import org.red5.server.api.IServer;
@@ -57,18 +54,11 @@ import org.red5.server.so.SharedObjectMessage;
 import org.red5.server.so.SharedObjectService;
 import org.red5.server.stream.StreamService;
 import org.red5.server.util.ScopeUtils;
-import org.slf4j.Logger;
 
 /**
  * RTMP events handler.
  */
 public class RTMPHandler extends BaseRTMPHandler {
-
-    protected static Logger log = Red5LoggerFactory.getLogger(RTMPHandler.class);
-
-    protected static boolean isTrace = log.isTraceEnabled();
-
-    protected static boolean isDebug = log.isDebugEnabled();
 
     /**
      * Status object service.
@@ -299,6 +289,9 @@ public class RTMPHandler extends BaseRTMPHandler {
             log.debug("connect - transaction id: {}", transId);
             // Get parameters passed from client to NetConnection#connection
             final Map<String, Object> params = command.getConnectionParams();
+            if (isDebug) {
+                log.debug("Connection params: {}", params);
+            }
             // Get hostname
             String host = getHostname((String) params.get("tcUrl"));
             // app name as path, but without query string if there is one
@@ -309,29 +302,6 @@ public class RTMPHandler extends BaseRTMPHandler {
                 path = path.substring(0, idx);
             }
             params.put("path", path);
-            // get enhanced properties
-            String[] fourCcList = null; // earlier impls of RTMP-E may use this style
-            if (params.containsKey("fourCcList")) {
-                log.debug("FourCC list: {}", params.get("fourCcList"));
-                //fourCcList = (String[]) params.get("fourCcList");
-            }
-            // newer style of RTMP-E codec support
-            Map<String, EnumSet<FourCcInfoMask>> audioFourCcInfoMap, videoFourCcInfoMap;
-            if (params.containsKey("audioFourCcInfoMap")) {
-                log.debug("Audio FourCC info map: {}", params.get("audioFourCcInfoMap"));
-                //audioFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("audioFourCcInfoMap");
-            }
-            if (params.containsKey("videoFourCcInfoMap")) {
-                log.debug("Video FourCC info map: {}", params.get("videoFourCcInfoMap"));
-                //videoFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("videoFourCcInfoMap");
-            }
-            // RTMP-E specific capabilities extensions
-            Map<String, EnumSet<CapsExMask>> capsEx;
-            if (params.containsKey("capsEx")) {
-                // number = CapsExMask.Reconnect | CapsExMask.Multitrack
-                log.debug("CapsEx: {}", params.get("capsEx"));
-                //capsEx = (Map<String, EnumSet<CapsExMask>>) params.get("capsEx");
-            }
             // connection setup
             conn.setup(host, path, params);
             try {
@@ -370,8 +340,8 @@ public class RTMPHandler extends BaseRTMPHandler {
                                             result.setAdditional("capabilities", Red5.getCapabilities());
                                             result.setAdditional("mode", Integer.valueOf(1));
                                             result.setAdditional("data", Red5.getDataVersion());
-                                            // XXX(paul) This is where the server needs to state its support for E-RTMP. The server SHOULD state
-                                            // its support via attributes such as videoFourCcInfoMap, capsEx, and similar properties.
+                                            // XXX(paul) This is where the server needs to state its support for Enhanced-RTMP.
+                                            // support is via attributes audio/videoFourCcInfoMap, capsEx, and fourCcList.
                                             result.setAdditional("fourCcList", new Object[] { "*" });
                                             result.setAdditional("audioFourCcInfoMap", Collections.singletonMap("*", 4));
                                             result.setAdditional("videoFourCcInfoMap", Collections.singletonMap("*", 4));

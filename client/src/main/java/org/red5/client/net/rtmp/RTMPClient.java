@@ -17,8 +17,6 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.transport.socket.SocketConnector;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RTMP client implementation supporting "rtmp" and "rtmpe" protocols.
@@ -33,8 +31,6 @@ import org.slf4j.LoggerFactory;
  * @author Jon Valliere
  */
 public class RTMPClient extends BaseRTMPClientHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(RTMPClient.class);
 
     protected static final int CONNECTOR_WORKER_TIMEOUT = 7000; // milliseconds
 

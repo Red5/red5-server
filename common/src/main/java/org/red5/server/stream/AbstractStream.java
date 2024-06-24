@@ -20,6 +20,8 @@ import org.red5.server.api.stream.IStream;
 import org.red5.server.api.stream.IStreamAwareScopeHandler;
 import org.red5.server.api.stream.StreamState;
 import org.red5.server.net.rtmp.event.Notify;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base implementation of IStream. Contains codec information, stream name, scope, event handling, and provides stream start and
@@ -28,6 +30,10 @@ import org.red5.server.net.rtmp.event.Notify;
  * @see org.red5.server.api.stream.IStream
  */
 public abstract class AbstractStream implements IStream {
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
+    protected boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     /**
      * Stream name

@@ -14,12 +14,8 @@ import org.red5.server.api.service.IPendingServiceCallback;
 import org.red5.server.api.so.IClientSharedObject;
 import org.red5.server.api.so.ISharedObjectBase;
 import org.red5.server.api.so.ISharedObjectListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SharedObjectClient extends RTMPClient implements IPendingServiceCallback, ISharedObjectListener, ClientExceptionHandler {
-
-    private static Logger log = LoggerFactory.getLogger(SharedObjectClient.class);
 
     private IClientSharedObject obj;
 

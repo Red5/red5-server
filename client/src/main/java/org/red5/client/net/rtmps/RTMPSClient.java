@@ -19,8 +19,6 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.red5.client.net.rtmp.RTMPClient;
 import org.red5.client.net.rtmp.RTMPMinaIoHandler;
 import org.red5.client.net.ssl.BogusSslContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RTMPS client object (RTMPS Native)
@@ -36,8 +34,6 @@ import org.slf4j.LoggerFactory;
  * @author Kevin Green (kevygreen@gmail.com)
  */
 public class RTMPSClient extends RTMPClient {
-
-    private static final Logger log = LoggerFactory.getLogger(RTMPSClient.class);
 
     // I/O handler
     private final RTMPSClientIoHandler ioHandler;

@@ -1376,6 +1376,16 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         log.info("W3C x-category:stream x-event:play c-ip:{} x-sname:{}", Red5.getConnectionLocal().getRemoteAddress(), stream.getName());
     }
 
+    /**
+     * RTMFP peer connect event handler.
+     *
+     * @link https://github.com/zenomt/rtmfp-cpp/blob/main/include/rtmfp/rtmfp.hpp
+     *
+     */
+    public void setPeerInfo() {
+        log.debug("setPeerInfo");
+    }
+
     @Override
     public boolean handleEvent(IEvent event) {
         log.debug("handleEvent: {}", event);

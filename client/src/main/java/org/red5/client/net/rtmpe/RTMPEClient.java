@@ -32,8 +32,6 @@ import org.red5.server.messaging.PipeConnectionEvent;
 import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.status.StatusCodes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RTMPE client object based on the original RTMP client.
@@ -42,8 +40,6 @@ import org.slf4j.LoggerFactory;
  * @author Gavriloaie Eugen-Andrei
  */
 public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, ClientExceptionHandler, IEventDispatcher, IPushableConsumer, IPipeConnectionListener {
-
-    private static final Logger log = LoggerFactory.getLogger(RTMPEClient.class);
 
     // list to hold any listeners
     private List<IClientListener> clientListeners = new ArrayList<>(1);

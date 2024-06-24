@@ -19,8 +19,6 @@ import org.red5.server.net.rtmp.codec.RTMPProtocolEncoder;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Packet;
 import org.red5.server.net.rtmpt.codec.RTMPTCodecFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RTMPT client object
@@ -28,8 +26,6 @@ import org.slf4j.LoggerFactory;
  * @author Anton Lebedevich
  */
 public class RTMPTClient extends BaseRTMPClientHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(RTMPTClient.class);
 
     // guarded by this
     protected RTMPTClientConnector connector;
