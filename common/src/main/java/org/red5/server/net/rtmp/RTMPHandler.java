@@ -324,10 +324,10 @@ public class RTMPHandler extends BaseRTMPHandler {
                                 // connections connect result
                                 boolean connectSuccess;
                                 try {
-                                    if (callArgs != null) {
-                                        connectSuccess = conn.connect(scope, callArgs);
-                                    } else {
+                                    if (callArgs == null) {
                                         connectSuccess = conn.connect(scope);
+                                    } else {
+                                        connectSuccess = conn.connect(scope, callArgs);
                                     }
                                     if (connectSuccess) {
                                         log.debug("Connected - {}", conn.getClient());

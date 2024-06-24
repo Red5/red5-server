@@ -23,6 +23,11 @@ public enum AudioCodec {
     MP3((byte) 0x02) {
 
         @Override
+        public IAudioStreamCodec newInstance() {
+            return new MP3Audio();
+        }
+
+        @Override
         public int getFourcc() {
             return 778924083; // MP3 / .mp3
         }
@@ -31,8 +36,25 @@ public enum AudioCodec {
     PCM_LE((byte) 0x03), // pcm le
     NELLY_MOSER_16K((byte) 0x04), NELLY_MOSER_8K((byte) 0x05), NELLY_MOSER((byte) 0x06), // nelly moser legacy
     PCM_ALAW((byte) 0x07), PCM_MULAW((byte) 0x08), // pcm alaw / mulaw
-    ExHeader((byte) 0x09), // used to signal FOURCC mode
+    ExHeader((byte) 0x09) {
+
+        @Override
+        public IAudioStreamCodec newInstance() {
+            return new ExtendedAudio(); // XXX(paul) will yield proper codec class after data parsing
+        }
+
+        @Override
+        public int getFourcc() {
+            return 9; // ExHd
+        }
+    
+    }, // used to signal FOURCC mode
     AAC((byte) 0x0a) {
+
+        @Override
+        public IAudioStreamCodec newInstance() {
+            return new AACAudio();
+        }
 
         @Override
         public int getFourcc() {
@@ -40,9 +62,26 @@ public enum AudioCodec {
         }
 
     }, // advanced audio codec
-    SPEEX((byte) 0x0b), // speex
+    SPEEX((byte) 0x0b) {
+            
+        @Override
+        public IAudioStreamCodec newInstance() {
+            return new SpeexAudio();
+        }
+
+        @Override
+        public int getFourcc() {
+            return 0x20787073; // Speex / "spx " 
+        }
+    
+    }, // speex
     MP2((byte) 0x0c), // mpeg2 audio
     OPUS((byte) 0x0d) {
+
+        @Override
+        public IAudioStreamCodec newInstance() {
+            return new OpusAudio();
+        }
 
         @Override
         public int getFourcc() {
@@ -57,6 +96,11 @@ public enum AudioCodec {
     AC3((byte) 0x10) {
 
         @Override
+        public IAudioStreamCodec newInstance() {
+            return new AC3Audio();
+        }
+
+        @Override
         public int getFourcc() {
             return 1633889587; // AC3 / ac-3
         }
@@ -65,12 +109,22 @@ public enum AudioCodec {
     EAC3((byte) 0x11) {
 
         @Override
+        public IAudioStreamCodec newInstance() {
+            return new EAC3Audio();
+        }
+
+        @Override
         public int getFourcc() {
             return 1700998451; // EAC3 / ec-3
         }
 
     }, // eac3
     FLAC((byte) 0x12) {
+
+        @Override
+        public IAudioStreamCodec newInstance() {
+            return new FLACAudio();
+        }
 
         @Override
         public int getFourcc() {
@@ -101,6 +155,15 @@ public enum AudioCodec {
     }
 
     /**
+     * Returns a new instance of the codec.
+     *
+     * @return codec implementation
+     */
+    public IAudioStreamCodec newInstance() {
+        return null;
+    }
+
+    /**
      * Returns back a numeric id for this codec, that happens to correspond to the numeric identifier that FLV will use for this codec.
      *
      * @return the codec id
@@ -118,6 +181,13 @@ public enum AudioCodec {
         return fourcc;
     }
 
+    /**
+     * Returns back the codec that corresponds to the given id.
+     *
+     * @param id
+     *            the id
+     * @return the codec
+     */
     public static AudioCodec valueOfById(int id) {
         return (AudioCodec) map.get((byte) id);
     }

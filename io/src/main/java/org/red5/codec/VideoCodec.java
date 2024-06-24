@@ -20,11 +20,52 @@ import java.util.Map;
 public enum VideoCodec {
 
     JPEG((byte) 0x01), // jpeg
-    H263((byte) 0x02), // h263
-    SCREEN_VIDEO((byte) 0x03), // screen video
+    H263((byte) 0x02) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new SorensonVideo();
+        }
+    
+        @Override
+        public int getFourcc() {
+            return 0; // h263
+        }
+
+    }, // h263
+    SCREEN_VIDEO((byte) 0x03) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new ScreenVideo();
+        }
+    
+        @Override
+        public int getFourcc() {
+            return 0; // FSV1
+        }
+
+    }, // screen video
     VP6((byte) 0x04), VP6a((byte) 0x05), // vp6 / vp6 alpha
-    SCREEN_VIDEO2((byte) 0x06), // screen video 2
+    SCREEN_VIDEO2((byte) 0x06) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new ScreenVideo2();
+        }
+    
+        @Override
+        public int getFourcc() {
+            return 0; // FSV2
+        }
+
+    }, // screen video 2
     AVC((byte) 0x07) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new AVCVideo();
+        }
 
         @Override
         public int getFourcc() {
@@ -35,6 +76,11 @@ public enum VideoCodec {
     VP8((byte) 0x08) {
 
         @Override
+        public IVideoStreamCodec newInstance() {
+            return new VP8Video();
+        }
+
+        @Override
         public int getFourcc() {
             return 1987063864; // VP8 / vp08
         }
@@ -43,14 +89,36 @@ public enum VideoCodec {
     VP9((byte) 0x09) {
 
         @Override
+        public IVideoStreamCodec newInstance() {
+            return new VP9Video();
+        }
+
+        @Override
         public int getFourcc() {
             return 1987063865; // VP9 / vp09
         }
 
     }, // vp9
     AVAILABLE((byte) 0x0a), // available
-    MPEG1((byte) 0x0b), // mpeg1 video
+    MPEG1((byte) 0x0b) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new MPEG1Video();
+        }
+
+        @Override
+        public int getFourcc() {
+            return 826496495; // MPEG / mpeg
+        }
+
+    }, // mpeg1 video
     HEVC((byte) 0x0c) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new HEVCVideo();
+        }
 
         @Override
         public int getFourcc() {
@@ -59,6 +127,11 @@ public enum VideoCodec {
 
     }, // h265
     AV1((byte) 0x0d) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new AV1Video();
+        }
 
         @Override
         public int getFourcc() {
@@ -86,6 +159,15 @@ public enum VideoCodec {
 
     private VideoCodec(byte id) {
         this.id = id;
+    }
+
+    /**
+     * Returns a new instance of the codec.
+     *
+     * @return codec implementation
+     */
+    public IVideoStreamCodec newInstance() {
+        return null;
     }
 
     /**

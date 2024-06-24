@@ -7,10 +7,8 @@
 
 package org.red5.server.stream;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.codec.AudioCodec;
 import org.red5.codec.IAudioStreamCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,21 +31,6 @@ public class AudioCodecFactory {
     private static Logger log = LoggerFactory.getLogger(AudioCodecFactory.class);
 
     /**
-     * List of available codecs
-     */
-    private static List<IAudioStreamCodec> codecs = new ArrayList<IAudioStreamCodec>(1);
-
-    /**
-     * Setter for codecs
-     *
-     * @param codecs
-     *            List of codecs
-     */
-    public void setCodecs(List<IAudioStreamCodec> codecs) {
-        AudioCodecFactory.codecs = codecs;
-    }
-
-    /**
      * Create and return new audio codec applicable for byte buffer data
      *
      * @param data
@@ -59,42 +42,17 @@ public class AudioCodecFactory {
         try {
             //get the codec identifying byte
             int codecId = (data.get() & 0xf0) >> 4;
-            switch (codecId) {
-                case 10: //aac
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.AACAudio").getDeclaredConstructor().newInstance();
-                    break;
-                case 11:
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.SpeexAudio").getDeclaredConstructor().newInstance();
-                    break;
-                case 13:
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.OpusAudio").getDeclaredConstructor().newInstance();
-                    break;
-                case 2:
-                case 14:
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.MP3Audio").getDeclaredConstructor().newInstance();
-                    break;
+            AudioCodec codec = AudioCodec.valueOfById(codecId);
+            if (codec != null) {
+                log.debug("Codec found: {}", codec);
+                result = codec.newInstance();
+            } else {
+                log.warn("Codec not found for id: {}", codecId);
             }
-            data.rewind();
         } catch (Exception ex) {
             log.error("Error creating codec instance", ex);
-        }
-        //if codec is not found do the old-style loop
-        if (result == null) {
-            for (IAudioStreamCodec storedCodec : codecs) {
-                IAudioStreamCodec codec;
-                // XXX: this is a bit of a hack to create new instances of the
-                // configured audio codec for each stream
-                try {
-                    codec = storedCodec.getClass().getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    log.error("Could not create audio codec instance", e);
-                    continue;
-                }
-                if (codec.canHandleData(data)) {
-                    result = codec;
-                    break;
-                }
-            }
+        } finally {
+            data.rewind();
         }
         return result;
     }
