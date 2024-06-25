@@ -46,6 +46,7 @@ public class AudioCodecFactory {
             if (codec != null) {
                 log.debug("Codec found: {}", codec);
                 result = codec.newInstance();
+                log.debug("Codec instance: {}", result);
             } else {
                 log.warn("Codec not found for id: {}", codecId);
             }

@@ -71,7 +71,9 @@ public class RTMPHandler extends BaseRTMPHandler {
     protected IServer server;
 
     /**
-     * Whether or not unvalidated connections are allowed.
+     * Whether or not unvalidated connections are allowed. An unvalidated connection is normally from a client which
+     * performs some manipulation of the handshake bytes that is not to-spec, but still provides standard aspects of
+     * RTMP required for a connection. One such implemenation is ffmpeg.
      */
     private boolean unvalidatedConnectionAllowed;
 

@@ -366,18 +366,17 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                     }
                     // notify event listeners
                     checkSendNotifications(event);
-                    // note this timestamp is set in event/body but not in the associated header
-                    try {
-                        // route to live
-                        if (livePipe != null) {
+                    // note this timestamp is set in event/body but not in the associated header route to live
+                    if (livePipe != null) {
+                        try {
                             // create new RTMP message, initialize it and push through pipe
                             RTMPMessage msg = RTMPMessage.build(rtmpEvent, eventTime);
                             livePipe.pushMessage(msg);
-                        } else if (isDebug) {
-                            log.debug("Live pipe was null, message was not pushed");
+                        } catch (IOException err) {
+                            stop();
                         }
-                    } catch (IOException err) {
-                        stop();
+                    } else if (isDebug) {
+                        log.debug("Live pipe was null, message was not pushed");
                     }
                     // notify listeners about received packet
                     if (rtmpEvent instanceof IStreamPacket) {

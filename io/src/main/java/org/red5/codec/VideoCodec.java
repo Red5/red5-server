@@ -29,7 +29,7 @@ public enum VideoCodec {
     
         @Override
         public int getFourcc() {
-            return 0; // h263
+            return 1748121139; // h263
         }
 
     }, // h263
@@ -42,7 +42,7 @@ public enum VideoCodec {
     
         @Override
         public int getFourcc() {
-            return 0; // FSV1
+            return 1179866673; // FSV1
         }
 
     }, // screen video
@@ -56,7 +56,7 @@ public enum VideoCodec {
     
         @Override
         public int getFourcc() {
-            return 0; // FSV2
+            return 1179866674; // FSV2
         }
 
     }, // screen video 2
@@ -109,7 +109,7 @@ public enum VideoCodec {
 
         @Override
         public int getFourcc() {
-            return 826496495; // MPEG / mpeg
+            return 1836069238; // MPEG / mpeg
         }
 
     }, // mpeg1 video

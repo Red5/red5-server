@@ -71,7 +71,7 @@ public enum AudioCodec {
 
         @Override
         public int getFourcc() {
-            return 0x20787073; // Speex / "spx " 
+            return 1936750624; // Speex / "spx "
         }
     
     }, // speex
@@ -91,7 +91,7 @@ public enum AudioCodec {
     }, // opus
     MP3_8K((byte) 0x0e), // mp3 8khz
     //DEVICE_SPECIFIC((byte) 0x0f), // device specific (reserved)
-    L16((byte) 0x0f), // L16 audio / XXX(paul) ensure we update those that used 0x09 previously for L16
+    L16((byte) 0x0f), // L16 audio / XXX(paul) update logic that used 0x09 previously for L16
     // RTMP-E specific that weren't already added previously
     AC3((byte) 0x10) {
 

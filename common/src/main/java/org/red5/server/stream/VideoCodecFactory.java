@@ -7,19 +7,8 @@
 
 package org.red5.server.stream;
 
-import java.util.Set;
-
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.codec.AV1Video;
-import org.red5.codec.AVCVideo;
-import org.red5.codec.AudioCodec;
-import org.red5.codec.HEVCVideo;
 import org.red5.codec.IVideoStreamCodec;
-import org.red5.codec.ScreenVideo;
-import org.red5.codec.ScreenVideo2;
-import org.red5.codec.SorensonVideo;
-import org.red5.codec.VP8Video;
-import org.red5.codec.VP9Video;
 import org.red5.codec.VideoCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,49 +39,14 @@ public class VideoCodecFactory {
      */
     public static IVideoStreamCodec getVideoCodec(IoBuffer data) {
         IVideoStreamCodec result = null;
-        //get the codec identifying byte
-        int codecId = data.get() & 0x0f;
-        try {
-            switch (codecId) {
-                case 2: // sorenson
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.SorensonVideo").getDeclaredConstructor().newInstance();
-                    break;
-                case 3: // screen video
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.ScreenVideo").getDeclaredConstructor().newInstance();
-                    break;
-                case 6: // screen video 2
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.ScreenVideo2").getDeclaredConstructor().newInstance();
-                    break;
-                case 7: // avc/h.264 video
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.AVCVideo").getDeclaredConstructor().newInstance();
-                    break;
-                case 8: // vp8
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.VP8Video").getDeclaredConstructor().newInstance();
-                    break;
-                case 9: // vp9
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.VP9Video").getDeclaredConstructor().newInstance();
-                    break;
-                case 10: // av1
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.AV1Video").getDeclaredConstructor().newInstance();
-                    break;
-                case 11: // mpeg1video
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.MPEG1Video").getDeclaredConstructor().newInstance();
-                    break;
-                case 12: // hevc
-                    result = (IVideoStreamCodec) Class.forName("org.red5.codec.HEVCVideo").getDeclaredConstructor().newInstance();
-                    break;
-            }
-        } catch (Exception ex) {
-            log.error("Error creating codec instance", ex);
-        }
-
         try {
             //get the codec identifying byte
-            int codecId = (data.get() & 0xf0) >> 4;
+            int codecId = data.get() & 0x0f;
             VideoCodec codec = VideoCodec.valueOfById(codecId);
             if (codec != null) {
                 log.debug("Codec found: {}", codec);
                 result = codec.newInstance();
+                log.debug("Codec instance: {}", result);
             } else {
                 log.warn("Codec not found for id: {}", codecId);
             }
