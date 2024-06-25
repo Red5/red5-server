@@ -22,32 +22,26 @@ public class AC3Audio extends AbstractAudio {
 
     private static Logger log = LoggerFactory.getLogger(AC3Audio.class);
 
-    public static final int[] AAC_SAMPLERATES = { 96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350 };
-
     /**
-     * Block of data (AAC DecoderConfigurationRecord)
+     * Block of data private to the codec.
      */
-    private byte[] blockDataAACDCR;
+    private byte[] privateData;
 
-    /** Constructs a new AACAudio */
     public AC3Audio() {
-        codec = AudioCodec.AAC;
+        codec = AudioCodec.AC3;
         this.reset();
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getName() {
         return codec.name();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void reset() {
-        blockDataAACDCR = null;
+        privateData = null;
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
         if (data.limit() == 0) {
@@ -55,12 +49,11 @@ public class AC3Audio extends AbstractAudio {
             return false;
         }
         byte first = data.get();
-        boolean result = (((first & 0xf0) >> 4) == AudioCodec.AAC.getId());
+        boolean result = (((first & 0xf0) >> 4) == codec.getId());
         data.rewind();
         return result;
     }
 
-    /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data) {
         if (data.hasRemaining()) {
@@ -71,13 +64,13 @@ public class AC3Audio extends AbstractAudio {
             byte frameType = data.get();
             log.trace("Frame type: {}", frameType);
             byte header = data.get();
-            // if we don't have the AACDecoderConfigurationRecord stored
-            if (blockDataAACDCR == null) {
-                if ((((frameType & 0xf0) >> 4) == AudioCodec.AAC.getId()) && (header == 0)) {
+            // if we don't have the privateData stored
+            if (privateData == null) {
+                if ((((frameType & 0xf0) >> 4) == codec.getId()) && (header == 0)) {
                     // back to the beginning
                     data.rewind();
-                    blockDataAACDCR = new byte[data.remaining()];
-                    data.get(blockDataAACDCR);
+                    privateData = new byte[data.remaining()];
+                    data.get(privateData);
                 }
             }
             data.position(start);
@@ -85,15 +78,14 @@ public class AC3Audio extends AbstractAudio {
         return true;
     }
 
-    /** {@inheritDoc} */
     @Override
     public IoBuffer getDecoderConfiguration() {
-        if (blockDataAACDCR == null) {
+        if (privateData == null) {
             return null;
         }
         IoBuffer result = IoBuffer.allocate(4);
         result.setAutoExpand(true);
-        result.put(blockDataAACDCR);
+        result.put(privateData);
         result.rewind();
         return result;
     }
