@@ -49,7 +49,7 @@ public class ExtendedAudio extends AbstractAudio {
                     byte second = data.get();
                     multitrackType = AvMultitrackType.valueOf((byte) ((second & 0xf0) >> 4));
                     // Fetch AudioPacketType for all audio tracks in the audio message
-                    // This fetch MUST not result in a AudioPacketType.Multitrack 
+                    // This fetch MUST not result in a AudioPacketType.Multitrack
                     packetType = AudioPacketType.valueOf((byte) (second & 0x0f));
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec.

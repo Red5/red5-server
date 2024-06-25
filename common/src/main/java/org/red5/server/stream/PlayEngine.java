@@ -24,6 +24,7 @@ import org.red5.codec.IStreamCodecInfo;
 import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.IVideoStreamCodec.FrameData;
 import org.red5.codec.StreamCodecInfo;
+import org.red5.codec.VideoFrameType;
 import org.red5.io.amf.Output;
 import org.red5.io.utils.ObjectMap;
 import org.red5.logging.Red5LoggerFactory;
@@ -59,7 +60,6 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
 import org.red5.server.net.rtmp.event.VideoData;
-import org.red5.server.net.rtmp.event.VideoData.FrameType;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.status.Status;
@@ -1796,7 +1796,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                             if (msg instanceof RTMPMessage) {
                                 RTMPMessage rtmpMessage = (RTMPMessage) msg;
                                 IRTMPEvent body = rtmpMessage.getBody();
-                                if (body instanceof VideoData && ((VideoData) body).getFrameType() == FrameType.KEYFRAME) {
+                                if (body instanceof VideoData && ((VideoData) body).getFrameType() == VideoFrameType.KEYFRAME) {
                                     //body.setTimestamp(seekPos);
                                     doPushMessage(rtmpMessage);
                                     rtmpMessage.getBody().release();

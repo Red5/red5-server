@@ -2,9 +2,7 @@ package org.red5.codec;
 
 public enum VideoPacketType {
 
-    SequenceStart((byte) 0),
-    CodedFrames((byte) 0x01),
-    SequenceEnd((byte) 0x02),
+    SequenceStart((byte) 0), CodedFrames((byte) 0x01), SequenceEnd((byte) 0x02),
     // CompositionTime Offset is implicitly set to zero. This optimization avoids transmitting an SI24 composition
     // time value of zero over the wire. See the ExVideoTagBody section below for corresponding pseudocode.
     CodedFramesX((byte) 0x03),

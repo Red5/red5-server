@@ -17,6 +17,7 @@ import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.codec.VideoCodec;
+import org.red5.codec.VideoFrameType;
 import org.red5.io.ITag;
 import org.red5.io.IoConstants;
 import org.red5.server.api.stream.IStreamPacket;
@@ -28,13 +29,6 @@ import org.red5.server.stream.IStreamData;
 public class VideoData extends BaseEvent implements IoConstants, IStreamData<VideoData>, IStreamPacket {
 
     private static final long serialVersionUID = 5538859593815804830L;
-
-    /**
-     * Videoframe type
-     */
-    public static enum FrameType {
-        UNKNOWN, KEYFRAME, INTERFRAME, DISPOSABLE_INTERFRAME, END_OF_SEQUENCE
-    }
 
     /**
      * Video data
@@ -49,7 +43,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     /**
      * Frame type, unknown by default
      */
-    protected FrameType frameType = FrameType.UNKNOWN;
+    protected VideoFrameType frameType;
 
     /**
      * Video codec
@@ -131,16 +125,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
                 endOfSequence = (secondByte == 2);
             }
             data.reset();
-            int frameType = (firstByte & MASK_VIDEO_FRAMETYPE) >> 4;
-            if (frameType == FLAG_FRAMETYPE_KEYFRAME) {
-                this.frameType = FrameType.KEYFRAME;
-            } else if (frameType == FLAG_FRAMETYPE_INTERFRAME) {
-                this.frameType = FrameType.INTERFRAME;
-            } else if (frameType == FLAG_FRAMETYPE_DISPOSABLE) {
-                this.frameType = FrameType.DISPOSABLE_INTERFRAME;
-            } else {
-                this.frameType = FrameType.UNKNOWN;
-            }
+            frameType = VideoFrameType.valueOf((firstByte & MASK_VIDEO_FRAMETYPE) >> 4);
         }
     }
 
@@ -153,7 +138,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
      *
      * @return Type of video frame
      */
-    public FrameType getFrameType() {
+    public VideoFrameType getFrameType() {
         return frameType;
     }
 
@@ -185,7 +170,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        frameType = (FrameType) in.readObject();
+        frameType = (VideoFrameType) in.readObject();
         byte[] byteBuf = (byte[]) in.readObject();
         if (byteBuf != null) {
             setData(byteBuf);

@@ -7,9 +7,9 @@
 
 package org.red5.server.stream;
 
+import org.red5.codec.VideoFrameType;
 import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.VideoData;
-import org.red5.server.net.rtmp.event.VideoData.FrameType;
 import org.red5.server.stream.message.RTMPMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,24 +62,24 @@ public class VideoFrameDropper implements IFrameDropper {
         // We currently only drop video packets.
         if (packet instanceof VideoData) {
             VideoData video = (VideoData) packet;
-            FrameType type = video.getFrameType();
+            VideoFrameType type = video.getFrameType();
             switch (state) {
                 case SEND_ALL:
                     // All packets will be sent
                     break;
                 case SEND_INTERFRAMES:
                     // Only keyframes and interframes will be sent.
-                    if (type == FrameType.KEYFRAME) {
+                    if (type == VideoFrameType.KEYFRAME) {
                         if (pending == 0) {
                             // Send all frames from now on.
                             state = SEND_ALL;
                         }
-                    } else if (type == FrameType.INTERFRAME) {
+                    } else if (type == VideoFrameType.INTERFRAME) {
                     }
                     break;
                 case SEND_KEYFRAMES:
                     // Only keyframes will be sent.
-                    result = (type == FrameType.KEYFRAME);
+                    result = (type == VideoFrameType.KEYFRAME);
                     if (result && pending == 0) {
                         // Maybe switch back to SEND_INTERFRAMES after the next keyframe
                         state = SEND_KEYFRAMES_CHECK;
@@ -87,7 +87,7 @@ public class VideoFrameDropper implements IFrameDropper {
                     break;
                 case SEND_KEYFRAMES_CHECK:
                     // Only keyframes will be sent.
-                    result = (type == FrameType.KEYFRAME);
+                    result = (type == VideoFrameType.KEYFRAME);
                     if (result && pending == 0) {
                         // Continue with sending interframes as well
                         state = SEND_INTERFRAMES;
@@ -105,28 +105,28 @@ public class VideoFrameDropper implements IFrameDropper {
         // Only check video packets.
         if (packet instanceof VideoData) {
             VideoData video = (VideoData) packet;
-            FrameType type = video.getFrameType();
+            VideoFrameType type = video.getFrameType();
             switch (state) {
                 case SEND_ALL:
-                    if (type == FrameType.DISPOSABLE_INTERFRAME) {
+                    if (type == VideoFrameType.DISPOSABLE) {
                         // Remain in state, packet is safe to drop.
                         return;
-                    } else if (type == FrameType.INTERFRAME) {
+                    } else if (type == VideoFrameType.INTERFRAME) {
                         // Drop all frames until the next keyframe.
                         state = SEND_KEYFRAMES;
                         return;
-                    } else if (type == FrameType.KEYFRAME) {
+                    } else if (type == VideoFrameType.KEYFRAME) {
                         // Drop all frames until the next keyframe.
                         state = SEND_KEYFRAMES;
                         return;
                     }
                     break;
                 case SEND_INTERFRAMES:
-                    if (type == FrameType.INTERFRAME) {
+                    if (type == VideoFrameType.INTERFRAME) {
                         // Drop all frames until the next keyframe.
                         state = SEND_KEYFRAMES_CHECK;
                         return;
-                    } else if (type == FrameType.KEYFRAME) {
+                    } else if (type == VideoFrameType.KEYFRAME) {
                         // Drop all frames until the next keyframe.
                         state = SEND_KEYFRAMES;
                         return;
@@ -136,7 +136,7 @@ public class VideoFrameDropper implements IFrameDropper {
                     // Remain in state.
                     break;
                 case SEND_KEYFRAMES_CHECK:
-                    if (type == FrameType.KEYFRAME) {
+                    if (type == VideoFrameType.KEYFRAME) {
                         // Switch back to sending keyframes, but don't move to
                         // SEND_INTERFRAMES afterwards.
                         state = SEND_KEYFRAMES;

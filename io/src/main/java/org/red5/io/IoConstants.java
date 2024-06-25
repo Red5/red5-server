@@ -113,11 +113,6 @@ public interface IoConstants {
     public static final int MASK_SOUND_FORMAT = 0xf0;
 
     /**
-     * Raw data format flag
-     */
-    public static final byte FLAG_FORMAT_RAW = 0x00;
-
-    /**
      * Mask video codec
      */
     public static final byte MASK_VIDEO_CODEC = 0x0f;

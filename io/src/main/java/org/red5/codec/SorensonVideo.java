@@ -91,13 +91,12 @@ public class SorensonVideo extends AbstractVideo {
         //log.trace("First byte: {}", HexDump.toHexString(first));
         data.rewind();
         // get frame type
-        int frameType = (first & MASK_VIDEO_FRAMETYPE) >> 4;
-        VideoFrameType frame = VideoFrameType.valueOf(frameType);
-        if (frameType != FLAG_FRAMETYPE_KEYFRAME) {
+        VideoFrameType frame = VideoFrameType.valueOf((first & MASK_VIDEO_FRAMETYPE) >> 4);
+        if (VideoFrameType.KEYFRAME != frame) {
             // Not a keyframe
             try {
                 int lastInterframe = numInterframes.getAndIncrement();
-                if (frameType != FLAG_FRAMETYPE_DISPOSABLE) {
+                if (VideoFrameType.DISPOSABLE != frame) {
                     log.trace("Buffering interframe #{}", lastInterframe);
                     if (lastInterframe < interframes.size()) {
                         interframes.get(lastInterframe).setData(data);
