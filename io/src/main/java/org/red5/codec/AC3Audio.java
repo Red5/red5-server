@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Red5 audio codec for the AC3 audio format.
  *
- * Stores the decoder configuration
+ * Stores the decoder configuration.
+ *
+ * AC-3/E-AC-3 - <https://en.wikipedia.org/wiki/Dolby_Digital>
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */

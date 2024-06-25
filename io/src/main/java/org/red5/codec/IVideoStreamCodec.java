@@ -151,4 +151,14 @@ public interface IVideoStreamCodec {
         }
 
     }
+
+    /**
+     * Returns the multitrack type for the codec.
+     *
+     * @return the multitrack type
+     */
+    default AvMultitrackType getMultitrackType() {
+        return null;
+    }
+
 }

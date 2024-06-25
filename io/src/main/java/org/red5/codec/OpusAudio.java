@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
  *
  * Opus has no decoder configuration; its all in-band.
  *
+ * Opus audio - <https://opus-codec.org/>
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class OpusAudio extends AbstractAudio {

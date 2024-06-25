@@ -14,7 +14,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Red5 audio codec for the AAC audio format.
  *
- * Stores the decoder configuration
+ * Stores the decoder configuration.
+ *
+ * Advanced Audio Coding - <https://en.wikipedia.org/wiki/Advanced_Audio_Coding>
+ * The following AAC profiles, denoted by their object types, are supported
+ * 1 = main profile
+ * 2 = low complexity, a.k.a., LC
+ * 5 = high efficiency / scale band replication, a.k.a., HE / SBR
  *
  * @author Paul Gregoire (mondain@gmail.com)
  * @author Wittawas Nakkasem (vittee@hotmail.com)

@@ -10,6 +10,8 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
 
     protected VideoCodec codec;
 
+    protected AvMultitrackType multitrackType;
+
     /** Current timestamp for the stored keyframe */
     protected int keyframeTimestamp;
 
@@ -124,6 +126,11 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
 
     public void setBufferInterframes(boolean bufferInterframes) {
         this.bufferInterframes = bufferInterframes;
+    }
+
+    @Override
+    public AvMultitrackType getMultitrackType() {
+        return multitrackType;
     }
 
 }

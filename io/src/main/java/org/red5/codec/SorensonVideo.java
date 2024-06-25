@@ -7,9 +7,6 @@
 
 package org.red5.codec;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,16 +41,6 @@ public class SorensonVideo extends AbstractVideo {
      * Data block size
      */
     private int blockSize;
-
-    /**
-     * Storage for frames buffered since last key frame
-     */
-    private final CopyOnWriteArrayList<FrameData> interframes = new CopyOnWriteArrayList<>();
-
-    /**
-     * Number of frames buffered since last key frame
-     */
-    private final AtomicInteger numInterframes = new AtomicInteger(0);
 
     /** Constructs a new SorensonVideo. */
     public SorensonVideo() {
@@ -105,6 +92,7 @@ public class SorensonVideo extends AbstractVideo {
         data.rewind();
         // get frame type
         int frameType = (first & MASK_VIDEO_FRAMETYPE) >> 4;
+        VideoFrameType frame = VideoFrameType.valueOf(frameType);
         if (frameType != FLAG_FRAMETYPE_KEYFRAME) {
             // Not a keyframe
             try {
@@ -146,21 +134,6 @@ public class SorensonVideo extends AbstractVideo {
             result.put(blockData, 0, dataCount);
             result.rewind();
             return result;
-        }
-        return null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int getNumInterframes() {
-        return numInterframes.get();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public FrameData getInterframe(int index) {
-        if (index < numInterframes.get()) {
-            return interframes.get(index);
         }
         return null;
     }

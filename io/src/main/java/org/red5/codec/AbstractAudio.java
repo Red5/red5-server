@@ -6,6 +6,10 @@ public class AbstractAudio implements IAudioStreamCodec {
 
     protected AudioCodec codec;
 
+    protected AvMultitrackType multitrackType;
+
+    protected AudioPacketType packetType;
+
     @Override
     public AudioCodec getCodec() {
         return codec;
@@ -38,6 +42,16 @@ public class AbstractAudio implements IAudioStreamCodec {
     @Override
     public IoBuffer getDecoderConfiguration() {
         return null;
+    }
+
+    @Override
+    public AvMultitrackType getMultitrackType() {
+        return multitrackType;
+    }
+
+    @Override
+    public AudioPacketType getPacketType() {
+        return packetType;
     }
 
 }

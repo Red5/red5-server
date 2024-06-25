@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Red5 audio codec for the FLAC audio format.
  *
- * Stores the decoder configuration
+ * Stores the decoder configuration.
+ *
+ * Free Lossless Audio Codec - <https://xiph.org/flac/format.html>
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */

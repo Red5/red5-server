@@ -42,8 +42,19 @@ public class ExtendedAudio extends AbstractAudio {
             // set the extended codec
             if (extendedCodec == null) {
                 byte first = data.get();
-                // get the codec
                 extendedCodec = AudioCodec.valueOfById((byte) ((first & 0xf0) >> 4));
+                // The UB[4] bits are interpreted as AudioPacketType instead of sound rate, size and type
+                packetType = AudioPacketType.valueOf((byte) (first & 0x0f));
+                if (packetType == AudioPacketType.Multitrack) {
+                    byte second = data.get();
+                    multitrackType = AvMultitrackType.valueOf((byte) ((second & 0xf0) >> 4));
+                    // Fetch AudioPacketType for all audio tracks in the audio message
+                    // This fetch MUST not result in a AudioPacketType.Multitrack 
+                    packetType = AudioPacketType.valueOf((byte) (second & 0x0f));
+                    if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
+                        // The tracks are encoded with the same codec.
+                    }
+                }
                 // create the codec implementation instance
                 if (extendedCodec == null) {
                     extendedAudio = extendedCodec.newInstance();

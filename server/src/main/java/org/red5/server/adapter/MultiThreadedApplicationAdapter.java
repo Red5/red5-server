@@ -1379,6 +1379,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * RTMFP peer connect event handler.
      *
+     * @link https://datatracker.ietf.org/doc/html/rfc7425#section-5.3.3
      * @link https://github.com/zenomt/rtmfp-cpp/blob/main/include/rtmfp/rtmfp.hpp
      *
      */

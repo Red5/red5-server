@@ -68,4 +68,22 @@ public interface IAudioStreamCodec {
         return null;
     }
 
+    /**
+     * Returns the multitrack type for the codec.
+     *
+     * @return the multitrack type
+     */
+    default AvMultitrackType getMultitrackType() {
+        return null;
+    }
+
+    /**
+     * Returns the packet type for the codec.
+     *
+     * @return the packet type
+     */
+    default AudioPacketType getPacketType() {
+        return null;
+    }
+
 }
