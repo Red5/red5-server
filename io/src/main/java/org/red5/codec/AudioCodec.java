@@ -47,7 +47,7 @@ public enum AudioCodec {
         public int getFourcc() {
             return 9; // ExHd
         }
-    
+
     }, // used to signal FOURCC mode
     AAC((byte) 0x0a) {
 
@@ -63,7 +63,7 @@ public enum AudioCodec {
 
     }, // advanced audio codec
     SPEEX((byte) 0x0b) {
-            
+
         @Override
         public IAudioStreamCodec newInstance() {
             return new SpeexAudio();
@@ -73,7 +73,7 @@ public enum AudioCodec {
         public int getFourcc() {
             return 1936750624; // Speex / "spx "
         }
-    
+
     }, // speex
     MP2((byte) 0x0c), // mpeg2 audio
     OPUS((byte) 0x0d) {

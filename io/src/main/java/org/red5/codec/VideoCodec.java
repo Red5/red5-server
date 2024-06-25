@@ -26,7 +26,7 @@ public enum VideoCodec {
         public IVideoStreamCodec newInstance() {
             return new SorensonVideo();
         }
-    
+
         @Override
         public int getFourcc() {
             return 1748121139; // h263
@@ -39,7 +39,7 @@ public enum VideoCodec {
         public IVideoStreamCodec newInstance() {
             return new ScreenVideo();
         }
-    
+
         @Override
         public int getFourcc() {
             return 1179866673; // FSV1
@@ -53,7 +53,7 @@ public enum VideoCodec {
         public IVideoStreamCodec newInstance() {
             return new ScreenVideo2();
         }
-    
+
         @Override
         public int getFourcc() {
             return 1179866674; // FSV2

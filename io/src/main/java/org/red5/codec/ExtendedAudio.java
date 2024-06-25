@@ -7,7 +7,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  * encoded with a codec that is not originally supported by Red5. An actual codec implemenation will be identified via
  * canHandleData() and returned by the getCodec() method. This codec "has an" extended codec, which is the actual
  * codec.
- * 
+ *
  * @author Paul Gregoire
  */
 public class ExtendedAudio extends AbstractAudio {

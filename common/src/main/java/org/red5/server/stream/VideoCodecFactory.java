@@ -54,7 +54,7 @@ public class VideoCodecFactory {
             log.error("Error creating codec instance", ex);
         } finally {
             data.rewind();
-        }        
+        }
         return result;
     }
 
