@@ -82,9 +82,8 @@ public class ScreenVideo extends AbstractVideo {
      */
     private int totalBlockDataSize;
 
-    /** Constructs a new ScreenVideo. */
-    public ScreenVideo() {
-        this.reset();
+    {
+        codec = VideoCodec.SCREEN_VIDEO;
     }
 
     /** {@inheritDoc} */
@@ -107,15 +106,6 @@ public class ScreenVideo extends AbstractVideo {
         this.blockCount = 0;
         this.blockDataSize = 0;
         this.totalBlockDataSize = 0;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        byte first = data.get();
-        boolean result = ((first & 0x0f) == VideoCodec.SCREEN_VIDEO.getId());
-        data.rewind();
-        return result;
     }
 
     /*

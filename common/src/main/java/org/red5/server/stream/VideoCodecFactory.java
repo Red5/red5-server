@@ -10,6 +10,7 @@ package org.red5.server.stream;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.VideoCodec;
+import org.red5.io.IoConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +41,21 @@ public class VideoCodecFactory {
     public static IVideoStreamCodec getVideoCodec(IoBuffer data) {
         IVideoStreamCodec result = null;
         try {
-            //get the codec identifying byte
-            int codecId = data.get() & 0x0f;
+            // get the codec identifying byte
+            byte c = data.array()[data.position()]; // prevent advancing the position at least once
+            int codecId = (c & IoConstants.MASK_VIDEO_CODEC);
             VideoCodec codec = VideoCodec.valueOfById(codecId);
             if (codec != null) {
                 log.debug("Codec found: {}", codec);
+                // this will be reset if the codec cannot handle the data
                 result = codec.newInstance();
-                log.debug("Codec instance: {}", result);
+                // check if the codec can handle the data
+                if (result.canHandleData(data)) {
+                    log.debug("Codec {} can handle the data", result);
+                } else {
+                    log.warn("Codec {} cannot handle data", codec);
+                    result = null;
+                }
             } else {
                 log.warn("Codec not found for id: {}", codecId);
             }

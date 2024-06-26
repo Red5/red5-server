@@ -1,6 +1,7 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.util.ByteNibbler;
 
 public class AbstractAudio implements IAudioStreamCodec {
 
@@ -9,6 +10,12 @@ public class AbstractAudio implements IAudioStreamCodec {
     protected AvMultitrackType multitrackType;
 
     protected AudioPacketType packetType;
+
+    // defaulting to 48khz, 16bit, stereo
+    protected int sampleRate = 48000, sampleSizeInBits = 16, channels = 2;
+
+    // defaulting to unsigned simply to support 8 bit audio / older codecs
+    protected boolean signed;
 
     @Override
     public AudioCodec getCodec() {
@@ -26,7 +33,37 @@ public class AbstractAudio implements IAudioStreamCodec {
 
     @Override
     public boolean canHandleData(IoBuffer data) {
-        return false;
+        boolean result = false;
+        if (data != null && data.limit() > 0) {
+            byte flgs = data.get();
+            ByteNibbler nibbler = new ByteNibbler(flgs);
+            int codecId = nibbler.nibble(4);
+            // check codec id against bitstream
+            result = codecId == codec.getId();
+            if (result) {
+                sampleRate = nibbler.nibble(2);
+                sampleSizeInBits = nibbler.nibble(1) == 0 ? 8 : 16;
+                // PCM and PCM_LE are the same, just the endianess is different, 16 bit are always signed
+                signed = (codecId != 3 && codecId != 0) || sampleSizeInBits == 16;
+                channels = 1 + nibbler.nibble(1);
+                // set the sample rate in kHz (this may change depending upon the codec)
+                switch (sampleRate) {
+                    case 0:
+                        sampleRate = 5500;
+                        break;
+                    case 1:
+                        sampleRate = 11025;
+                        break;
+                    case 2:
+                        sampleRate = 22050;
+                        break;
+                    case 3: // flash sends this for 48kHz also
+                        sampleRate = 44100;
+                        break;
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -52,6 +89,34 @@ public class AbstractAudio implements IAudioStreamCodec {
     @Override
     public AudioPacketType getPacketType() {
         return packetType;
+    }
+
+    public void setSampleRate(int sampleRate) {
+        this.sampleRate = sampleRate;
+    }
+
+    @Override
+    public int getSampleRate() {
+        return sampleRate;
+    }
+
+    @Override
+    public int getSampleSizeInBits() {
+        return sampleSizeInBits;
+    }
+
+    public void setChannels(int channels) {
+        this.channels = channels;
+    }
+
+    @Override
+    public int getChannels() {
+        return channels;
+    }
+
+    @Override
+    public boolean isSigned() {
+        return signed;
     }
 
 }

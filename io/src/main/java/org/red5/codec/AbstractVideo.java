@@ -67,7 +67,12 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
 
     @Override
     public boolean canHandleData(IoBuffer data) {
-        return false;
+        boolean result = false;
+        if (data != null && data.limit() > 0) {
+            // read the first byte verify the codec matches
+            result = ((data.get() & IoConstants.MASK_VIDEO_CODEC) == codec.getId());
+        }
+        return result;
     }
 
     @Override

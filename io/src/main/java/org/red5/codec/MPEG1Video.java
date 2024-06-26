@@ -27,9 +27,8 @@ public class MPEG1Video extends AbstractVideo {
     /** Video decoder configuration data */
     private FrameData decoderConfiguration;
 
-    public MPEG1Video() {
+    {
         codec = VideoCodec.MPEG1;
-        this.reset();
     }
 
     /** {@inheritDoc} */
@@ -43,18 +42,6 @@ public class MPEG1Video extends AbstractVideo {
     public void reset() {
         decoderConfiguration = new FrameData();
         softReset();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        boolean result = false;
-        if (data.limit() > 0) {
-            // read the first byte and ensure its AVC / h.264 type
-            result = ((data.get() & 0x0f) == VideoCodec.MPEG1.getId());
-            data.rewind();
-        }
-        return result;
     }
 
     /** {@inheritDoc} */

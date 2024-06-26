@@ -6,8 +6,6 @@
  */
 package org.red5.codec;
 
-import org.apache.mina.core.buffer.IoBuffer;
-
 /**
  * Red5 audio codec for the Speex audio format.
  *
@@ -26,18 +24,6 @@ public class SpeexAudio extends AbstractAudio {
     @Override
     public String getName() {
         return CODEC_NAME;
-    }
-
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        if (data.limit() == 0) {
-            // Empty buffer
-            return false;
-        }
-        byte first = data.get();
-        boolean result = (((first & 0xf0) >> 4) == AudioCodec.SPEEX.getId());
-        data.rewind();
-        return result;
     }
 
 }

@@ -7,6 +7,7 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.io.IoConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +39,8 @@ public class OpusAudio extends AbstractAudio {
 
     static final String CODEC_NAME = "Opus";
 
-    // default to 48kHz and stereo
-    private int index = 0, channels = 2;
+    // default to 48kHz
+    private int index = 0;
 
     // ensure we store at least one config chunk; default is false, since Opus doesnt require configuration
     // 48k stereo is the default configuration.
@@ -56,13 +57,21 @@ public class OpusAudio extends AbstractAudio {
 
     @Override
     public boolean canHandleData(IoBuffer data) {
-        if (data.limit() == 0) {
-            // Empty buffer
-            return false;
+        boolean result = false;
+        if (data.limit() > 0) {
+            byte flgs = data.get();
+            byte hdr = data.get();
+            result = (((flgs & IoConstants.MASK_SOUND_FORMAT) >> 4) == AudioCodec.OPUS.getId());
+            if (result && hdr == 0) {
+                // we have an opus header
+                log.debug("Received opus header");
+                // set the sample rate and channels
+                index = data.get();
+                channels = data.get();
+                sampleRate = OPUS_SAMPLERATES[index];
+                log.info("opus sample rate {} channels {}", sampleRate, channels);
+            }
         }
-        byte first = data.get();
-        boolean result = (((first & 0xf0) >> 4) == AudioCodec.OPUS.getId());
-        data.rewind();
         return result;
     }
 
@@ -85,7 +94,8 @@ public class OpusAudio extends AbstractAudio {
                 if (needConfig) {
                     // expand the data to hold the amf markers
                     data.expand(remaining + 4);
-                    data.put(new byte[] { (byte) 0, (byte) OPUS_SAMPLERATES[index], (byte) channels });
+                    // sample rate index and channels are the primary config data
+                    data.put(new byte[] { (byte) index, (byte) channels });
                     // flip config flag
                     needConfig = false;
                 } else {
@@ -116,14 +126,6 @@ public class OpusAudio extends AbstractAudio {
 
     public void setIndex(int index) {
         this.index = index;
-    }
-
-    public int getChannels() {
-        return channels;
-    }
-
-    public void setChannels(int channels) {
-        this.channels = channels;
     }
 
     public boolean isNeedConfig() {

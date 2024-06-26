@@ -92,9 +92,8 @@ public class ScreenVideo2 extends AbstractVideo {
      */
     private byte specInfo2;
 
-    /** Constructs a new ScreenVideo2. */
-    public ScreenVideo2() {
-        this.reset();
+    {
+        codec = VideoCodec.SCREEN_VIDEO2;
     }
 
     /** {@inheritDoc} */

@@ -10,6 +10,7 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.io.IoConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +29,8 @@ public class AVCVideo extends AbstractVideo {
     /** Video decoder configuration data */
     private FrameData decoderConfiguration;
 
-    /** Constructs a new AVCVideo. */
-    public AVCVideo() {
+    {
         codec = VideoCodec.AVC;
-        this.reset();
     }
 
     /** {@inheritDoc} */
@@ -49,18 +48,6 @@ public class AVCVideo extends AbstractVideo {
 
     /** {@inheritDoc} */
     @Override
-    public boolean canHandleData(IoBuffer data) {
-        boolean result = false;
-        if (data.limit() > 0) {
-            // read the first byte and ensure its AVC / h.264 type
-            result = ((data.get() & 0x0f) == VideoCodec.AVC.getId());
-            data.rewind();
-        }
-        return result;
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean addData(IoBuffer data) {
         return addData(data, (keyframeTimestamp + 1));
     }
@@ -72,10 +59,10 @@ public class AVCVideo extends AbstractVideo {
         if (data.hasRemaining()) {
             // mark
             int start = data.position();
-            // get frame type
-            byte frameType = data.get();
-            byte avcType = data.get();
-            if ((frameType & 0x0f) == VideoCodec.AVC.getId()) {
+            if (canHandleData(data)) {
+                // get frame type
+                byte frameType = data.get();
+                byte avcType = data.get();
                 // check for keyframe
                 if ((frameType & 0xf0) == FLV_FRAME_KEY) {
                     if (isDebug) {
@@ -106,7 +93,6 @@ public class AVCVideo extends AbstractVideo {
                     }
                     //log.trace("Keyframes: {}", keyframes.size());
                 } else if (bufferInterframes) {
-                    //log.trace("Interframe");
                     if (isDebug) {
                         log.debug("Interframe - AVC type: {}", avcType);
                     }
@@ -128,6 +114,8 @@ public class AVCVideo extends AbstractVideo {
                     }
                     //log.trace("Interframes: {}", interframes.size());
                 }
+                // go back to where we started
+                data.position(start);
             } else {
                 // not AVC data
                 log.debug("Non-AVC data, rejecting");
@@ -135,8 +123,6 @@ public class AVCVideo extends AbstractVideo {
                 data.position(start);
                 return false;
             }
-            // go back to where we started
-            data.position(start);
         }
         return true;
     }

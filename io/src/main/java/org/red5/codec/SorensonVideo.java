@@ -42,9 +42,8 @@ public class SorensonVideo extends AbstractVideo {
      */
     private int blockSize;
 
-    /** Constructs a new SorensonVideo. */
-    public SorensonVideo() {
-        this.reset();
+    {
+        codec = VideoCodec.H263;
     }
 
     /** {@inheritDoc} */
@@ -65,17 +64,6 @@ public class SorensonVideo extends AbstractVideo {
         this.blockData = null;
         this.blockSize = 0;
         this.dataCount = 0;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        if (data.limit() > 0) {
-            byte first = data.get();
-            data.rewind();
-            return ((first & 0x0f) == VideoCodec.H263.getId());
-        }
-        return false;
     }
 
     /** {@inheritDoc} */
