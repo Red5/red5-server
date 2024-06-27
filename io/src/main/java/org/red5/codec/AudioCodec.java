@@ -192,6 +192,22 @@ public enum AudioCodec {
         return (AudioCodec) map.get((byte) id);
     }
 
+    /**
+     * Returns back the codec that corresponds to the given four character code.
+     *
+     * @param fourcc
+     *            the four character code
+     * @return the codec
+     */
+    public static AudioCodec valueOfByFourCc(int fourcc) {
+        for (AudioCodec codec : AudioCodec.values()) {
+            if (codec.getFourcc() == fourcc) {
+                return codec;
+            }
+        }
+        return null;
+    }
+
     public static EnumSet<AudioCodec> getConfigured() {
         return configured;
     }

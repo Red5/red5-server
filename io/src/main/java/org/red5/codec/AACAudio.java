@@ -75,8 +75,7 @@ public class AACAudio extends AbstractAudio {
                 sampleRate = AAC_SAMPLERATES[freqIndex];
                 log.info("aac config sample rate {} type {} channels {}", sampleRate, objectType, channels);
                 // create the decoder configuration record
-                blockDataAACDCR = new byte[] { (byte) ((0x10 | ((freqIndex >> 1) & 0x07))),
-                    (byte) ((((freqIndex & 0x01) << 7) | ((channels & 0x0f) << 3))) };
+                blockDataAACDCR = new byte[] { (byte) ((0x10 | ((freqIndex >> 1) & 0x07))), (byte) ((((freqIndex & 0x01) << 7) | ((channels & 0x0f) << 3))) };
             }
             // when the result is returned, an expected rewind of the buffer should be done
         }

@@ -34,15 +34,15 @@ public class AudioCodecFactory {
     /**
      * Create and return new audio codec applicable for byte buffer data; return the codec and its configuration if
      * available.
-     * 
+     *
      * SoundFormat: UB[4] Format of SoundData
-     * 
+     *
      * Standard RTMP bits (for SoundFormat != 9):
      * soundRate = UB[2]
      * soundSize = UB[1]
      * soundType = UB[1]
-     * 
-     * Ehanced RTMP bits:
+     *
+     * Enhanced RTMP bits:
      * audioPacketType = UB[4] as AudioPacketType
      * if audioPacketType == Multitrack
      *   audioMultitrackType = UB[4] as AvMultitrackType
@@ -51,19 +51,19 @@ public class AudioCodecFactory {
      *       audioFourCc = FOURCC as AudioFourCc
      * else if audioPacketType != Multitrack
      *   audioFourCc = FOURCC as AudioFourCc
-     *  
+     *
      * Format 3, linear PCM, stores raw PCM samples. If the data is 8-bit, the samples are unsigned bytes. If the data
      * is 16-bit, the samples are stored as little endian, signed numbers. If the data is stereo, left and right
-     * samples are stored interleaved: left - right - left - right - and so on. 
-     * 
+     * samples are stored interleaved: left - right - left - right - and so on.
+     *
      * Format 0 PCM is the same as format 3 PCM, except that format 0 stores 16-bit PCM samples in the endian order of
-     * the platform on which the file was created. For this reason, format 0 is not recommended for use. 
-     * 
+     * the platform on which the file was created. For this reason, format 0 is not recommended for use.
+     *
      * Nellymoser 8-kHz and 16-kHz are special cases 8 and 16 sampling rates are not supported in other formats, and
      * the SoundRate bits can’t represent this value. When Nellymoser 8-kHz or Nellymoser 16-kHz is specified in
      * SoundFormat, the SoundRate and SoundType fields are ignored. For other Nellymoser sampling rates, specify the
      * normal Nellymoser SoundFormat and use the SoundRate and SoundType fields as usual.
-     * 
+     *
      * If the SoundFormat indicates AAC, the SoundType should be set to 1 (stereo) and the SoundRate should be set to 3
      * (44 kHz). However, this does not mean that AAC audio in FLV is always stereo, 44 kHz data. Instead, the Flash
      * Player ignores these values and extracts the channel and sample rate data is encoded in the AAC bitstream.

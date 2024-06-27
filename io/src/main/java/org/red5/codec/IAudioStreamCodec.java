@@ -88,7 +88,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Returns the sample rate for the codec.
-     * 
+     *
      * @return sample rate, default is 48000
      */
     default int getSampleRate() {
@@ -97,7 +97,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Returns the sample size in bits for the codec.
-     * 
+     *
      * @return sample size in bits, default is 16
      */
     default int getSampleSizeInBits() {
@@ -106,7 +106,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Returns the number of channels for the codec.
-     * 
+     *
      * @return number of channels, default is 2
      */
     default int getChannels() {
@@ -115,7 +115,7 @@ public interface IAudioStreamCodec {
 
     /**
      * Returns whether the codec is signed or not.
-     * 
+     *
      * @return true if signed, false otherwise
      */
     default boolean isSigned() {

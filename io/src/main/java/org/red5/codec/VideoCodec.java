@@ -192,6 +192,22 @@ public enum VideoCodec {
         return (VideoCodec) map.get((byte) id);
     }
 
+    /**
+     * Returns back the codec that corresponds to the given four character code.
+     *
+     * @param fourcc
+     *            the four character code
+     * @return the codec
+     */
+    public static VideoCodec valueOfByFourCc(int fourcc) {
+        for (VideoCodec codec : VideoCodec.values()) {
+            if (codec.getFourcc() == fourcc) {
+                return codec;
+            }
+        }
+        return null;
+    }
+
     public static EnumSet<VideoCodec> getConfigured() {
         return configured;
     }
