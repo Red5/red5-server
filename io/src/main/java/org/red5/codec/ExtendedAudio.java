@@ -88,7 +88,7 @@ public class ExtendedAudio extends AbstractAudio {
                 // set up for reading more bits
                 nibbler = new ByteNibbler(data.get());
                 multitrackType = AvMultitrackType.valueOf((byte) nibbler.nibble(4));
-                // Fetch AudioPacketType for all audio tracks in the audio message
+                // Fetch AudioPacketType for all audio tracks in the message
                 // This fetch MUST not result in a AudioPacketType.Multitrack
                 packetType = AudioPacketType.valueOf(nibbler.nibble(4));
                 if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {

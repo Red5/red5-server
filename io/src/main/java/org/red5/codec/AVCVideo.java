@@ -19,7 +19,10 @@ import org.apache.mina.core.buffer.IoBuffer;
  */
 public class AVCVideo extends AbstractVideo {
 
-    /** Video decoder configuration data */
+    /**
+     * Video decoder configuration record to start the sequence. See ISO/IEC 14496-15, 5.2.4.1 for the description of
+     * AVCDecoderConfigurationRecord
+     */
     private FrameData decoderConfiguration;
 
     {

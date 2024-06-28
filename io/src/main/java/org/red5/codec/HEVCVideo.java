@@ -10,8 +10,6 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 video codec for the HEVC (h265) video format. Stores DecoderConfigurationRecord and last keyframe.
@@ -20,11 +18,10 @@ import org.slf4j.LoggerFactory;
  */
 public class HEVCVideo extends AbstractVideo {
 
-    private static Logger log = LoggerFactory.getLogger(HEVCVideo.class);
-
-    private static boolean isDebug = log.isDebugEnabled();
-
-    /** Video decoder configuration data */
+    /**
+     * Video decoder configuration record to start the sequence. See ISO/IEC 14496-15, 8.3.3.1.2 for the description of
+     * HEVCDecoderConfigurationRecord
+     */
     private FrameData decoderConfiguration;
 
     /** Constructs a new HEVCVideo. */
@@ -44,18 +41,6 @@ public class HEVCVideo extends AbstractVideo {
     public void reset() {
         decoderConfiguration = new FrameData();
         softReset();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        boolean result = false;
-        if (data.limit() > 0) {
-            // read the first byte and ensure its HEVC type
-            result = ((data.get() & 0x0f) == VideoCodec.HEVC.getId());
-            data.rewind();
-        }
-        return result;
     }
 
     /** {@inheritDoc} */

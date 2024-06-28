@@ -34,7 +34,8 @@ public class AV1Video extends AbstractVideo {
     @SuppressWarnings("unused")
     private IoBuffer obuBuffer;
 
-    public AV1Video() {
+    {
+        codec = VideoCodec.AV1;
     }
 
     /** {@inheritDoc} */
@@ -47,18 +48,6 @@ public class AV1Video extends AbstractVideo {
     @Override
     public boolean canDropFrames() {
         return true;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        // XXX also add support for handling non-amf AV1, maybe
-        if (data.hasRemaining()) {
-            byte first = data.get();
-            data.rewind();
-            return ((first & 0x0f) == VideoCodec.AV1.getId());
-        }
-        return false;
     }
 
     /** {@inheritDoc} */

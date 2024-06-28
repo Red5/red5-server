@@ -9,8 +9,6 @@ package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 video codec for the sorenson video format.
@@ -20,8 +18,6 @@ import org.slf4j.LoggerFactory;
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class SorensonVideo extends AbstractVideo {
-
-    private Logger log = LoggerFactory.getLogger(SorensonVideo.class);
 
     /**
      * Sorenson video codec constant

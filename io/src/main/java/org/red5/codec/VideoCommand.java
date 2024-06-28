@@ -14,4 +14,13 @@ public enum VideoCommand {
         return value;
     }
 
+    public static VideoCommand valueOf(int value) {
+        for (VideoCommand command : values()) {
+            if (command.value == value) {
+                return command;
+            }
+        }
+        return null;
+    }
+
 }

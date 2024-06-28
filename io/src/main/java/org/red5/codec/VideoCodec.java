@@ -145,6 +145,11 @@ public enum VideoCodec {
      */
     private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC, VP8, VP9, AV1);
 
+    /**
+     * Codecs supplying composition time offset.
+     */
+    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC);
+
     private final static Map<Byte, VideoCodec> map = new HashMap<>();
 
     private byte id;
@@ -210,6 +215,10 @@ public enum VideoCodec {
 
     public static EnumSet<VideoCodec> getConfigured() {
         return configured;
+    }
+
+    public static EnumSet<VideoCodec> getCompositionTime() {
+        return compositionTime;
     }
 
 }

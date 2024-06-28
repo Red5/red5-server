@@ -17,7 +17,7 @@ public enum VideoFrameType {
      *
      * frameType is ignored if videoPacketType is VideoPacketType.MetaData
      */
-    COMMAND_FRAME((byte) 0x05); // Command frame
+    COMMAND_FRAME((byte) 0x05); // Command or informational frame
 
     private final byte value;
 

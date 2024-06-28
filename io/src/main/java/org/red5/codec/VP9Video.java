@@ -8,8 +8,6 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 video codec for the VP8 video format.
@@ -18,8 +16,6 @@ import org.slf4j.LoggerFactory;
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class VP9Video extends AbstractVideo {
-
-    private static Logger log = LoggerFactory.getLogger(VP9Video.class);
 
     /**
      * VP8 video codec constant
@@ -70,7 +66,8 @@ public class VP9Video extends AbstractVideo {
      */
     private static final byte X_BIT = (byte) 0x80;
 
-    public VP9Video() {
+    {
+        codec = VideoCodec.VP9;
     }
 
     /** {@inheritDoc} */
@@ -83,18 +80,6 @@ public class VP9Video extends AbstractVideo {
     @Override
     public boolean canDropFrames() {
         return true;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        // XXX also add support for handling non-amf VP8, maybe
-        if (data.hasRemaining()) {
-            byte first = data.get();
-            data.rewind();
-            return ((first & 0x0f) == VideoCodec.VP8.getId());
-        }
-        return false;
     }
 
     /** {@inheritDoc} */
