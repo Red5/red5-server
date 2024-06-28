@@ -24,7 +24,7 @@
     <name>Red5</name>
     <description>The Red5 server</description>
     <groupId>org.red5</groupId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <url>https://github.com/Red5/red5-server</url>
     <inceptionYear>2005</inceptionYear>
     <organization>
@@ -228,14 +228,6 @@
                                 <head>To do:</head>
                             </tag>
                         </tags>
-                        <reportSets>
-                            <reportSet>
-                                <reports>
-                                    <report>aggregate-no-fork</report>
-                                    <report>test-aggregate-no-fork</report>
-                                </reports>
-                            </reportSet>
-                        </reportSets>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -454,7 +446,7 @@
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-junit</artifactId>
-                <version>2.0.0.0</version>
+                <version>2.0.1.0</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -497,10 +489,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -508,10 +496,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-junit</artifactId>
         </dependency>
+        -->
     </dependencies>
     <profiles>
         <profile>
