@@ -10,9 +10,6 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.io.IoConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 video codec for the AVC (h264) video format. Stores DecoderConfigurationRecord and last keyframe.
@@ -21,10 +18,6 @@ import org.slf4j.LoggerFactory;
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class AVCVideo extends AbstractVideo {
-
-    private static Logger log = LoggerFactory.getLogger(AVCVideo.class);
-
-    private static boolean isDebug = log.isDebugEnabled();
 
     /** Video decoder configuration data */
     private FrameData decoderConfiguration;

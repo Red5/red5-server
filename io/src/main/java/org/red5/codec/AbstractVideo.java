@@ -5,8 +5,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class AbstractVideo implements IVideoStreamCodec, IoConstants {
+/**
+ * Abstract video codec implementation.
+ *
+ */
+public class AbstractVideo implements IVideoStreamCodec {
+
+    protected static Logger log = LoggerFactory.getLogger("Video");
+
+    protected static boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     protected VideoCodec codec;
 
@@ -35,6 +45,9 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
      */
     protected boolean bufferInterframes;
 
+    // track id
+    protected int trackId = 0;
+
     @Override
     public VideoCodec getCodec() {
         return codec;
@@ -43,6 +56,16 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
     @Override
     public String getName() {
         return codec.name();
+    }
+
+    @Override
+    public void setTrackId(int trackId) {
+        this.trackId = trackId;
+    }
+
+    @Override
+    public int getTrackId() {
+        return trackId;
     }
 
     @Override
@@ -136,6 +159,36 @@ public class AbstractVideo implements IVideoStreamCodec, IoConstants {
     @Override
     public AvMultitrackType getMultitrackType() {
         return multitrackType;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((codec == null) ? 0 : codec.hashCode());
+        result = prime * result + trackId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractVideo other = (AbstractVideo) obj;
+        if (codec != other.codec)
+            return false;
+        if (trackId != other.trackId)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractVideo [codec=" + codec + ", multitrackType=" + multitrackType + ", trackId=" + trackId + "]";
     }
 
 }

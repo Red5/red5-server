@@ -2,8 +2,18 @@ package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.util.ByteNibbler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Abstract audio codec implementation.
+ *
+ */
 public class AbstractAudio implements IAudioStreamCodec {
+
+    protected static Logger log = LoggerFactory.getLogger("Audio");
+
+    protected static boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     protected AudioCodec codec;
 
@@ -17,6 +27,18 @@ public class AbstractAudio implements IAudioStreamCodec {
     // defaulting to unsigned simply to support 8 bit audio / older codecs
     protected boolean signed;
 
+    // track id
+    protected int trackId;
+
+    // audio channel order
+    protected AudioChannelOrder audioChannelOrder = AudioChannelOrder.Unspecified;
+
+    // each entry specifies the speaker layout
+    protected AudioChannel[] audioChannelMap;
+
+    // indicates which channels are present in the multi-channel stream
+    protected int audioChannelFlags;
+
     @Override
     public AudioCodec getCodec() {
         return codec;
@@ -25,6 +47,16 @@ public class AbstractAudio implements IAudioStreamCodec {
     @Override
     public String getName() {
         return codec.name();
+    }
+
+    @Override
+    public void setTrackId(int trackId) {
+        this.trackId = trackId;
+    }
+
+    @Override
+    public int getTrackId() {
+        return trackId;
     }
 
     @Override
@@ -117,6 +149,45 @@ public class AbstractAudio implements IAudioStreamCodec {
     @Override
     public boolean isSigned() {
         return signed;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((codec == null) ? 0 : codec.hashCode());
+        result = prime * result + sampleRate;
+        result = prime * result + sampleSizeInBits;
+        result = prime * result + channels;
+        result = prime * result + trackId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractAudio other = (AbstractAudio) obj;
+        if (codec != other.codec)
+            return false;
+        if (sampleRate != other.sampleRate)
+            return false;
+        if (sampleSizeInBits != other.sampleSizeInBits)
+            return false;
+        if (channels != other.channels)
+            return false;
+        if (trackId != other.trackId)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractAudio [codec=" + codec + ", multitrackType=" + multitrackType + ", sampleRate=" + sampleRate + ", sampleSizeInBits=" + sampleSizeInBits + ", channels=" + channels + ", signed=" + signed + ", trackId=" + trackId + "]";
     }
 
 }

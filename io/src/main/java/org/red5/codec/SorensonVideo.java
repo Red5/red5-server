@@ -8,6 +8,7 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.io.IoConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +80,7 @@ public class SorensonVideo extends AbstractVideo {
         //log.trace("First byte: {}", HexDump.toHexString(first));
         data.rewind();
         // get frame type
-        VideoFrameType frame = VideoFrameType.valueOf((first & MASK_VIDEO_FRAMETYPE) >> 4);
+        VideoFrameType frame = VideoFrameType.valueOf((first & IoConstants.MASK_VIDEO_FRAMETYPE) >> 4);
         if (VideoFrameType.KEYFRAME != frame) {
             // Not a keyframe
             try {

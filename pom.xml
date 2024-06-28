@@ -103,7 +103,7 @@
         <logback.version>1.4.14</logback.version>
         <bc.version>1.78.1</bc.version>
         <mina.version>2.0.23</mina.version>
-        <!-- Can no longer open-end spring, 6.0 forces jdk 17 -->
+        <!-- Can no longer open-end spring, 6.0 forces jdk 17+ -->
         <spring.version>6.1.8</spring.version>
         <tomcat.version>11.0.0-M20</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>

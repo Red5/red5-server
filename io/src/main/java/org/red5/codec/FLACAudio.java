@@ -8,8 +8,6 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 audio codec for the FLAC audio format.
@@ -22,21 +20,13 @@ import org.slf4j.LoggerFactory;
  */
 public class FLACAudio extends AbstractAudio {
 
-    private static Logger log = LoggerFactory.getLogger(FLACAudio.class);
-
     /**
      * Block of data private to the codec.
      */
     private byte[] privateData;
 
-    public FLACAudio() {
+    {
         codec = AudioCodec.FLAC;
-        this.reset();
-    }
-
-    @Override
-    public String getName() {
-        return codec.name();
     }
 
     @Override

@@ -8,8 +8,6 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 audio codec for the AC3 audio format.
@@ -22,26 +20,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AC3Audio extends AbstractAudio {
 
-    private static Logger log = LoggerFactory.getLogger(AC3Audio.class);
-
-    /**
-     * Block of data private to the codec.
-     */
-    private byte[] privateData;
-
-    public AC3Audio() {
+    {
         codec = AudioCodec.AC3;
-        this.reset();
-    }
-
-    @Override
-    public String getName() {
-        return codec.name();
-    }
-
-    @Override
-    public void reset() {
-        privateData = null;
     }
 
     @Override
@@ -56,53 +36,4 @@ public class AC3Audio extends AbstractAudio {
         return result;
     }
 
-    @Override
-    public boolean addData(IoBuffer data) {
-        if (data.hasRemaining()) {
-            // mark
-            int start = data.position();
-            // ensure we are at the beginning
-            data.rewind();
-            byte frameType = data.get();
-            log.trace("Frame type: {}", frameType);
-            byte header = data.get();
-            // if we don't have the privateData stored
-            if (privateData == null) {
-                if ((((frameType & 0xf0) >> 4) == codec.getId()) && (header == 0)) {
-                    // back to the beginning
-                    data.rewind();
-                    privateData = new byte[data.remaining()];
-                    data.get(privateData);
-                }
-            }
-            data.position(start);
-        }
-        return true;
-    }
-
-    @Override
-    public IoBuffer getDecoderConfiguration() {
-        if (privateData == null) {
-            return null;
-        }
-        IoBuffer result = IoBuffer.allocate(4);
-        result.setAutoExpand(true);
-        result.put(privateData);
-        result.rewind();
-        return result;
-    }
-
-    @SuppressWarnings("unused")
-    private static long sample2TC(long time, int sampleRate) {
-        return (time * 1000L / sampleRate);
-    }
-
-    //private final byte[] getAACSpecificConfig() {
-    //	byte[] b = new byte[] {
-    //			(byte) (0x10 | /*((profile > 2) ? 2 : profile << 3) | */((sampleRateIndex >> 1) & 0x03)),
-    //			(byte) (((sampleRateIndex & 0x01) << 7) | ((channels & 0x0F) << 3))
-    //		};
-    //	log.debug("SpecificAudioConfig {}", HexDump.toHexString(b));
-    //	return b;
-    //}
 }

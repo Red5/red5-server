@@ -122,4 +122,19 @@ public interface IAudioStreamCodec {
         return true;
     }
 
+    /**
+     * Sets the track id.
+     */
+    default void setTrackId(int trackId) {
+    }
+
+    /**
+     * Returns the track id.
+     *
+     * @return track id
+     */
+    default int getTrackId() {
+        return 0;
+    }
+
 }

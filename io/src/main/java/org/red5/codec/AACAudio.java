@@ -9,8 +9,6 @@ package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 audio codec for the AAC audio format.
@@ -29,8 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AACAudio extends AbstractAudio {
 
-    private static Logger log = LoggerFactory.getLogger(AACAudio.class);
-
     public static final int[] AAC_SAMPLERATES = { 96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350 };
 
     /**
@@ -40,12 +36,6 @@ public class AACAudio extends AbstractAudio {
 
     {
         codec = AudioCodec.AAC;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getName() {
-        return codec.name();
     }
 
     /** {@inheritDoc} */

@@ -8,8 +8,6 @@ package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 audio codec for the Opus audio format.
@@ -21,8 +19,6 @@ import org.slf4j.LoggerFactory;
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class OpusAudio extends AbstractAudio {
-
-    private static Logger log = LoggerFactory.getLogger(OpusAudio.class);
 
     /**
      * Sample rates:
@@ -58,7 +54,7 @@ public class OpusAudio extends AbstractAudio {
     @Override
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
-        if (data.limit() > 0) {
+        if (data != null && data.limit() > 0) {
             byte flgs = data.get();
             byte hdr = data.get();
             result = (((flgs & IoConstants.MASK_SOUND_FORMAT) >> 4) == AudioCodec.OPUS.getId());
@@ -117,7 +113,7 @@ public class OpusAudio extends AbstractAudio {
 
     @Override
     public IoBuffer getDecoderConfiguration() {
-        return IoBuffer.wrap(new byte[] { (byte) OPUS_SAMPLERATES[index], (byte) channels });
+        return IoBuffer.wrap(new byte[] { (byte) index, (byte) channels });
     }
 
     public int getIndex() {
