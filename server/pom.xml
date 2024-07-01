@@ -43,8 +43,10 @@
                         <exclude>**/red5_codetemplate.xml</exclude>
                     </excludes>
                     <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
                         <manifestEntries>
-                            <Add-Opens>java.base/java.lang jdk.management/com.sun.management.internal java.rmi/sun.rmi.transport</Add-Opens>
                             <Build-OS>${os.name} ${os.version}</Build-OS>
                             <Build-Java>Java ${java.version}</Build-Java>
                             <Build-Number>${buildNumber}</Build-Number>

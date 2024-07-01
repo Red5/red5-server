@@ -183,6 +183,26 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>1.4</version>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>create</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <doCheck>false</doCheck>
+                        <doUpdate>false</doUpdate>
+                        <!-- Use 7 available chars from git commit -->
+                        <shortRevisionLength>7</shortRevisionLength>
+                        <scmBranchPropertyName>buildScmBranch</scmBranchPropertyName>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.13.0</version>
                     <configuration>
@@ -232,22 +252,19 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
-                    <executions>
-                        <execution>
-                            <configuration>
-                                <archive>
-                                    <manifest>
-                                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                    </manifest>
-                                    <manifestEntries>
-                                        <SCM-Revision>${buildNumber}</SCM-Revision>
-                                        <Implementation-Build>${buildNumber}</Implementation-Build>
-                                    </manifestEntries>
-                                </archive>
-                            </configuration>
-                        </execution>
-                    </executions>
+                    <version>3.4.2</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Build-OS>${os.name} ${os.version}</Build-OS>
+                                <Build-Java>Java ${java.version}</Build-Java>
+                                <Build-Number>${buildNumber}</Build-Number>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>

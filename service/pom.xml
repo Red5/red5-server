@@ -33,22 +33,20 @@
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                </manifest>
-                                <manifestEntries>
-                                    <Add-Opens>java.base/java.lang jdk.management/com.sun.management.internal java.rmi/sun.rmi.transport</Add-Opens>
-                                    <SCM-Revision>${buildNumber}</SCM-Revision>
-                                    <Implementation-Build>${buildNumber}</Implementation-Build>
-                                </manifestEntries>
-                            </archive>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Add-Opens>java.base/java.lang jdk.management/com.sun.management.internal java.rmi/sun.rmi.transport java.base/javax.crypto java.base/sun.security.provider java.base/jdk.crypto.cryptoki java.base/jdk.crypto.ec</Add-Opens>
+                            <Add-Exports>jdk.crypto.cryptoki/sun.security.pkcs11.SunPKCS11</Add-Exports>
+                            <Build-OS>${os.name} ${os.version}</Build-OS>
+                            <Build-Java>Java ${java.version}</Build-Java>
+                            <Build-Number>${buildNumber}</Build-Number>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
