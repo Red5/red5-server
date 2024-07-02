@@ -39,92 +39,88 @@ public class HEVCVideo extends AbstractVideo {
     /** {@inheritDoc} */
     @Override
     public void reset() {
-        decoderConfiguration = new FrameData();
         softReset();
     }
 
     /** {@inheritDoc} */
     @Override
-    public boolean addData(IoBuffer data) {
-        return addData(data, (keyframeTimestamp + 1));
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean addData(IoBuffer data, int timestamp) {
-        //log.trace("addData timestamp: {} remaining: {}", timestamp, data.remaining());
+        log.trace("addData timestamp: {} remaining: {}", timestamp, data.remaining());
+        boolean result = false;
         if (data.hasRemaining()) {
             // mark
-            int start = data.position();
-            // get frame type
+            data.mark();
+            // get frame type and HEVC type
             byte frameType = data.get();
-            byte avcType = data.get();
-            if ((frameType & 0x0f) == VideoCodec.HEVC.getId()) {
-                // check for keyframe
-                if ((frameType & 0xf0) == FLV_FRAME_KEY) {
-                    if (isDebug) {
-                        log.debug("Keyframe - HEVC type: {}", avcType);
-                    }
-                    // rewind
-                    data.rewind();
-                    switch (avcType) {
-                        case 1: // keyframe
-                            //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
-                            // get the time stamp and compare with the current value
-                            if (timestamp != keyframeTimestamp) {
-                                //log.trace("New keyframe");
-                                // new keyframe
-                                keyframeTimestamp = timestamp;
-                                // if its a new keyframe, clear keyframe and interframe collections
-                                softReset();
-                            }
-                            // store keyframe
-                            keyframes.add(new FrameData(data));
-                            break;
-                        case 0: // configuration
-                            if (isDebug) {
-                                log.debug("Decoder configuration");
-                            }
-                            // Store HEVCDecoderConfigurationRecord data
-                            decoderConfiguration.setData(data);
-                            softReset();
-                            break;
-                    }
-                    //log.trace("Keyframes: {}", keyframes.size());
-                } else if (bufferInterframes) {
-                    //log.trace("Interframe");
-                    if (isDebug) {
-                        log.debug("Interframe - HEVC type: {}", avcType);
-                    }
-                    if (interframes == null) {
-                        interframes = new CopyOnWriteArrayList<>();
-                    }
-                    // rewind
-                    data.rewind();
-                    try {
-                        int lastInterframe = numInterframes.getAndIncrement();
-                        //log.trace("Buffering interframe #{}", lastInterframe);
-                        if (lastInterframe < interframes.size()) {
-                            interframes.get(lastInterframe).setData(data);
-                        } else {
-                            interframes.add(new FrameData(data));
-                        }
-                    } catch (Throwable e) {
-                        log.warn("Failed to buffer interframe", e);
-                    }
-                    //log.trace("Interframes: {}", interframes.size());
+            byte hvcType = data.get();
+            // reset before reading into a frame farther down
+            data.reset();
+            // create mark for frame data
+            data.mark();
+            // check for keyframe
+            if ((frameType & 0xf0) == FLV_FRAME_KEY) {
+                if (isDebug) {
+                    log.debug("Keyframe - HEVC type: {}", hvcType);
                 }
-            } else {
-                // not HEVC data
-                log.debug("Non-HEVC data, rejecting");
-                // go back to where we started
-                data.position(start);
-                return false;
+                // rewind
+                data.rewind();
+                switch (hvcType) {
+                    case 1: // keyframe
+                        //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
+                        // get the time stamp and compare with the current value
+                        if (timestamp != keyframeTimestamp) {
+                            //log.trace("New keyframe");
+                            // new keyframe
+                            keyframeTimestamp = timestamp;
+                            // if its a new keyframe, clear keyframe and interframe collections
+                            softReset();
+                        }
+                        // store keyframe
+                        keyframes.add(new FrameData(data));
+                        break;
+                    case 0: // configuration
+                        if (isDebug) {
+                            log.debug("Decoder configuration");
+                        }
+                        // Store HEVCDecoderConfigurationRecord data
+                        if (decoderConfiguration == null) {
+                            decoderConfiguration = new FrameData(data);
+                        } else {
+                            decoderConfiguration.setData(data);
+                        }
+                        softReset();
+                        break;
+                }
+                //log.trace("Keyframes: {}", keyframes.size());
+            } else if (bufferInterframes) {
+                //log.trace("Interframe");
+                if (isDebug) {
+                    log.debug("Interframe - HEVC type: {}", hvcType);
+                }
+                if (interframes == null) {
+                    interframes = new CopyOnWriteArrayList<>();
+                }
+                // rewind
+                data.rewind();
+                try {
+                    int lastInterframe = numInterframes.getAndIncrement();
+                    //log.trace("Buffering interframe #{}", lastInterframe);
+                    if (lastInterframe < interframes.size()) {
+                        interframes.get(lastInterframe).setData(data);
+                    } else {
+                        interframes.add(new FrameData(data));
+                    }
+                } catch (Throwable e) {
+                    log.warn("Failed to buffer interframe", e);
+                }
+                //log.trace("Interframes: {}", interframes.size());
             }
+            // we handled the data
+            result = true;
             // go back to where we started
-            data.position(start);
+            data.reset();
         }
-        return true;
+        return result;
     }
 
     /** {@inheritDoc} */

@@ -76,14 +76,14 @@ public class OpusAudio extends AbstractAudio {
     public boolean addData(IoBuffer data, int timestamp, boolean amf) {
         log.trace("addData timestamp: {} remaining: {} amf? {}", timestamp, data.remaining(), amf);
         if (data.hasRemaining()) {
-            // mark starting position
-            int start = data.position();
             // are we amf?
             if (!amf) {
+                // mark starting position
+                data.mark();
                 int remaining = data.remaining();
                 // if we're not amf, figure out how to proceed based on data contents
                 // slice-out the existing data
-                IoBuffer slice = data.getSlice(start, remaining);
+                IoBuffer slice = data.getSlice(data.position(), remaining);
                 // prefix the data with amf markers (two bytes)
                 data.put((byte) (AudioCodec.OPUS.getId() << 4));
                 // determine if we need to add config data (frequency and channels)
@@ -102,10 +102,8 @@ public class OpusAudio extends AbstractAudio {
                 data.put(slice);
                 // flip it
                 data.flip();
-                // reset start (which technically will be the same position)
-                start = data.position();
-                // jump back to the starting pos
-                data.position(start);
+                // reset the mark / position
+                data.reset();
             }
         }
         return true;

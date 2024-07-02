@@ -77,10 +77,12 @@ public class AACAudio extends AbstractAudio {
     public boolean addData(IoBuffer data) {
         // if we don't have the AACDecoderConfigurationRecord stored
         if (blockDataAACDCR == null) {
+            // set a mark
+            data.mark();
             // attempt to parse the configuration
             canHandleData(data);
-            // rewind the data buffer
-            data.rewind();
+            // reset the data buffer mark
+            data.reset();
         }
         return true;
     }

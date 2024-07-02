@@ -85,6 +85,8 @@ public class AudioCodecFactory {
                 log.debug("Codec found: {}", codec);
                 // this will be reset if the codec cannot handle the data
                 result = codec.newInstance();
+                // set mark first
+                data.mark();
                 // check if the codec can handle the data
                 if (result.canHandleData(data)) {
                     log.debug("Codec {} can handle the data", result);
@@ -92,13 +94,17 @@ public class AudioCodecFactory {
                     log.warn("Codec {} cannot handle data", codec);
                     result = null;
                 }
+                // reset the data buffer mark
+                data.reset();
             } else {
                 log.warn("Codec not found for id: {}", codecId);
             }
         } catch (Exception ex) {
             log.error("Error creating codec instance", ex);
         } finally {
-            data.rewind();
+            if (data.markValue() > 0) {
+                data.reset();
+            }
         }
         return result;
     }

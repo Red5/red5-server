@@ -106,17 +106,44 @@ public class AbstractVideo implements IVideoStreamCodec {
         return false;
     }
 
-    @SuppressWarnings("incomplete-switch")
     @Override
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
         if (data != null && data.limit() > 0) {
+            // get the first byte
+            byte flg = data.get();
+            // determine if we've got an enhanced codec
+            ByteNibbler nibbler = new ByteNibbler(flg);
+            // check for enhanced codec handling first
+            enhanced = nibbler.nibble(1) == 1;
+            // the codec id for enhanced is handled via addData
+            if (enhanced) {
+                log.debug("Codec is enhanced, codec id is determined via subsequent addData calls");
+                result = true;
+            } else {
+                result = ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean addData(IoBuffer data) {
+        // not an ideal implementation, but it works when there's no timestamp supplied
+        return addData(data, (keyframeTimestamp + 1));
+    }
+
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    public boolean addData(IoBuffer data, int timestamp) {
+        boolean result = false;
+        if (data != null && data.limit() > 0) {
             boolean processVideoBody = false;
             VideoPacketType packetType = null;
+            @SuppressWarnings("unused")
             VideoCommand command = null;
             // grab the first two bytes
-            byte flg = data.get();
-            byte flg2 = data.get();
+            byte flg = data.get(), flg2 = data.get();
             ByteNibbler nibbler = new ByteNibbler(flg);
             // check for enhanced codec handling first
             enhanced = nibbler.nibble(1) == 1;
@@ -210,11 +237,29 @@ public class AbstractVideo implements IVideoStreamCodec {
 
                             break;
                         case SequenceStart: // start of sequence
-                            result = trackCodec.canHandleData(data);
+                            // set mark first
+                            data.mark();
+                            if (trackCodec.canHandleData(data)) {
+                                // reset the mark
+                                data.reset();
+                                // add data has its own mark and reset
+                                trackCodec.addData(data);
+                            }
+                            // reset the mark just in-case the codec didn't handle the data
+                            data.reset();
                             break;
                         case MPEG2TSSequenceStart: // start of MPEG2TS sequence
                             if (VideoCodec.AV1.getFourcc() == trackCodec.getCodec().getFourcc()) {
-                                result = trackCodec.canHandleData(data);
+                                // set mark first
+                                data.mark();
+                                if (trackCodec.canHandleData(data)) {
+                                    // reset the mark
+                                    data.reset();
+                                    // add data has its own mark and reset
+                                    trackCodec.addData(data);
+                                }
+                                // reset the mark just in-case the codec didn't handle the data
+                                data.reset();
                             }
                             break;
                         case CodedFramesX: // pass coded data without comp time offset
@@ -249,16 +294,6 @@ public class AbstractVideo implements IVideoStreamCodec {
             }
         }
         return result;
-    }
-
-    @Override
-    public boolean addData(IoBuffer data) {
-        return false;
-    }
-
-    @Override
-    public boolean addData(IoBuffer data, int timestamp) {
-        return false;
     }
 
     @Override
