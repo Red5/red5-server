@@ -62,8 +62,6 @@ public class HEVCVideo extends AbstractVideo {
                 if (isDebug) {
                     log.debug("Keyframe - HEVC type: {}", hvcType);
                 }
-                // rewind
-                data.rewind();
                 switch (hvcType) {
                     case 1: // keyframe
                         //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
@@ -100,8 +98,6 @@ public class HEVCVideo extends AbstractVideo {
                 if (interframes == null) {
                     interframes = new CopyOnWriteArrayList<>();
                 }
-                // rewind
-                data.rewind();
                 try {
                     int lastInterframe = numInterframes.getAndIncrement();
                     //log.trace("Buffering interframe #{}", lastInterframe);
@@ -117,8 +113,10 @@ public class HEVCVideo extends AbstractVideo {
             }
             // we handled the data
             result = true;
-            // go back to where we started
-            data.reset();
+            // go back to where we started if we're marked
+            if (data.markValue() > 0) {
+                data.reset();
+            }
         }
         return result;
     }

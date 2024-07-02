@@ -112,8 +112,10 @@ public class AVCVideo extends AbstractVideo {
             }
             // we handled the data
             result = true;
-            // go back to where we started
-            data.reset();
+            // go back to where we started if we're marked
+            if (data.markValue() > 0) {
+                data.reset();
+            }
         }
         return result;
     }
