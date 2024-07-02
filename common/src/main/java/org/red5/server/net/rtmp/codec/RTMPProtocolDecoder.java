@@ -250,8 +250,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // store the header based on its channel id
         rtmp.setLastReadHeader(channelId, header);
         // ensure that we dont exceed maximum packet size
-        int size = header.getSize();
-        log.debug("Packet size: {}", size);
+        if (isTrace) {
+            int size = header.getSize();
+            log.trace("Packet size: {}", size);
+        }
         // get the size of our chunks
         int readChunkSize = rtmp.getReadChunkSize();
         // check to see if this is a new packet or continue decoding an existing one

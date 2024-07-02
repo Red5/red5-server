@@ -458,12 +458,12 @@ public class RTMPHandler extends BaseRTMPHandler {
             conn.close();
         }
         if (command instanceof Invoke) {
-            if (isDebug) {
-                log.debug("Command type Invoke");
+            if (isTrace) {
+                log.trace("Command type Invoke");
             }
             if ((source.getStreamId().intValue() != 0) && (call.getStatus() == Call.STATUS_SUCCESS_VOID || call.getStatus() == Call.STATUS_SUCCESS_NULL)) {
                 // This fixes a bug in the FP on Intel Macs.
-                log.debug("Method does not have return value, do not reply");
+                log.trace("Method does not have return value, do not reply");
                 return;
             }
             boolean sendResult = true;

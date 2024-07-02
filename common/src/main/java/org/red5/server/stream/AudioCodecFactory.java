@@ -76,7 +76,9 @@ public class AudioCodecFactory {
         IAudioStreamCodec result = null;
         try {
             // get the codec identifying byte
-            byte c = data.array()[data.position()]; // prevent needlessly advancing the position
+            data.mark();
+            byte c = data.get();
+            data.reset();
             int codecId = (c & IoConstants.MASK_SOUND_FORMAT) >> 4;
             AudioCodec codec = AudioCodec.valueOfById(codecId);
             if (codec != null) {

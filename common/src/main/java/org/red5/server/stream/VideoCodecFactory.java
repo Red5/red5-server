@@ -42,7 +42,9 @@ public class VideoCodecFactory {
         IVideoStreamCodec result = null;
         try {
             // get the codec identifying byte
-            byte c = data.array()[data.position()]; // prevent advancing the position at least once
+            data.mark();
+            byte c = data.get();
+            data.reset();
             int codecId = (c & IoConstants.MASK_VIDEO_CODEC);
             VideoCodec codec = VideoCodec.valueOfById(codecId);
             if (codec != null) {

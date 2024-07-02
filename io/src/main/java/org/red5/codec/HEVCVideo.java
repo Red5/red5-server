@@ -130,7 +130,7 @@ public class HEVCVideo extends AbstractVideo {
     /** {@inheritDoc} */
     @Override
     public IoBuffer getDecoderConfiguration() {
-        return decoderConfiguration.getFrame();
+        return decoderConfiguration != null ? decoderConfiguration.getFrame() : null;
     }
 
 }
