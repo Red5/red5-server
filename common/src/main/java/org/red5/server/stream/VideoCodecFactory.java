@@ -8,9 +8,11 @@
 package org.red5.server.stream;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.codec.AbstractVideo;
 import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.VideoCodec;
 import org.red5.io.IoConstants;
+import org.red5.util.ByteNibbler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,36 +43,41 @@ public class VideoCodecFactory {
     public static IVideoStreamCodec getVideoCodec(IoBuffer data) {
         IVideoStreamCodec result = null;
         try {
+            // holder for codec
+            VideoCodec codec = null;
             // get the codec identifying byte
             data.mark();
             byte c = data.get();
             data.reset();
-            int codecId = (c & IoConstants.MASK_VIDEO_CODEC);
-            VideoCodec codec = VideoCodec.valueOfById(codecId);
+            log.debug("Flag: {}", Integer.toBinaryString(c & 0xff));
+            boolean enhanced = ByteNibbler.isBitSet(c, 15);
+            if (enhanced) {
+                log.debug("Enhanced codec handling");
+                AbstractVideo absv = new AbstractVideo();
+                data.mark();
+                absv.addData(data, 0);
+                data.reset();
+                codec = absv.getTrackCodec(0);
+            } else {
+                int codecId = (c & IoConstants.MASK_VIDEO_CODEC);
+                codec = VideoCodec.valueOfById(codecId);
+            }
             if (codec != null) {
                 log.debug("Codec found: {}", codec);
                 // this will be reset if the codec cannot handle the data
                 result = codec.newInstance();
-                // set mark first
-                data.mark();
-                // check if the codec can handle the data
-                if (result.canHandleData(data)) {
-                    log.debug("Codec {} can handle the data", result);
+                // add the data to the codec
+                if (result.addData(data)) {
+                    log.debug("Codec {} accepted data", result);
                 } else {
-                    log.warn("Codec {} cannot handle data", codec);
+                    log.warn("Codec {} rejected data", codec);
                     result = null;
                 }
-                // reset the data buffer mark
-                data.reset();
             } else {
-                log.warn("Codec not found for id: {}", codecId);
+                log.warn("Codec not found for {}", String.format("%02x", c));
             }
         } catch (Exception ex) {
             log.error("Error creating codec instance", ex);
-        } finally {
-            if (data.markValue() > 0) {
-                data.reset();
-            }
         }
         return result;
     }

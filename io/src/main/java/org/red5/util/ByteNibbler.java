@@ -53,8 +53,8 @@ public class ByteNibbler {
     /**
      * Returns whether or not the bit is set.
      *
-     * @param b
-     * @param bit
+     * @param b byte being checked
+     * @param bit bit index
      * @return true if set and false otherwise
      */
     public static boolean isBitSet(byte b, int bit) {

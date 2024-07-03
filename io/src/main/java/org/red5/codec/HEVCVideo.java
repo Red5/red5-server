@@ -10,6 +10,7 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.io.IoConstants;
 import org.red5.util.ByteNibbler;
 
 /**
@@ -42,9 +43,10 @@ public class HEVCVideo extends AbstractVideo {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data, int timestamp) {
-        log.trace("addData timestamp: {} remaining: {}", timestamp, data.remaining());
+        log.trace("{} addData timestamp: {} remaining: {}", codec.name(), timestamp, data.remaining());
         boolean result = false;
         if (data.hasRemaining()) {
             // mark
@@ -55,44 +57,74 @@ public class HEVCVideo extends AbstractVideo {
             // reset before reading into a frame farther down
             data.reset();
             // determine if we've got an enhanced codec
-            ByteNibbler nibbler = new ByteNibbler(flg);
-            // check for enhanced codec handling first
-            boolean enhanced = nibbler.nibble(1) == 1;
-            // get video frame type
-            VideoFrameType frameType = VideoFrameType.valueOf(nibbler.nibble(3));
+            enhanced = ByteNibbler.isBitSet(flg, 15);
+            // for frame type we need get 3 bits
+            int ft = ((flg & 0b01110000) >> 4);
+            VideoFrameType frameType = VideoFrameType.valueOf(ft);
             // create mark for frame data
             data.mark();
             // check for keyframe or other non-interframe
-            if ((flg & 0xf0) == 0x10 || (enhanced && frameType != VideoFrameType.INTERFRAME)) {
-                //if (isDebug) {
-                log.info("{} - HEVC type: {}", frameType, hvcType);
-                //}
-                switch (hvcType) {
-                    case 1: // keyframe
-                        //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
-                        // get the time stamp and compare with the current value
-                        if (timestamp != keyframeTimestamp) {
-                            //log.trace("New keyframe");
-                            // new keyframe
-                            keyframeTimestamp = timestamp;
-                            // if its a new keyframe, clear keyframe and interframe collections
+            if ((flg & IoConstants.MASK_VIDEO_FRAMETYPE) == 0x10 || (enhanced && frameType != VideoFrameType.INTERFRAME)) {
+                if (isDebug) {
+                    log.debug("{} - HEVC type: {}", frameType, hvcType);
+                }
+                if (enhanced) {
+                    switch (frameType) {
+                        case KEYFRAME: // keyframe
+                            //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
+                            // get the time stamp and compare with the current value
+                            if (timestamp != keyframeTimestamp) {
+                                //log.trace("New keyframe");
+                                // new keyframe
+                                keyframeTimestamp = timestamp;
+                                // if its a new keyframe, clear keyframe and interframe collections
+                                softReset();
+                            }
+                            // store keyframe
+                            keyframes.add(new FrameData(data));
+                            break;
+                        case RESERVED: // configuration
+                            if (isDebug) {
+                                log.debug("Decoder configuration");
+                            }
+                            // Store HEVCDecoderConfigurationRecord data
+                            if (decoderConfiguration == null) {
+                                decoderConfiguration = new FrameData(data);
+                            } else {
+                                decoderConfiguration.setData(data);
+                            }
                             softReset();
-                        }
-                        // store keyframe
-                        keyframes.add(new FrameData(data));
-                        break;
-                    case 0: // configuration
-                        if (isDebug) {
-                            log.debug("Decoder configuration");
-                        }
-                        // Store HEVCDecoderConfigurationRecord data
-                        if (decoderConfiguration == null) {
-                            decoderConfiguration = new FrameData(data);
-                        } else {
-                            decoderConfiguration.setData(data);
-                        }
-                        softReset();
-                        break;
+                            break;
+                    }
+                } else {
+                    switch (hvcType) {
+                        case 1: // keyframe
+                            //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
+                            // get the time stamp and compare with the current value
+                            if (timestamp != keyframeTimestamp) {
+                                //log.trace("New keyframe");
+                                // new keyframe
+                                keyframeTimestamp = timestamp;
+                                // if its a new keyframe, clear keyframe and interframe collections
+                                softReset();
+                            }
+                            // store keyframe
+                            keyframes.add(new FrameData(data));
+                            break;
+                        case 0: // configuration
+                            if (isDebug) {
+                                log.debug("Decoder configuration");
+                            }
+                            // Store AVCDecoderConfigurationRecord data
+                            if (decoderConfiguration == null) {
+                                decoderConfiguration = new FrameData(data);
+                            } else {
+                                decoderConfiguration.setData(data);
+                            }
+                            // new configuration, clear keyframe and interframe collections
+                            softReset();
+                            break;
+                    }
                 }
                 //log.trace("Keyframes: {}", keyframes.size());
             } else if (bufferInterframes) {
