@@ -116,11 +116,14 @@ public class AbstractVideo implements IVideoStreamCodec {
             ByteNibbler nibbler = new ByteNibbler(flg);
             // check for enhanced codec handling first
             enhanced = nibbler.nibble(1) == 1;
+            // get video frame type
+            VideoFrameType frameType = VideoFrameType.valueOf(nibbler.nibble(3));
             // the codec id for enhanced is handled via addData
             if (enhanced) {
-                log.debug("Codec is enhanced, codec id is determined via subsequent addData calls");
+                log.info("Codec is enhanced, codec id is determined via subsequent addData calls, frame type: {}", frameType);
                 result = true;
             } else {
+                log.info("Codec is not enhanced, codec id: {} frame type: {}", codec.getId(), frameType);
                 result = ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId());
             }
         }

@@ -109,13 +109,13 @@ public class ConversionUtils {
             return source;
         }
         final Class<?> sourceClass = source.getClass();
-        log.debug("Source: {} target: {}", sourceClass, target);
+        log.trace("Source: {} target: {}", sourceClass, target);
         if (target.isInstance(source) || target.isAssignableFrom(sourceClass)) {
-            log.debug("Source: {} is already an instance of: {}", source, target);
+            log.trace("Source: {} is already an instance of: {}", source, target);
             return source;
         }
         if (target.isArray()) {
-            log.debug("Source: {} to target array: {}", source, target);
+            log.trace("Source: {} to target array: {}", source, target);
             return convertToArray(source, target);
         }
         if (target.equals(String.class)) {
@@ -134,10 +134,10 @@ public class ConversionUtils {
             return convertMapToList((LinkedHashMap<?, ?>) source);
         } else if (sourceClass.isArray()) {
             if (List.class.isAssignableFrom(target)) {
-                log.debug("Source: {} to target list: {}", source, target);
+                log.trace("Source: {} to target list: {}", source, target);
                 return Arrays.stream((Object[]) source).collect(Collectors.toCollection(ArrayList::new));
             } else if (Set.class.isAssignableFrom(target)) {
-                log.debug("Source: {} to target set: {}", source, target);
+                log.trace("Source: {} to target set: {}", source, target);
                 // special handling for sets when the source is a list
                 if (source instanceof List) {
                     return ((List<?>) source).stream().collect(Collectors.toCollection(HashSet::new));

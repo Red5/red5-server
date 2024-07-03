@@ -10,6 +10,7 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.util.ByteNibbler;
 
 /**
  * Red5 video codec for the AVC (h264) video format. Stores DecoderConfigurationRecord and last keyframe.
@@ -50,16 +51,22 @@ public class AVCVideo extends AbstractVideo {
             // mark
             data.mark();
             // get frame type and AVC type
-            byte frameType = data.get();
+            byte flg = data.get();
             byte avcType = data.get();
             // reset before reading into a frame farther down
             data.reset();
+            // determine if we've got an enhanced codec
+            ByteNibbler nibbler = new ByteNibbler(flg);
+            // check for enhanced codec handling first
+            boolean enhanced = nibbler.nibble(1) == 1;
+            // get video frame type
+            VideoFrameType frameType = VideoFrameType.valueOf(nibbler.nibble(3));
             // create mark for frame data
             data.mark();
-            // check for keyframe
-            if ((frameType & 0xf0) == FLV_FRAME_KEY) {
+            // check for keyframe or other non-interframe
+            if ((flg & 0xf0) == 0x10 || (enhanced && frameType != VideoFrameType.INTERFRAME)) {
                 if (isDebug) {
-                    log.debug("Keyframe - AVC type: {}", avcType);
+                    log.debug("{} - AVC type: {}", frameType, avcType);
                 }
                 switch (avcType) {
                     case 1: // keyframe

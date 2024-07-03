@@ -10,6 +10,7 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.util.ByteNibbler;
 
 /**
  * Red5 video codec for the HEVC (h265) video format. Stores DecoderConfigurationRecord and last keyframe.
@@ -49,17 +50,23 @@ public class HEVCVideo extends AbstractVideo {
             // mark
             data.mark();
             // get frame type and HEVC type
-            byte frameType = data.get();
+            byte flg = data.get();
             byte hvcType = data.get();
             // reset before reading into a frame farther down
             data.reset();
+            // determine if we've got an enhanced codec
+            ByteNibbler nibbler = new ByteNibbler(flg);
+            // check for enhanced codec handling first
+            boolean enhanced = nibbler.nibble(1) == 1;
+            // get video frame type
+            VideoFrameType frameType = VideoFrameType.valueOf(nibbler.nibble(3));
             // create mark for frame data
             data.mark();
-            // check for keyframe
-            if ((frameType & 0xf0) == FLV_FRAME_KEY) {
-                if (isDebug) {
-                    log.debug("Keyframe - HEVC type: {}", hvcType);
-                }
+            // check for keyframe or other non-interframe
+            if ((flg & 0xf0) == 0x10 || (enhanced && frameType != VideoFrameType.INTERFRAME)) {
+                //if (isDebug) {
+                log.info("{} - HEVC type: {}", frameType, hvcType);
+                //}
                 switch (hvcType) {
                     case 1: // keyframe
                         //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
@@ -89,7 +96,7 @@ public class HEVCVideo extends AbstractVideo {
                 }
                 //log.trace("Keyframes: {}", keyframes.size());
             } else if (bufferInterframes) {
-                //log.trace("Interframe");
+                log.info("Interframe");
                 if (isDebug) {
                     log.debug("Interframe - HEVC type: {}", hvcType);
                 }

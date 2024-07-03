@@ -104,7 +104,7 @@ public class SorensonVideo extends AbstractVideo {
                     blockSize = dataCount;
                     blockData = new byte[blockSize];
                 }
-                data.get(blockData, 0, dataCount);   
+                data.get(blockData, 0, dataCount);
             }
             data.reset();
             result = true;
