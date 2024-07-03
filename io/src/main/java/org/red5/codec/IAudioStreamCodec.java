@@ -69,6 +69,15 @@ public interface IAudioStreamCodec {
     }
 
     /**
+     * Returns true if the codec is enhanced.
+     *
+     * @return true if enhanced and false otherwise
+     */
+    default boolean isEnhanced() {
+        return false;
+    }
+
+    /**
      * Returns the multitrack type for the codec.
      *
      * @return the multitrack type

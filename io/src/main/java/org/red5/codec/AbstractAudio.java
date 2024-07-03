@@ -17,6 +17,9 @@ public class AbstractAudio implements IAudioStreamCodec {
 
     protected AudioCodec codec;
 
+    // whether or not to employ enhanced codec handling
+    protected boolean enhanced;
+
     protected AvMultitrackType multitrackType;
 
     protected AudioPacketType packetType;
@@ -111,6 +114,11 @@ public class AbstractAudio implements IAudioStreamCodec {
     @Override
     public IoBuffer getDecoderConfiguration() {
         return null;
+    }
+
+    @Override
+    public boolean isEnhanced() {
+        return enhanced;
     }
 
     @Override

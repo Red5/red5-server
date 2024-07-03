@@ -31,6 +31,7 @@ public class ExtendedAudio extends AbstractAudio {
 
     {
         codec = AudioCodec.ExHeader;
+        enhanced = true;
     }
 
     /**

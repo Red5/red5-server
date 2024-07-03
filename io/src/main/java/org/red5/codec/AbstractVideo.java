@@ -23,6 +23,9 @@ public class AbstractVideo implements IVideoStreamCodec {
 
     protected VideoCodec codec;
 
+    // whether or not to employ enhanced codec handling
+    protected boolean enhanced;
+
     protected AvMultitrackType multitrackType;
 
     /** Current timestamp for the stored keyframe */
@@ -47,9 +50,6 @@ public class AbstractVideo implements IVideoStreamCodec {
      * Whether or not to buffer interframes. Default is false.
      */
     protected boolean bufferInterframes;
-
-    // whether or not to employ enhanced codec handling
-    protected boolean enhanced;
 
     // tracks for multitrack video, if size = 1, theres only one track
     protected ConcurrentMap<Integer, IVideoStreamCodec> tracks = new ConcurrentSkipListMap<>();
@@ -347,6 +347,11 @@ public class AbstractVideo implements IVideoStreamCodec {
         if (bufferInterframes && interframes == null) {
             interframes = new CopyOnWriteArrayList<>();
         }
+    }
+
+    @Override
+    public boolean isEnhanced() {
+        return enhanced;
     }
 
     @Override

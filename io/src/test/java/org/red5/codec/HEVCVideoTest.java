@@ -37,9 +37,26 @@ public class HEVCVideoTest {
 
         HEVCVideo video = new HEVCVideo();
         assertTrue(video.canHandleData(data));
+        assertFalse(video.isEnhanced());
 
         assertFalse(video.canHandleData(badData));
         log.info("testCanHandleData end\n");
+    }
+
+    @Test
+    public void testCanHandleDataEnhanced() {
+        log.info("testCanHandleDataEnhanced");
+        IoBuffer data = IoBuffer.allocate(8);
+        // first bit being set indicates enhanced
+        byte enhancedByte = (byte) 0b10011100;
+        log.info("enhancedByte: {}", Integer.toHexString(enhancedByte));
+        //data.put(enhancedByte);
+        data.put((byte) 0x9c);
+        data.flip();
+
+        HEVCVideo video = new HEVCVideo();
+        assertTrue(video.canHandleData(data));
+        assertTrue(video.isEnhanced());
     }
 
     @Test
