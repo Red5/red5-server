@@ -66,48 +66,50 @@ public class SorensonVideo extends AbstractVideo {
     /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data) {
-        if (data.limit() == 0) {
-            return true;
-        }
-        if (!this.canHandleData(data)) {
-            return false;
-        }
-        byte first = data.get();
-        //log.trace("First byte: {}", HexDump.toHexString(first));
-        data.rewind();
-        // get frame type
-        VideoFrameType frame = VideoFrameType.valueOf((first & IoConstants.MASK_VIDEO_FRAMETYPE) >> 4);
-        if (VideoFrameType.KEYFRAME != frame) {
-            // Not a keyframe
-            try {
-                int lastInterframe = numInterframes.getAndIncrement();
-                if (VideoFrameType.DISPOSABLE != frame) {
-                    log.trace("Buffering interframe #{}", lastInterframe);
-                    if (lastInterframe < interframes.size()) {
-                        interframes.get(lastInterframe).setData(data);
+        log.info("addData remaining: {} limit: {}", data.remaining(), data.limit());
+        boolean result = false;
+        if (data.hasRemaining()) {
+            // mark
+            data.mark();
+            byte first = data.get();
+            //log.trace("First byte: {}", HexDump.toHexString(first));
+            data.reset();
+            // create mark for frame data
+            data.mark();
+            // get frame type
+            VideoFrameType frame = VideoFrameType.valueOf((first & IoConstants.MASK_VIDEO_FRAMETYPE) >> 4);
+            if (VideoFrameType.KEYFRAME != frame) {
+                // Not a keyframe
+                try {
+                    int lastInterframe = numInterframes.getAndIncrement();
+                    if (VideoFrameType.DISPOSABLE != frame) {
+                        log.trace("Buffering interframe #{}", lastInterframe);
+                        if (lastInterframe < interframes.size()) {
+                            interframes.get(lastInterframe).setData(data);
+                        } else {
+                            interframes.add(new FrameData(data));
+                        }
                     } else {
-                        interframes.add(new FrameData(data));
+                        numInterframes.set(lastInterframe);
                     }
-                } else {
-                    numInterframes.set(lastInterframe);
+                } catch (Throwable e) {
+                    log.error("Failed to buffer interframe", e);
                 }
-            } catch (Throwable e) {
-                log.error("Failed to buffer interframe", e);
+            } else {
+                numInterframes.set(0);
+                interframes.clear();
+                // Store last keyframe
+                dataCount = data.remaining();
+                if (blockSize < dataCount) {
+                    blockSize = dataCount;
+                    blockData = new byte[blockSize];
+                }
+                data.get(blockData, 0, dataCount);   
             }
-            data.rewind();
-            return true;
+            data.reset();
+            result = true;
         }
-        numInterframes.set(0);
-        interframes.clear();
-        // Store last keyframe
-        dataCount = data.limit();
-        if (blockSize < dataCount) {
-            blockSize = dataCount;
-            blockData = new byte[blockSize];
-        }
-        data.get(blockData, 0, dataCount);
-        data.rewind();
-        return true;
+        return result;
     }
 
     /** {@inheritDoc} */
@@ -116,7 +118,7 @@ public class SorensonVideo extends AbstractVideo {
         if (dataCount > 0) {
             IoBuffer result = IoBuffer.allocate(dataCount);
             result.put(blockData, 0, dataCount);
-            result.rewind();
+            result.flip();
             return result;
         }
         return null;

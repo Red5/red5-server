@@ -24,10 +24,8 @@ public class HEVCVideo extends AbstractVideo {
      */
     private FrameData decoderConfiguration;
 
-    /** Constructs a new HEVCVideo. */
-    public HEVCVideo() {
+    {
         codec = VideoCodec.HEVC;
-        this.reset();
     }
 
     /** {@inheritDoc} */

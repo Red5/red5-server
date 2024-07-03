@@ -142,7 +142,7 @@ public interface IVideoStreamCodec {
             if (frame != null) {
                 frame = null;
             }
-            frame = new byte[data.limit()];
+            frame = new byte[data.remaining()];
             data.get(frame);
         }
 

@@ -330,7 +330,9 @@ public class AbstractVideo implements IVideoStreamCodec {
     /** {@inheritDoc} */
     @Override
     public FrameData getInterframe(int index) {
-        if (index < numInterframes.get()) {
+        int interframeCount = numInterframes.get();
+        log.trace("Interframe count: {} index: {}", interframeCount, index);
+        if (interframes != null && index < interframeCount) {
             return interframes.get(index);
         }
         return null;
@@ -342,6 +344,9 @@ public class AbstractVideo implements IVideoStreamCodec {
 
     public void setBufferInterframes(boolean bufferInterframes) {
         this.bufferInterframes = bufferInterframes;
+        if (bufferInterframes && interframes == null) {
+            interframes = new CopyOnWriteArrayList<>();
+        }
     }
 
     @Override

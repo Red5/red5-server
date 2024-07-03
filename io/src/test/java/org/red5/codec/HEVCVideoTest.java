@@ -8,6 +8,7 @@
 package org.red5.codec;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -19,34 +20,101 @@ import org.red5.codec.IVideoStreamCodec.FrameData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SorensonVideoTest {
+public class HEVCVideoTest {
 
-    private static Logger log = LoggerFactory.getLogger(SorensonVideoTest.class);
-
-    private static byte keyFrameType = (byte) 0x12;
-
-    private static byte interFrameType = (byte) 0x22;
-
-    @SuppressWarnings("unused")
-    private static byte disposableFrameType = (byte) 0x32;
+    private static Logger log = LoggerFactory.getLogger(HEVCVideoTest.class);
 
     @Test
-    public void testRealisticFlow() {
-        log.info("testRealisticFlow");
+    public void testCanHandleData() {
+        log.info("testCanHandleData");
+        IoBuffer data = IoBuffer.allocate(8);
+        data.put((byte) 0x1c);
+        data.flip();
+        //
+        IoBuffer badData = IoBuffer.allocate(8);
+        badData.put((byte) 0x44);
+        badData.flip();
 
+        HEVCVideo video = new HEVCVideo();
+        assertTrue(video.canHandleData(data));
+
+        assertFalse(video.canHandleData(badData));
+        log.info("testCanHandleData end\n");
+    }
+
+    @Test
+    public void testSimpleFlow() {
+        log.info("testSimpleFlow");
         IoBuffer data = IoBuffer.allocate(128);
-        data.put((byte) keyFrameType);
+        data.put((byte) 0x1c);
+        data.put((byte) 0x01);
         data.put(RandomStringUtils.random(24).getBytes());
         data.flip();
 
-        SorensonVideo video = new SorensonVideo();
-        video.setBufferInterframes(true);
+        HEVCVideo video = new HEVCVideo();
         assertTrue(video.canHandleData(data));
         assertTrue(video.addData(data));
         for (int i = 0; i < 10; i++) {
             // interframe
             IoBuffer inter = IoBuffer.allocate(128);
-            inter.put((byte) interFrameType);
+            inter.put((byte) 0x27);
+            inter.put((byte) 0x01);
+            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.flip();
+            // add it
+            assertTrue(video.addData(inter));
+        }
+        log.info("testSimpleFlow end\n");
+    }
+
+    @Test
+    public void testSimpleFlowNoInterframeBuffer() {
+        log.info("testSimpleFlowNoInterframeBuffer");
+        IoBuffer data = IoBuffer.allocate(128);
+        data.put((byte) 0x1c);
+        data.put((byte) 0x01);
+        data.put(RandomStringUtils.random(24).getBytes());
+        data.flip();
+
+        HEVCVideo video = new HEVCVideo();
+        video.setBufferInterframes(false);
+        assertTrue(video.canHandleData(data));
+        assertTrue(video.addData(data));
+        for (int i = 0; i < 10; i++) {
+            // interframe
+            IoBuffer inter = IoBuffer.allocate(128);
+            inter.put((byte) 0x2c);
+            inter.put((byte) 0x01);
+            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.flip();
+            // add it
+            assertTrue(video.addData(inter));
+        }
+        assertTrue(video.getNumInterframes() == 0);
+        log.info("testSimpleFlowNoInterframeBuffer end\n");
+    }
+
+    @Test
+    public void testRealisticFlow() {
+        log.info("testRealisticFlow");
+        IoBuffer data = IoBuffer.allocate(128);
+        data.put((byte) 0x1c);
+        data.put((byte) 0x01);
+        data.put(RandomStringUtils.random(24).getBytes());
+        data.flip();
+
+        HEVCVideo video = new HEVCVideo();
+        assertTrue(video.canHandleData(data));
+        assertTrue(video.addData(data));
+        if (!video.isBufferInterframes()) {
+            log.warn("Skipping interframe test, interframe buffering is disabled");
+            return;
+        }
+        for (int i = 0; i < 10; i++) {
+            // interframe
+            IoBuffer inter = IoBuffer.allocate(128);
+            inter.put((byte) 0x2c);
+            inter.put((byte) 0x01);
             inter.putInt(i); // store our counter for testing
             inter.put(RandomStringUtils.random(24).getBytes());
             inter.flip();
@@ -62,8 +130,8 @@ public class SorensonVideoTest {
             fd = video.getInterframe(i);
             assertNotNull(fd);
             IoBuffer buf = fd.getFrame();
-            buf.skip(1);
-            //assertEquals(buf.getInt(), i);
+            buf.skip(2);
+            assertEquals(buf.getInt(), i);
         }
         // non-existent
         fd = video.getInterframe(10);
@@ -73,7 +141,8 @@ public class SorensonVideoTest {
         for (int i = 0; i < 4; i++) {
             // interframe
             IoBuffer inter = IoBuffer.allocate(128);
-            inter.put((byte) interFrameType);
+            inter.put((byte) 0x2c);
+            inter.put((byte) 0x01);
             inter.putInt(i + 10); // store our counter for testing
             inter.put(RandomStringUtils.random(24).getBytes());
             inter.flip();
@@ -86,7 +155,7 @@ public class SorensonVideoTest {
             fd = video.getInterframe(i);
             assertNotNull(fd);
             IoBuffer buf = fd.getFrame();
-            buf.skip(1);
+            buf.skip(2);
             assertEquals(buf.getInt(), i + 10);
         }
         // non-existent
@@ -94,4 +163,5 @@ public class SorensonVideoTest {
         assertNull(fd);
         log.info("testRealisticFlow end\n");
     }
+
 }
