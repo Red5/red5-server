@@ -150,6 +150,10 @@ public interface IVideoStreamCodec {
             return frame == null ? null : IoBuffer.wrap(frame).asReadOnlyBuffer();
         }
 
+        public byte[] getFrameBytes() {
+            return frame;
+        }
+
     }
 
     /**

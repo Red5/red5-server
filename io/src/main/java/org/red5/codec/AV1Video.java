@@ -7,7 +7,11 @@
 
 package org.red5.codec;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.io.IoConstants;
+import org.red5.util.ByteNibbler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,104 +55,79 @@ public class AV1Video extends AbstractVideo {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data, int timestamp) {
-        //log.trace("addData timestamp: {} remaining: {}", timestamp, data.remaining());
-        return addData(data, timestamp, true);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean addData(IoBuffer data, int timestamp, boolean amf) {
-        log.trace("addData timestamp: {} remaining: {} amf? {}", timestamp, data.remaining(), amf);
+        log.trace("{} addData timestamp: {} remaining: {}", codec.name(), timestamp, data.remaining());
+        boolean result = false;
         if (data.hasRemaining()) {
-            // mark starting position
-            int start = data.position();
-            // are we amf?
-            if (!amf) {
-                int remaining = data.remaining();
-                // if we're not amf, figure out how to proceed based on data contents
-                if (remaining > 7) {
-                    // grab the first 8 bytes
-                    byte[] peek = new byte[8];
-                    data.get(peek);
-                    // int sz = getDesciptorSize(peek,0,peek.length);
-                    boolean isKey = isKeyFrame(peek, 0);
-                    // jump back to the starting pos
-                    data.position(start);
-                    // slice-out the existing data
-                    IoBuffer slice = data.getSlice(start, remaining);
-                    log.info("Data start: {} post-slice: {}", start, data.position());
-                    // expand the data by two to hold the amf markers
-                    data.expand(remaining + 2);
-                    // prefix the data with amf markers (two bytes)
-                    if (isKey) {
-                        // AV1 keyframe
-                        data.put(AV1_KEYFRAME_PREFIX);
-                    } else {
-                        // AV1 non-keyframe
-                        data.put(AV1_FRAME_PREFIX);
-                    }
-                    // drop the slice in behind the prefix
-                    data.put(slice);
-                    // flip it
-                    data.flip();
-                    // reset start (which technically will be the same position)
-                    start = data.position();
-                } else {
-                    log.warn("Remaining AV1 content was less than expected: {}", remaining);
+            // mark
+            data.mark();
+            // get flags
+            byte flg = data.get();
+            // reset before reading into a frame farther down
+            data.reset();
+            // determine if we've got an enhanced codec
+            enhanced = ByteNibbler.isBitSet(flg, 15);
+            // for frame type we need get 3 bits
+            int ft = ((flg & 0b01110000) >> 4);
+            VideoFrameType frameType = VideoFrameType.valueOf(ft);
+            // create mark for frame data
+            data.mark();
+            // check for keyframe or other non-interframe
+            if ((flg & IoConstants.MASK_VIDEO_FRAMETYPE) == 0x10 || (enhanced && frameType != VideoFrameType.INTERFRAME)) {
+                if (isDebug) {
+                    log.debug("{} - AV1", frameType);
                 }
-                // jump back to the starting pos
-                data.position(start);
-            }
-            // get frame type (codec + type)
-            byte frameType = data.get();
-            // get sub frame / sequence type (config, keyframe, interframe)
-            byte subFrameType = data.get();
-            if ((frameType & 0x0f) == VideoCodec.AV1.getId()) {
-                // check for keyframe (we're not storing non-keyframes here)
-                if ((frameType & 0xf0) == FLV_FRAME_KEY) {
-                    //log.trace("Key frame");
-                    if (log.isDebugEnabled()) {
-                        log.debug("Keyframe - AV1 type: {}", subFrameType);
-                    }
-                    // rewind
-                    data.rewind();
-                    switch (subFrameType) {
-                        case 1: // keyframe
+                if (enhanced) {
+                    switch (frameType) {
+                        // XXX implement this to look at the kf flag in AV1 data
+                        case KEYFRAME: // keyframe
                             //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
                             // get the time stamp and compare with the current value
                             if (timestamp != keyframeTimestamp) {
                                 //log.trace("New keyframe");
                                 // new keyframe
                                 keyframeTimestamp = timestamp;
-                                keyframes.clear();
+                                // if its a new keyframe, clear keyframe and interframe collections
+                                softReset();
                             }
                             // store keyframe
                             keyframes.add(new FrameData(data));
                             break;
-                        case 0: // no decoder configuration for vp8
-                            //log.trace("Decoder configuration");
-                            break;
                     }
-                    //log.trace("Keyframes: {}", keyframes.size());
+                } else {
+                    // no non-enhanced support att
                 }
-            } else {
-                // not AV1 data
-                log.debug("Non-AV1 data, rejecting");
-                // go back to where we started
-                data.position(start);
-                return false;
+                //log.trace("Keyframes: {}", keyframes.size());
+            } else if (bufferInterframes) {
+                if (isDebug) {
+                    log.debug("Interframe - AV1");
+                }
+                if (interframes == null) {
+                    interframes = new CopyOnWriteArrayList<>();
+                }
+                try {
+                    int lastInterframe = numInterframes.getAndIncrement();
+                    //log.trace("Buffering interframe #{}", lastInterframe);
+                    if (lastInterframe < interframes.size()) {
+                        interframes.get(lastInterframe).setData(data);
+                    } else {
+                        interframes.add(new FrameData(data));
+                    }
+                } catch (Throwable e) {
+                    log.warn("Failed to buffer interframe", e);
+                }
+                //log.trace("Interframes: {}", interframes.size());
             }
-            // go back to where we started
-            data.position(start);
+            // we handled the data
+            result = true;
+            // go back to where we started if we're marked
+            if (data.markValue() > 0) {
+                data.reset();
+            }
         }
-        return true;
-    }
-
-    private boolean isKeyFrame(byte[] data, int index) {
-        // XXX implement this to look at the kf flag in AV1 data
-        return true;
+        return result;
     }
 
     /*

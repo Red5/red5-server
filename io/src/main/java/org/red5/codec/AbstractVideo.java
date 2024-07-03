@@ -266,17 +266,25 @@ public class AbstractVideo implements IVideoStreamCodec {
                             trackCodec.addData(data);
                             break;
                         case MPEG2TSSequenceStart: // start of MPEG2TS sequence
-                            if (VideoCodec.AV1.getFourcc() == trackCodec.getCodec().getFourcc()) {
+                            // track codec is null if we're not multitrack or command frame
+                            if (trackCodec == null) {
                                 // set mark first
                                 data.mark();
-                                if (trackCodec.canHandleData(data)) {
-                                    // reset the mark
-                                    data.reset();
-                                    // add data has its own mark and reset
-                                    trackCodec.addData(data);
+                                Integer fourcc = data.getInt();
+                                log.debug("Fourcc: {}", fourcc);
+                                if (!tracks.containsKey(fourcc)) {
+                                    // create a new codec instance
+                                    trackCodec = VideoCodec.valueOfByFourCc(fourcc).newInstance();
+                                    tracks.put(fourcc, trackCodec);
+                                } else {
+                                    trackCodec = tracks.get(fourcc);
                                 }
-                                // reset the mark just in-case the codec didn't handle the data
+                                log.debug("Track codec: {}", trackCodec);
                                 data.reset();
+                            }
+                            if (VideoCodec.AV1.getFourcc() == trackCodec.getCodec().getFourcc()) {
+                                // add data has its own mark and reset
+                                trackCodec.addData(data);
                             }
                             break;
                         case CodedFramesX: // pass coded data without comp time offset
