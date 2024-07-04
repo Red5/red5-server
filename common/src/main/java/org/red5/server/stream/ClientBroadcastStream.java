@@ -310,8 +310,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             } else if (codecInfo != null) {
                                 audioStreamCodec = codecInfo.getAudioCodec();
                             }
-                            if (audioStreamCodec != null) {
-                                audioStreamCodec.addData(buf);
+                            if (audioStreamCodec != null && audioStreamCodec.addData(buf)) {
+                                //log.debug("Audio codec: {}", audioStreamCodec.getName());
+                                ((AudioData) rtmpEvent).setAudioCodecReference(audioStreamCodec);
                             }
                             if (info != null) {
                                 info.setHasAudio(true);
@@ -329,8 +330,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             } else if (codecInfo != null) {
                                 videoStreamCodec = codecInfo.getVideoCodec();
                             }
-                            if (videoStreamCodec != null) {
-                                videoStreamCodec.addData(buf, eventTime);
+                            if (videoStreamCodec != null && videoStreamCodec.addData(buf, eventTime)) {
+                                //log.debug("Video codec: {}", videoStreamCodec.getName());
+                                ((VideoData) rtmpEvent).setVideoCodecReference(videoStreamCodec);
                             }
                             if (info != null) {
                                 info.setHasVideo(true);

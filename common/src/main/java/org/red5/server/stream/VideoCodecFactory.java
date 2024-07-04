@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory for video codecs. Creates and returns video codecs
+ * Factory for video codecs. Creates and returns video codecs.
  *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
@@ -52,18 +52,16 @@ public class VideoCodecFactory {
             log.debug("Flag: {}", Integer.toBinaryString(c & 0xff));
             boolean enhanced = ByteNibbler.isBitSet(c, 15);
             if (enhanced) {
-                log.debug("Enhanced codec handling");
+                log.debug("Enhanced codec handling; pos: {}", data.position());
                 AbstractVideo absv = new AbstractVideo();
-                data.mark();
                 absv.addData(data, 0);
-                data.reset();
                 codec = absv.getTrackCodec(0);
             } else {
                 int codecId = (c & IoConstants.MASK_VIDEO_CODEC);
                 codec = VideoCodec.valueOfById(codecId);
             }
             if (codec != null) {
-                log.debug("Codec found: {}", codec);
+                log.debug("Codec found: {} pos: {}", codec, data.position());
                 // this will be reset if the codec cannot handle the data
                 result = codec.newInstance();
                 // add the data to the codec

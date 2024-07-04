@@ -60,7 +60,7 @@ public class HEVCVideo extends AbstractVideo {
             enhanced = ByteNibbler.isBitSet(flg, 15);
             // for frame type we need get 3 bits
             int ft = ((flg & 0b01110000) >> 4);
-            VideoFrameType frameType = VideoFrameType.valueOf(ft);
+            frameType = VideoFrameType.valueOf(ft);
             // create mark for frame data
             data.mark();
             // check for keyframe or other non-interframe
@@ -69,6 +69,7 @@ public class HEVCVideo extends AbstractVideo {
                     log.debug("{} - HEVC type: {}", frameType, hvcType);
                 }
                 if (enhanced) {
+                    packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
                     switch (frameType) {
                         case KEYFRAME: // keyframe
                             //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
@@ -128,7 +129,6 @@ public class HEVCVideo extends AbstractVideo {
                 }
                 //log.trace("Keyframes: {}", keyframes.size());
             } else if (bufferInterframes) {
-                log.info("Interframe");
                 if (isDebug) {
                     log.debug("Interframe - HEVC type: {}", hvcType);
                 }

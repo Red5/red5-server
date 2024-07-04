@@ -61,7 +61,7 @@ public class AVCVideo extends AbstractVideo {
             enhanced = ByteNibbler.isBitSet(flg, 15); // network order so its rtl
             // for frame type we need get 3 bits
             int ft = ((flg & 0b01110000) >> 4);
-            VideoFrameType frameType = VideoFrameType.valueOf(ft);
+            frameType = VideoFrameType.valueOf(ft);
             // create mark for frame data
             data.mark();
             // check for keyframe or other non-interframe
@@ -88,7 +88,7 @@ public class AVCVideo extends AbstractVideo {
                             if (isDebug) {
                                 log.debug("Decoder configuration");
                             }
-                            // Store HEVCDecoderConfigurationRecord data
+                            // Store AVCDecoderConfigurationRecord data
                             if (decoderConfiguration == null) {
                                 decoderConfiguration = new FrameData(data);
                             } else {

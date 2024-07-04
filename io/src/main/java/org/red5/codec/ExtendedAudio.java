@@ -97,24 +97,14 @@ public class ExtendedAudio extends AbstractAudio {
                     packetType = AudioPacketType.valueOf(nibbler.nibble(4));
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
-                        Integer fourcc = data.getInt();
-                        if (!tracks.containsKey(fourcc)) {
-                            // create a new codec instance
-                            trackCodec = AudioCodec.valueOfByFourCc(fourcc).newInstance();
-                            tracks.put(fourcc, trackCodec);
-                        } else {
-                            trackCodec = tracks.get(fourcc);
+                        if (trackCodec == null) {
+                            trackCodec = getTrackCodec(data);
                         }
                     }
                 } else {
                     // The tracks are encoded with the same codec identified by the FOURCC
-                    Integer fourcc = data.getInt();
-                    if (!tracks.containsKey(fourcc)) {
-                        // create a new codec instance
-                        trackCodec = AudioCodec.valueOfByFourCc(fourcc).newInstance();
-                        tracks.put(fourcc, trackCodec);
-                    } else {
-                        trackCodec = tracks.get(fourcc);
+                    if (trackCodec == null) {
+                        trackCodec = getTrackCodec(data);
                     }
                 }
             }
@@ -125,13 +115,8 @@ public class ExtendedAudio extends AbstractAudio {
                     // handle tracks that each have their own codec
                     if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with their own codec identified by the FOURCC
-                        Integer fourcc = data.getInt();
-                        if (!tracks.containsKey(fourcc)) {
-                            // create a new codec instance
-                            trackCodec = AudioCodec.valueOfByFourCc(fourcc).newInstance();
-                            tracks.put(fourcc, trackCodec);
-                        } else {
-                            trackCodec = tracks.get(fourcc);
+                        if (trackCodec == null) {
+                            trackCodec = getTrackCodec(data);
                         }
                     }
                     // track ordering
@@ -155,11 +140,11 @@ public class ExtendedAudio extends AbstractAudio {
                     }
                 }
                 switch (packetType) {
-                    case SequenceStart: // start of sequence
                     case CodedFrames: // pass coded data
+                        if (trackCodec == null) {
+                            trackCodec = getTrackCodec(data);
+                        }
                         result = trackCodec.addData(data);
-                        break;
-                    case SequenceEnd: // end of sequence
                         break;
                     case MultichannelConfig:
                         // Specify a speaker for a channel as it appears in the bitstream. This is needed if the codec is
@@ -184,6 +169,10 @@ public class ExtendedAudio extends AbstractAudio {
                             audioChannelFlags = (data.get() & 0xff) << 24 | (data.get() & 0xff) << 16 | (data.get() & 0xff) << 8 | data.get() & 0xff;
                         }
                         break;
+                    case SequenceStart: // start of sequence
+                        break;
+                    case SequenceEnd: // end of sequence
+                        break;
                 }
                 // check for multiple tracks
                 if (multitrack && trackSize > 0) {
@@ -199,6 +188,26 @@ public class ExtendedAudio extends AbstractAudio {
             data.reset();
         }
         return result;
+    }
+
+    /**
+    * Get the track codec for the given data.
+    *
+    * @param data
+    * @return Audio codec
+    */
+    protected IAudioStreamCodec getTrackCodec(IoBuffer data) {
+        Integer fourcc = data.getInt();
+        log.debug("Fourcc: {} pos: {}", fourcc, data.position());
+        if (!tracks.containsKey(fourcc)) {
+            // create a new codec instance
+            trackCodec = AudioCodec.valueOfByFourCc(fourcc).newInstance();
+            tracks.put(fourcc, trackCodec);
+        } else {
+            trackCodec = tracks.get(fourcc);
+        }
+        log.debug("Track codec: {}", trackCodec);
+        return trackCodec;
     }
 
 }

@@ -16,8 +16,8 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.codec.AudioCodec;
-import org.red5.io.ITag;
+import org.red5.codec.AudioPacketType;
+import org.red5.codec.IAudioStreamCodec;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.IStreamData;
 
@@ -35,12 +35,7 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     /**
      * Audio codec
      */
-    protected AudioCodec codec;
-
-    /**
-     * True if this is configuration data and false otherwise
-     */
-    protected boolean config;
+    protected IAudioStreamCodec codec;
 
     /** Constructs a new AudioData. */
     public AudioData() {
@@ -79,25 +74,11 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
         return dataType;
     }
 
-    public void setDataType(byte dataType) {
-        this.dataType = dataType;
-    }
-
-    /** {@inheritDoc} */
     public IoBuffer getData() {
         return data;
     }
 
     public void setData(IoBuffer data) {
-        if (data != null && data.limit() > 0) {
-            data.mark();
-            codec = AudioCodec.valueOfById(((data.get(0) & 0xff) & ITag.MASK_SOUND_FORMAT) >> 4);
-            // determine by codec whether or not config data is included
-            if (AudioCodec.getConfigured().contains(codec)) {
-                config = (data.get() == 0);
-            }
-            data.reset();
-        }
         this.data = data;
     }
 
@@ -105,12 +86,17 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
         setData(IoBuffer.wrap(data));
     }
 
+    @Override
+    public void setAudioCodecReference(IAudioStreamCodec codec) {
+        this.codec = codec;
+    }
+
     public int getCodecId() {
-        return codec.getId();
+        return codec != null ? codec.getCodec().getId() : -1;
     }
 
     public boolean isConfig() {
-        return config;
+        return (codec.getPacketType() == AudioPacketType.SequenceStart && codec.getDecoderConfiguration() != null) || (!codec.isEnhanced() || data.array()[1] == 0x00);
     }
 
     /** {@inheritDoc} */

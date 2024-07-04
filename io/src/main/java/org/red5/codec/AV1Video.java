@@ -58,7 +58,7 @@ public class AV1Video extends AbstractVideo {
     @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data, int timestamp) {
-        log.trace("{} addData timestamp: {} remaining: {}", codec.name(), timestamp, data.remaining());
+        log.trace("{} addData timestamp: {} remaining: {} pos: {}", codec.name(), timestamp, data.remaining(), data.position());
         boolean result = false;
         if (data.hasRemaining()) {
             // mark
@@ -80,6 +80,7 @@ public class AV1Video extends AbstractVideo {
                     log.debug("{} - AV1", frameType);
                 }
                 if (enhanced) {
+                    packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
                     switch (frameType) {
                         // XXX implement this to look at the kf flag in AV1 data
                         case KEYFRAME: // keyframe

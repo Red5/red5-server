@@ -55,17 +55,21 @@ public class AACAudio extends AbstractAudio {
             // check for AAC codec id
             result = codecId == AudioCodec.AAC.getId();
             // attempt configuration parsing if we've identified the codec and have in-band data
-            if (result && hdr == 0) {
-                // the sound "header" data is ignored for AAC and the bitstream is parsed instead
-                byte[] cfg = new byte[2];
-                data.get(cfg);
-                int objectType = (cfg[0] >> 3) & 0x1f; // five bits
-                int freqIndex = ((cfg[0] & 0x7) << 1) | ((cfg[1] >> 7) & 0x1);
-                channels = (cfg[1] & 0x78) >> 3;
-                sampleRate = AAC_SAMPLERATES[freqIndex];
-                log.info("aac config sample rate {} type {} channels {}", sampleRate, objectType, channels);
-                // create the decoder configuration record
-                blockDataAACDCR = new byte[] { (byte) ((0x10 | ((freqIndex >> 1) & 0x07))), (byte) ((((freqIndex & 0x01) << 7) | ((channels & 0x0f) << 3))) };
+            if (result) {
+                if (hdr == 0) {
+                    // the sound "header" data is ignored for AAC and the bitstream is parsed instead
+                    byte[] cfg = new byte[2];
+                    data.get(cfg);
+                    int objectType = (cfg[0] >> 3) & 0x1f; // five bits
+                    int freqIndex = ((cfg[0] & 0x7) << 1) | ((cfg[1] >> 7) & 0x1);
+                    channels = (cfg[1] & 0x78) >> 3;
+                    sampleRate = AAC_SAMPLERATES[freqIndex];
+                    log.info("aac config sample rate {} type {} channels {}", sampleRate, objectType, channels);
+                    // create the decoder configuration record
+                    blockDataAACDCR = new byte[] { (byte) ((0x10 | ((freqIndex >> 1) & 0x07))), (byte) ((((freqIndex & 0x01) << 7) | ((channels & 0x0f) << 3))) };
+                } else {
+                    // maybe mark that we weren't a config packet?
+                }
             }
             // when the result is returned, an expected rewind of the buffer should be done
         }

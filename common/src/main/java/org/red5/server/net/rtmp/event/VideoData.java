@@ -16,9 +16,9 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.codec.VideoCodec;
+import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.VideoFrameType;
-import org.red5.io.ITag;
+import org.red5.codec.VideoPacketType;
 import org.red5.io.IoConstants;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.IStreamData;
@@ -48,17 +48,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     /**
      * Video codec
      */
-    protected VideoCodec codec;
-
-    /**
-     * True if this is configuration data and false otherwise
-     */
-    protected boolean config;
-
-    /**
-     * True if this indicates an end-of-sequence and false otherwise
-     */
-    protected boolean endOfSequence;
+    protected transient IVideoStreamCodec codec;
 
     /** Constructs a new VideoData. */
     public VideoData() {
@@ -103,34 +93,21 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         return dataType;
     }
 
-    public void setDataType(byte dataType) {
-        this.dataType = dataType;
-    }
-
-    /** {@inheritDoc} */
     public IoBuffer getData() {
         return data;
     }
 
     public void setData(IoBuffer data) {
         this.data = data;
-        if (data != null && data.limit() > 0) {
-            data.mark();
-            int firstByte = data.get(0) & 0xff;
-            codec = VideoCodec.valueOfById(firstByte & ITag.MASK_VIDEO_CODEC);
-            // determine by codec whether or not frame / sequence types are included
-            if (VideoCodec.getConfigured().contains(codec)) {
-                int secondByte = data.get(1) & 0xff;
-                config = (secondByte == 0);
-                endOfSequence = (secondByte == 2);
-            }
-            data.reset();
-            frameType = VideoFrameType.valueOf((firstByte & MASK_VIDEO_FRAMETYPE) >> 4);
-        }
     }
 
     public void setData(byte[] data) {
         setData(IoBuffer.wrap(data));
+    }
+
+    @Override
+    public void setVideoCodecReference(IVideoStreamCodec codec) {
+        this.codec = codec;
     }
 
     /**
@@ -143,15 +120,15 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     }
 
     public int getCodecId() {
-        return codec.getId();
+        return codec != null ? codec.getCodec().getId() : -1;
     }
 
     public boolean isConfig() {
-        return config;
+        return frameType == VideoFrameType.RESERVED || (codec.getPacketType() == VideoPacketType.SequenceStart && codec.getDecoderConfiguration() != null);
     }
 
     public boolean isEndOfSequence() {
-        return endOfSequence;
+        return codec.getPacketType() == VideoPacketType.SequenceEnd;
     }
 
     /** {@inheritDoc} */

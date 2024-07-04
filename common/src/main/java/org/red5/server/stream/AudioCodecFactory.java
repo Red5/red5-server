@@ -89,9 +89,9 @@ public class AudioCodecFactory {
                 data.mark();
                 // check if the codec can handle the data
                 if (result.canHandleData(data)) {
-                    log.debug("Codec {} can handle the data", result);
+                    log.debug("Codec {} accepted data", result);
                 } else {
-                    log.warn("Codec {} cannot handle data", codec);
+                    log.warn("Codec {} rejected data", codec);
                     result = null;
                 }
                 // reset the data buffer mark

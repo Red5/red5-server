@@ -175,6 +175,24 @@ public interface IVideoStreamCodec {
     }
 
     /**
+     * Returns the frame type for the codec.
+     *
+     * @return the frame type
+     */
+    default VideoFrameType getFrameType() {
+        return null;
+    }
+
+    /**
+     * Returns the packet type for the codec.
+     *
+     * @return the packet type
+     */
+    default VideoPacketType getPacketType() {
+        return null;
+    }
+
+    /**
      * Sets the track id.
      */
     default void setTrackId(int trackId) {
