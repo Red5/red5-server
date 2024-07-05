@@ -22,6 +22,16 @@ public class AbstractVideo implements IVideoStreamCodec {
 
     protected static boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
+    // tracks for multitrack video, if size = 1, theres only one track
+    protected ConcurrentMap<Integer, IVideoStreamCodec> tracks = new ConcurrentSkipListMap<>();
+
+    // multitrack flag
+    protected boolean multitrack;
+
+    // track codec - this is temporary when used for multitrack video
+    protected IVideoStreamCodec trackCodec;
+
+    // codec enum
     protected VideoCodec codec;
 
     // whether or not to employ enhanced codec handling
@@ -55,15 +65,6 @@ public class AbstractVideo implements IVideoStreamCodec {
      * Whether or not to buffer interframes. Default is false.
      */
     protected boolean bufferInterframes;
-
-    // tracks for multitrack video, if size = 1, theres only one track
-    protected ConcurrentMap<Integer, IVideoStreamCodec> tracks = new ConcurrentSkipListMap<>();
-
-    // multitrack flag
-    protected boolean multitrack;
-
-    // track codec - this is temporary when used for multitrack video
-    protected IVideoStreamCodec trackCodec;
 
     // track id
     protected int trackId = 0;

@@ -30,12 +30,12 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     /**
      * Data type
      */
-    private byte dataType = TYPE_AUDIO_DATA;
+    private final byte dataType = TYPE_AUDIO_DATA;
 
     /**
      * Audio codec
      */
-    protected IAudioStreamCodec codec;
+    protected transient IAudioStreamCodec codec;
 
     /** Constructs a new AudioData. */
     public AudioData() {

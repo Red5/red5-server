@@ -38,7 +38,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     /**
      * Data type
      */
-    private byte dataType = TYPE_VIDEO_DATA;
+    private final byte dataType = TYPE_VIDEO_DATA;
 
     /**
      * Frame type, unknown by default
