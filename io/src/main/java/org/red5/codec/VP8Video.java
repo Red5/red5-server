@@ -8,6 +8,7 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.io.IoConstants;
 
 /**
  * Red5 video codec for the VP8 video format.
@@ -18,62 +19,47 @@ import org.apache.mina.core.buffer.IoBuffer;
 public class VP8Video extends AbstractVideo {
 
     /**
-     * VP8 video codec constant
-     */
-    static final String CODEC_NAME = "VP8";
-
-    public static final byte[] VP8_KEYFRAME_PREFIX = new byte[] { 0x18, 0x01 };
-
-    public static final byte[] VP8_FRAME_PREFIX = new byte[] { 0x28, 0x01 };
-
-    /**
      * I bit from the X byte of the payload descriptor.
      */
-    private static final byte I_BIT = (byte) 0x80;
+    protected static final byte I_BIT = (byte) 0x80;
 
     /**
      * K bit from the X byte of the payload descriptor.
      */
-    private static final byte K_BIT = (byte) 0x10;
+    protected static final byte K_BIT = (byte) 0x10;
 
     /**
      * L bit from the X byte of the payload descriptor.
      */
-    private static final byte L_BIT = (byte) 0x40;
+    protected static final byte L_BIT = (byte) 0x40;
 
     /**
      * I bit from the I byte of the payload descriptor.
      */
-    private static final byte M_BIT = (byte) 0x80;
+    protected static final byte M_BIT = (byte) 0x80;
+
+    /**
+     * S bit from the first byte of the payload descriptor.
+     */
+    protected static final byte S_BIT = (byte) 0x10;
+
+    /**
+     * T bit from the X byte of the payload descriptor.
+     */
+    protected static final byte T_BIT = (byte) 0x20;
+
+    /**
+     * X bit from the first byte of the payload descriptor.
+     */
+    protected static final byte X_BIT = (byte) 0x80;
 
     /**
      * Maximum length of a VP8 payload descriptor.
      */
     public static final int MAX_LENGTH = 6;
 
-    /**
-     * S bit from the first byte of the payload descriptor.
-     */
-    private static final byte S_BIT = (byte) 0x10;
-
-    /**
-     * T bit from the X byte of the payload descriptor.
-     */
-    private static final byte T_BIT = (byte) 0x20;
-
-    /**
-     * X bit from the first byte of the payload descriptor.
-     */
-    private static final byte X_BIT = (byte) 0x80;
-
     {
         codec = VideoCodec.VP8;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getName() {
-        return CODEC_NAME;
     }
 
     /** {@inheritDoc} */
@@ -93,53 +79,61 @@ public class VP8Video extends AbstractVideo {
     @Override
     public boolean addData(IoBuffer data, int timestamp, boolean amf) {
         log.trace("addData timestamp: {} remaining: {} amf? {}", timestamp, data.remaining(), amf);
+        boolean result = false;
+        // go back to the beginning, this only works in non-multitrack scenarios
+        if (data.position() > 0) {
+            data.rewind();
+        }
+        // no data, no operation
         if (data.hasRemaining()) {
-            // mark starting position
-            int start = data.position();
             // are we amf?
             if (!amf) {
                 int remaining = data.remaining();
                 // if we're not amf, figure out how to proceed based on data contents
                 if (remaining > 7) {
                     // grab the first 8 bytes
-                    byte[] peek = new byte[8];
-                    data.get(peek);
-                    // int sz = getDesciptorSize(peek,0,peek.length);
-                    boolean isKey = isKeyFrame(peek, 0);
+                    data.mark();
+                    byte[] vpxData = new byte[remaining];
+                    data.get(vpxData);
                     // jump back to the starting pos
-                    data.position(start);
-                    // slice-out the existing data
-                    IoBuffer slice = data.getSlice(start, remaining);
-                    log.info("Data start: {} post-slice: {}", start, data.position());
-                    // expand the data by two to hold the amf markers
-                    data.expand(remaining + 2);
-                    // prefix the data with amf markers (two bytes)
+                    data.reset();
+                    // int sz = getDesciptorSize(peek,0,peek.length);
+                    boolean isKey = (vpxData[0] & S_BIT) == 0;
+                    // expand the data to hold the enhanced rtmp bytes
+                    data.expand(remaining + 5);
+                    data.clear();
+                    // prefix the data with amf markers
+                    byte flg = (byte) 0b10000000;
                     if (isKey) {
-                        // VP8 keyframe
-                        data.put(VP8_KEYFRAME_PREFIX);
+                        // add frame type at position 4
+                        flg = (byte) (flg | (VideoFrameType.KEYFRAME.getValue() << 4));
+                        // add packet type at position 0
+                        flg = (byte) (flg | VideoPacketType.CodedFramesX.getPacketType());
                     } else {
-                        // VP8 non-keyframe
-                        data.put(VP8_FRAME_PREFIX);
+                        // add frame type at position 4
+                        flg = (byte) (flg | (VideoFrameType.INTERFRAME.getValue() << 4));
+                        // add packet type at position 0
+                        flg = (byte) (flg | VideoPacketType.CodedFramesX.getPacketType());
                     }
-                    // drop the slice in behind the prefix
-                    data.put(slice);
+                    // frame type and packet type need to be set
+                    data.put(flg);
+                    // add codec fourcc
+                    data.putInt(codec.getFourcc());
+                    // drop the vpxData in behind the header
+                    data.put(vpxData);
                     // flip it
                     data.flip();
-                    // reset start (which technically will be the same position)
-                    start = data.position();
                 } else {
                     log.warn("Remaining VP8 content was less than expected: {}", remaining);
                 }
-                // jump back to the starting pos
-                data.position(start);
             }
             // get frame type (codec + type)
             byte frameType = data.get();
             // get sub frame / sequence type (config, keyframe, interframe)
             byte subFrameType = data.get();
-            if ((frameType & 0x0f) == VideoCodec.VP8.getId()) {
+            if ((frameType & IoConstants.MASK_VIDEO_CODEC) == codec.getId()) {
                 // check for keyframe (we're not storing non-keyframes here)
-                if ((frameType & 0xf0) == FLV_FRAME_KEY) {
+                if ((frameType & IoConstants.MASK_VIDEO_FRAMETYPE) == FLV_FRAME_KEY) {
                     //log.trace("Key frame");
                     if (log.isDebugEnabled()) {
                         log.debug("Keyframe - VP8 type: {}", subFrameType);
@@ -165,17 +159,12 @@ public class VP8Video extends AbstractVideo {
                     }
                     //log.trace("Keyframes: {}", keyframes.size());
                 }
-            } else {
-                // not VP8 data
-                log.debug("Non-VP8 data, rejecting");
-                // go back to where we started
-                data.position(start);
-                return false;
+                result = true;
             }
             // go back to where we started
-            data.position(start);
+            data.rewind();
         }
-        return true;
+        return result;
     }
 
     /**
@@ -189,8 +178,7 @@ public class VP8Video extends AbstractVideo {
      *            length
      * @return The size in bytes of the payload descriptor at offset in input, or -1 if the input is not valid
      */
-    @SuppressWarnings("unused")
-    private static int getDesciptorSize(byte[] input, int offset, int length) {
+    public static int getDesciptorSize(byte[] input, int offset, int length) {
         if ((input[offset] & X_BIT) == 0) {
             return 1;
         }
@@ -210,7 +198,7 @@ public class VP8Video extends AbstractVideo {
         return size;
     }
 
-    private static boolean isKeyFrame(byte[] input, int offset) {
+    public static boolean isKeyFrame(byte[] input, int offset) {
         // if set to 0 the frame is a key frame, if set to 1 its an interframe. Defined in [RFC6386]
         return (input[offset] & S_BIT) == 0;
     }

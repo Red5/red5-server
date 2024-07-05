@@ -170,7 +170,7 @@ public class HEVCVideo extends AbstractVideo {
                         if (isDebug) {
                             log.debug("Decoder configuration");
                         }
-                        // Store AVCDecoderConfigurationRecord data
+                        // Store HEVCDecoderConfigurationRecord data
                         if (decoderConfiguration == null) {
                             decoderConfiguration = new FrameData(data);
                         } else {
