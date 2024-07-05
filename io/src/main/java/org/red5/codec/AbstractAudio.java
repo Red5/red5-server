@@ -1,5 +1,8 @@
 package org.red5.codec;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.util.ByteNibbler;
 import org.slf4j.Logger;
@@ -41,6 +44,9 @@ public class AbstractAudio implements IAudioStreamCodec {
 
     // indicates which channels are present in the multi-channel stream
     protected int audioChannelFlags;
+
+    // audio codec specific attributes
+    protected transient ConcurrentMap<String, String> attributes = new ConcurrentHashMap<>();
 
     @Override
     public AudioCodec getCodec() {
@@ -157,6 +163,26 @@ public class AbstractAudio implements IAudioStreamCodec {
     @Override
     public boolean isSigned() {
         return signed;
+    }
+
+    /**
+     * Sets an attribute directly on the codec instance.
+     *
+     * @param key
+     * @param value
+     */
+    public void setAttribute(String key, String value) {
+        attributes.put(key, value);
+    }
+
+    /**
+     * Returns the attribute for a given key.
+     *
+     * @param key
+     * @return String value
+     */
+    public String getAttribute(String key) {
+        return attributes.get(key);
     }
 
     @Override

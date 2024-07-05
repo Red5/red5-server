@@ -97,15 +97,11 @@ public class ExtendedAudio extends AbstractAudio {
                     packetType = AudioPacketType.valueOf(nibbler.nibble(4));
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
-                        if (trackCodec == null) {
-                            trackCodec = getTrackCodec(data);
-                        }
+                        trackCodec = getTrackCodec(data);
                     }
                 } else {
                     // The tracks are encoded with the same codec identified by the FOURCC
-                    if (trackCodec == null) {
-                        trackCodec = getTrackCodec(data);
-                    }
+                    trackCodec = getTrackCodec(data);
                 }
             }
             // read all the data
@@ -115,9 +111,7 @@ public class ExtendedAudio extends AbstractAudio {
                     // handle tracks that each have their own codec
                     if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with their own codec identified by the FOURCC
-                        if (trackCodec == null) {
-                            trackCodec = getTrackCodec(data);
-                        }
+                        trackCodec = getTrackCodec(data);
                     }
                     // track ordering
                     // For identifying the highest priority (a.k.a., default track) or highest quality track, it is RECOMMENDED
@@ -138,12 +132,11 @@ public class ExtendedAudio extends AbstractAudio {
                     if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                         trackCodec.setTrackId(trackId);
                     }
+                } else {
+                    trackCodec = getTrackCodec(data);
                 }
                 switch (packetType) {
                     case CodedFrames: // pass coded data
-                        if (trackCodec == null) {
-                            trackCodec = getTrackCodec(data);
-                        }
                         result = trackCodec.addData(data);
                         break;
                     case MultichannelConfig:

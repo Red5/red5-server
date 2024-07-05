@@ -1,6 +1,7 @@
 package org.red5.codec;
 
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -71,6 +72,9 @@ public class AbstractVideo implements IVideoStreamCodec {
 
     // track length in bytes
     protected int trackSize = 0;
+
+    // video codec specific attributes
+    protected transient ConcurrentMap<String, String> attributes = new ConcurrentHashMap<>();
 
     @Override
     public VideoCodec getCodec() {
@@ -181,14 +185,10 @@ public class AbstractVideo implements IVideoStreamCodec {
                     packetType = VideoPacketType.valueOf(nibbler.nibble(4));
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
-                        if (trackCodec == null) {
-                            trackCodec = getTrackCodec(data);
-                        }
+                        trackCodec = getTrackCodec(data);
                     } else {
                         // The tracks are encoded with the same codec identified by the FOURCC
-                        if (trackCodec == null) {
-                            trackCodec = getTrackCodec(data);
-                        }
+                        trackCodec = getTrackCodec(data);
                     }
                 }
                 log.debug("Multitrack: {} multitrackType: {} packetType: {}", multitrack, multitrackType, packetType);
@@ -199,9 +199,7 @@ public class AbstractVideo implements IVideoStreamCodec {
                         // handle tracks that each have their own codec
                         if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                             // The tracks are encoded with their own codec identified by the FOURCC
-                            if (trackCodec == null) {
-                                trackCodec = getTrackCodec(data);
-                            }
+                            trackCodec = getTrackCodec(data);
                         }
                         // track ordering
                         // For identifying the highest priority (a.k.a., default track) or highest quality track, it is RECOMMENDED
@@ -222,38 +220,18 @@ public class AbstractVideo implements IVideoStreamCodec {
                         if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                             trackCodec.setTrackId(trackId);
                         }
+                    } else {
+                        // track codec is null if we're not multitrack or command frame
+                        trackCodec = getTrackCodec(data);
                     }
                     switch (packetType) {
                         case CodedFramesX: // pass coded data without comp time offset
-                            // track codec is null if we're not multitrack or command frame
-                            if (trackCodec == null) {
-                                trackCodec = getTrackCodec(data);
-                            }
-                            result = trackCodec.addData(data);
                             break;
                         case CodedFrames: // pass coded data
-                            // track codec is null if we're not multitrack or command frame
-                            if (trackCodec == null) {
-                                trackCodec = getTrackCodec(data);
-                            }
-                            int compTimeOffset = 0;
-                            // check for composition time offset for h.264 and h.265
-                            if (VideoCodec.getCompositionTime().contains(trackCodec.getCodec())) {
-                                compTimeOffset = (data.get() << 16 | data.get() << 8 | data.get());
-                            }
-                            result = trackCodec.addData(data, compTimeOffset);
                             break;
                         case SequenceStart: // start of sequence
-                            // track codec is null if we're not multitrack or command frame
-                            if (trackCodec == null) {
-                                trackCodec = getTrackCodec(data);
-                            }
                             break;
                         case MPEG2TSSequenceStart: // start of MPEG2TS sequence
-                            // track codec is null if we're not multitrack or command frame
-                            if (trackCodec == null) {
-                                trackCodec = getTrackCodec(data);
-                            }
                             break;
                         case SequenceEnd: // end of sequence
                             break;
@@ -274,6 +252,7 @@ public class AbstractVideo implements IVideoStreamCodec {
                     // break out of the loop
                     break;
                 }
+                result = true;
             } else {
                 // read the first byte verify the codec matches
                 result = ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId());
@@ -379,6 +358,26 @@ public class AbstractVideo implements IVideoStreamCodec {
     @Override
     public VideoPacketType getPacketType() {
         return packetType;
+    }
+
+    /**
+     * Sets an attribute directly on the codec instance.
+     *
+     * @param key
+     * @param value
+     */
+    public void setAttribute(String key, String value) {
+        attributes.put(key, value);
+    }
+
+    /**
+     * Returns the attribute for a given key.
+     *
+     * @param key
+     * @return String value
+     */
+    public String getAttribute(String key) {
+        return attributes.get(key);
     }
 
     /**

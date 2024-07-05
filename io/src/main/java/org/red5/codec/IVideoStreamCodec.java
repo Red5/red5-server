@@ -125,6 +125,8 @@ public interface IVideoStreamCodec {
 
         private byte[] frame;
 
+        private int compTimeOffset;
+
         public FrameData() {
         }
 
@@ -132,8 +134,14 @@ public interface IVideoStreamCodec {
             setData(data);
         }
 
+        public FrameData(IoBuffer data, int compTimeOffset) {
+            setData(data);
+            this.compTimeOffset = compTimeOffset;
+        }
+
         /**
-         * Makes a copy of the incoming bytes and places them in an IoBuffer. No flip or rewind is performed on the source data.
+         * Makes a copy of the incoming bytes and places them in an IoBuffer. No flip or rewind is performed on the
+         * source data. Ensure that the data is at the correct position before calling this method.
          *
          * @param data
          *            data
@@ -152,6 +160,10 @@ public interface IVideoStreamCodec {
 
         public byte[] getFrameBytes() {
             return frame;
+        }
+
+        public int getCompTimeOffset() {
+            return compTimeOffset;
         }
 
     }
