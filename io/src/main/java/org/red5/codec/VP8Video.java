@@ -7,8 +7,11 @@
 
 package org.red5.codec;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
+import org.red5.util.ByteNibbler;
 
 /**
  * Red5 video codec for the VP8 video format.
@@ -76,6 +79,7 @@ public class VP8Video extends AbstractVideo {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data, int timestamp, boolean amf) {
         log.trace("addData timestamp: {} remaining: {} amf? {}", timestamp, data.remaining(), amf);
@@ -91,7 +95,7 @@ public class VP8Video extends AbstractVideo {
                 int remaining = data.remaining();
                 // if we're not amf, figure out how to proceed based on data contents
                 if (remaining > 7) {
-                    // grab the first 8 bytes
+                    // grab the all the vpx bytes
                     data.mark();
                     byte[] vpxData = new byte[remaining];
                     data.get(vpxData);
@@ -127,43 +131,78 @@ public class VP8Video extends AbstractVideo {
                     log.warn("Remaining VP8 content was less than expected: {}", remaining);
                 }
             }
-            // get frame type (codec + type)
-            byte frameType = data.get();
-            // get sub frame / sequence type (config, keyframe, interframe)
-            byte subFrameType = data.get();
-            if ((frameType & IoConstants.MASK_VIDEO_CODEC) == codec.getId()) {
-                // check for keyframe (we're not storing non-keyframes here)
-                if ((frameType & IoConstants.MASK_VIDEO_FRAMETYPE) == FLV_FRAME_KEY) {
-                    //log.trace("Key frame");
-                    if (log.isDebugEnabled()) {
-                        log.debug("Keyframe - VP8 type: {}", subFrameType);
-                    }
-                    // rewind
-                    data.rewind();
-                    switch (subFrameType) {
-                        case 1: // keyframe
-                            //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
-                            // get the time stamp and compare with the current value
-                            if (timestamp != keyframeTimestamp) {
-                                //log.trace("New keyframe");
-                                // new keyframe
-                                keyframeTimestamp = timestamp;
-                                keyframes.clear();
-                            }
-                            // store keyframe
-                            keyframes.add(new FrameData(data));
-                            break;
-                        case 0: // no decoder configuration for vp8
-                            //log.trace("Decoder configuration");
-                            break;
-                    }
-                    //log.trace("Keyframes: {}", keyframes.size());
+            // mark the position before we get the flags
+            data.mark();
+            // get the first byte for v1 codec type or enhanced codec bit
+            byte flg = data.get();
+            // determine if we've got an enhanced codec
+            enhanced = ByteNibbler.isBitSet(flg, 7);
+            // for frame type we need get 3 bits
+            int ft = ((flg & 0b01110000) >> 4);
+            frameType = VideoFrameType.valueOf(ft);
+            if (enhanced) {
+                // get the packet type
+                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                // get the fourcc
+                int fourcc = data.getInt();
+                // reset back to the beginning after we got the fourcc
+                data.reset();
+                if (isDebug) {
+                    log.debug("{} - frame type: {} packet type: {}", VideoCodec.valueOfByFourCc(fourcc), frameType, packetType);
                 }
-                result = true;
+                switch (packetType) {
+                    case CodedFramesX: // pass coded data without comp time offset
+                        switch (frameType) {
+                            case KEYFRAME: // keyframe
+                                if (isDebug) {
+                                    log.debug("Keyframe - keyframeTimestamp: {}", keyframeTimestamp);
+                                }
+                                // get the time stamp and compare with the current value
+                                if (timestamp != keyframeTimestamp) {
+                                    //log.trace("New keyframe");
+                                    // new keyframe
+                                    keyframeTimestamp = timestamp;
+                                    // if its a new keyframe, clear keyframe and interframe collections
+                                    softReset();
+                                }
+                                // store keyframe
+                                keyframes.add(new FrameData(data));
+                                break;
+                            case INTERFRAME:
+                                if (bufferInterframes) {
+                                    if (isDebug) {
+                                        log.debug("Interframe - timestamp: {}", timestamp);
+                                    }
+                                    if (interframes == null) {
+                                        interframes = new CopyOnWriteArrayList<>();
+                                    }
+                                    try {
+                                        int lastInterframe = numInterframes.getAndIncrement();
+                                        //log.trace("Buffering interframe #{}", lastInterframe);
+                                        if (lastInterframe < interframes.size()) {
+                                            interframes.get(lastInterframe).setData(data);
+                                        } else {
+                                            interframes.add(new FrameData(data));
+                                        }
+                                    } catch (Throwable e) {
+                                        log.warn("Failed to buffer interframe", e);
+                                    }
+                                    //log.trace("Interframes: {}", interframes.size());
+                                }
+                                break;
+                        }
+                        break;
+                    default:
+                        // not handled
+                        break;
+                }
             }
-            // go back to where we started
-            data.rewind();
+            //log.trace("Keyframes: {}", keyframes.size());
+            // we handled the data
+            result = true;
         }
+        // reset the position
+        data.rewind();
         return result;
     }
 

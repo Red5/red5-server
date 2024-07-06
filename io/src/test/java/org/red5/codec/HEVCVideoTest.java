@@ -50,7 +50,7 @@ public class HEVCVideoTest {
         nibbler = new ByteNibbler(flg);
         // check for enhanced codec handling first
         enhanced = nibbler.nibble(1) == 1;
-        assertTrue(ByteNibbler.isBitSet(flg, 15));
+        assertTrue(ByteNibbler.isBitSet(flg, 7));
         // get video frame type
         frameType = VideoFrameType.valueOf(nibbler.nibble(3));
         if (((flg & 0xf0) == 0x10 && frameType == VideoFrameType.RESERVED) || (enhanced && frameType == VideoFrameType.RESERVED)) {

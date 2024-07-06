@@ -59,7 +59,7 @@ public class HEVCVideo extends AbstractVideo {
             // get the first byte for v1 codec type or enhanced codec bit
             byte flg = data.get();
             // determine if we've got an enhanced codec
-            enhanced = ByteNibbler.isBitSet(flg, 15);
+            enhanced = ByteNibbler.isBitSet(flg, 7);
             // for frame type we need get 3 bits
             int ft = ((flg & 0b01110000) >> 4);
             frameType = VideoFrameType.valueOf(ft);
@@ -207,6 +207,8 @@ public class HEVCVideo extends AbstractVideo {
             // we handled the data
             result = true;
         }
+        // reset the position
+        data.rewind();
         return result;
     }
 
