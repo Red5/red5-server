@@ -136,7 +136,7 @@ public enum AudioCodec {
     /**
      * Codecs which have private / config data or type identifiers included.
      */
-    private final static EnumSet<AudioCodec> configured = EnumSet.of(AAC, OPUS, AC3, EAC3, FLAC, ExHeader);
+    private final static EnumSet<AudioCodec> configured = EnumSet.of(AAC, AC3, EAC3, FLAC);
 
     private final static Map<Byte, AudioCodec> map = new HashMap<>();
 

@@ -17,11 +17,13 @@ import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.codec.IVideoStreamCodec;
+import org.red5.codec.VideoCodec;
 import org.red5.codec.VideoFrameType;
 import org.red5.codec.VideoPacketType;
 import org.red5.io.IoConstants;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.IStreamData;
+import org.red5.util.ByteNibbler;
 
 /**
  * Video data event
@@ -39,6 +41,21 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
      * Data type
      */
     private final byte dataType = TYPE_VIDEO_DATA;
+
+    /**
+     * Codec id
+     */
+    private byte codecId = -1;
+
+    /**
+     * Configuration flag
+     */
+    private boolean config;
+
+    /**
+     * Enhanced flag
+     */
+    private boolean enhanced;
 
     /**
      * Frame type, unknown by default
@@ -102,6 +119,24 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     }
 
     public void setData(byte[] data) {
+        // set some properties if we can
+        if (codecId == -1 && data.length > 0) {
+            byte flg = data[0];
+            // check for enhanced bit
+            enhanced = ByteNibbler.isBitSet(flg, 7);
+            if (enhanced && data.length > 5) {
+                // enhanced handling
+                int fourcc = ((data[1] & 0xff) << 24 | (data[2] & 0xff) << 16 | (data[3] & 0xff) << 8 | data[4] & 0xff);
+                VideoCodec vc = VideoCodec.valueOfByFourCc(fourcc);
+                codecId = vc != null ? vc.getId() : -1;
+                frameType = VideoFrameType.valueOf((flg & 0b01110000) >> 4);
+                config = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC) == VideoPacketType.SequenceStart;
+            } else {
+                codecId = (byte) (flg & IoConstants.MASK_VIDEO_CODEC);
+                frameType = VideoFrameType.valueOf((flg & MASK_VIDEO_FRAMETYPE) >> 4);
+                config = (data[1] == 0);
+            }
+        }
         setData(IoBuffer.wrap(data));
     }
 
@@ -120,11 +155,16 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     }
 
     public int getCodecId() {
-        return codec != null ? codec.getCodec().getId() : -1;
+        return codec != null ? codec.getCodec().getId() : codecId;
     }
 
     public boolean isConfig() {
-        return frameType == VideoFrameType.RESERVED || (codec.getPacketType() == VideoPacketType.SequenceStart && codec.getDecoderConfiguration() != null);
+        if (codec == null) {
+            return config;
+        }
+        // if sequence start is the packet type for either enhanced or non-enhanced, it can be used for testing the avc/hevc type byte of 0 for config.
+        // this will prevent simple non-enhanced codecs with keyframe marker from being identified as config packets
+        return codec.getPacketType() == VideoPacketType.SequenceStart && codec.getDecoderConfiguration() != null;
     }
 
     public boolean isEndOfSequence() {

@@ -50,7 +50,7 @@ public class VideoCodecFactory {
             byte c = data.get();
             data.reset();
             log.debug("Flag: {}", Integer.toBinaryString(c & 0xff));
-            boolean enhanced = ByteNibbler.isBitSet(c, 15);
+            boolean enhanced = ByteNibbler.isBitSet(c, 7);
             if (enhanced) {
                 log.debug("Enhanced codec handling; pos: {}", data.position());
                 AbstractVideo absv = new AbstractVideo();

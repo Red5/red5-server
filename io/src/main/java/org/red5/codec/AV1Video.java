@@ -7,30 +7,51 @@
 
 package org.red5.codec;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
+import org.red5.io.utils.LEB128;
 import org.red5.util.ByteNibbler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Red5 video codec for the AV1 video format.
+ * Red5 video codec for the AV1 video format. Portions of this AV1 code are based on the work of the Pion project.
  *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class AV1Video extends AbstractVideo {
 
-    private static Logger log = LoggerFactory.getLogger(AV1Video.class);
+    private static final byte Z_MASK = (byte) 0b10000000;
+
+    private static final int Z_BITSHIFT = 7;
+
+    private static final byte Y_MASK = (byte) 0b01000000;
+
+    private static final int Y_BITSHIFT = 6;
+
+    private static final byte W_MASK = (byte) 0b00110000;
+
+    private static final int W_BITSHIFT = 4;
+
+    private static final byte N_MASK = (byte) 0b00001000;
+
+    private static final int N_BITSHIFT = 3;
+
+    private static final byte OBU_FRAME_TYPE_MASK = (byte) 0b01111000;
+
+    private static final int OBU_FRAME_TYPE_BITSHIFT = 3;
+
+    private static final byte OBU_FRAME_TYPE_SEQUENCE_HEADER = 1;
+
+    private static final int AV1_PAYLOADER_HEADER_SIZE = 1;
+
+    private static final int LEB128_SIZE = 1;
 
     // not sure if this is needed or not
     private FrameData decoderConfiguration;
-
-    // buffer holding OBU's
-    @SuppressWarnings("unused")
-    private IoBuffer obuBuffer;
 
     {
         codec = VideoCodec.AV1;
@@ -79,7 +100,7 @@ public class AV1Video extends AbstractVideo {
                             if (isDebug) {
                                 log.debug("Decoder configuration");
                             }
-                            // Store AV1 DecoderConfigurationRecord data
+                            // Store AV1 DecoderConfigurationRecord data, if one exists
                             if (decoderConfiguration == null) {
                                 decoderConfiguration = new FrameData(data);
                             } else {
@@ -156,15 +177,129 @@ public class AV1Video extends AbstractVideo {
         return result;
     }
 
-    /*
-     * public ByteBuffer[] readFrames(ByteBuffer packet) { ByteBuffer[] obuList = new ByteBuffer[0]; boolean isFirstOBUFragment = packet.get(0) & LEB128.MSB_BITMASK > 0; for (int i =
-     * 1; i <= packet.get(0) & LEB128.SEVEN_LSB_BITMASK; i++) { obuList = pushOBUElement(isFirstOBUFragment, packet.get(i), obuList); } if (packet.get(0) & LEB128.MSB_BITMASK > 0) { //
-     * Take copy of OBUElement that is being cached if (obuBuffer == null) { return obuList; } obuBuffer.put(packet.array(), 1, packet.get(0) & LEB128.SEVEN_LSB_BITMASK);
-     * packet.position(packet.position() + packet.get(0) & LEB128.SEVEN_LSB_BITMASK); packet.compact(); obuList = pushOBUElement(isFirstOBUFragment, obuBuffer.array(), obuList);
-     * obuBuffer = null; } return obuList; } private ByteBuffer[] pushOBUElement(boolean isFirstOBUFragment, ByteBuffer obuElement, ByteBuffer[] obuList) { if (isFirstOBUFragment) {
-     * isFirstOBUFragment = false; // Discard pushed because we don't have a fragment to combine it with if (obuBuffer == null) { return obuList; } obuElement.put(obuBuffer.array());
-     * obuBuffer = null; } return append(obuList, obuElement); } private ByteBuffer[] append(ByteBuffer[] obuList, ByteBuffer obuElement) { ByteBuffer[] newObuList = new
-     * ByteBuffer[obuList.length + 1]; System.arraycopy(obuList, 0, newObuList, 0, obuList.length); newObuList[obuList.length] = obuElement; return newObuList; }
-     */
+    public static class AV1Payloader {
+
+        private byte[] sequenceHeader;
+
+        public List<byte[]> payload(int mtu, byte[] payload) {
+            List<byte[]> payloads = new ArrayList<>();
+            int payloadDataIndex = 0;
+            int payloadDataRemaining = payload.length;
+
+            if (mtu <= 0 || payloadDataRemaining <= 0) {
+                return payloads;
+            }
+
+            byte frameType = (byte) ((payload[0] & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
+            if (frameType == OBU_FRAME_TYPE_SEQUENCE_HEADER) {
+                sequenceHeader = payload;
+                return payloads;
+            }
+
+            while (payloadDataRemaining > 0) {
+                byte obuCount = 1;
+                int metadataSize = AV1_PAYLOADER_HEADER_SIZE;
+                if (sequenceHeader != null && sequenceHeader.length != 0) {
+                    obuCount++;
+                    metadataSize += LEB128_SIZE + sequenceHeader.length;
+                }
+
+                byte[] out = new byte[Math.min(mtu, payloadDataRemaining + metadataSize)];
+                int outOffset = AV1_PAYLOADER_HEADER_SIZE;
+                out[0] = (byte) (obuCount << W_BITSHIFT);
+
+                if (obuCount == 2) {
+                    out[0] ^= N_MASK;
+                    out[1] = (byte) LEB128.encode(sequenceHeader.length);
+                    System.arraycopy(sequenceHeader, 0, out, 2, sequenceHeader.length);
+                    outOffset += LEB128_SIZE + sequenceHeader.length;
+                    sequenceHeader = null;
+                }
+
+                int outBufferRemaining = out.length - outOffset;
+                System.arraycopy(payload, payloadDataIndex, out, outOffset, outBufferRemaining);
+                payloadDataRemaining -= outBufferRemaining;
+                payloadDataIndex += outBufferRemaining;
+
+                if (!payloads.isEmpty()) {
+                    out[0] ^= Z_MASK;
+                }
+
+                if (payloadDataRemaining != 0) {
+                    out[0] ^= Y_MASK;
+                }
+
+                payloads.add(out);
+            }
+
+            return payloads;
+        }
+
+    }
+
+    public static class AV1Packet {
+        public boolean Z;
+
+        public boolean Y;
+
+        public byte W;
+
+        public boolean N;
+
+        public List<byte[]> OBUElements;
+
+        public byte[] unmarshal(byte[] payload) throws Exception {
+            if (payload == null) {
+                throw new Exception("Nil packet");
+            } else if (payload.length < 2) {
+                throw new Exception("Short packet");
+            }
+
+            Z = ((payload[0] & Z_MASK) >> Z_BITSHIFT) != 0;
+            Y = ((payload[0] & Y_MASK) >> Y_BITSHIFT) != 0;
+            N = ((payload[0] & N_MASK) >> N_BITSHIFT) != 0;
+            W = (byte) ((payload[0] & W_MASK) >> W_BITSHIFT);
+
+            if (Z && N) {
+                throw new Exception("Packet cannot be both a keyframe and a fragment");
+            }
+
+            OBUElements = parseBody(payload);
+
+            byte[] result = new byte[payload.length - 1];
+            System.arraycopy(payload, 1, result, 0, result.length);
+            return result;
+        }
+
+        private List<byte[]> parseBody(byte[] payload) throws Exception {
+            List<byte[]> obuElements = new ArrayList<>();
+
+            int currentIndex = 1;
+            for (int i = 1; currentIndex < payload.length; i++) {
+                int obuElementLength;
+                int bytesRead = 0;
+
+                if (i == W) {
+                    bytesRead = 0;
+                    obuElementLength = payload.length - currentIndex;
+                } else {
+                    obuElementLength = LEB128.decode(payload[currentIndex]);
+                    bytesRead++;
+                }
+
+                currentIndex += bytesRead;
+                if (payload.length < currentIndex + obuElementLength) {
+                    throw new Exception("Short packet");
+                }
+                byte[] obuElement = new byte[obuElementLength];
+                System.arraycopy(payload, currentIndex, obuElement, 0, obuElementLength);
+                obuElements.add(obuElement);
+                currentIndex += obuElementLength;
+            }
+
+            return obuElements;
+        }
+
+    }
 
 }

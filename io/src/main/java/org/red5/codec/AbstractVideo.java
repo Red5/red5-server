@@ -220,7 +220,7 @@ public class AbstractVideo implements IVideoStreamCodec {
                         if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                             trackCodec.setTrackId(trackId);
                         }
-                    } else {
+                    } else if (packetType != VideoPacketType.Metadata) { // no fourcc for metadata non-multitrack
                         // track codec is null if we're not multitrack or command frame
                         trackCodec = getTrackCodec(data);
                     }

@@ -82,7 +82,7 @@ public enum VideoCodec {
 
         @Override
         public int getFourcc() {
-            return 1987063864; // VP8 / vp08
+            return 1987063864; // VP8 / vp08 / 1987063864
         }
 
     }, // vp8
@@ -143,7 +143,7 @@ public enum VideoCodec {
     /**
      * Codecs which have private / config data or frame type identifiers included.
      */
-    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC, VP8, VP9, AV1);
+    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC);
 
     /**
      * Codecs supplying composition time offset.

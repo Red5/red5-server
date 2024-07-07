@@ -16,8 +16,10 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.codec.AudioCodec;
 import org.red5.codec.AudioPacketType;
 import org.red5.codec.IAudioStreamCodec;
+import org.red5.io.IoConstants;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.IStreamData;
 
@@ -31,6 +33,21 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
      * Data type
      */
     private final byte dataType = TYPE_AUDIO_DATA;
+
+    /**
+     * Codec id
+     */
+    private byte codecId = -1;
+
+    /**
+     * Configuration flag
+     */
+    private boolean config;
+
+    /**
+     * Enhanced flag
+     */
+    private boolean enhanced;
 
     /**
      * Audio codec
@@ -83,6 +100,12 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     }
 
     public void setData(byte[] data) {
+        // set some properties if we can
+        if (codecId == -1 && data.length > 0) {
+            codecId = (byte) ((data[0] & IoConstants.MASK_SOUND_FORMAT) >> 4);
+            enhanced = (codecId == AudioCodec.ExHeader.getId());
+            config = (data[1] == 0);
+        }
         setData(IoBuffer.wrap(data));
     }
 
@@ -92,11 +115,14 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     }
 
     public int getCodecId() {
-        return codec != null ? codec.getCodec().getId() : -1;
+        return codec != null ? codec.getCodec().getId() : codecId;
     }
 
     public boolean isConfig() {
-        return (codec.getPacketType() == AudioPacketType.SequenceStart && codec.getDecoderConfiguration() != null) || (!codec.isEnhanced() || data.array()[1] == 0x00);
+        if (codec == null) {
+            return config;
+        }
+        return (codec.getPacketType() == AudioPacketType.SequenceStart && codec.getDecoderConfiguration() != null);
     }
 
     /** {@inheritDoc} */
