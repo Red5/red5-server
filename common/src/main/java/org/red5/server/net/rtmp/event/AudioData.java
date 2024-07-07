@@ -50,6 +50,11 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     private boolean enhanced;
 
     /**
+     * Packet type
+     */
+    private AudioPacketType packetType;
+
+    /**
      * Audio codec
      */
     protected transient IAudioStreamCodec codec;
@@ -104,7 +109,12 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
         if (codecId == -1 && data.length > 0) {
             codecId = (byte) ((data[0] & IoConstants.MASK_SOUND_FORMAT) >> 4);
             enhanced = (codecId == AudioCodec.ExHeader.getId());
-            config = (data[1] == 0);
+            if (enhanced) {
+                packetType = AudioPacketType.valueOf(data[0] & 0x0f);
+            } else {
+                packetType = AudioPacketType.valueOf(data[1]);
+            }
+            config = (packetType == AudioPacketType.SequenceStart);
         }
         setData(IoBuffer.wrap(data));
     }

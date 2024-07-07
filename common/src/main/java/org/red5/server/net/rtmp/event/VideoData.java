@@ -60,7 +60,12 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     /**
      * Frame type, unknown by default
      */
-    protected VideoFrameType frameType;
+    private VideoFrameType frameType;
+
+    /**
+     * Packet type
+     */
+    private VideoPacketType packetType;
 
     /**
      * Video codec
@@ -130,12 +135,13 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
                 VideoCodec vc = VideoCodec.valueOfByFourCc(fourcc);
                 codecId = vc != null ? vc.getId() : -1;
                 frameType = VideoFrameType.valueOf((flg & 0b01110000) >> 4);
-                config = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC) == VideoPacketType.SequenceStart;
+                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
             } else {
                 codecId = (byte) (flg & IoConstants.MASK_VIDEO_CODEC);
                 frameType = VideoFrameType.valueOf((flg & MASK_VIDEO_FRAMETYPE) >> 4);
-                config = (data[1] == 0);
+                packetType = VideoPacketType.valueOf(data[1]);
             }
+            config = (packetType == VideoPacketType.SequenceStart);
         }
         setData(IoBuffer.wrap(data));
     }
