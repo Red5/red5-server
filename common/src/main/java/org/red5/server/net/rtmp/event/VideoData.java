@@ -177,6 +177,10 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         return codec.getPacketType() == VideoPacketType.SequenceEnd;
     }
 
+    public void reset() {
+        releaseInternal();
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void releaseInternal() {
@@ -188,6 +192,9 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
             localData.clear();
             localData.free();
         }
+        codec = null;
+        codecId = -1;
+        config = false;
     }
 
     @Override

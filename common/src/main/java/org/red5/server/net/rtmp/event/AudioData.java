@@ -135,6 +135,10 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
         return (codec.getPacketType() == AudioPacketType.SequenceStart && codec.getDecoderConfiguration() != null);
     }
 
+    public void reset() {
+        releaseInternal();
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void releaseInternal() {
@@ -142,6 +146,9 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
             data.free();
             data = null;
         }
+        codec = null;
+        codecId = -1;
+        config = false;
     }
 
     @Override
