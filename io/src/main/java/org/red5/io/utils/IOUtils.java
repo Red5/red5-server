@@ -240,6 +240,29 @@ public class IOUtils {
         return data;
     }
 
+    /**
+     * Return fourcc as an integer.
+     *
+     * @param fourcc
+     * @return integer representation of fourcc
+     */
+    public static int makeFourcc(String fourcc) {
+        if (fourcc == null || fourcc.length() != 4) {
+            return -1;
+        }
+        return fourcc.charAt(0) | (fourcc.charAt(1) << 8) | (fourcc.charAt(2) << 16) | (fourcc.charAt(3) << 24);
+    }
+
+    /**
+     * Return fourcc as a string.
+     *
+     * @param fourcc
+     * @return string representation of fourcc
+     */
+    public static String getFourccString(int fourcc) {
+        return new String(new char[] { (char) (fourcc & 0xff), (char) ((fourcc >> 8) & 0xff), (char) ((fourcc >> 16) & 0xff), (char) ((fourcc >> 24) & 0xff) });
+    }
+
     public static void main(String[] args) {
         ByteBuffer buf = ByteBuffer.allocate(4);
         IOUtils.writeExtendedMediumInt(buf, 1234567890);

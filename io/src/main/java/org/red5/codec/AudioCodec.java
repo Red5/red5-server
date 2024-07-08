@@ -11,6 +11,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.red5.io.utils.IOUtils;
+
 /**
  * Audio codecs that Red5 supports; which includes some RTMP-E specific codecs.
  *
@@ -19,7 +21,22 @@ import java.util.Map;
  */
 public enum AudioCodec {
 
-    PCM((byte) 0), ADPCM((byte) 0x01), // pcm / adpcm
+    PCM((byte) 0) {
+
+        @Override
+        public String getMimeType() {
+            return "raw ";
+        }
+
+    }, // pcm raw
+    ADPCM((byte) 0x01) {
+
+        @Override
+        public String getMimeType() {
+            return "g722"; // XXX(paul) not sure if this is correct
+        }
+
+    }, // adpcm
     MP3((byte) 0x02) {
 
         @Override
@@ -28,19 +45,52 @@ public enum AudioCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 778924083; // MP3 / .mp3
-        }
-
-        @Override
         public String getMimeType() {
             return ".mp3";
         }
 
-    }, // mp3
+    }, // MP3 / .mp3 / mp3
     PCM_LE((byte) 0x03), // pcm le
-    NELLY_MOSER_16K((byte) 0x04), NELLY_MOSER_8K((byte) 0x05), NELLY_MOSER((byte) 0x06), // nelly moser legacy
-    PCM_ALAW((byte) 0x07), PCM_MULAW((byte) 0x08), // pcm alaw / mulaw
+    NELLY_MOSER_16K((byte) 0x04) {
+
+        @Override
+        public String getMimeType() {
+            return "NELL";
+        }
+
+    },
+    NELLY_MOSER_8K((byte) 0x05) {
+
+        @Override
+        public String getMimeType() {
+            return "NELL";
+        }
+
+    },
+    NELLY_MOSER((byte) 0x06) {
+
+        @Override
+        public String getMimeType() {
+            return "NELL";
+        }
+
+    }, // nelly moser legacy
+    PCM_ALAW((byte) 0x07) {
+
+        @Override
+        public String getMimeType() {
+            return "alaw";
+        }
+
+    }, // pcm alaw
+    PCM_MULAW((byte) 0x08) {
+
+        @Override
+        public String getMimeType() {
+            return "ulaw";
+        }
+
+    }, // pcm mulaw
     ExHeader((byte) 0x09) {
 
         @Override
@@ -67,16 +117,11 @@ public enum AudioCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1836069985; // AAC / mp4a
-        }
-
-        @Override
         public String getMimeType() {
             return "mp4a";
         }
 
-    }, // advanced audio codec
+    }, // AAC / mp4a / advanced audio codec
     SPEEX((byte) 0x0b) {
 
         @Override
@@ -85,17 +130,19 @@ public enum AudioCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1936750624; // Speex / "spx "
-        }
-
-        @Override
         public String getMimeType() {
             return "spx ";
         }
 
-    }, // speex
-    MP2((byte) 0x0c), // mpeg2 audio
+    }, // Speex / "spx " / speex
+    MP2((byte) 0x0c) {
+
+        @Override
+        public String getMimeType() {
+            return "mp2a";
+        }
+
+    }, // MP2 / mp2a / mpeg2 audio
     OPUS((byte) 0x0d) {
 
         @Override
@@ -104,19 +151,38 @@ public enum AudioCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1332770163; // Opus
-        }
-
-        @Override
         public String getMimeType() {
             return "Opus";
         }
 
-    }, // opus
-    MP3_8K((byte) 0x0e), // mp3 8khz
+    }, // Opus / opus
+    MP3_8K((byte) 0x0e) {
+
+        @Override
+        public IAudioStreamCodec newInstance() {
+            return new MP3Audio();
+        }
+
+        @Override
+        public String getMimeType() {
+            return ".mp3";
+        }
+
+    }, // mp3 8khz
     //DEVICE_SPECIFIC((byte) 0x0f), // device specific (reserved)
-    L16((byte) 0x0f), // L16 audio / XXX(paul) update logic that used 0x09 previously for L16
+    L16((byte) 0x0f) {
+
+        @Override
+        public int getFourcc() {
+            return 15;
+        }
+
+        @Override
+        public String getMimeType() {
+            return "L16 ";
+        }
+
+    }, // L16 audio / XXX(paul) update logic that used 0x09 previously for L16
     // RTMP-E specific that weren't already added previously
     AC3((byte) 0x10) {
 
@@ -126,16 +192,11 @@ public enum AudioCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1633889587; // AC3 / ac-3
-        }
-
-        @Override
         public String getMimeType() {
             return "ac-3";
         }
 
-    }, // ac3
+    }, // AC3 / ac-3 / ac3
     EAC3((byte) 0x11) {
 
         @Override
@@ -144,16 +205,11 @@ public enum AudioCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1700998451; // EAC3 / ec-3
-        }
-
-        @Override
         public String getMimeType() {
             return "ec-3";
         }
 
-    }, // eac3
+    }, // EAC3 / ec-3 / eac3
     FLAC((byte) 0x12) {
 
         @Override
@@ -162,16 +218,11 @@ public enum AudioCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1716281667; // FLAC / fLaC
-        }
-
-        @Override
         public String getMimeType() {
             return "fLaC";
         }
 
-    }; // flac
+    }; // FLAC / fLaC / flac
 
     /**
      * Codecs which have private / config data or type identifiers included.
@@ -194,6 +245,7 @@ public enum AudioCodec {
 
     private AudioCodec(byte id) {
         this.id = id;
+        this.fourcc = IOUtils.makeFourcc(getMimeType());
     }
 
     /**

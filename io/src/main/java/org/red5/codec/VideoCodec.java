@@ -11,6 +11,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.red5.io.utils.IOUtils;
+
 /**
  * Video codecs that Red5 supports; which includes some RTMP-E specific codecs.
  *
@@ -19,17 +21,19 @@ import java.util.Map;
  */
 public enum VideoCodec {
 
-    JPEG((byte) 0x01), // jpeg
+    JPEG((byte) 0x01) {
+
+        @Override
+        public String getMimeType() {
+            return "jpeg";
+        }
+
+    }, // jpeg
     H263((byte) 0x02) {
 
         @Override
         public IVideoStreamCodec newInstance() {
             return new SorensonVideo();
-        }
-
-        @Override
-        public int getFourcc() {
-            return 1748121139; // h263
         }
 
         @Override
@@ -46,17 +50,27 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1179866673; // FSV1
-        }
-
-        @Override
         public String getMimeType() {
             return "FSV1";
         }
 
-    }, // screen video
-    VP6((byte) 0x04), VP6a((byte) 0x05), // vp6 / vp6 alpha
+    }, // FSV1 / screen video
+    VP6((byte) 0x04) {
+
+        @Override
+        public String getMimeType() {
+            return "VP6F";
+        }
+
+    }, // VP6 / vp6f / vp6
+    VP6a((byte) 0x05) {
+
+        @Override
+        public String getMimeType() {
+            return "VP6A";
+        }
+
+    }, // VP6A / vp6 alpha
     SCREEN_VIDEO2((byte) 0x06) {
 
         @Override
@@ -65,16 +79,11 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1179866674; // FSV2
-        }
-
-        @Override
         public String getMimeType() {
             return "FSV2";
         }
 
-    }, // screen video 2
+    }, // FSV2 / screen video 2
     AVC((byte) 0x07) {
 
         @Override
@@ -83,16 +92,11 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1635148593; // AVC / avc1
-        }
-
-        @Override
         public String getMimeType() {
             return "avc1";
         }
 
-    }, // h264
+    }, // AVC / avc1 / h264
     VP8((byte) 0x08) {
 
         @Override
@@ -101,16 +105,11 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1987063864; // VP8 / vp08 / 1987063864
-        }
-
-        @Override
         public String getMimeType() {
             return "vp08";
         }
 
-    }, // vp8
+    }, // VP8 / vp08 / vp8
     VP9((byte) 0x09) {
 
         @Override
@@ -119,16 +118,11 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1987063865; // VP9 / vp09
-        }
-
-        @Override
         public String getMimeType() {
             return "vp09";
         }
 
-    }, // vp9
+    }, // VP9 / vp09
     AVAILABLE((byte) 0x0a), // available
     MPEG1((byte) 0x0b) {
 
@@ -138,16 +132,11 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1836069238; // MPEG / mpeg
-        }
-
-        @Override
         public String getMimeType() {
             return "mpeg";
         }
 
-    }, // mpeg1 video
+    }, // MPEG / mpeg / mpeg1 video
     HEVC((byte) 0x0c) {
 
         @Override
@@ -156,16 +145,11 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1752589105; // HEVC / hvc1
-        }
-
-        @Override
         public String getMimeType() {
             return "hvc1";
         }
 
-    }, // h265
+    }, // HEVC / hvc1 / h265
     AV1((byte) 0x0d) {
 
         @Override
@@ -174,16 +158,11 @@ public enum VideoCodec {
         }
 
         @Override
-        public int getFourcc() {
-            return 1635135537; // AV1 / av01
-        }
-
-        @Override
         public String getMimeType() {
             return "av01";
         }
 
-    }; // av1
+    }; // AV1 / av01
 
     /**
      * Codecs which have private / config data or frame type identifiers included.
@@ -211,6 +190,7 @@ public enum VideoCodec {
 
     private VideoCodec(byte id) {
         this.id = id;
+        this.fourcc = IOUtils.makeFourcc(getMimeType());
     }
 
     /**
