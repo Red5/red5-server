@@ -32,6 +32,11 @@ public enum AudioCodec {
             return 778924083; // MP3 / .mp3
         }
 
+        @Override
+        public String getMimeType() {
+            return ".mp3";
+        }
+
     }, // mp3
     PCM_LE((byte) 0x03), // pcm le
     NELLY_MOSER_16K((byte) 0x04), NELLY_MOSER_8K((byte) 0x05), NELLY_MOSER((byte) 0x06), // nelly moser legacy
@@ -48,6 +53,11 @@ public enum AudioCodec {
             return 9; // ExHd
         }
 
+        @Override
+        public String getMimeType() {
+            return "ExHd";
+        }
+
     }, // used to signal FOURCC mode
     AAC((byte) 0x0a) {
 
@@ -59,6 +69,11 @@ public enum AudioCodec {
         @Override
         public int getFourcc() {
             return 1836069985; // AAC / mp4a
+        }
+
+        @Override
+        public String getMimeType() {
+            return "mp4a";
         }
 
     }, // advanced audio codec
@@ -74,6 +89,11 @@ public enum AudioCodec {
             return 1936750624; // Speex / "spx "
         }
 
+        @Override
+        public String getMimeType() {
+            return "spx ";
+        }
+
     }, // speex
     MP2((byte) 0x0c), // mpeg2 audio
     OPUS((byte) 0x0d) {
@@ -86,6 +106,11 @@ public enum AudioCodec {
         @Override
         public int getFourcc() {
             return 1332770163; // Opus
+        }
+
+        @Override
+        public String getMimeType() {
+            return "Opus";
         }
 
     }, // opus
@@ -105,6 +130,11 @@ public enum AudioCodec {
             return 1633889587; // AC3 / ac-3
         }
 
+        @Override
+        public String getMimeType() {
+            return "ac-3";
+        }
+
     }, // ac3
     EAC3((byte) 0x11) {
 
@@ -116,6 +146,11 @@ public enum AudioCodec {
         @Override
         public int getFourcc() {
             return 1700998451; // EAC3 / ec-3
+        }
+
+        @Override
+        public String getMimeType() {
+            return "ec-3";
         }
 
     }, // eac3
@@ -131,6 +166,11 @@ public enum AudioCodec {
             return 1716281667; // FLAC / fLaC
         }
 
+        @Override
+        public String getMimeType() {
+            return "fLaC";
+        }
+
     }; // flac
 
     /**
@@ -143,6 +183,8 @@ public enum AudioCodec {
     private byte id;
 
     private int fourcc;
+
+    private String mimeType;
 
     static {
         for (AudioCodec codec : AudioCodec.values()) {
@@ -179,6 +221,15 @@ public enum AudioCodec {
      */
     public int getFourcc() {
         return fourcc;
+    }
+
+    /**
+     * Returns the four character code for this codec.
+     *
+     * @return
+     */
+    public String getMimeType() {
+        return mimeType;
     }
 
     /**

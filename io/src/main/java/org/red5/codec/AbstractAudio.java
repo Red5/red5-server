@@ -31,7 +31,7 @@ public class AbstractAudio implements IAudioStreamCodec {
     protected int sampleRate = 48000, sampleSizeInBits = 16, channels = 2;
 
     // defaulting to unsigned simply to support 8 bit audio / older codecs
-    protected boolean signed;
+    protected boolean signed = true;
 
     // track id
     protected int trackId;
