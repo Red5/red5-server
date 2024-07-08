@@ -106,7 +106,7 @@ public enum VideoCodec {
 
         @Override
         public String getMimeType() {
-            return "vp08";
+            return "vp08"; // vp8 / ffmpeg LE = 08pv / 0x76703038
         }
 
     }, // VP8 / vp08 / vp8
@@ -119,7 +119,7 @@ public enum VideoCodec {
 
         @Override
         public String getMimeType() {
-            return "vp09";
+            return "vp09"; // vp9 / ffmpeg LE = 09pv / 0x76703039 
         }
 
     }, // VP9 / vp09
@@ -159,7 +159,7 @@ public enum VideoCodec {
 
         @Override
         public String getMimeType() {
-            return "av01";
+            return "av01"; // av1 / ffmpeg LE = 10va / 0x61763031
         }
 
     }; // AV1 / av01
