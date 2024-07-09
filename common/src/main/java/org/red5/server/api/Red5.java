@@ -13,7 +13,6 @@ import java.util.Map;
 
 import javax.management.openmbean.CompositeData;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,12 +57,12 @@ public final class Red5 {
     /**
      * Server version with revision
      */
-    public static final String VERSION = "Red5 Server 2.0.2";
+    public static final String VERSION = "Red5 Server 2.0.3";
 
     /**
      * Server version for fmsVer requests
      */
-    public static final String FMS_VERSION = "RED5/2,0,2,0";
+    public static final String FMS_VERSION = "RED5/2,0,3,0";
 
     /**
      * Server capabilities

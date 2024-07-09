@@ -18,7 +18,6 @@ import java.io.ObjectOutputStream;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.codec.AudioCodec;
 import org.red5.codec.AudioPacketType;
-import org.red5.codec.IAudioStreamCodec;
 import org.red5.io.IoConstants;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.IStreamData;
@@ -57,7 +56,7 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     /**
      * Audio codec
      */
-    protected transient IAudioStreamCodec codec;
+    //protected transient IAudioStreamCodec codec;
 
     /** Constructs a new AudioData. */
     public AudioData() {
@@ -119,20 +118,25 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
         setData(IoBuffer.wrap(data));
     }
 
-    @Override
-    public void setAudioCodecReference(IAudioStreamCodec codec) {
-        this.codec = codec;
-    }
-
     public int getCodecId() {
-        return codec != null ? codec.getCodec().getId() : codecId;
+        return codecId;
     }
 
     public boolean isConfig() {
-        if (codec == null) {
-            return config;
-        }
-        return (codec.getPacketType() == AudioPacketType.SequenceStart && codec.getDecoderConfiguration() != null);
+        return config;
+    }
+
+    /**
+     * Returns the audio packet type.
+     *
+     * @return audio packet type
+     */
+    public AudioPacketType getPacketType() {
+        return packetType;
+    }
+
+    public boolean isEndOfSequence() {
+        return packetType == AudioPacketType.SequenceEnd;
     }
 
     public void reset() {
@@ -146,7 +150,7 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
             data.free();
             data = null;
         }
-        codec = null;
+        //codec = null;
         codecId = -1;
         config = false;
     }

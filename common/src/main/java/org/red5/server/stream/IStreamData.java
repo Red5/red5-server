@@ -10,8 +10,6 @@ package org.red5.server.stream;
 import java.io.IOException;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.codec.IAudioStreamCodec;
-import org.red5.codec.IVideoStreamCodec;
 
 /**
  * Stream data packet
@@ -48,15 +46,15 @@ public interface IStreamData<T> {
      *
      * @param codec
      */
-    default void setAudioCodecReference(IAudioStreamCodec codec) {
-    }
+    //default void setAudioCodecReference(IAudioStreamCodec codec) {
+    //}
 
     /**
      * Set the video codec reference.
      *
      * @param codec
      */
-    default void setVideoCodecReference(IVideoStreamCodec codec) {
-    }
+    //default void setVideoCodecReference(IVideoStreamCodec codec) {
+    //}
 
 }

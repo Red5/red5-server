@@ -20,10 +20,9 @@ import org.slf4j.Logger;
  */
 public class IOUtils {
 
-    /**
-     * UTF-8 is used
-     */
     public final static Charset CHARSET = Charset.forName("UTF-8");
+
+    public final static Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
     /**
      * Writes integer in reverse order
@@ -241,6 +240,17 @@ public class IOUtils {
     }
 
     /**
+     * Return fourcc as a byte array.
+     *
+     * @param fourcc
+     * @return byte array representation of fourcc
+     */
+    public static byte[] makeFourccBytes(String fourcc) {
+        // automatically convert to with network byte order
+        return fourcc.getBytes(CHARSET_ASCII);
+    }
+
+    /**
      * Return fourcc as an integer.
      *
      * @param fourcc
@@ -250,7 +260,10 @@ public class IOUtils {
         if (fourcc == null || fourcc.length() != 4) {
             return -1;
         }
-        return fourcc.charAt(0) | (fourcc.charAt(1) << 8) | (fourcc.charAt(2) << 16) | (fourcc.charAt(3) << 24);
+        // automatically convert to with network byte order
+        byte[] data = fourcc.getBytes(CHARSET_ASCII);
+        //return fourcc.charAt(0) | (fourcc.charAt(1) << 8) | (fourcc.charAt(2) << 16) | (fourcc.charAt(3) << 24);
+        return ((data[0] & 0xff) << 24) | ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
     }
 
     /**

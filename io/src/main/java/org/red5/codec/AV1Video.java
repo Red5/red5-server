@@ -161,8 +161,6 @@ public class AV1Video extends AbstractVideo {
                                 keyframes.add(new FrameData(data, compTimeOffset));
                                 break;
                         }
-                    default:
-                        // not handled
                         break;
                 }
             } else {

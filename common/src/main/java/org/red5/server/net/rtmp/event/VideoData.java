@@ -16,7 +16,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.VideoCodec;
 import org.red5.codec.VideoFrameType;
 import org.red5.codec.VideoPacketType;
@@ -70,7 +69,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     /**
      * Video codec
      */
-    protected transient IVideoStreamCodec codec;
+    //protected transient IVideoStreamCodec codec;
 
     /** Constructs a new VideoData. */
     public VideoData() {
@@ -146,35 +145,38 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         setData(IoBuffer.wrap(data));
     }
 
-    @Override
-    public void setVideoCodecReference(IVideoStreamCodec codec) {
-        this.codec = codec;
+    public int getCodecId() {
+        return codecId;
+    }
+
+    public boolean isConfig() {
+        return config;
     }
 
     /**
-     * Getter for frame type
+     * Returns the video frame type.
      *
-     * @return Type of video frame
+     * @return video frame type
      */
     public VideoFrameType getFrameType() {
         return frameType;
     }
 
-    public int getCodecId() {
-        return codec != null ? codec.getCodec().getId() : codecId;
+    public boolean isKeyFrame() {
+        return frameType == VideoFrameType.KEYFRAME;
     }
 
-    public boolean isConfig() {
-        if (codec == null) {
-            return config;
-        }
-        // if sequence start is the packet type for either enhanced or non-enhanced, it can be used for testing the avc/hevc type byte of 0 for config.
-        // this will prevent simple non-enhanced codecs with keyframe marker from being identified as config packets
-        return codec.getPacketType() == VideoPacketType.SequenceStart && codec.getDecoderConfiguration() != null;
+    /**
+     * Returns the video packet type.
+     *
+     * @return video packet type
+     */
+    public VideoPacketType getVideoPacketType() {
+        return packetType;
     }
 
     public boolean isEndOfSequence() {
-        return codec.getPacketType() == VideoPacketType.SequenceEnd;
+        return packetType == VideoPacketType.SequenceEnd;
     }
 
     public void reset() {
@@ -192,7 +194,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
             localData.clear();
             localData.free();
         }
-        codec = null;
+        //codec = null;
         codecId = -1;
         config = false;
     }

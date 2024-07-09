@@ -119,7 +119,7 @@ public enum VideoCodec {
 
         @Override
         public String getMimeType() {
-            return "vp09"; // vp9 / ffmpeg LE = 09pv / 0x76703039 
+            return "vp09"; // vp9 / ffmpeg LE = 09pv / 0x76703039
         }
 
     }, // VP9 / vp09
@@ -167,12 +167,12 @@ public enum VideoCodec {
     /**
      * Codecs which have private / config data or frame type identifiers included.
      */
-    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC);
+    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC, AV1);
 
     /**
      * Codecs supplying composition time offset.
      */
-    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC);
+    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC, AV1);
 
     private final static Map<Byte, VideoCodec> map = new HashMap<>();
 
