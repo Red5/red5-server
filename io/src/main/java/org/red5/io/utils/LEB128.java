@@ -44,6 +44,18 @@ public final class LEB128 {
         return out;
     }
 
+    public static int encode(byte[] value) {
+        int out = 0;
+        for (int i = 0; i < value.length; i++) {
+            out |= (value[i] & SEVEN_LSB_BITMASK);
+            if (i < value.length - 1) {
+                out |= MSB_BITMASK;
+                out <<= 8;
+            }
+        }
+        return out;
+    }
+
     /**
      * Decodes an LEB128 unsigned integer into a regular int.
      *

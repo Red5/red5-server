@@ -236,13 +236,10 @@ public class AV1Video extends AbstractVideo {
     }
 
     public static class AV1Packet {
-        public boolean Z;
 
-        public boolean Y;
+        public boolean Z, Y, N;
 
         public byte W;
-
-        public boolean N;
 
         public List<byte[]> OBUElements;
 
