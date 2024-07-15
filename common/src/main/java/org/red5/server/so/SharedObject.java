@@ -773,7 +773,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
     public void release() {
         log.debug("release");
         if (acquireCount.get() == 0) {
-            throw new RuntimeException("The shared object was not acquired before.");
+            throw new RuntimeException("The shared object was not acquired before");
         }
         if (acquireCount.decrementAndGet() == 0) {
             checkRelease();

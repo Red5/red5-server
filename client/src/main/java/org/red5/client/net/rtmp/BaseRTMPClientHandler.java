@@ -337,7 +337,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         ClientSharedObject result = sharedObjects.get(name);
         if (result != null) {
             if (result.isPersistent() != persistent) {
-                throw new RuntimeException("Already connected to a shared object with this name, but with different persistence.");
+                throw new RuntimeException("Already connected to a shared object with this name, but with different persistence");
             }
             return result;
         }

@@ -219,7 +219,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
             // don't free configured scopes when a client disconnects
             keepOnDisconnect = true;
         } else {
-            log.info("Webscope already registered; remove the 'init-method' from your 'web.scope' bean to prevent this message in the future.");
+            log.info("Webscope already registered; remove the 'init-method' from your 'web.scope' bean to prevent this message in the future");
         }
     }
 

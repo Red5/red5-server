@@ -950,7 +950,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *         {@link IOnDemandStream} for details.
      */
     public IOnDemandStream getOnDemandStream(IScope scope, String name) {
-        log.warn("This won't work until the refactoring of the streaming code is complete.");
+        log.warn("This won't work until the refactoring of the streaming code is complete");
         IOnDemandStreamService service = (IOnDemandStreamService) ScopeUtils.getScopeService(scope, IOnDemandStreamService.class, StreamService.class, false);
         return service.getOnDemandStream(scope, name);
     }
@@ -966,7 +966,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return ISubscriberStream object
      */
     public ISubscriberStream getSubscriberStream(IScope scope, String name) {
-        log.warn("This won't work until the refactoring of the streaming code is complete.");
+        log.warn("This won't work until the refactoring of the streaming code is complete");
         ISubscriberStreamService service = (ISubscriberStreamService) ScopeUtils.getScopeService(scope, ISubscriberStreamService.class, StreamService.class, false);
         return service.getSubscriberStream(scope, name);
     }

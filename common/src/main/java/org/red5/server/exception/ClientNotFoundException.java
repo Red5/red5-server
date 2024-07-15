@@ -24,7 +24,7 @@ public class ClientNotFoundException extends RuntimeException {
      *            id
      */
     public ClientNotFoundException(String id) {
-        super("Client \"" + id + "\" not found.");
+        super("Client \"" + id + "\" not found");
     }
 
 }

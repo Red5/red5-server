@@ -164,7 +164,7 @@ public class FlexMessagingService {
         setClientId(msg);
         if (serviceInvoker == null) {
             log.error("No service invoker configured: {}", msg);
-            return returnError(msg, "Server.Invoke.Error", "No service invoker configured.", "No service invoker configured.");
+            return returnError(msg, "Server.Invoke.Error", "No service invoker configured.", "No service invoker configured");
         }
 
         Object endpoint = endpoints.get(msg.destination);

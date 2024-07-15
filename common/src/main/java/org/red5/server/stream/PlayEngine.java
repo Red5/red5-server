@@ -1313,7 +1313,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         insufficientBW.setClientid(streamId);
         insufficientBW.setLevel(Status.WARNING);
         insufficientBW.setDetails(item.getName());
-        insufficientBW.setDesciption("Data is playing behind the normal speed.");
+        insufficientBW.setDesciption("Data is playing behind the normal speed");
 
         doPushMessage(insufficientBW);
     }

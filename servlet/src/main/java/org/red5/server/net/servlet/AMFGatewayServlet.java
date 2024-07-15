@@ -90,7 +90,7 @@ public class AMFGatewayServlet extends HttpServlet {
             webAppCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(ctx);
             //now try to look it up as an attribute
             if (webAppCtx == null) {
-                log.debug("Webapp context was null, trying lookup as attr.");
+                log.debug("Webapp context was null, trying lookup as attr");
                 webAppCtx = (WebApplicationContext) ctx.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
             }
             //lookup the server and codec factory

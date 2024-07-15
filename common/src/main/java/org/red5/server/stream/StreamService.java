@@ -700,7 +700,7 @@ public class StreamService implements IStreamService {
             Number streamId = conn.getStreamId();
             if (StringUtils.isEmpty(name)) {
                 sendNSFailed(streamConn, StatusCodes.NS_FAILED, "The stream name may not be empty.", name, streamId);
-                log.error("The stream name may not be empty.");
+                log.error("The stream name may not be empty");
                 return;
             }
             IStreamSecurityService security = (IStreamSecurityService) ScopeUtils.getScopeService(scope, IStreamSecurityService.class);

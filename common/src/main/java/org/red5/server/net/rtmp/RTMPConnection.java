@@ -1087,7 +1087,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                 decoderState.stopDecoding();
             }
         } else if (isDebug) {
-            log.debug("Already closing..");
+            log.debug("Already closing.");
         }
     }
 

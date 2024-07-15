@@ -597,7 +597,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     //                            log.warn("Tag was not written");
     //                        }
     //                    } else {
-    //                        log.warn("Skipping message with negative timestamp.");
+    //                        log.warn("Skipping message with negative timestamp");
     //                    }
     //                } catch (IOException e) {
     //                    log.error("Error writing tag", e);
@@ -643,7 +643,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
                             log.warn("Tag was not written");
                         }
                     } else {
-                        log.warn("Skipping message with negative timestamp.");
+                        log.warn("Skipping message with negative timestamp");
                     }
                 } catch (ClosedChannelException cce) {
                     // the channel we tried to write to is closed, we should not try

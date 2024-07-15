@@ -227,12 +227,12 @@ public class RecordingListener implements IRecordingListener {
                 log.debug("Event queue was empty on stop");
             } else {
                 if (!eqj.processing.get()) {
-                    log.debug("Event queue was not empty on stop and it's not processing, processing...");
+                    log.debug("Event queue was not empty on stop and it's not processing, processing..");
                     do {
                         processQueue();
                     } while (!queue.isEmpty());
                 } else {
-                    log.debug("Event queue was not empty on stop but it's in processing, waiting...");
+                    log.debug("Event queue was not empty on stop but it's in processing, waiting..");
                     do {
                     } while (!queue.isEmpty());
                 }

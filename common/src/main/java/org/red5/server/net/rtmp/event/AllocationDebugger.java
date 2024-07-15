@@ -90,7 +90,7 @@ public class AllocationDebugger {
         if (info != null) {
             info.refcount.incrementAndGet();
         } else {
-            log.warn("Retain called on already released event.");
+            log.warn("Retain called on already released event");
         }
     }
 
@@ -107,7 +107,7 @@ public class AllocationDebugger {
                 events.remove(event);
             }
         } else {
-            log.warn("Release called on already released event.");
+            log.warn("Release called on already released event");
         }
     }
 

@@ -720,7 +720,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             }
                         }
                     } else {
-                        log.debug("Could not initialize stream output, videoCodec is null.");
+                        log.debug("Could not initialize stream output, videoCodec is null");
                     }
                     IAudioStreamCodec audioCodec = info.getAudioCodec();
                     //log.debug("Audio codec: {}", audioCodec);
@@ -738,7 +738,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             }
                         }
                     } else {
-                        log.debug("No decoder configuration available, audioCodec is null.");
+                        log.debug("No decoder configuration available, audioCodec is null");
                     }
                 }
                 // set as primary listener

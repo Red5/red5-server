@@ -167,7 +167,7 @@ public enum VideoCodec {
     /**
      * Codecs which have private / config data or frame type identifiers included.
      */
-    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC, AV1);
+    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC); // leaving AV1 out since config isnt required
 
     /**
      * Codecs supplying composition time offset.

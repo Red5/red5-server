@@ -800,10 +800,10 @@ public class Input extends org.red5.io.amf.Input {
                 result = properties;
             } else if ("RecordSet".equals(className)) {
                 // TODO: how are RecordSet objects encoded?
-                throw new RuntimeException("Objects of type RecordSet not supported yet.");
+                throw new RuntimeException("Objects of type RecordSet not supported yet");
             } else if ("RecordSetPage".equals(className)) {
                 // TODO: how are RecordSetPage objects encoded?
-                throw new RuntimeException("Objects of type RecordSetPage not supported yet.");
+                throw new RuntimeException("Objects of type RecordSetPage not supported yet");
             } else {
                 // Apply properties to object
                 result = newInstance(className);
@@ -1028,7 +1028,7 @@ public class Input extends org.red5.io.amf.Input {
     /** {@inheritDoc} */
     @Override
     public Object readReference() {
-        throw new RuntimeException("AMF3 doesn't support direct references.");
+        throw new RuntimeException("AMF3 doesn't support direct references");
     }
 
     /**

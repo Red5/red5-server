@@ -7,11 +7,15 @@
 
 package org.red5.io.utils;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class encodes and decodes integers in the LEB128 compression format.
  *
  * Reference examples:
- * @see <a href="https://github.com/pion/rtp/blob/master/pkg/obu/leb128.go">leb128.go</a>
+ * @see <a href="https://github.com/pion/rtp/blob/master/codecs/av1/obu/leb128.go">leb128.go</a>
  * @see <a href="https://github.com/hathibelagal-dev/LEB128/blob/master/lib/leb128.dart">leb128.dart</a>
  *
  * @author The Red5 Project
@@ -19,7 +23,9 @@ package org.red5.io.utils;
  */
 public final class LEB128 {
 
-    public static final int SEVEN_LSB_BITMASK = 0b01111111;
+    private static Logger log = LoggerFactory.getLogger(LEB128.class);
+
+    public static final int SEVEN_LSB_BITMASK = 0b01111111; // 0x7F
 
     public static final int MSB_BITMASK = 0b10000000; // 0x80
 
@@ -31,7 +37,8 @@ public final class LEB128 {
      */
     public static int encode(int value) {
         int out = 0;
-        while (true) {
+        //int byteCount = 1;
+        do {
             out |= (value & SEVEN_LSB_BITMASK);
             value >>= 7;
             if (value != 0) {
@@ -40,7 +47,9 @@ public final class LEB128 {
             } else {
                 break;
             }
-        }
+            //byteCount++;
+        } while (value != 0);
+        //log.trace("Encoded {} bytes", byteCount);
         return out;
     }
 
@@ -57,40 +66,151 @@ public final class LEB128 {
     }
 
     /**
+     * Encodes an int into an LEB128 unsigned integer and writes it to a buffer at the given offset.
+     *
+     * @param value integer to encode
+     * @param buffer byte array to write to
+     * @param offset offset to write to
+     * @return number of bytes written
+     */
+    public static int encode(int value, byte[] buffer, int offset) {
+        int byteCount = 0;
+        do {
+            byte b = (byte) (value & SEVEN_LSB_BITMASK);
+            value >>= 7;
+            if (value != 0) {
+                b |= MSB_BITMASK;
+            }
+            buffer[offset + byteCount] = b;
+            byteCount++;
+        } while (value != 0);
+        return byteCount;
+    }
+
+    /**
      * Decodes an LEB128 unsigned integer into a regular int.
      *
      * @param value unsigned integer in LEB128 format to decode
-     * @return int
+     * @return LEB128Result
      */
-    public static int decode(int value) {
-        int out = 0;
-        while (true) {
-            out |= (value & SEVEN_LSB_BITMASK);
-            value >>= 8;
-            if (value == 0) {
+    public static LEB128Result decode(int value) {
+        LEB128Result result = new LEB128Result(0, 1);
+        do {
+            result.value |= (value & SEVEN_LSB_BITMASK);
+            value >>>= 8;
+            if ((value & MSB_BITMASK) == 0) {
                 break;
             }
-            out <<= 7;
-        }
-        return out;
+            result.value <<= 7;
+            result.bytesRead++;
+        } while (value != 0);
+        //log.debug("Decoded {} bytes", byteCount);
+        return result;
     }
 
-    public static void main(String[] args) {
-        int[][] testData = { { 0, 0 }, { 5, 5 }, { 999999, 0xBF843D } };
+    /**
+     * Decodes an LEB128 unsigned integer from a byte array into a regular int.
+     *
+     * @param value
+     * @return LEB128Result
+     */
+    public static LEB128Result decode(byte[] value) {
+        log.debug("Decode encoded bytes: {}", HexDump.byteArrayToHexString(value));
+        LEB128Result result = new LEB128Result(0, 1);
+        int v = hexBytesToUnsignedInt(value);
+        log.debug("Decode: {}", v);
+        do {
+            result.value |= (v & SEVEN_LSB_BITMASK);
+            v >>>= 8;
+            if ((v & MSB_BITMASK) == 0) {
+                break;
+            }
+            result.value <<= 7;
+            result.bytesRead++;
+        } while (v != 0);
+        log.debug("Decoded leb: {}", result);
+        return result;
+    }
+
+    public static int hexBytesToUnsignedInt(byte[] hex) {
+        //log.trace("Hex length: {}", hex.length);
+        IoBuffer buf = IoBuffer.wrap(hex);
+        if (hex.length == 1) {
+            return buf.get() & 0xff;
+        } else if (hex.length == 2) {
+            return buf.getUnsignedShort();
+        } else if (hex.length == 3) {
+            return buf.getUnsignedMediumInt();
+        }
+        try {
+            return Math.toIntExact(buf.getUnsignedInt());
+        } catch (Exception e) {
+            log.warn("Exception extrating unsigned int", e);
+        }
+        return buf.getInt();
+    }
+
+    /**
+     * Result of a LEB128 encoding or decoding operation.
+     */
+    public static class LEB128Result {
+
+        public int value;
+
+        public int bytesRead;
+
+        public LEB128Result(int value, int bytesRead) {
+            this.value = value;
+            this.bytesRead = bytesRead;
+        }
+
+        @Override
+        public String toString() {
+            return "LEB128Result [value=" + value + ", bytesRead=" + bytesRead + "]";
+        }
+
+    }
+
+    /**
+     * Exception thrown when a LEB128 operation fails.
+     */
+    public static class LEB128Exception extends Exception {
+
+        public LEB128Exception(String message) {
+            super(message);
+        }
+
+    }
+
+    public static void main(String[] args) throws LEB128Exception {
+        int[][] testData = { { 0, 0 }, { 127, 0x7f }, { 11, 0x0b08, 0x0b }, { 150, 0x9601 }, { 254, 0xfe01 }, { 400, 0x9003 }, { 1200, 0xb009 }, { 999999, 0xBF843D }, { 1176, 0x9809 }, { 1162, 0x8a09 }, { Integer.MAX_VALUE, 0xffffff07 } };
         for (int i = 0; i < testData.length; i++) {
             int encoded = encode(testData[i][0]);
+            System.out.println("Value: " + testData[i][0] + " encoded: " + Integer.toHexString(encoded));
             if (encoded != testData[i][1]) {
-                System.out.printf("Encode failed: %d expected %d%n", encoded, testData[i][1]);
+                if (testData[i][2] == 0) {
+                    System.out.printf("Encode failed: %d expected %d%n", encoded, testData[i][1]);
+                } else {
+                    System.out.printf("Encode failed: %d expected %d or %d%n", encoded, testData[i][1], testData[i][2]);
+                }
             } else {
                 System.out.printf("Encode success: %d decoded: %d%n", encoded, testData[i][0]);
             }
-            int decoded = decode(encoded);
-            if (decoded != testData[i][0]) {
-                System.out.printf("Decode failed: %d expected %d%n", decoded, testData[i][0]);
+            LEB128Result decoded = decode(encoded);
+            if (decoded.value != testData[i][0]) {
+                System.out.printf("Decode failed: %d expected %d%n", decoded.value, testData[i][0]);
             } else {
-                System.out.printf("Decode success: %d encoded: %d%n", decoded, testData[i][1]);
+                System.out.printf("Decode success: %d encoded: %d%n", decoded.value, testData[i][1]);
             }
+            System.out.println();
         }
+        //int bytesEncoded = encode(2824, test, 0);
+        //int bytesEncoded = encode(0, test, 0);
+        //System.out.println("Bytes encoded: " + bytesEncoded + " value: " + HexDump.byteArrayToHexString(test) + " decoded: " + decode(test, 0)[0]);
+        //byte[] fragmentLen = new byte[] { 0x01, (byte) 0x88, 0x16, 0, 0 }; // 2824 index 1
+        //byte[] fragmentLen = new byte[] { 0x07, 0x07, (byte) 0xfe, 1, (byte) 0x8f, 0 }; // 254 index 2
+        //LEB128Result result = decode(fragmentLen, 2);
+        //System.out.println("Decoded: " + result);
     }
 
 }

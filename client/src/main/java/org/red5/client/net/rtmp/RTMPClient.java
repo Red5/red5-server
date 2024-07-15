@@ -130,7 +130,7 @@ public class RTMPClient extends BaseRTMPClientHandler {
     public void setProtocol(String protocol) throws Exception {
         this.protocol = protocol;
         if ("rtmps".equals(protocol) || "rtmpt".equals(protocol) || "rtmpte".equals(protocol) || "rtmfp".equals(protocol)) {
-            throw new Exception("Unsupported protocol specified, please use the correct client for the intended protocol.");
+            throw new Exception("Unsupported protocol specified, please use the correct client for the intended protocol");
         }
     }
 }

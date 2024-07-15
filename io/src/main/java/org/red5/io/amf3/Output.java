@@ -521,7 +521,7 @@ public class Output extends org.red5.io.amf.Output {
     /** {@inheritDoc} */
     @Override
     public void writeRecordSet(RecordSet recordset) {
-        writeString("Not implemented.");
+        writeString("Not implemented");
     }
 
     /** {@inheritDoc} */

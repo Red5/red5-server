@@ -7,13 +7,10 @@
 
 package org.red5.codec;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
-import org.red5.io.utils.LEB128;
 import org.red5.util.ByteNibbler;
 
 /**
@@ -24,33 +21,38 @@ import org.red5.util.ByteNibbler;
  */
 public class AV1Video extends AbstractVideo {
 
-    private static final byte Z_MASK = (byte) 0b10000000;
+    /* AV1
+       https://aomediacodec.github.io/av1-isobmff/v1.3.0.html#av1codecconfigurationbox-definition
 
-    private static final int Z_BITSHIFT = 7;
+       class AV1CodecConfigurationBox extends Box('av1C')
+        {
+        AV1CodecConfigurationRecord av1Config;
+        }
 
-    private static final byte Y_MASK = (byte) 0b01000000;
+        aligned(8) class AV1CodecConfigurationRecord {
+            unsigned int(1) marker = 1;
+            unsigned int(7) version = 1;
+            unsigned int(3) seq_profile;
+            unsigned int(5) seq_level_idx_0;
+            unsigned int(1) seq_tier_0;
+            unsigned int(1) high_bitdepth;
+            unsigned int(1) twelve_bit;
+            unsigned int(1) monochrome;
+            unsigned int(1) chroma_subsampling_x;
+            unsigned int(1) chroma_subsampling_y;
+            unsigned int(2) chroma_sample_position;
+            unsigned int(3) reserved = 0;
 
-    private static final int Y_BITSHIFT = 6;
+            unsigned int(1) initial_presentation_delay_present;
+            if (initial_presentation_delay_present) {
+                unsigned int(4) initial_presentation_delay_minus_one;
+            } else {
+                unsigned int(4) reserved = 0;
+            }
 
-    private static final byte W_MASK = (byte) 0b00110000;
-
-    private static final int W_BITSHIFT = 4;
-
-    private static final byte N_MASK = (byte) 0b00001000;
-
-    private static final int N_BITSHIFT = 3;
-
-    private static final byte OBU_FRAME_TYPE_MASK = (byte) 0b01111000;
-
-    private static final int OBU_FRAME_TYPE_BITSHIFT = 3;
-
-    private static final byte OBU_FRAME_TYPE_SEQUENCE_HEADER = 1;
-
-    private static final int AV1_PAYLOADER_HEADER_SIZE = 1;
-
-    private static final int LEB128_SIZE = 1;
-
-    // not sure if this is needed or not
+            unsigned int(8) configOBUs[];
+        }
+    */
     private FrameData decoderConfiguration;
 
     {
@@ -173,128 +175,6 @@ public class AV1Video extends AbstractVideo {
         // reset the position
         data.rewind();
         return result;
-    }
-
-    public static class AV1Payloader {
-
-        private byte[] sequenceHeader;
-
-        public List<byte[]> payload(int mtu, byte[] payload) {
-            List<byte[]> payloads = new ArrayList<>();
-            int payloadDataIndex = 0;
-            int payloadDataRemaining = payload.length;
-
-            if (mtu <= 0 || payloadDataRemaining <= 0) {
-                return payloads;
-            }
-
-            byte frameType = (byte) ((payload[0] & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
-            if (frameType == OBU_FRAME_TYPE_SEQUENCE_HEADER) {
-                sequenceHeader = payload;
-                return payloads;
-            }
-
-            while (payloadDataRemaining > 0) {
-                byte obuCount = 1;
-                int metadataSize = AV1_PAYLOADER_HEADER_SIZE;
-                if (sequenceHeader != null && sequenceHeader.length != 0) {
-                    obuCount++;
-                    metadataSize += LEB128_SIZE + sequenceHeader.length;
-                }
-
-                byte[] out = new byte[Math.min(mtu, payloadDataRemaining + metadataSize)];
-                int outOffset = AV1_PAYLOADER_HEADER_SIZE;
-                out[0] = (byte) (obuCount << W_BITSHIFT);
-
-                if (obuCount == 2) {
-                    out[0] ^= N_MASK;
-                    out[1] = (byte) LEB128.encode(sequenceHeader.length);
-                    System.arraycopy(sequenceHeader, 0, out, 2, sequenceHeader.length);
-                    outOffset += LEB128_SIZE + sequenceHeader.length;
-                    sequenceHeader = null;
-                }
-
-                int outBufferRemaining = out.length - outOffset;
-                System.arraycopy(payload, payloadDataIndex, out, outOffset, outBufferRemaining);
-                payloadDataRemaining -= outBufferRemaining;
-                payloadDataIndex += outBufferRemaining;
-
-                if (!payloads.isEmpty()) {
-                    out[0] ^= Z_MASK;
-                }
-
-                if (payloadDataRemaining != 0) {
-                    out[0] ^= Y_MASK;
-                }
-
-                payloads.add(out);
-            }
-
-            return payloads;
-        }
-
-    }
-
-    public static class AV1Packet {
-
-        public boolean Z, Y, N;
-
-        public byte W;
-
-        public List<byte[]> OBUElements;
-
-        public byte[] unmarshal(byte[] payload) throws Exception {
-            if (payload == null) {
-                throw new Exception("Nil packet");
-            } else if (payload.length < 2) {
-                throw new Exception("Short packet");
-            }
-
-            Z = ((payload[0] & Z_MASK) >> Z_BITSHIFT) != 0;
-            Y = ((payload[0] & Y_MASK) >> Y_BITSHIFT) != 0;
-            N = ((payload[0] & N_MASK) >> N_BITSHIFT) != 0;
-            W = (byte) ((payload[0] & W_MASK) >> W_BITSHIFT);
-
-            if (Z && N) {
-                throw new Exception("Packet cannot be both a keyframe and a fragment");
-            }
-
-            OBUElements = parseBody(payload);
-
-            byte[] result = new byte[payload.length - 1];
-            System.arraycopy(payload, 1, result, 0, result.length);
-            return result;
-        }
-
-        private List<byte[]> parseBody(byte[] payload) throws Exception {
-            List<byte[]> obuElements = new ArrayList<>();
-
-            int currentIndex = 1;
-            for (int i = 1; currentIndex < payload.length; i++) {
-                int obuElementLength;
-                int bytesRead = 0;
-
-                if (i == W) {
-                    bytesRead = 0;
-                    obuElementLength = payload.length - currentIndex;
-                } else {
-                    obuElementLength = LEB128.decode(payload[currentIndex]);
-                    bytesRead++;
-                }
-
-                currentIndex += bytesRead;
-                if (payload.length < currentIndex + obuElementLength) {
-                    throw new Exception("Short packet");
-                }
-                byte[] obuElement = new byte[obuElementLength];
-                System.arraycopy(payload, currentIndex, obuElement, 0, obuElementLength);
-                obuElements.add(obuElement);
-                currentIndex += obuElementLength;
-            }
-
-            return obuElements;
-        }
-
     }
 
 }
