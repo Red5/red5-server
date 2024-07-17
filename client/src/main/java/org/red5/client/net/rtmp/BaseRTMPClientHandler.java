@@ -805,10 +805,14 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
             Number streamId = (Number) (source.getStreamId() != null ? source.getStreamId().doubleValue() : 1.0d);
             if (log.isDebugEnabled()) {
                 log.debug("Stream id from header: {}", streamId);
-                // XXX create better to serialize ObjectMap to Status object
-                ObjectMap<?, ?> objMap = (ObjectMap<?, ?>) call.getArguments()[0];
-                // should keep this as an Object to stay compatible with FMS3 etc
-                log.debug("Client id from status: {}", objMap.get("clientid"));
+                try {
+                    // XXX create better to serialize ObjectMap to Status object
+                    ObjectMap<?, ?> objMap = (ObjectMap<?, ?>) call.getArguments()[0];
+                    // should keep this as an Object to stay compatible with FMS3 etc
+                    log.debug("Client id from status: {}", objMap.get("clientid"));
+                } catch (Exception e) {
+                    log.warn("Exception mapping call args", e);
+                }
             }
             if (streamId != null) {
                 // try lookup by stream id, if null return the first one
@@ -829,7 +833,14 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
             call.setException(new MethodNotFoundException(methodName));
             log.info("No service provider / method for: {}; to handle calls like onBWCheck, add a service provider", methodName);
         } else {
-            serviceInvoker.invoke(call, serviceProvider);
+            try {
+                serviceInvoker.invoke(call, serviceProvider);
+            } catch (Exception ex) {
+                Object[] callArgs = call.getArguments();
+                log.warn("Exception invoking method: {} args[0] type: {}", methodName, (callArgs.length > 0 ? callArgs[0].getClass() : "null"), ex);
+                call.setStatus(Call.STATUS_METHOD_NOT_FOUND);
+                call.setException(ex);
+            }
         }
         if (call instanceof IPendingServiceCall) {
             IPendingServiceCall psc = (IPendingServiceCall) call;

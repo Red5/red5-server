@@ -791,6 +791,15 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return so.get();
     }
 
+    /**
+     * Returns true if the scope has a reference to a shared object.
+     *
+     * @return true if the scope has a reference to a shared object
+     */
+    public boolean hasRef() {
+        return so.get() != null;
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {
