@@ -221,7 +221,10 @@ public class AbstractAudio implements IAudioStreamCodec {
 
     @Override
     public String toString() {
-        return "Audio [codec=" + codec + ", multitrackType=" + multitrackType + ", sampleRate=" + sampleRate + ", sampleSizeInBits=" + sampleSizeInBits + ", channels=" + channels + ", signed=" + signed + ", trackId=" + trackId + "]";
+        if (enhanced) {
+            return "Audio [codec=" + codec + ", multitrackType=" + multitrackType + ", sampleRate=" + sampleRate + ", sampleSizeInBits=" + sampleSizeInBits + ", channels=" + channels + ", signed=" + signed + ", trackId=" + trackId + ", audioChannelOrder=" + audioChannelOrder + ", audioChannelMap=" + audioChannelMap + ", audioChannelFlags=" + audioChannelFlags + ", attributes=" + attributes + "]";
+        }
+        return "Audio [codec=" + codec + ", sampleRate=" + sampleRate + ", sampleSizeInBits=" + sampleSizeInBits + ", channels=" + channels + ", signed=" + signed + ", not enhanced]";
     }
 
 }

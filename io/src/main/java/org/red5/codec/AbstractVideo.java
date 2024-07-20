@@ -425,7 +425,10 @@ public class AbstractVideo implements IVideoStreamCodec {
 
     @Override
     public String toString() {
-        return "Video [codec=" + codec + ", multitrackType=" + multitrackType + ", trackId=" + trackId + ", frameType=" + frameType + ", packetType=" + packetType + "]";
+        if (enhanced) {
+            return "Video [codec=" + codec + ", multitrackType=" + multitrackType + ", trackId=" + trackId + ", frameType=" + frameType + ", packetType=" + packetType + "]";
+        }
+        return "Video [codec=" + codec + ", frameType=" + frameType + ", not enhanced]";
     }
 
 }
