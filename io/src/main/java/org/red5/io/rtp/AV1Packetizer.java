@@ -98,6 +98,15 @@ public class AV1Packetizer {
     // Collection of OBU Elements; each OBU Element may be a full OBU, or just a fragment of one.
     private List<byte[]> OBUElements;
 
+    // Aggregation item: Z first packet in frame is fragment
+    private boolean firstPacketInFrame;
+
+    // Aggregation item: Y last packet in frame is fragment
+    private boolean lastPacketInFrame;
+
+    // Aggregation item: N start sequence
+    private boolean startSequence;
+
     private byte[] sequenceHeader;
 
     /**
@@ -115,9 +124,9 @@ public class AV1Packetizer {
         }
         // aggregate header byte is used to indicate if the first and/or last OBU element in the payload is a fragment
         // of an OBU
-        boolean firstPacketInFrame = OBUParser.startsWithFragment(payload[0]); // Z first packet in frame is fragment
-        boolean lastPacketInFrame = OBUParser.endsWithFragment(payload[0]); // Y last packet in frame is fragment
-        boolean startSequence = OBUParser.startsNewCodedVideoSequence(payload[0]); // N
+        firstPacketInFrame = OBUParser.startsWithFragment(payload[0]); // Z first packet in frame is fragment
+        lastPacketInFrame = OBUParser.endsWithFragment(payload[0]); // Y last packet in frame is fragment
+        startSequence = OBUParser.startsNewCodedVideoSequence(payload[0]); // N
         // obu's in the payload
         int obuCount = OBUParser.obuCount(payload[0]); // W
         logger.debug("Depacketize - first packet in frame: {}, last packet in frame: {}, start sequence: {} count: {}", firstPacketInFrame, lastPacketInFrame, startSequence, obuCount);
@@ -335,10 +344,36 @@ public class AV1Packetizer {
             OBUElements.clear();
         }
         sequenceHeader = null;
+        // reset aggregation items; also done at depacketize
+        firstPacketInFrame = lastPacketInFrame = startSequence = false;
     }
 
     public List<byte[]> getOBUElements() {
         return OBUElements;
+    }
+
+    public boolean isFirstPacketInFrame() {
+        return firstPacketInFrame;
+    }
+
+    public void setFirstPacketInFrame(boolean firstPacketInFrame) {
+        this.firstPacketInFrame = firstPacketInFrame;
+    }
+
+    public boolean isLastPacketInFrame() {
+        return lastPacketInFrame;
+    }
+
+    public void setLastPacketInFrame(boolean lastPacketInFrame) {
+        this.lastPacketInFrame = lastPacketInFrame;
+    }
+
+    public boolean isStartSequence() {
+        return startSequence;
+    }
+
+    public void setStartSequence(boolean startSequence) {
+        this.startSequence = startSequence;
     }
 
     @Override
