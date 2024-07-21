@@ -18,7 +18,7 @@ public class OBPConstants {
 
     public static final int N_BITSHIFT = 3;
 
-    public static final byte OBU_FRAME_TYPE_MASK = (byte) 0b01111000;
+    public static final byte OBU_FRAME_TYPE_MASK = (byte) 0b01111000; // 0x78
 
     public static final int OBU_FRAME_TYPE_BITSHIFT = 3;
 

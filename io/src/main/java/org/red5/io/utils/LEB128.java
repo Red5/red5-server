@@ -182,35 +182,4 @@ public final class LEB128 {
 
     }
 
-    public static void main(String[] args) throws LEB128Exception {
-        int[][] testData = { { 0, 0 }, { 127, 0x7f }, { 11, 0x0b08, 0x0b }, { 150, 0x9601 }, { 254, 0xfe01 }, { 400, 0x9003 }, { 1200, 0xb009 }, { 999999, 0xBF843D }, { 1176, 0x9809 }, { 1162, 0x8a09 }, { Integer.MAX_VALUE, 0xffffff07 } };
-        for (int i = 0; i < testData.length; i++) {
-            int encoded = encode(testData[i][0]);
-            System.out.println("Value: " + testData[i][0] + " encoded: " + Integer.toHexString(encoded));
-            if (encoded != testData[i][1]) {
-                if (testData[i][2] == 0) {
-                    System.out.printf("Encode failed: %d expected %d%n", encoded, testData[i][1]);
-                } else {
-                    System.out.printf("Encode failed: %d expected %d or %d%n", encoded, testData[i][1], testData[i][2]);
-                }
-            } else {
-                System.out.printf("Encode success: %d decoded: %d%n", encoded, testData[i][0]);
-            }
-            LEB128Result decoded = decode(encoded);
-            if (decoded.value != testData[i][0]) {
-                System.out.printf("Decode failed: %d expected %d%n", decoded.value, testData[i][0]);
-            } else {
-                System.out.printf("Decode success: %d encoded: %d%n", decoded.value, testData[i][1]);
-            }
-            System.out.println();
-        }
-        //int bytesEncoded = encode(2824, test, 0);
-        //int bytesEncoded = encode(0, test, 0);
-        //System.out.println("Bytes encoded: " + bytesEncoded + " value: " + HexDump.byteArrayToHexString(test) + " decoded: " + decode(test, 0)[0]);
-        //byte[] fragmentLen = new byte[] { 0x01, (byte) 0x88, 0x16, 0, 0 }; // 2824 index 1
-        //byte[] fragmentLen = new byte[] { 0x07, 0x07, (byte) 0xfe, 1, (byte) 0x8f, 0 }; // 254 index 2
-        //LEB128Result result = decode(fragmentLen, 2);
-        //System.out.println("Decoded: " + result);
-    }
-
 }

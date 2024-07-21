@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bouncycastle.util.Arrays;
+import org.red5.io.obu.OBUInfo;
 import org.red5.io.obu.OBUParser;
 import org.red5.io.obu.OBUType;
 import org.red5.io.utils.LEB128;
@@ -148,13 +149,13 @@ public class AV1Packetizer {
                 obuElementLength = result.value;
                 //logger.trace("Index: {} new index: {}", currentIndex, (currentIndex + result[1]));
                 currentIndex += result.bytesRead;
-                obuType = OBUType.fromValue((payload[currentIndex] & 0x78) >> 3);
+                obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
                 logger.debug("OBU element type: {} w/required length: {}", obuType, obuElementLength);
             } else {
                 logger.debug("Last OBU element #{} current index: {}", obuIndex, currentIndex);
                 // last OBU element in the packet will not have a length field
                 obuElementLength = (payload.length - currentIndex);
-                obuType = OBUType.fromValue((payload[currentIndex] & 0x78) >> 3);
+                obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
                 logger.debug("Last OBU element type: {} length: {}", obuType, obuElementLength);
             }
             if (payload.length < (currentIndex + obuElementLength)) {
@@ -182,16 +183,55 @@ public class AV1Packetizer {
     }
 
     /**
-     * Packetizes a list of AV1 payloads.
+     * Packetizes a list of AV1 OBU elements.
      *
-     * @param obuElements list of AV1 payloads
+     * @param obuElements list of OBUInfo
      * @param mtu         maximum transmission unit
      * @return list of packets
      */
-    public List<byte[]> packetize(List<byte[]> obuElements, int mtu) {
+    public List<byte[]> packetize(List<OBUInfo> obuInfos, int mtu) {
         List<byte[]> payloads = new LinkedList<>();
-        for (byte[] obuElement : obuElements) {
-            payloads.addAll(packetize(obuElement, mtu));
+        for (OBUInfo obuInfo : obuInfos) {
+            // obuInfo.data does not include the OBU header
+            byte[] payload = obuInfo.data.array();
+            byte frameType = (byte) ((obuInfo.obuType.getValue() & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
+            if (frameType == OBU_FRAME_TYPE_SEQUENCE_HEADER) {
+                sequenceHeader = payload;
+            } else {
+                int payloadDataIndex = 0;
+                int payloadDataRemaining = payload.length;
+                byte obuCount = 0;
+                // no meta no need to add to metadata size
+                int metadataSize = 0;
+                if (sequenceHeader != null && sequenceHeader.length > 0) {
+                    // metadata size is small so 1 byte to hold its leb128 encoded length
+                    metadataSize += sequenceHeader.length + 1;
+                    obuCount++;
+                }
+                do {
+                    int outOffset = 1; // AV1_PAYLOADER_HEADER_SIZE
+                    byte[] out = new byte[Math.min(mtu, payloadDataRemaining + metadataSize)];
+                    out[0] = (byte) (obuCount << W_BITSHIFT);
+                    if (obuCount == 2) {
+                        out[0] ^= N_MASK;
+                        out[1] = (byte) LEB128.encode(sequenceHeader.length);
+                        System.arraycopy(sequenceHeader, 0, out, 2, sequenceHeader.length);
+                        outOffset += sequenceHeader.length + 1; // 1 byte for LEB128
+                        sequenceHeader = null;
+                    }
+                    int outBufferRemaining = out.length - outOffset;
+                    System.arraycopy(payload, payloadDataIndex, out, outOffset, outBufferRemaining);
+                    payloadDataRemaining -= outBufferRemaining;
+                    payloadDataIndex += outBufferRemaining;
+                    if (!payloads.isEmpty()) {
+                        out[0] ^= Z_MASK;
+                    }
+                    if (payloadDataRemaining != 0) {
+                        out[0] ^= Y_MASK;
+                    }
+                    payloads.add(out);
+                } while (payloadDataRemaining > 0);
+            }
         }
         return payloads;
     }
@@ -294,6 +334,7 @@ public class AV1Packetizer {
         if (OBUElements != null) {
             OBUElements.clear();
         }
+        sequenceHeader = null;
     }
 
     public List<byte[]> getOBUElements() {

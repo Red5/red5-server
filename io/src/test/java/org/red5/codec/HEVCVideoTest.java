@@ -109,7 +109,7 @@ public class HEVCVideoTest {
         data.flip();
 
         HEVCVideo video = new HEVCVideo();
-        video.setBufferInterframes(true);
+        video.setBufferInterframes(false);
         assertTrue(video.canHandleData(data));
         assertTrue(video.addData(data, 1000)); // use a timestamp of 1000
         if (!video.isBufferInterframes()) {
