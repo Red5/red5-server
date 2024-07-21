@@ -192,60 +192,6 @@ public class AV1Packetizer {
     }
 
     /**
-     * Packetizes a list of AV1 OBU elements.
-     *
-     * @param obuElements list of OBUInfo
-     * @param mtu         maximum transmission unit
-     * @return list of packets
-     */
-    public List<byte[]> packetize(List<OBUInfo> obuInfos, int mtu) {
-        List<byte[]> payloads = new LinkedList<>();
-        for (OBUInfo obuInfo : obuInfos) {
-            // obuInfo.data does not include the OBU header
-            byte[] payload = obuInfo.data.array();
-            byte frameType = (byte) ((obuInfo.obuType.getValue() & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
-            if (frameType == OBU_FRAME_TYPE_SEQUENCE_HEADER) {
-                sequenceHeader = payload;
-            } else {
-                int payloadDataIndex = 0;
-                int payloadDataRemaining = payload.length;
-                byte obuCount = 0;
-                // no meta no need to add to metadata size
-                int metadataSize = 0;
-                if (sequenceHeader != null && sequenceHeader.length > 0) {
-                    // metadata size is small so 1 byte to hold its leb128 encoded length
-                    metadataSize += sequenceHeader.length + 1;
-                    obuCount++;
-                }
-                do {
-                    int outOffset = 1; // AV1_PAYLOADER_HEADER_SIZE
-                    byte[] out = new byte[Math.min(mtu, payloadDataRemaining + metadataSize)];
-                    out[0] = (byte) (obuCount << W_BITSHIFT);
-                    if (obuCount == 2) {
-                        out[0] ^= N_MASK;
-                        out[1] = (byte) LEB128.encode(sequenceHeader.length);
-                        System.arraycopy(sequenceHeader, 0, out, 2, sequenceHeader.length);
-                        outOffset += sequenceHeader.length + 1; // 1 byte for LEB128
-                        sequenceHeader = null;
-                    }
-                    int outBufferRemaining = out.length - outOffset;
-                    System.arraycopy(payload, payloadDataIndex, out, outOffset, outBufferRemaining);
-                    payloadDataRemaining -= outBufferRemaining;
-                    payloadDataIndex += outBufferRemaining;
-                    if (!payloads.isEmpty()) {
-                        out[0] ^= Z_MASK;
-                    }
-                    if (payloadDataRemaining != 0) {
-                        out[0] ^= Y_MASK;
-                    }
-                    payloads.add(out);
-                } while (payloadDataRemaining > 0);
-            }
-        }
-        return payloads;
-    }
-
-    /**
      * Packetizes an AV1 payload.
      *
      * @param payload AV1 payload
@@ -295,39 +241,49 @@ public class AV1Packetizer {
         return payloads;
     }
 
-    // Payload fragments a AV1 packet across one or more byte arrays
-    // See AV1Packet for description of AV1 Payload Header
-    public static LinkedList<byte[]> marshal(int mtu, byte[] payload) {
+    /**
+     * Packetizes a list of AV1 OBU, consisting of a sequence header and one or more OBU elements.
+     *
+     * @param obuElements list of OBUInfo
+     * @param mtu         maximum transmission unit
+     * @return list of packets
+     */
+    public List<byte[]> packetize(List<OBUInfo> obuInfos, int mtu) {
         LinkedList<byte[]> payloads = new LinkedList<>();
         int aggregationHeaderLength = 1;
         int maxFragmentSize = mtu - aggregationHeaderLength - 2;
-        int payloadDataRemaining = payload.length;
-        int payloadDataIndex = 0;
-        // Make sure the fragment/payload size is correct
-        if (Math.min(maxFragmentSize, payloadDataRemaining) > 0) {
-            while (payloadDataRemaining > 0) {
-                int currentFragmentSize = Math.min(maxFragmentSize, payloadDataRemaining);
-                int leb128Size = 1;
-                if (currentFragmentSize >= 127) {
-                    leb128Size = 2;
-                }
-                byte[] out = new byte[aggregationHeaderLength + leb128Size + currentFragmentSize];
-                int leb128Value = LEB128.encode(currentFragmentSize);
-                if (leb128Size == 1) {
-                    out[1] = (byte) leb128Value;
-                } else {
-                    out[1] = (byte) (leb128Value >> 8);
-                    out[2] = (byte) leb128Value;
-                }
-                System.arraycopy(payload, payloadDataIndex, out, aggregationHeaderLength + leb128Size, currentFragmentSize);
-                payloads.add(out);
-                payloadDataRemaining -= currentFragmentSize;
-                payloadDataIndex += currentFragmentSize;
-                if (payloads.size() > 1) {
-                    out[0] ^= Z_MASK;
-                }
-                if (payloadDataRemaining != 0) {
-                    out[0] ^= Y_MASK;
+        for (OBUInfo obuInfo : obuInfos) {
+            // obuInfo.data does not include the OBU header
+            byte frameType = (byte) ((obuInfo.obuType.getValue() & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
+            byte[] payload = obuInfo.data.array();
+            int payloadDataRemaining = payload.length, payloadDataIndex = 0;
+            logger.debug("Frame type: {}", frameType);
+            // Make sure the fragment/payload size is correct
+            if (Math.min(maxFragmentSize, payloadDataRemaining) > 0) {
+                while (payloadDataRemaining > 0) {
+                    int currentFragmentSize = Math.min(maxFragmentSize, payloadDataRemaining);
+                    int leb128Value = LEB128.encode(currentFragmentSize);
+                    byte[] out;
+                    if (currentFragmentSize >= 127) { // leb takes at least 2 bytes
+                        int outLen = aggregationHeaderLength + 2 + currentFragmentSize;
+                        out = new byte[outLen];
+                        out[1] = (byte) (leb128Value >> 8);
+                        out[2] = (byte) leb128Value;
+                        System.arraycopy(payload, payloadDataIndex, out, aggregationHeaderLength + 2, currentFragmentSize);
+                    } else { // leb expected to be 1 byte
+                        out = new byte[aggregationHeaderLength + 1 + currentFragmentSize];
+                        out[1] = (byte) leb128Value;
+                        System.arraycopy(payload, payloadDataIndex, out, aggregationHeaderLength + 1, currentFragmentSize);
+                    }
+                    payloads.add(out);
+                    payloadDataRemaining -= currentFragmentSize;
+                    payloadDataIndex += currentFragmentSize;
+                    if (payloads.size() > 1) {
+                        out[0] ^= Z_MASK;
+                    }
+                    if (payloadDataRemaining != 0) {
+                        out[0] ^= Y_MASK;
+                    }
                 }
             }
         }
