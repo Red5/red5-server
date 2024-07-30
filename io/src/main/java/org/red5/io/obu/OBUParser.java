@@ -1932,13 +1932,13 @@ public class OBUParser {
     }
 
     private static int getRelativeDist(int a, int b, OBPSequenceHeader seq) {
-        if (!seq.enableOrderHint) {
-            return 0;
+        if (seq.enableOrderHint) {
+            int diff = a - b;
+            int m = 1 << (seq.OrderHintBits - 1);
+            diff = (diff & (m - 1)) - (diff & m);
+            return diff;
         }
-        int diff = a - b;
-        int m = 1 << (seq.OrderHintBits - 1);
-        diff = (diff & (m - 1)) - (diff & m);
-        return diff;
+        return 0;
     }
 
     /**
@@ -1986,40 +1986,44 @@ public class OBUParser {
     }
 
     /**
-     * Returns true if the given byte starts a fragment.
+     * Returns true if the given byte starts a fragment. This is denoted as Z in the spec: MUST be set to 1 if the
+     * first OBU element is an OBU fragment that is a continuation of an OBU fragment from the previous packet, and
+     * MUST be set to 0 otherwise.
      *
      * @param aggregationHeader
-     * @return
+     * @return true if the given byte starts a fragment
      */
     public static boolean startsWithFragment(byte aggregationHeader) {
-        return (aggregationHeader & OBU_START_FRAGMENT_BIT) != 0;
+        return (aggregationHeader & OBU_START_FRAGMENT_BIT) == 0;
     }
 
     /**
-     * Returns true if the given byte ends a fragment.
+     * Returns true if the given byte ends a fragment. This is denoted as Y in the spec: MUST be set to 1 if the last
+     * OBU element is an OBU fragment that will continue in the next packet, and MUST be set to 0 otherwise.
      *
      * @param aggregationHeader
-     * @return
+     * @return true if the given byte ends a fragment
      */
     public static boolean endsWithFragment(byte aggregationHeader) {
-        return (aggregationHeader & OBU_END_FRAGMENT_BIT) != 0;
+        return (aggregationHeader & OBU_END_FRAGMENT_BIT) == 0;
     }
 
     /**
-     * Returns true if the given byte is the starts a new sequence.
+     * Returns true if the given byte is the starts a new sequence. This denoted as N in the spec: MUST be set to 1 if
+     * the packet is the first packet of a coded video sequence, and MUST be set to 0 otherwise.
      *
      * @param aggregationHeader
-     * @return
+     * @return true if the given byte starts a new sequence
      */
     public static boolean startsNewCodedVideoSequence(byte aggregationHeader) {
-        return (aggregationHeader & OBU_START_SEQUENCE_BIT) != 0;
+        return (aggregationHeader & OBU_START_SEQUENCE_BIT) == 1;
     }
 
     /**
      * Returns expected number of OBU's.
      *
      * @param aggregationHeader
-     * @return
+     * @return expected number of OBU's
      */
     public static int obuCount(byte aggregationHeader) {
         return (aggregationHeader & OBU_COUNT_MASK) >> 4;
@@ -2029,7 +2033,7 @@ public class OBUParser {
      * Returns the OBU type from the given byte.
      *
      * @param obuHeader
-     * @return
+     * @return the OBU type
      */
     public static int obuType(byte obuHeader) {
         return (obuHeader & OBU_TYPE_MASK) >>> 3;
@@ -2039,7 +2043,7 @@ public class OBUParser {
      * Returns whether or not the OBU has an extension.
      *
      * @param obuHeader
-     * @return
+     * @return true if the OBU has an extension
      */
     public static boolean obuHasExtension(byte obuHeader) {
         return (obuHeader & OBU_EXT_BIT) != 0;
@@ -2049,7 +2053,7 @@ public class OBUParser {
      * Returns whether or not the OBU has a size.
      *
      * @param obuHeader
-     * @return
+     * @return true if the OBU has a size
      */
     public static boolean obuHasSize(byte obuHeader) {
         return (obuHeader & OBU_SIZE_PRESENT_BIT) != 0;

@@ -124,7 +124,7 @@ public class OBUParserTest {
         // get any remaining OBUs
         List<byte[]> obuElements = av1Packetizer.getOBUElements();
         System.out.println("Depacketized OBUs: " + obuElements.size());
-        assertTrue(obuElements.size() == 6);
+        assertTrue(obuElements.size() == 11);
         List<OBUInfo> obuInfos = new LinkedList<>();
         for (byte[] obu : obuElements) {
             OBUType type = OBUType.fromValue((obu[0] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);

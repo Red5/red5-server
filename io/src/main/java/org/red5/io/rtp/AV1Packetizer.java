@@ -161,21 +161,33 @@ public class AV1Packetizer {
                 currentIndex += result.bytesRead;
             }
             obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
-            if (isTrace) {
-                boolean obuExtensionFlag = OBUParser.obuHasExtension(payload[currentIndex]);
-                boolean obuHasSizeField = OBUParser.obuHasSize(payload[currentIndex]);
-                logger.trace("OBU type: {} extension? {} size field? {}, length: {}", obuType, obuExtensionFlag, obuHasSizeField, obuFragmentLength);
+            if (obuType == null) {
+                logger.warn("Unknown OBU type, assume data belongs on the end of the last packet fragment");
+                byte[] lastFragment = OBUElements.removeLast();
+                byte[] newLastFragment = new byte[lastFragment.length + obuFragmentLength];
+                System.arraycopy(lastFragment, 0, newLastFragment, 0, lastFragment.length);
+                System.arraycopy(payload, currentIndex, newLastFragment, lastFragment.length, obuFragmentLength);
+                OBUElements.add(newLastFragment);
+            } else {
+                if (isTrace) {
+                    boolean obuExtensionFlag = OBUParser.obuHasExtension(payload[currentIndex]);
+                    boolean obuHasSizeField = OBUParser.obuHasSize(payload[currentIndex]);
+                    logger.trace("OBU type: {} extension? {} size field? {}, length: {}", obuType, obuExtensionFlag, obuHasSizeField, obuFragmentLength);
+                }
+                //if (payload.length < (currentIndex + obuElementLength)) {
+                //    throw new Exception("Short packet");
+                //}
+                byte[] obuFragment = new byte[obuFragmentLength];
+                System.arraycopy(payload, currentIndex, obuFragment, 0, obuFragmentLength);
+                // if we have a sequence header, store it
+                if (obuType == OBUType.SEQUENCE_HEADER) {
+                    sequenceHeader = Arrays.clone(obuFragment);
+                }
+                // we don't store padding
+                if (obuType != OBUType.PADDING) {
+                    OBUElements.add(obuFragment);
+                }
             }
-            //if (payload.length < (currentIndex + obuElementLength)) {
-            //    throw new Exception("Short packet");
-            //}
-            byte[] obuFragment = new byte[obuFragmentLength];
-            System.arraycopy(payload, currentIndex, obuFragment, 0, obuFragmentLength);
-            // if we have a sequence header, store it
-            if (obuType == OBUType.SEQUENCE_HEADER) {
-                sequenceHeader = Arrays.clone(obuFragment);
-            }
-            OBUElements.add(obuFragment);
             currentIndex += obuFragmentLength;
         }
         if (isTrace) {
@@ -246,7 +258,7 @@ public class AV1Packetizer {
         int aggregationHeaderLength = 1;
         int maxFragmentSize = mtu - aggregationHeaderLength - 2;
         for (OBUInfo obuInfo : obuInfos) {
-            // obuInfo.data does not include the OBU header
+            // obuInfo.data includes the OBU header, but no aggregation header nor size field
             byte frameType = (byte) ((obuInfo.obuType.getValue() & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
             byte[] payload = obuInfo.data.array();
             int payloadDataRemaining = payload.length, payloadDataIndex = 0;
