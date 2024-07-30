@@ -34,6 +34,8 @@ public class AV1Packetizer {
 
     private static final Logger logger = LoggerFactory.getLogger(AV1Packetizer.class);
 
+    private static final boolean isTrace = logger.isTraceEnabled();
+
     /*
         AV1 format:
 
@@ -143,50 +145,41 @@ public class AV1Packetizer {
         // example: [ SH MD MD(0,0) FH(0,0) TG(0,0) ] [ MD(0,1) FH(0,1) TG(0,1) ]
         // parse the bodies
         int currentIndex = 1; // skip the aggregation header
+        // first obu is index 1
         for (int obuIndex = 1; currentIndex < payload.length; obuIndex++) {
             OBUType obuType = null;
-            int obuElementLength = 0;
+            int obuFragmentLength = (payload.length - currentIndex);
             // W is the obu count expected in the packet
+            logger.debug("OBU element #{} of {} array index: {}", obuIndex, obuCount, currentIndex);
             if (obuCount == 0 || obuIndex < obuCount) {
-                logger.debug("OBU element #{} current index: {}", obuIndex, currentIndex);
-                int lebLength = 1;
-                // read the length of the OBU element and if its 127 expect to read 2 bytes
-                if (payload[currentIndex] == 127) {
-                    lebLength = 2;
-                }
-                LEB128Result result = LEB128.decode(Arrays.copyOfRange(payload, currentIndex, currentIndex + lebLength));
-                obuElementLength = result.value;
+                // read the length of the OBU fragment and if its 127 expect to read 2 bytes
+                byte[] fragmentLen = new byte[payload[currentIndex] == 127 ? 2 : 1];
+                System.arraycopy(payload, currentIndex, fragmentLen, 0, fragmentLen.length);
+                LEB128Result result = LEB128.decode(fragmentLen);
+                obuFragmentLength = result.value;
                 //logger.trace("Index: {} new index: {}", currentIndex, (currentIndex + result[1]));
                 currentIndex += result.bytesRead;
-                obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
-                logger.debug("OBU element type: {} w/required length: {}", obuType, obuElementLength);
-            } else {
-                logger.debug("Last OBU element #{} current index: {}", obuIndex, currentIndex);
-                // last OBU element in the packet will not have a length field
-                obuElementLength = (payload.length - currentIndex);
-                obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >> OBU_FRAME_TYPE_BITSHIFT);
-                logger.debug("Last OBU element type: {} length: {}", obuType, obuElementLength);
             }
-            if (payload.length < (currentIndex + obuElementLength)) {
-                throw new Exception("Short packet");
+            obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
+            if (isTrace) {
+                boolean obuExtensionFlag = OBUParser.obuHasExtension(payload[currentIndex]);
+                boolean obuHasSizeField = OBUParser.obuHasSize(payload[currentIndex]);
+                logger.trace("OBU type: {} extension? {} size field? {}, length: {}", obuType, obuExtensionFlag, obuHasSizeField, obuFragmentLength);
             }
-            byte[] obuElement = new byte[obuElementLength];
-            System.arraycopy(payload, currentIndex, obuElement, 0, obuElementLength);
+            //if (payload.length < (currentIndex + obuElementLength)) {
+            //    throw new Exception("Short packet");
+            //}
+            byte[] obuFragment = new byte[obuFragmentLength];
+            System.arraycopy(payload, currentIndex, obuFragment, 0, obuFragmentLength);
             // if we have a sequence header, store it
             if (obuType == OBUType.SEQUENCE_HEADER) {
-                sequenceHeader = Arrays.clone(obuElement);
+                sequenceHeader = Arrays.clone(obuFragment);
             }
-            //if (firstPacketInFrame) {
-            // if we have a continuation, add to the last OBU element
-            //byte[] lastFragment = OBUElements.removeLast();
-            //byte[] updatedFragment = new byte[lastFragment.length + obuElement.length];
-            //System.arraycopy(lastFragment, 0, updatedFragment, 0, lastFragment.length);
-            //System.arraycopy(obuElement, 0, updatedFragment, lastFragment.length, obuElement.length);
-            //OBUElements.add(updatedFragment);
-            //} else {
-            OBUElements.add(obuElement);
-            //}
-            currentIndex += obuElementLength;
+            OBUElements.add(obuFragment);
+            currentIndex += obuFragmentLength;
+        }
+        if (isTrace) {
+            logger.debug("OBU read completely? {}", (currentIndex == payload.length));
         }
         return OBUElements.size();
     }

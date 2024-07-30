@@ -1,5 +1,7 @@
 package org.red5.io.obu;
 
+import static org.red5.io.obu.OBPConstants.OBU_FRAME_TYPE_BITSHIFT;
+import static org.red5.io.obu.OBPConstants.OBU_FRAME_TYPE_MASK;
 import static org.red5.io.obu.OBUType.FRAME;
 import static org.red5.io.obu.OBUType.FRAME_HEADER;
 import static org.red5.io.obu.OBUType.METADATA;
@@ -15,6 +17,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.red5.io.utils.HexDump;
 import org.red5.io.utils.LEB128;
 import org.red5.io.utils.LEB128.LEB128Result;
 import org.slf4j.Logger;
@@ -66,20 +69,20 @@ public class OBUParser {
     *     0 on success, -1 on error.
     */
     public static OBUInfo getNextObu(byte[] buf, int offset, int bufSize) throws OBUParseException {
+        log.trace("getNextObu - buffer length: {} size: {} offset: {}", buf.length, bufSize, offset);
         if (bufSize < 1) {
             throw new OBUParseException("Buffer is too small to contain an OBU");
         }
-        log.trace("Buffer length: {} size: {} offset: {}", buf.length, bufSize, offset);
         if (buf.length < (offset + 1)) {
             throw new OBUParseException("Buffer is too small for given offset");
         }
         int pos = offset;
-        int obuType = (buf[pos] & 0x78) >> 3;
+        int obuType = (buf[pos] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT;
         if (!isValidObu(obuType)) {
+            log.warn("OBU header contains invalid OBU type: {} data: {}", obuType, HexDump.byteArrayToHexString(buf));
             throw new OBUParseException("OBU header contains invalid OBU type: " + obuType);
         }
-        OBUInfo info = new OBUInfo();
-        info.obuType = OBUType.fromValue(obuType);
+        OBUInfo info = new OBUInfo(OBUType.fromValue(obuType), ByteBuffer.allocate(1180));
         boolean obuExtensionFlag = obuHasExtension(buf[pos]);
         boolean obuHasSizeField = obuHasSize(buf[pos]);
         log.trace("OBU type: {} extension? {} size field? {}", info.obuType, obuExtensionFlag, obuHasSizeField);
@@ -90,12 +93,16 @@ public class OBUParser {
             }
             info.temporalId = (buf[pos] & 0xE0) >> 5;
             info.spatialId = (buf[pos] & 0x18) >> 3;
+            log.trace("Temporal id: {} spatial id: {}", info.temporalId, info.spatialId);
             pos++; // move past the OBU extension header
         }
         if (obuHasSizeField) {
-            LEB128Result result = LEB128.decode(Arrays.copyOfRange(buf, pos, pos + 1));
+            byte[] lengthBytes = new byte[buf[pos] == 127 ? 2 : 1];
+            System.arraycopy(buf, pos, lengthBytes, 0, lengthBytes.length);
+            LEB128Result result = LEB128.decode(lengthBytes);
             pos += result.bytesRead;
             info.size = result.value;
+            log.trace("OBU had size field: {}", info.size);
         } else {
             info.size = bufSize - pos;
         }
@@ -995,9 +1002,13 @@ public class OBUParser {
         OBPMetadata metadata = new OBPMetadata();
         int consumed;
         // int will only be 4 bytes long max
-        int leb = LEB128.encode(Arrays.copyOfRange(buf, 0, 4));
+        LEB128Result result = LEB128.decode(buf);
+        int leb = result.value;
+        consumed = result.bytesRead;
+        // old logic
+        //int leb = LEB128.encode(Arrays.copyOfRange(buf, 0, 4));
+        //consumed = 4;
         metadata.metadataType = OBPMetadataType.fromValue(leb);
-        consumed = 4;
         BitReader br = new BitReader(buf, consumed, bufSize - consumed);
         switch (metadata.metadataType) {
             case HDR_CLL:

@@ -1,7 +1,10 @@
 package org.red5.io.obu;
 
 import static org.junit.Assert.assertTrue;
+import static org.red5.io.obu.OBPConstants.OBU_FRAME_TYPE_BITSHIFT;
+import static org.red5.io.obu.OBPConstants.OBU_FRAME_TYPE_MASK;
 
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -70,6 +73,8 @@ public class OBUParserTest {
             System.err.println("Error handling AV1 payloads: " + e.getMessage());
         }
 
+        System.out.println("\nChrome captured buffers");
+
         // fragmented buffers from Chrome 126 - mtu 1176
         // first packet in frame: false, last packet in frame: true, start sequence: true count: 2
         String[] chromeBuffers = {
@@ -96,10 +101,39 @@ public class OBUParserTest {
         int counter = 1;
         for (String buf : chromeBuffers) {
             byte[] data = IOUtils.hexStringToByteArray(buf);
+            // inspect the buffer to see if we're starting a new sequence, if we are, grab the current OBU elements
+            if (OBUParser.startsNewCodedVideoSequence(data[0])) {
+                List<byte[]> obuElements = av1Packetizer.getOBUElements();
+                System.out.println("Depacketized OBUs: " + obuElements.size());
+                //assertTrue(obuElements.size() == 10);
+                List<OBUInfo> obuInfos = new LinkedList<>();
+                for (byte[] obu : obuElements) {
+                    OBUType type = OBUType.fromValue((obu[0] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
+                    OBUInfo info = new OBUInfo(type, ByteBuffer.wrap(obu, 0, obu.length));
+                    System.out.println(info);
+                    obuInfos.add(info);
+                }
+                // reset
+                av1Packetizer.reset();
+            }
+            // continue depacketizing
             obuCount = av1Packetizer.depacketize(data);
             System.out.println("Packetized buffer " + counter + " - " + av1Packetizer + " OBUs: " + obuCount);
             counter++;
         }
+        // get any remaining OBUs
+        List<byte[]> obuElements = av1Packetizer.getOBUElements();
+        System.out.println("Depacketized OBUs: " + obuElements.size());
+        assertTrue(obuElements.size() == 6);
+        List<OBUInfo> obuInfos = new LinkedList<>();
+        for (byte[] obu : obuElements) {
+            OBUType type = OBUType.fromValue((obu[0] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
+            OBUInfo info = new OBUInfo(type, ByteBuffer.wrap(obu, 0, obu.length));
+            System.out.println(info);
+            obuInfos.add(info);
+        }
+        // reset
+        av1Packetizer.reset();
 
         /*
         // packetizing
