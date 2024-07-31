@@ -57,10 +57,11 @@ public class AACAudio extends AbstractAudio {
             // attempt configuration parsing if we've identified the codec and have in-band data
             if (result) {
                 if (hdr == 0) {
-                    data.rewind();
-                    blockDataAACDCR = new byte[data.remaining()];
+                    // rewind the buffer without causing an error with mark and reset
+                    data.position(0);
+                    blockDataAACDCR = new byte[data.remaining()]; // expect > 2 bytes
+                    // example: AF 00 11 90
                     data.get(blockDataAACDCR);
-                    data.rewind();
                     // the sound "header" data is ignored for AAC and the bitstream is parsed instead
                     int objectType = (blockDataAACDCR[2] >> 3) & 0x1f; // five bits
                     int freqIndex = ((blockDataAACDCR[2] & 0x7) << 1) | ((blockDataAACDCR[3] >> 7) & 0x1);

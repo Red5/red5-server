@@ -34,11 +34,7 @@ public class OBUParser {
 
     private static final Set<Integer> VALID_OBU_TYPES = Set.of(SEQUENCE_HEADER.getValue(), TEMPORAL_DELIMITER.getValue(), FRAME_HEADER.getValue(), TILE_GROUP.getValue(), METADATA.getValue(), FRAME.getValue(), REDUNDANT_FRAME_HEADER.getValue(), TILE_LIST.getValue(), PADDING.getValue());
 
-    public static final byte OBU_SIZE_PRESENT_BIT = 0b0000_0010;
-
-    public static final byte OBU_EXT_BIT = 0b0000_0100;
-
-    public static final byte OBU_START_FRAGMENT_BIT = (byte) 0b1000_0000;
+    public static final byte OBU_START_FRAGMENT_BIT = (byte) 0b1000_0000; // 0b1'0000'000
 
     public static final byte OBU_END_FRAGMENT_BIT = 0b0100_0000;
 
@@ -47,6 +43,25 @@ public class OBUParser {
     public static final byte OBU_COUNT_MASK = 0b0011_0000;
 
     public static final byte OBU_TYPE_MASK = 0b0111_1000;
+
+    public static final byte OBU_SIZE_PRESENT_BIT = 0b0000_0010; // 0b0'0000'010
+
+    public static final byte OBU_EXT_BIT = 0b0000_0100; // 0b0'0000'100
+
+    public static final byte OBU_EXT_S1T1_BIT = 0b0010_1000; // 0b001'01'000
+
+    public static final byte OBU_TYPE_SHIFT = 3;
+
+    // constexpr uint8_t kAv1ObuTypeSequenceHeader = 1 << 3;
+    // constexpr uint8_t kAv1ObuTypeTemporalDelimiter = 2 << 3;
+    // constexpr uint8_t kAv1ObuTypeFrameHeader = 3 << 3;
+    // constexpr uint8_t kAv1ObuTypeTileGroup = 4 << 3;
+    // constexpr uint8_t kAv1ObuTypeMetadata = 5 << 3;
+    // constexpr uint8_t kAv1ObuTypeFrame = 6 << 3;
+    // constexpr uint8_t kAv1ObuTypeTileList = 8 << 3;
+    // constexpr uint8_t kAv1ObuExtensionPresentBit = 0b0'0000'100;
+    // constexpr uint8_t kAv1ObuSizePresentBit = 0b0'0000'010;
+    // constexpr uint8_t kAv1ObuExtensionS1T1 = 0b001'01'000;
 
     /*
     * obp_get_next_obu parses the next OBU header in a packet containing a set of one or more OBUs
@@ -1960,14 +1975,14 @@ public class OBUParser {
     public static boolean isValidObu(OBUType type) {
         switch (type) {
             case SEQUENCE_HEADER:
-            case TEMPORAL_DELIMITER:
+                //case TEMPORAL_DELIMITER: // not meant for rtp transport
             case FRAME_HEADER:
             case TILE_GROUP:
             case METADATA:
             case FRAME:
             case REDUNDANT_FRAME_HEADER:
-            case TILE_LIST:
-            case PADDING:
+                //case TILE_LIST: // not meant for rtp transport
+                //case PADDING: // not meant for rtp transport
                 return true;
             default:
                 return false;
@@ -1994,7 +2009,7 @@ public class OBUParser {
      * @return true if the given byte starts a fragment
      */
     public static boolean startsWithFragment(byte aggregationHeader) {
-        return (aggregationHeader & OBU_START_FRAGMENT_BIT) == 0;
+        return (aggregationHeader & OBU_START_FRAGMENT_BIT) != 0;
     }
 
     /**
@@ -2005,7 +2020,7 @@ public class OBUParser {
      * @return true if the given byte ends a fragment
      */
     public static boolean endsWithFragment(byte aggregationHeader) {
-        return (aggregationHeader & OBU_END_FRAGMENT_BIT) == 0;
+        return (aggregationHeader & OBU_END_FRAGMENT_BIT) != 0;
     }
 
     /**
@@ -2016,7 +2031,7 @@ public class OBUParser {
      * @return true if the given byte starts a new sequence
      */
     public static boolean startsNewCodedVideoSequence(byte aggregationHeader) {
-        return (aggregationHeader & OBU_START_SEQUENCE_BIT) == 1;
+        return (aggregationHeader & OBU_START_SEQUENCE_BIT) != 0;
     }
 
     /**

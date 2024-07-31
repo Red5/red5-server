@@ -34,7 +34,7 @@ public class AV1Packetizer {
 
     private static final Logger logger = LoggerFactory.getLogger(AV1Packetizer.class);
 
-    private static final boolean isTrace = logger.isTraceEnabled();
+    private static final boolean isTrace = logger.isTraceEnabled(), isDebug = logger.isDebugEnabled();
 
     /*
         AV1 format:
@@ -131,7 +131,10 @@ public class AV1Packetizer {
         startSequence = OBUParser.startsNewCodedVideoSequence(payload[0]); // N
         // obu's in the payload
         int obuCount = OBUParser.obuCount(payload[0]); // W
-        logger.debug("Depacketize - first packet in frame: {}, last packet in frame: {}, start sequence: {} count: {}", firstPacketInFrame, lastPacketInFrame, startSequence, obuCount);
+        if (isDebug) {
+            String bits = String.format("%8s", Integer.toBinaryString(0xff & payload[0])).replace(' ', '0');
+            logger.debug("Depacketize - first packet in frame: {}, last packet in frame: {}, start sequence: {} count: {} bits: {}", firstPacketInFrame, lastPacketInFrame, startSequence, obuCount, bits);
+        }
         if (firstPacketInFrame && startSequence) {
             throw new Exception("Packet cannot be both a fragment and keyframe");
         }
@@ -161,9 +164,11 @@ public class AV1Packetizer {
                 currentIndex += result.bytesRead;
             }
             obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
-            if (obuType == null) {
-                logger.warn("Unknown OBU type, assume data belongs on the end of the last packet fragment");
+            if (obuType == null && !OBUElements.isEmpty()) {
                 byte[] lastFragment = OBUElements.removeLast();
+                // read the type for the last fragment
+                obuType = OBUType.fromValue((lastFragment[0] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
+                logger.warn("Unknown OBU type, appending data of the last packet fragment: {}", obuType);
                 byte[] newLastFragment = new byte[lastFragment.length + obuFragmentLength];
                 System.arraycopy(lastFragment, 0, newLastFragment, 0, lastFragment.length);
                 System.arraycopy(payload, currentIndex, newLastFragment, lastFragment.length, obuFragmentLength);
@@ -183,15 +188,17 @@ public class AV1Packetizer {
                 if (obuType == OBUType.SEQUENCE_HEADER) {
                     sequenceHeader = Arrays.clone(obuFragment);
                 }
-                // we don't store padding
-                if (obuType != OBUType.PADDING) {
+                // we don't store temporal delimiter, tile list, or padding
+                if (OBUParser.isValidObu(obuType)) {
                     OBUElements.add(obuFragment);
+                } else {
+                    logger.debug("Skip OBU type for RTP: {}", obuType);
                 }
             }
             currentIndex += obuFragmentLength;
         }
         if (isTrace) {
-            logger.debug("OBU read completely? {}", (currentIndex == payload.length));
+            logger.trace("OBU read completely? {}", (currentIndex == payload.length));
         }
         return OBUElements.size();
     }
