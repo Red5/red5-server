@@ -119,6 +119,26 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     }
 
     public void setData(IoBuffer data) {
+        if (codecId == -1 && data.remaining() > 0) {
+            data.mark();
+            byte flg = data.get();
+            enhanced = ByteNibbler.isBitSet(flg, 7);
+            if (enhanced) {
+                frameType = VideoFrameType.valueOf((flg & 0b01110000) >> 4);
+                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                if (data.remaining() > 3 && frameType != VideoFrameType.COMMAND_FRAME && packetType != VideoPacketType.Multitrack) {
+                    int fourcc = data.getInt();
+                    VideoCodec vc = VideoCodec.valueOfByFourCc(fourcc);
+                    codecId = vc != null ? vc.getId() : -1;
+                }
+            } else {
+                codecId = (byte) (flg & IoConstants.MASK_VIDEO_CODEC);
+                frameType = VideoFrameType.valueOf((flg & MASK_VIDEO_FRAMETYPE) >> 4);
+                packetType = VideoPacketType.valueOf(data.get());
+            }
+            data.reset();
+        }
+
         this.data = data;
     }
 
@@ -128,13 +148,15 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
             byte flg = data[0];
             // check for enhanced bit
             enhanced = ByteNibbler.isBitSet(flg, 7);
-            if (enhanced && data.length > 5) {
+            if (enhanced) {
                 // enhanced handling
-                int fourcc = ((data[1] & 0xff) << 24 | (data[2] & 0xff) << 16 | (data[3] & 0xff) << 8 | data[4] & 0xff);
-                VideoCodec vc = VideoCodec.valueOfByFourCc(fourcc);
-                codecId = vc != null ? vc.getId() : -1;
                 frameType = VideoFrameType.valueOf((flg & 0b01110000) >> 4);
                 packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                if (data.length > 4 && frameType != VideoFrameType.COMMAND_FRAME && packetType != VideoPacketType.Multitrack) {
+                    int fourcc = ((data[1] & 0xff) << 24 | (data[2] & 0xff) << 16 | (data[3] & 0xff) << 8 | data[4] & 0xff);
+                    VideoCodec vc = VideoCodec.valueOfByFourCc(fourcc);
+                    codecId = vc != null ? vc.getId() : -1;
+                }
             } else {
                 codecId = (byte) (flg & IoConstants.MASK_VIDEO_CODEC);
                 frameType = VideoFrameType.valueOf((flg & MASK_VIDEO_FRAMETYPE) >> 4);
@@ -179,7 +201,11 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         return packetType == VideoPacketType.SequenceEnd;
     }
 
-    public void reset() {
+    public boolean isEnhanced() {
+		return enhanced;
+	}
+
+	public void reset() {
         releaseInternal();
     }
 
