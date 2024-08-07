@@ -100,7 +100,6 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     }
 
     public void setData(IoBuffer data) {
-
         // set some properties if we can
         if (codecId == -1 && data.remaining() > 0) {
             data.mark();
@@ -113,12 +112,9 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
                 flg = data.get();
                 packetType = AudioPacketType.valueOf(flg);
             }
-
             data.reset();
-
             config = (packetType == AudioPacketType.SequenceStart);
         }
-
         this.data = data;
     }
 
@@ -129,7 +125,7 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
             enhanced = (codecId == AudioCodec.ExHeader.getId());
             if (enhanced) {
                 packetType = AudioPacketType.valueOf(data[0] & 0x0f);
-            } else if (codecId == 10 && data.length > 1) {
+            } else if (codecId == AudioCodec.AAC.getId() && data.length > 1) {
                 packetType = AudioPacketType.valueOf(data[1]);
             }
             config = (packetType == AudioPacketType.SequenceStart);
@@ -159,10 +155,10 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     }
 
     public boolean isEnhanced() {
-		return enhanced;
-	}
+        return enhanced;
+    }
 
-	public void reset() {
+    public void reset() {
         releaseInternal();
     }
 

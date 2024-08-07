@@ -202,10 +202,10 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     }
 
     public boolean isEnhanced() {
-		return enhanced;
-	}
+        return enhanced;
+    }
 
-	public void reset() {
+    public void reset() {
         releaseInternal();
     }
 
