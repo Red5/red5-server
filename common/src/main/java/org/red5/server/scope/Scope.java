@@ -917,7 +917,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * Initialization actions, start if autostart is set to true.
      */
     public void init() {
-        log.debug("Init scope: {} parent: {}", name, parent);
+        log.debug("Init scope: {} parent: {}", name, (parent != null ? parent.getName() : "no-parent"));
         if (hasParent()) {
             if (!parent.hasChildScope(name)) {
                 if (parent.addChildScope(this)) {
@@ -942,7 +942,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * Uninitialize scope and unregister from parent.
      */
     public void uninit() {
-        log.debug("Un-init scope");
+        log.debug("Un-init scope: {}", name);
         children.forEach(child -> {
             if (child instanceof Scope) {
                 ((Scope) child).uninit();
@@ -1344,12 +1344,13 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return true;
     }
 
-    private final class ConcurrentScopeSet extends ConcurrentSkipListSet<org.red5.server.api.scope.IBasicScope> {
+    private final class ConcurrentScopeSet extends ConcurrentSkipListSet<IBasicScope> {
 
         private static final long serialVersionUID = 283917025588555L;
 
         @Override
         public boolean add(IBasicScope scope) {
+            log.debug("Add child scope: {}", scope);
             boolean added = false;
             // check #1
             if (!contains(scope)) {
@@ -1360,10 +1361,10 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                     // add the scope to the handler
                     if (!hdlr.addChildScope(scope)) {
                         log.warn("Failed to add child scope: {} to {}", scope, this);
-                        return false;
+                        return added;
                     }
                 } else {
-                    log.debug("No handler found for {}", this);
+                    log.trace("No handler found for {}", this);
                 }
                 try {
                     // check #2 for entry
@@ -1372,24 +1373,22 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                         added = super.add(scope);
                         if (added) {
                             subscopeStats.increment();
+                            if (scope instanceof Scope) {
+                                // start the scope
+                                if (((Scope) scope).start()) {
+                                    log.debug("Child scope started");
+                                } else {
+                                    log.trace("Failed to start child scope: {} in {}", scope, this);
+                                }
+                            }
                         } else {
-                            log.debug("Subscope was not added");
+                            log.debug("Scope was not added");
                         }
                     } else {
-                        log.debug("Subscope already exists");
+                        log.debug("Scope already exists");
                     }
                 } catch (Exception e) {
                     log.warn("Exception on add", e);
-                }
-                if (added && scope instanceof Scope) {
-                    // cast it
-                    Scope scp = (Scope) scope;
-                    // start the scope
-                    if (scp.start()) {
-                        log.debug("Child scope started");
-                    } else {
-                        log.debug("Failed to start child scope: {} in {}", scope, this);
-                    }
                 }
             }
             return added;
@@ -1398,27 +1397,26 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         @Override
         public boolean remove(Object scope) {
             log.debug("Remove child scope: {}", scope);
-            if (hasHandler()) {
-                IScopeHandler hdlr = getHandler();
-                log.debug("Removing child scope: {}", (((IBasicScope) scope).getName()));
-                hdlr.removeChildScope((IBasicScope) scope);
-                if (scope instanceof Scope) {
-                    // cast it
-                    Scope scp = (Scope) scope;
-                    // stop the scope
-                    scp.stop();
-                }
-            } else {
-                log.debug("No handler found for {}", this);
-            }
+            boolean removed = false;
             // remove the entry, ensure removed value is equal to the given object
             if (super.remove(scope)) {
                 subscopeStats.decrement();
-                return true;
+                if (hasHandler()) {
+                    IScopeHandler hdlr = getHandler();
+                    log.debug("Removing child scope: {}", (((IBasicScope) scope).getName()));
+                    hdlr.removeChildScope((IBasicScope) scope);
+                    if (scope instanceof Scope) {
+                        // stop the scope
+                        ((Scope) scope).stop();
+                    }
+                } else {
+                    log.trace("No handler found for {}", this);
+                }
+                removed = true;
             } else {
-                log.debug("Subscope was not removed or was not found");
+                log.debug("Scope was not removed or was not found");
             }
-            return false;
+            return removed;
         }
 
         /**
