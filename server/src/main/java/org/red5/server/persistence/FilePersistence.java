@@ -529,14 +529,6 @@ public class FilePersistence extends RamPersistence {
         }
         //if we made it this far and everything seems ok
         if (result) {
-            // if it's a persistent SharedObject and it's empty don't write it to disk. APPSERVER-364
-            if (object instanceof SharedObject) {
-                SharedObject soRef = (SharedObject) object;
-                if (soRef.getAttributes().size() == 0) {
-                    // if SharedObject is empty, remove the persistence file to not load old data in the future
-                    return dir.delete();
-                }
-            }
             String filename = getObjectFilename(object);
             log.debug("File name: {}", filename);
             //strip path
@@ -545,6 +537,16 @@ public class FilePersistence extends RamPersistence {
                 log.debug("New file name: {}", filename);
             }
             File file = new File(dir, filename);
+
+            // if it's a persistent SharedObject and it's empty don't write it to disk. APPSERVER-364
+            if (object instanceof SharedObject) {
+                SharedObject soRef = (SharedObject) object;
+                // if SharedObject is empty and have a persistence file
+                if (soRef.getAttributes().isEmpty() && file.exists()) {
+                    // remove the persistence file to not load old data in the future
+                    return file.delete();
+                }
+            }
             //Resource resFile = resources.getResource(filename);
             //log.debug("Resource (file) check #1 - file name: {} exists: {}", resPath.getFilename(), exists);
             IoBuffer buf = null;
