@@ -533,8 +533,8 @@ public class FilePersistence extends RamPersistence {
             if (object instanceof SharedObject) {
                 SharedObject soRef = (SharedObject) object;
                 if (soRef.getAttributes().size() == 0) {
-                    // return true to trick the server into thinking everything is just fine :P
-                    return true;
+                    // if SharedObject is empty, remove the persistence file to not load old data in the future
+                    return dir.delete();
                 }
             }
             String filename = getObjectFilename(object);
