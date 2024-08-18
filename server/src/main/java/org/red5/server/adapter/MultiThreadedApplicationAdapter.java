@@ -950,7 +950,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *         {@link IOnDemandStream} for details.
      */
     public IOnDemandStream getOnDemandStream(IScope scope, String name) {
-        log.warn("This won't work until the refactoring of the streaming code is complete.");
+        log.warn("This won't work until the refactoring of the streaming code is complete");
         IOnDemandStreamService service = (IOnDemandStreamService) ScopeUtils.getScopeService(scope, IOnDemandStreamService.class, StreamService.class, false);
         return service.getOnDemandStream(scope, name);
     }
@@ -966,7 +966,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @return ISubscriberStream object
      */
     public ISubscriberStream getSubscriberStream(IScope scope, String name) {
-        log.warn("This won't work until the refactoring of the streaming code is complete.");
+        log.warn("This won't work until the refactoring of the streaming code is complete");
         ISubscriberStreamService service = (ISubscriberStreamService) ScopeUtils.getScopeService(scope, ISubscriberStreamService.class, StreamService.class, false);
         return service.getSubscriberStream(scope, name);
     }
@@ -1374,6 +1374,17 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     public void streamSubscriberStart(ISubscriberStream stream) {
         // log w3c connect event
         log.info("W3C x-category:stream x-event:play c-ip:{} x-sname:{}", Red5.getConnectionLocal().getRemoteAddress(), stream.getName());
+    }
+
+    /**
+     * RTMFP peer connect event handler.
+     *
+     * @link https://datatracker.ietf.org/doc/html/rfc7425#section-5.3.3
+     * @link https://github.com/zenomt/rtmfp-cpp/blob/main/include/rtmfp/rtmfp.hpp
+     *
+     */
+    public void setPeerInfo() {
+        log.debug("setPeerInfo");
     }
 
     @Override

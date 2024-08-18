@@ -7,11 +7,13 @@
 
 package org.red5.server.net.rtmp;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.red5.io.CapsExMask;
 import org.red5.io.object.StreamAction;
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection.Encoding;
 import org.red5.server.api.IContext;
 import org.red5.server.api.IServer;
@@ -52,18 +54,11 @@ import org.red5.server.so.SharedObjectMessage;
 import org.red5.server.so.SharedObjectService;
 import org.red5.server.stream.StreamService;
 import org.red5.server.util.ScopeUtils;
-import org.slf4j.Logger;
 
 /**
  * RTMP events handler.
  */
 public class RTMPHandler extends BaseRTMPHandler {
-
-    protected static Logger log = Red5LoggerFactory.getLogger(RTMPHandler.class);
-
-    protected static boolean isTrace = log.isTraceEnabled();
-
-    protected static boolean isDebug = log.isDebugEnabled();
 
     /**
      * Status object service.
@@ -76,7 +71,9 @@ public class RTMPHandler extends BaseRTMPHandler {
     protected IServer server;
 
     /**
-     * Whether or not unvalidated connections are allowed.
+     * Whether or not unvalidated connections are allowed. An unvalidated connection is normally from a client which
+     * performs some manipulation of the handshake bytes that is not to-spec, but still provides standard aspects of
+     * RTMP required for a connection. One such implemenation is ffmpeg.
      */
     private boolean unvalidatedConnectionAllowed;
 
@@ -294,6 +291,9 @@ public class RTMPHandler extends BaseRTMPHandler {
             log.debug("connect - transaction id: {}", transId);
             // Get parameters passed from client to NetConnection#connection
             final Map<String, Object> params = command.getConnectionParams();
+            if (isDebug) {
+                log.debug("Connection params: {}", params);
+            }
             // Get hostname
             String host = getHostname((String) params.get("tcUrl"));
             // app name as path, but without query string if there is one
@@ -317,31 +317,37 @@ public class RTMPHandler extends BaseRTMPHandler {
                         // TODO optimize this to use Scope instead of Context
                         scope = context.resolveScope(global, path);
                         if (scope != null) {
+                            Object[] callArgs = call.getArguments();
                             if (isDebug) {
-                                log.debug("Connecting to: {}", scope.getName());
-                                log.debug("Conn {}, scope {}, call {} args {}", new Object[] { conn, scope, call, call.getArguments() });
+                                log.debug("Connecting to: {} conn: {} scope: {} call: {} args: {}", scope.getName(), conn, scope, call, Arrays.toString(callArgs));
                             }
                             // if scope connection is allowed
                             if (scope.isConnectionAllowed(conn)) {
                                 // connections connect result
                                 boolean connectSuccess;
                                 try {
-                                    if (call.getArguments() != null) {
-                                        connectSuccess = conn.connect(scope, call.getArguments());
-                                    } else {
+                                    if (callArgs == null) {
                                         connectSuccess = conn.connect(scope);
+                                    } else {
+                                        connectSuccess = conn.connect(scope, callArgs);
                                     }
                                     if (connectSuccess) {
                                         log.debug("Connected - {}", conn.getClient());
                                         call.setStatus(Call.STATUS_SUCCESS_RESULT);
                                         if (call instanceof IPendingServiceCall) {
                                             IPendingServiceCall pc = (IPendingServiceCall) call;
-                                            //send fmsver and capabilities
+                                            // send fmsver and capabilities
                                             StatusObject result = getStatus(NC_CONNECT_SUCCESS);
                                             result.setAdditional("fmsVer", Red5.getFMSVersion());
                                             result.setAdditional("capabilities", Red5.getCapabilities());
                                             result.setAdditional("mode", Integer.valueOf(1));
                                             result.setAdditional("data", Red5.getDataVersion());
+                                            // XXX(paul) This is where the server needs to state its support for Enhanced-RTMP.
+                                            // support is via attributes audio/videoFourCcInfoMap, capsEx, and fourCcList.
+                                            result.setAdditional("fourCcList", new Object[] { "*" });
+                                            result.setAdditional("audioFourCcInfoMap", Collections.singletonMap("*", 4));
+                                            result.setAdditional("videoFourCcInfoMap", Collections.singletonMap("*", 4));
+                                            result.setAdditional("CapsEx", (CapsExMask.Reconnect.getMask() | CapsExMask.Multitrack.getMask()));
                                             pc.setResult(result);
                                         }
                                         // Measure initial round-trip time after connecting
@@ -452,12 +458,12 @@ public class RTMPHandler extends BaseRTMPHandler {
             conn.close();
         }
         if (command instanceof Invoke) {
-            if (isDebug) {
-                log.debug("Command type Invoke");
+            if (isTrace) {
+                log.trace("Command type Invoke");
             }
             if ((source.getStreamId().intValue() != 0) && (call.getStatus() == Call.STATUS_SUCCESS_VOID || call.getStatus() == Call.STATUS_SUCCESS_NULL)) {
                 // This fixes a bug in the FP on Intel Macs.
-                log.debug("Method does not have return value, do not reply");
+                log.trace("Method does not have return value, do not reply");
                 return;
             }
             boolean sendResult = true;

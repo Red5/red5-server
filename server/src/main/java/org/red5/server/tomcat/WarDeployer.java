@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.red5.server.LoaderBase;
 import org.red5.server.jmx.mxbeans.LoaderMXBean;

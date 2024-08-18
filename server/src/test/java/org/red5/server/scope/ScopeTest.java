@@ -74,9 +74,9 @@ public class ScopeTest extends AbstractJUnit4SpringContextTests {
         log.info("testScopeCreation");
         if (appScope == null) {
             appScope = (WebScope) applicationContext.getBean("web.scope");
-            log.debug("Application / web scope: {}", appScope);
             assertTrue(appScope.getDepth() == 1);
         }
+        log.debug("Application / web scope: {}", appScope);
         //Room 0 /default/junit/room0 (created in the spring config)
         assertNotNull(appScope.getScope("room0"));
         IScope room0 = appScope.getScope("room0");
@@ -151,6 +151,10 @@ public class ScopeTest extends AbstractJUnit4SpringContextTests {
     @Test
     public void testScopeCreationTypes() throws InterruptedException {
         log.info("testScopeCreationTypes");
+        if (appScope == null) {
+            appScope = (WebScope) applicationContext.getBean("web.scope");
+            assertTrue(appScope.getDepth() == 1);
+        }
         log.debug("Application / web scope: {}", appScope);
         //Room 0 /default/junit/room0 (created in the spring config)
         assertNotNull(appScope.getScope("room0"));

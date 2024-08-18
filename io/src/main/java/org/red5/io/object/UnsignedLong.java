@@ -73,7 +73,7 @@ public final class UnsignedLong extends UnsignedNumber {
     public static UnsignedLong fromBytes(byte[] c, int offset) {
         UnsignedLong number = new UnsignedLong();
         if ((c.length - offset) < 8)
-            throw new IllegalArgumentException("An UnsignedLong number is composed of 8 bytes.");
+            throw new IllegalArgumentException("An UnsignedLong number is composed of 8 bytes");
 
         for (int i = 7; i >= 0; i--)
             number.value[i] = c[offset + i];
@@ -139,7 +139,7 @@ public final class UnsignedLong extends UnsignedNumber {
     public int compareTo(UnsignedNumber other) {
         byte[] otherValue = other.getBytes();
         if (otherValue.length > 8)
-            throw new IllegalArgumentException("The number is more than 8 bytes.");
+            throw new IllegalArgumentException("The number is more than 8 bytes");
 
         byte[] normalValue = new byte[8];
         Arrays.fill(normalValue, (byte) 0);
@@ -183,9 +183,9 @@ public final class UnsignedLong extends UnsignedNumber {
     @Override
     public void shiftRight(int nBits) {
         if (nBits > 64 || nBits < 0)
-            throw new IllegalArgumentException("Cannot right shift " + nBits + " an UnsignedLong.");
+            throw new IllegalArgumentException("Cannot right shift " + nBits + " an UnsignedLong");
         if (nBits % 8 != 0)
-            throw new IllegalArgumentException("nBits must be a multiple of 8.");
+            throw new IllegalArgumentException("nBits must be a multiple of 8");
 
         int nBytes = nBits / 8;
         for (int i = 7; i >= nBytes; i--)
@@ -197,9 +197,9 @@ public final class UnsignedLong extends UnsignedNumber {
     @Override
     public void shiftLeft(int nBits) {
         if (nBits > 64 || nBits < 0)
-            throw new IllegalArgumentException("Cannot left shift " + nBits + " an UnsignedLong.");
+            throw new IllegalArgumentException("Cannot left shift " + nBits + " an UnsignedLong");
         if (nBits % 8 != 0)
-            throw new IllegalArgumentException("nBits must be a multiple of 8.");
+            throw new IllegalArgumentException("nBits must be a multiple of 8");
 
         int nBytes = nBits / 8;
         for (int i = 0; i <= 7 - nBytes; i++) {

@@ -9,8 +9,6 @@ package org.red5.server.scope;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.servlet.ServletContext;
-
 import org.red5.server.LoaderBase;
 import org.red5.server.api.IApplicationContext;
 import org.red5.server.api.IApplicationLoader;
@@ -25,6 +23,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.web.context.ServletContextAware;
+
+import jakarta.servlet.ServletContext;
 
 /**
  * <p>
@@ -219,7 +219,7 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
             // don't free configured scopes when a client disconnects
             keepOnDisconnect = true;
         } else {
-            log.info("Webscope already registered; remove the 'init-method' from your 'web.scope' bean to prevent this message in the future.");
+            log.info("Webscope already registered; remove the 'init-method' from your 'web.scope' bean to prevent this message in the future");
         }
     }
 

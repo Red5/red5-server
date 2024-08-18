@@ -13,9 +13,9 @@ import java.util.Map;
 
 import javax.management.openmbean.CompositeData;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for accessing Red5 API objects.
@@ -40,7 +40,7 @@ import org.slf4j.Logger;
  */
 public final class Red5 {
 
-    private static Logger log = Red5LoggerFactory.getLogger(Red5.class);
+    private static Logger log = LoggerFactory.getLogger(Red5.class);
 
     private static boolean isDebug = log.isDebugEnabled();
 
@@ -57,12 +57,12 @@ public final class Red5 {
     /**
      * Server version with revision
      */
-    public static final String VERSION = "Red5 Server 1.3.34";
+    public static final String VERSION = "Red5 Server 2.0.5";
 
     /**
      * Server version for fmsVer requests
      */
-    public static final String FMS_VERSION = "RED5/1,3,34,0";
+    public static final String FMS_VERSION = "RED5/2,0,5,0";
 
     /**
      * Server capabilities

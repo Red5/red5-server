@@ -8,21 +8,24 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.red5.io.IoConstants;
 
 /**
  * Red5 audio codec for the AAC audio format.
  *
- * Stores the decoder configuration
+ * Stores the decoder configuration.
+ *
+ * Advanced Audio Coding - <https://en.wikipedia.org/wiki/Advanced_Audio_Coding>
+ * The following AAC profiles, denoted by their object types, are supported
+ * 1 = main profile
+ * 2 = low complexity, a.k.a., LC
+ * 5 = high efficiency / scale band replication, a.k.a., HE / SBR
  *
  * @author Paul Gregoire (mondain@gmail.com)
  * @author Wittawas Nakkasem (vittee@hotmail.com)
  * @author Vladimir Hmelyoff (vlhm@splitmedialabs.com)
  */
 public class AACAudio extends AbstractAudio {
-
-    private static Logger log = LoggerFactory.getLogger(AACAudio.class);
 
     public static final int[] AAC_SAMPLERATES = { 96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350 };
 
@@ -31,16 +34,8 @@ public class AACAudio extends AbstractAudio {
      */
     private byte[] blockDataAACDCR;
 
-    /** Constructs a new AACAudio */
-    public AACAudio() {
+    {
         codec = AudioCodec.AAC;
-        this.reset();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getName() {
-        return codec.name();
     }
 
     /** {@inheritDoc} */
@@ -52,37 +47,47 @@ public class AACAudio extends AbstractAudio {
     /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
-        if (data.limit() == 0) {
-            // Empty buffer
-            return false;
+        boolean result = false;
+        if (data != null && data.limit() > 0) {
+            byte flgs = data.get();
+            byte hdr = data.get();
+            int codecId = (flgs & IoConstants.MASK_SOUND_FORMAT) >> 4;
+            // check for AAC codec id
+            result = codecId == AudioCodec.AAC.getId();
+            // attempt configuration parsing if we've identified the codec and have in-band data
+            if (result) {
+                if (hdr == 0) {
+                    // rewind the buffer without causing an error with mark and reset
+                    data.position(0);
+                    blockDataAACDCR = new byte[data.remaining()]; // expect > 2 bytes
+                    // example: AF 00 11 90
+                    data.get(blockDataAACDCR);
+                    // the sound "header" data is ignored for AAC and the bitstream is parsed instead
+                    int objectType = (blockDataAACDCR[2] >> 3) & 0x1f; // five bits
+                    int freqIndex = ((blockDataAACDCR[2] & 0x7) << 1) | ((blockDataAACDCR[3] >> 7) & 0x1);
+                    channels = (blockDataAACDCR[3] & 0x78) >> 3;
+                    sampleRate = AAC_SAMPLERATES[freqIndex];
+                    log.info("aac config sample rate {} type {} channels {}", sampleRate, objectType, channels);
+                } else {
+                    // maybe mark that we weren't a config packet?
+                }
+            }
+            // when the result is returned, an expected rewind of the buffer should be done
         }
-        byte first = data.get();
-        boolean result = (((first & 0xf0) >> 4) == AudioCodec.AAC.getId());
-        data.rewind();
         return result;
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data) {
-        if (data.hasRemaining()) {
-            // mark
-            int start = data.position();
-            // ensure we are at the beginning
-            data.rewind();
-            byte frameType = data.get();
-            log.trace("Frame type: {}", frameType);
-            byte header = data.get();
-            // if we don't have the AACDecoderConfigurationRecord stored
-            if (blockDataAACDCR == null) {
-                if ((((frameType & 0xf0) >> 4) == AudioCodec.AAC.getId()) && (header == 0)) {
-                    // back to the beginning
-                    data.rewind();
-                    blockDataAACDCR = new byte[data.remaining()];
-                    data.get(blockDataAACDCR);
-                }
-            }
-            data.position(start);
+        // if we don't have the AACDecoderConfigurationRecord stored
+        if (blockDataAACDCR == null) {
+            // set a mark
+            data.mark();
+            // attempt to parse the configuration
+            canHandleData(data);
+            // reset the data buffer mark
+            data.reset();
         }
         return true;
     }
@@ -90,14 +95,10 @@ public class AACAudio extends AbstractAudio {
     /** {@inheritDoc} */
     @Override
     public IoBuffer getDecoderConfiguration() {
-        if (blockDataAACDCR == null) {
-            return null;
+        if (blockDataAACDCR != null) {
+            return IoBuffer.wrap(blockDataAACDCR);
         }
-        IoBuffer result = IoBuffer.allocate(4);
-        result.setAutoExpand(true);
-        result.put(blockDataAACDCR);
-        result.rewind();
-        return result;
+        return null;
     }
 
     @SuppressWarnings("unused")
@@ -105,12 +106,4 @@ public class AACAudio extends AbstractAudio {
         return (time * 1000L / sampleRate);
     }
 
-    //private final byte[] getAACSpecificConfig() {
-    //	byte[] b = new byte[] {
-    //			(byte) (0x10 | /*((profile > 2) ? 2 : profile << 3) | */((sampleRateIndex >> 1) & 0x03)),
-    //			(byte) (((sampleRateIndex & 0x01) << 7) | ((channels & 0x0F) << 3))
-    //		};
-    //	log.debug("SpecificAudioConfig {}", HexDump.toHexString(b));
-    //	return b;
-    //}
 }

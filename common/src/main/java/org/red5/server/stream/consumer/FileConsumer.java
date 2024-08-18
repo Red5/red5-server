@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.red5.codec.VideoCodec;
+import org.red5.codec.VideoFrameType;
 import org.red5.io.ITag;
 import org.red5.io.ITagWriter;
 import org.red5.io.flv.impl.FLVWriter;
@@ -33,7 +34,6 @@ import org.red5.server.messaging.IPushableConsumer;
 import org.red5.server.messaging.OOBControlMessage;
 import org.red5.server.messaging.PipeConnectionEvent;
 import org.red5.server.net.rtmp.event.IRTMPEvent;
-import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.stream.DefaultStreamFilenameGenerator;
 import org.red5.server.stream.IStreamData;
@@ -269,7 +269,7 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
                                                     continue;
                                                 }
                                             } else {
-                                                if (queued.frameType == VideoData.FrameType.KEYFRAME) {
+                                                if (queued.frameType == VideoFrameType.KEYFRAME) {
                                                     gotKeyFrame = true;
                                                 }
                                                 if (waitForVideoKeyframe && !gotKeyFrame) {

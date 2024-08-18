@@ -53,4 +53,20 @@ public interface IStreamCodecInfo {
      */
     IAudioStreamCodec getAudioCodec();
 
+    /**
+     * Set audio codec.
+     *
+     * @param codec
+     */
+    default void setAudioCodec(IAudioStreamCodec codec) {
+    }
+
+    /**
+     * Set video codec.
+     *
+     * @param codec
+     */
+    default void setVideoCodec(IVideoStreamCodec codec) {
+    }
+
 }

@@ -48,10 +48,7 @@ public class StreamCodecInfo implements IStreamCodecInfo {
     /** {@inheritDoc} */
     @Override
     public String getAudioCodecName() {
-        if (audioCodec == null) {
-            return null;
-        }
-        return audioCodec.getName();
+        return audioCodec != null ? audioCodec.getName() : null;
     }
 
     /** {@inheritDoc} */
@@ -89,10 +86,7 @@ public class StreamCodecInfo implements IStreamCodecInfo {
     /** {@inheritDoc} */
     @Override
     public String getVideoCodecName() {
-        if (videoCodec == null) {
-            return null;
-        }
-        return videoCodec.getName();
+        return videoCodec != null ? videoCodec.getName() : null;
     }
 
     /** {@inheritDoc} */

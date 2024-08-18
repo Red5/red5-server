@@ -221,7 +221,7 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
      * @param client
      *            Client to remove
      */
-    protected void removeClient(IClient client) {
+    public void removeClient(IClient client) {
         clients.remove(client.getId());
     }
 

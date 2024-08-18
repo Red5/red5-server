@@ -9,13 +9,14 @@
 		"java.compile.nullAnalysis.mode": "automatic",
 		"java.project.sourcePaths": [
 			"io",
-			"server-common",
+			"common",
 			"server",
 			"service",
 			"client",
 		],
 		"java.jdt.ls.androidSupport.enabled": "off",
 		"java.maven.updateSnapshots": true,
-		"java.maven.downloadSources": true
+		"java.maven.downloadSources": true,
+		"scm.experimental.showHistoryGraph": true
 	}
 }

@@ -8,6 +8,7 @@
 package org.red5.client.net.rtmp;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -50,16 +51,12 @@ import org.red5.server.so.SharedObjectMessage;
 import org.red5.server.stream.AbstractClientStream;
 import org.red5.server.stream.OutputStream;
 import org.red5.server.stream.consumer.ConnectionConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Base class for clients (RTMP and RTMPT)
  */
 public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements IRTMPClient {
-
-    private static final Logger log = LoggerFactory.getLogger(BaseRTMPClientHandler.class);
 
     /**
      * Connection scheme / protocol
@@ -215,14 +212,18 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         params.put("app", application);
         params.put("objectEncoding", Integer.valueOf(0));
         params.put("fpad", Boolean.FALSE);
-        params.put("flashVer", "WIN 11,2,202,235");
-        params.put("audioCodecs", Integer.valueOf(3575));
+        params.put("flashVer", "FMLE/3.0 (compatible; Red5Client)"); // old value WIN 11,2,202,235
+        params.put("audioCodecs", Integer.valueOf(0x0FFF)); // old value 3575 = 0x0E0F
         params.put("videoFunction", Integer.valueOf(1));
         params.put("pageUrl", null);
         params.put("path", application);
         params.put("capabilities", Integer.valueOf(15));
         params.put("swfUrl", null);
-        params.put("videoCodecs", Integer.valueOf(252));
+        params.put("videoCodecs", Integer.valueOf(0x00FF)); // old value 252 = 0x0FC
+        params.put("audioFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
+        //params.put("audioFourCcInfoMap", Collections.singletonMap(AudioCodec.AAC.getFourcc(), Integer.valueOf(4)));
+        params.put("videoFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
+        //params.put("videoFourCcInfoMap", Collections.singletonMap(VideoCodec.AVC.getFourcc(), Integer.valueOf(4)));
         return params;
     }
 
@@ -336,7 +337,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         ClientSharedObject result = sharedObjects.get(name);
         if (result != null) {
             if (result.isPersistent() != persistent) {
-                throw new RuntimeException("Already connected to a shared object with this name, but with different persistence.");
+                throw new RuntimeException("Already connected to a shared object with this name, but with different persistence");
             }
             return result;
         }
@@ -804,10 +805,14 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
             Number streamId = (Number) (source.getStreamId() != null ? source.getStreamId().doubleValue() : 1.0d);
             if (log.isDebugEnabled()) {
                 log.debug("Stream id from header: {}", streamId);
-                // XXX create better to serialize ObjectMap to Status object
-                ObjectMap<?, ?> objMap = (ObjectMap<?, ?>) call.getArguments()[0];
-                // should keep this as an Object to stay compatible with FMS3 etc
-                log.debug("Client id from status: {}", objMap.get("clientid"));
+                try {
+                    // XXX create better to serialize ObjectMap to Status object
+                    ObjectMap<?, ?> objMap = (ObjectMap<?, ?>) call.getArguments()[0];
+                    // should keep this as an Object to stay compatible with FMS3 etc
+                    log.debug("Client id from status: {}", objMap.get("clientid"));
+                } catch (Exception e) {
+                    log.warn("Exception mapping call args", e);
+                }
             }
             if (streamId != null) {
                 // try lookup by stream id, if null return the first one
@@ -828,7 +833,14 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
             call.setException(new MethodNotFoundException(methodName));
             log.info("No service provider / method for: {}; to handle calls like onBWCheck, add a service provider", methodName);
         } else {
-            serviceInvoker.invoke(call, serviceProvider);
+            try {
+                serviceInvoker.invoke(call, serviceProvider);
+            } catch (Exception ex) {
+                Object[] callArgs = call.getArguments();
+                log.warn("Exception invoking method: {} args[0] type: {}", methodName, (callArgs.length > 0 ? callArgs[0].getClass() : "null"), ex);
+                call.setStatus(Call.STATUS_METHOD_NOT_FOUND);
+                call.setException(ex);
+            }
         }
         if (call instanceof IPendingServiceCall) {
             IPendingServiceCall psc = (IPendingServiceCall) call;
@@ -994,7 +1006,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         this.streamEventHandler = streamEventHandler;
     }
 
-    private static class NetStream extends AbstractClientStream implements IEventDispatcher {
+    private class NetStream extends AbstractClientStream implements IEventDispatcher {
 
         private IEventDispatcher dispatcher;
 

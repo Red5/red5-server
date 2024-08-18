@@ -9,8 +9,6 @@ package org.red5.server.net.rtmpt;
 
 import org.red5.server.net.rtmp.RTMPHandler;
 import org.red5.server.net.rtmpt.codec.RTMPTCodecFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Handler for RTMPT messages.
@@ -20,8 +18,6 @@ import org.slf4j.LoggerFactory;
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class RTMPTHandler extends RTMPHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(RTMPTHandler.class);
 
     /**
      * Protocol codec factory

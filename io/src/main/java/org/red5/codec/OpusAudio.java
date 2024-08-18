@@ -7,19 +7,18 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.red5.io.IoConstants;
 
 /**
  * Red5 audio codec for the Opus audio format.
  *
  * Opus has no decoder configuration; its all in-band.
  *
+ * Opus audio - <https://opus-codec.org/>
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class OpusAudio extends AbstractAudio {
-
-    private static Logger log = LoggerFactory.getLogger(OpusAudio.class);
 
     /**
      * Sample rates:
@@ -36,8 +35,8 @@ public class OpusAudio extends AbstractAudio {
 
     static final String CODEC_NAME = "Opus";
 
-    // default to 48kHz and stereo
-    private int index = 0, channels = 2;
+    // default to 48kHz
+    private int index = 0;
 
     // ensure we store at least one config chunk; default is false, since Opus doesnt require configuration
     // 48k stereo is the default configuration.
@@ -54,13 +53,21 @@ public class OpusAudio extends AbstractAudio {
 
     @Override
     public boolean canHandleData(IoBuffer data) {
-        if (data.limit() == 0) {
-            // Empty buffer
-            return false;
+        boolean result = false;
+        if (data != null && data.limit() > 0) {
+            byte flgs = data.get();
+            byte hdr = data.get();
+            result = (((flgs & IoConstants.MASK_SOUND_FORMAT) >> 4) == AudioCodec.OPUS.getId());
+            if (result && hdr == 0) {
+                // we have an opus header
+                log.debug("Received opus header");
+                // set the sample rate and channels
+                index = data.get();
+                channels = data.get();
+                sampleRate = OPUS_SAMPLERATES[index];
+                log.info("opus sample rate {} channels {}", sampleRate, channels);
+            }
         }
-        byte first = data.get();
-        boolean result = (((first & 0xf0) >> 4) == AudioCodec.OPUS.getId());
-        data.rewind();
         return result;
     }
 
@@ -69,21 +76,22 @@ public class OpusAudio extends AbstractAudio {
     public boolean addData(IoBuffer data, int timestamp, boolean amf) {
         log.trace("addData timestamp: {} remaining: {} amf? {}", timestamp, data.remaining(), amf);
         if (data.hasRemaining()) {
-            // mark starting position
-            int start = data.position();
             // are we amf?
             if (!amf) {
+                // mark starting position
+                data.mark();
                 int remaining = data.remaining();
                 // if we're not amf, figure out how to proceed based on data contents
                 // slice-out the existing data
-                IoBuffer slice = data.getSlice(start, remaining);
+                IoBuffer slice = data.getSlice(data.position(), remaining);
                 // prefix the data with amf markers (two bytes)
                 data.put((byte) (AudioCodec.OPUS.getId() << 4));
                 // determine if we need to add config data (frequency and channels)
                 if (needConfig) {
                     // expand the data to hold the amf markers
                     data.expand(remaining + 4);
-                    data.put(new byte[] { (byte) 0, (byte) OPUS_SAMPLERATES[index], (byte) channels });
+                    // sample rate index and channels are the primary config data
+                    data.put(new byte[] { (byte) index, (byte) channels });
                     // flip config flag
                     needConfig = false;
                 } else {
@@ -94,10 +102,8 @@ public class OpusAudio extends AbstractAudio {
                 data.put(slice);
                 // flip it
                 data.flip();
-                // reset start (which technically will be the same position)
-                start = data.position();
-                // jump back to the starting pos
-                data.position(start);
+                // reset the mark / position
+                data.reset();
             }
         }
         return true;
@@ -105,7 +111,7 @@ public class OpusAudio extends AbstractAudio {
 
     @Override
     public IoBuffer getDecoderConfiguration() {
-        return IoBuffer.wrap(new byte[] { (byte) OPUS_SAMPLERATES[index], (byte) channels });
+        return IoBuffer.wrap(new byte[] { (byte) index, (byte) channels });
     }
 
     public int getIndex() {
@@ -114,14 +120,6 @@ public class OpusAudio extends AbstractAudio {
 
     public void setIndex(int index) {
         this.index = index;
-    }
-
-    public int getChannels() {
-        return channels;
-    }
-
-    public void setChannels(int channels) {
-        this.channels = channels;
     }
 
     public boolean isNeedConfig() {

@@ -44,7 +44,7 @@ public final class UnsignedByte extends UnsignedNumber {
     public static UnsignedByte fromBytes(byte[] c, int idx) {
         UnsignedByte number = new UnsignedByte();
         if ((c.length - idx) < 1)
-            throw new IllegalArgumentException("An UnsignedByte number is composed of 1 byte.");
+            throw new IllegalArgumentException("An UnsignedByte number is composed of 1 byte");
 
         number.value = (short) (c[0] & 0xFF);
         return number;
@@ -126,7 +126,7 @@ public final class UnsignedByte extends UnsignedNumber {
     @Override
     public void shiftRight(int nBits) {
         if (Math.abs(nBits) > 8) {
-            throw new IllegalArgumentException("Cannot right shift " + nBits + " an UnsignedByte.");
+            throw new IllegalArgumentException("Cannot right shift " + nBits + " an UnsignedByte");
         }
         value >>>= nBits;
     }
@@ -134,7 +134,7 @@ public final class UnsignedByte extends UnsignedNumber {
     @Override
     public void shiftLeft(int nBits) {
         if (Math.abs(nBits) > 8) {
-            throw new IllegalArgumentException("Cannot left shift " + nBits + " an UnsignedByte.");
+            throw new IllegalArgumentException("Cannot left shift " + nBits + " an UnsignedByte");
         }
         value <<= nBits;
     }

@@ -7,40 +7,56 @@
 
 package org.red5.codec;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.red5.io.IoConstants;
+import org.red5.util.ByteNibbler;
 
 /**
- * Red5 video codec for the AV1 video format.
+ * Red5 video codec for the AV1 video format. Portions of this AV1 code are based on the work of the Pion project.
  *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class AV1Video extends AbstractVideo {
 
-    private static Logger log = LoggerFactory.getLogger(AV1Video.class);
+    /* AV1
+       https://aomediacodec.github.io/av1-isobmff/v1.3.0.html#av1codecconfigurationbox-definition
 
-    /**
-     * AV1 video codec constant
-     */
-    static final String CODEC_NAME = "AV1";
+       class AV1CodecConfigurationBox extends Box('av1C')
+        {
+        AV1CodecConfigurationRecord av1Config;
+        }
 
-    public static final byte[] AV1_KEYFRAME_PREFIX = new byte[] { 0x0a, 0x01 };
+        aligned(8) class AV1CodecConfigurationRecord {
+            unsigned int(1) marker = 1;
+            unsigned int(7) version = 1;
+            unsigned int(3) seq_profile;
+            unsigned int(5) seq_level_idx_0;
+            unsigned int(1) seq_tier_0;
+            unsigned int(1) high_bitdepth;
+            unsigned int(1) twelve_bit;
+            unsigned int(1) monochrome;
+            unsigned int(1) chroma_subsampling_x;
+            unsigned int(1) chroma_subsampling_y;
+            unsigned int(2) chroma_sample_position;
+            unsigned int(3) reserved = 0;
 
-    public static final byte[] AV1_FRAME_PREFIX = new byte[] { 0x2a, 0x01 };
+            unsigned int(1) initial_presentation_delay_present;
+            if (initial_presentation_delay_present) {
+                unsigned int(4) initial_presentation_delay_minus_one;
+            } else {
+                unsigned int(4) reserved = 0;
+            }
 
-    // buffer holding OBU's
-    @SuppressWarnings("unused")
-    private IoBuffer obuBuffer;
+            unsigned int(8) configOBUs[];
+        }
+    */
+    private FrameData decoderConfiguration;
 
-    public AV1Video() {
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getName() {
-        return CODEC_NAME;
+    {
+        codec = VideoCodec.AV1;
     }
 
     /** {@inheritDoc} */
@@ -50,127 +66,115 @@ public class AV1Video extends AbstractVideo {
     }
 
     /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        // XXX also add support for handling non-amf AV1, maybe
-        if (data.hasRemaining()) {
-            byte first = data.get();
-            data.rewind();
-            return ((first & 0x0f) == VideoCodec.AV1.getId());
-        }
-        return false;
-    }
-
-    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data, int timestamp) {
-        //log.trace("addData timestamp: {} remaining: {}", timestamp, data.remaining());
-        return addData(data, timestamp, true);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean addData(IoBuffer data, int timestamp, boolean amf) {
-        log.trace("addData timestamp: {} remaining: {} amf? {}", timestamp, data.remaining(), amf);
+        log.trace("{} addData timestamp: {} remaining: {} pos: {}", codec.name(), timestamp, data.remaining(), data.position());
+        boolean result = false;
+        // go back to the beginning, this only works in non-multitrack scenarios
+        if (data.position() > 0) {
+            data.rewind();
+        }
+        // no data, no operation
         if (data.hasRemaining()) {
-            // mark starting position
-            int start = data.position();
-            // are we amf?
-            if (!amf) {
-                int remaining = data.remaining();
-                // if we're not amf, figure out how to proceed based on data contents
-                if (remaining > 7) {
-                    // grab the first 8 bytes
-                    byte[] peek = new byte[8];
-                    data.get(peek);
-                    // int sz = getDesciptorSize(peek,0,peek.length);
-                    boolean isKey = isKeyFrame(peek, 0);
-                    // jump back to the starting pos
-                    data.position(start);
-                    // slice-out the existing data
-                    IoBuffer slice = data.getSlice(start, remaining);
-                    log.info("Data start: {} post-slice: {}", start, data.position());
-                    // expand the data by two to hold the amf markers
-                    data.expand(remaining + 2);
-                    // prefix the data with amf markers (two bytes)
-                    if (isKey) {
-                        // AV1 keyframe
-                        data.put(AV1_KEYFRAME_PREFIX);
-                    } else {
-                        // AV1 non-keyframe
-                        data.put(AV1_FRAME_PREFIX);
-                    }
-                    // drop the slice in behind the prefix
-                    data.put(slice);
-                    // flip it
-                    data.flip();
-                    // reset start (which technically will be the same position)
-                    start = data.position();
-                } else {
-                    log.warn("Remaining AV1 content was less than expected: {}", remaining);
+            // mark the position before we get the flags
+            data.mark();
+            // get the first byte for v1 codec type or enhanced codec bit
+            byte flg = data.get();
+            // determine if we've got an enhanced codec
+            enhanced = ByteNibbler.isBitSet(flg, 7);
+            // for frame type we need get 3 bits
+            int ft = ((flg & 0b01110000) >> 4);
+            frameType = VideoFrameType.valueOf(ft);
+            if (enhanced) {
+                // get the packet type
+                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                // get the fourcc
+                int fourcc = data.getInt();
+                // reset back to the beginning after we got the fourcc
+                data.reset();
+                if (isDebug) {
+                    log.debug("{} - frame type: {} packet type: {}", VideoCodec.valueOfByFourCc(fourcc), frameType, packetType);
                 }
-                // jump back to the starting pos
-                data.position(start);
-            }
-            // get frame type (codec + type)
-            byte frameType = data.get();
-            // get sub frame / sequence type (config, keyframe, interframe)
-            byte subFrameType = data.get();
-            if ((frameType & 0x0f) == VideoCodec.AV1.getId()) {
-                // check for keyframe (we're not storing non-keyframes here)
-                if ((frameType & 0xf0) == FLV_FRAME_KEY) {
-                    //log.trace("Key frame");
-                    if (log.isDebugEnabled()) {
-                        log.debug("Keyframe - AV1 type: {}", subFrameType);
-                    }
-                    // rewind
-                    data.rewind();
-                    switch (subFrameType) {
-                        case 1: // keyframe
-                            //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
-                            // get the time stamp and compare with the current value
-                            if (timestamp != keyframeTimestamp) {
-                                //log.trace("New keyframe");
-                                // new keyframe
-                                keyframeTimestamp = timestamp;
-                                keyframes.clear();
+                switch (packetType) {
+                    case SequenceStart:
+                        if (frameType == VideoFrameType.KEYFRAME) {
+                            if (isDebug) {
+                                log.debug("Decoder configuration");
                             }
-                            // store keyframe
-                            keyframes.add(new FrameData(data));
-                            break;
-                        case 0: // no decoder configuration for vp8
-                            //log.trace("Decoder configuration");
-                            break;
-                    }
-                    //log.trace("Keyframes: {}", keyframes.size());
+                            // Store AV1 DecoderConfigurationRecord data, if one exists
+                            if (decoderConfiguration == null) {
+                                decoderConfiguration = new FrameData(data);
+                            } else {
+                                decoderConfiguration.setData(data);
+                            }
+                            // new sequence, clear keyframe and interframe collections
+                            softReset();
+                        }
+                        break;
+                    case CodedFramesX: // pass coded data without comp time offset
+                        switch (frameType) {
+                            case KEYFRAME: // keyframe
+                                if (isDebug) {
+                                    log.debug("Keyframe - keyframeTimestamp: {}", keyframeTimestamp);
+                                }
+                                // get the time stamp and compare with the current value
+                                if (timestamp != keyframeTimestamp) {
+                                    //log.trace("New keyframe");
+                                    // new keyframe
+                                    keyframeTimestamp = timestamp;
+                                    // if its a new keyframe, clear keyframe and interframe collections
+                                    softReset();
+                                }
+                                // store keyframe
+                                keyframes.add(new FrameData(data));
+                                break;
+                            case INTERFRAME:
+                                if (bufferInterframes) {
+                                    if (isDebug) {
+                                        log.debug("Interframe - timestamp: {}", timestamp);
+                                    }
+                                    if (interframes == null) {
+                                        interframes = new CopyOnWriteArrayList<>();
+                                    }
+                                    try {
+                                        int lastInterframe = numInterframes.getAndIncrement();
+                                        //log.trace("Buffering interframe #{}", lastInterframe);
+                                        if (lastInterframe < interframes.size()) {
+                                            interframes.get(lastInterframe).setData(data);
+                                        } else {
+                                            interframes.add(new FrameData(data));
+                                        }
+                                    } catch (Throwable e) {
+                                        log.warn("Failed to buffer interframe", e);
+                                    }
+                                    //log.trace("Interframes: {}", interframes.size());
+                                }
+                                break;
+                        }
+                        break;
+                    case CodedFrames: // pass coded data
+                        int compTimeOffset = (data.get() << 16 | data.get() << 8 | data.get());
+                        switch (frameType) {
+                            case KEYFRAME: // keyframe
+                                if (isDebug) {
+                                    log.debug("Keyframe - keyframeTimestamp: {} compTimeOffset: {}", keyframeTimestamp, compTimeOffset);
+                                }
+                                keyframes.add(new FrameData(data, compTimeOffset));
+                                break;
+                        }
+                        break;
                 }
             } else {
-                // not AV1 data
-                log.debug("Non-AV1 data, rejecting");
-                // go back to where we started
-                data.position(start);
-                return false;
+                // no non-enhanced codec suspport yet
             }
-            // go back to where we started
-            data.position(start);
+            //log.trace("Keyframes: {}", keyframes.size());
+            // we handled the data
+            result = true;
         }
-        return true;
+        // reset the position
+        data.rewind();
+        return result;
     }
-
-    private boolean isKeyFrame(byte[] data, int index) {
-        // XXX implement this to look at the kf flag in AV1 data
-        return true;
-    }
-
-    /*
-     * public ByteBuffer[] readFrames(ByteBuffer packet) { ByteBuffer[] obuList = new ByteBuffer[0]; boolean isFirstOBUFragment = packet.get(0) & LEB128.MSB_BITMASK > 0; for (int i =
-     * 1; i <= packet.get(0) & LEB128.SEVEN_LSB_BITMASK; i++) { obuList = pushOBUElement(isFirstOBUFragment, packet.get(i), obuList); } if (packet.get(0) & LEB128.MSB_BITMASK > 0) { //
-     * Take copy of OBUElement that is being cached if (obuBuffer == null) { return obuList; } obuBuffer.put(packet.array(), 1, packet.get(0) & LEB128.SEVEN_LSB_BITMASK);
-     * packet.position(packet.position() + packet.get(0) & LEB128.SEVEN_LSB_BITMASK); packet.compact(); obuList = pushOBUElement(isFirstOBUFragment, obuBuffer.array(), obuList);
-     * obuBuffer = null; } return obuList; } private ByteBuffer[] pushOBUElement(boolean isFirstOBUFragment, ByteBuffer obuElement, ByteBuffer[] obuList) { if (isFirstOBUFragment) {
-     * isFirstOBUFragment = false; // Discard pushed because we don't have a fragment to combine it with if (obuBuffer == null) { return obuList; } obuElement.put(obuBuffer.array());
-     * obuBuffer = null; } return append(obuList, obuElement); } private ByteBuffer[] append(ByteBuffer[] obuList, ByteBuffer obuElement) { ByteBuffer[] newObuList = new
-     * ByteBuffer[obuList.length + 1]; System.arraycopy(obuList, 0, newObuList, 0, obuList.length); newObuList[obuList.length] = obuElement; return newObuList; }
-     */
 
 }

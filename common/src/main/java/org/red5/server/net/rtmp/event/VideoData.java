@@ -17,10 +17,12 @@ import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.codec.VideoCodec;
-import org.red5.io.ITag;
+import org.red5.codec.VideoFrameType;
+import org.red5.codec.VideoPacketType;
 import org.red5.io.IoConstants;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.IStreamData;
+import org.red5.util.ByteNibbler;
 
 /**
  * Video data event
@@ -30,13 +32,6 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     private static final long serialVersionUID = 5538859593815804830L;
 
     /**
-     * Videoframe type
-     */
-    public static enum FrameType {
-        UNKNOWN, KEYFRAME, INTERFRAME, DISPOSABLE_INTERFRAME, END_OF_SEQUENCE
-    }
-
-    /**
      * Video data
      */
     protected IoBuffer data;
@@ -44,27 +39,37 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     /**
      * Data type
      */
-    private byte dataType = TYPE_VIDEO_DATA;
+    private final byte dataType = TYPE_VIDEO_DATA;
+
+    /**
+     * Codec id
+     */
+    private byte codecId = -1;
+
+    /**
+     * Configuration flag
+     */
+    private boolean config;
+
+    /**
+     * Enhanced flag
+     */
+    private boolean enhanced;
 
     /**
      * Frame type, unknown by default
      */
-    protected FrameType frameType = FrameType.UNKNOWN;
+    private VideoFrameType frameType;
+
+    /**
+     * Packet type
+     */
+    private VideoPacketType packetType;
 
     /**
      * Video codec
      */
-    protected VideoCodec codec;
-
-    /**
-     * True if this is configuration data and false otherwise
-     */
-    protected boolean config;
-
-    /**
-     * True if this indicates an end-of-sequence and false otherwise
-     */
-    protected boolean endOfSequence;
+    //protected transient IVideoStreamCodec codec;
 
     /** Constructs a new VideoData. */
     public VideoData() {
@@ -109,64 +114,99 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         return dataType;
     }
 
-    public void setDataType(byte dataType) {
-        this.dataType = dataType;
-    }
-
-    /** {@inheritDoc} */
     public IoBuffer getData() {
         return data;
     }
 
     public void setData(IoBuffer data) {
-        this.data = data;
-        if (data != null && data.limit() > 0) {
+        if (codecId == -1 && data.remaining() > 0) {
             data.mark();
-            int firstByte = data.get(0) & 0xff;
-            codec = VideoCodec.valueOfById(firstByte & ITag.MASK_VIDEO_CODEC);
-            // determine by codec whether or not frame / sequence types are included
-            if (VideoCodec.getConfigured().contains(codec)) {
-                int secondByte = data.get(1) & 0xff;
-                config = (secondByte == 0);
-                endOfSequence = (secondByte == 2);
+            byte flg = data.get();
+            enhanced = ByteNibbler.isBitSet(flg, 7);
+            if (enhanced) {
+                frameType = VideoFrameType.valueOf((flg & 0b01110000) >> 4);
+                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                if (data.remaining() > 3 && frameType != VideoFrameType.COMMAND_FRAME && packetType != VideoPacketType.Multitrack) {
+                    int fourcc = data.getInt();
+                    VideoCodec vc = VideoCodec.valueOfByFourCc(fourcc);
+                    codecId = vc != null ? vc.getId() : -1;
+                }
+            } else {
+                codecId = (byte) (flg & IoConstants.MASK_VIDEO_CODEC);
+                frameType = VideoFrameType.valueOf((flg & MASK_VIDEO_FRAMETYPE) >> 4);
+                packetType = VideoPacketType.valueOf(data.get());
             }
             data.reset();
-            int frameType = (firstByte & MASK_VIDEO_FRAMETYPE) >> 4;
-            if (frameType == FLAG_FRAMETYPE_KEYFRAME) {
-                this.frameType = FrameType.KEYFRAME;
-            } else if (frameType == FLAG_FRAMETYPE_INTERFRAME) {
-                this.frameType = FrameType.INTERFRAME;
-            } else if (frameType == FLAG_FRAMETYPE_DISPOSABLE) {
-                this.frameType = FrameType.DISPOSABLE_INTERFRAME;
-            } else {
-                this.frameType = FrameType.UNKNOWN;
-            }
         }
+
+        this.data = data;
     }
 
     public void setData(byte[] data) {
+        // set some properties if we can
+        if (codecId == -1 && data.length > 0) {
+            byte flg = data[0];
+            // check for enhanced bit
+            enhanced = ByteNibbler.isBitSet(flg, 7);
+            if (enhanced) {
+                // enhanced handling
+                frameType = VideoFrameType.valueOf((flg & 0b01110000) >> 4);
+                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                if (data.length > 4 && frameType != VideoFrameType.COMMAND_FRAME && packetType != VideoPacketType.Multitrack) {
+                    int fourcc = ((data[1] & 0xff) << 24 | (data[2] & 0xff) << 16 | (data[3] & 0xff) << 8 | data[4] & 0xff);
+                    VideoCodec vc = VideoCodec.valueOfByFourCc(fourcc);
+                    codecId = vc != null ? vc.getId() : -1;
+                }
+            } else {
+                codecId = (byte) (flg & IoConstants.MASK_VIDEO_CODEC);
+                frameType = VideoFrameType.valueOf((flg & MASK_VIDEO_FRAMETYPE) >> 4);
+                packetType = VideoPacketType.valueOf(data[1]);
+            }
+            config = (packetType == VideoPacketType.SequenceStart);
+        }
         setData(IoBuffer.wrap(data));
     }
 
-    /**
-     * Getter for frame type
-     *
-     * @return Type of video frame
-     */
-    public FrameType getFrameType() {
-        return frameType;
-    }
-
     public int getCodecId() {
-        return codec.getId();
+        return codecId;
     }
 
     public boolean isConfig() {
         return config;
     }
 
+    /**
+     * Returns the video frame type.
+     *
+     * @return video frame type
+     */
+    public VideoFrameType getFrameType() {
+        return frameType;
+    }
+
+    public boolean isKeyFrame() {
+        return frameType == VideoFrameType.KEYFRAME;
+    }
+
+    /**
+     * Returns the video packet type.
+     *
+     * @return video packet type
+     */
+    public VideoPacketType getVideoPacketType() {
+        return packetType;
+    }
+
     public boolean isEndOfSequence() {
-        return endOfSequence;
+        return packetType == VideoPacketType.SequenceEnd;
+    }
+
+    public boolean isEnhanced() {
+        return enhanced;
+    }
+
+    public void reset() {
+        releaseInternal();
     }
 
     /** {@inheritDoc} */
@@ -180,12 +220,15 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
             localData.clear();
             localData.free();
         }
+        //codec = null;
+        codecId = -1;
+        config = false;
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        frameType = (FrameType) in.readObject();
+        frameType = (VideoFrameType) in.readObject();
         byte[] byteBuf = (byte[]) in.readObject();
         if (byteBuf != null) {
             setData(byteBuf);

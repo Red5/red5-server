@@ -17,7 +17,8 @@ import java.io.ObjectOutputStream;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.codec.AudioCodec;
-import org.red5.io.ITag;
+import org.red5.codec.AudioPacketType;
+import org.red5.io.IoConstants;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.IStreamData;
 
@@ -30,17 +31,32 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
     /**
      * Data type
      */
-    private byte dataType = TYPE_AUDIO_DATA;
+    private final byte dataType = TYPE_AUDIO_DATA;
+
+    /**
+     * Codec id
+     */
+    private byte codecId = -1;
+
+    /**
+     * Configuration flag
+     */
+    private boolean config;
+
+    /**
+     * Enhanced flag
+     */
+    private boolean enhanced;
+
+    /**
+     * Packet type
+     */
+    private AudioPacketType packetType;
 
     /**
      * Audio codec
      */
-    protected AudioCodec codec;
-
-    /**
-     * True if this is configuration data and false otherwise
-     */
-    protected boolean config;
+    //protected transient IAudioStreamCodec codec;
 
     /** Constructs a new AudioData. */
     public AudioData() {
@@ -79,38 +95,71 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
         return dataType;
     }
 
-    public void setDataType(byte dataType) {
-        this.dataType = dataType;
-    }
-
-    /** {@inheritDoc} */
     public IoBuffer getData() {
         return data;
     }
 
     public void setData(IoBuffer data) {
-        if (data != null && data.limit() > 0) {
+        // set some properties if we can
+        if (codecId == -1 && data.remaining() > 0) {
             data.mark();
-            codec = AudioCodec.valueOfById(((data.get(0) & 0xff) & ITag.MASK_SOUND_FORMAT) >> 4);
-            // determine by codec whether or not config data is included
-            if (AudioCodec.getConfigured().contains(codec)) {
-                config = (data.get() == 0);
+            byte flg = data.get();
+            codecId = (byte) ((flg & IoConstants.MASK_SOUND_FORMAT) >> 4);
+            enhanced = (codecId == AudioCodec.ExHeader.getId());
+            if (enhanced) {
+                packetType = AudioPacketType.valueOf(flg & 0x0f);
+            } else if (codecId == 10 && data.remaining() > 0) {
+                flg = data.get();
+                packetType = AudioPacketType.valueOf(flg);
             }
             data.reset();
+            config = (packetType == AudioPacketType.SequenceStart);
         }
         this.data = data;
     }
 
     public void setData(byte[] data) {
+        // set some properties if we can
+        if (codecId == -1 && data.length > 0) {
+            codecId = (byte) ((data[0] & IoConstants.MASK_SOUND_FORMAT) >> 4);
+            enhanced = (codecId == AudioCodec.ExHeader.getId());
+            if (enhanced) {
+                packetType = AudioPacketType.valueOf(data[0] & 0x0f);
+            } else if (codecId == AudioCodec.AAC.getId() && data.length > 1) {
+                packetType = AudioPacketType.valueOf(data[1]);
+            }
+            config = (packetType == AudioPacketType.SequenceStart);
+        }
         setData(IoBuffer.wrap(data));
     }
 
     public int getCodecId() {
-        return codec.getId();
+        return codecId;
     }
 
     public boolean isConfig() {
         return config;
+    }
+
+    /**
+     * Returns the audio packet type.
+     *
+     * @return audio packet type
+     */
+    public AudioPacketType getPacketType() {
+        return packetType;
+    }
+
+    public boolean isEndOfSequence() {
+        return packetType == AudioPacketType.SequenceEnd;
+    }
+
+    public boolean isEnhanced() {
+        return enhanced;
+    }
+
+    public void reset() {
+        releaseInternal();
     }
 
     /** {@inheritDoc} */
@@ -120,6 +169,9 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
             data.free();
             data = null;
         }
+        //codec = null;
+        codecId = -1;
+        config = false;
     }
 
     @Override

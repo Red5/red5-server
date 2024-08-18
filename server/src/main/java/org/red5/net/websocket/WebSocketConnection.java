@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
-import javax.websocket.Extension;
-import javax.websocket.Session;
+import jakarta.websocket.Extension;
+import jakarta.websocket.Session;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.Constants;

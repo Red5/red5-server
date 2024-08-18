@@ -68,4 +68,82 @@ public interface IAudioStreamCodec {
         return null;
     }
 
+    /**
+     * Returns true if the codec is enhanced.
+     *
+     * @return true if enhanced and false otherwise
+     */
+    default boolean isEnhanced() {
+        return false;
+    }
+
+    /**
+     * Returns the multitrack type for the codec.
+     *
+     * @return the multitrack type
+     */
+    default AvMultitrackType getMultitrackType() {
+        return null;
+    }
+
+    /**
+     * Returns the packet type for the codec.
+     *
+     * @return the packet type
+     */
+    default AudioPacketType getPacketType() {
+        return null;
+    }
+
+    /**
+     * Returns the sample rate for the codec.
+     *
+     * @return sample rate, default is 48000
+     */
+    default int getSampleRate() {
+        return 48000;
+    }
+
+    /**
+     * Returns the sample size in bits for the codec.
+     *
+     * @return sample size in bits, default is 16
+     */
+    default int getSampleSizeInBits() {
+        return 16;
+    }
+
+    /**
+     * Returns the number of channels for the codec.
+     *
+     * @return number of channels, default is 2
+     */
+    default int getChannels() {
+        return 2;
+    }
+
+    /**
+     * Returns whether the codec is signed or not.
+     *
+     * @return true if signed, false otherwise
+     */
+    default boolean isSigned() {
+        return true;
+    }
+
+    /**
+     * Sets the track id.
+     */
+    default void setTrackId(int trackId) {
+    }
+
+    /**
+     * Returns the track id.
+     *
+     * @return track id
+     */
+    default int getTrackId() {
+        return 0;
+    }
+
 }

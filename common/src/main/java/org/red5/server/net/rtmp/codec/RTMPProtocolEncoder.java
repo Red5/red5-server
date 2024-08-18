@@ -11,7 +11,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.codec.VideoFrameType;
 import org.red5.io.object.Output;
 import org.red5.io.object.Serializer;
 import org.red5.server.api.IConnection.Encoding;
@@ -39,7 +41,6 @@ import org.red5.server.net.rtmp.event.ServerBW;
 import org.red5.server.net.rtmp.event.SetBuffer;
 import org.red5.server.net.rtmp.event.Unknown;
 import org.red5.server.net.rtmp.event.VideoData;
-import org.red5.server.net.rtmp.event.VideoData.FrameType;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.message.Packet;
@@ -305,7 +306,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
             } else {
                 if (isDroppable && message instanceof VideoData) {
                     VideoData video = (VideoData) message;
-                    if (video.getFrameType() == FrameType.KEYFRAME) {
+                    if (video.getFrameType() == VideoFrameType.KEYFRAME) {
                         // if its a key frame the inter and disposable checks can be skipped
                         if (log.isDebugEnabled()) {
                             log.debug("Resuming stream with key frame; message: {}", message);
@@ -313,7 +314,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                         mapping.setKeyFrameNeeded(false);
                     } else if (incomingLatency >= baseTolerance && incomingLatency < midTolerance) {
                         // drop disposable frames
-                        if (video.getFrameType() == FrameType.DISPOSABLE_INTERFRAME) {
+                        if (video.getFrameType() == VideoFrameType.DISPOSABLE) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Dropping disposible frame; message: {}", message);
                             }
@@ -801,11 +802,17 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      *            Command event
      */
     protected void encodeCommand(IoBuffer out, ICommand command) {
-        // TODO: tidy up here
-        Output output = new org.red5.io.amf.Output(out);
         final IServiceCall call = command.getCall();
         final boolean isPending = (call.getStatus() == Call.STATUS_PENDING);
         log.debug("Call: {} pending: {}", call, isPending);
+        // always start with AMF0, even if the client is using AMF3
+        Output output = new org.red5.io.amf.Output(out);
+        // response to initial connect is always AMF0
+        if (!"connect".equals(call.getServiceMethodName())) {
+            if (Red5.getConnectionLocal().getEncoding() == Encoding.AMF3) {
+                output = new org.red5.io.amf3.Output(out);
+            }
+        }
         if (!isPending) {
             log.debug("Call has been executed, send result");
             Serializer.serialize(output, call.isSuccess() ? "_result" : "_error");
@@ -817,16 +824,6 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         if (command instanceof Invoke) {
             Serializer.serialize(output, Integer.valueOf(command.getTransactionId()));
             Serializer.serialize(output, command.getConnectionParams());
-        }
-        if (call.getServiceName() == null && "connect".equals(call.getServiceMethodName())) {
-            // response to initial connect, always use AMF0
-            output = new org.red5.io.amf.Output(out);
-        } else {
-            if (Red5.getConnectionLocal().getEncoding() == Encoding.AMF3) {
-                output = new org.red5.io.amf3.Output(out);
-            } else {
-                output = new org.red5.io.amf.Output(out);
-            }
         }
         if (!isPending && (command instanceof Invoke)) {
             IPendingServiceCall pendingCall = (IPendingServiceCall) call;

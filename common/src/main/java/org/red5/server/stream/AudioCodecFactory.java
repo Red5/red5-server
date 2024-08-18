@@ -7,11 +7,10 @@
 
 package org.red5.server.stream;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.codec.AudioCodec;
 import org.red5.codec.IAudioStreamCodec;
+import org.red5.io.IoConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,22 +32,41 @@ public class AudioCodecFactory {
     private static Logger log = LoggerFactory.getLogger(AudioCodecFactory.class);
 
     /**
-     * List of available codecs
-     */
-    private static List<IAudioStreamCodec> codecs = new ArrayList<IAudioStreamCodec>(1);
-
-    /**
-     * Setter for codecs
+     * Create and return new audio codec applicable for byte buffer data; return the codec and its configuration if
+     * available.
      *
-     * @param codecs
-     *            List of codecs
-     */
-    public void setCodecs(List<IAudioStreamCodec> codecs) {
-        AudioCodecFactory.codecs = codecs;
-    }
-
-    /**
-     * Create and return new audio codec applicable for byte buffer data
+     * SoundFormat: UB[4] Format of SoundData
+     *
+     * Standard RTMP bits (for SoundFormat != 9):
+     * soundRate = UB[2]
+     * soundSize = UB[1]
+     * soundType = UB[1]
+     *
+     * Enhanced RTMP bits:
+     * audioPacketType = UB[4] as AudioPacketType
+     * if audioPacketType == Multitrack
+     *   audioMultitrackType = UB[4] as AvMultitrackType
+     *     audioPacketType = UB[4] as AudioPacketType
+     *     if audioMultitrackType != AvMultitrackType.ManyTracksManyCodecs
+     *       audioFourCc = FOURCC as AudioFourCc
+     * else if audioPacketType != Multitrack
+     *   audioFourCc = FOURCC as AudioFourCc
+     *
+     * Format 3, linear PCM, stores raw PCM samples. If the data is 8-bit, the samples are unsigned bytes. If the data
+     * is 16-bit, the samples are stored as little endian, signed numbers. If the data is stereo, left and right
+     * samples are stored interleaved: left - right - left - right - and so on.
+     *
+     * Format 0 PCM is the same as format 3 PCM, except that format 0 stores 16-bit PCM samples in the endian order of
+     * the platform on which the file was created. For this reason, format 0 is not recommended for use.
+     *
+     * Nellymoser 8-kHz and 16-kHz are special cases 8 and 16 sampling rates are not supported in other formats, and
+     * the SoundRate bits can’t represent this value. When Nellymoser 8-kHz or Nellymoser 16-kHz is specified in
+     * SoundFormat, the SoundRate and SoundType fields are ignored. For other Nellymoser sampling rates, specify the
+     * normal Nellymoser SoundFormat and use the SoundRate and SoundType fields as usual.
+     *
+     * If the SoundFormat indicates AAC, the SoundType should be set to 1 (stereo) and the SoundRate should be set to 3
+     * (44 kHz). However, this does not mean that AAC audio in FLV is always stereo, 44 kHz data. Instead, the Flash
+     * Player ignores these values and extracts the channel and sample rate data is encoded in the AAC bitstream.
      *
      * @param data
      *            Byte buffer data
@@ -57,43 +75,35 @@ public class AudioCodecFactory {
     public static IAudioStreamCodec getAudioCodec(IoBuffer data) {
         IAudioStreamCodec result = null;
         try {
-            //get the codec identifying byte
-            int codecId = (data.get() & 0xf0) >> 4;
-            switch (codecId) {
-                case 10: //aac
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.AACAudio").getDeclaredConstructor().newInstance();
-                    break;
-                case 11:
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.SpeexAudio").getDeclaredConstructor().newInstance();
-                    break;
-                case 13:
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.OpusAudio").getDeclaredConstructor().newInstance();
-                    break;
-                case 2:
-                case 14:
-                    result = (IAudioStreamCodec) Class.forName("org.red5.codec.MP3Audio").getDeclaredConstructor().newInstance();
-                    break;
+            // get the codec identifying byte
+            data.mark();
+            byte c = data.get();
+            data.reset();
+            int codecId = (c & IoConstants.MASK_SOUND_FORMAT) >> 4;
+            AudioCodec codec = AudioCodec.valueOfById(codecId);
+            if (codec != null) {
+                log.debug("Codec found: {}", codec);
+                // this will be reset if the codec cannot handle the data
+                result = codec.newInstance();
+                // set mark first
+                data.mark();
+                // check if the codec can handle the data
+                if (result.canHandleData(data)) {
+                    log.debug("Codec {} accepted data", result);
+                } else {
+                    log.warn("Codec {} rejected data", codec);
+                    result = null;
+                }
+                // reset the data buffer mark
+                data.reset();
+            } else {
+                log.warn("Codec not found for id: {}", codecId);
             }
-            data.rewind();
         } catch (Exception ex) {
             log.error("Error creating codec instance", ex);
-        }
-        //if codec is not found do the old-style loop
-        if (result == null) {
-            for (IAudioStreamCodec storedCodec : codecs) {
-                IAudioStreamCodec codec;
-                // XXX: this is a bit of a hack to create new instances of the
-                // configured audio codec for each stream
-                try {
-                    codec = storedCodec.getClass().getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    log.error("Could not create audio codec instance", e);
-                    continue;
-                }
-                if (codec.canHandleData(data)) {
-                    result = codec;
-                    break;
-                }
+        } finally {
+            if (data.markValue() > 0) {
+                data.reset();
             }
         }
         return result;

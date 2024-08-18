@@ -160,10 +160,10 @@ public class ImmutableTag implements ITag {
         if (data != null) {
             if (data instanceof IoBuffer) {
                 IoBuffer buf = (IoBuffer) data;
-                byte[] body = new byte[buf.limit()];
-                int pos = buf.position();
+                byte[] body = new byte[buf.remaining()];
+                buf.mark();
                 buf.get(body);
-                buf.position(pos);
+                buf.reset();
                 return new ImmutableTag(dataType, timestamp, body);
             } else {
                 byte[] buf = (byte[]) data;
@@ -178,10 +178,10 @@ public class ImmutableTag implements ITag {
 
     public static ImmutableTag build(byte dataType, int timestamp, IoBuffer data) {
         if (data != null) {
-            byte[] body = new byte[data.limit()];
-            int pos = data.position();
+            byte[] body = new byte[data.remaining()];
+            data.mark();
             data.get(body);
-            data.position(pos);
+            data.reset();
             return new ImmutableTag(dataType, timestamp, body);
         } else {
             return new ImmutableTag(dataType, timestamp, null);
@@ -200,10 +200,10 @@ public class ImmutableTag implements ITag {
 
     public static ImmutableTag build(byte dataType, int timestamp, IoBuffer data, int previousTagSize) {
         if (data != null) {
-            byte[] body = new byte[data.limit()];
-            int pos = data.position();
+            byte[] body = new byte[data.remaining()];
+            data.mark();
             data.get(body);
-            data.position(pos);
+            data.reset();
             return new ImmutableTag(dataType, timestamp, body, previousTagSize);
         } else {
             return new ImmutableTag(dataType, timestamp, null, previousTagSize);

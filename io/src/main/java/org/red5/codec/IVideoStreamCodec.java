@@ -125,6 +125,8 @@ public interface IVideoStreamCodec {
 
         private byte[] frame;
 
+        private int compTimeOffset;
+
         public FrameData() {
         }
 
@@ -132,8 +134,14 @@ public interface IVideoStreamCodec {
             setData(data);
         }
 
+        public FrameData(IoBuffer data, int compTimeOffset) {
+            setData(data);
+            this.compTimeOffset = compTimeOffset;
+        }
+
         /**
-         * Makes a copy of the incoming bytes and places them in an IoBuffer. No flip or rewind is performed on the source data.
+         * Makes a copy of the incoming bytes and places them in an IoBuffer. No flip or rewind is performed on the
+         * source data. Ensure that the data is at the correct position before calling this method.
          *
          * @param data
          *            data
@@ -142,7 +150,7 @@ public interface IVideoStreamCodec {
             if (frame != null) {
                 frame = null;
             }
-            frame = new byte[data.limit()];
+            frame = new byte[data.remaining()];
             data.get(frame);
         }
 
@@ -150,5 +158,65 @@ public interface IVideoStreamCodec {
             return frame == null ? null : IoBuffer.wrap(frame).asReadOnlyBuffer();
         }
 
+        public byte[] getFrameBytes() {
+            return frame;
+        }
+
+        public int getCompTimeOffset() {
+            return compTimeOffset;
+        }
+
     }
+
+    /**
+     * Returns true if the codec is enhanced.
+     *
+     * @return true if enhanced and false otherwise
+     */
+    default boolean isEnhanced() {
+        return false;
+    }
+
+    /**
+     * Returns the multitrack type for the codec.
+     *
+     * @return the multitrack type
+     */
+    default AvMultitrackType getMultitrackType() {
+        return null;
+    }
+
+    /**
+     * Returns the frame type for the codec.
+     *
+     * @return the frame type
+     */
+    default VideoFrameType getFrameType() {
+        return null;
+    }
+
+    /**
+     * Returns the packet type for the codec.
+     *
+     * @return the packet type
+     */
+    default VideoPacketType getPacketType() {
+        return null;
+    }
+
+    /**
+     * Sets the track id.
+     */
+    default void setTrackId(int trackId) {
+    }
+
+    /**
+     * Returns the track id.
+     *
+     * @return track id
+     */
+    default int getTrackId() {
+        return 0;
+    }
+
 }

@@ -11,24 +11,176 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.red5.io.utils.IOUtils;
+
 /**
- * Video codecs that Red5 supports.
+ * Video codecs that Red5 supports; which includes some RTMP-E specific codecs.
  *
  * @author Art Clarke
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public enum VideoCodec {
 
-    JPEG((byte) 0x01), H263((byte) 0x02), SCREEN_VIDEO((byte) 0x03), VP6((byte) 0x04), VP6a((byte) 0x05), SCREEN_VIDEO2((byte) 0x06), AVC((byte) 0x07), VP8((byte) 0x08), VP9((byte) 0x09), AV1((byte) 0x0a), MPEG1((byte) 0x0b), HEVC((byte) 0x0c);
+    JPEG((byte) 0x01) {
+
+        @Override
+        public String getMimeType() {
+            return "jpeg";
+        }
+
+    }, // jpeg
+    H263((byte) 0x02) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new SorensonVideo();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "h263";
+        }
+
+    }, // h263
+    SCREEN_VIDEO((byte) 0x03) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new ScreenVideo();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "FSV1";
+        }
+
+    }, // FSV1 / screen video
+    VP6((byte) 0x04) {
+
+        @Override
+        public String getMimeType() {
+            return "VP6F";
+        }
+
+    }, // VP6 / vp6f / vp6
+    VP6a((byte) 0x05) {
+
+        @Override
+        public String getMimeType() {
+            return "VP6A";
+        }
+
+    }, // VP6A / vp6 alpha
+    SCREEN_VIDEO2((byte) 0x06) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new ScreenVideo2();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "FSV2";
+        }
+
+    }, // FSV2 / screen video 2
+    AVC((byte) 0x07) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new AVCVideo();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "avc1";
+        }
+
+    }, // AVC / avc1 / h264
+    VP8((byte) 0x08) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new VP8Video();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "vp08"; // vp8 / ffmpeg LE = 08pv / 0x76703038
+        }
+
+    }, // VP8 / vp08 / vp8
+    VP9((byte) 0x09) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new VP9Video();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "vp09"; // vp9 / ffmpeg LE = 09pv / 0x76703039
+        }
+
+    }, // VP9 / vp09
+    AVAILABLE((byte) 0x0a), // available
+    MPEG1((byte) 0x0b) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new MPEG1Video();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "mpeg";
+        }
+
+    }, // MPEG / mpeg / mpeg1 video
+    HEVC((byte) 0x0c) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new HEVCVideo();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "hvc1";
+        }
+
+    }, // HEVC / hvc1 / h265
+    AV1((byte) 0x0d) {
+
+        @Override
+        public IVideoStreamCodec newInstance() {
+            return new AV1Video();
+        }
+
+        @Override
+        public String getMimeType() {
+            return "av01"; // av1 / ffmpeg LE = 10va / 0x61763031
+        }
+
+    }; // AV1 / av01
 
     /**
      * Codecs which have private / config data or frame type identifiers included.
      */
-    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC, VP8, VP9, AV1);
+    private final static EnumSet<VideoCodec> configured = EnumSet.of(AVC, HEVC); // leaving AV1 out since config isnt required
+
+    /**
+     * Codecs supplying composition time offset.
+     */
+    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC, AV1);
 
     private final static Map<Byte, VideoCodec> map = new HashMap<>();
 
     private byte id;
+
+    private int fourcc;
+
+    private String mimeType;
 
     static {
         for (VideoCodec codec : VideoCodec.values()) {
@@ -38,6 +190,16 @@ public enum VideoCodec {
 
     private VideoCodec(byte id) {
         this.id = id;
+        this.fourcc = IOUtils.makeFourcc(getMimeType());
+    }
+
+    /**
+     * Returns a new instance of the codec.
+     *
+     * @return codec implementation
+     */
+    public IVideoStreamCodec newInstance() {
+        return null;
     }
 
     /**
@@ -49,12 +211,50 @@ public enum VideoCodec {
         return id;
     }
 
+    /**
+     * Returns back a four character code for this codec.
+     *
+     * @return the four character code
+     */
+    public int getFourcc() {
+        return fourcc;
+    }
+
+    /**
+     * Returns the four character code for this codec.
+     *
+     * @return
+     */
+    public String getMimeType() {
+        return mimeType;
+    }
+
     public static VideoCodec valueOfById(int id) {
         return (VideoCodec) map.get((byte) id);
     }
 
+    /**
+     * Returns back the codec that corresponds to the given four character code.
+     *
+     * @param fourcc
+     *            the four character code
+     * @return the codec
+     */
+    public static VideoCodec valueOfByFourCc(int fourcc) {
+        for (VideoCodec codec : VideoCodec.values()) {
+            if (codec.getFourcc() == fourcc) {
+                return codec;
+            }
+        }
+        return null;
+    }
+
     public static EnumSet<VideoCodec> getConfigured() {
         return configured;
+    }
+
+    public static EnumSet<VideoCodec> getCompositionTime() {
+        return compositionTime;
     }
 
 }

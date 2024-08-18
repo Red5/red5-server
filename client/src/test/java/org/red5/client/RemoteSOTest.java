@@ -44,7 +44,7 @@ public class RemoteSOTest {
             //System.err.println(e.getMessage());
             skipTest = true;
         } finally {
-            if (s.isConnected()) {
+            if (s != null && s.isConnected()) {
                 s.close();
             }
         }

@@ -23,6 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.codec.AudioCodec;
 import org.red5.codec.VideoCodec;
+import org.red5.codec.VideoFrameType;
 import org.red5.io.BufferType;
 import org.red5.io.IKeyFrameMetaCache;
 import org.red5.io.IStreamableFile;
@@ -799,7 +800,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                     if (keyframeMeta.videoCodecId == -1) {
                         keyframeMeta.videoCodecId = frametype & MASK_VIDEO_CODEC;
                     }
-                    if (((frametype & MASK_VIDEO_FRAMETYPE) >> 4) == FLAG_FRAMETYPE_KEYFRAME) {
+                    if (((frametype & MASK_VIDEO_FRAMETYPE) >> 4) == VideoFrameType.KEYFRAME.getValue()) {
                         positionList.add(pos);
                         timestampList.add(tmpTag.getTimestamp());
                     }

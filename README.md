@@ -1,4 +1,5 @@
-red5-server - Red5 server core
+# red5-server - Red5 server core
+
 ===========
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.red5/red5-server.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.red5%22)
@@ -6,38 +7,37 @@ red5-server - Red5 server core
 
 Red5 is an Open Source Flash Server written in Java that supports:
 
- * Streaming Video (FLV, F4V, MP4, 3GP)
- * Streaming Audio (MP3, F4A, M4A, AAC)
- * Recording Client Streams (FLV and AVC+AAC in FLV container)
- * Shared Objects
- * Live Stream Publishing
- * Remoting
- * Protocols: RTMP, RTMPT, RTMPS, and RTMPE
+* Streaming Video (FLV, F4V, MP4, 3GP)
+* Streaming Audio (MP3, F4A, M4A, AAC)
+* Recording Client Streams (FLV and AVC+AAC in FLV container)
+* Shared Objects
+* Live Stream Publishing
+* Remoting
+* Protocols: RTMP, RTMPT, RTMPS, and RTMPE
 
 The Red5 users list may be found here: [red5interest](https://groups.google.com/forum/#!forum/red5interest)
 
 Subreddit: [r/red5](http://www.reddit.com/r/red5)
 
-Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.org/)): 
- * [Red5](https://builds.apache.org/view/M-R/view/OpenMeetings/job/Red5-server/)
- * [Windows Installer](https://builds.apache.org/view/M-R/view/OpenMeetings/job/red5-installer/)
+Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.org/)):
 
-# [Releases](https://github.com/Red5/red5-server/releases/latest)
-# [Previous releases](https://github.com/Red5/red5-server/blob/master/README.md#previous-releases)
+* [Red5](https://builds.apache.org/view/M-R/view/OpenMeetings/job/Red5-server/)
+* [Windows Installer](https://builds.apache.org/view/M-R/view/OpenMeetings/job/red5-installer/)
 
-<i>Note on Bootstrap</i>
+__Note on Bootstrap__ The bootstrap and shutdown classes have been moved to the [red5-service](https://github.com/Red5/red5-service) project; the dependency has been added to this projects pom.
 
-The bootstrap and shutdown classes have been moved to the [red5-service](https://github.com/Red5/red5-service) project; the dependency has been added to this projects pom.
+## StackOverflow
 
-# StackOverflow
 If you want answers from a broader audience, [Stack Overflow](http://stackoverflow.com/tags/red5/info) may be your best bet.
 
-# Maven
+## Maven
+
 Releases are available at [Sonatype - Releases](https://oss.sonatype.org/content/repositories/releases/org/red5/)
 
 Snapshots are available at [Sonatype - Snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/red5/)
 
 Include the red5-parent in your __pom.xml__  in the __dependencyManagement__ section
+
 ```xml
 <dependencyManagement>
     <dependencies>
@@ -50,7 +50,9 @@ Include the red5-parent in your __pom.xml__  in the __dependencyManagement__ sec
     </dependencies>
 </dependencyManagement>  
 ```
+
 in addition to any other Red5 projects in the __dependencies__ section
+
 ```xml
   <dependency>
       <groupId>org.red5</groupId>

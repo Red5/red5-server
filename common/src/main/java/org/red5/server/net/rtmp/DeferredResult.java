@@ -54,12 +54,12 @@ public class DeferredResult {
      */
     public void setResult(Object result) {
         if (resultSent) {
-            throw new RuntimeException("You can only set the result once.");
+            throw new RuntimeException("You can only set the result once");
         }
         this.resultSent = true;
         Channel channel = this.channel.get();
         if (channel == null) {
-            log.warn("The client is no longer connected.");
+            log.warn("The client is no longer connected");
             return;
         }
         call.setResult(result);

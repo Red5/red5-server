@@ -20,10 +20,9 @@ import org.slf4j.Logger;
  */
 public class IOUtils {
 
-    /**
-     * UTF-8 is used
-     */
     public final static Charset CHARSET = Charset.forName("UTF-8");
+
+    public final static Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
     /**
      * Writes integer in reverse order
@@ -238,6 +237,43 @@ public class IOUtils {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
+    }
+
+    /**
+     * Return fourcc as a byte array.
+     *
+     * @param fourcc
+     * @return byte array representation of fourcc
+     */
+    public static byte[] makeFourccBytes(String fourcc) {
+        // automatically convert to with network byte order
+        return fourcc.getBytes(CHARSET_ASCII);
+    }
+
+    /**
+     * Return fourcc as an integer.
+     *
+     * @param fourcc
+     * @return integer representation of fourcc
+     */
+    public static int makeFourcc(String fourcc) {
+        if (fourcc == null || fourcc.length() != 4) {
+            return -1;
+        }
+        // automatically convert to with network byte order
+        byte[] data = fourcc.getBytes(CHARSET_ASCII);
+        //return fourcc.charAt(0) | (fourcc.charAt(1) << 8) | (fourcc.charAt(2) << 16) | (fourcc.charAt(3) << 24);
+        return ((data[0] & 0xff) << 24) | ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
+    }
+
+    /**
+     * Return fourcc as a string.
+     *
+     * @param fourcc
+     * @return string representation of fourcc
+     */
+    public static String getFourccString(int fourcc) {
+        return new String(new char[] { (char) (fourcc & 0xff), (char) ((fourcc >> 8) & 0xff), (char) ((fourcc >> 16) & 0xff), (char) ((fourcc >> 24) & 0xff) });
     }
 
     public static void main(String[] args) {

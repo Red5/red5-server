@@ -23,7 +23,6 @@ import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.Loader;
-import ch.qos.logback.core.util.StatusPrinter;
 
 /**
  * A class that allows the LoggerFactory to access an web context based LoggerContext.
@@ -126,7 +125,7 @@ public class LoggingContextSelector implements ContextSelector {
                         configurator.doConfigure(url);
                         context.start();
                     } catch (JoranException e) {
-                        StatusPrinter.print(context);
+                        //
                     }
                 } else {
                     if (Red5LoggerFactory.DEBUG) {
@@ -165,7 +164,7 @@ public class LoggingContextSelector implements ContextSelector {
                         configurator.doConfigure(url);
                         context.start();
                     } catch (JoranException e) {
-                        StatusPrinter.print(context);
+                        //
                     }
                 }
             } catch (InterruptedException e) {

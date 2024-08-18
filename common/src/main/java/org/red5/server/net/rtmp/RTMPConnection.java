@@ -9,15 +9,19 @@ package org.red5.server.net.rtmp;
 
 import java.beans.ConstructorProperties;
 import java.beans.PropertyChangeEvent;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -35,6 +39,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.red5.io.CapsExMask;
+import org.red5.io.FourCcInfoMask;
 import org.red5.server.BaseConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.api.event.IEvent;
@@ -83,9 +89,6 @@ import org.red5.server.util.ScopeUtils;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * RTMP connection. Stores information about client streams, data transfer channels, pending RPC calls, bandwidth configuration, AMF
@@ -250,7 +253,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     /**
      * Ping interval in ms to detect dead clients.
      */
-    protected volatile int pingInterval = 5000;
+    protected volatile Duration pingInterval = Duration.ofMillis(5000L);
 
     /**
      * Maximum time in ms after which a client is disconnected because of inactivity.
@@ -525,7 +528,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         // start the handshake checker after maxHandshakeTimeout milliseconds
         if (scheduler != null) {
             try {
-                Date endDate = Date.from(Instant.now().plusMillis(maxHandshakeTimeout));
+                Instant endDate = Instant.now().plusMillis(maxHandshakeTimeout);
                 if (isDebug) {
                     log.debug("Handshake timeout at: {}", endDate);
                 }
@@ -559,13 +562,13 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      */
     private void startRoundTripMeasurement() {
         if (scheduler != null) {
-            if (pingInterval > 0) {
+            if (!pingInterval.isZero()) {
                 if (isDebug) {
                     log.debug("startRoundTripMeasurement - {}", sessionId);
                 }
                 try {
                     // schedule with an initial delay of now + 2s to prevent ping messages during connect post processes
-                    Date delayUntilDate = Date.from(Instant.now().plusMillis(2000));
+                    Instant delayUntilDate = Instant.now().plusMillis(2000L);
                     if (isDebug) {
                         log.debug("Keep alive delayed until: {}", delayUntilDate);
                     }
@@ -608,15 +611,51 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      * @param params
      *            Params passed from client
      */
+    @SuppressWarnings("unchecked")
     public void setup(String host, String path, Map<String, Object> params) {
         this.host = host;
         this.path = path;
+        // set the parameters which are passed from the client via the command object, not the args after the object
         this.params = params;
         if (Integer.valueOf(3).equals(params.get("objectEncoding"))) {
             if (isDebug) {
                 log.debug("Setting object encoding to AMF3");
             }
             state.setEncoding(Encoding.AMF3);
+        }
+        // get enhanced properties
+        List<String> fourCcList = null; // earlier impls of RTMP-E may use this style
+        if (params.containsKey("fourCcList")) {
+            log.debug("FourCC list: {}", params.get("fourCcList"));
+            fourCcList = (ArrayList<String>) params.get("fourCcList");
+        } else {
+            log.debug("FourCC list not found; either not using RTMP-E or using newer style of codec support");
+        }
+        // newer style of RTMP-E codec support
+        Map<String, EnumSet<FourCcInfoMask>> audioFourCcInfoMap = Collections.emptyMap(), videoFourCcInfoMap = Collections.emptyMap();
+        if (params.containsKey("audioFourCcInfoMap")) {
+            log.debug("Audio FourCC info map: {}", params.get("audioFourCcInfoMap"));
+            audioFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("audioFourCcInfoMap");
+        } else {
+            log.debug("Audio FourCC info map not found; either not using RTMP-E or using older style of codec support");
+        }
+        if (params.containsKey("videoFourCcInfoMap")) {
+            log.debug("Video FourCC info map: {}", params.get("videoFourCcInfoMap"));
+            videoFourCcInfoMap = (Map<String, EnumSet<FourCcInfoMask>>) params.get("videoFourCcInfoMap");
+        } else {
+            log.debug("Video FourCC info map not found; either not using RTMP-E or using older style of codec support");
+        }
+        // RTMP-E specific capabilities extensions
+        EnumSet<CapsExMask> capsEx = EnumSet.noneOf(CapsExMask.class);
+        if (params.containsKey("capsEx")) {
+            // number = CapsExMask.Reconnect | CapsExMask.Multitrack
+            log.debug("CapsEx: {}", params.get("capsEx"));
+            capsEx = CapsExMask.fromMask(((Number) params.get("capsEx")).byteValue());
+        } else {
+            log.debug("CapsEx not found; either not using RTMP-E or using older style of codec support");
+        }
+        if (isDebug) {
+            log.debug("Setup complete - host: {} path: {} fourCcList: {} audioFourCc: {} videoFourCc: {} CapEx: {}", host, path, fourCcList, audioFourCcInfoMap, videoFourCcInfoMap, capsEx);
         }
     }
 
@@ -1048,7 +1087,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                 decoderState.stopDecoding();
             }
         } else if (isDebug) {
-            log.debug("Already closing..");
+            log.debug("Already closing.");
         }
     }
 
@@ -1388,6 +1427,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         updateBytesRead();
     }
 
+    @SuppressWarnings("unused")
     private String getMessageType(Packet packet) {
         final Header header = packet.getHeader();
         final byte headerDataType = header.getDataType();
@@ -1464,50 +1504,23 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                             }
                             // decrement the queue size
                             receivedQueueSizeUpdater.decrementAndGet(this);
-                            // call directly to the handler
-                            //handler.messageReceived(conn, p);
                             // create a task to handle the packet
                             ReceivedMessageTask task = new ReceivedMessageTask(conn, p);
-                            try {
-                                @SuppressWarnings("unchecked")
-                                ListenableFuture<Packet> future = (ListenableFuture<Packet>) executor.submitListenable(new ListenableFutureTask<Packet>(task));
-                                future.addCallback(new ListenableFutureCallback<Packet>() {
-
-                                    long startTime = System.currentTimeMillis();
-
-                                    int getProcessingTime() {
-                                        return (int) (System.currentTimeMillis() - startTime);
-                                    }
-
-                                    @SuppressWarnings("null")
-                                    public void onFailure(Throwable t) {
-                                        log.warn("onFailure - processingTime: {} msgtype: {} task: {}", getProcessingTime(), getMessageType(packet), task);
-                                    }
-
-                                    @SuppressWarnings("null")
-                                    public void onSuccess(Packet packet) {
-                                        log.debug("onSuccess - processingTime: {} msgtype: {} task: {}", getProcessingTime(), getMessageType(packet), task);
-                                    }
-
-                                });
-                            } catch (TaskRejectedException tre) {
-                                Throwable[] suppressed = tre.getSuppressed();
-                                for (Throwable t : suppressed) {
-                                    log.warn("Suppressed exception on {}", task, t);
-                                }
-                                log.info("Rejected task: {}", task);
-                            } catch (Throwable e) {
-                                log.warn("Incoming message failed task: {}", task, e);
-                                if (isDebug) {
-                                    log.debug("Execution rejected on {} - {} lock permits - decode: {} encode: {}", getSessionId(), RTMP.states[getStateCode()], decoderLock.availablePermits(), encoderLock.availablePermits());
-                                }
-                            }
+                            // run the task
+                            CompletableFuture<Packet> future = CompletableFuture.supplyAsync(() -> task.get(), executor).exceptionally(throwable -> {
+                                throw new RuntimeException(throwable);
+                            });
+                            future.join();
                         }
                     } while (state.getState() < RTMP.STATE_ERROR); // keep processing unless we pass the error state
                 } catch (InterruptedException e) {
                     log.debug("Interrupted while waiting for message {} state: {}", sessionId, RTMP.states[getStateCode()], e);
                 } catch (Exception e) {
-                    log.error("Error processing received message {} state: {}", sessionId, RTMP.states[getStateCode()], e);
+                    if (conn.hasAttribute("exception")) {
+                        log.error("Error processing received message {} state: {}", sessionId, RTMP.states[getStateCode()], conn.getAttribute("exception"));
+                    } else {
+                        log.error("Error processing received message {} state: {}", sessionId, RTMP.states[getStateCode()], e);
+                    }
                 } finally {
                     receivedPacketFuture = null;
                     receivedPacketQueue.clear();
@@ -1662,7 +1675,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      *            Interval in ms to ping clients. Set to 0 to disable ghost detection code.
      */
     public void setPingInterval(int pingInterval) {
-        this.pingInterval = pingInterval;
+        this.pingInterval = Duration.ofMillis(pingInterval);
     }
 
     /**

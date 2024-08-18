@@ -310,8 +310,8 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             } else if (codecInfo != null) {
                                 audioStreamCodec = codecInfo.getAudioCodec();
                             }
-                            if (audioStreamCodec != null) {
-                                audioStreamCodec.addData(buf);
+                            if (audioStreamCodec != null && audioStreamCodec.addData(buf)) {
+                                log.debug("Audio codec updated: {}", audioStreamCodec);
                             }
                             if (info != null) {
                                 info.setHasAudio(true);
@@ -329,8 +329,8 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             } else if (codecInfo != null) {
                                 videoStreamCodec = codecInfo.getVideoCodec();
                             }
-                            if (videoStreamCodec != null) {
-                                videoStreamCodec.addData(buf, eventTime);
+                            if (videoStreamCodec != null && videoStreamCodec.addData(buf, eventTime)) {
+                                log.debug("Video codec updated: {}", videoStreamCodec);
                             }
                             if (info != null) {
                                 info.setHasVideo(true);
@@ -366,18 +366,17 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                     }
                     // notify event listeners
                     checkSendNotifications(event);
-                    // note this timestamp is set in event/body but not in the associated header
-                    try {
-                        // route to live
-                        if (livePipe != null) {
+                    // note this timestamp is set in event/body but not in the associated header route to live
+                    if (livePipe != null) {
+                        try {
                             // create new RTMP message, initialize it and push through pipe
                             RTMPMessage msg = RTMPMessage.build(rtmpEvent, eventTime);
                             livePipe.pushMessage(msg);
-                        } else if (isDebug) {
-                            log.debug("Live pipe was null, message was not pushed");
+                        } catch (IOException err) {
+                            stop();
                         }
-                    } catch (IOException err) {
-                        stop();
+                    } else if (isDebug) {
+                        log.debug("Live pipe was null, message was not pushed");
                     }
                     // notify listeners about received packet
                     if (rtmpEvent instanceof IStreamPacket) {
@@ -721,7 +720,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             }
                         }
                     } else {
-                        log.debug("Could not initialize stream output, videoCodec is null.");
+                        log.debug("Could not initialize stream output, videoCodec is null");
                     }
                     IAudioStreamCodec audioCodec = info.getAudioCodec();
                     //log.debug("Audio codec: {}", audioCodec);
@@ -739,7 +738,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             }
                         }
                     } else {
-                        log.debug("No decoder configuration available, audioCodec is null.");
+                        log.debug("No decoder configuration available, audioCodec is null");
                     }
                 }
                 // set as primary listener

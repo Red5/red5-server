@@ -89,8 +89,8 @@ public class RTMPClientTest {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
             }
-        } while (!client.conn.isClosed());
-        log.debug("Client not connected");
+        } while (client.conn != null && !client.conn.isClosed());
+        log.debug("Client not connected: {}", client.conn);
         timer.cancel();
         log.info("Exit");
     }

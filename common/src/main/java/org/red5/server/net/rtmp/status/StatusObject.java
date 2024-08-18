@@ -38,7 +38,6 @@ public class StatusObject implements IExternalizable {
 
     /** Constructs a new StatusObject. */
     public StatusObject() {
-
     }
 
     public StatusObject(String code, String level) {
@@ -129,13 +128,12 @@ public class StatusObject implements IExternalizable {
     }
 
     public void setAdditional(String name, Object value) {
-        if ("code,level,description,application".indexOf(name) != -1) {
-            throw new RuntimeException("the name \"" + name + "\" is reserved");
+        if (!"code,level,description,application".contains(name)) {
+            if (additional == null) {
+                additional = new HashMap<>();
+            }
+            additional.put(name, value);
         }
-        if (additional == null) {
-            additional = new HashMap<>();
-        }
-        additional.put(name, value);
     }
 
     /**
@@ -150,6 +148,9 @@ public class StatusObject implements IExternalizable {
     /** {@inheritDoc} */
     @Override
     public String toString() {
+        if (additional != null) {
+            return String.format("Status code: %s level: %s description: %s additional: %s", code, level, description, additional);
+        }
         return String.format("Status code: %s level: %s description: %s", code, level, description);
     }
 

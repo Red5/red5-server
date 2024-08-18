@@ -123,7 +123,7 @@ public class DebugProxyHandler extends IoHandlerAdapter implements ResourceLoade
         }
         //session.getFilterChain().addLast("logger", new LoggingFilter() );
         if (!isClient) {
-            log.debug("Connecting..");
+            log.debug("Connecting");
             IoConnector connector = new NioSocketConnector();
             connector.setHandler(this);
             ConnectFuture future = connector.connect(forward);

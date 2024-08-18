@@ -8,8 +8,6 @@
 package org.red5.codec;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Red5 video codec for the screen capture format.
@@ -19,8 +17,6 @@ import org.slf4j.LoggerFactory;
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class ScreenVideo2 extends AbstractVideo {
-
-    private Logger log = LoggerFactory.getLogger(ScreenVideo2.class);
 
     /**
      * FLV codec name constant
@@ -92,9 +88,8 @@ public class ScreenVideo2 extends AbstractVideo {
      */
     private byte specInfo2;
 
-    /** Constructs a new ScreenVideo2. */
-    public ScreenVideo2() {
-        this.reset();
+    {
+        codec = VideoCodec.SCREEN_VIDEO2;
     }
 
     /** {@inheritDoc} */
@@ -117,15 +112,6 @@ public class ScreenVideo2 extends AbstractVideo {
         this.blockCount = 0;
         this.blockDataSize = 0;
         this.totalBlockDataSize = 0;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean canHandleData(IoBuffer data) {
-        byte first = data.get();
-        boolean result = ((first & 0x0f) == VideoCodec.SCREEN_VIDEO2.getId());
-        data.rewind();
-        return result;
     }
 
     /*

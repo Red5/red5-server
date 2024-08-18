@@ -1,5 +1,6 @@
 package org.red5.server.stream.consumer;
 
+import org.red5.codec.VideoFrameType;
 import org.red5.server.net.rtmp.event.AudioData;
 import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.server.stream.IStreamData;
@@ -19,7 +20,7 @@ public class QueuedMediaData {
 
     int codecId;
 
-    VideoData.FrameType frameType;
+    VideoFrameType frameType;
 
     public QueuedMediaData(int timestamp, byte dataType) {
         this.tag = ImmutableTag.build(dataType, timestamp);
