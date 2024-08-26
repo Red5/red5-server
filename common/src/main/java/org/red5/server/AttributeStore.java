@@ -153,7 +153,7 @@ public class AttributeStore implements ICastingAttributeStore {
         boolean result = false;
         if (name != null && value != null) {
             // get previous value
-            final Object previous = attributes.putIfAbsent(name, value);
+            final Object previous = attributes.put(name, value);
             // previous will be null if the attribute didn't exist and if it does it will equal the previous value
             if (previous != null) {
                 // if the value is a collection, check the elements for modification
