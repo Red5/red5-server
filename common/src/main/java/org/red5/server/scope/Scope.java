@@ -1252,8 +1252,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 }
                 names = null;
             }
-            log.trace("Handler: {}", handler);
-            log.trace("Child count: {}", children.size());
+            log.trace("Handler: {} child count: {}", handler, children.size());
             children.forEach(child -> {
                 log.trace("Child: {}", child);
             });

@@ -18,7 +18,7 @@ import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.red5.client.net.rtmp.RTMPClient;
 import org.red5.client.net.rtmp.RTMPMinaIoHandler;
-import org.red5.client.net.ssl.BogusSslContextFactory;
+import org.red5.io.tls.TLSFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,14 +45,12 @@ public class RTMPSClient extends RTMPClient {
     /**
      * Password for accessing the keystore.
      */
-    @SuppressWarnings("unused")
     private char[] password;
 
     /**
      * The keystore type, valid options are JKS and PKCS12
      */
-    @SuppressWarnings("unused")
-    private String keyStoreType = "JKS";
+    private String keyStoreType = "PKCS12";
 
     /** Constructs a new RTMPClient. */
     public RTMPSClient() {
@@ -113,8 +111,9 @@ public class RTMPSClient extends RTMPClient {
         @Override
         public void sessionOpened(IoSession session) throws Exception {
             // START OF NATIVE SSL STUFF
-            SSLContext sslContext = BogusSslContextFactory.getInstance(false);
-            SslFilter sslFilter = new SslFilter(sslContext);
+            SSLContext context = TLSFactory.getTLSContext(keyStoreType, password);
+            SslFilter sslFilter = new SslFilter(context);
+            // we are a client
             sslFilter.setUseClientMode(true);
             if (sslFilter != null) {
                 session.getFilterChain().addFirst("sslFilter", sslFilter);

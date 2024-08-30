@@ -5,6 +5,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.red5.client.net.rtmp.ClientExceptionHandler;
 import org.red5.client.util.PropertiesReader;
+import org.red5.io.tls.TLSFactory;
 import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IPendingServiceCallback;
@@ -15,6 +16,9 @@ public class RTMPSClientTest {
     // https://github.com/Red5/red5-client/pull/31
     @Test
     public void test31() throws InterruptedException {
+        TLSFactory.setKeyFilename("/media/mondain/terrorbyte/workspace/github-red5/red5-server/server/src/main/server/conf/server.p12");
+        TLSFactory.setTrustFilename("/media/mondain/terrorbyte/workspace/github-red5/red5-server/server/src/main/server/conf/truststore.p12");
+
         final RTMPSClient client = new RTMPSClient();
         client.setConnectionClosedHandler(new Runnable() {
             @Override

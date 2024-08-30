@@ -15,8 +15,21 @@
             <pattern>%d{ISO8601} [%thread] %-5level %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="TRACE">
+    <root>
+        <level value="DEBUG" />
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
+    <logger name="org.red5.client" level="TRACE"/>
+    <logger name="org.red5.io" level="DEBUG"/>
+    <logger name="org.red5.server.util" level="INFO"/>
+    <logger name="org.red5.server.net" level="TRACE"/>
+    <logger name="org.red5.server.net.rtmp.event.BaseEvent" level="TRACE"/>
+    <logger name="org.red5.server.net.rtmp.event.Notify" level="TRACE"/>
+    <!-- 
+    <logger name="org.red5.server.net.rtmp.RTMPHandshake" level="TRACE"/>
+    <logger name="org.red5.server.net.rtmp.InboundHandshake" level="TRACE"/>
+    <logger name="org.red5.client.net.rtmp.OutboundHandshake" level="TRACE"/>
+     -->
+    <logger name="net.sf.ehcache" level="WARN"/>
 </configuration>

@@ -1,4 +1,4 @@
-package org.red5.client.test;
+package org.red5.client;
 
 import java.io.File;
 import java.util.Random;

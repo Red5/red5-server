@@ -7,9 +7,8 @@
 
 package org.red5.server.net.rtmps;
 
-import java.io.File;
 import java.io.NotActiveException;
-import java.security.KeyStore;
+import java.nio.file.Paths;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Arrays;
@@ -19,10 +18,8 @@ import javax.net.ssl.SSLParameters;
 
 import org.apache.mina.core.filterchain.IoFilterChain;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.ssl.KeyStoreFactory;
-import org.apache.mina.filter.ssl.SslContextFactory;
 import org.apache.mina.filter.ssl.SslFilter;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.red5.io.tls.TLSFactory;
 import org.red5.server.net.rtmp.InboundHandshake;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPHandler;
@@ -102,7 +99,7 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
 
     static {
         // add bouncycastle security provider
-        Security.addProvider(new BouncyCastleProvider());
+        //Security.addProvider(new BouncyCastleProvider());
         if (log.isTraceEnabled()) {
             Provider[] providers = Security.getProviders();
             for (Provider provider : providers) {
@@ -118,50 +115,22 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
         if (keystoreFile == null || truststoreFile == null) {
             throw new NotActiveException("Keystore or truststore are null");
         }
+        // get key store and trust store file locations
+        String keyFilename = Paths.get(System.getProperty("user.dir"), keystoreFile).toString(), trustFilename = Paths.get(System.getProperty("user.dir"), truststoreFile).toString();
+        String keyStoreType = keyFilename.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
         // create the ssl context
         SSLContext sslContext = null;
         try {
-            log.debug("Keystore: {}", keystoreFile);
-            File keyStore = new File(keystoreFile);
-            log.trace("Keystore - read: {} path: {}", keyStore.canRead(), keyStore.getCanonicalPath());
-            log.debug("Truststore: {}", truststoreFile);
-            File trustStore = new File(truststoreFile);
-            log.trace("Truststore - read: {} path: {}", trustStore.canRead(), trustStore.getCanonicalPath());
-            if (keyStore.exists() && trustStore.exists()) {
-                // keystore
-                final KeyStoreFactory keyStoreFactory = new KeyStoreFactory();
-                keyStoreFactory.setDataFile(keyStore);
-                keyStoreFactory.setPassword(keystorePassword);
-                // truststore
-                final KeyStoreFactory trustStoreFactory = new KeyStoreFactory();
-                trustStoreFactory.setDataFile(trustStore);
-                trustStoreFactory.setPassword(truststorePassword);
-                // ssl context factory
-                final SslContextFactory sslContextFactory = new SslContextFactory();
-                //sslContextFactory.setProtocol("TLS");
-                // get keystore
-                final KeyStore ks = keyStoreFactory.newInstance();
-                sslContextFactory.setKeyManagerFactoryKeyStore(ks);
-                // get truststore
-                final KeyStore ts = trustStoreFactory.newInstance();
-                sslContextFactory.setTrustManagerFactoryKeyStore(ts);
-                sslContextFactory.setKeyManagerFactoryKeyStorePassword(keystorePassword);
-                // get ssl context
-                sslContext = sslContextFactory.newInstance();
-                log.debug("SSL provider is: {}", sslContext.getProvider());
-                // get ssl context parameters
-                SSLParameters params = sslContext.getDefaultSSLParameters();
-                if (log.isDebugEnabled()) {
-                    log.debug("SSL context params - need client auth: {} want client auth: {} endpoint id algorithm: {}", params.getNeedClientAuth(), params.getWantClientAuth(), params.getEndpointIdentificationAlgorithm());
-                    String[] supportedProtocols = params.getProtocols();
-                    for (String protocol : supportedProtocols) {
-                        log.debug("SSL context supported protocol: {}", protocol);
-                    }
+            sslContext = TLSFactory.getTLSContext(keyStoreType, keystorePassword, keyFilename, truststorePassword, trustFilename);
+            log.debug("SSL provider is: {}", sslContext.getProvider());
+            // get ssl context parameters
+            SSLParameters params = sslContext.getDefaultSSLParameters();
+            if (log.isDebugEnabled()) {
+                log.debug("SSL context params - need client auth: {} want client auth: {} endpoint id algorithm: {}", params.getNeedClientAuth(), params.getWantClientAuth(), params.getEndpointIdentificationAlgorithm());
+                String[] supportedProtocols = params.getProtocols();
+                for (String protocol : supportedProtocols) {
+                    log.debug("SSL context supported protocol: {}", protocol);
                 }
-                // compatibility: remove the SSLv2Hello message in the available protocols - some systems will fail
-                // to handshake if TSLv1 messages are enwrapped with SSLv2 messages, Java 6 tries to send TSLv1 embedded in SSLv2
-            } else {
-                log.warn("Keystore or Truststore file does not exist");
             }
         } catch (Exception ex) {
             log.error("Exception getting SSL context", ex);
