@@ -8,6 +8,7 @@
 package org.red5.server.net.rtmps;
 
 import java.io.NotActiveException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Provider;
 import java.security.Security;
@@ -64,12 +65,12 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
     /**
      * Stores the keystore path.
      */
-    private String keystoreFile;
+    private String keystorePath;
 
     /**
      * Stores the truststore path.
      */
-    private String truststoreFile;
+    private String truststorePath;
 
     /**
      * Names of the SSL cipher suites which are currently enabled for use.
@@ -98,8 +99,6 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
     private boolean wantClientAuth;
 
     static {
-        // add bouncycastle security provider
-        //Security.addProvider(new BouncyCastleProvider());
         if (log.isTraceEnabled()) {
             Provider[] providers = Security.getProviders();
             for (Provider provider : providers) {
@@ -112,16 +111,15 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
     @Override
     public void sessionCreated(IoSession session) throws Exception {
         log.debug("Session created: RTMPS");
-        if (keystoreFile == null || truststoreFile == null) {
+        if (keystorePath == null || truststorePath == null) {
             throw new NotActiveException("Keystore or truststore are null");
         }
-        // get key store and trust store file locations
-        String keyFilename = Paths.get(System.getProperty("user.dir"), keystoreFile).toString(), trustFilename = Paths.get(System.getProperty("user.dir"), truststoreFile).toString();
-        String keyStoreType = keyFilename.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
+        // determine the keystore type by the file extension
+        String keyStoreType = keystorePath.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
         // create the ssl context
         SSLContext sslContext = null;
         try {
-            sslContext = TLSFactory.getTLSContext(keyStoreType, keystorePassword, keyFilename, truststorePassword, trustFilename);
+            sslContext = TLSFactory.getTLSContext(keyStoreType, keystorePassword, keystorePath, truststorePassword, truststorePath);
             log.debug("SSL provider is: {}", sslContext.getProvider());
             // get ssl context parameters
             SSLParameters params = sslContext.getDefaultSSLParameters();
@@ -166,9 +164,6 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
         // use notification messages
         session.setAttribute(SslFilter.USE_NOTIFICATION, Boolean.TRUE);
         log.debug("isSslStarted: {}", sslFilter.isSslStarted(session));
-        //if (log.isTraceEnabled()) {
-        //    chain.addLast("logger", new LoggingFilter());
-        //}
         // add rtmps filter
         session.getFilterChain().addAfter("sslFilter", "rtmpsFilter", new RTMPSIoFilter());
         // create a connection
@@ -213,8 +208,13 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
      * @param path
      *            contains keystore
      */
-    public void setKeystoreFile(String path) {
-        this.keystoreFile = path;
+    public void setKeystorePath(String path) {
+        if (Path.of(path).isAbsolute()) {
+            this.keystorePath = path;
+        } else {
+            this.keystorePath = Paths.get(System.getProperty("user.dir"), path).toString();
+        }
+        this.keystorePath = path;
     }
 
     /**
@@ -223,8 +223,13 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
      * @param path
      *            contains truststore
      */
-    public void setTruststoreFile(String path) {
-        this.truststoreFile = path;
+    public void setTruststorePath(String path) {
+        if (Path.of(path).isAbsolute()) {
+            this.truststorePath = path;
+        } else {
+            this.truststorePath = Paths.get(System.getProperty("user.dir"), path).toString();
+        }
+        this.truststorePath = path;
     }
 
     public String[] getCipherSuites() {

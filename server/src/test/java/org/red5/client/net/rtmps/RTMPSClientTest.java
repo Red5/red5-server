@@ -3,12 +3,13 @@ package org.red5.client.net.rtmps;
 import java.util.Map;
 
 import org.junit.Test;
-import org.red5.client.net.rtmp.ClientExceptionHandler;
 import org.red5.client.util.PropertiesReader;
 import org.red5.io.tls.TLSFactory;
 import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IPendingServiceCallback;
+import org.red5.server.net.rtmp.RTMPConnection;
+import org.red5.server.net.rtmp.codec.RTMP;
 import org.red5.server.net.rtmp.event.Ping;
 
 public class RTMPSClientTest {
@@ -16,22 +17,11 @@ public class RTMPSClientTest {
     // https://github.com/Red5/red5-client/pull/31
     @Test
     public void test31() throws InterruptedException {
-        TLSFactory.setKeyFilename("/media/mondain/terrorbyte/workspace/github-red5/red5-server/server/src/main/server/conf/server.p12");
-        TLSFactory.setTrustFilename("/media/mondain/terrorbyte/workspace/github-red5/red5-server/server/src/main/server/conf/truststore.p12");
+        TLSFactory.setKeystorePath("/media/mondain/terrorbyte/workspace/github-red5/red5-server/server/src/main/server/conf/server.p12");
+        TLSFactory.setTruststorePath("/media/mondain/terrorbyte/workspace/github-red5/red5-server/server/src/main/server/conf/truststore.p12");
 
         final RTMPSClient client = new RTMPSClient();
-        client.setConnectionClosedHandler(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Connection closed");
-            }
-        });
-        client.setExceptionHandler(new ClientExceptionHandler() {
-            @Override
-            public void handleException(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
+        client.setConnectionClosedHandler(() -> System.out.println("Connection closed"));
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -79,8 +69,18 @@ public class RTMPSClientTest {
         });
         t.start();
         t.join();
-        System.out.println("Joined");
-        Thread.sleep(60000L);
+        RTMPConnection conn = (RTMPConnection) client.getConnection();
+        if (conn != null) {
+            RTMP rtmpState = conn.getState();
+            System.out.println("Joined with state: " + rtmpState);
+            if (rtmpState != null && rtmpState.getState() == RTMP.STATE_CONNECTED) {
+                Thread.sleep(60000L);
+            } else {
+                System.out.println("Connection is not connected");
+            }
+        } else {
+            System.out.println("Connection failed");
+        }
         // disconnect
         client.disconnect();
     }

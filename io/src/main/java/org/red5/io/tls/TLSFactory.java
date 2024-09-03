@@ -22,8 +22,9 @@ public class TLSFactory {
 
     private static final Logger log = LoggerFactory.getLogger(TLSFactory.class);
 
-    private static final boolean isDebug = log.isDebugEnabled();
+    private static final boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
 
+    // shared thread-safe random
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public static final int MAX_HANDSHAKE_LOOPS = 200;
@@ -44,20 +45,19 @@ public class TLSFactory {
      */
     private static String storeType = "PKCS12"; // JKS or PKCS12
 
-    private static String keyStoreFile = String.format("server.%s", "PKCS12".equals(storeType) ? "p12" : "jks");
+    private static String keyStoreFile = String.format("server.%s", "PKCS12".equals(storeType) ? "p12" : "jks"), trustStoreFile = String.format("truststore.%s", "PKCS12".equals(storeType) ? "p12" : "jks");
 
-    private static String trustStoreFile = String.format("truststore.%s", "PKCS12".equals(storeType) ? "p12" : "jks");
+    private static String keystorePath = Paths.get(System.getProperty("user.dir"), "conf", keyStoreFile).toString(), truststorePath = Paths.get(System.getProperty("user.dir"), "conf", trustStoreFile).toString();
 
     private static String passwd = "password123";
 
-    private static String keyFilename = Paths.get(System.getProperty("user.dir"), "conf", keyStoreFile).toString();
-
-    private static String trustFilename = Paths.get(System.getProperty("user.dir"), "conf", trustStoreFile).toString();
-
     static {
         if (isDebug) {
-            //System.setProperty("javax.net.debug", "all");
-            System.setProperty("javax.net.debug", "SSL,handshake,verbose,trustmanager,keymanager,record,plaintext");
+            if (isTrace) {
+                System.setProperty("javax.net.debug", "SSL,handshake,verbose,trustmanager,keymanager,record,plaintext");
+            } else {
+                System.setProperty("javax.net.debug", "all");
+            }
         }
         // set unlimited crypto policy
         Security.setProperty("crypto.policy", "unlimited");
@@ -79,27 +79,27 @@ public class TLSFactory {
     }
 
     public static SSLContext getTLSContext() throws Exception {
-        log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keyFilename, trustFilename, storeType);
+        log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
         KeyStore ks = KeyStore.getInstance(storeType);
         KeyStore ts = KeyStore.getInstance(storeType);
         char[] passphrase = passwd.toCharArray();
-        try (FileInputStream fis = new FileInputStream(keyFilename)) {
+        try (FileInputStream fis = new FileInputStream(keystorePath)) {
             ks.load(fis, passphrase);
         } catch (Exception e) {
-            log.error("Failed to load keystore: {}", keyFilename, e);
+            log.error("Failed to load keystore: {}", keystorePath, e);
             throw e;
         }
-        try (FileInputStream fis = new FileInputStream(trustFilename)) {
+        try (FileInputStream fis = new FileInputStream(truststorePath)) {
             ts.load(fis, passphrase);
         } catch (Exception e) {
-            log.error("Failed to load truststore: {}", trustFilename, e);
+            log.error("Failed to load truststore: {}", truststorePath, e);
             throw e;
         }
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         try {
             kmf.init(ks, passphrase);
         } catch (UnrecoverableKeyException e) {
-            log.error("Failed to initialize KeyManagerFactory with keystore: {}", keyFilename, e);
+            log.error("Failed to initialize KeyManagerFactory with keystore: {}", keystorePath, e);
             throw e;
         }
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
@@ -110,21 +110,21 @@ public class TLSFactory {
     }
 
     public static SSLContext getTLSContext(String storeType, char[] passphrase) throws Exception {
-        log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keyFilename, trustFilename, storeType);
-        log.debug("Keystore - file name: {} password: {}", keyFilename, passphrase);
-        log.debug("Truststore - file name: {} password: {}", trustFilename, passphrase);        
+        log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
+        log.debug("Keystore - file: {} password: {}", keystorePath, passphrase);
+        log.debug("Truststore - file: {} password: {}", truststorePath, passphrase);
         KeyStore ks = KeyStore.getInstance(storeType);
         KeyStore ts = KeyStore.getInstance(storeType);
-        try (FileInputStream fis = new FileInputStream(keyFilename)) {
+        try (FileInputStream fis = new FileInputStream(keystorePath)) {
             ks.load(fis, passphrase);
         } catch (Exception e) {
-            log.error("Failed to load keystore: {}", keyFilename, e);
+            log.error("Failed to load keystore: {}", keystorePath, e);
             throw e;
         }
-        try (FileInputStream fis = new FileInputStream(trustFilename)) {
+        try (FileInputStream fis = new FileInputStream(truststorePath)) {
             ts.load(fis, passphrase);
         } catch (Exception e) {
-            log.error("Failed to load truststore: {}", trustFilename, e);
+            log.error("Failed to load truststore: {}", truststorePath, e);
             throw e;
         }
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
@@ -133,7 +133,7 @@ public class TLSFactory {
             log.debug("Private key: {}", privateKey);
             kmf.init(ks, passphrase);
         } catch (UnrecoverableKeyException e) {
-            log.error("Failed to initialize KeyManagerFactory with keystore: {}", keyFilename, e);
+            log.error("Failed to initialize KeyManagerFactory with keystore: {}", keystorePath, e);
             throw e;
         }
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
@@ -143,18 +143,18 @@ public class TLSFactory {
         return sslCtx;
     }
 
-    public static SSLContext getTLSContext(String storeType, String keystorePassword, String keyFilename, String truststorePassword, String trustFilename) throws Exception {
-        log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keyFilename, trustFilename, storeType);
-        log.debug("Keystore - file name: {} password: {}", keyFilename, keystorePassword);
-        log.debug("Truststore - file name: {} password: {}", trustFilename, truststorePassword);
+    public static SSLContext getTLSContext(String storeType, String keystorePassword, String keystorePath, String truststorePassword, String truststorePath) throws Exception {
+        log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
+        log.debug("Keystore - file: {} password: {}", keystorePath, keystorePassword);
+        log.debug("Truststore - file: {} password: {}", truststorePath, truststorePassword);
         KeyStore ks = KeyStore.getInstance(storeType);
         KeyStore ts = KeyStore.getInstance(storeType);
         char[] keyStrorePassphrase = keystorePassword.toCharArray();
         char[] trustStorePassphrase = truststorePassword.toCharArray();
-        try (FileInputStream fis = new FileInputStream(keyFilename)) {
+        try (FileInputStream fis = new FileInputStream(keystorePath)) {
             ks.load(fis, keyStrorePassphrase);
         }
-        try (FileInputStream fis = new FileInputStream(trustFilename)) {
+        try (FileInputStream fis = new FileInputStream(truststorePath)) {
             ts.load(fis, trustStorePassphrase);
         }
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
@@ -208,20 +208,20 @@ public class TLSFactory {
         TLSFactory.passwd = passwd;
     }
 
-    public static String getKeyFilename() {
-        return keyFilename;
+    public static String getKeystorePath() {
+        return keystorePath;
     }
 
-    public static void setKeyFilename(String keyFilename) {
-        TLSFactory.keyFilename = keyFilename;
+    public static void setKeystorePath(String keystorePath) {
+        TLSFactory.keystorePath = keystorePath;
     }
 
-    public static String getTrustFilename() {
-        return trustFilename;
+    public static String getTruststorePath() {
+        return truststorePath;
     }
 
-    public static void setTrustFilename(String trustFilename) {
-        TLSFactory.trustFilename = trustFilename;
+    public static void setTruststorePath(String truststorePath) {
+        TLSFactory.truststorePath = truststorePath;
     }
 
 }

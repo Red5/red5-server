@@ -16,6 +16,7 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
+import org.red5.client.net.rtmp.ClientExceptionHandler;
 import org.red5.client.net.rtmp.RTMPClient;
 import org.red5.client.net.rtmp.RTMPMinaIoHandler;
 import org.red5.io.tls.TLSFactory;
@@ -39,7 +40,7 @@ public class RTMPSClient extends RTMPClient {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPSClient.class);
 
-    private static String[] cipherSuites = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA" };
+    private static String[] cipherSuites;
 
     // I/O handler
     private final RTMPSClientIoHandler ioHandler;
@@ -59,11 +60,37 @@ public class RTMPSClient extends RTMPClient {
         protocol = "rtmps";
         ioHandler = new RTMPSClientIoHandler();
         ioHandler.setHandler(this);
+        setExceptionHandler(new ClientExceptionHandler() {
+            @Override
+            public void handleException(Throwable throwable) {
+                log.error("Exception", throwable);
+                try {
+                    ioHandler.exceptionCaught(null, throwable);
+                } catch (Exception e) {
+                    log.debug("Exception", e);
+                }
+            }
+        });
+    }
+
+    /**
+     * Creates a new RTMPSClient with the given keystore type and password.
+     *
+     * @param keyStoreType keystore type
+     * @param password keystore password
+     */
+    public RTMPSClient(String keyStoreType, String password) {
+        protocol = "rtmps";
+        this.keyStoreType = keyStoreType;
+        this.password = password.toCharArray();
+        ioHandler = new RTMPSClientIoHandler();
+        ioHandler.setHandler(this);
     }
 
     @SuppressWarnings({ "rawtypes" })
     @Override
     protected void startConnector(String server, int port) {
+        log.debug("startConnector - server: {} port: {}", server, port);
         socketConnector = new NioSocketConnector();
         socketConnector.setHandler(ioHandler);
         future = socketConnector.connect(new InetSocketAddress(server, port));
@@ -73,20 +100,17 @@ public class RTMPSClient extends RTMPClient {
                 try {
                     // will throw RuntimeException after connection error
                     future.getSession();
-                } catch (Throwable e) {
-                    //if there isn't an ClientExceptionHandler set, a
-                    //RuntimeException may be thrown in handleException
-                    handleException(e);
+                } catch (Throwable t) {
+                    try {
+                        ioHandler.exceptionCaught(null, t);
+                    } catch (Exception e) {
+                        // no-op
+                    }
                 }
             }
         });
-        // Do the close requesting that the pending messages are sent before
-        // the session is closed
-        //future.getSession().close(false);
         // Now wait for the close to be completed
         future.awaitUninterruptibly(CONNECTOR_WORKER_TIMEOUT);
-        // We can now dispose the connector
-        //socketConnector.dispose();
     }
 
     /**
@@ -107,34 +131,47 @@ public class RTMPSClient extends RTMPClient {
         this.keyStoreType = keyStoreType;
     }
 
+    public static void setCipherSuites(String[] cipherSuites) {
+        RTMPSClient.cipherSuites = cipherSuites;
+    }
+
     private class RTMPSClientIoHandler extends RTMPMinaIoHandler {
 
         /** {@inheritDoc} */
         @Override
         public void sessionOpened(IoSession session) throws Exception {
-            // START OF NATIVE SSL STUFF
+            log.debug("RTMPS sessionOpened: {}", session);
+            // do tls stuff
             SSLContext context = TLSFactory.getTLSContext(keyStoreType, password);
             SslFilter sslFilter = new SslFilter(context);
             if (sslFilter != null) {
                 // we are a client
                 sslFilter.setUseClientMode(true);
                 // set the cipher suites
-                //sslFilter.setEnabledCipherSuites(cipherSuites);
+                if (cipherSuites != null) {
+                    sslFilter.setEnabledCipherSuites(cipherSuites);
+                }
                 session.getFilterChain().addFirst("sslFilter", sslFilter);
             }
-            // END OF NATIVE SSL STUFF
             super.sessionOpened(session);
+        }
+
+        @Override
+        public void sessionClosed(IoSession session) throws Exception {
+            log.debug("RTMPS sessionClosed: {}", session);
+            super.sessionClosed(session);
         }
 
         /** {@inheritDoc} */
         @Override
         public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-            log.warn("Exception caught {}", cause.getMessage());
-            if (log.isDebugEnabled()) {
-                log.error("Exception detail", cause);
+            log.warn("Exception caught: {}", cause.getMessage());
+            log.debug("Exception detail", cause);
+            // if there are any errors using ssl, kill the session
+            if (session != null) {
+                session.closeNow();
             }
-            //if there are any errors using ssl, kill the session
-            session.closeNow();
+            socketConnector.dispose(false);
         }
 
     }
