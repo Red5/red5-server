@@ -39,13 +39,15 @@ public class RTMPSClient extends RTMPClient {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPSClient.class);
 
+    private static String[] cipherSuites = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA" };
+
     // I/O handler
     private final RTMPSClientIoHandler ioHandler;
 
     /**
      * Password for accessing the keystore.
      */
-    private char[] password;
+    private char[] password = "password123".toCharArray();
 
     /**
      * The keystore type, valid options are JKS and PKCS12
@@ -113,9 +115,11 @@ public class RTMPSClient extends RTMPClient {
             // START OF NATIVE SSL STUFF
             SSLContext context = TLSFactory.getTLSContext(keyStoreType, password);
             SslFilter sslFilter = new SslFilter(context);
-            // we are a client
-            sslFilter.setUseClientMode(true);
             if (sslFilter != null) {
+                // we are a client
+                sslFilter.setUseClientMode(true);
+                // set the cipher suites
+                //sslFilter.setEnabledCipherSuites(cipherSuites);
                 session.getFilterChain().addFirst("sslFilter", sslFilter);
             }
             // END OF NATIVE SSL STUFF

@@ -77,9 +77,9 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
     private String[] cipherSuites;
 
     /**
-     * Names of the protocol versions which are currently enabled for use.
+     * Names of the protocol versions which are currently enabled for use. Defaults to TLSv1.2.
      */
-    private String[] protocols;
+    private String[] protocols = new String[] { "TLSv1.2" };
 
     /**
      * Use client (or server) mode when handshaking.
@@ -125,6 +125,16 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
             log.debug("SSL provider is: {}", sslContext.getProvider());
             // get ssl context parameters
             SSLParameters params = sslContext.getDefaultSSLParameters();
+            //params.setApplicationProtocols(protocols);
+            if (log.isDebugEnabled()) {
+                Arrays.asList(params.getCipherSuites()).forEach(cipher -> log.debug("Supported cipher suite: {}", cipher));
+            }
+            params.setCipherSuites(cipherSuites);
+            // set the endpoint identification algorithm
+            //params.setEndpointIdentificationAlgorithm("RTMPS");
+            //params.setProtocols(protocols);
+            // choose to honor the client's preference rather than its own preference
+            params.setUseCipherSuitesOrder(false);
             if (log.isDebugEnabled()) {
                 log.debug("SSL context params - need client auth: {} want client auth: {} endpoint id algorithm: {}", params.getNeedClientAuth(), params.getWantClientAuth(), params.getEndpointIdentificationAlgorithm());
                 String[] supportedProtocols = params.getProtocols();
