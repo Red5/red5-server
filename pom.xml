@@ -104,7 +104,7 @@
         <bc.version>1.78.1</bc.version>
         <mina.version>2.0.23</mina.version>
         <!-- Can no longer open-end spring, 6.0 forces jdk 17 -->
-        <spring.version>5.3.33</spring.version>
+        <spring.version>5.3.39</spring.version>
         <tomcat.version>8.5.100</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>

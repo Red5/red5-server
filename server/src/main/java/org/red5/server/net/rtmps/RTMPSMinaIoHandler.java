@@ -53,24 +53,14 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
     private static Logger log = LoggerFactory.getLogger(RTMPSMinaIoHandler.class);
 
     /**
-     * Password for accessing the keystore.
+     * Password for accessing the keystore and / or truststore.
      */
-    private String keystorePassword;
+    private String keystorePassword, truststorePassword;
 
     /**
-     * Password for accessing the truststore.
+     * Stores the keystore and truststore paths.
      */
-    private String truststorePassword;
-
-    /**
-     * Stores the keystore path.
-     */
-    private String keystorePath;
-
-    /**
-     * Stores the truststore path.
-     */
-    private String truststorePath;
+    private String keystorePath, truststorePath;
 
     /**
      * Names of the SSL cipher suites which are currently enabled for use.

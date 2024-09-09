@@ -1,6 +1,7 @@
 package org.red5.io.tls;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -63,7 +64,8 @@ public class TLSFactory {
         Security.setProperty("crypto.policy", "unlimited");
         // set extensions
         System.setProperty("jdk.tls.useExtendedMasterSecret", "true"); // https://bugs.openjdk.org/browse/JDK-8192045 not for DTLS 1.3
-        System.setProperty("jdk.tls.allowLegacyMasterSecret", "false"); // allows rejection if session hash and master secret are not supported
+        // allows rejection if session hash and master secret are not supported
+        System.setProperty("jdk.tls.allowLegacyMasterSecret", "false");
         System.setProperty("jdk.tls.acknowledgeCloseNotify", "true");
         // https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html
         // https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/ReadDebug.html
@@ -78,6 +80,12 @@ public class TLSFactory {
         log.info("Max key size for AES: {}", (maxKeySize == Integer.MAX_VALUE ? "unlimited" : maxKeySize));
     }
 
+    /**
+     * Returns an SSLContext for the configured keystore and truststore with the default password.
+     *
+     * @return SSLContext
+     * @throws Exception
+     */
     public static SSLContext getTLSContext() throws Exception {
         log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
         KeyStore ks = KeyStore.getInstance(storeType);
@@ -109,6 +117,13 @@ public class TLSFactory {
         return sslCtx;
     }
 
+    /**
+     * Returns an SSLContext for the configured keystore and truststore with the provided password.
+     *
+     * @param passphrase
+     * @return SSLContext
+     * @throws Exception
+     */
     public static SSLContext getTLSContext(String storeType, char[] passphrase) throws Exception {
         log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
         log.debug("Keystore - file: {} password: {}", keystorePath, passphrase);
@@ -143,6 +158,17 @@ public class TLSFactory {
         return sslCtx;
     }
 
+    /**
+     * Returns an SSLContext for the provided keystore, truststore, and password.
+     *
+     * @param storeType
+     * @param keystorePassword
+     * @param keystorePath
+     * @param truststorePassword
+     * @param truststorePath
+     * @return SSLContext
+     * @throws Exception
+     */
     public static SSLContext getTLSContext(String storeType, String keystorePassword, String keystorePath, String truststorePassword, String truststorePath) throws Exception {
         log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
         log.debug("Keystore - file: {} password: {}", keystorePath, keystorePassword);
@@ -157,6 +183,34 @@ public class TLSFactory {
         try (FileInputStream fis = new FileInputStream(truststorePath)) {
             ts.load(fis, trustStorePassphrase);
         }
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, keyStrorePassphrase);
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        tmf.init(ts);
+        SSLContext sslCtx = SSLContext.getInstance(PROTOCOL_VERSION);
+        sslCtx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), RANDOM);
+        return sslCtx;
+    }
+
+    /**
+     * Returns an SSLContext for the provided keystore and truststore input streams.
+     *
+     * @param storeType
+     * @param keyStrorePassphrase
+     * @param keystoreInput
+     * @param trustStorePassphrase
+     * @param truststoreInput
+     * @return SSLContext
+     * @throws Exception
+     */
+    public static SSLContext getTLSContext(String storeType, char[] keyStrorePassphrase, InputStream keystoreInput, char[] trustStorePassphrase, InputStream truststoreInput) throws Exception {
+        log.info("Creating SSL context with keystore and truststore input streams, using {}", storeType);
+        log.debug("Keystore - passphrase: {}", keyStrorePassphrase);
+        log.debug("Truststore - passphrase: {}", trustStorePassphrase);
+        KeyStore ks = KeyStore.getInstance(storeType);
+        KeyStore ts = KeyStore.getInstance(storeType);
+        ks.load(keystoreInput, keyStrorePassphrase);
+        ts.load(truststoreInput, trustStorePassphrase);
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         kmf.init(ks, keyStrorePassphrase);
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");

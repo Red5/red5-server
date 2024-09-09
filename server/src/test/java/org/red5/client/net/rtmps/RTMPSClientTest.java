@@ -22,50 +22,47 @@ public class RTMPSClientTest {
 
         final RTMPSClient client = new RTMPSClient();
         client.setConnectionClosedHandler(() -> System.out.println("Connection closed"));
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                client.connect(PropertiesReader.getProperty("rtmps.server"), Integer.valueOf(PropertiesReader.getProperty("rtmps.port")), PropertiesReader.getProperty("rtmps.app"), new IPendingServiceCallback() {
-                    @Override
-                    public void resultReceived(IPendingServiceCall result) {
-                        System.out.println("resultReceived: " + result);
-                        ObjectMap<?, ?> map = (ObjectMap<?, ?>) result.getResult();
-                        String code = (String) map.get("code");
-                        System.out.printf("Response code: %s\n", code);
-                        if ("NetConnection.Connect.Rejected".equals(code)) {
-                            System.out.printf("Rejected: %s\n", map.get("description"));
-                            client.disconnect();
-                        } else if ("NetConnection.Connect.Success".equals(code)) {
-                            System.out.println("Success: " + result.isSuccess());
-                            // if its oflaDemo, get the list of flvs
-                            if ("oflaDemo".equals(PropertiesReader.getProperty("rtmps.app"))) {
-                                client.invoke("demoService.getListOfAvailableFLVs", new Object[] {}, new IPendingServiceCallback() {
-                                    @Override
-                                    public void resultReceived(IPendingServiceCall call) {
-                                        System.out.println("methodCallCallback");
-                                        Map<?, ?> map = (Map<?, ?>) call.getResult();
-                                        System.out.printf("Response %s\n", map);
-                                    }
-                                });
-                            }
-                            client.createStream(new IPendingServiceCallback() {
+        Thread t = new Thread(() -> {
+            client.connect(PropertiesReader.getProperty("rtmps.server"), Integer.valueOf(PropertiesReader.getProperty("rtmps.port")), PropertiesReader.getProperty("rtmps.app"), new IPendingServiceCallback() {
+                @Override
+                public void resultReceived(IPendingServiceCall result) {
+                    System.out.println("resultReceived: " + result);
+                    ObjectMap<?, ?> map = (ObjectMap<?, ?>) result.getResult();
+                    String code = (String) map.get("code");
+                    System.out.printf("Response code: %s\n", code);
+                    if ("NetConnection.Connect.Rejected".equals(code)) {
+                        System.out.printf("Rejected: %s\n", map.get("description"));
+                        client.disconnect();
+                    } else if ("NetConnection.Connect.Success".equals(code)) {
+                        System.out.println("Success: " + result.isSuccess());
+                        // if its oflaDemo, get the list of flvs
+                        if ("oflaDemo".equals(PropertiesReader.getProperty("rtmps.app"))) {
+                            client.invoke("demoService.getListOfAvailableFLVs", new Object[] {}, new IPendingServiceCallback() {
                                 @Override
                                 public void resultReceived(IPendingServiceCall call) {
-                                    Number streamId = (Number) call.getResult();
-                                    // live buffer 0.5s / vod buffer 4s
-                                    if (Boolean.valueOf(PropertiesReader.getProperty("rtmps.live"))) {
-                                        client.ping(Ping.CLIENT_BUFFER, streamId, 500);
-                                        client.play(streamId, PropertiesReader.getProperty("rtmps.name"), -1, -1);
-                                    } else {
-                                        client.ping(Ping.CLIENT_BUFFER, streamId, 4000);
-                                        client.play(streamId, PropertiesReader.getProperty("rtmps.name"), 0, -1);
-                                    }
+                                    System.out.println("methodCallCallback");
+                                    Map<?, ?> map = (Map<?, ?>) call.getResult();
+                                    System.out.printf("Response %s\n", map);
                                 }
                             });
                         }
+                        client.createStream(new IPendingServiceCallback() {
+                            @Override
+                            public void resultReceived(IPendingServiceCall call) {
+                                Number streamId = (Number) call.getResult();
+                                // live buffer 0.5s / vod buffer 4s
+                                if (Boolean.valueOf(PropertiesReader.getProperty("rtmps.live"))) {
+                                    client.ping(Ping.CLIENT_BUFFER, streamId, 500);
+                                    client.play(streamId, PropertiesReader.getProperty("rtmps.name"), -1, -1);
+                                } else {
+                                    client.ping(Ping.CLIENT_BUFFER, streamId, 4000);
+                                    client.play(streamId, PropertiesReader.getProperty("rtmps.name"), 0, -1);
+                                }
+                            }
+                        });
                     }
-                });
-            }
+                }
+            });
         });
         t.start();
         t.join();
@@ -74,6 +71,7 @@ public class RTMPSClientTest {
             RTMP rtmpState = conn.getState();
             System.out.println("Joined with state: " + rtmpState);
             if (rtmpState != null && rtmpState.getState() == RTMP.STATE_CONNECTED) {
+                System.out.println("Connection is connected, waiting for 60s");
                 Thread.sleep(60000L);
             } else {
                 System.out.println("Connection is not connected");

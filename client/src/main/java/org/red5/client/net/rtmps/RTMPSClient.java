@@ -7,7 +7,12 @@
 
 package org.red5.client.net.rtmps;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.net.ssl.SSLContext;
 
@@ -51,6 +56,11 @@ public class RTMPSClient extends RTMPClient {
     private char[] password = "password123".toCharArray();
 
     /**
+     * Path to the keystore and truststore files.
+     */
+    private InputStream keystoreStream, truststoreStream;
+
+    /**
      * The keystore type, valid options are JKS and PKCS12
      */
     private String keyStoreType = "PKCS12";
@@ -83,6 +93,26 @@ public class RTMPSClient extends RTMPClient {
         protocol = "rtmps";
         this.keyStoreType = keyStoreType;
         this.password = password.toCharArray();
+        ioHandler = new RTMPSClientIoHandler();
+        ioHandler.setHandler(this);
+    }
+
+    /**
+     * Creates a new RTMPSClient with the given keystore type, password, and paths to store files. If the stores
+     * are inside a jar file, use the following format: jar:file:/path/to/your.jar!/path/to/file/in/jar
+     *
+     * @param keyStoreType keystore type
+     * @param password keystore password
+     * @param keystorePath path to keystore file
+     * @param truststorePath path to truststore file
+     * @throws IOException
+     */
+    public RTMPSClient(String keyStoreType, String password, String keystorePath, String truststorePath) throws IOException {
+        protocol = "rtmps";
+        this.keyStoreType = keyStoreType;
+        this.password = password.toCharArray();
+        this.keystoreStream = Files.newInputStream(Paths.get(URI.create(keystorePath)));
+        this.truststoreStream = Files.newInputStream(Paths.get(URI.create(truststorePath)));
         ioHandler = new RTMPSClientIoHandler();
         ioHandler.setHandler(this);
     }
@@ -141,8 +171,13 @@ public class RTMPSClient extends RTMPClient {
         @Override
         public void sessionOpened(IoSession session) throws Exception {
             log.debug("RTMPS sessionOpened: {}", session);
-            // do tls stuff
-            SSLContext context = TLSFactory.getTLSContext(keyStoreType, password);
+            // if we're using a input streams, pass them to the ctor
+            SSLContext context = null;
+            if (keystoreStream != null && truststoreStream != null) {
+                context = TLSFactory.getTLSContext(keyStoreType, password, keystoreStream, password, truststoreStream);
+            } else {
+                context = TLSFactory.getTLSContext(keyStoreType, password);
+            }
             SslFilter sslFilter = new SslFilter(context);
             if (sslFilter != null) {
                 // we are a client
