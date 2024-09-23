@@ -173,7 +173,7 @@ The following configuration changes are required to enable RTMPS in Red5.
 
 On a server where RTMPS will be employed, two files in `conf` must be updated: `red5.properties` and `red5-core.xml`. This is in-addition to the keystore and truststore proceedure.
 
-* In `red5-core.xml` uncomment the beans named `rtmpsMinaIoHandler` and `rtmpsTransport` which may be updated as required, otherwise their values come from the `red5.properties` file.  Note that the previous property names `keyStoreFile` and `trustStoreFile` have been replaced with `keystorePath` and `truststorePath`. 
+* In `red5-core.xml` uncomment the beans named `rtmpsMinaIoHandler` and `rtmpsTransport` which may be updated as required, otherwise their values come from the `red5.properties` file. Note that the previous property names `keyStoreFile` and `trustStoreFile` have been replaced with `keystorePath` and `truststorePath`.
 
 ```xml
 <bean id="rtmpsMinaIoHandler" class="org.red5.server.net.rtmps.RTMPSMinaIoHandler">
