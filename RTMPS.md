@@ -191,9 +191,9 @@ To modify the ciphers and / or protocols in the  `rtmpsMinaIoHandler` bean in `r
 <bean id="rtmpsMinaIoHandler" class="org.red5.server.net.rtmps.RTMPSMinaIoHandler">
     <property name="handler" ref="rtmpHandler" />
     <property name="keystorePassword" value="${rtmps.keystorepass}" />
-    <property name="keystoreFile" value="${rtmps.keystorefile}" />
+    <property name="keystorePath" value="${rtmps.keystorefile}" />
     <property name="truststorePassword" value="${rtmps.truststorepass}" />
-    <property name="truststoreFile" value="${rtmps.truststorefile}" />
+    <property name="truststorePath" value="${rtmps.truststorefile}" />
     <property name="cipherSuites">
         <array>
             <value>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</value>
@@ -207,6 +207,21 @@ To modify the ciphers and / or protocols in the  `rtmpsMinaIoHandler` bean in `r
         </array>
     </property>
 </bean>
+```
+
+* The `rtmpsTransport` is not expected to need modification, but can be updated as required. The `rtmps.host` and `rtmps.port` properties are required to be set in `red5.properties` and are used in the `rtmpsTransport` bean:
+
+```xml
+    <bean id="rtmpsTransport" class="org.red5.server.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
+        <property name="ioHandler" ref="rtmpsMinaIoHandler" />
+        <property name="addresses">
+            <list>
+                 <value>${rtmps.host}:${rtmps.port}</value>
+            </list>
+        </property>
+        <property name="ioThreads" value="${rtmp.io_threads}" />
+        <property name="tcpNoDelay" value="${rtmp.tcp_nodelay}" />
+    </bean>
 ```
 
 * In `red5.properties`, update these properties to utilize your values; especially for store passwords and locations:

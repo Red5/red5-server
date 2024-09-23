@@ -127,9 +127,9 @@
     <bean id="rtmpsMinaIoHandler" class="org.red5.server.net.rtmps.RTMPSMinaIoHandler">
         <property name="handler" ref="rtmpHandler" />
         <property name="keystorePassword" value="${rtmps.keystorepass}" />
-        <property name="keystoreFile" value="${rtmps.keystorefile}" />
+        <property name="keystorePath" value="${rtmps.keystorefile}" />
         <property name="truststorePassword" value="${rtmps.truststorepass}" />
-        <property name="truststoreFile" value="${rtmps.truststorefile}" />
+        <property name="truststorePath" value="${rtmps.truststorefile}" />
     </bean>
     
     <bean id="rtmpsTransport" class="org.red5.server.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
