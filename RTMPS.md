@@ -109,7 +109,7 @@ subject=C = US, ST = Nevada, L = Henderson, O = Red5, OU = dev, CN = mondain-XPS
 keytool -genkey -dname "CN=mondain-XPS-8930, OU=dev, O=Red5, L=Henderson, S=Nevada, C=US" -keystore rtmps_keystore.jks -storepass password123 -keypass password123 -alias server -keyalg RSA -file server.crt
 
 Generating 2,048 bit RSA key pair and self-signed certificate (SHA256withRSA) with a validity of 90 days
-	for: CN=mondain-XPS-8930, OU=dev, O=Red5, L=Henderson, ST=Nevada, C=US
+    for: CN=mondain-XPS-8930, OU=dev, O=Red5, L=Henderson, ST=Nevada, C=US
 ```
 
 * Add the self-signed CA root certificate to the truststore (_Make sure to use the same password for the store_):
@@ -122,8 +122,8 @@ Issuer: EMAILADDRESS=mondain@gmail.com, CN=Paul Gregoire, OU=dev, O=Red5, L=Hend
 Serial number: 7139dce6b44a5e3d50ace573849cf88e63366153
 Valid from: Mon Mar 04 18:10:14 PST 2024 until: Thu Mar 02 18:10:14 PST 2034
 Certificate fingerprints:
-	 SHA1: 48:CC:8A:65:5B:96:5B:7B:39:6C:55:27:30:84:24:B8:67:B0:91:6A
-	 SHA256: C0:41:37:4C:DB:49:12:6B:14:C5:B4:8E:4A:28:1C:33:A0:C2:38:C7:76:44:97:6B:5E:A0:7B:20:01:0F:C9:2C
+    SHA1: 48:CC:8A:65:5B:96:5B:7B:39:6C:55:27:30:84:24:B8:67:B0:91:6A
+    SHA256: C0:41:37:4C:DB:49:12:6B:14:C5:B4:8E:4A:28:1C:33:A0:C2:38:C7:76:44:97:6B:5E:A0:7B:20:01:0F:C9:2C
 Signature algorithm name: SHA256withECDSA
 Subject Public Key Algorithm: 256-bit EC (secp256r1) key
 Version: 3
