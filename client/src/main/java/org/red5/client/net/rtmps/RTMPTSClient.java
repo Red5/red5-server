@@ -9,6 +9,8 @@ package org.red5.client.net.rtmps;
 
 import org.red5.client.net.rtmpt.RTMPTClient;
 import org.red5.server.net.rtmpt.codec.RTMPTCodecFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * RTMPT/S client object
@@ -16,6 +18,8 @@ import org.red5.server.net.rtmpt.codec.RTMPTCodecFactory;
  * @author Paul Gregoire
  */
 public class RTMPTSClient extends RTMPTClient {
+
+    private static final Logger log = LoggerFactory.getLogger(RTMPTSClient.class);
 
     public RTMPTSClient() {
         protocol = "rtmps";

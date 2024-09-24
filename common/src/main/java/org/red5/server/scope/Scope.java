@@ -1252,8 +1252,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 }
                 names = null;
             }
-            log.trace("Handler: {}", handler);
-            log.trace("Child count: {}", children.size());
+            log.trace("Handler: {} child count: {}", handler, children.size());
             children.forEach(child -> {
                 log.trace("Child: {}", child);
             });
@@ -1373,22 +1372,24 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                         added = super.add(scope);
                         if (added) {
                             subscopeStats.increment();
-                            if (scope instanceof Scope) {
-                                // start the scope
-                                if (((Scope) scope).start()) {
-                                    log.debug("Child scope started");
-                                } else {
-                                    log.trace("Failed to start child scope: {} in {}", scope, this);
-                                }
-                            }
                         } else {
-                            log.debug("Scope was not added");
+                            log.debug("Subscope was not added");
                         }
                     } else {
-                        log.debug("Scope already exists");
+                        log.debug("Subscope already exists");
                     }
                 } catch (Exception e) {
                     log.warn("Exception on add", e);
+                }
+                if (added && scope instanceof Scope) {
+                    // cast it
+                    Scope scp = (Scope) scope;
+                    // start the scope
+                    if (scp.start()) {
+                        log.debug("Child scope started");
+                    } else {
+                        log.debug("Failed to start child scope: {} in {}", scope, this);
+                    }
                 }
             }
             return added;

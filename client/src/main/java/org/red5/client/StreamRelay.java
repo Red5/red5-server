@@ -107,7 +107,7 @@ public class StreamRelay {
                     e.printStackTrace();
                 }
             } while (!proxy.isPublished());
-            System.out.println("Publishing..");
+            System.out.println("Publishing...");
 
             // create the consumer
             client = new RTMPClient();

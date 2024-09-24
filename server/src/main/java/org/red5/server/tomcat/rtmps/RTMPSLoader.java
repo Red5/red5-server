@@ -102,14 +102,14 @@ public class RTMPSLoader extends RTMPTLoader {
         // add servlet wrapper
         StandardWrapper wrapper = new StandardWrapper();
         wrapper.setServletName("RTMPTServlet");
-        wrapper.setServletClass("org.red5.server.net.rtmpt.RTMPTServlet");
+        wrapper.setServletClass("org.red5.server.net.rtmps.RTMPSLoader");
         ctx.addChild(wrapper);
 
         // add servlet mappings
-        ctx.addServletMappingDecoded("/open/*", "RTMPTServlet");
-        ctx.addServletMappingDecoded("/close/*", "RTMPTServlet");
-        ctx.addServletMappingDecoded("/send/*", "RTMPTServlet");
-        ctx.addServletMappingDecoded("/idle/*", "RTMPTServlet");
+        ctx.addServletMappingDecoded("/open/*", "RTMPSLoader");
+        ctx.addServletMappingDecoded("/close/*", "RTMPSLoader");
+        ctx.addServletMappingDecoded("/send/*", "RTMPSLoader");
+        ctx.addServletMappingDecoded("/idle/*", "RTMPSLoader");
         // add the host
         rtmpsEngine.addChild(host);
         // add new Engine to set of Engine for embedded server

@@ -59,7 +59,7 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
 
     /** Constructs a new JDKSchedulingService. */
     public void afterPropertiesSet() throws Exception {
-        log.debug("Initializing..");
+        log.debug("Initializing...");
         scheduler = Executors.newScheduledThreadPool(threadCount);
     }
 
@@ -191,7 +191,7 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
 
     public void destroy() throws Exception {
         if (scheduler != null) {
-            log.debug("Destroying..");
+            log.debug("Destroying...");
             scheduler.shutdownNow();
         }
         keyMap.clear();

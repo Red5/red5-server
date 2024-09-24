@@ -125,7 +125,6 @@ public class LoggingContextSelector implements ContextSelector {
                         configurator.doConfigure(url);
                         context.start();
                     } catch (JoranException e) {
-                        //
                     }
                 } else {
                     if (Red5LoggerFactory.DEBUG) {
@@ -164,7 +163,6 @@ public class LoggingContextSelector implements ContextSelector {
                         configurator.doConfigure(url);
                         context.start();
                     } catch (JoranException e) {
-                        //
                     }
                 }
             } catch (InterruptedException e) {
