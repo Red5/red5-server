@@ -19,8 +19,8 @@ The Red5 users list may be found here: [red5interest](https://groups.google.com/
 Subreddit: [r/red5](http://www.reddit.com/r/red5)
 
 Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.org/)): 
- * [Red5](https://builds.apache.org/view/M-R/view/OpenMeetings/job/Red5-server/)
- * [Windows Installer](https://builds.apache.org/view/M-R/view/OpenMeetings/job/red5-installer/)
+ * [Red5](https://ci-builds.apache.org/job/OpenMeetings/job/Red5-server/)
+ * [Windows Installer](https://ci-builds.apache.org/job/OpenMeetings/job/red5-installer/)
 
 # [Releases](https://github.com/Red5/red5-server/releases/latest)
 # [Previous releases](https://github.com/Red5/red5-server/blob/master/README.md#previous-releases)
