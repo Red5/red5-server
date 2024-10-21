@@ -63,7 +63,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     private AtomicBoolean connected = new AtomicBoolean(false);
 
     // associated websocket session
-    private WeakReference<WsSession> wsSession;
+    private final WsSession wsSession;
 
     private WeakReference<WebSocketScope> scope;
 
@@ -114,9 +114,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
             log.debug("path: {}", path);
         }
         // cast ws session
-        this.wsSession = new WeakReference<>((WsSession) session);
+        this.wsSession = (WsSession) session;
         if (isDebug) {
-            log.debug("ws session: {}", wsSession.get());
+            log.debug("ws session: {}", wsSession);
         }
         // the websocket session id will be used for hash code comparison, its the only usable value currently
         wsSessionId = session.getId();
@@ -186,7 +186,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
         // process the incoming string
         if (StringUtils.isNotBlank(data)) {
-            final WsSession session = wsSession.get();
+            final WsSession session = wsSession;
             // attempt send only if the session is not closed
             if (session != null && !session.isClosed()) {
                 try {
@@ -236,7 +236,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (isDebug) {
             log.debug("send binary: {}", Arrays.toString(buf));
         }
-        WsSession session = wsSession.get();
+        WsSession session = wsSession;
         if (session != null && session.isOpen()) {
             try {
                 // send the bytes
@@ -281,7 +281,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (isTrace) {
             log.trace("send ping: {}", buf);
         }
-        WsSession session = wsSession.get();
+        WsSession session = wsSession;
         if (session != null && session.isOpen()) {
             synchronized (wsSessionId) {
                 // send the bytes
@@ -305,7 +305,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (isTrace) {
             log.trace("send pong: {}", buf);
         }
-        WsSession session = wsSession.get();
+        WsSession session = wsSession;
         if (session != null && session.isOpen()) {
             synchronized (wsSessionId) {
                 // send the bytes
@@ -324,15 +324,11 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     public void close() {
         if (connected.compareAndSet(true, false)) {
             log.debug("close: {}", wsSessionId);
-            WsSession session = wsSession != null ? wsSession.get() : null;
-            // session has to be open, or user props cannot be retrieved
-            if (session != null && session.isOpen()) {
-                // trying to close the session nicely
-                try {
-                    session.close();
-                } catch (Exception e) {
-                    log.debug("Exception closing session", e);
-                }
+            // trying to close the session nicely
+            try {
+                wsSession.close();
+            } catch (Exception e) {
+                log.debug("Exception closing session", e);
             }
             // clean up our props
             attributes.clear();
@@ -351,7 +347,6 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                 // disconnect from scope
                 scope.get().removeConnection(this);
                 // clear weak refs
-                wsSession.clear();
                 scope.clear();
             }
         }
@@ -369,7 +364,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         // XXX(paul) only logging here as we should more than likely rely upon the container checking expiration
         log.trace("timeoutAsync: {} on session id: {} read: {} written: {}", now, wsSessionId, readBytes, writtenBytes);
         /*
-        WsSession session = wsSession.get();
+        WsSession session = wsSession;
         Map<String, Object> props = session.getUserProperties();
         log.debug("Session properties: {}", props);
         long maxIdleTimeout = session.getMaxIdleTimeout();
@@ -453,7 +448,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      * @return true if secure and false if unsecure or unconnected
      */
     public boolean isSecure() {
-        Optional<WsSession> opt = Optional.ofNullable(wsSession.get());
+        Optional<WsSession> opt = Optional.ofNullable(wsSession);
         if (opt.isPresent()) {
             return (opt.get().isOpen() ? opt.get().isSecure() : false);
         }
@@ -672,12 +667,12 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
 
     public void setWsSessionTimeout(long idleTimeout) {
         if (wsSession != null) {
-            wsSession.get().setMaxIdleTimeout(idleTimeout);
+            wsSession.setMaxIdleTimeout(idleTimeout);
         }
     }
 
     public WsSession getWsSession() {
-        return wsSession != null ? wsSession.get() : null;
+        return wsSession != null ? wsSession : null;
     }
 
     public long getReadBytes() {

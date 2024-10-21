@@ -22,9 +22,8 @@ import org.bouncycastle.util.io.Streams;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TlsUtils {
 
-    private static byte[] DOWNGRADE_TLS11 = Hex.decodeStrict("444F574E47524400");
-
-    private static byte[] DOWNGRADE_TLS12 = Hex.decodeStrict("444F574E47524401");
+    @SuppressWarnings("unused")
+    private static byte[] DOWNGRADE_TLS11 = Hex.decodeStrict("444F574E47524400"), DOWNGRADE_TLS12 = Hex.decodeStrict("444F574E47524401");
 
     public static final byte[] EMPTY_BYTES = new byte[0];
 
@@ -608,15 +607,16 @@ public class TlsUtils {
     }
 
     public static ASN1Primitive readASN1Object(byte[] encoding) throws IOException {
-        ASN1InputStream asn1 = new ASN1InputStream(encoding);
-        ASN1Primitive result = asn1.readObject();
-        if (null == result) {
-            throw new IOException("AlertDescription.decode_error");
+        try (ASN1InputStream asn1 = new ASN1InputStream(encoding)) {
+            ASN1Primitive result = asn1.readObject();
+            if (null == result) {
+                throw new IOException("AlertDescription.decode_error");
+            }
+            if (null != asn1.readObject()) {
+                throw new IOException("AlertDescription.decode_error");
+            }
+            return result;
         }
-        if (null != asn1.readObject()) {
-            throw new IOException("AlertDescription.decode_error");
-        }
-        return result;
     }
 
     /** @deprecated Will be removed. Use readASN1Object in combination with requireDEREncoding instead */
@@ -739,6 +739,7 @@ public class TlsUtils {
         return c;
     }
 
+    @SuppressWarnings("unused")
     private static byte[] getCertificateVerifyHeader(String contextString) {
         int count = contextString.length();
         byte[] header = new byte[64 + count + 1];

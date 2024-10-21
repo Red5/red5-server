@@ -181,6 +181,8 @@ public class WebSocketScopeManager {
                                             log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
                                             // if the connection isn't connected, remove them
                                             wsScope.removeConnection(wsConn);
+                                            // if connection is not connected, close it (ensure closed / removed)
+                                            wsConn.close();
                                         }
                                     } catch (Exception e) {
                                         log.warn("Exception in WS pinger", e);
