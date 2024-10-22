@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.websocket.CloseReason.CloseCodes;
+
 import org.red5.net.websocket.listener.IWebSocketDataListener;
 import org.red5.net.websocket.model.WSMessage;
 import org.red5.server.api.scope.IScope;
@@ -91,7 +93,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         // clean up the connections by first closing them
         conns.forEach(conn -> {
             if (conns.remove(conn)) {
-                conn.close();
+                conn.close(CloseCodes.GOING_AWAY, "WebSocket scope removed");
             }
         });
         // clean up the listeners by first stopping them

@@ -21,6 +21,7 @@ import org.apache.tomcat.util.net.SSLSupport;
 import org.apache.tomcat.util.net.SocketEvent;
 import org.apache.tomcat.util.net.SocketWrapperBase;
 import org.apache.tomcat.util.res.StringManager;
+import org.apache.tomcat.websocket.Constants;
 import org.apache.tomcat.websocket.Transformation;
 import org.apache.tomcat.websocket.WsIOException;
 import org.apache.tomcat.websocket.WsSession;
@@ -77,6 +78,10 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     private WsFrameServer wsFrame;
 
     private WsSession wsSession;
+
+    private long lastTimeoutCheck = System.currentTimeMillis();
+
+    private long lastReadBytes, lastWrittenBytes;
 
     public WsHttpUpgradeHandler() {
         applicationClassLoader = Thread.currentThread().getContextClassLoader();
@@ -284,23 +289,66 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     @Override
     public void timeoutAsync(long now) {
         log.trace("timeoutAsync: {} on session: {}", now, wsSession);
-        // session methods may not be called if the session is not open
         if (wsSession != null) {
-            if (wsSession.isOpen()) {
-                try {
-                    // if we have a timeout, inform the ws connection
-                    WebSocketConnection conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
-                    if (conn != null) {
-                        conn.timeoutAsync(now);
-                    }
-                } catch (Throwable t) {
-                    log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
+            try {
+                final String wsSessionId = wsSession.getId();
+                // get scope from endpoint config
+                WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
+                // do lookup by session id, skips need for session user props
+                WebSocketConnection conn = scope.getConnectionBySessionId(wsSessionId);
+                // if we don't get it from the scope, try the session lookup
+                if (conn == null && wsSession.isOpen()) {
+                    // session methods may not be called if its not open
+                    conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
                 }
-            } else {
-                log.debug("timeoutAsync: {} session is not open for session id: {}", now, wsSession.getId());
-                // we need the processor released from the async waitingProcessors list
-                // located in abstract protocol
-                //socketWrapper.close();
+                // last check, if we don't have a connection, log a warning
+                if (conn == null) {
+                    log.warn("Connection for id: {} was not found in the scope or session: {}", wsSession.getId(), scope.getPath());
+                    return;
+                }
+                // negative now means always treat as expired
+                if (now > 0) {
+                    long checkDelta = now - lastTimeoutCheck;
+                    long readBytes = conn.getReadBytes(), writtenBytes = conn.getWrittenBytes();
+                    log.info("timeoutAsync: {}ms on session id: {} read: {} written: {}", checkDelta, wsSessionId, readBytes, writtenBytes);
+                    Map<String, Object> props = wsSession.getUserProperties();
+                    log.debug("Session properties: {}", props);
+                    long maxIdleTimeout = wsSession.getMaxIdleTimeout();
+                    long readTimeout = (long) props.get(Constants.READ_IDLE_TIMEOUT_MS);
+                    long writeTimeout = (long) props.get(Constants.WRITE_IDLE_TIMEOUT_MS);
+                    log.debug("Session timeouts - max: {} read: {} write: {}", maxIdleTimeout, readTimeout, writeTimeout);
+                    if (maxIdleTimeout > 0) {
+                        if (checkDelta > maxIdleTimeout && (readBytes == lastReadBytes || writtenBytes == lastWrittenBytes)) {
+                            log.info("Max idle timeout: {}ms on session id: {}", checkDelta, wsSessionId);
+                            conn.close(CloseCodes.GOING_AWAY, "Max idle timeout");
+                        }
+                    } else {
+                        if (readTimeout > 0) {
+                            if (readBytes == lastReadBytes) {
+                                if (checkDelta > readTimeout) {
+                                    log.info("Read timeout: {}ms on session id: {}", checkDelta, wsSessionId);
+                                    conn.close(CloseCodes.GOING_AWAY, "Read timeout");
+                                }
+                            }
+                        }
+                        if (writeTimeout > 0) {
+                            if (writtenBytes == lastWrittenBytes) {
+                                if (checkDelta > writeTimeout) {
+                                    log.info("Write timeout: {}ms on session id: {}", checkDelta, wsSessionId);
+                                    conn.close(CloseCodes.GOING_AWAY, "Write timeout");
+                                }
+                            }
+                        }
+                    }
+                    lastReadBytes = readBytes;
+                    lastWrittenBytes = writtenBytes;
+                    lastTimeoutCheck = now;
+                } else {
+                    log.warn("timeoutAsync: negative time on session id: {}", wsSessionId);
+                    conn.close(CloseCodes.GOING_AWAY, "Timeout expired");
+                }
+            } catch (Throwable t) {
+                log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
             }
         }
     }

@@ -15,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.websocket.CloseReason.CloseCodes;
+
 import org.red5.net.websocket.listener.DefaultWebSocketDataListener;
 import org.red5.net.websocket.listener.IWebSocketDataListener;
 import org.red5.net.websocket.listener.IWebSocketScopeListener;
@@ -172,17 +174,12 @@ public class WebSocketScopeManager {
                                                 wsConn.sendPing(PING_BYTES);
                                             } catch (Exception e) {
                                                 log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
-                                                // if the connection isn't connected, remove them
-                                                wsScope.removeConnection(wsConn);
-                                                // if the ping fails, consider them gone
-                                                wsConn.close();
+                                                wsConn.close(CloseCodes.CLOSED_ABNORMALLY, e.getMessage());
                                             }
                                         } else {
                                             log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
                                             // if the connection isn't connected, remove them
-                                            wsScope.removeConnection(wsConn);
-                                            // if connection is not connected, close it (ensure closed / removed)
-                                            wsConn.close();
+                                            wsConn.close(CloseCodes.UNEXPECTED_CONDITION, "Connection not connected");
                                         }
                                     } catch (Exception e) {
                                         log.warn("Exception in WS pinger", e);

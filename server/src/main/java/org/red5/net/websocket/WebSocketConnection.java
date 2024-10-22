@@ -25,6 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCode;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Extension;
 import javax.websocket.Session;
 
@@ -65,6 +68,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     // associated websocket session
     private final WsSession wsSession;
 
+    // reference to the scope for manager access
     private WeakReference<WebSocketScope> scope;
 
     // unique identifier for the session
@@ -163,6 +167,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         // add the timeouts to the user props
         userProps.put(Constants.READ_IDLE_TIMEOUT_MS, readTimeout);
         userProps.put(Constants.WRITE_IDLE_TIMEOUT_MS, sendTimeout);
+        // set the close timeout to 5 seconds
+        userProps.put(Constants.SESSION_CLOSE_TIMEOUT_PROPERTY, TimeUnit.SECONDS.toMillis(5));
         if (isDebug) {
             log.debug("userProps: {}", userProps);
         }
@@ -186,9 +192,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
         // process the incoming string
         if (StringUtils.isNotBlank(data)) {
-            final WsSession session = wsSession;
             // attempt send only if the session is not closed
-            if (session != null && !session.isClosed()) {
+            if (!wsSession.isClosed()) {
                 try {
                     if (useAsync) {
                         if (sendFuture != null && !sendFuture.isDone()) {
@@ -197,7 +202,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                             } catch (TimeoutException e) {
                                 log.warn("Send timed out {}", wsSessionId);
                                 // if the session is not open, cancel the future
-                                if (!session.isOpen()) {
+                                if (!wsSession.isOpen()) {
                                     sendFuture.cancel(true);
                                     return;
                                 }
@@ -205,13 +210,13 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                         }
                         synchronized (wsSessionId) {
                             int lengthToWrite = data.getBytes().length;
-                            sendFuture = session.getAsyncRemote().sendText(data);
+                            sendFuture = wsSession.getAsyncRemote().sendText(data);
                             updateWriteBytes(lengthToWrite);
                         }
                     } else {
                         synchronized (wsSessionId) {
                             int lengthToWrite = data.getBytes().length;
-                            session.getBasicRemote().sendText(data);
+                            wsSession.getBasicRemote().sendText(data);
                             updateWriteBytes(lengthToWrite);
                         }
                     }
@@ -236,8 +241,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (isDebug) {
             log.debug("send binary: {}", Arrays.toString(buf));
         }
-        WsSession session = wsSession;
-        if (session != null && session.isOpen()) {
+        if (!wsSession.isClosed()) {
             try {
                 // send the bytes
                 if (useAsync) {
@@ -253,12 +257,12 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                         }
                     }
                     synchronized (wsSessionId) {
-                        sendFuture = session.getAsyncRemote().sendBinary(ByteBuffer.wrap(buf));
+                        sendFuture = wsSession.getAsyncRemote().sendBinary(ByteBuffer.wrap(buf));
                         updateWriteBytes(buf.length);
                     }
                 } else {
                     synchronized (wsSessionId) {
-                        session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
+                        wsSession.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
                         updateWriteBytes(buf.length);
                     }
                 }
@@ -281,11 +285,10 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (isTrace) {
             log.trace("send ping: {}", buf);
         }
-        WsSession session = wsSession;
-        if (session != null && session.isOpen()) {
+        if (!wsSession.isClosed()) {
             synchronized (wsSessionId) {
                 // send the bytes
-                session.getBasicRemote().sendPing(ByteBuffer.wrap(buf));
+                wsSession.getBasicRemote().sendPing(ByteBuffer.wrap(buf));
                 // update counter
                 updateWriteBytes(buf.length);
             }
@@ -305,11 +308,10 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         if (isTrace) {
             log.trace("send pong: {}", buf);
         }
-        WsSession session = wsSession;
-        if (session != null && session.isOpen()) {
+        if (!wsSession.isClosed()) {
             synchronized (wsSessionId) {
                 // send the bytes
-                session.getBasicRemote().sendPong(ByteBuffer.wrap(buf));
+                wsSession.getBasicRemote().sendPong(ByteBuffer.wrap(buf));
                 // update counter
                 updateWriteBytes(buf.length);
             }
@@ -319,14 +321,34 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     /**
-     * close Connection
+     * Close the connection.
      */
     public void close() {
+        close(CloseCodes.NORMAL_CLOSURE, "");
+    }
+
+    /**
+     * Close the connection with a reason.
+     *
+     * @param code CloseCode
+     * @param reasonPhrase short reason for closing
+     */
+    public void close(CloseCode code, String reasonPhrase) {
         if (connected.compareAndSet(true, false)) {
-            log.debug("close: {}", wsSessionId);
-            // trying to close the session nicely
+            // no blank reasons
+            if (reasonPhrase == null) {
+                reasonPhrase = "";
+            }
+            log.debug("close: {} code: {} reason: {}", wsSessionId, code, reasonPhrase);
             try {
-                wsSession.close();
+                // close the session if open
+                if (wsSession.isOpen()) {
+                    CloseReason reason = new CloseReason(code, reasonPhrase);
+                    if (isDebug) {
+                        log.debug("Closing session: {} with reason: {}", wsSessionId, reason);
+                    }
+                    wsSession.close(reason);
+                }
             } catch (Exception e) {
                 log.debug("Exception closing session", e);
             }
@@ -343,37 +365,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
             if (headers != null) {
                 headers = null;
             }
-            if (scope.get() != null) {
-                // disconnect from scope
-                scope.get().removeConnection(this);
-                // clear weak refs
-                scope.clear();
-            }
         }
-    }
-
-    /*
-     WsSession uses these userProperties for checkExpiration along with maxIdleTimeout
-
-        configuration for read idle timeout on WebSocket session
-        READ_IDLE_TIMEOUT_MS = "org.apache.tomcat.websocket.READ_IDLE_TIMEOUT_MS";
-        configuration for write idle timeout on WebSocket session
-        WRITE_IDLE_TIMEOUT_MS = "org.apache.tomcat.websocket.WRITE_IDLE_TIMEOUT_MS";
-    */
-    public void timeoutAsync(long now) {
-        // XXX(paul) only logging here as we should more than likely rely upon the container checking expiration
-        log.trace("timeoutAsync: {} on session id: {} read: {} written: {}", now, wsSessionId, readBytes, writtenBytes);
-        /*
-        WsSession session = wsSession;
-        Map<String, Object> props = session.getUserProperties();
-        log.debug("Session properties: {}", props);
-        long maxIdleTimeout = session.getMaxIdleTimeout();
-        long readTimeout = (long) props.get(Constants.READ_IDLE_TIMEOUT_MS);
-        long sendTimeout = (long) props.get(Constants.WRITE_IDLE_TIMEOUT_MS);
-        log.debug("Session timeouts - max: {} read: {} write: {}", maxIdleTimeout, readTimeout, sendTimeout);
-        //long readDelta = (now - lastReadTime), writeDelta = (now - lastWriteTime);
-        //log.debug("timeoutAsync: {} on {} last read: {} last write: {}", now, wsSessionId, readDelta, writeDelta);
-        */
     }
 
     /**

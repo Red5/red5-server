@@ -91,7 +91,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 // force remove on exception
                 scope.removeConnection(conn);
                 // fire close, to be sure
-                conn.close();
+                conn.close(closeReason.getCloseCode(), closeReason.getReasonPhrase());
             }
         }
     }
