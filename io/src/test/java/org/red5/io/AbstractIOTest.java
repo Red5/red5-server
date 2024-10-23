@@ -369,7 +369,7 @@ public abstract class AbstractIOTest {
     @Test
     public void testLongString1() {
         log.debug("\ntestLongString1");
-        String inStr = RandomStringUtils.random(rnd.nextInt(AMF.LONG_STRING_LENGTH));
+        String inStr = RandomStringUtils.secure().nextPrint(rnd.nextInt(AMF.LONG_STRING_LENGTH));
         log.trace(inStr);
         Serializer.serialize(out, inStr);
         dumpOutput();

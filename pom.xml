@@ -104,16 +104,16 @@
         <bc.version>1.78.1</bc.version>
         <mina.version>2.0.23</mina.version>
         <!-- Can no longer open-end spring, 6.0 forces jdk 17+ -->
-        <spring.version>6.1.13</spring.version>
+        <spring.version>6.1.14</spring.version>
         <tomcat.version>11.0.0-M26</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>
         <ehcache.version>2.10.6</ehcache.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
-        <commons-codec.version>1.13</commons-codec.version>
+        <commons-codec.version>1.17.1</commons-codec.version>
         <commons-collections.version>4.4</commons-collections.version>
-        <commons-io.version>2.11.0</commons-io.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
+        <commons-io.version>2.17.0</commons-io.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
         <httpcore.version>[4.4.11,)</httpcore.version>
         <httpclient.version>[4.5.13,)</httpclient.version>
         <cglib.version>3.2.7</cglib.version>

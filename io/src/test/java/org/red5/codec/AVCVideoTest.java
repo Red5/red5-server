@@ -55,7 +55,7 @@ public class AVCVideoTest {
         IoBuffer data = IoBuffer.allocate(128);
         data.put((byte) 0x17);
         data.put((byte) 0x01);
-        data.put(RandomStringUtils.random(24).getBytes());
+        data.put(RandomStringUtils.secure().next(24).getBytes());
         data.flip();
 
         AVCVideo video = new AVCVideo();
@@ -66,7 +66,7 @@ public class AVCVideoTest {
             IoBuffer inter = IoBuffer.allocate(128);
             inter.put((byte) 0x27);
             inter.put((byte) 0x01);
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter));
@@ -80,7 +80,7 @@ public class AVCVideoTest {
         IoBuffer data = IoBuffer.allocate(128);
         data.put((byte) 0x17);
         data.put((byte) 0x01);
-        data.put(RandomStringUtils.random(24).getBytes());
+        data.put(RandomStringUtils.secure().next(24).getBytes());
         data.flip();
 
         AVCVideo video = new AVCVideo();
@@ -92,7 +92,7 @@ public class AVCVideoTest {
             IoBuffer inter = IoBuffer.allocate(128);
             inter.put((byte) 0x27);
             inter.put((byte) 0x01);
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter));
@@ -107,7 +107,7 @@ public class AVCVideoTest {
         IoBuffer data = IoBuffer.allocate(128);
         data.put((byte) 0x17);
         data.put((byte) 0x01);
-        data.put(RandomStringUtils.random(24).getBytes());
+        data.put(RandomStringUtils.secure().next(24).getBytes());
         data.flip();
 
         AVCVideo video = new AVCVideo();
@@ -123,7 +123,7 @@ public class AVCVideoTest {
             inter.put((byte) 0x27);
             inter.put((byte) 0x01);
             inter.putInt(i); // store our counter for testing
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter));
@@ -151,7 +151,7 @@ public class AVCVideoTest {
             inter.put((byte) 0x27);
             inter.put((byte) 0x01);
             inter.putInt(i + 10); // store our counter for testing
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter));

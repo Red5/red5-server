@@ -105,7 +105,7 @@ public class HEVCVideoTest {
         IoBuffer data = IoBuffer.allocate(128);
         data.put((byte) 0x1c);
         data.put((byte) 0x01);
-        data.put(RandomStringUtils.random(24).getBytes());
+        data.put(RandomStringUtils.secure().next(24).getBytes());
         data.flip();
 
         HEVCVideo video = new HEVCVideo();
@@ -122,7 +122,7 @@ public class HEVCVideoTest {
             inter.put((byte) 0x2c);
             inter.put((byte) 0x01);
             inter.putInt(i); // store our counter for testing
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter, 1000 + i));
@@ -150,7 +150,7 @@ public class HEVCVideoTest {
             inter.put((byte) 0x2c);
             inter.put((byte) 0x01);
             inter.putInt(i + 10); // store our counter for testing
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter, 2000 + i));

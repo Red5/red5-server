@@ -35,7 +35,7 @@ public class SorensonVideoTest {
 
         IoBuffer data = IoBuffer.allocate(128);
         data.put((byte) keyFrameType);
-        data.put(RandomStringUtils.random(24).getBytes());
+        data.put(RandomStringUtils.secure().next(24).getBytes());
         data.flip();
 
         SorensonVideo video = new SorensonVideo();
@@ -47,7 +47,7 @@ public class SorensonVideoTest {
             IoBuffer inter = IoBuffer.allocate(128);
             inter.put((byte) interFrameType);
             inter.putInt(i); // store our counter for testing
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter));
@@ -74,7 +74,7 @@ public class SorensonVideoTest {
             IoBuffer inter = IoBuffer.allocate(128);
             inter.put((byte) interFrameType);
             inter.putInt(i + 10); // store our counter for testing
-            inter.put(RandomStringUtils.random(24).getBytes());
+            inter.put(RandomStringUtils.secure().next(24).getBytes());
             inter.flip();
             // add it
             assertTrue(video.addData(inter));
