@@ -24,6 +24,8 @@ import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.websocket.CloseReason.CloseCodes;
+
 /**
  * Manages websocket scopes and listeners.
  *
@@ -172,15 +174,12 @@ public class WebSocketScopeManager {
                                                 wsConn.sendPing(PING_BYTES);
                                             } catch (Exception e) {
                                                 log.debug("Exception pinging connection: {} connection will be closed", wsConn.getSessionId(), e);
-                                                // if the connection isn't connected, remove them
-                                                wsScope.removeConnection(wsConn);
-                                                // if the ping fails, consider them gone
-                                                wsConn.close();
+                                                wsConn.close(CloseCodes.CLOSED_ABNORMALLY, e.getMessage());
                                             }
                                         } else {
                                             log.debug("Removing unconnected connection: {} during ping loop", wsConn.getSessionId());
                                             // if the connection isn't connected, remove them
-                                            wsScope.removeConnection(wsConn);
+                                            wsConn.close(CloseCodes.UNEXPECTED_CONDITION, "Connection not connected");
                                         }
                                     } catch (Exception e) {
                                         log.warn("Exception in WS pinger", e);

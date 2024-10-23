@@ -11,7 +11,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.net.websocket.WSConstants;
@@ -57,15 +56,10 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         if (isDebug) {
             log.debug("Session opened: {}\n{}", session.getId(), session.getRequestParameterMap());
         }
-        Map<String, Object> confUserProps = config.getUserProperties();
-        Map<String, Object> sessionUserProps = session.getUserProperties();
-        if (isTrace) {
-            log.trace("User conf props: {}\nsession props: {}", confUserProps, sessionUserProps);
-        }
         // get ws scope from user props
-        scope = (WebSocketScope) confUserProps.get(WSConstants.WS_SCOPE);
+        scope = (WebSocketScope) config.getUserProperties().get(WSConstants.WS_SCOPE);
         // get ws connection from session user props
-        WebSocketConnection conn = (WebSocketConnection) sessionUserProps.get(WSConstants.WS_CONNECTION);
+        WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
         if (conn == null) {
             log.warn("WebSocketConnection null at onOpen for {}", session.getId());
         }
@@ -76,24 +70,13 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
+        final String sessionId = session.getId();
+        log.debug("Session closed: {}", sessionId);
         WebSocketConnection conn = null;
         // getting the sessions user properties on a closed connection will throw an exception when it checks state
         try {
-            Map<String, Object> sessionUserProps = session.getUserProperties();
-            if (isTrace) {
-                log.trace("User session props: {}", sessionUserProps);
-            }
             // ensure we grab the scope from the session if its null
-            if (scope == null) {
-                scope = (WebSocketScope) sessionUserProps.get(WSConstants.WS_SCOPE);
-                log.trace("Scope pulled from session: {}", scope);
-            }
-            String sessionId = session.getId();
-            if (isDebug) {
-                log.debug("Session closed: {} on scope: {}", sessionId, scope);
-            }
-            // get ws connection from session user props
-            conn = (WebSocketConnection) sessionUserProps.get(WSConstants.WS_CONNECTION);
+            conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
             // if we don't get it from the session, try the scope lookup
             if (conn == null) {
                 log.warn("Connection for id: {} was not found in the session onClose", sessionId);
@@ -107,11 +90,9 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         } finally {
             if (conn != null) {
                 // fire close, to be sure
-                conn.close();
+                scope.removeConnection(conn);
                 // force remove on exception
-                if (scope != null) {
-                    scope.removeConnection(conn);
-                }
+                conn.close(closeReason.getCloseCode(), closeReason.getReasonPhrase());
             }
         }
     }

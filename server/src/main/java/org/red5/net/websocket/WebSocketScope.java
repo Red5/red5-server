@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import jakarta.websocket.CloseReason.CloseCodes;
+
 /**
  * WebSocketScope contains an IScope and keeps track of WebSocketConnection and IWebSocketDataListener instances.
  *
@@ -91,7 +93,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         // clean up the connections by first closing them
         conns.forEach(conn -> {
             if (conns.remove(conn)) {
-                conn.close();
+                conn.close(CloseCodes.GOING_AWAY, "WebSocket scope removed");
             }
         });
         // clean up the listeners by first stopping them

@@ -21,8 +21,8 @@ Subreddit: [r/red5](http://www.reddit.com/r/red5)
 
 Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.org/)):
 
-* [Red5](https://builds.apache.org/view/M-R/view/OpenMeetings/job/Red5-server/)
-* [Windows Installer](https://builds.apache.org/view/M-R/view/OpenMeetings/job/red5-installer/)
+ * [Red5](https://ci-builds.apache.org/job/OpenMeetings/job/Red5-server/)
+ * [Windows Installer](https://ci-builds.apache.org/job/OpenMeetings/job/red5-installer/)
 
 __Note on Bootstrap__ The bootstrap and shutdown classes have been moved to the [red5-service](https://github.com/Red5/red5-service) project; the dependency has been added to this projects pom.
 

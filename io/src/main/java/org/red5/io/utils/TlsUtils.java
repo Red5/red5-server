@@ -23,10 +23,7 @@ import org.bouncycastle.util.io.Streams;
 public class TlsUtils {
 
     @SuppressWarnings("unused")
-    private static byte[] DOWNGRADE_TLS11 = Hex.decodeStrict("444F574E47524400");
-
-    @SuppressWarnings("unused")
-    private static byte[] DOWNGRADE_TLS12 = Hex.decodeStrict("444F574E47524401");
+    private static byte[] DOWNGRADE_TLS11 = Hex.decodeStrict("444F574E47524400"), DOWNGRADE_TLS12 = Hex.decodeStrict("444F574E47524401");
 
     public static final byte[] EMPTY_BYTES = new byte[0];
 
@@ -610,9 +607,7 @@ public class TlsUtils {
     }
 
     public static ASN1Primitive readASN1Object(byte[] encoding) throws IOException {
-        ASN1InputStream asn1 = null;
-        try {
-            asn1 = new ASN1InputStream(encoding);
+        try (ASN1InputStream asn1 = new ASN1InputStream(encoding)) {
             ASN1Primitive result = asn1.readObject();
             if (null == result) {
                 throw new IOException("AlertDescription.decode_error");
@@ -621,10 +616,6 @@ public class TlsUtils {
                 throw new IOException("AlertDescription.decode_error");
             }
             return result;
-        } finally {
-            if (asn1 != null) {
-                asn1.close();
-            }
         }
     }
 
