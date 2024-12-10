@@ -150,7 +150,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         } else {
             this.type = IConnection.Type.UNKNOWN;
         }
-        this.sessionId = RandomStringUtils.secure().nextPrint(13).toUpperCase();
+        this.sessionId = RandomStringUtils.secure().nextAlphanumeric(13).toUpperCase();
         log.debug("Generated session id: {}", sessionId);
     }
 
