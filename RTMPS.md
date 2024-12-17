@@ -9,7 +9,7 @@ The following commands will create the necessary files for the RTMPS feature. Th
 * Create our CA key and certificate for self-signing:
 
 ```bash
-openssl ecparam -name prime256v1 -genkeopenssl ecparam -name prime256v1 -genkey -noout -out ca.key
+openssl ecparam -name prime256v1 -genkey -noout -out ca.key
 
 openssl req -new -x509 -sha256 -key ca.key -out ca.crt -days 3650
 
