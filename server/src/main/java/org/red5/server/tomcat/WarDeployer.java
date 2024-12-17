@@ -19,39 +19,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jakarta.servlet.ServletException;
 
-import org.red5.server.LoaderBase;
 import org.red5.server.jmx.mxbeans.LoaderMXBean;
 import org.red5.server.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import jakarta.servlet.ServletException;
 
 /**
  * This service provides the means to auto-deploy a war.
  *
+ * Note: This class has deprecated use of Spring and has been refactored to be instantiated and controlled via the
+ * TomcatLoader, it is no longer meant to be used in the jee-container.xml as a bean.
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public final class WarDeployer implements ApplicationContextAware, InitializingBean, DisposableBean {
+public final class WarDeployer implements ApplicationContextAware {
 
     private Logger log = LoggerFactory.getLogger(WarDeployer.class);
 
     //that wars are currently being installed
     private static AtomicBoolean deploying = new AtomicBoolean(false);
 
-    /**
-     * Spring Application context
-     */
-    private ApplicationContext applicationContext;
-
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    private ScheduledFuture<DeployJob> future;
+    private ScheduledFuture<?> future;
 
     /**
      * How often to check for new war files
@@ -61,48 +57,36 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
     /**
      * Deployment directory
      */
-    private String webappFolder;
-
-    /**
-     * Expand WAR files in the webapps directory prior to start up
-     */
-    private boolean expandWars;
+    private final File webappsDirectory;
 
     {
         log.info("War deployer service created");
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        log.info("Starting WarDeployer");
-        // create the job and schedule it
-        future = (ScheduledFuture<DeployJob>) scheduler.scheduleAtFixedRate(new DeployJob(), 60000L, checkInterval, TimeUnit.MILLISECONDS);
-        // check the deploy from directory
-        log.debug("Webapps directory: {}", webappFolder);
-        File dir = new File(webappFolder);
-        if (!dir.exists()) {
-            log.warn("Source directory not found");
-        } else {
-            if (!dir.isDirectory()) {
-                throw new Exception("Webapps directory is not a directory");
-            }
-        }
-        dir = null;
+    @Deprecated(since = "2.0.9", forRemoval = true)
+    public WarDeployer() {
+        log.warn("Use via constructor or as a Spring bean is deprecated");
+        webappsDirectory = new File("webapps");
+    }
+
+    public WarDeployer(File webappsDirectory) {
+        this(webappsDirectory, false);
+    }
+
+    public WarDeployer(File webappsDirectory, boolean expandWars) {
+        log.info("Starting WarDeployer - webapps directory: {}", webappsDirectory.getAbsolutePath());
+        // set the webapp folder
+        this.webappsDirectory = webappsDirectory;
         // expand wars if so requested
         if (expandWars) {
-            log.debug("Deploying wars");
+            log.debug("Deploying wars, not starting applications");
             deploy(false);
         }
-        try {
-            // check for an embedded jee server
-            LoaderBase jeeServer = applicationContext.getBean(LoaderBase.class);
-            // lookup the jee container
-            if (jeeServer != null) {
-                log.info("JEE server was found: {}", jeeServer.toString());
-            }
-        } catch (Exception e) {
-        }
+        // create the job and schedule it
+        future = (ScheduledFuture<?>) scheduler.scheduleAtFixedRate(() -> {
+            log.debug("Starting scheduled deployment of wars");
+            deploy(true);
+        }, 60000L, checkInterval, TimeUnit.MILLISECONDS);
     }
 
     private void deploy(boolean startApplication) {
@@ -112,10 +96,8 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
             String application = null;
             // file name
             String applicationWarName = null;
-            // look for web application archives
-            File dir = new File(webappFolder);
             // get a list of wars
-            File[] files = dir.listFiles(new DirectoryFilter());
+            File[] files = webappsDirectory.listFiles(new DirectoryFilter());
             for (File f : files) {
                 // get the war name
                 applicationWarName = f.getName();
@@ -130,10 +112,10 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
                 log.debug("Application name: {}", application);
                 // setup context
                 String contextPath = '/' + application;
-                String contextDir = webappFolder + contextPath;
+                String contextDir = webappsDirectory.getAbsolutePath() + contextPath;
                 log.debug("Web context: {} context directory: {}", contextPath, contextDir);
                 // verify this is a unique app
-                File appDir = new File(dir, application);
+                File appDir = new File(webappsDirectory, application);
                 if (appDir.exists()) {
                     if (appDir.isDirectory()) {
                         log.debug("Application directory exists");
@@ -144,7 +126,7 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
                 } else {
                     log.debug("Unwaring and starting...");
                     // un-archive it to app dir
-                    FileUtil.unzip(webappFolder + '/' + applicationWarName, contextDir);
+                    FileUtil.unzip(webappsDirectory.getAbsolutePath() + '/' + applicationWarName, contextDir);
                     // load and start the context
                     if (startApplication) {
                         // get the webapp loader from jmx
@@ -158,7 +140,7 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
                         }
                     }
                     // remove the war file
-                    File warFile = new File(dir, applicationWarName);
+                    File warFile = new File(webappsDirectory, applicationWarName);
                     if (warFile.delete()) {
                         log.debug("{} was deleted", warFile.getName());
                     } else {
@@ -169,24 +151,16 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
                 }
                 appDir = null;
             }
-            dir = null;
             // reset sentinel
             deploying.set(false);
         }
     }
 
-    @Override
-    public void destroy() throws Exception {
+    public void stop() throws Exception {
         if (future != null) {
             future.cancel(true);
         }
         scheduler.shutdownNow();
-    }
-
-    @SuppressWarnings("null")
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 
     public void setCheckInterval(int checkInterval) {
@@ -195,24 +169,6 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
 
     public int getCheckInterval() {
         return checkInterval;
-    }
-
-    public String getWebappFolder() {
-        return webappFolder;
-    }
-
-    public void setWebappFolder(String webappFolder) {
-        this.webappFolder = webappFolder;
-    }
-
-    /**
-     * Whether or not to expand war files prior to start up.
-     *
-     * @param expandWars
-     *            to expand or not
-     */
-    public void setExpandWars(boolean expandWars) {
-        this.expandWars = expandWars;
     }
 
     /**
@@ -263,13 +219,11 @@ public final class WarDeployer implements ApplicationContextAware, InitializingB
         }
     }
 
-    private class DeployJob implements Runnable {
-
-        public void run() {
-            log.debug("Starting scheduled deployment of wars");
-            deploy(true);
-        }
-
+    @Deprecated(since = "2.0.9", forRemoval = true)
+    @SuppressWarnings("null")
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        log.warn("This method is deprecated and should not be used; instances are created and controlled internally via TomcatLoader");
     }
 
 }

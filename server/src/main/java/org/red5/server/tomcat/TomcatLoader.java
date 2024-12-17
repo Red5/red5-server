@@ -22,9 +22,6 @@ import java.util.concurrent.Future;
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import jakarta.security.auth.message.config.AuthConfigFactory;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
@@ -63,6 +60,10 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+
+import jakarta.security.auth.message.config.AuthConfigFactory;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 /**
  * Red5 loader for Tomcat.
@@ -178,6 +179,11 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     private static ExecutorService executor;
 
+    /**
+     * War deployer
+     */
+    private WarDeployer deployer;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         // if we are not awaiting plugins, start immediately
@@ -189,8 +195,8 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
                 Thread.currentThread().setName("TomcatLoader-delayed-start");
                 try {
                     while (!Red5.isPluginsReady()) {
-                        log.debug("Waiting for plugins to load");
-                        Thread.sleep(500L);
+                        log.trace("Waiting for plugins to load");
+                        Thread.sleep(2000L);
                     }
                     start();
                 } catch (ServletException e) {
@@ -291,7 +297,6 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Initialization.
      */
-    @SuppressWarnings("null")
     public void start() throws ServletException {
         log.info("Loading Tomcat");
         // if websockets are enabled, ensure the websocket plugin is loaded
@@ -332,6 +337,8 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         log.info("Application root: {}", webappFolder);
         // Root applications directory
         File appDirBase = new File(webappFolder);
+        // create/start the war deployer, but don't start any expanded apps, yet
+        deployer = new WarDeployer(appDirBase, true);
         // Subdirs of root apps dir
         File[] dirs = appDirBase.listFiles(new DirectoryFilter());
         // Search for additional context files
@@ -531,7 +538,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
                 applicationContext.getBean("rtmpt.server");
                 log.debug("Finished initializing RTMPT");
             } else {
-                log.info("Dedicated RTMPT server configuration was not specified");
+                log.debug("Dedicated RTMPT server configuration was not specified");
             }
             if (applicationContext.containsBean("rtmps.server")) {
                 log.debug("Initializing RTMPS");
@@ -901,6 +908,10 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     @Override
     public void destroy() throws Exception {
         log.info("Shutting down Tomcat context");
+        if (deployer != null) {
+            deployer.stop();
+            deployer = null;
+        }
         if (executor != null) {
             executor.shutdown();
         }
