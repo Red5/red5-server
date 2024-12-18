@@ -173,6 +173,11 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     protected boolean websocketEnabled = true;
 
     /**
+     * HTTPS/WSS feature
+     */
+    protected boolean secureEnabled;
+
+    /**
      * Flag to indicate if we should await plugin loading
      */
     protected boolean awaitPlugins = true;
@@ -406,6 +411,11 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             for (TomcatConnector tomcatConnector : connectors) {
                 // get the connector
                 Connector connector = tomcatConnector.getConnector();
+                // check for secure connector and skip it if secure is not enabled
+                if (!secureEnabled && connector.getSecure()) {
+                    log.debug("Skipping secure connector");
+                    continue;
+                }
                 // add new Connector to set of Connectors for embedded server, associated with Engine
                 if (!added) {
                     embedded.setConnector(connector);
@@ -854,6 +864,24 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      */
     public void setWebsocketEnabled(boolean websocketEnabled) {
         this.websocketEnabled = websocketEnabled;
+    }
+
+    /**
+     * Returns enabled state of secure support.
+     *
+     * @return true if enabled and false otherwise
+     */
+    public boolean isSecureEnabled() {
+        return secureEnabled;
+    }
+
+    /**
+     * Set secure feature enabled / disabled.
+     *
+     * @param secureEnabled
+     */
+    public void setSecureEnabled(boolean secureEnabled) {
+        this.secureEnabled = secureEnabled;
     }
 
     /**

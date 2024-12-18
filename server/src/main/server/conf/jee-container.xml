@@ -5,17 +5,20 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
 
-    <!--
-    The tomcat connectors may be blocking or non-blocking. Select between either option via the protocol property.
-        Blocking I/O:
-            <property name="protocol" value="org.apache.coyote.http11.Http11Protocol" />
-        Non-blocking I/O:
-            <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
-     -->
-    <!-- Tomcat without SSL enabled -->
+    <!-- Transports for HTTP/S and WS/S 
+        The tomcat connectors may be blocking or non-blocking. Select between either option via the protocol property.
+            Blocking I/O:
+                <property name="protocol" value="org.apache.coyote.http11.Http11Protocol" />
+            Non-blocking I/O:
+                <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
+            
+        Connection properties available for TomcatConnector in Red5 2.0.10:
+            protocols="TLSv1.2,TLSv1.3"
+            ciphers="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+    -->
     <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
-        <property name="awaitPlugins" value="false" />
-        <property name="websocketEnabled" value="true" />
+        <property name="secureEnabled" value="${secure.enabled}" />
+        <property name="websocketEnabled" value="${websocket.enabled}" />
         <property name="webappFolder" value="${red5.root}/webapps" />
         <property name="connectors">
             <list>
@@ -28,40 +31,17 @@
                             <entry key="maxHttpHeaderSize" value="${http.max_headers_size}"/>
                             <entry key="maxKeepAliveRequests" value="${http.max_keep_alive_requests}"/>
                             <entry key="keepAliveTimout" value="-1"/>
+                            <entry key="useExecutor" value="true"/>
+                            <entry key="maxThreads" value="${http.max_threads}"/>
+                            <entry key="acceptCount" value="100"/>
+                            <entry key="acceptorThreadCount" value="${http.acceptor_thread_count}"/>
+                            <entry key="processorCache" value="${http.processor_cache}"/>
+                            <entry key="connectionTimeout" value="20000"/>
+                            <entry key="maxConnections" value="-1"/>
+                            <entry key="relaxedQueryChars" value="[,]"/>
+                            <entry key="useLowerCaseHeaders" value="false"/>
                         </map>
                     </property>
-                </bean>
-            </list>
-        </property>
-        <property name="baseHost">
-           <bean class="org.apache.catalina.core.StandardHost">
-               <property name="name" value="${http.host}" />
-           </bean>
-        </property>
-        <property name="valves">
-            <list>
-                <bean id="valve.access" class="org.apache.catalina.valves.AccessLogValve">
-                    <property name="directory" value="log" />
-                    <property name="prefix" value="${http.host}_access." />
-                    <property name="suffix" value=".log" />
-                    <property name="pattern" value="common" />
-                    <property name="rotatable" value="true" />
-                </bean>
-            </list>
-        </property>
-    </bean>
-
-    <!-- Tomcat with SSL enabled -->
-<!--
-    <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
-        <property name="websocketEnabled" value="true" />
-        <property name="webappFolder" value="${red5.root}/webapps" />
-        <property name="connectors">
-            <list>
-                <bean name="httpConnector" class="org.red5.server.tomcat.TomcatConnector">
-                    <property name="protocol" value="org.apache.coyote.http11.Http11Nio2Protocol" />
-                    <property name="address" value="${http.host}:${http.port}" />
-                    <property name="redirectPort" value="${https.port}" />
                 </bean>
                 <bean name="httpsConnector" class="org.red5.server.tomcat.TomcatConnector">
                     <property name="secure" value="true" />
@@ -70,26 +50,23 @@
                     <property name="redirectPort" value="${http.port}" />
                     <property name="connectionProperties">
                         <map>
-                            <entry key="port" value="${https.port}" />
-                            <entry key="redirectPort" value="${http.port}" />
-
-                            <entry key="SSLEnabled" value="true" />
-                            <entry key="sslProtocol" value="TLS" />
+                            <entry key="keystoreType" value="JKS" />
                             <entry key="keystoreFile" value="${rtmps.keystorefile}" />
                             <entry key="keystorePass" value="${rtmps.keystorepass}" />
+                            <entry key="truststoreType" value="JKS" />
                             <entry key="truststoreFile" value="${rtmps.truststorefile}" />
                             <entry key="truststorePass" value="${rtmps.truststorepass}" />
-                            <entry key="clientAuth" value="false" />
-                            <entry key="allowUnsafeLegacyRenegotiation" value="true" />
-
+                            <entry key="allowUnsafeLegacyRenegotiation" value="false" />
                             <entry key="maxHttpHeaderSize" value="${http.max_headers_size}"/>
                             <entry key="maxKeepAliveRequests" value="${http.max_keep_alive_requests}"/>
                             <entry key="keepAliveTimout" value="-1"/>
-
                             <entry key="useExecutor" value="true"/>
                             <entry key="maxThreads" value="${http.max_threads}"/>
                             <entry key="acceptorThreadCount" value="${http.acceptor_thread_count}"/>
                             <entry key="processorCache" value="${http.processor_cache}"/>
+                            <entry key="connectionTimeout" value="20000"/>
+                            <entry key="relaxedQueryChars" value="[,]"/>
+                            <entry key="useLowerCaseHeaders" value="false"/>
                         </map>
                     </property>
                 </bean>
@@ -100,7 +77,17 @@
                 <property name="name" value="${http.host}" />
             </bean>
         </property>
+        <property name="valves">
+            <list>
+                <bean id="valve.access" class="org.apache.catalina.valves.AccessLogValve">
+                    <property name="directory" value="log" />
+                    <property name="prefix" value="${http.host}_access" />
+                    <property name="suffix" value=".log" />
+                    <property name="pattern" value="common" />
+                    <property name="rotatable" value="true" />
+                </bean>
+            </list>
+        </property>
     </bean>
--->
 
 </beans>
