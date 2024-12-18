@@ -13,11 +13,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.AprLifecycleListener;
 import org.apache.coyote.ProtocolHandler;
 import org.apache.coyote.http11.Http11Nio2Protocol;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.IntrospectionUtils;
+import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
@@ -72,25 +73,88 @@ public class TomcatConnector {
             // set connection properties
             if (connectionProperties != null) {
                 for (String key : connectionProperties.keySet()) {
+                    // skip ssl related properties
+                    if (key.startsWith("keystore") || key.startsWith("truststore") || key.startsWith("certificate") || key.equals("clientAuth") || key.equals("allowUnsafeLegacyRenegotiation")) {
+                        continue;
+                    }
                     connector.setProperty(key, connectionProperties.get(key));
                 }
             }
             // turn off native apr support
-            AprLifecycleListener listener = new AprLifecycleListener();
-            listener.setSSLEngine("off");
-            connector.addLifecycleListener(listener);
-            // determine if https support is requested
-            if (secure) {
-                // set connection properties
-                connector.setSecure(true);
-                connector.setScheme("https");
-            }
+            //AprLifecycleListener listener = new AprLifecycleListener();
+            //listener.setSSLEngine("off");
+            //connector.addLifecycleListener(listener);
             // apply the bind address to the handler
             ProtocolHandler handler = connector.getProtocolHandler();
             if (handler instanceof Http11Nio2Protocol) {
                 ((Http11Nio2Protocol) handler).setAddress(address.getAddress());
             } else if (handler instanceof Http11NioProtocol) {
                 ((Http11NioProtocol) handler).setAddress(address.getAddress());
+            }
+            // Reference https://tomcat.apache.org/tomcat-11.0-doc/ssl-howto.html#SSL_and_Tomcat
+            // determine if https support is requested
+            if (secure) {
+                // set connection properties
+                connector.setSecure(true);
+                connector.setScheme("https");
+                connector.setProperty("SSLEnabled", "true");
+                // create a new ssl host config
+                SSLHostConfig sslHostConfig = new SSLHostConfig();
+                /*
+                    <entry key="sslProtocol" value="TLS" />
+                    <entry key="keystoreFile" value="${rtmps.keystorefile}" />
+                    <entry key="keystorePass" value="${rtmps.keystorepass}" />
+                    <entry key="truststoreFile" value="${rtmps.truststorefile}" />
+                    <entry key="truststorePass" value="${rtmps.truststorepass}" />
+                    <entry key="clientAuth" value="false" />
+                    <entry key="allowUnsafeLegacyRenegotiation" value="true" />
+                 */
+                sslHostConfig.setSslProtocol("TLS");
+                sslHostConfig.setTruststoreFile(connectionProperties.get("truststoreFile"));
+                sslHostConfig.setTruststorePassword(connectionProperties.get("truststorePass"));
+                if (connectionProperties.containsKey("truststoreType")) {
+                    sslHostConfig.setTruststoreType(connectionProperties.get("truststoreType"));
+                } else {
+                    sslHostConfig.setTruststoreType("JKS");
+                }
+                // set the protocols
+                if (connectionProperties.containsKey("protocols")) {
+                    String[] protocols = connectionProperties.get("protocols").split(",");
+                    //sslHostConfig.setProtocols(protocols);
+                    sslHostConfig.setEnabledProtocols(protocols);
+                } else {
+                    sslHostConfig.setProtocols("TLSv1.2");
+                    sslHostConfig.setEnabledProtocols(new String[] { "TLSv1.2" });
+                }
+                // set the ciphers
+                if (connectionProperties.containsKey("ciphers")) {
+                    String[] ciphers = connectionProperties.get("ciphers").split(",");
+                    //sslHostConfig.setCiphers(ciphers);
+                    sslHostConfig.setEnabledCiphers(ciphers);
+                } else {
+                    //sslHostConfig.setCiphers("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384");
+                }
+                // dont allow unsafe renegotiation
+                sslHostConfig.setInsecureRenegotiation(!secure);
+                // create a new ssl host config certificate
+                SSLHostConfigCertificate sslHostConfigCert = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
+                sslHostConfigCert.setCertificateKeystoreFile(connectionProperties.get("keystoreFile"));
+                sslHostConfigCert.setCertificateKeystorePassword(connectionProperties.get("keystorePass"));
+                if (connectionProperties.containsKey("keystoreType")) {
+                    sslHostConfigCert.setCertificateKeystoreType(connectionProperties.get("keystoreType"));
+                } else {
+                    sslHostConfigCert.setCertificateKeystoreType("JKS");
+                }
+                // set the certificate key alias
+                if (connectionProperties.containsKey("certificateKeyAlias")) {
+                    sslHostConfigCert.setCertificateKeyAlias(connectionProperties.get("certificateKeyAlias"));
+                } else {
+                    //sslHostConfigCert.setCertificateKeyAlias("red5");
+                }
+                // add the ssl host config certificate to the ssl host config
+                sslHostConfig.addCertificate(sslHostConfigCert);
+                // add the ssl host config to the handler
+                handler.addSslHostConfig(sslHostConfig);
             }
             // set initialized flag
             initialized = true;

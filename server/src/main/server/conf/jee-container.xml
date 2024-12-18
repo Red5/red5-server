@@ -72,6 +72,7 @@
                         <map>
                             <entry key="port" value="${https.port}" />
                             <entry key="redirectPort" value="${http.port}" />
+
                             <entry key="SSLEnabled" value="true" />
                             <entry key="sslProtocol" value="TLS" />
                             <entry key="keystoreFile" value="${rtmps.keystorefile}" />
@@ -80,9 +81,11 @@
                             <entry key="truststorePass" value="${rtmps.truststorepass}" />
                             <entry key="clientAuth" value="false" />
                             <entry key="allowUnsafeLegacyRenegotiation" value="true" />
+
                             <entry key="maxHttpHeaderSize" value="${http.max_headers_size}"/>
                             <entry key="maxKeepAliveRequests" value="${http.max_keep_alive_requests}"/>
                             <entry key="keepAliveTimout" value="-1"/>
+
                             <entry key="useExecutor" value="true"/>
                             <entry key="maxThreads" value="${http.max_threads}"/>
                             <entry key="acceptorThreadCount" value="${http.acceptor_thread_count}"/>
