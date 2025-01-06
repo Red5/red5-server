@@ -186,10 +186,9 @@ public class AbstractVideo implements IVideoStreamCodec {
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
                         trackCodec = getTrackCodec(data);
-                    } else {
-                        // The tracks are encoded with the same codec identified by the FOURCC
-                        trackCodec = getTrackCodec(data);
-                    }
+                    } 
+                }else {                    
+                    trackCodec = getTrackCodec(data);
                 }
                 log.debug("Multitrack: {} multitrackType: {} packetType: {}", multitrack, multitrackType, packetType);
                 // read all the data
@@ -220,28 +219,25 @@ public class AbstractVideo implements IVideoStreamCodec {
                         if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                             trackCodec.setTrackId(trackId);
                         }
-                    } else if (packetType != VideoPacketType.Metadata) { // no fourcc for metadata non-multitrack
-                        // track codec is null if we're not multitrack or command frame
-                        trackCodec = getTrackCodec(data);
+                    } else if (packetType == VideoPacketType.Metadata) {
+                        // The body does not contain video data; instead, it consists of AMF-encoded metadata. The
+                        // metadata is represented by a series of [name, value] pairs. Currently, the only defined
+                        // [name, value] pair is ["colorInfo", Object]. See the Metadata Frame section for more
+                        // details on this object.
+                        // For a deeper understanding of the encoding, please refer to the descriptions of SCRIPTDATA
+                        // and SCRIPTDATAVALUE in the [FLV] file specification.
+                        break;
                     }
                     switch (packetType) {
                         case CodedFramesX: // pass coded data without comp time offset
                             break;
-                        case CodedFrames: // pass coded data
+                        case CodedFrames: // pass coded data, avc and hevc with U24 offset
                             break;
                         case SequenceStart: // start of sequence
                             break;
                         case MPEG2TSSequenceStart: // start of MPEG2TS sequence
                             break;
                         case SequenceEnd: // end of sequence
-                            break;
-                        case Metadata: // metadata
-                            // The body does not contain video data; instead, it consists of AMF-encoded metadata. The
-                            // metadata is represented by a series of [name, value] pairs. Currently, the only defined
-                            // [name, value] pair is ["colorInfo", Object]. See the Metadata Frame section for more
-                            // details on this object.
-                            // For a deeper understanding of the encoding, please refer to the descriptions of SCRIPTDATA
-                            // and SCRIPTDATAVALUE in the [FLV] file specification.
                             break;
                     }
                     // check for multiple tracks
@@ -252,7 +248,11 @@ public class AbstractVideo implements IVideoStreamCodec {
                     // break out of the loop
                     break;
                 }
-                result = true;
+                if(command != null && trackCodec == null) {
+                    result = true;
+                }else {
+                    result = multitrack?true:codec == trackCodec.getCodec();
+                }
             } else {
                 // read the first byte verify the codec matches
                 result = ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId());

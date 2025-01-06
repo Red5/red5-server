@@ -53,6 +53,7 @@ public class AVCVideo extends AbstractVideo {
         if (data.position() > 0) {
             data.rewind();
         }
+        int fourcc = 0;
         // no data, no operation
         if (data.hasRemaining()) {
             // mark the position before we get the flags
@@ -67,8 +68,11 @@ public class AVCVideo extends AbstractVideo {
             if (enhanced) {
                 // get the packet type
                 packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
-                // get the fourcc
-                int fourcc = data.getInt();
+                if(frameType.getValue() < 5 &&  packetType.getPacketType() < 5 ) {
+                    // get the fourcc
+                    fourcc = data.getInt();                
+                    result = (codec.getFourcc() == fourcc);
+                }
                 // reset back to the beginning after we got the fourcc
                 data.reset();
                 if (isDebug) {
@@ -133,19 +137,53 @@ public class AVCVideo extends AbstractVideo {
                         break;
                     case CodedFrames: // pass coded data
                         int compTimeOffset = (data.get() << 16 | data.get() << 8 | data.get());
+                        data.reset();
                         switch (frameType) {
                             case KEYFRAME: // keyframe
                                 if (isDebug) {
                                     log.debug("Keyframe - keyframeTimestamp: {} compTimeOffset: {}", keyframeTimestamp, compTimeOffset);
                                 }
+                                // get the time stamp and compare with the current value
+                                if (timestamp != keyframeTimestamp) {
+                                    //log.trace("New keyframe");
+                                    // new keyframe
+                                    keyframeTimestamp = timestamp;
+                                    // if its a new keyframe, clear keyframe and interframe collections
+                                    softReset();
+                                }
                                 keyframes.add(new FrameData(data, compTimeOffset));
+                                break;
+                            case INTERFRAME:
+                                if (bufferInterframes) {
+                                    if (isDebug) {
+                                        log.debug("Interframe - timestamp: {}", timestamp);
+                                    }
+                                    if (interframes == null) {
+                                        interframes = new CopyOnWriteArrayList<>();
+                                    }
+                                    try {
+                                        int lastInterframe = numInterframes.getAndIncrement();
+                                        //log.trace("Buffering interframe #{}", lastInterframe);
+                                        if (lastInterframe < interframes.size()) {
+                                            interframes.get(lastInterframe).setData(data);
+                                        } else {
+                                            interframes.add(new FrameData(data));
+                                        }
+                                    } catch (Throwable e) {
+                                        log.warn("Failed to buffer interframe", e);
+                                    }
+                                    //log.trace("Interframes: {}", interframes.size());
+                                }
                                 break;
                         }
                     default:
                         // not handled
                         break;
                 }
-            } else {
+                
+                
+            } else if((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId()){
+                result = true;
                 // get the codecs frame type
                 byte avcType = data.get();
                 // reset back to the beginning after we got the avc type
@@ -154,18 +192,47 @@ public class AVCVideo extends AbstractVideo {
                     log.debug("AVC type: {}", avcType);
                 }
                 switch (avcType) {
-                    case 1: // keyframe
-                        //log.trace("Keyframe - keyframeTimestamp: {} {}", keyframeTimestamp, timestamp);
-                        // get the time stamp and compare with the current value
-                        if (timestamp != keyframeTimestamp) {
-                            //log.trace("New keyframe");
-                            // new keyframe
-                            keyframeTimestamp = timestamp;
-                            // if its a new keyframe, clear keyframe and interframe collections
-                            softReset();
-                        }
-                        // store keyframe
-                        keyframes.add(new FrameData(data));
+                    case 1: // VCL video coding layer, 
+                        frameType = VideoFrameType.valueOf((flg & IoConstants.MASK_VIDEO_FRAMETYPE) >> 4);
+                        switch (frameType) {
+                            case KEYFRAME: // keyframe
+                                
+                                if (isDebug) {
+                                    log.debug("Keyframe - keyframeTimestamp: {}", keyframeTimestamp);
+                                }
+                                // get the time stamp and compare with the current value
+                                if (timestamp != keyframeTimestamp) {
+                                    //log.trace("New keyframe");
+                                    // new keyframe
+                                    keyframeTimestamp = timestamp;
+                                    // if its a new keyframe, clear keyframe and interframe collections
+                                    softReset();
+                                }
+                                keyframes.add(new FrameData(data));
+                                break;
+                            case INTERFRAME:
+                                if (bufferInterframes) {
+                                    if (isDebug) {
+                                        log.debug("Interframe - AVC type: {}", avcType);
+                                    }
+                                    if (interframes == null) {
+                                        interframes = new CopyOnWriteArrayList<>();
+                                    }
+                                    try {
+                                        int lastInterframe = numInterframes.getAndIncrement();
+                                        //log.trace("Buffering interframe #{}", lastInterframe);
+                                        if (lastInterframe < interframes.size()) {
+                                            interframes.get(lastInterframe).setData(data);
+                                        } else {
+                                            interframes.add(new FrameData(data));
+                                        }
+                                    } catch (Throwable e) {
+                                        log.warn("Failed to buffer interframe", e);
+                                    }
+                                    //log.trace("Interframes: {}", interframes.size());
+                                }
+                                break;
+                        } 
                         break;
                     case 0: // configuration
                         if (isDebug) {
@@ -181,32 +248,10 @@ public class AVCVideo extends AbstractVideo {
                         softReset();
                         break;
                     default:
-                        if (bufferInterframes) {
-                            if (isDebug) {
-                                log.debug("Interframe - AVC type: {}", avcType);
-                            }
-                            if (interframes == null) {
-                                interframes = new CopyOnWriteArrayList<>();
-                            }
-                            try {
-                                int lastInterframe = numInterframes.getAndIncrement();
-                                //log.trace("Buffering interframe #{}", lastInterframe);
-                                if (lastInterframe < interframes.size()) {
-                                    interframes.get(lastInterframe).setData(data);
-                                } else {
-                                    interframes.add(new FrameData(data));
-                                }
-                            } catch (Throwable e) {
-                                log.warn("Failed to buffer interframe", e);
-                            }
-                            //log.trace("Interframes: {}", interframes.size());
-                        }
                         break;
                 }
             }
             //log.trace("Keyframes: {}", keyframes.size());
-            // we handled the data
-            result = true;
         }
         // reset the position
         data.rewind();
