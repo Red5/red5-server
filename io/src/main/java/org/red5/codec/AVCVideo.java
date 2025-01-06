@@ -68,11 +68,11 @@ public class AVCVideo extends AbstractVideo {
             if (enhanced) {
                 // get the packet type
                 packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
-                if(frameType.getValue() < 5 &&  packetType.getPacketType() < 5 ) {
+                if (frameType.getValue() < 5 && packetType.getPacketType() < 5) {
                     // get the fourcc
-                    fourcc = data.getInt();                
+                    fourcc = data.getInt();
                     result = (codec.getFourcc() == fourcc);
-                    if(!result) {
+                    if (!result) {
                         data.reset();
                         return result;
                     }
@@ -184,9 +184,8 @@ public class AVCVideo extends AbstractVideo {
                         // not handled
                         break;
                 }
-                
-                
-            } else if((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId()){
+
+            } else if ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId()) {
                 result = true;
                 // get the codecs frame type
                 byte avcType = data.get();
@@ -196,11 +195,11 @@ public class AVCVideo extends AbstractVideo {
                     log.debug("AVC type: {}", avcType);
                 }
                 switch (avcType) {
-                    case 1: // VCL video coding layer, 
+                    case 1: // VCL video coding layer,
                         frameType = VideoFrameType.valueOf((flg & IoConstants.MASK_VIDEO_FRAMETYPE) >> 4);
                         switch (frameType) {
                             case KEYFRAME: // keyframe
-                                
+
                                 if (isDebug) {
                                     log.debug("Keyframe - keyframeTimestamp: {}", keyframeTimestamp);
                                 }
@@ -236,7 +235,7 @@ public class AVCVideo extends AbstractVideo {
                                     //log.trace("Interframes: {}", interframes.size());
                                 }
                                 break;
-                        } 
+                        }
                         break;
                     case 0: // configuration
                         if (isDebug) {

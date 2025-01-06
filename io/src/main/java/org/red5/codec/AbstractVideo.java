@@ -186,8 +186,8 @@ public class AbstractVideo implements IVideoStreamCodec {
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
                         trackCodec = getTrackCodec(data);
-                    } 
-                }else {                    
+                    }
+                } else {
                     trackCodec = getTrackCodec(data);
                 }
                 log.debug("Multitrack: {} multitrackType: {} packetType: {}", multitrack, multitrackType, packetType);
@@ -248,10 +248,10 @@ public class AbstractVideo implements IVideoStreamCodec {
                     // break out of the loop
                     break;
                 }
-                if(command != null && trackCodec == null) {
+                if (command != null && trackCodec == null) {
                     result = true;
-                }else {
-                    result = multitrack?true:codec == trackCodec.getCodec();
+                } else {
+                    result = multitrack ? true : codec == trackCodec.getCodec();
                 }
             } else {
                 // read the first byte verify the codec matches
