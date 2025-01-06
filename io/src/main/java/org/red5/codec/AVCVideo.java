@@ -72,6 +72,10 @@ public class AVCVideo extends AbstractVideo {
                     // get the fourcc
                     fourcc = data.getInt();                
                     result = (codec.getFourcc() == fourcc);
+                    if(!result) {
+                        data.reset();
+                        return result;
+                    }
                 }
                 // reset back to the beginning after we got the fourcc
                 data.reset();
