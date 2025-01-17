@@ -7,6 +7,7 @@
 
 package org.red5.server.api;
 
+import java.beans.PropertyChangeEvent;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -301,5 +302,14 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
      * @return protocol type
      */
     String getProtocol();
+
+    /**
+     * Notifies listeners of a property change.
+     *
+     * @param evt PropertyChangeEvent containing details
+     */
+    default void notifyPropertyChanged(PropertyChangeEvent evt) {
+        // no-op
+    }
 
 }

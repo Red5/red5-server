@@ -24,7 +24,7 @@
     <name>Red5</name>
     <description>The Red5 server</description>
     <groupId>org.red5</groupId>
-    <version>2.0.12</version>
+    <version>2.0.13</version>
     <url>https://github.com/Red5/red5-server</url>
     <inceptionYear>2005</inceptionYear>
     <organization>
@@ -101,17 +101,17 @@
         <red5-service.version>${project.version}</red5-service.version>
         <slf4j.version>2.0.13</slf4j.version>
         <logback.version>1.5.6</logback.version>
-        <bc.version>1.78.1</bc.version>
+        <bc.version>1.79</bc.version>
         <mina.version>2.0.23</mina.version>
         <spring.version>6.2.0</spring.version>
-        <tomcat.version>11.0.1</tomcat.version>
+        <tomcat.version>11.0.2</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>
         <ehcache.version>2.10.6</ehcache.version>
-        <commons-beanutils.version>1.9.4</commons-beanutils.version>
-        <commons-codec.version>1.17.1</commons-codec.version>
+        <commons-beanutils.version>1.10.0</commons-beanutils.version>
+        <commons-codec.version>1.17.2</commons-codec.version>
         <commons-collections.version>4.4</commons-collections.version>
-        <commons-io.version>2.17.0</commons-io.version>
+        <commons-io.version>2.18.0</commons-io.version>
         <commons-lang3.version>3.17.0</commons-lang3.version>
         <httpcore.version>[4.4.11,)</httpcore.version>
         <httpclient.version>[4.5.13,)</httpclient.version>

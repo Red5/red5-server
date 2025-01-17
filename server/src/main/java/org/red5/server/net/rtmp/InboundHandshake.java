@@ -78,7 +78,7 @@ public class InboundHandshake extends RTMPHandshake {
      */
     public IoBuffer decodeClientRequest1(IoBuffer in) {
         if (log.isTraceEnabled()) {
-            log.debug("decodeClientRequest1: {}", Hex.encodeHexString(in.array()));
+            log.trace("decodeClientRequest1: {}", Hex.encodeHexString(in.array()));
         }
         // copy into a new array to ensure the position is respected
         c1 = new byte[Constants.HANDSHAKE_SIZE];
@@ -175,7 +175,7 @@ public class InboundHandshake extends RTMPHandshake {
         if (useEncryption()) {
             switch (handshakeType) {
                 case RTMPConnection.RTMP_ENCRYPTED:
-                    log.debug("RTMPE type 6");
+                    log.debug("RTMPE type 6 - C1");
                     // we dont encrypt signatureResp for type 6
                     break;
                 case RTMPConnection.RTMP_ENCRYPTED_XTEA:
@@ -225,7 +225,7 @@ public class InboundHandshake extends RTMPHandshake {
      */
     public boolean decodeClientRequest2(IoBuffer in) {
         if (log.isTraceEnabled()) {
-            log.debug("decodeClientRequest2: {}", Hex.encodeHexString(in.array()));
+            log.trace("decodeClientRequest2: {}", Hex.encodeHexString(in.array()));
         }
         byte[] c2 = new byte[Constants.HANDSHAKE_SIZE];
         in.get(c2);
@@ -240,7 +240,7 @@ public class InboundHandshake extends RTMPHandshake {
             if (useEncryption()) {
                 switch (handshakeType) {
                     case RTMPConnection.RTMP_ENCRYPTED:
-                        log.debug("RTMPE type 6");
+                        log.debug("RTMPE type 6 - C2");
                         break;
                     case RTMPConnection.RTMP_ENCRYPTED_XTEA:
                         log.debug("RTMPE type 8 XTEA");
