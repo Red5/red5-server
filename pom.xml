@@ -103,7 +103,7 @@
         <logback.version>1.5.6</logback.version>
         <bc.version>1.79</bc.version>
         <mina.version>2.0.23</mina.version>
-        <spring.version>6.2.0</spring.version>
+        <spring.version>6.2.2</spring.version>
         <tomcat.version>11.0.2</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>
@@ -223,7 +223,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.7.0</version>
+                    <version>3.11.2</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
