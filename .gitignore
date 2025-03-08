@@ -14,3 +14,4 @@ log/
 *.log
 temp/
 ci/Red5-release-steps.md
+/.metadata/

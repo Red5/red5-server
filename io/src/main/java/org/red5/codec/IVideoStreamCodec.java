@@ -55,7 +55,7 @@ public interface IVideoStreamCodec {
      *
      * @param data
      *            data to tell the codec we're adding
-     * @return true for success. false for error
+     * @return true for success. false for passing wrong video format or other error.
      */
     boolean addData(IoBuffer data);
 
@@ -65,7 +65,7 @@ public interface IVideoStreamCodec {
      * @param data
      *            data to tell the codec we're adding
      * @param timestamp time associated with the data
-     * @return true for success. false for error
+     * @return true for success. false for passing wrong video format or other error.
      */
     boolean addData(IoBuffer data, int timestamp);
 
