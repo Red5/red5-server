@@ -148,8 +148,11 @@ public class AbstractVideo implements IVideoStreamCodec {
     @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data, int timestamp) {
-        boolean result = false;
+        //Starting true, since null data or un-rewound data may be an accident.
+        boolean result = true;
         if (data != null && data.hasRemaining()) {
+            //data must prove itself.
+            result = false;
             boolean processVideoBody = false;
             @SuppressWarnings("unused")
             VideoCommand command = null;
@@ -228,18 +231,18 @@ public class AbstractVideo implements IVideoStreamCodec {
                         // and SCRIPTDATAVALUE in the [FLV] file specification.
                         break;
                     }
-                    switch (packetType) {
-                        case CodedFramesX: // pass coded data without comp time offset
-                            break;
-                        case CodedFrames: // pass coded data, avc and hevc with U24 offset
-                            break;
-                        case SequenceStart: // start of sequence
-                            break;
-                        case MPEG2TSSequenceStart: // start of MPEG2TS sequence
-                            break;
-                        case SequenceEnd: // end of sequence
-                            break;
-                    }
+                    //switch (packetType) {
+                    //    case CodedFramesX: // pass coded data without comp time offset
+                    //        break;
+                    //    case CodedFrames: // pass coded data, avc and hevc with U24 offset
+                    //        break;
+                    //    case SequenceStart: // start of sequence
+                    //        break;
+                    //    case MPEG2TSSequenceStart: // start of MPEG2TS sequence
+                    //        break;
+                    //    case SequenceEnd: // end of sequence
+                    //        break;
+                    //}
                     // check for multiple tracks
                     if (multitrack && trackSize > 0) {
                         data.skip(trackSize);
@@ -251,18 +254,38 @@ public class AbstractVideo implements IVideoStreamCodec {
                 if (command != null && trackCodec == null) {
                     result = true;
                 } else {
+
                     result = multitrack ? true : codec == trackCodec.getCodec();
+                    if (result) {
+                        if (this instanceof IEnhancedRTMPVideoCodec) {
+                            IEnhancedRTMPVideoCodec enhancedCodec = IEnhancedRTMPVideoCodec.class.cast(this);
+                            if (!multitrack) {
+                                if (packetType == VideoPacketType.Metadata) {
+                                    enhancedCodec.onVideoMetadata(null);
+                                }
+                                if (frameType == VideoFrameType.COMMAND_FRAME) {
+                                    enhancedCodec.onVideoCommand(command, data, timestamp);
+                                } else {
+                                    enhancedCodec.handleFrame(packetType, frameType, data, timestamp);
+                                }
+                            } else {
+                                enhancedCodec.onMultiTrackParsed(multitrackType, data, timestamp);
+                            }
+                        }
+                    }
                 }
             } else {
                 // read the first byte verify the codec matches
                 result = ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId());
-                if (frameType == VideoFrameType.COMMAND_FRAME) {
-                    // get the command
-                    command = VideoCommand.valueOf(data.get());
+                if (result) {
+                    if (this instanceof IEnhancedRTMPVideoCodec) {
+                        IEnhancedRTMPVideoCodec enhancedCodec = IEnhancedRTMPVideoCodec.class.cast(this);
+                        enhancedCodec.handleNonEnhanced(frameType, data, timestamp);
+                    }
                 }
             }
-            // reset
-            data.reset();
+            // Using rewind because mark might not be valid after calling sub classes.
+            data.rewind();
         }
         return result;
     }
