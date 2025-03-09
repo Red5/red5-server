@@ -10,6 +10,8 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.red5.io.IoConstants;
+import org.red5.util.ByteNibbler;
 
 /**
  * Red5 video codec for the HEVC (h265) video format. Stores DecoderConfigurationRecord and last keyframe.
@@ -213,15 +215,15 @@ public class HEVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec 
     //                // reset back to the beginning after we got the fourcc
     //                data.reset();
     //                VideoCodec frameCodec = VideoCodec.valueOfByFourCc(fourcc);
-    //                if(frameCodec!= codec) {
-    //                	return false;
+    //                if (frameCodec != codec) {
+    //                    return false;
     //                }
     //
     //                if (isDebug) {
-    //                    log.debug("{} - frame type: {} packet type: {}",frameCodec, frameType, packetType);
+    //                    log.debug("{} - frame type: {} packet type: {}", frameCodec, frameType, packetType);
     //                }
     //                if (packetType != VideoPacketType.Metadata && frameType == VideoFrameType.COMMAND_FRAME) {
-    //                	return true;
+    //                    return true;
     //                }
     //                //Multitrack support not implemented for HEVC yet.
     //                //Abstract video should call abstract methods from it's 'Add data' method for handling the payload types it parses.
@@ -301,8 +303,8 @@ public class HEVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec 
     //                byte hvcType = data.get();
     //                // reset back to the beginning after we got the hvc type
     //                data.reset();
-    //                if((hvcType & 0x0f) != VideoCodec.HEVC.getId()) {
-    //                	return false;
+    //                if ((hvcType & 0x0f) != VideoCodec.HEVC.getId()) {
+    //                    return false;
     //                }
     //                if (isDebug) {
     //                    log.debug("HEVC type: {}", hvcType);

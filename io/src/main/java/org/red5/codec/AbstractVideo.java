@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractVideo implements IVideoStreamCodec {
 
-    protected static Logger log = LoggerFactory.getLogger("Video");
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected static boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
+    protected boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     // tracks for multitrack video, if size = 1, theres only one track
     protected ConcurrentMap<Integer, IVideoStreamCodec> tracks = new ConcurrentSkipListMap<>();
@@ -119,7 +119,7 @@ public class AbstractVideo implements IVideoStreamCodec {
     @Override
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
-        if (data != null && data.limit() > 0) {
+        if (data != null && data.limit() > 5) {// header + 4cc, and maybe +1 for multitrack , OR legacy 1 or 2 byte header and 3 byte offset + data[]
             // get the first byte
             byte flg = data.get();
             // determine if we've got an enhanced codec
@@ -129,13 +129,29 @@ public class AbstractVideo implements IVideoStreamCodec {
             frameType = VideoFrameType.valueOf(ft);
             // the codec id for enhanced is handled via addData
             if (enhanced) {
+                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                if (packetType != VideoPacketType.Metadata && frameType == VideoFrameType.COMMAND_FRAME) {
+                    result = true; //no fourCC on commands, and assuming canHandledata is not called with a command frame.
+                } else if (packetType == VideoPacketType.Multitrack) {
+                    ByteNibbler nibbler = new ByteNibbler(data.get());
+                    multitrackType = AvMultitrackType.valueOf((byte) nibbler.nibble(4));
+                    if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
+                        Integer fourcc = data.getInt();
+                        result = (this.getCodec().getFourcc() == fourcc);
+                    }
+                } else {
+                    //all other frametypes and metadata have fourcc here
+                    Integer fourcc = data.getInt();
+                    result = (this.getCodec().getFourcc() == fourcc);
+                }
                 log.info("Codec is enhanced, codec id is determined via subsequent addData calls, frame type: {}", frameType);
-                result = true;
+
             } else {
                 log.info("Codec is not enhanced, codec id: {} frame type: {}", codec.getId(), frameType);
                 result = ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId());
             }
         }
+        data.rewind();
         return result;
     }
 
@@ -145,7 +161,6 @@ public class AbstractVideo implements IVideoStreamCodec {
         return addData(data, (keyframeTimestamp + 1));
     }
 
-    @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data, int timestamp) {
         //Starting true, since null data or un-rewound data may be an accident.
@@ -154,7 +169,6 @@ public class AbstractVideo implements IVideoStreamCodec {
             //data must prove itself.
             result = false;
             boolean processVideoBody = false;
-            @SuppressWarnings("unused")
             VideoCommand command = null;
             // mark
             data.mark();
@@ -171,7 +185,9 @@ public class AbstractVideo implements IVideoStreamCodec {
                 processVideoBody = true;
                 // The UB[4] bits are interpreted as VideoPacketType instead of codec id
                 packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
-                log.debug("Enhanced codec handling, packet type: {}", packetType);
+                if (isTrace) {
+                    log.trace("Enhanced codec handling, packet type: {}", packetType);
+                }
                 if (packetType != VideoPacketType.Metadata && frameType == VideoFrameType.COMMAND_FRAME) {
                     // get the command
                     command = VideoCommand.valueOf(data.get());
@@ -193,7 +209,8 @@ public class AbstractVideo implements IVideoStreamCodec {
                 } else {
                     trackCodec = getTrackCodec(data);
                 }
-                log.debug("Multitrack: {} multitrackType: {} packetType: {}", multitrack, multitrackType, packetType);
+                if (isTrace)
+                    log.trace("Multitrack: {} multitrackType: {} packetType: {}", multitrack, multitrackType, packetType);
                 // read all the data
                 while (processVideoBody && data.hasRemaining()) {
                     // handle multiple tracks
@@ -229,20 +246,9 @@ public class AbstractVideo implements IVideoStreamCodec {
                         // details on this object.
                         // For a deeper understanding of the encoding, please refer to the descriptions of SCRIPTDATA
                         // and SCRIPTDATAVALUE in the [FLV] file specification.
+                        //TODO read map or array
                         break;
                     }
-                    //switch (packetType) {
-                    //    case CodedFramesX: // pass coded data without comp time offset
-                    //        break;
-                    //    case CodedFrames: // pass coded data, avc and hevc with U24 offset
-                    //        break;
-                    //    case SequenceStart: // start of sequence
-                    //        break;
-                    //    case MPEG2TSSequenceStart: // start of MPEG2TS sequence
-                    //        break;
-                    //    case SequenceEnd: // end of sequence
-                    //        break;
-                    //}
                     // check for multiple tracks
                     if (multitrack && trackSize > 0) {
                         data.skip(trackSize);
@@ -251,26 +257,33 @@ public class AbstractVideo implements IVideoStreamCodec {
                     // break out of the loop
                     break;
                 }
+                data.rewind();
                 if (command != null && trackCodec == null) {
                     result = true;
                 } else {
-
                     result = multitrack ? true : codec == trackCodec.getCodec();
-                    if (result) {
-                        if (this instanceof IEnhancedRTMPVideoCodec) {
-                            IEnhancedRTMPVideoCodec enhancedCodec = IEnhancedRTMPVideoCodec.class.cast(this);
-                            if (!multitrack) {
-                                if (packetType == VideoPacketType.Metadata) {
-                                    enhancedCodec.onVideoMetadata(null);
-                                }
-                                if (frameType == VideoFrameType.COMMAND_FRAME) {
-                                    enhancedCodec.onVideoCommand(command, data, timestamp);
-                                } else {
-                                    enhancedCodec.handleFrame(packetType, frameType, data, timestamp);
-                                }
-                            } else {
-                                enhancedCodec.onMultiTrackParsed(multitrackType, data, timestamp);
-                            }
+                }
+                if (result && this instanceof IEnhancedRTMPVideoCodec) {
+                    IEnhancedRTMPVideoCodec enhancedCodec = IEnhancedRTMPVideoCodec.class.cast(this);
+                    if (command != null) {
+                        enhancedCodec.onVideoCommand(command, data, timestamp);
+                    } else {
+                        switch (packetType) {
+                            case Metadata://TODO
+                                enhancedCodec.onVideoMetadata(null);
+                                break;
+                            case Multitrack:
+                                enhancedCodec.onMultiTrackParsed(getMultitrackType(), data, timestamp);
+                                break;
+                            case MPEG2TSSequenceStart: // start of MPEG2TS sequence
+                                break;
+                            // CodedFramesX pass coded data without comp time offset
+                            // CodedFrames pass coded data, avc and hevc with U24 offset
+                            // SequenceStartstart of sequence
+                            // SequenceEnd end of sequence
+                            default:
+                                enhancedCodec.handleFrame(packetType, frameType, data, timestamp);
+                                break;
                         }
                     }
                 }
@@ -280,6 +293,7 @@ public class AbstractVideo implements IVideoStreamCodec {
                 if (result) {
                     if (this instanceof IEnhancedRTMPVideoCodec) {
                         IEnhancedRTMPVideoCodec enhancedCodec = IEnhancedRTMPVideoCodec.class.cast(this);
+                        data.rewind();
                         enhancedCodec.handleNonEnhanced(frameType, data, timestamp);
                     }
                 }
@@ -298,7 +312,9 @@ public class AbstractVideo implements IVideoStreamCodec {
      */
     protected IVideoStreamCodec getTrackCodec(IoBuffer data) {
         Integer fourcc = data.getInt();
-        log.debug("Fourcc: {} pos: {}", fourcc, data.position());
+        if (isTrace) {
+            log.trace("Fourcc: {} pos: {}", fourcc, data.position());
+        }
         if (!tracks.containsKey(fourcc)) {
             // create a new codec instance
             trackCodec = VideoCodec.valueOfByFourCc(fourcc).newInstance();
@@ -306,7 +322,9 @@ public class AbstractVideo implements IVideoStreamCodec {
         } else {
             trackCodec = tracks.get(fourcc);
         }
-        log.debug("Track codec: {}", trackCodec);
+        if (isTrace) {
+            log.trace("Track codec: {}", trackCodec.getCodec().toString());
+        }
         return trackCodec;
     }
 

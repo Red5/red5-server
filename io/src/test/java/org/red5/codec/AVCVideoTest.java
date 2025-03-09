@@ -34,12 +34,16 @@ public class AVCVideoTest {
     @Test
     public void testCanHandleData() {
         log.info("testCanHandleData");
-        IoBuffer data = IoBuffer.allocate(8);
+        IoBuffer data = IoBuffer.allocate(9);
         data.put((byte) 0x17);
+        data.putInt(0);
+        data.putInt(0);
         data.flip();
         //
-        IoBuffer badData = IoBuffer.allocate(8);
+        IoBuffer badData = IoBuffer.allocate(9);
         badData.put((byte) 0x44);
+        badData.putInt(0);
+        badData.putInt(0);
         badData.flip();
 
         AVCVideo video = new AVCVideo();

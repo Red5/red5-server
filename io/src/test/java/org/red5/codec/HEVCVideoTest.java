@@ -65,8 +65,10 @@ public class HEVCVideoTest {
     @Test
     public void testCanHandleData() {
         log.info("testCanHandleData");
-        IoBuffer data = IoBuffer.allocate(8);
+        IoBuffer data = IoBuffer.allocate(9);
         data.put((byte) 0x1c);
+        data.putInt(0);
+        data.putInt(0);
         data.flip();
         //
         IoBuffer badData = IoBuffer.allocate(8);
@@ -84,12 +86,17 @@ public class HEVCVideoTest {
     @Test
     public void testCanHandleDataEnhanced() {
         log.info("testCanHandleDataEnhanced");
-        IoBuffer data = IoBuffer.allocate(8);
+        IoBuffer data = IoBuffer.allocate(9);
         // first bit being set indicates enhanced
         byte enhancedByte = (byte) 0b10011100;
-        log.info("enhancedByte: {}", Integer.toHexString(enhancedByte));
+        log.info("enhancedByte: {}", Integer.toHexString(enhancedByte & 0xFF));
         //data.put(enhancedByte);
         data.put((byte) 0x9c);
+        data.put((byte) 'h');
+        data.put((byte) 'v');
+        data.put((byte) 'c');
+        data.put((byte) '1');
+        data.putInt(0);
         data.flip();
 
         HEVCVideo video = new HEVCVideo();
