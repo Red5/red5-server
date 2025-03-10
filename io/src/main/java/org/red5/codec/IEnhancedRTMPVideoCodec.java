@@ -9,7 +9,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  * Methods are called only if codec id of frame is valid.
  */
 public interface IEnhancedRTMPVideoCodec extends IVideoStreamCodec {
-    
+
     /**
      * Called when frame type is video command.
      * @param command
