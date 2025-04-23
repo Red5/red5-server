@@ -39,10 +39,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     private Logger log = LoggerFactory.getLogger(WsHttpUpgradeHandler.class); // must not be static
 
-    private final boolean isTrace = log.isTraceEnabled();
-
-    @SuppressWarnings("unused")
-    private final boolean isDebug = log.isDebugEnabled();
+    private final boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     private static final StringManager sm = StringManager.getManager(WsHttpUpgradeHandler.class);
 
@@ -83,6 +80,10 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     private long lastReadBytes, lastWrittenBytes;
 
+    private transient WebSocketScopeManager manager;
+
+    private transient WebSocketScope scope;
+
     public WsHttpUpgradeHandler() {
         applicationClassLoader = Thread.currentThread().getContextClassLoader();
     }
@@ -110,6 +111,12 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         } else {
             log.debug("pre-init without http session");
         }
+        // user props
+        Map<String, Object> userProps = endpointConfig.getUserProperties();
+        // get the ws scope manager from user props
+        manager = (WebSocketScopeManager) userProps.get(WSConstants.WS_MANAGER);
+        // get ws scope from user props
+        scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
     }
 
     @Override
@@ -141,10 +148,6 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                 wsFrame = new WsFrameServer(socketWrapper, upgradeInfo, wsSession, transformation, applicationClassLoader);
                 // WsFrame adds the necessary final transformations. Copy the completed transformation chain to the remote end point.
                 wsRemoteEndpointServer.setTransformation(wsFrame.getTransformation());
-                // get the ws scope manager from user props
-                WebSocketScopeManager manager = (WebSocketScopeManager) endpointConfig.getUserProperties().get(WSConstants.WS_MANAGER);
-                // get ws scope from user props
-                WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
                 // create a ws connection instance
                 WebSocketConnection conn = new WebSocketConnection(scope, wsSession);
                 // set ip and port
@@ -243,7 +246,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     }
 
     private void onError(Throwable throwable) {
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("onError for ws id: {}", wsSession.getId(), throwable);
         }
         // Need to call onError using the web application's class loader
@@ -258,7 +261,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     }
 
     private void close(CloseReason cr) {
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("close for ws id: {} reason: {}", wsSession.getId(), cr);
         }
         /*
@@ -268,6 +271,15 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
          * recover from whatever messed up state the client put the connection into.
          */
         wsSession.onClose(cr);
+        // null these so that we don't try to use them again
+        wsSession = null;
+        connection = null;
+        upgradeInfo = null;
+        // null the socket wrapper so that we don't try to use it again
+        if (socketWrapper != null) {
+            socketWrapper.close();
+            socketWrapper = null;
+        }
     }
 
     @Override
@@ -290,8 +302,6 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         if (wsSession != null) {
             try {
                 final String wsSessionId = wsSession.getId();
-                // get scope from endpoint config
-                WebSocketScope scope = (WebSocketScope) endpointConfig.getUserProperties().get(WSConstants.WS_SCOPE);
                 // do lookup by session id, skips need for session user props
                 WebSocketConnection conn = scope.getConnectionBySessionId(wsSessionId);
                 // if we don't get it from the scope, try the session lookup

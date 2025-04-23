@@ -11,6 +11,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.net.websocket.WSConstants;
@@ -36,11 +37,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
 
     private final Logger log = LoggerFactory.getLogger(DefaultWebSocketEndpoint.class);
 
-    @SuppressWarnings("unused")
     private final boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
-
-    // websocket scope where connections connect
-    private WebSocketScope scope;
 
     /**
      * TODO: Currently, Tomcat uses an Endpoint instance once - however the java doc of endpoint says: "Each instance
@@ -56,10 +53,15 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         if (isDebug) {
             log.debug("Session opened: {}\n{}", session.getId(), session.getRequestParameterMap());
         }
+        // user props from session
+        Map<String, Object> userProps = session.getUserProperties();
         // get ws scope from user props
-        scope = (WebSocketScope) config.getUserProperties().get(WSConstants.WS_SCOPE);
+        WebSocketScope scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
+        if (isDebug) {
+            log.debug("onOpen - session: {} props: {} scope: {}", session.getId(), userProps, scope);
+        }
         // get ws connection from session user props
-        WebSocketConnection conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
+        WebSocketConnection conn = (WebSocketConnection) userProps.get(WSConstants.WS_CONNECTION);
         if (conn == null) {
             log.warn("WebSocketConnection null at onOpen for {}", session.getId());
         }
@@ -72,11 +74,18 @@ public class DefaultWebSocketEndpoint extends Endpoint {
     public void onClose(Session session, CloseReason closeReason) {
         final String sessionId = session.getId();
         log.debug("Session closed: {}", sessionId);
+        // user props from session
+        Map<String, Object> userProps = session.getUserProperties();
+        // get ws scope from user props
+        WebSocketScope scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
+        if (isDebug) {
+            log.debug("onClose - session: {} props: {} scope: {}", session.getId(), userProps, scope);
+        }
         WebSocketConnection conn = null;
         // getting the sessions user properties on a closed connection will throw an exception when it checks state
         try {
             // ensure we grab the scope from the session if its null
-            conn = (WebSocketConnection) session.getUserProperties().get(WSConstants.WS_CONNECTION);
+            conn = (WebSocketConnection) userProps.get(WSConstants.WS_CONNECTION);
             // if we don't get it from the session, try the scope lookup
             if (conn == null) {
                 log.warn("Connection for id: {} was not found in the session onClose", sessionId);
@@ -137,8 +146,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 try {
                     // create a websocket message and add the current connection for listener access
                     WSMessage wsMessage = new WSMessage(message, conn);
-                    // fire the message off to the scope for handling
-                    scope.onMessage(wsMessage);
+                    conn.onReceive(wsMessage);
                 } catch (UnsupportedEncodingException e) {
                     log.warn("Exception on message", e);
                 }
@@ -167,8 +175,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
                 conn.updateReadBytes(message.limit());
                 // create a websocket message and add the current connection for listener access
                 WSMessage wsMessage = new WSMessage(IoBuffer.wrap(message), conn);
-                // fire the message off to the scope for handling
-                scope.onMessage(wsMessage);
+                conn.onReceive(wsMessage);
             } else {
                 log.debug("Connection null or not connected", conn);
             }

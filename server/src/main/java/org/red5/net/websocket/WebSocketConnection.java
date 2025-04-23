@@ -9,7 +9,6 @@ package org.red5.net.websocket;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +27,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.Constants;
 import org.apache.tomcat.websocket.WsSession;
+import org.red5.net.websocket.model.WSMessage;
 import org.red5.server.AttributeStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +50,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnection.class);
 
-    private static final boolean isTrace = log.isTraceEnabled();
-
-    private static final boolean isDebug = log.isDebugEnabled();
+    private static final boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     // Sending async on windows times out
     private static boolean useAsync;
@@ -69,7 +67,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     private final WsSession wsSession;
 
     // reference to the scope for manager access
-    private WeakReference<WebSocketScope> scope;
+    private final WebSocketScope scope;
 
     // unique identifier for the session
     private final String wsSessionId;
@@ -111,7 +109,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     public WebSocketConnection(WebSocketScope scope, Session session) {
         log.debug("New WebSocket - scope: {} session: {}", scope, session);
         // set the scope for ease of use later
-        this.scope = new WeakReference<>(scope);
+        this.scope = scope;
+        // add the session to the user props
+        session.getUserProperties().put(WSConstants.WS_SCOPE, scope);
         // set our path
         path = scope.getPath();
         if (isDebug) {
@@ -167,15 +167,20 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         // add the timeouts to the user props
         userProps.put(Constants.READ_IDLE_TIMEOUT_MS, readTimeout);
         userProps.put(Constants.WRITE_IDLE_TIMEOUT_MS, sendTimeout);
-        // set the close timeout to 5 seconds
-        userProps.put(Constants.SESSION_CLOSE_TIMEOUT_PROPERTY, TimeUnit.SECONDS.toMillis(5));
+        // write timeout used when sending WebSocket messages in blocking mode
+        userProps.put(Constants.BLOCKING_SEND_TIMEOUT_PROPERTY, Long.getLong(Constants.BLOCKING_SEND_TIMEOUT_PROPERTY, 8000L).longValue());
+        // write timeout Tomcat uses when writing a session close message when the close is abnormal
+        userProps.put(Constants.ABNORMAL_SESSION_CLOSE_SEND_TIMEOUT_PROPERTY, Long.getLong(Constants.ABNORMAL_SESSION_CLOSE_SEND_TIMEOUT_PROPERTY, 10000L).longValue());
+        // time Tomcat waits for a peer to send a WebSocket session close message after Tomcat has sent a close message
+        // to the peer
+        userProps.put(Constants.SESSION_CLOSE_TIMEOUT_PROPERTY, Long.getLong(Constants.SESSION_CLOSE_TIMEOUT_PROPERTY, 5000L).longValue());
         if (isDebug) {
             log.debug("userProps: {}", userProps);
         }
         // set maximum messages size to 10,000 bytes
         session.setMaxTextMessageBufferSize(10000);
-        // set maximum idle timeout to 30 seconds (read timeout)
-        session.setMaxIdleTimeout(readTimeout);
+        // set maximum idle timeout to the largest of the read and send timeouts
+        session.setMaxIdleTimeout(Math.max(readTimeout, sendTimeout));
     }
 
     /**
@@ -321,6 +326,16 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     /**
+     * Send a received message to the scope.
+     *
+     * @param wsMessage
+     *            WSMessage
+     */
+    public void onReceive(WSMessage wsMessage) {
+        scope.onMessage(wsMessage);
+    }
+
+    /**
      * Close the connection.
      */
     public void close() {
@@ -386,7 +401,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      * @return WebSocketScope
      */
     public WebSocketScope getScope() {
-        return scope != null ? scope.get() : null;
+        return scope;
     }
 
     /**
