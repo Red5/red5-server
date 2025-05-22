@@ -9,7 +9,7 @@ fi
 if [ -f "${JAVA_HOME}/bin/java" ]; then
    JAVA_HOME=${JAVA_HOME}
 else
-   echo "Please set JAVA_HOME in your current path. Preferably use JDK 11."
+   echo "Please set JAVA_HOME in your current path. Preferably use JDK 21 or newer."
 fi
 
 P=":" # The default classpath separator

@@ -88,9 +88,9 @@ echo Installing '%SERVICE_NAME%' service
     --StopClass org.red5.daemon.EngineLauncher ^
     --StopMethod windowsService ^
     --StopParams 9999 ^
-    --JvmOptions "-Xverify:none;-XX:+TieredCompilation;-XX:+UseBiasedLocking;-XX:+UseStringCache;-XX:+UseParNewGC;-XX:InitialCodeCacheSize=8m;-XX:ReservedCodeCacheSize=32m;-Dorg.terracotta.quartz.skipUpdateCheck=true;-Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector;-Dcatalina.home=%RED5_HOME%;-Dcatalina.useNaming=true;-Djava.security.debug=failure;" ^
+    --JvmOptions "-Xverify:none;-XX:+TieredCompilation;-XX:+UseBiasedLocking;-XX:+UseStringCache;-XX:+ZGC;-XX:InitialCodeCacheSize=8m;-XX:ReservedCodeCacheSize=32m;-Dorg.terracotta.quartz.skipUpdateCheck=true;-Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector;-Dcatalina.home=%RED5_HOME%;-Dcatalina.useNaming=true;-Djava.security.debug=failure;" ^
     --JvmMs 256 ^
-    --JvmMx 768
+    --JvmMx 1024
 if not errorlevel 1 goto installed
 echo Failed installing '%SERVICE_NAME%' service
 goto end
