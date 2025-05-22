@@ -205,7 +205,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         // if we are not awaiting plugins, start immediately
         if (awaitPlugins) {
             log.info("Awaiting plugin loading");
-            ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+            executor = Executors.newVirtualThreadPerTaskExecutor();
             executor.submit(() -> {
                 Thread.currentThread().setName("TomcatLoader-delayed-start");
                 try {
