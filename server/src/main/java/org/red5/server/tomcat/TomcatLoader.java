@@ -205,8 +205,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         // if we are not awaiting plugins, start immediately
         if (awaitPlugins) {
             log.info("Awaiting plugin loading");
-            executor = Executors.newVirtualThreadPerTaskExecutor();
-            executor.submit(() -> {
+            Executors.newVirtualThreadPerTaskExecutor().submit(() -> {
                 Thread.currentThread().setName("TomcatLoader-delayed-start");
                 try {
                     // wait for plugins to load but only up to 60 seconds
@@ -954,9 +953,6 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         if (deployer != null) {
             deployer.stop();
             deployer = null;
-        }
-        if (executor != null) {
-            executor.shutdown();
         }
         // run through the applications and ensure that spring is told to commence shutdown / disposal
         AbstractApplicationContext absCtx = (AbstractApplicationContext) LoaderBase.getApplicationContext();
