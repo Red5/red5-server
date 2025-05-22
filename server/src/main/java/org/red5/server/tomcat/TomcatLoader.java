@@ -180,26 +180,42 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Flag to indicate if we should await plugin loading
      */
-    protected boolean awaitPlugins = true;
-
-    private static ExecutorService executor;
+    protected boolean awaitPlugins;
 
     /**
      * War deployer
      */
     private WarDeployer deployer;
 
+    {
+        // allow setting to true if we're running in Red5 Pro
+        if (!awaitPlugins) {
+            try {
+                awaitPlugins = Class.forName("com.red5pro.plugin.Red5ProPlugin") != null;
+                log.debug("Red5ProPlugin found, awaiting plugins");
+            } catch (ClassNotFoundException e) {
+                log.debug("Red5ProPlugin not found, not awaiting plugins");
+            }
+        }
+    }
+
+    // TODO(paul) decouple this from Spring init bean use start method
     @Override
     public void afterPropertiesSet() throws Exception {
         // if we are not awaiting plugins, start immediately
         if (awaitPlugins) {
             log.info("Awaiting plugin loading");
-            executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
-                final String oldName = Thread.currentThread().getName();
+            Executors.newVirtualThreadPerTaskExecutor().submit(() -> {
                 Thread.currentThread().setName("TomcatLoader-delayed-start");
                 try {
-                    while (!Red5.isPluginsReady()) {
+                    // wait for plugins to load but only up to 60 seconds
+                    long startTime = System.currentTimeMillis();
+                    while (System.currentTimeMillis() - startTime < 60000L) {
+                        // check if plugins are ready
+                        if (Red5.isPluginsReady()) {
+                            log.info("Plugins are ready");
+                            break;
+                        }
                         log.trace("Waiting for plugins to load");
                         Thread.sleep(2000L);
                     }
@@ -208,8 +224,6 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
                     log.error("Error starting Tomcat", e);
                 } catch (InterruptedException e) {
                     log.error("Error waiting for plugins", e);
-                } finally {
-                    Thread.currentThread().setName(oldName);
                 }
             });
         } else {
@@ -939,9 +953,6 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         if (deployer != null) {
             deployer.stop();
             deployer = null;
-        }
-        if (executor != null) {
-            executor.shutdown();
         }
         // run through the applications and ensure that spring is told to commence shutdown / disposal
         AbstractApplicationContext absCtx = (AbstractApplicationContext) LoaderBase.getApplicationContext();

@@ -38,7 +38,7 @@ echo "Path $FILE_PATH";
 JAVA_HOME="/usr/lib/jvm/default-java"
 
 # Our classpath including our jar file and the Apache Commons Daemon library
-CLASS_PATH="$FILE_PATH/commons-daemon-1.0.15.jar:$FILE_PATH/red5-service.jar:$FILE_PATH/conf"
+CLASS_PATH="$FILE_PATH/commons-daemon-1.4.1.jar:$FILE_PATH/red5-service.jar:$FILE_PATH/conf"
 
 # The fully qualified name of the class to execute
 CLASS="org.red5.daemon.EngineLauncher"
