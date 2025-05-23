@@ -17,7 +17,6 @@ import java.util.Set;
  * @author Luke Hubbard (luke@codegent.com)
  * @author Joachim Bauch (jojo@struktur.de)
  */
-
 public interface IPersistenceStore {
 
     /**

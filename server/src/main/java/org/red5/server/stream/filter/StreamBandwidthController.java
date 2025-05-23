@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Controls stream bandwidth
+ *
+ * @author mondain
  */
 public class StreamBandwidthController implements IFilter, IPipeConnectionListener, Runnable {
 
@@ -84,7 +86,9 @@ public class StreamBandwidthController implements IFilter, IPipeConnectionListen
     public void onOOBControlMessage(IMessageComponent source, IPipe pipe, OOBControlMessage oobCtrlMsg) {
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void run() {
         while (isStarted && providerPipe != null && consumerPipe != null) {
             try {

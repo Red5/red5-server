@@ -237,6 +237,13 @@ public class VP8Video extends AbstractVideo {
         return size;
     }
 
+    /**
+     * <p>isKeyFrame.</p>
+     *
+     * @param input an array of {@link byte} objects
+     * @param offset a int
+     * @return a boolean
+     */
     public static boolean isKeyFrame(byte[] input, int offset) {
         // if set to 0 the frame is a key frame, if set to 1 its an interframe. Defined in [RFC6386]
         return (input[offset] & S_BIT) == 0;

@@ -40,7 +40,7 @@ public interface IMetaService {
      *
      * @param meta
      *            Metadata
-     * @throws IOException
+     * @throws java.io.IOException
      *             I/O exception
      */
     public void write(IMetaData<?, ?> meta) throws IOException;

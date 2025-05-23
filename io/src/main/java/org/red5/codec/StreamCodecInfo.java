@@ -7,6 +7,11 @@
 
 package org.red5.codec;
 
+/**
+ * <p>StreamCodecInfo class.</p>
+ *
+ * @author mondain
+ */
 public class StreamCodecInfo implements IStreamCodecInfo {
 
     /**
@@ -58,10 +63,9 @@ public class StreamCodecInfo implements IStreamCodecInfo {
     }
 
     /**
-     * Setter for audio codec
+     * {@inheritDoc}
      *
-     * @param codec
-     *            Audio codec
+     * Setter for audio codec
      */
     public void setAudioCodec(IAudioStreamCodec codec) {
         this.audioCodec = codec;
@@ -96,10 +100,9 @@ public class StreamCodecInfo implements IStreamCodecInfo {
     }
 
     /**
-     * Setter for video codec
+     * {@inheritDoc}
      *
-     * @param codec
-     *            Video codec
+     * Setter for video codec
      */
     public void setVideoCodec(IVideoStreamCodec codec) {
         this.videoCodec = codec;

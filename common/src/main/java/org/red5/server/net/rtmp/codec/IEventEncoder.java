@@ -21,6 +21,8 @@ import org.red5.server.so.ISharedObjectMessage;
 
 /**
  * Encodes events to byte buffer.
+ *
+ * @author mondain
  */
 public interface IEventEncoder {
     /**

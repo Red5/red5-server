@@ -22,7 +22,7 @@ public interface IMessageInput {
      * Pull message from this input endpoint. Return w/o waiting.
      *
      * @return The pulled message or null if message is not available.
-     * @throws IOException
+     * @throws java.io.IOException
      *             on error
      */
     IMessage pullMessage() throws IOException;

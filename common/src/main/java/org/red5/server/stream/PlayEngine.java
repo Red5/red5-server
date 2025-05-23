@@ -268,10 +268,20 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     }
 
+    /**
+     * <p>Setter for the field <code>bufferCheckInterval</code>.</p>
+     *
+     * @param bufferCheckInterval a int
+     */
     public void setBufferCheckInterval(int bufferCheckInterval) {
         this.bufferCheckInterval = bufferCheckInterval;
     }
 
+    /**
+     * <p>Setter for the field <code>underrunTrigger</code>.</p>
+     *
+     * @param underrunTrigger a int
+     */
     public void setUnderrunTrigger(int underrunTrigger) {
         this.underrunTrigger = underrunTrigger;
     }
@@ -308,11 +318,11 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      *
      * @param item
      *            Playlist item
-     * @throws StreamNotFoundException
+     * @throws org.red5.server.stream.StreamNotFoundException
      *             Stream not found
-     * @throws IllegalStateException
+     * @throws java.lang.IllegalStateException
      *             Stream is in stopped state
-     * @throws IOException
+     * @throws java.io.IOException
      *             Stream had io exception
      */
     public void play(IPlayItem item) throws StreamNotFoundException, IllegalStateException, IOException {
@@ -328,11 +338,11 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      *            Playlist item
      * @param withReset
      *            Send reset status before playing.
-     * @throws StreamNotFoundException
+     * @throws org.red5.server.stream.StreamNotFoundException
      *             Stream not found
-     * @throws IllegalStateException
+     * @throws java.lang.IllegalStateException
      *             Stream is in stopped state
-     * @throws IOException
+     * @throws java.io.IOException
      *             Stream had IO exception
      */
     public void play(IPlayItem item, boolean withReset) throws StreamNotFoundException, IllegalStateException, IOException {
@@ -681,7 +691,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      *
      * @param position
      *            Position in file
-     * @throws IllegalStateException
+     * @throws java.lang.IllegalStateException
      *             If stream is stopped
      */
     public void pause(int position) throws IllegalStateException {
@@ -705,7 +715,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      *
      * @param position
      *            Resumes playback
-     * @throws IllegalStateException
+     * @throws java.lang.IllegalStateException
      *             If stream is stopped
      */
     public void resume(int position) throws IllegalStateException {
@@ -741,9 +751,9 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      *
      * @param position
      *            Position
-     * @throws IllegalStateException
+     * @throws java.lang.IllegalStateException
      *             If stream is in stopped state
-     * @throws OperationNotSupportedException
+     * @throws org.red5.server.api.stream.OperationNotSupportedException
      *             If this object doesn't support the operation.
      */
     public void seek(int position) throws IllegalStateException, OperationNotSupportedException {
@@ -756,7 +766,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     /**
      * Stop playback
      *
-     * @throws IllegalStateException
+     * @throws java.lang.IllegalStateException
      *             If stream is in stopped state
      */
     public void stop() throws IllegalStateException {
@@ -1587,10 +1597,20 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         return subscriberStream.getConnection().getPendingMessages();
     }
 
+    /**
+     * <p>isPullMode.</p>
+     *
+     * @return a boolean
+     */
     public boolean isPullMode() {
         return pullMode;
     }
 
+    /**
+     * <p>isPaused.</p>
+     *
+     * @return a boolean
+     */
     public boolean isPaused() {
         return subscriberStream.isPaused();
     }
@@ -1604,10 +1624,20 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         return lastMessageTs;
     }
 
+    /**
+     * <p>Getter for the field <code>playbackStart</code>.</p>
+     *
+     * @return a long
+     */
     public long getPlaybackStart() {
         return playbackStart;
     }
 
+    /**
+     * <p>sendBlankAudio.</p>
+     *
+     * @param sendBlankAudio a boolean
+     */
     public void sendBlankAudio(boolean sendBlankAudio) {
         this.sendBlankAudio = sendBlankAudio;
     }
@@ -1975,6 +2005,8 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     }
 
     /**
+     * <p>Setter for the field <code>maxPendingVideoFrames</code>.</p>
+     *
      * @param maxPendingVideoFrames
      *            the maxPendingVideoFrames to set
      */
@@ -1983,6 +2015,8 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     }
 
     /**
+     * <p>Setter for the field <code>maxSequentialPendingVideoFrames</code>.</p>
+     *
      * @param maxSequentialPendingVideoFrames
      *            the maxSequentialPendingVideoFrames to set
      */

@@ -36,25 +36,37 @@ public class InboundHandshake extends RTMPHandshake {
 
     private boolean unvalidatedConnectionAllowed;
 
+    /**
+     * <p>Constructor for InboundHandshake.</p>
+     */
     public InboundHandshake() {
         super(RTMPConnection.RTMP_NON_ENCRYPTED);
     }
 
+    /**
+     * <p>Constructor for InboundHandshake.</p>
+     *
+     * @param handshakeType a byte
+     */
     public InboundHandshake(byte handshakeType) {
         super(handshakeType);
     }
 
+    /**
+     * <p>Constructor for InboundHandshake.</p>
+     *
+     * @param handshakeType a byte
+     * @param algorithm a int
+     */
     public InboundHandshake(byte handshakeType, int algorithm) {
         this(handshakeType);
         this.algorithm = algorithm;
     }
 
     /**
-     * Generates response for versioned connections.
+     * {@inheritDoc}
      *
-     * @param in
-     *            incoming RTMP handshake bytes
-     * @return outgoing handshake
+     * Generates response for versioned connections.
      */
     public IoBuffer doHandshake(IoBuffer in) {
         if (log.isTraceEnabled()) {
@@ -318,6 +330,8 @@ public class InboundHandshake extends RTMPHandshake {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Creates the servers handshake bytes
      */
     @Override
@@ -354,11 +368,9 @@ public class InboundHandshake extends RTMPHandshake {
     }
 
     /**
-     * Determines the validation scheme for given input.
+     * {@inheritDoc}
      *
-     * @param handshake
-     *            handshake bytes from the client
-     * @return true if client used a supported validation scheme, false if unsupported
+     * Determines the validation scheme for given input.
      */
     @Override
     public boolean validate(byte[] handshake) {
@@ -430,14 +442,29 @@ public class InboundHandshake extends RTMPHandshake {
         blowfish.processBlock(in, index, in, index);
     }
 
+    /**
+     * <p>setHandshakeBytes.</p>
+     *
+     * @param handshake an array of {@link byte} objects
+     */
     public void setHandshakeBytes(byte[] handshake) {
         this.handshakeBytes = handshake;
     }
 
+    /**
+     * <p>getHandshakeBytes.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
     public byte[] getHandshakeBytes() {
         return s1;
     }
 
+    /**
+     * <p>Setter for the field <code>unvalidatedConnectionAllowed</code>.</p>
+     *
+     * @param unvalidatedConnectionAllowed a boolean
+     */
     public void setUnvalidatedConnectionAllowed(boolean unvalidatedConnectionAllowed) {
         this.unvalidatedConnectionAllowed = unvalidatedConnectionAllowed;
     }

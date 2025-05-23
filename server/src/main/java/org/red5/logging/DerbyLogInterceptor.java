@@ -13,12 +13,23 @@ import java.io.OutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>DerbyLogInterceptor class.</p>
+ *
+ * @author mondain
+ */
 public class DerbyLogInterceptor {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(DerbyLogInterceptor.class);
 
     private static ThreadLocal<StringBuilder> local = new ThreadLocal<>();
 
+    /**
+     * <p>handleDerbyLogFile.</p>
+     *
+     * @return a {@link java.io.OutputStream} object
+     */
     public static OutputStream handleDerbyLogFile() {
         return new OutputStream() {
 

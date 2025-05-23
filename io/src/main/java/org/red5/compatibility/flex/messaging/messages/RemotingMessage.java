@@ -12,7 +12,6 @@ package org.red5.compatibility.flex.messaging.messages;
  *
  * @see <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a>
  * @see <a href="http://flex.apache.org/asdoc/mx/messaging/messages/RemotingMessage.html">Apache Flex</a>
- *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  */
@@ -28,26 +27,56 @@ public class RemotingMessage extends RPCMessage {
 
     private Object[] parameters;
 
+    /**
+     * <p>Getter for the field <code>operation</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getOperation() {
         return operation;
     }
 
+    /**
+     * <p>Setter for the field <code>operation</code>.</p>
+     *
+     * @param operation a {@link java.lang.String} object
+     */
     public void setOperation(String operation) {
         this.operation = operation;
     }
 
+    /**
+     * <p>Getter for the field <code>source</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getSource() {
         return source;
     }
 
+    /**
+     * <p>Setter for the field <code>source</code>.</p>
+     *
+     * @param source a {@link java.lang.String} object
+     */
     public void setSource(String source) {
         this.source = source;
     }
 
+    /**
+     * <p>Getter for the field <code>parameters</code>.</p>
+     *
+     * @return an array of {@link java.lang.Object} objects
+     */
     public Object[] getParameters() {
         return parameters;
     }
 
+    /**
+     * <p>Setter for the field <code>parameters</code>.</p>
+     *
+     * @param params a {@link java.lang.Object} object
+     */
     public void setParameters(Object... params) {
         this.parameters = params;
     }

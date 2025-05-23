@@ -34,42 +34,61 @@ public class ServerDetector {
 
     private static boolean websphere;
 
+    /** Constant <code>GERONIMO_CLASS="/org/apache/geronimo/system/main/Daemon"{trunked}</code> */
     public static final String GERONIMO_CLASS = "/org/apache/geronimo/system/main/Daemon.class";
 
+    /** Constant <code>GERONIMO_ID="geronimo"</code> */
     public static final String GERONIMO_ID = "geronimo";
 
+    /** Constant <code>GLASSFISH_ID="glassfish"</code> */
     public static final String GLASSFISH_ID = "glassfish";
 
+    /** Constant <code>GLASSFISH_SYSTEM_PROPERTY="com.sun.aas.instanceRoot"</code> */
     public static final String GLASSFISH_SYSTEM_PROPERTY = "com.sun.aas.instanceRoot";
 
+    /** Constant <code>JBOSS_CLASS="/org/jboss/Main.class"</code> */
     public static final String JBOSS_CLASS = "/org/jboss/Main.class";
 
+    /** Constant <code>JBOSS_ID="jboss"</code> */
     public static final String JBOSS_ID = "jboss";
 
+    /** Constant <code>JETTY_CLASS="/org/mortbay/jetty/Server.class"</code> */
     public static final String JETTY_CLASS = "/org/mortbay/jetty/Server.class";
 
+    /** Constant <code>JETTY_ID="jetty"</code> */
     public static final String JETTY_ID = "jetty";
 
+    /** Constant <code>JONAS_CLASS="/org/objectweb/jonas/server/Server.clas"{trunked}</code> */
     public static final String JONAS_CLASS = "/org/objectweb/jonas/server/Server.class";
 
+    /** Constant <code>JONAS_ID="jonas"</code> */
     public static final String JONAS_ID = "jonas";
 
+    /** Constant <code>RESIN_CLASS="/com/caucho/server/resin/Resin.class"</code> */
     public static final String RESIN_CLASS = "/com/caucho/server/resin/Resin.class";
 
+    /** Constant <code>RESIN_ID="resin"</code> */
     public static final String RESIN_ID = "resin";
 
+    /** Constant <code>TOMCAT_BOOTSTRAP_CLASS="/org/apache/catalina/startup/Bootstrap."{trunked}</code> */
     public static final String TOMCAT_BOOTSTRAP_CLASS = "/org/apache/catalina/startup/Bootstrap.class";
 
+    /** Constant <code>TOMCAT_EMBEDDED_CLASS="/org/apache/catalina/startup/Embedded.c"{trunked}</code> */
     public static final String TOMCAT_EMBEDDED_CLASS = "/org/apache/catalina/startup/Embedded.class";
 
+    /** Constant <code>TOMCAT_ID="tomcat"</code> */
     public static final String TOMCAT_ID = "tomcat";
 
+    /** Constant <code>WEBLOGIC_CLASS="/weblogic/Server.class"</code> */
     public static final String WEBLOGIC_CLASS = "/weblogic/Server.class";
 
+    /** Constant <code>WEBLOGIC_ID="weblogic"</code> */
     public static final String WEBLOGIC_ID = "weblogic";
 
+    /** Constant <code>WEBSPHERE_CLASS="/com/ibm/websphere/product/VersionInfo."{trunked}</code> */
     public static final String WEBSPHERE_CLASS = "/com/ibm/websphere/product/VersionInfo.class";
 
+    /** Constant <code>WEBSPHERE_ID="websphere"</code> */
     public static final String WEBSPHERE_ID = "websphere";
 
     static {
@@ -123,6 +142,11 @@ public class ServerDetector {
 
     }
 
+    /**
+     * <p>isGeronimo.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isGeronimo() {
         if (!geronimo) {
             geronimo = detect(GERONIMO_CLASS);
@@ -130,6 +154,11 @@ public class ServerDetector {
         return geronimo;
     }
 
+    /**
+     * <p>isGlassfish.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isGlassfish() {
         if (!glassfish) {
             String value = System.getProperty(GLASSFISH_SYSTEM_PROPERTY);
@@ -140,6 +169,11 @@ public class ServerDetector {
         return glassfish;
     }
 
+    /**
+     * <p>isJBoss.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isJBoss() {
         if (!jboss) {
             jboss = detect(JBOSS_CLASS);
@@ -147,6 +181,11 @@ public class ServerDetector {
         return jboss;
     }
 
+    /**
+     * <p>isJetty.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isJetty() {
         if (!jetty) {
             jetty = detect(JETTY_CLASS);
@@ -154,6 +193,11 @@ public class ServerDetector {
         return jetty;
     }
 
+    /**
+     * <p>isJOnAS.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isJOnAS() {
         if (!jonas) {
             jonas = detect(JONAS_CLASS);
@@ -161,6 +205,11 @@ public class ServerDetector {
         return jonas;
     }
 
+    /**
+     * <p>isResin.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isResin() {
         if (!resin) {
             resin = detect(RESIN_CLASS);
@@ -168,6 +217,11 @@ public class ServerDetector {
         return resin;
     }
 
+    /**
+     * <p>isTomcat.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isTomcat() {
         if (!tomcat) {
             tomcat = detect(TOMCAT_BOOTSTRAP_CLASS);
@@ -179,6 +233,11 @@ public class ServerDetector {
         return tomcat;
     }
 
+    /**
+     * <p>isWebLogic.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isWebLogic() {
         if (!weblogic) {
             weblogic = detect(WEBLOGIC_CLASS);
@@ -186,6 +245,11 @@ public class ServerDetector {
         return weblogic;
     }
 
+    /**
+     * <p>isWebSphere.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isWebSphere() {
         if (!websphere) {
             websphere = detect(WEBSPHERE_CLASS);

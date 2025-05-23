@@ -9,6 +9,8 @@ package org.red5.server.api.stream;
 
 /**
  * IServerStream has both IPlaylist and IBroadcastStream methods but add nothing new. It represents a stream broadcasted from the server.
+ *
+ * @author mondain
  */
 public interface IServerStream extends IPlaylist, IBroadcastStream {
 

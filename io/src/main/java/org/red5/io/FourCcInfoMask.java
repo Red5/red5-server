@@ -19,10 +19,21 @@ public enum FourCcInfoMask {
         mask = b;
     }
 
+    /**
+     * <p>Getter for the field <code>mask</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getMask() {
         return mask;
     }
 
+    /**
+     * <p>fromMask.</p>
+     *
+     * @param b a byte
+     * @return a {@link java.util.EnumSet} object
+     */
     public static EnumSet<FourCcInfoMask> fromMask(byte b) {
         EnumSet<FourCcInfoMask> result = EnumSet.noneOf(FourCcInfoMask.class);
         for (FourCcInfoMask mask : values()) {
@@ -33,6 +44,12 @@ public enum FourCcInfoMask {
         return result;
     }
 
+    /**
+     * <p>toMask.</p>
+     *
+     * @param set a {@link java.util.EnumSet} object
+     * @return a byte
+     */
     public static byte toMask(EnumSet<FourCcInfoMask> set) {
         byte result = 0;
         for (FourCcInfoMask mask : set) {
@@ -41,6 +58,11 @@ public enum FourCcInfoMask {
         return result;
     }
 
+    /**
+     * <p>all.</p>
+     *
+     * @return a {@link java.util.EnumSet} object
+     */
     public static EnumSet<FourCcInfoMask> all() {
         return EnumSet.allOf(FourCcInfoMask.class);
     }

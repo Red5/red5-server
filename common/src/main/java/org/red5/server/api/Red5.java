@@ -218,10 +218,20 @@ public final class Red5 {
         return FMS_VERSION;
     }
 
+    /**
+     * <p>getCapabilities.</p>
+     *
+     * @return a {@link java.lang.Integer} object
+     */
     public static Integer getCapabilities() {
         return CAPABILITIES;
     }
 
+    /**
+     * <p>getDataVersion.</p>
+     *
+     * @return a {@link java.lang.Object} object
+     */
     public static Object getDataVersion() {
         return DATA_VERSION;
     }
@@ -286,11 +296,18 @@ public final class Red5 {
 
     /**
      * Plugins ready flag. This is set to true when the PluginLauncher has completed loading all plugins.
+     *
+     * @param pluginsReady a boolean
      */
     public static void setPluginsReady(boolean pluginsReady) {
         Red5.pluginsReady = pluginsReady;
     }
 
+    /**
+     * <p>isPluginsReady.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isPluginsReady() {
         return pluginsReady;
     }

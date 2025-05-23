@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class PluginLauncher implements ApplicationContextAware, InitializingBean {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(PluginLauncher.class);
 
     /**
@@ -37,6 +38,11 @@ public class PluginLauncher implements ApplicationContextAware, InitializingBean
      */
     private ApplicationContext applicationContext;
 
+    /**
+     * <p>afterPropertiesSet.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void afterPropertiesSet() throws Exception {
         // get common context
         ApplicationContext common = (ApplicationContext) applicationContext.getBean("red5.common");
@@ -126,6 +132,7 @@ public class PluginLauncher implements ApplicationContextAware, InitializingBean
         //Red5.setPluginsReady(true);
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         log.trace("Setting application context");

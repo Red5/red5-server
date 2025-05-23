@@ -57,13 +57,19 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
 
     private boolean interruptOnRemove = true;
 
-    /** Constructs a new JDKSchedulingService. */
+    /**
+     * Constructs a new JDKSchedulingService.
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void afterPropertiesSet() throws Exception {
         log.debug("Initializing...");
         scheduler = Executors.newScheduledThreadPool(threadCount);
     }
 
     /**
+     * <p>Getter for the field <code>threadCount</code>.</p>
+     *
      * @return the threadCount
      */
     public int getThreadCount() {
@@ -71,6 +77,8 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
     }
 
     /**
+     * <p>Setter for the field <code>threadCount</code>.</p>
+     *
      * @param threadCount
      *            the threadCount to set
      */
@@ -154,7 +162,11 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
         return String.format("ScheduledJob_%d", jobDetailCounter.getAndIncrement());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<String> getScheduledJobNames() {
         if (scheduler != null) {
             return new ArrayList<>(keyMap.keySet());
@@ -189,6 +201,11 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
         }
     }
 
+    /**
+     * <p>destroy.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void destroy() throws Exception {
         if (scheduler != null) {
             log.debug("Destroying...");
@@ -197,10 +214,20 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
         keyMap.clear();
     }
 
+    /**
+     * <p>isInterruptOnRemove.</p>
+     *
+     * @return a boolean
+     */
     public boolean isInterruptOnRemove() {
         return interruptOnRemove;
     }
 
+    /**
+     * <p>Setter for the field <code>interruptOnRemove</code>.</p>
+     *
+     * @param interruptOnRemove a boolean
+     */
     public void setInterruptOnRemove(boolean interruptOnRemove) {
         this.interruptOnRemove = interruptOnRemove;
     }

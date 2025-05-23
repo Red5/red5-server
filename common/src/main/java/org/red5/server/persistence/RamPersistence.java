@@ -146,7 +146,12 @@ public class RamPersistence implements IPersistenceStore {
         return true;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param name a {@link java.lang.String} object
+     * @return a {@link org.red5.server.api.persistence.IPersistable} object
+     */
     public IPersistable load(String name) {
         return objects.get(name);
     }
@@ -156,7 +161,12 @@ public class RamPersistence implements IPersistenceStore {
         return obj.isPersistent();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param object a {@link org.red5.server.api.persistence.IPersistable} object
+     * @return a boolean
+     */
     public boolean remove(IPersistable object) {
         return remove(getObjectId(object));
     }
@@ -170,17 +180,27 @@ public class RamPersistence implements IPersistenceStore {
         return true;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getObjectNames() {
         return objects.keySet();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Collection} object
+     */
     public Collection<IPersistable> getObjects() {
         return objects.values();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void notifyClose() {
         objects.clear();
     }

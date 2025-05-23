@@ -70,6 +70,7 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
      * Get the object encoding in use for this connection.
      *
      * @return encoding type
+     * @return encoding type
      */
     Encoding getEncoding();
 

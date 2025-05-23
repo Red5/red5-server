@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * Flex <code>ArrayCollection</code> compatibility class.
  *
  * @see <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/collections/ArrayCollection.html">ArrayCollection</a>
- *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -37,82 +36,108 @@ public class ArrayCollection<T> implements List<T>, IExternalizable {
 
     private ArrayList<T> source;
 
+    /**
+     * <p>Constructor for ArrayCollection.</p>
+     */
     public ArrayCollection() {
         this.source = new ArrayList<T>();
     }
 
+    /**
+     * <p>Constructor for ArrayCollection.</p>
+     *
+     * @param source an array of T[] objects
+     */
     public ArrayCollection(T[] source) {
         this.source = new ArrayList<T>(source.length);
         this.source.addAll(Arrays.asList(source));
     }
 
+    /**
+     * <p>Setter for the field <code>source</code>.</p>
+     *
+     * @param source an array of T[] objects
+     */
     public void setSource(T[] source) {
         this.source = new ArrayList<T>(source.length);
         this.source.addAll(Arrays.asList(source));
     }
 
+    /** {@inheritDoc} */
     @Override
     public int size() {
         return source.size();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isEmpty() {
         return source == null ? true : source.isEmpty();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean contains(Object o) {
         return source.contains(o);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Iterator<T> iterator() {
         return source.iterator();
     }
 
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("unchecked")
     public T[] toArray() {
         return (T[]) source.toArray();
     }
 
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("hiding")
     public <T> T[] toArray(T[] a) {
         return source.toArray(a);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean add(T e) {
         return source.add(e);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean remove(Object o) {
         return source.remove(o);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean containsAll(Collection<?> c) {
         return source.containsAll(c);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addAll(Collection<? extends T> c) {
         return source.addAll(c);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean removeAll(Collection<?> c) {
         return source.removeAll(c);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean retainAll(Collection<?> c) {
         return source.retainAll(c);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void clear() {
         if (source != null) {
@@ -120,56 +145,67 @@ public class ArrayCollection<T> implements List<T>, IExternalizable {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
         return source.addAll(index, c);
     }
 
+    /** {@inheritDoc} */
     @Override
     public T get(int index) {
         return source.get(index);
     }
 
+    /** {@inheritDoc} */
     @Override
     public T set(int index, T element) {
         return source.set(index, element);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void add(int index, T element) {
         source.add(index, element);
     }
 
+    /** {@inheritDoc} */
     @Override
     public T remove(int index) {
         return source.remove(index);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int indexOf(Object o) {
         return source.indexOf(o);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int lastIndexOf(Object o) {
         return source.lastIndexOf(o);
     }
 
+    /** {@inheritDoc} */
     @Override
     public ListIterator<T> listIterator() {
         return source.listIterator();
     }
 
+    /** {@inheritDoc} */
     @Override
     public ListIterator<T> listIterator(int index) {
         return source.listIterator(index);
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
         return source.subList(fromIndex, toIndex);
     }
 
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("unchecked")
     public void readExternal(IDataInput input) {
@@ -182,6 +218,7 @@ public class ArrayCollection<T> implements List<T>, IExternalizable {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput output) {
         log.debug("writeExternal");

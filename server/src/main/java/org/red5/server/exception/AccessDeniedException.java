@@ -9,6 +9,8 @@ package org.red5.server.exception;
 
 /**
  * Access denied
+ *
+ * @author mondain
  */
 public class AccessDeniedException extends RuntimeException {
 

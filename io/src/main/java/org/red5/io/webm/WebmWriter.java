@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class able to write webm tags to file
  *
+ * @author mondain
  */
 public class WebmWriter implements Closeable, TagConsumer {
 
@@ -83,9 +84,9 @@ public class WebmWriter implements Closeable, TagConsumer {
     /**
      * method to write webm header to the new file
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO errors
-     * @throws ConverterException
+     * @throws org.red5.io.matroska.ConverterException
      *             - in case of conversion errors
      */
     public void writeHeader() throws IOException, ConverterException {
@@ -109,7 +110,7 @@ public class WebmWriter implements Closeable, TagConsumer {
      *
      * @param tag
      *            - tag to be written
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of any IO errors
      */
     public void writeTag(Tag tag) throws IOException {
@@ -119,6 +120,8 @@ public class WebmWriter implements Closeable, TagConsumer {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Will close all opened resources and "finalize" the write process
      */
     @Override
@@ -140,9 +143,7 @@ public class WebmWriter implements Closeable, TagConsumer {
         }
     }
 
-    /**
-     * @see org.red5.io.webm.TagConsumer#consume(org.red5.io.matroska.dtd.Tag)
-     */
+    /** {@inheritDoc} */
     @Override
     public void consume(Tag tag) throws IOException {
         //TODO add mode switch

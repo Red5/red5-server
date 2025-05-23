@@ -119,8 +119,10 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     // Initialize Logging
     private static Logger log = LoggerFactory.getLogger(TomcatLoader.class);
 
+    /** Constant <code>defaultSpringConfigLocation="/WEB-INF/red5-*.xml"</code> */
     public static final String defaultSpringConfigLocation = "/WEB-INF/red5-*.xml";
 
+    /** Constant <code>defaultParentContextKey="default.context"</code> */
     public static final String defaultParentContextKey = "default.context";
 
     static {
@@ -200,6 +202,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     }
 
     // TODO(paul) decouple this from Spring init bean use start method
+    /** {@inheritDoc} */
     @Override
     public void afterPropertiesSet() throws Exception {
         // if we are not awaiting plugins, start immediately
@@ -238,12 +241,11 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Add context for path and docbase to current host.
      *
-     * @param contextPath
-     *            Path
      * @param docBase
      *            Document base
      * @return Catalina context (that is, web application)
-     * @throws ServletException
+     * @throws jakarta.servlet.ServletException
+     * @param path a {@link java.lang.String} object
      */
     public Context addContext(String path, String docBase) throws ServletException {
         return addContext(path, docBase, host);
@@ -259,7 +261,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      * @param host
      *            Host to add context to
      * @return Catalina context (that is, web application)
-     * @throws ServletException
+     * @throws jakarta.servlet.ServletException
      */
     public Context addContext(String contextPath, String docBase, Host host) throws ServletException {
         log.debug("Add context - path: {} docbase: {}", contextPath, docBase);
@@ -286,10 +288,9 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     }
 
     /**
-     * Remove context from the current host.
+     * {@inheritDoc}
      *
-     * @param path
-     *            Path
+     * Remove context from the current host.
      */
     @Override
     public void removeContext(String path) {
@@ -315,6 +316,8 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
 
     /**
      * Initialization.
+     *
+     * @throws jakarta.servlet.ServletException if any.
      */
     public void start() throws ServletException {
         log.info("Loading Tomcat");
@@ -608,10 +611,9 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     }
 
     /**
-     * Starts a web application and its red5 (spring) component. This is basically a stripped down version of start().
+     * {@inheritDoc}
      *
-     * @return true on success
-     * @throws ServletException
+     * Starts a web application and its red5 (spring) component. This is basically a stripped down version of start().
      */
     @SuppressWarnings("null")
     public boolean startWebApplication(String applicationName) throws ServletException {
@@ -759,7 +761,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Set connectors.
      *
-     * @param connectors
+     * @param connectors a {@link java.util.List} object
      */
     public void setConnectors(List<TomcatConnector> connectors) {
         log.debug("setConnectors: {}", connectors.size());
@@ -771,7 +773,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      *
      * @param contexts
      *            Map of contexts
-     * @throws ServletException
+     * @throws jakarta.servlet.ServletException
      */
     public void setContexts(Map<String, String> contexts) throws ServletException {
         log.debug("setContexts: {}", contexts.size());
@@ -874,7 +876,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Set websocket feature enabled / disabled.
      *
-     * @param websocketEnabled
+     * @param websocketEnabled a boolean
      */
     public void setWebsocketEnabled(boolean websocketEnabled) {
         this.websocketEnabled = websocketEnabled;
@@ -892,7 +894,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Set secure feature enabled / disabled.
      *
-     * @param secureEnabled
+     * @param secureEnabled a boolean
      */
     public void setSecureEnabled(boolean secureEnabled) {
         this.secureEnabled = secureEnabled;
@@ -901,7 +903,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /**
      * Returns await plugin loading state.
      *
-     * @return true if awaiting plugin loading and false otherwise
+     * @param awaitPlugins a boolean
      */
     public void setAwaitPlugins(boolean awaitPlugins) {
         this.awaitPlugins = awaitPlugins;
@@ -918,6 +920,9 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         return hostId;
     }
 
+    /**
+     * <p>registerJMX.</p>
+     */
     protected void registerJMX() {
         // register with jmx
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -934,6 +939,9 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         }
     }
 
+    /**
+     * <p>unregisterJMX.</p>
+     */
     protected void unregisterJMX() {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         try {
@@ -945,6 +953,8 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Shut server down.
      */
     @Override
@@ -1000,6 +1010,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "TomcatLoader [serviceEngineName=" + serviceEngineName + "]";

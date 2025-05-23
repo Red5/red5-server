@@ -16,7 +16,7 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Base class for applications, takes care that callbacks are executed single-threaded. If you want to have maximum performance, use
- * {@link MultiThreadedApplicationAdapter} instead.
+ * {@link org.red5.server.adapter.MultiThreadedApplicationAdapter} instead.
  *
  * Using this class may lead to problems if accepting a client in the <code>Connect</code> or <code>Join</code> methods takes too
  * long, so using the multi-threaded version is preferred.

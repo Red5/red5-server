@@ -27,28 +27,50 @@ public class ClientList<E> extends AbstractList<E> {
     private CopyOnWriteArrayList<WeakReference<E>> items = new CopyOnWriteArrayList<WeakReference<E>>();
 
     @ConstructorProperties(value = { "" })
+    /**
+     * <p>Constructor for ClientList.</p>
+     */
     public ClientList() {
     }
 
     @ConstructorProperties({ "c" })
+    /**
+     * <p>Constructor for ClientList.</p>
+     *
+     * @param c a {@link java.util.Collection} object
+     */
     public ClientList(Collection<E> c) {
         addAll(0, c);
     }
 
+    /**
+     * <p>add.</p>
+     *
+     * @param element a E object
+     * @return a boolean
+     */
     public boolean add(E element) {
         return items.add(new WeakReference<E>(element));
     }
 
+    /**
+     * <p>add.</p>
+     *
+     * @param index a int
+     * @param element a E object
+     */
     public void add(int index, E element) {
         items.add(index, new WeakReference<E>(element));
     }
 
+    /** {@inheritDoc} */
     @Override
     public E remove(int index) {
         WeakReference<E> ref = items.remove(index);
         return ref.get();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean remove(Object o) {
         boolean removed = false;
@@ -64,6 +86,7 @@ public class ClientList<E> extends AbstractList<E> {
         return removed;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean contains(Object o) {
         List<E> list = new ArrayList<E>();
@@ -78,11 +101,17 @@ public class ClientList<E> extends AbstractList<E> {
         return contains;
     }
 
+    /**
+     * <p>size.</p>
+     *
+     * @return a int
+     */
     public int size() {
         removeReleased();
         return items.size();
     }
 
+    /** {@inheritDoc} */
     public E get(int index) {
         return (items.get(index)).get();
     }

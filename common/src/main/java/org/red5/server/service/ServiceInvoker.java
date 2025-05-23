@@ -99,7 +99,13 @@ public class ServiceInvoker implements IServiceInvoker {
         return invoke(call, service);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param call a {@link org.red5.server.api.service.IServiceCall} object
+     * @param service a {@link java.lang.Object} object
+     * @return a boolean
+     */
     public boolean invoke(IServiceCall call, Object service) {
         boolean invoked = false;
         IConnection conn = Red5.getConnectionLocal();

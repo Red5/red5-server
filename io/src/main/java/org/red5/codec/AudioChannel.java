@@ -3,8 +3,7 @@ package org.red5.codec;
 /**
  * Audio channel enumeration.
  *
- * @link <https://en.wikipedia.org/wiki/Surround_sound#Standard_speaker_channels>
- *
+ * @see <a href="https://en.wikipedia.org/wiki/Surround_sound#Standard_speaker_channels">Standard_speaker_channels</a>
  * @author Paul Gregoire
  */
 public enum AudioChannel {
@@ -28,10 +27,21 @@ public enum AudioChannel {
         this.channel = (byte) channel;
     }
 
+    /**
+     * <p>Getter for the field <code>channel</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getChannel() {
         return channel;
     }
 
+    /**
+     * <p>fromChannel.</p>
+     *
+     * @param channel a int
+     * @return a {@link org.red5.codec.AudioChannel} object
+     */
     public static AudioChannel fromChannel(int channel) {
         for (AudioChannel ac : AudioChannel.values()) {
             if (ac.getChannel() == channel) {

@@ -19,18 +19,38 @@ public final class UnsignedShort extends UnsignedNumber {
 
     private int value;
 
+    /**
+     * <p>Constructor for UnsignedShort.</p>
+     *
+     * @param c a byte
+     */
     public UnsignedShort(byte c) {
         value = c;
     }
 
+    /**
+     * <p>Constructor for UnsignedShort.</p>
+     *
+     * @param c a short
+     */
     public UnsignedShort(short c) {
         value = c;
     }
 
+    /**
+     * <p>Constructor for UnsignedShort.</p>
+     *
+     * @param c a int
+     */
     public UnsignedShort(int c) {
         value = c & 0xFFFF;
     }
 
+    /**
+     * <p>Constructor for UnsignedShort.</p>
+     *
+     * @param c a long
+     */
     public UnsignedShort(long c) {
         value = (int) (c & 0xFFFFL);
     }
@@ -39,10 +59,23 @@ public final class UnsignedShort extends UnsignedNumber {
         value = 0;
     }
 
+    /**
+     * <p>fromBytes.</p>
+     *
+     * @param c an array of {@link byte} objects
+     * @return a {@link org.red5.io.object.UnsignedShort} object
+     */
     public static UnsignedShort fromBytes(byte[] c) {
         return fromBytes(c, 0);
     }
 
+    /**
+     * <p>fromBytes.</p>
+     *
+     * @param c an array of {@link byte} objects
+     * @param idx a int
+     * @return a {@link org.red5.io.object.UnsignedShort} object
+     */
     public static UnsignedShort fromBytes(byte[] c, int idx) {
         UnsignedShort number = new UnsignedShort();
         if ((c.length - idx) < 2) {
@@ -52,10 +85,23 @@ public final class UnsignedShort extends UnsignedNumber {
         return number;
     }
 
+    /**
+     * <p>fromString.</p>
+     *
+     * @param c a {@link java.lang.String} object
+     * @return a {@link org.red5.io.object.UnsignedShort} object
+     */
     public static UnsignedShort fromString(String c) {
         return fromString(c, 10);
     }
 
+    /**
+     * <p>fromString.</p>
+     *
+     * @param c a {@link java.lang.String} object
+     * @param radix a int
+     * @return a {@link org.red5.io.object.UnsignedShort} object
+     */
     public static UnsignedShort fromString(String c, int radix) {
         UnsignedShort number = new UnsignedShort();
         long v = Integer.parseInt(c, radix);
@@ -63,36 +109,43 @@ public final class UnsignedShort extends UnsignedNumber {
         return number;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double doubleValue() {
         return value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public float floatValue() {
         return value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public short shortValue() {
         return (short) (value & 0xFFFF);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int intValue() {
         return value & 0xFFFF;
     }
 
+    /** {@inheritDoc} */
     @Override
     public long longValue() {
         return value & 0xFFFFL;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getBytes() {
         return new byte[] { (byte) ((value >> 8) & 0xFF), (byte) (value & 0xFF) };
     }
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(UnsignedNumber other) {
         int otherValue = other.intValue();
@@ -104,6 +157,7 @@ public final class UnsignedShort extends UnsignedNumber {
         return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object other) {
         if (other instanceof Number) {
@@ -113,16 +167,19 @@ public final class UnsignedShort extends UnsignedNumber {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return Integer.toString(value);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shiftRight(int nBits) {
         if (Math.abs(nBits) > 16) {
@@ -131,6 +188,7 @@ public final class UnsignedShort extends UnsignedNumber {
         value >>>= nBits;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shiftLeft(int nBits) {
         if (Math.abs(nBits) > 16) {

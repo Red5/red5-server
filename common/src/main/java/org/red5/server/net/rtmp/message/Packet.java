@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMP packet. Consists of packet header, data and event context.
+ *
+ * @author mondain
  */
 public class Packet implements Externalizable {
 
@@ -54,6 +56,9 @@ public class Packet implements Externalizable {
      */
     private transient final AtomicBoolean processed = new AtomicBoolean(false);
 
+    /**
+     * <p>Constructor for Packet.</p>
+     */
     public Packet() {
         log.trace("ctor");
     }
@@ -219,6 +224,7 @@ public class Packet implements Externalizable {
         return this.processed.get();
     }
 
+    /** {@inheritDoc} */
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         header = (Header) in.readObject();
         message = (IRTMPEvent) in.readObject();
@@ -226,6 +232,7 @@ public class Packet implements Externalizable {
         message.setTimestamp(header.getTimer());
     }
 
+    /** {@inheritDoc} */
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(header);
         out.writeObject(message);
@@ -235,6 +242,7 @@ public class Packet implements Externalizable {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Packet [");

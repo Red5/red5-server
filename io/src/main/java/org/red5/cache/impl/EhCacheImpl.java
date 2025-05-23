@@ -33,12 +33,12 @@ import net.sf.ehcache.event.CacheManagerEventListener;
  * Provides an implementation of an object cache using EhCache.
  *
  * @see <a href="http://ehcache.sourceforge.net/">ehcache homepage</a>
- *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class EhCacheImpl implements ICacheStore, ApplicationContextAware {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(EhCacheImpl.class);
 
     private static Ehcache cache;
@@ -74,6 +74,9 @@ public class EhCacheImpl implements ICacheStore, ApplicationContextAware {
         return applicationContext;
     }
 
+    /**
+     * <p>init.</p>
+     */
     public void init() {
         log.info("Loading ehcache");
         // log.debug("Appcontext: " + applicationContext.toString());

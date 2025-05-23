@@ -31,6 +31,12 @@ public class JMXUtil {
 
     private static Logger log = LoggerFactory.getLogger(JMXUtil.class);
 
+    /**
+     * <p>printMBeanInfo.</p>
+     *
+     * @param objectName a {@link javax.management.ObjectName} object
+     * @param className a {@link java.lang.String} object
+     */
     public static void printMBeanInfo(ObjectName objectName, String className) {
         log.info("Retrieve the management information for the {}", className);
         log.info("MBean using the getMBeanInfo() method of the MBeanServer");
@@ -87,6 +93,13 @@ public class JMXUtil {
         }
     }
 
+    /**
+     * <p>registerNewMBean.</p>
+     *
+     * @param clazz a {@link java.lang.Class} object
+     * @param interfaceClass a {@link java.lang.Class} object
+     * @return a boolean
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static boolean registerNewMBean(Class clazz, Class interfaceClass) {
         boolean status = false;

@@ -8,6 +8,8 @@ import org.red5.io.amf3.IExternalizable;
 
 /**
  * Color info event
+ *
+ * @author mondain
  */
 public class ColorInfo implements IExternalizable {
 
@@ -104,30 +106,61 @@ public class ColorInfo implements IExternalizable {
 
     private HdrMdcv hdrMdcv;
 
+    /**
+     * <p>Getter for the field <code>colorConfig</code>.</p>
+     *
+     * @return a {@link org.red5.codec.ColorInfo.ColorConfig} object
+     */
     public ColorConfig getColorConfig() {
         return colorConfig;
     }
 
+    /**
+     * <p>Setter for the field <code>colorConfig</code>.</p>
+     *
+     * @param colorConfig a {@link org.red5.codec.ColorInfo.ColorConfig} object
+     */
     public void setColorConfig(ColorConfig colorConfig) {
         this.colorConfig = colorConfig;
     }
 
+    /**
+     * <p>Getter for the field <code>hdrCll</code>.</p>
+     *
+     * @return a {@link org.red5.codec.ColorInfo.HdrCll} object
+     */
     public HdrCll getHdrCll() {
         return hdrCll;
     }
 
+    /**
+     * <p>Setter for the field <code>hdrCll</code>.</p>
+     *
+     * @param hdrCll a {@link org.red5.codec.ColorInfo.HdrCll} object
+     */
     public void setHdrCll(HdrCll hdrCll) {
         this.hdrCll = hdrCll;
     }
 
+    /**
+     * <p>Getter for the field <code>hdrMdcv</code>.</p>
+     *
+     * @return a {@link org.red5.codec.ColorInfo.HdrMdcv} object
+     */
     public HdrMdcv getHdrMdcv() {
         return hdrMdcv;
     }
 
+    /**
+     * <p>Setter for the field <code>hdrMdcv</code>.</p>
+     *
+     * @param hdrMdcv a {@link org.red5.codec.ColorInfo.HdrMdcv} object
+     */
     public void setHdrMdcv(HdrMdcv hdrMdcv) {
         this.hdrMdcv = hdrMdcv;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         colorConfig = (ColorConfig) in.readObject();
@@ -135,6 +168,7 @@ public class ColorInfo implements IExternalizable {
         hdrMdcv = (HdrMdcv) in.readObject();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         out.writeObject(colorConfig);
@@ -142,6 +176,7 @@ public class ColorInfo implements IExternalizable {
         out.writeObject(hdrMdcv);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "ColorInfo [colorConfig=" + colorConfig + ", hdrCll=" + hdrCll + ", hdrMdcv=" + hdrMdcv + "]";

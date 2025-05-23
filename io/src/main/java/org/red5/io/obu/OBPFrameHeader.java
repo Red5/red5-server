@@ -1,5 +1,10 @@
 package org.red5.io.obu;
 
+/**
+ * <p>OBPFrameHeader class.</p>
+ *
+ * @author mondain
+ */
 public class OBPFrameHeader {
 
     public boolean showExistingFrame;

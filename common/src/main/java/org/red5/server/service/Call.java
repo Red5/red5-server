@@ -115,6 +115,9 @@ public class Call implements IServiceCall, IExternalizable {
      */
     private long writeTime;
 
+    /**
+     * <p>Constructor for Call.</p>
+     */
     public Call() {
     }
 
@@ -159,6 +162,8 @@ public class Call implements IServiceCall, IExternalizable {
 
     /**
      * {@inheritDoc}
+     *
+     * @return a boolean
      */
     public boolean isSuccess() {
         return (status == STATUS_SUCCESS_RESULT) || (status == STATUS_SUCCESS_NULL) || (status == STATUS_SUCCESS_VOID);
@@ -166,6 +171,8 @@ public class Call implements IServiceCall, IExternalizable {
 
     /**
      * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
      */
     public String getServiceMethodName() {
         return serviceMethodName;
@@ -183,6 +190,8 @@ public class Call implements IServiceCall, IExternalizable {
 
     /**
      * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
      */
     public String getServiceName() {
         return serviceName;
@@ -200,6 +209,8 @@ public class Call implements IServiceCall, IExternalizable {
 
     /**
      * {@inheritDoc}
+     *
+     * @return an array of {@link java.lang.Object} objects
      */
     public Object[] getArguments() {
         return arguments;
@@ -217,20 +228,22 @@ public class Call implements IServiceCall, IExternalizable {
 
     /**
      * {@inheritDoc}
+     *
+     * @return a byte
      */
     public byte getStatus() {
         return status;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void setStatus(byte status) {
         this.status = status;
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @return a long
      */
     public long getReadTime() {
         return readTime;
@@ -238,6 +251,8 @@ public class Call implements IServiceCall, IExternalizable {
 
     /**
      * {@inheritDoc}
+     *
+     * @return a long
      */
     public long getWriteTime() {
         return writeTime;
@@ -245,14 +260,14 @@ public class Call implements IServiceCall, IExternalizable {
 
     /**
      * {@inheritDoc}
+     *
+     * @return a {@link java.lang.Exception} object
      */
     public Exception getException() {
         return exception;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void setException(Exception exception) {
         this.exception = exception;
     }
@@ -279,6 +294,7 @@ public class Call implements IServiceCall, IExternalizable {
         return sb.toString();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         // keep a time of receipt
@@ -296,6 +312,7 @@ public class Call implements IServiceCall, IExternalizable {
         exception = (Exception) in.readObject();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         // keep a time of receipt

@@ -20,6 +20,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
+/**
+ * <p>ServletUtils class.</p>
+ *
+ * @author mondain
+ */
 public class ServletUtils {
 
     private static Logger log = Red5LoggerFactory.getLogger(ServletUtils.class);
@@ -36,7 +41,6 @@ public class ServletUtils {
      *            input
      * @param output
      *            output
-     *
      * @throws java.io.IOException
      *             on error
      */
@@ -131,6 +135,8 @@ public class ServletUtils {
     }
 
     /**
+     * <p>getBytes.</p>
+     *
      * @param input
      *            input stream
      * @return a byte[] containing the information contained in the specified InputStream.

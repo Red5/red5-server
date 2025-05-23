@@ -106,7 +106,7 @@ public interface ScopeMXBean {
     /**
      * Destroys scope
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on error
      */
     public void destroy() throws Exception;
@@ -116,8 +116,8 @@ public interface ScopeMXBean {
      *
      * @param persistenceClass
      *            Scope's persistence class
-     * @throws Exception
-     *             Exception
+     * @throws java.lang.Exception
+     *             java.lang.Exception
      */
     public void setPersistenceClass(String persistenceClass) throws Exception;
 

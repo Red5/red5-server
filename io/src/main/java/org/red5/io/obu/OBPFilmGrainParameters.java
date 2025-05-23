@@ -1,5 +1,10 @@
 package org.red5.io.obu;
 
+/**
+ * <p>OBPFilmGrainParameters class.</p>
+ *
+ * @author mondain
+ */
 public class OBPFilmGrainParameters {
     public boolean applyGrain;
 

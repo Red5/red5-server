@@ -19,21 +19,40 @@ import org.red5.io.sctp.SctpException;
 import org.red5.io.sctp.IAssociationControl.State;
 import org.red5.io.sctp.packet.SctpPacket;
 
+/**
+ * <p>CookieEcho class.</p>
+ *
+ * @author mondain
+ */
 public class CookieEcho extends Chunk {
 
     private byte[] cookie;
 
+    /**
+     * <p>Constructor for CookieEcho.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     * @throws org.red5.io.sctp.SctpException if any.
+     */
     public CookieEcho(byte[] data, int offset, int length) throws SctpException {
         super(data, offset, length);
         cookie = new byte[length - super.getSize()];
         System.arraycopy(data, offset, cookie, 0, cookie.length);
     }
 
+    /**
+     * <p>Constructor for CookieEcho.</p>
+     *
+     * @param cookie an array of {@link byte} objects
+     */
     public CookieEcho(byte[] cookie) {
         super(ChunkType.COOKIE_ECHO, (byte) 0x00);
         this.cookie = cookie;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getBytes() {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(super.getSize() + cookie.length);
@@ -47,10 +66,12 @@ public class CookieEcho extends Chunk {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(IAssociationControl channel) throws SctpException, IOException {
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(InetSocketAddress address, IServerChannelControl server) throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException {
         // validate state cookie info

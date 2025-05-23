@@ -9,6 +9,11 @@ package org.red5.server.net.rtmp;
 
 import java.util.Collection;
 
+/**
+ * <p>IRTMPConnManager interface.</p>
+ *
+ * @author mondain
+ */
 public interface IRTMPConnManager {
 
     /**

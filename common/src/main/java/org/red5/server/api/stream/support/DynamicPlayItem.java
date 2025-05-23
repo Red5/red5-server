@@ -12,6 +12,8 @@ import org.red5.server.messaging.IMessageInput;
 
 /**
  * Dynamic playlist item implementation
+ *
+ * @author mondain
  */
 public class DynamicPlayItem implements IPlayItem {
 
@@ -87,6 +89,8 @@ public class DynamicPlayItem implements IPlayItem {
 
     /**
      * Returns boolean value that specifies whether item can be played
+     *
+     * @return a long
      */
     public long getStart() {
         return start;
@@ -130,6 +134,7 @@ public class DynamicPlayItem implements IPlayItem {
         this.size = size;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -140,6 +145,7 @@ public class DynamicPlayItem implements IPlayItem {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

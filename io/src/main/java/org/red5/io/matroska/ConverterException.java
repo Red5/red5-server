@@ -10,11 +10,14 @@ package org.red5.io.matroska;
 /**
  * Any exception happens during webm conversion
  *
+ * @author mondain
  */
 public class ConverterException extends Exception {
     private static final long serialVersionUID = 1L;
 
     /**
+     * <p>Constructor for ConverterException.</p>
+     *
      * @see Exception#Exception()
      */
     public ConverterException() {
@@ -22,8 +25,9 @@ public class ConverterException extends Exception {
     }
 
     /**
-     * @see Exception#Exception(String)
+     * <p>Constructor for ConverterException.</p>
      *
+     * @see Exception#Exception(String)
      * @param message
      *            - string message for this exception
      */

@@ -23,9 +23,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMP protocol decoder.
+ *
+ * @author mondain
  */
 public class RTMPMinaProtocolDecoder extends ProtocolDecoderAdapter {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(RTMPMinaProtocolDecoder.class);
 
     private RTMPProtocolDecoder decoder = new RTMPProtocolDecoder();

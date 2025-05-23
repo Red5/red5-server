@@ -222,34 +222,6 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.2</version>
-                    <executions>
-                        <execution>
-                            <id>attach-javadocs</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <verbose>${verbose}</verbose>
-                        <release>${java.release.level}</release>
-                        <failOnError>false</failOnError>
-                        <sourcepath>${basedir}/src/main/java</sourcepath>
-                        <includeDependencySources>false</includeDependencySources>
-                        <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
-                        <tags>
-                            <tag>
-                                <name>todo</name>
-                                <!-- todo tag for all places -->
-                                <placement>a</placement>
-                                <head>To do:</head>
-                            </tag>
-                        </tags>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.4.2</version>
                     <configuration>
@@ -343,6 +315,56 @@
             </plugins>
         </pluginManagement>
     </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <verbose>${verbose}</verbose>
+                    <release>${java.release.level}</release>
+                    <failOnError>false</failOnError>
+                    <failOnWarning>false</failOnWarning>
+                    <failOnMissingJavadoc>false</failOnMissingJavadoc>
+                    <failOnEmpty>false</failOnEmpty>
+                    <warningAsError>false</warningAsError>
+                    <warnOnMissingJavadocTag>false</warnOnMissingJavadocTag>
+                    <failOnMissingSource>false</failOnMissingSource>
+                    <failOnMissingPackage>false</failOnMissingPackage>
+                    <failOnMissingMethod>false</failOnMissingMethod>
+                    <failOnMissingConstructor>false</failOnMissingConstructor>
+                    <failOnMissingType>false</failOnMissingType>
+                    <failOnMissingTypeParameter>false</failOnMissingTypeParameter>
+                    <failOnMissingParameter>false</failOnMissingParameter>
+                    <failOnMissingReturn>false</failOnMissingReturn>
+                    <tags>
+                        <tag>
+                            <name>todo</name>
+                            <!-- todo tag for all places -->
+                            <placement>a</placement>
+                            <head>To do:</head>
+                        </tag>
+                    </tags>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <id>aggregate</id>
+                        <inherited>false</inherited>
+                        <reports>
+                            <report>aggregate-no-fork</report>
+                            <report>test-aggregate-no-fork</report>
+                        </reports>
+                    </reportSet>
+                    <reportSet>
+                        <id>default</id>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
     <dependencyManagement>
         <dependencies>
             <dependency>

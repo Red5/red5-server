@@ -9,5 +9,14 @@ package org.red5.io.sctp;
 
 import java.net.SocketOption;
 
+/**
+ * <p>SctpSocketOption interface.</p>
+ *
+ * @param <T> the type of the option value
+ * @see java.net.SocketOption
+ * @see java.net.StandardSocketOptions
+ *
+ * @author mondain
+ */
 public interface SctpSocketOption<T> extends SocketOption<T> {
 }

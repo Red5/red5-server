@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * stop operations.
  *
  * @see org.red5.server.api.stream.IStream
+ * @author mondain
  */
 public abstract class AbstractStream implements IStream {
 
@@ -76,12 +77,12 @@ public abstract class AbstractStream implements IStream {
     protected final transient AtomicReference<StreamState> state = new AtomicReference<>(StreamState.UNINIT);
 
     /**
-     * Creates a new {@link PropertyChangeEvent} and delivers it to all currently registered state listeners.
+     * Creates a new {@link java.beans.PropertyChangeEvent} and delivers it to all currently registered state listeners.
      *
      * @param oldState
-     *            the {@link StreamState} we had before the change
+     *            the {@link org.red5.server.api.stream.StreamState} we had before the change
      * @param newState
-     *            the {@link StreamState} we had after the change
+     *            the {@link org.red5.server.api.stream.StreamState} we had after the change
      */
     protected void fireStateChange(StreamState oldState, StreamState newState) {
         final PropertyChangeEvent evt = new PropertyChangeEvent(this, "StreamState", oldState, newState);
@@ -91,7 +92,7 @@ public abstract class AbstractStream implements IStream {
     }
 
     /**
-     * Adds to the list of listeners tracking changes of the {@link StreamState} of this stream.
+     * Adds to the list of listeners tracking changes of the {@link org.red5.server.api.stream.StreamState} of this stream.
      *
      * @param listener
      *            the listener to register
@@ -101,7 +102,7 @@ public abstract class AbstractStream implements IStream {
     }
 
     /**
-     * Removes from the list of listeners tracking changes of the {@link StreamState} of this stream.
+     * Removes from the list of listeners tracking changes of the {@link org.red5.server.api.stream.StreamState} of this stream.
      *
      * @param listener
      *            the listener to remove

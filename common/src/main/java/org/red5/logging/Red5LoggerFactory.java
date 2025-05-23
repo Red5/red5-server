@@ -23,10 +23,12 @@ import ch.qos.logback.core.CoreConstants;
  */
 public class Red5LoggerFactory {
 
+    /** Constant <code>LOGGER_CONTEXT_ATTRIBUTE="logger.context"</code> */
     public static final String LOGGER_CONTEXT_ATTRIBUTE = "logger.context";
 
     private static boolean useLogback = true;
 
+    /** Constant <code>DEBUG=true</code> */
     public static boolean DEBUG = true;
 
     // root logger
@@ -48,6 +50,12 @@ public class Red5LoggerFactory {
         }
     }
 
+    /**
+     * <p>getLogger.</p>
+     *
+     * @param clazz a {@link java.lang.Class} object
+     * @return a {@link org.slf4j.Logger} object
+     */
     public static Logger getLogger(Class<?> clazz) {
         if (DEBUG) {
             System.out.printf("getLogger for: %s thread: %s%n", clazz.getName(), Thread.currentThread().getName());
@@ -72,10 +80,24 @@ public class Red5LoggerFactory {
         return logger;
     }
 
+    /**
+     * <p>getLogger.</p>
+     *
+     * @param clazz a {@link java.lang.Class} object
+     * @param contextName a {@link java.lang.String} object
+     * @return a {@link org.slf4j.Logger} object
+     */
     public static Logger getLogger(Class<?> clazz, String contextName) {
         return getLogger(clazz.getName(), contextName);
     }
 
+    /**
+     * <p>getLogger.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param contextName a {@link java.lang.String} object
+     * @return a {@link org.slf4j.Logger} object
+     */
     public static Logger getLogger(String name, String contextName) {
         if (DEBUG) {
             System.out.printf("getLogger for: %s in context: %s thread: %s%n", name, contextName, Thread.currentThread().getName());
@@ -113,6 +135,11 @@ public class Red5LoggerFactory {
         return logger;
     }
 
+    /**
+     * <p>Getter for the field <code>contextSelector</code>.</p>
+     *
+     * @return a {@link ch.qos.logback.classic.selector.ContextSelector} object
+     */
     public static ContextSelector getContextSelector() {
         ContextSelector selector = null;
         if (useLogback) {
@@ -136,6 +163,11 @@ public class Red5LoggerFactory {
         return selector;
     }
 
+    /**
+     * <p>Setter for the field <code>useLogback</code>.</p>
+     *
+     * @param useLogback a boolean
+     */
     public static void setUseLogback(boolean useLogback) {
         Red5LoggerFactory.useLogback = useLogback;
     }

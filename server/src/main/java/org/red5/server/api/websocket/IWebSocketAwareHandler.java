@@ -12,11 +12,10 @@ public interface IWebSocketAwareHandler {
     /**
      * Handler method. Called when a WebSocket connects to the application.
      *
-     * @param conn
-     *            WebSocket connection object
      * @param params
      *            List of parameters after connection URL
      * @return true upon success, false otherwise
+     * @param wsConn a {@link org.red5.net.websocket.WebSocketConnection} object
      */
     boolean appConnect(WebSocketConnection wsConn, Object[] params);
 

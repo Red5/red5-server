@@ -20,26 +20,52 @@ public class Abort extends BaseEvent {
 
     private int channelId = 0;
 
+    /**
+     * <p>Constructor for Abort.</p>
+     */
     public Abort() {
         super(Type.SYSTEM);
     }
 
+    /**
+     * <p>Constructor for Abort.</p>
+     *
+     * @param channelId a int
+     */
     public Abort(int channelId) {
         this.channelId = channelId;
     }
 
+    /**
+     * <p>getDataType.</p>
+     *
+     * @return a byte
+     */
     public byte getDataType() {
         return TYPE_ABORT;
     }
 
+    /**
+     * <p>releaseInternal.</p>
+     */
     protected void releaseInternal() {
 
     }
 
+    /**
+     * <p>Setter for the field <code>channelId</code>.</p>
+     *
+     * @param channelId a int
+     */
     public void setChannelId(int channelId) {
         this.channelId = channelId;
     }
 
+    /**
+     * <p>Getter for the field <code>channelId</code>.</p>
+     *
+     * @return a int
+     */
     public int getChannelId() {
         return channelId;
     }
@@ -50,12 +76,14 @@ public class Abort extends BaseEvent {
         return "Abort Channel: " + channelId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         channelId = in.readInt();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

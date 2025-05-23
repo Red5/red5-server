@@ -91,7 +91,7 @@ public class ConversionUtils {
      * @param target
      *            Target class
      * @return Converted object
-     * @throws ConversionException
+     * @throws org.apache.commons.beanutils.ConversionException
      *             If object can't be converted
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -174,7 +174,7 @@ public class ConversionUtils {
      * @param target
      *            Target class
      * @return Converted object
-     * @throws ConversionException
+     * @throws org.apache.commons.beanutils.ConversionException
      *             If object can't be converted
      */
     public static Object convertToArray(Object source, Class<?> target) throws ConversionException {
@@ -203,6 +203,12 @@ public class ConversionUtils {
         }
     }
 
+    /**
+     * <p>convertMapToList.</p>
+     *
+     * @param map a {@link java.util.Map} object
+     * @return a {@link java.util.List} object
+     */
     public static List<Object> convertMapToList(Map<?, ?> map) {
         return List.of(map.values());
     }
@@ -310,7 +316,7 @@ public class ConversionUtils {
      * @param target
      *            Array of target classes
      * @return Array of converted objects
-     * @throws ConversionException
+     * @throws org.apache.commons.beanutils.ConversionException
      *             If object can't be converted
      */
     public static Object[] convertParams(Object[] source, Class<?>[] target) throws ConversionException {
@@ -342,11 +348,12 @@ public class ConversionUtils {
     }
 
     /**
+     * <p>convertArrayToList.</p>
      *
      * @param source
      *            source arra
      * @return list
-     * @throws ConversionException
+     * @throws org.apache.commons.beanutils.ConversionException
      *             on failure
      */
     public static List<?> convertArrayToList(Object[] source) throws ConversionException {
@@ -361,7 +368,7 @@ public class ConversionUtils {
      * @param target
      *            Target class
      * @return Bean of that class
-     * @throws ConversionException
+     * @throws org.apache.commons.beanutils.ConversionException
      *             on failure
      */
     public static Object convertMapToBean(Map<String, ? extends Object> source, Class<?> target) throws ConversionException {

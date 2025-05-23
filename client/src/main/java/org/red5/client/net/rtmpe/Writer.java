@@ -39,7 +39,7 @@ public class Writer implements IClientListener {
     /**
      * Instantiates a writer for the given path.
      *
-     * @param filePath
+     * @param filePath a {@link java.lang.String} object
      */
     public Writer(String filePath) {
         File file = new File(filePath);
@@ -54,7 +54,7 @@ public class Writer implements IClientListener {
     /**
      * Instantiates a writer for the given path.
      *
-     * @param filePath
+     * @param filePath a {@link java.nio.file.Path} object
      */
     public Writer(Path filePath) {
         File file = filePath.toFile();
@@ -130,7 +130,9 @@ public class Writer implements IClientListener {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void stopListening() {
         log.debug("stopListening, client is finished providing data");
         if (writer != null) {

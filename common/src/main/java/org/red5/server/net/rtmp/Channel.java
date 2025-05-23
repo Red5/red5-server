@@ -26,9 +26,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Identified connection that transfers packets.
+ *
+ * @author mondain
  */
 public class Channel {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Channel.class);
 
     private final static String CALL_ON_STATUS = "onStatus";
@@ -188,6 +191,7 @@ public class Channel {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         if (connection != null) {

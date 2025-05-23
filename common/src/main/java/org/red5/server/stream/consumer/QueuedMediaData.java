@@ -7,6 +7,8 @@ import org.red5.server.stream.IStreamData;
 
 /**
  * Queued data wrapper.
+ *
+ * @author mondain
  */
 public class QueuedMediaData {
 
@@ -22,11 +24,24 @@ public class QueuedMediaData {
 
     VideoFrameType frameType;
 
+    /**
+     * <p>Constructor for QueuedMediaData.</p>
+     *
+     * @param timestamp a int
+     * @param dataType a byte
+     */
     public QueuedMediaData(int timestamp, byte dataType) {
         this.tag = ImmutableTag.build(dataType, timestamp);
     }
 
     @SuppressWarnings("rawtypes")
+    /**
+     * <p>Constructor for QueuedMediaData.</p>
+     *
+     * @param timestamp a int
+     * @param dataType a byte
+     * @param streamData a {@link org.red5.server.stream.IStreamData} object
+     */
     public QueuedMediaData(int timestamp, byte dataType, IStreamData streamData) {
         this.tag = ImmutableTag.build(dataType, timestamp, streamData.getData());
         if (streamData instanceof VideoData) {
@@ -40,34 +55,70 @@ public class QueuedMediaData {
         }
     }
 
+    /**
+     * <p>getTimestamp.</p>
+     *
+     * @return a int
+     */
     public int getTimestamp() {
         return tag.getTimestamp();
     }
 
+    /**
+     * <p>getDataType.</p>
+     *
+     * @return a byte
+     */
     public byte getDataType() {
         return tag.getDataType();
     }
 
+    /**
+     * <p>getData.</p>
+     *
+     * @return a {@link org.red5.server.stream.consumer.ImmutableTag} object
+     */
     public ImmutableTag getData() {
         return tag;
     }
 
+    /**
+     * <p>isVideo.</p>
+     *
+     * @return a boolean
+     */
     public boolean isVideo() {
         return video;
     }
 
+    /**
+     * <p>isAudio.</p>
+     *
+     * @return a boolean
+     */
     public boolean isAudio() {
         return audio;
     }
 
+    /**
+     * <p>isConfig.</p>
+     *
+     * @return a boolean
+     */
     public boolean isConfig() {
         return config;
     }
 
+    /**
+     * <p>hasData.</p>
+     *
+     * @return a boolean
+     */
     public boolean hasData() {
         return tag != null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -77,6 +128,7 @@ public class QueuedMediaData {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -95,6 +147,9 @@ public class QueuedMediaData {
         return true;
     }
 
+    /**
+     * <p>dispose.</p>
+     */
     public void dispose() {
         tag = null;
     }

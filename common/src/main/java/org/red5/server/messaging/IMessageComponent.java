@@ -9,9 +9,12 @@ package org.red5.server.messaging;
 
 /**
  * Message component handles out-of-band control messages
+ *
+ * @author mondain
  */
 public interface IMessageComponent {
     /**
+     * <p>onOOBControlMessage.</p>
      *
      * @param source
      *            Message component source

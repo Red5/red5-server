@@ -37,13 +37,14 @@ public class ExtendedAudio extends AbstractAudio {
     /**
      * Returns the codec for the specified track.
      *
-     * @param trackId
+     * @param trackId a int
      * @return codec for the track id or null if not found
      */
     public IAudioStreamCodec getTrackCodec(int trackId) {
         return tracks.values().stream().filter(c -> c.getTrackId() == trackId).findFirst().orElse(null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
@@ -53,6 +54,7 @@ public class ExtendedAudio extends AbstractAudio {
         return result;
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("incomplete-switch")
     @Override
     public boolean addData(IoBuffer data) {
@@ -184,11 +186,11 @@ public class ExtendedAudio extends AbstractAudio {
     }
 
     /**
-    * Get the track codec for the given data.
-    *
-    * @param data
-    * @return Audio codec
-    */
+     * Get the track codec for the given data.
+     *
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @return Audio codec
+     */
     protected IAudioStreamCodec getTrackCodec(IoBuffer data) {
         Integer fourcc = data.getInt();
         log.debug("Fourcc: {} pos: {}", fourcc, data.position());

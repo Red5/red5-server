@@ -9,10 +9,23 @@ package org.red5.client.net.rtmp;
 
 import org.red5.server.net.rtmp.event.IRTMPEvent;
 
+/**
+ * <p>IClientListener interface.</p>
+ *
+ * @author mondain
+ */
 public interface IClientListener {
 
+    /**
+     * <p>onClientListenerEvent.</p>
+     *
+     * @param rtmpEvent a {@link org.red5.server.net.rtmp.event.IRTMPEvent} object
+     */
     public void onClientListenerEvent(IRTMPEvent rtmpEvent);
 
+    /**
+     * <p>stopListening.</p>
+     */
     public void stopListening();
 
 }

@@ -20,9 +20,15 @@ import org.red5.io.sctp.SctpException;
 /*
  * see https://tools.ietf.org/html/rfc4960#section-3.2
  */
+/**
+ * <p>Abstract Chunk class.</p>
+ *
+ * @author mondain
+ */
 public abstract class Chunk {
 
     // type(1 byte) + flags(1 byte) + length(2 byte)
+    /** Constant <code>CHUNK_HEADER_SIZE=4</code> */
     protected static final int CHUNK_HEADER_SIZE = 4;
 
     private ChunkType type;
@@ -32,6 +38,14 @@ public abstract class Chunk {
     @SuppressWarnings("unused")
     private int length;
 
+    /**
+     * <p>Constructor for Chunk.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     * @throws org.red5.io.sctp.SctpException if any.
+     */
     public Chunk(byte[] data, int offset, int length) throws SctpException {
         // parse common header
         if (length < CHUNK_HEADER_SIZE) {
@@ -43,25 +57,67 @@ public abstract class Chunk {
         this.length = byteBuffer.getShort() & 0xffff;
     }
 
+    /**
+     * <p>Constructor for Chunk.</p>
+     *
+     * @param type a {@link org.red5.io.sctp.packet.chunks.ChunkType} object
+     * @param flags a byte
+     * @param length a short
+     */
     public Chunk(final ChunkType type, final byte flags, final short length) {
         this.type = type;
         this.flags = flags;
         this.length = length;
     }
 
+    /**
+     * <p>Constructor for Chunk.</p>
+     *
+     * @param type a {@link org.red5.io.sctp.packet.chunks.ChunkType} object
+     * @param flags a byte
+     */
     public Chunk(final ChunkType type, final byte flags) {
         this.type = type;
         this.flags = flags;
     }
 
+    /**
+     * <p>apply.</p>
+     *
+     * @param channel a {@link org.red5.io.sctp.IAssociationControl} object
+     * @throws org.red5.io.sctp.SctpException if any.
+     * @throws java.io.IOException if any.
+     * @throws java.security.InvalidKeyException if any.
+     * @throws java.security.NoSuchAlgorithmException if any.
+     */
     public abstract void apply(IAssociationControl channel) throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException;
 
+    /**
+     * <p>apply.</p>
+     *
+     * @param address a {@link java.net.InetSocketAddress} object
+     * @param server a {@link org.red5.io.sctp.IServerChannelControl} object
+     * @throws org.red5.io.sctp.SctpException if any.
+     * @throws java.security.InvalidKeyException if any.
+     * @throws java.security.NoSuchAlgorithmException if any.
+     * @throws java.io.IOException if any.
+     */
     public abstract void apply(InetSocketAddress address, IServerChannelControl server) throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException;
 
+    /**
+     * <p>getSize.</p>
+     *
+     * @return a int
+     */
     public int getSize() {
         return CHUNK_HEADER_SIZE;
     }
 
+    /**
+     * <p>getBytes.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
     public byte[] getBytes() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE);
         byteBuffer.put((byte) type.getValue());
@@ -74,6 +130,11 @@ public abstract class Chunk {
         return result;
     }
 
+    /**
+     * <p>Setter for the field <code>length</code>.</p>
+     *
+     * @param length a int
+     */
     protected void setLength(int length) {
         this.length = length;
     }

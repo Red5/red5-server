@@ -7,6 +7,11 @@
 
 package org.red5.io;
 
+/**
+ * <p>ITagReader interface.</p>
+ *
+ * @author mondain
+ */
 public interface ITagReader {
 
     /**
@@ -16,7 +21,6 @@ public interface ITagReader {
 
     /**
      * Decode the header of the stream;
-     *
      */
     default void decodeHeader() {
         // no-op

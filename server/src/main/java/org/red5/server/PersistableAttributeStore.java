@@ -21,6 +21,8 @@ import org.red5.server.api.persistence.IPersistenceStore;
 
 /**
  * Persistable attributes store. Server-side SharedObjects feature based on this class.
+ *
+ * @author mondain
  */
 public class PersistableAttributeStore extends AttributeStore implements IPersistable {
 
@@ -94,10 +96,9 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
     }
 
     /**
-     * Set for persistence
+     * {@inheritDoc}
      *
-     * @param persistent
-     *            Persistence flag value
+     * Set for persistence
      */
     public void setPersistent(boolean persistent) {
         this.persistent = persistent;
@@ -122,10 +123,9 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
     }
 
     /**
-     * Setter for name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Name
+     * Setter for name
      */
     public void setName(String name) {
         this.name = name;
@@ -141,10 +141,9 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
     }
 
     /**
-     * Setter for scope path
+     * {@inheritDoc}
      *
-     * @param path
-     *            Path
+     * Setter for scope path
      */
     public void setPath(String path) {
         this.path = path;
@@ -160,12 +159,9 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
     }
 
     /**
-     * Serializes byte buffer output, storing them to attributes
+     * {@inheritDoc}
      *
-     * @param output
-     *            Output object
-     * @throws IOException
-     *             if error
+     * Serializes byte buffer output, storing them to attributes
      */
     public void serialize(Output output) throws IOException {
         Map<String, Object> persistentAttributes = new HashMap<String, Object>();
@@ -181,22 +177,18 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
     }
 
     /**
-     * Deserializes data from input to attributes
+     * {@inheritDoc}
      *
-     * @param input
-     *            Input object
-     * @throws IOException
-     *             I/O exception
+     * Deserializes data from input to attributes
      */
     public void deserialize(Input input) throws IOException {
         setAttributes(Deserializer.<Map<String, Object>> deserialize(input, Map.class));
     }
 
     /**
-     * Load data from another persistent store
+     * {@inheritDoc}
      *
-     * @param store
-     *            Persistent store
+     * Load data from another persistent store
      */
     public void setStore(IPersistenceStore store) {
         if (this.store != null) {
@@ -262,11 +254,9 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
     }
 
     /**
-     * Removes attribute
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return true if attribute was removed, false otherwise
+     * Removes attribute
      */
     @Override
     public boolean removeAttribute(String name) {
@@ -278,6 +268,8 @@ public class PersistableAttributeStore extends AttributeStore implements IPersis
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Removes all attributes and sets modified flag
      */
     @Override

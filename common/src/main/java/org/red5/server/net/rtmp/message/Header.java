@@ -14,6 +14,8 @@ import java.io.ObjectOutput;
 
 /**
  * RTMP packet header
+ *
+ * @author mondain
  */
 public class Header implements Constants, Cloneable, Externalizable {
 
@@ -154,34 +156,70 @@ public class Header implements Constants, Cloneable, Externalizable {
         this.timerDelta = 0;
     }
 
+    /**
+     * <p>Setter for the field <code>timerBase</code>.</p>
+     *
+     * @param timerBase a int
+     */
     public void setTimerBase(int timerBase) {
         this.timerBase = timerBase;
     }
 
+    /**
+     * <p>Getter for the field <code>timerBase</code>.</p>
+     *
+     * @return a int
+     */
     public int getTimerBase() {
         return timerBase;
     }
 
+    /**
+     * <p>Setter for the field <code>timerDelta</code>.</p>
+     *
+     * @param timerDelta a int
+     */
     public void setTimerDelta(int timerDelta) {
         this.timerDelta = timerDelta;
     }
 
+    /**
+     * <p>Getter for the field <code>timerDelta</code>.</p>
+     *
+     * @return a int
+     */
     public int getTimerDelta() {
         return timerDelta;
     }
 
+    /**
+     * <p>Setter for the field <code>extended</code>.</p>
+     *
+     * @param extended a boolean
+     */
     public void setExtended(boolean extended) {
         this.extended = extended;
     }
 
+    /**
+     * <p>isExtended.</p>
+     *
+     * @return a boolean
+     */
     public boolean isExtended() {
         return extended;
     }
 
+    /**
+     * <p>isEmpty.</p>
+     *
+     * @return a boolean
+     */
     public boolean isEmpty() {
         return !((channelId + dataType + size + streamId.doubleValue()) > 0d);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -218,6 +256,7 @@ public class Header implements Constants, Cloneable, Externalizable {
         return header;
     }
 
+    /** {@inheritDoc} */
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         dataType = in.readByte();
         channelId = in.readInt();
@@ -228,6 +267,7 @@ public class Header implements Constants, Cloneable, Externalizable {
         timerDelta = in.readInt();
     }
 
+    /** {@inheritDoc} */
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeByte(dataType);
         out.writeInt(channelId);
@@ -242,6 +282,7 @@ public class Header implements Constants, Cloneable, Externalizable {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         // if its new and props are un-set, just return that message

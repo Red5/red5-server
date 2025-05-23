@@ -44,11 +44,9 @@ public class RTMPTHandler extends RTMPHandler {
     }
 
     /**
-     * Return hostname for URL.
+     * {@inheritDoc}
      *
-     * @param url
-     *            URL
-     * @return Hostname from that URL
+     * Return hostname for URL.
      */
     @Override
     protected String getHostname(String url) {

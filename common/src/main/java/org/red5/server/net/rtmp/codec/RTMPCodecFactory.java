@@ -14,6 +14,8 @@ import org.apache.mina.filter.codec.ProtocolEncoder;
 
 /**
  * RTMP codec factory creates RTMP encoders/decoders.
+ *
+ * @author mondain
  */
 public class RTMPCodecFactory implements ProtocolCodecFactory {
 

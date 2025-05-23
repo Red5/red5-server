@@ -13,6 +13,8 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 
 /**
  * Shared object message
+ *
+ * @author mondain
  */
 public interface ISharedObjectMessage extends IRTMPEvent {
 

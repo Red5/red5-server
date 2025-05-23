@@ -33,138 +33,113 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
      */
     IMetaCue[] cuePoints; //CuePoint array
 
-    /** MetaData constructor */
+    /**
+     * MetaData constructor
+     */
     public MetaData() {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean getCanSeekToEnd() {
         return (Boolean) this.get("canSeekToEnd");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setCanSeekToEnd(boolean b) {
         this.put("canSeekToEnd", b);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int getVideoCodecId() {
         return ((Double) this.get("videocodecid")).intValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setVideoCodecId(int id) {
         this.put("videocodecid", Double.valueOf(id));
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getAudioCodecId() {
         return ((Double) this.get("audiocodecid")).intValue();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setAudioCodecId(int id) {
         this.put("audiocodecid", Double.valueOf(id));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public double getFrameRate() {
         return (Double) this.get("framerate");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setFrameRate(double rate) {
         this.put("framerate", Double.valueOf(rate));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int getVideoDataRate() {
         return (Integer) this.get("videodatarate");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setVideoDataRate(int rate) {
         this.put("videodatarate", rate);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int getWidth() {
         return (Integer) this.get("width");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setWidth(int w) {
         this.put("width", w);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public double getDuration() {
         return (Double) this.get("duration");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setDuration(double d) {
         this.put("duration", d);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int getHeight() {
         return (Integer) this.get("height");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setHeight(int h) {
         this.put("height", h);
     }
 
     /**
-     * Sets the Meta Cue Points
+     * {@inheritDoc}
      *
-     * @param cuePoints
-     *            The cuePoints to set.
+     * Sets the Meta Cue Points
      */
     @Override
     public void setMetaCue(IMetaCue[] cuePoints) {
@@ -190,9 +165,9 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     }
 
     /**
-     * Return array of cue points
+     * {@inheritDoc}
      *
-     * @return Array of cue points
+     * Return array of cue points
      */
     @Override
     public IMetaCue[] getMetaCue() {

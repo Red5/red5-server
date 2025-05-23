@@ -16,6 +16,8 @@ import org.red5.server.messaging.PipeConnectionEvent;
 
 /**
  * Provides connection via pipe
+ *
+ * @author mondain
  */
 public class ConnectionProvider implements IProvider, IPipeConnectionListener {
 

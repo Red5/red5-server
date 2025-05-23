@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FLV implements IFLV {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(FLV.class);
 
     private static ICacheStore cache;
@@ -114,10 +115,9 @@ public class FLV implements IFLV {
     }
 
     /**
-     * Sets the cache implementation to be used.
+     * {@inheritDoc}
      *
-     * @param cache
-     *            Cache store
+     * Sets the cache implementation to be used.
      */
     @Override
     public void setCache(ICacheStore cache) {
@@ -160,21 +160,22 @@ public class FLV implements IFLV {
         }
     }
 
+    /**
+     * <p>Getter for the field <code>writePostProcessors</code>.</p>
+     *
+     * @return a {@link java.util.LinkedList} object
+     */
     public LinkedList<Class<IPostProcessor>> getWritePostProcessors() {
         return writePostProcessors;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasMetaData() {
         return metaData != null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @SuppressWarnings({ "rawtypes" })
     @Override
     public IMetaData getMetaData() throws FileNotFoundException {
@@ -182,9 +183,7 @@ public class FLV implements IFLV {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasKeyFrameData() {
         //if (hasMetaData()) {
@@ -193,9 +192,7 @@ public class FLV implements IFLV {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void setKeyFrameData(Map keyframedata) {
@@ -225,9 +222,7 @@ public class FLV implements IFLV {
         ((MetaData) metaData).put("filepositions", filepositions);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @SuppressWarnings({ "rawtypes" })
     @Override
     public Map getKeyFrameData() {
@@ -238,23 +233,17 @@ public class FLV implements IFLV {
         return keyframes;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void refreshHeaders() throws IOException {
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void flushHeaders() throws IOException {
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagReader getReader() throws IOException {
         FLVReader reader = null;
@@ -290,17 +279,13 @@ public class FLV implements IFLV {
         return reader;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagReader readerFromNearestKeyFrame(int seekPoint) {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagWriter getWriter() throws IOException {
         log.info("getWriter: {}", file);
@@ -314,9 +299,7 @@ public class FLV implements IFLV {
         return new FLVWriter(file.toPath(), true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagWriter writerFromNearestKeyFrame(int seekPoint) {
         return null;

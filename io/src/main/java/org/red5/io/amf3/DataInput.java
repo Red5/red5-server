@@ -20,7 +20,6 @@ import org.red5.io.object.Deserializer;
  *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
- *
  */
 public class DataInput implements IDataInput {
 

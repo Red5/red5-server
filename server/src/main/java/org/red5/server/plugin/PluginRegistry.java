@@ -40,12 +40,12 @@ public class PluginRegistry {
     }
 
     /**
-    * Returns true if the plug-in is registered.
-    *
-    * @param pluginName
-    *            plugin name
-    * @return true if the plug-in is registered
-    */
+     * Returns true if the plug-in is registered.
+     *
+     * @param pluginName
+     *            plugin name
+     * @return true if the plug-in is registered
+     */
     public static boolean isRegistered(String pluginName) {
         return plugins.containsKey(pluginName);
     }
@@ -121,7 +121,7 @@ public class PluginRegistry {
     /**
      * Shuts down the registry and stops any plug-ins that are found.
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on exception
      */
     public static void shutdown() throws Exception {

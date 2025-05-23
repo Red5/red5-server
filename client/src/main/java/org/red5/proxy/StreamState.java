@@ -7,6 +7,11 @@
 
 package org.red5.proxy;
 
+/**
+ * <p>StreamState class.</p>
+ *
+ * @author mondain
+ */
 public enum StreamState {
 
     UNINITIALIZED, STOPPED, CONNECTING, STREAM_CREATING, PUBLISHING, PUBLISHED, UNPUBLISHED;

@@ -1,5 +1,10 @@
 package org.red5.codec;
 
+/**
+ * <p>AudioChannelOrder class.</p>
+ *
+ * @author mondain
+ */
 public enum AudioChannelOrder {
 
     Unspecified(0), // Only the channel count is specified, without any further information about the channel order
@@ -12,10 +17,21 @@ public enum AudioChannelOrder {
         this.order = order;
     }
 
+    /**
+     * <p>Getter for the field <code>order</code>.</p>
+     *
+     * @return a int
+     */
     public int getOrder() {
         return order;
     }
 
+    /**
+     * <p>valueOf.</p>
+     *
+     * @param order a int
+     * @return a {@link org.red5.codec.AudioChannelOrder} object
+     */
     public static AudioChannelOrder valueOf(int order) {
         for (AudioChannelOrder aco : values()) {
             if (aco.getOrder() == order) {

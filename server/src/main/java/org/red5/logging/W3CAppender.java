@@ -50,10 +50,18 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
     //linked list to preserve order
     private static LinkedList<String> fieldList = new LinkedList<>();
 
+    /**
+     * <p>Constructor for W3CAppender.</p>
+     */
     public W3CAppender() {
         setPrudent(true);
     }
 
+    /**
+     * <p>Setter for the field <code>events</code>.</p>
+     *
+     * @param events a {@link java.lang.String} object
+     */
     public void setEvents(String events) {
         W3CAppender.events = events;
         //make a list out of the event names
@@ -63,10 +71,20 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         }
     }
 
+    /**
+     * <p>Getter for the field <code>events</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getEvents() {
         return events;
     }
 
+    /**
+     * <p>Setter for the field <code>fields</code>.</p>
+     *
+     * @param fields a {@link java.lang.String} object
+     */
     public void setFields(String fields) {
         W3CAppender.fields = fields;
         //make a list out of the field names
@@ -76,10 +94,16 @@ public class W3CAppender extends FileAppender<LoggingEvent> {
         }
     }
 
+    /**
+     * <p>Getter for the field <code>fields</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getFields() {
         return fields;
     }
 
+    /** {@inheritDoc} */
     @Override
     public synchronized void doAppend(LoggingEvent event) {
         //get the log message

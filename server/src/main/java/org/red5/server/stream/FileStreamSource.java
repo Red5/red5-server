@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents stream source that is file
+ *
+ * @author mondain
  */
 public class FileStreamSource implements ISeekableStreamSource, Constants {
     /**
@@ -91,7 +93,11 @@ public class FileStreamSource implements ISeekableStreamSource, Constants {
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean hasMore() {
         return reader.hasMoreTags();
     }

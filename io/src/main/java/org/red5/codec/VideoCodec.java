@@ -223,12 +223,18 @@ public enum VideoCodec {
     /**
      * Returns the four character code for this codec.
      *
-     * @return
+     * @return a {@link java.lang.String} object
      */
     public String getMimeType() {
         return mimeType;
     }
 
+    /**
+     * <p>valueOfById.</p>
+     *
+     * @param id a int
+     * @return a {@link org.red5.codec.VideoCodec} object
+     */
     public static VideoCodec valueOfById(int id) {
         return (VideoCodec) map.get((byte) id);
     }
@@ -249,10 +255,20 @@ public enum VideoCodec {
         return null;
     }
 
+    /**
+     * <p>Getter for the field <code>configured</code>.</p>
+     *
+     * @return a {@link java.util.EnumSet} object
+     */
     public static EnumSet<VideoCodec> getConfigured() {
         return configured;
     }
 
+    /**
+     * <p>Getter for the field <code>compositionTime</code>.</p>
+     *
+     * @return a {@link java.util.EnumSet} object
+     */
     public static EnumSet<VideoCodec> getCompositionTime() {
         return compositionTime;
     }

@@ -13,6 +13,8 @@ import org.red5.server.net.rtmp.codec.RTMPProtocolEncoder;
 
 /**
  * RTMPT codec factory creates RTMP codec objects
+ *
+ * @author mondain
  */
 public class RTMPTCodecFactory extends RTMPCodecFactory {
 
@@ -47,6 +49,8 @@ public class RTMPTCodecFactory extends RTMPCodecFactory {
     }
 
     /**
+     * <p>Setter for the field <code>baseTolerance</code>.</p>
+     *
      * @param baseTolerance
      *            the baseTolerance to set
      */
@@ -55,6 +59,8 @@ public class RTMPTCodecFactory extends RTMPCodecFactory {
     }
 
     /**
+     * <p>Setter for the field <code>dropLiveFuture</code>.</p>
+     *
      * @param dropLiveFuture
      *            the dropLiveFuture to set
      */

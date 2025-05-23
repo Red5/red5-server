@@ -209,7 +209,6 @@ public class FLVWriter implements ITagWriter {
      *
      * @param repair
      *            repair the .ser file
-     *
      * @param filePath
      *            path to existing file
      */
@@ -337,10 +336,9 @@ public class FLVWriter implements ITagWriter {
     }
 
     /**
-     * Writes the header bytes
+     * {@inheritDoc}
      *
-     * @throws IOException
-     *             Any I/O exception
+     * Writes the header bytes
      */
     @Override
     public void writeHeader() throws IOException {
@@ -362,9 +360,7 @@ public class FLVWriter implements ITagWriter {
         buf = null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean writeTag(ITag tag) throws IOException {
         // a/v config written flags
@@ -594,9 +590,7 @@ public class FLVWriter implements ITagWriter {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean writeTag(byte dataType, IoBuffer data) throws IOException {
         if (timeOffset == 0) {
@@ -1058,6 +1052,8 @@ public class FLVWriter implements ITagWriter {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Ends the writing process, then merges the data file with the flv file header and metadata.
      */
     @Override
@@ -1103,15 +1099,12 @@ public class FLVWriter implements ITagWriter {
      *
      * @param flv
      *            FLV source
-     *
      */
     public static void setFLV(IFLV flv) {
         FLVWriter.flv = flv;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int getOffset() {
         return offset;
@@ -1127,42 +1120,80 @@ public class FLVWriter implements ITagWriter {
         this.offset = offset;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public long getBytesWritten() {
         return bytesWritten;
     }
 
+    /**
+     * <p>Setter for the field <code>videoCodecId</code>.</p>
+     *
+     * @param videoCodecId a int
+     */
     public void setVideoCodecId(int videoCodecId) {
         this.videoCodecId = videoCodecId;
     }
 
+    /**
+     * <p>Setter for the field <code>audioCodecId</code>.</p>
+     *
+     * @param audioCodecId a int
+     */
     public void setAudioCodecId(int audioCodecId) {
         this.audioCodecId = audioCodecId;
     }
 
+    /**
+     * <p>Setter for the field <code>soundRate</code>.</p>
+     *
+     * @param soundRate a int
+     */
     public void setSoundRate(int soundRate) {
         this.soundRate = soundRate;
     }
 
+    /**
+     * <p>Setter for the field <code>soundSize</code>.</p>
+     *
+     * @param soundSize a int
+     */
     public void setSoundSize(int soundSize) {
         this.soundSize = soundSize;
     }
 
+    /**
+     * <p>Setter for the field <code>soundType</code>.</p>
+     *
+     * @param soundType a boolean
+     */
     public void setSoundType(boolean soundType) {
         this.soundType = soundType;
     }
 
+    /**
+     * <p>Setter for the field <code>duration</code>.</p>
+     *
+     * @param duration a int
+     */
     public void setDuration(int duration) {
         this.duration = duration;
     }
 
+    /**
+     * <p>Setter for the field <code>videoDataSize</code>.</p>
+     *
+     * @param videoDataSize a int
+     */
     public void setVideoDataSize(int videoDataSize) {
         this.videoDataSize = videoDataSize;
     }
 
+    /**
+     * <p>Setter for the field <code>audioDataSize</code>.</p>
+     *
+     * @param audioDataSize a int
+     */
     public void setAudioDataSize(int audioDataSize) {
         this.audioDataSize = audioDataSize;
     }
@@ -1198,7 +1229,7 @@ public class FLVWriter implements ITagWriter {
      * @param videoId
      *            video codec id
      * @return true if conversion was successful
-     * @throws InterruptedException
+     * @throws java.lang.InterruptedException
      *             Exception on interruption
      */
     public static boolean repair(String path, Integer audioId, Integer videoId) throws InterruptedException {
@@ -1273,7 +1304,7 @@ public class FLVWriter implements ITagWriter {
      *
      * @param args
      *            0: path to .ser file 1: audio codec id 2: video codec id
-     * @throws InterruptedException
+     * @throws java.lang.InterruptedException
      *             Exception on interruption
      */
     public static void main(String[] args) throws InterruptedException {

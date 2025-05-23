@@ -17,11 +17,20 @@ public class SetBuffer extends Ping {
 
     private int bufferLength;
 
+    /**
+     * <p>Constructor for SetBuffer.</p>
+     */
     public SetBuffer() {
         super();
         this.eventType = Ping.CLIENT_BUFFER;
     }
 
+    /**
+     * <p>Constructor for SetBuffer.</p>
+     *
+     * @param streamId a int
+     * @param bufferLength a int
+     */
     public SetBuffer(int streamId, int bufferLength) {
         this();
         this.streamId = streamId;
@@ -29,6 +38,8 @@ public class SetBuffer extends Ping {
     }
 
     /**
+     * <p>Getter for the field <code>streamId</code>.</p>
+     *
      * @return the streamId
      */
     public int getStreamId() {
@@ -36,6 +47,8 @@ public class SetBuffer extends Ping {
     }
 
     /**
+     * <p>Setter for the field <code>streamId</code>.</p>
+     *
      * @param streamId
      *            the streamId to set
      */
@@ -44,6 +57,8 @@ public class SetBuffer extends Ping {
     }
 
     /**
+     * <p>Getter for the field <code>bufferLength</code>.</p>
+     *
      * @return the bufferLength
      */
     public int getBufferLength() {
@@ -51,6 +66,8 @@ public class SetBuffer extends Ping {
     }
 
     /**
+     * <p>Setter for the field <code>bufferLength</code>.</p>
+     *
      * @param bufferLength
      *            the bufferLength to set
      */
@@ -58,6 +75,7 @@ public class SetBuffer extends Ping {
         this.bufferLength = bufferLength;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -66,6 +84,7 @@ public class SetBuffer extends Ping {
         bufferLength = in.readInt();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -78,6 +97,7 @@ public class SetBuffer extends Ping {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "SetBuffer [streamId=" + streamId + ", bufferLength=" + bufferLength + "]";

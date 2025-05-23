@@ -24,6 +24,11 @@ import org.red5.server.api.ICastingAttributeStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>AttributeStore class.</p>
+ *
+ * @author mondain
+ */
 public class AttributeStore implements ICastingAttributeStore {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
@@ -99,17 +104,30 @@ public class AttributeStore implements ICastingAttributeStore {
         return hasAttribute(enm.name());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getAttributeNames() {
         return Collections.unmodifiableSet(attributes.keySet());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> getAttributes() {
         return Collections.unmodifiableMap(attributes);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param name a {@link java.lang.String} object
+     * @return a {@link java.lang.Object} object
+     */
     public Object getAttribute(String name) {
         if (name == null) {
             return null;
@@ -140,13 +158,9 @@ public class AttributeStore implements ICastingAttributeStore {
     }
 
     /**
-     * Set an attribute on this object.
+     * {@inheritDoc}
      *
-     * @param name
-     *            the name of the attribute to change
-     * @param value
-     *            the new value of the attribute
-     * @return true if the attribute value was added or changed, otherwise false
+     * Set an attribute on this object.
      */
     public boolean setAttribute(final String name, final Object value) {
         log.trace("setAttribute({}, {})", name, value);
@@ -220,7 +234,12 @@ public class AttributeStore implements ICastingAttributeStore {
         return setAttribute(enm.name(), value);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param values a {@link java.util.Map} object
+     * @return a boolean
+     */
     public boolean setAttributes(Map<String, Object> values) {
         attributes.putAll(filterNull(values));
         // put all doesn't return a boolean so we assume all were added
@@ -252,116 +271,100 @@ public class AttributeStore implements ICastingAttributeStore {
         attributes.clear();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int size() {
         return attributes != null ? attributes.size() : 0;
     }
 
     /**
-     * Get Boolean attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get Boolean attribute by name
      */
     public Boolean getBoolAttribute(String name) {
         return (Boolean) getAttribute(name);
     }
 
     /**
-     * Get Byte attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get Byte attribute by name
      */
     public Byte getByteAttribute(String name) {
         return (Byte) getAttribute(name);
     }
 
     /**
-     * Get Double attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get Double attribute by name
      */
     public Double getDoubleAttribute(String name) {
         return (Double) getAttribute(name);
     }
 
     /**
-     * Get Integer attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get Integer attribute by name
      */
     public Integer getIntAttribute(String name) {
         return (Integer) getAttribute(name);
     }
 
     /**
-     * Get List attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get List attribute by name
      */
     public List<?> getListAttribute(String name) {
         return (List<?>) getAttribute(name);
     }
 
     /**
-     * Get boolean attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get boolean attribute by name
      */
     public Long getLongAttribute(String name) {
         return (Long) getAttribute(name);
     }
 
     /**
-     * Get Long attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get Long attribute by name
      */
     public Map<?, ?> getMapAttribute(String name) {
         return (Map<?, ?>) getAttribute(name);
     }
 
     /**
-     * Get Set attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get Set attribute by name
      */
     public Set<?> getSetAttribute(String name) {
         return (Set<?>) getAttribute(name);
     }
 
     /**
-     * Get Short attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get Short attribute by name
      */
     public Short getShortAttribute(String name) {
         return (Short) getAttribute(name);
     }
 
     /**
-     * Get String attribute by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Attribute name
-     * @return Attribute
+     * Get String attribute by name
      */
     public String getStringAttribute(String name) {
         return (String) getAttribute(name);

@@ -17,18 +17,38 @@ public final class UnsignedInt extends UnsignedNumber {
 
     private long value;
 
+    /**
+     * <p>Constructor for UnsignedInt.</p>
+     *
+     * @param c a byte
+     */
     public UnsignedInt(byte c) {
         value = c;
     }
 
+    /**
+     * <p>Constructor for UnsignedInt.</p>
+     *
+     * @param c a short
+     */
     public UnsignedInt(short c) {
         value = c;
     }
 
+    /**
+     * <p>Constructor for UnsignedInt.</p>
+     *
+     * @param c a int
+     */
     public UnsignedInt(int c) {
         value = c;
     }
 
+    /**
+     * <p>Constructor for UnsignedInt.</p>
+     *
+     * @param c a long
+     */
     public UnsignedInt(long c) {
         value = c & 0xFFFFFFFFL;
     }
@@ -37,10 +57,23 @@ public final class UnsignedInt extends UnsignedNumber {
         value = 0;
     }
 
+    /**
+     * <p>fromBytes.</p>
+     *
+     * @param c an array of {@link byte} objects
+     * @return a {@link org.red5.io.object.UnsignedInt} object
+     */
     public static UnsignedInt fromBytes(byte[] c) {
         return fromBytes(c, 0);
     }
 
+    /**
+     * <p>fromBytes.</p>
+     *
+     * @param c an array of {@link byte} objects
+     * @param idx a int
+     * @return a {@link org.red5.io.object.UnsignedInt} object
+     */
     public static UnsignedInt fromBytes(byte[] c, int idx) {
         UnsignedInt number = new UnsignedInt();
         if ((c.length - idx) < 4) {
@@ -50,10 +83,23 @@ public final class UnsignedInt extends UnsignedNumber {
         return number;
     }
 
+    /**
+     * <p>fromString.</p>
+     *
+     * @param c a {@link java.lang.String} object
+     * @return a {@link org.red5.io.object.UnsignedInt} object
+     */
     public static UnsignedInt fromString(String c) {
         return fromString(c, 10);
     }
 
+    /**
+     * <p>fromString.</p>
+     *
+     * @param c a {@link java.lang.String} object
+     * @param radix a int
+     * @return a {@link org.red5.io.object.UnsignedInt} object
+     */
     public static UnsignedInt fromString(String c, int radix) {
         UnsignedInt number = new UnsignedInt();
         long v = Long.parseLong(c, radix);
@@ -61,26 +107,31 @@ public final class UnsignedInt extends UnsignedNumber {
         return number;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double doubleValue() {
         return value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public float floatValue() {
         return value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int intValue() {
         return (int) (value & 0xFFFFFFFFL);
     }
 
+    /** {@inheritDoc} */
     @Override
     public long longValue() {
         return value & 0xFFFFFFFFL;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getBytes() {
         byte[] c = new byte[4];
@@ -91,6 +142,7 @@ public final class UnsignedInt extends UnsignedNumber {
         return c;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(UnsignedNumber other) {
         long otherValue = other.longValue();
@@ -101,6 +153,7 @@ public final class UnsignedInt extends UnsignedNumber {
         return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof Number))
@@ -108,16 +161,19 @@ public final class UnsignedInt extends UnsignedNumber {
         return value == ((Number) other).longValue();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return Long.toString(value & 0xFFFFFFFFL);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return (int) (value ^ (value >>> 32));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shiftRight(int nBits) {
         if (Math.abs(nBits) > 32)
@@ -126,6 +182,7 @@ public final class UnsignedInt extends UnsignedNumber {
         value >>>= nBits;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shiftLeft(int nBits) {
         if (Math.abs(nBits) > 32)

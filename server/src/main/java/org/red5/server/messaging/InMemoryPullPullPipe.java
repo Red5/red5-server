@@ -46,7 +46,12 @@ public class InMemoryPullPullPipe extends AbstractPipe {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.messaging.IMessage} object
+     * @throws java.io.IOException if any.
+     */
     public IMessage pullMessage() throws IOException {
         IMessage message = null;
         for (IProvider provider : providers) {

@@ -17,6 +17,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.red5.io.flv.IKeyFrameDataAnalyzer.KeyFrameMeta;
 
+/**
+ * <p>CachingFileKeyFrameMetaCache class.</p>
+ *
+ * @author mondain
+ */
 public class CachingFileKeyFrameMetaCache extends FileKeyFrameMetaCache {
 
     private Map<String, KeyFrameMeta> inMemoryMetaCache = new HashMap<String, KeyFrameMeta>();
@@ -43,6 +48,7 @@ public class CachingFileKeyFrameMetaCache extends FileKeyFrameMetaCache {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyFrameMeta loadKeyFrameMeta(File file) {
         rwLock.readLock().lock();
@@ -74,6 +80,7 @@ public class CachingFileKeyFrameMetaCache extends FileKeyFrameMetaCache {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void removeKeyFrameMeta(File file) {
         rwLock.writeLock().lock();
@@ -87,6 +94,7 @@ public class CachingFileKeyFrameMetaCache extends FileKeyFrameMetaCache {
         super.removeKeyFrameMeta(file);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void saveKeyFrameMeta(File file, KeyFrameMeta meta) {
         rwLock.writeLock().lock();
@@ -103,6 +111,11 @@ public class CachingFileKeyFrameMetaCache extends FileKeyFrameMetaCache {
         super.saveKeyFrameMeta(file, meta);
     }
 
+    /**
+     * <p>Setter for the field <code>maxCacheEntry</code>.</p>
+     *
+     * @param maxCacheEntry a int
+     */
     public void setMaxCacheEntry(int maxCacheEntry) {
         this.maxCacheEntry = maxCacheEntry;
     }

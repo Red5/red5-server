@@ -27,11 +27,15 @@ public class AcknowledgeMessage extends AsyncMessage {
 
     static Logger log = LoggerFactory.getLogger(AcknowledgeMessage.class);
 
+    /**
+     * <p>Constructor for AcknowledgeMessage.</p>
+     */
     public AcknowledgeMessage() {
         this.messageId = UUID.randomUUID().toString();
         this.timestamp = System.currentTimeMillis();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         super.readExternal(in);
@@ -51,6 +55,7 @@ public class AcknowledgeMessage extends AsyncMessage {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput output) {
         super.writeExternal(output);

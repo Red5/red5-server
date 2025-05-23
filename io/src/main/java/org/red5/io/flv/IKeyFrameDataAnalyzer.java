@@ -12,6 +12,8 @@ import java.util.Arrays;
 
 /**
  * Analyzes key frame data.
+ *
+ * @author mondain
  */
 public interface IKeyFrameDataAnalyzer {
 

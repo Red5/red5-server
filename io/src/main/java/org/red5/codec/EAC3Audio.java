@@ -14,8 +14,6 @@ import org.apache.mina.core.buffer.IoBuffer;
  *
  * Stores the decoder configuration.
  *
- * AC-3/E-AC-3 - <https://en.wikipedia.org/wiki/Dolby_Digital>
- *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class EAC3Audio extends AbstractAudio {
@@ -24,6 +22,7 @@ public class EAC3Audio extends AbstractAudio {
         codec = AudioCodec.EAC3;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
         if (data.limit() == 0) {

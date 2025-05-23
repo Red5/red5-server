@@ -9,6 +9,8 @@ package org.red5.server.exception;
 
 /**
  * Base for all shared object-related exceptions
+ *
+ * @author mondain
  */
 public class SharedObjectException extends RuntimeException {
 

@@ -11,37 +11,115 @@ import java.util.List;
 
 import javax.management.MXBean;
 
+/**
+ * <p>RTMPConnectionMXBean interface.</p>
+ *
+ * @author mondain
+ */
 @MXBean
 public interface RTMPConnectionMXBean extends AttributeStoreMXBean {
 
+    /**
+     * <p>getType.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getType();
 
+    /**
+     * <p>getHost.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getHost();
 
+    /**
+     * <p>getRemoteAddress.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getRemoteAddress();
 
+    /**
+     * <p>getRemoteAddresses.</p>
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<String> getRemoteAddresses();
 
+    /**
+     * <p>getRemotePort.</p>
+     *
+     * @return a int
+     */
     public int getRemotePort();
 
+    /**
+     * <p>getPath.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPath();
 
+    /**
+     * <p>getSessionId.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getSessionId();
 
+    /**
+     * <p>isConnected.</p>
+     *
+     * @return a boolean
+     */
     public boolean isConnected();
 
+    /**
+     * <p>close.</p>
+     */
     public void close();
 
+    /**
+     * <p>getReadBytes.</p>
+     *
+     * @return a long
+     */
     public long getReadBytes();
 
+    /**
+     * <p>getWrittenBytes.</p>
+     *
+     * @return a long
+     */
     public long getWrittenBytes();
 
+    /**
+     * <p>getReadMessages.</p>
+     *
+     * @return a long
+     */
     public long getReadMessages();
 
+    /**
+     * <p>getWrittenMessages.</p>
+     *
+     * @return a long
+     */
     public long getWrittenMessages();
 
+    /**
+     * <p>getDroppedMessages.</p>
+     *
+     * @return a long
+     */
     public long getDroppedMessages();
 
+    /**
+     * <p>getPendingMessages.</p>
+     *
+     * @return a long
+     */
     public long getPendingMessages();
 
 }

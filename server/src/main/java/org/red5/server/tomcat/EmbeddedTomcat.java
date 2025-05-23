@@ -27,7 +27,14 @@ public class EmbeddedTomcat extends Tomcat {
     private long cacheMaxSize = 1024 * 1024;
 
     /**
+     * <p>addWebapp.</p>
+     *
      * @see #addWebapp(String, String)
+     * @param host a {@link org.apache.catalina.Host} object
+     * @param contextPath a {@link java.lang.String} object
+     * @param docBase a {@link java.lang.String} object
+     * @param config a {@link org.apache.catalina.startup.ContextConfig} object
+     * @return a {@link org.apache.catalina.Context} object
      */
     public Context addWebapp(Host host, String contextPath, String docBase, ContextConfig config) {
         Context ctx = createContext(host, contextPath);
@@ -76,10 +83,20 @@ public class EmbeddedTomcat extends Tomcat {
         }
     }
 
+    /**
+     * <p>Getter for the field <code>cacheMaxSize</code>.</p>
+     *
+     * @return a long
+     */
     public long getCacheMaxSize() {
         return cacheMaxSize;
     }
 
+    /**
+     * <p>Setter for the field <code>cacheMaxSize</code>.</p>
+     *
+     * @param cacheMaxSize a long
+     */
     public void setCacheMaxSize(long cacheMaxSize) {
         this.cacheMaxSize = cacheMaxSize;
     }

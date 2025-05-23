@@ -13,6 +13,8 @@ import java.io.ObjectOutput;
 
 /**
  * Ping event, actually combination of different events. This is also known as a user control message.
+ *
+ * @author mondain
  */
 public class Ping extends BaseEvent {
 
@@ -107,28 +109,54 @@ public class Ping extends BaseEvent {
      */
     private String debug = "";
 
-    /** Constructs a new Ping. */
+    /**
+     * Constructs a new Ping.
+     */
     public Ping() {
         super(Type.SYSTEM);
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param eventType a short
+     */
     public Ping(short eventType) {
         super(Type.SYSTEM);
         this.eventType = eventType;
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param eventType a short
+     * @param value2 a int
+     */
     public Ping(short eventType, int value2) {
         super(Type.SYSTEM);
         this.eventType = eventType;
         this.value2 = value2;
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param eventType a short
+     * @param value2 a {@link java.lang.Number} object
+     */
     public Ping(short eventType, Number value2) {
         super(Type.SYSTEM);
         this.eventType = eventType;
         this.value2 = value2;
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param eventType a short
+     * @param value2 a int
+     * @param value3 a int
+     */
     public Ping(short eventType, int value2, int value3) {
         super(Type.SYSTEM);
         this.eventType = eventType;
@@ -136,6 +164,13 @@ public class Ping extends BaseEvent {
         this.value3 = value3;
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param eventType a short
+     * @param value2 a {@link java.lang.Number} object
+     * @param value3 a int
+     */
     public Ping(short eventType, Number value2, int value3) {
         super(Type.SYSTEM);
         this.eventType = eventType;
@@ -143,6 +178,14 @@ public class Ping extends BaseEvent {
         this.value3 = value3;
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param eventType a short
+     * @param value2 a int
+     * @param value3 a int
+     * @param value4 a int
+     */
     public Ping(short eventType, int value2, int value3, int value4) {
         super(Type.SYSTEM);
         this.eventType = eventType;
@@ -151,6 +194,14 @@ public class Ping extends BaseEvent {
         this.value4 = value4;
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param eventType a short
+     * @param value2 a {@link java.lang.Number} object
+     * @param value3 a int
+     * @param value4 a int
+     */
     public Ping(short eventType, Number value2, int value3, int value4) {
         super(Type.SYSTEM);
         this.eventType = eventType;
@@ -159,6 +210,11 @@ public class Ping extends BaseEvent {
         this.value4 = value4;
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param in a {@link org.red5.server.net.rtmp.event.Ping} object
+     */
     public Ping(Ping in) {
         super(Type.SYSTEM);
         this.eventType = in.getEventType();
@@ -268,6 +324,9 @@ public class Ping extends BaseEvent {
         this.debug = debug;
     }
 
+    /**
+     * <p>doRelease.</p>
+     */
     protected void doRelease() {
         eventType = 0;
         value2 = 0;
@@ -287,6 +346,7 @@ public class Ping extends BaseEvent {
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -303,6 +363,7 @@ public class Ping extends BaseEvent {
         value4 = in.readInt();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

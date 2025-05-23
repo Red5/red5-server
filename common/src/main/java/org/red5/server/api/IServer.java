@@ -19,7 +19,6 @@ import org.red5.server.api.scope.IGlobalScope;
  *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
- *
  */
 public interface IServer {
     /**

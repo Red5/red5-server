@@ -9,6 +9,8 @@ package org.red5.server.net.protocol;
 
 /**
  * Represents current decode state of the protocol.
+ *
+ * @author mondain
  */
 public class RTMPDecodeState {
 
@@ -35,6 +37,11 @@ public class RTMPDecodeState {
      */
     private volatile State decoderState = State.OK;
 
+    /**
+     * <p>Constructor for RTMPDecodeState.</p>
+     *
+     * @param sessionId a {@link java.lang.String} object
+     */
     public RTMPDecodeState(String sessionId) {
         this.sessionId = sessionId;
     }
@@ -83,6 +90,9 @@ public class RTMPDecodeState {
         decoderBufferAmount = 0;
     }
 
+    /**
+     * <p>stopDecoding.</p>
+     */
     public void stopDecoding() {
         decoderState = State.DESTROYED;
     }
@@ -106,6 +116,8 @@ public class RTMPDecodeState {
     }
 
     /**
+     * <p>Getter for the field <code>sessionId</code>.</p>
+     *
      * @return the sessionId
      */
     public String getSessionId() {
@@ -116,6 +128,7 @@ public class RTMPDecodeState {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "RTMPDecodeState [sessionId=" + sessionId + ", decoderState=" + decoderState + ", decoderBufferAmount=" + decoderBufferAmount + "]";

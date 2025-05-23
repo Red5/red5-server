@@ -31,6 +31,8 @@ import org.red5.server.so.SharedObjectScope;
 
 /**
  * Base abstract class for connections. Adds connection specific functionality like work with clients to AttributeStore.
+ *
+ * @author mondain
  */
 public abstract class BaseConnection extends AttributeStore implements IConnection {
 
@@ -208,9 +210,9 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
-     * Notifies listeners of a property change.
+     * {@inheritDoc}
      *
-     * @param evt PropertyChangeEvent containing details
+     * Notifies listeners of a property change.
      */
     public void notifyPropertyChanged(PropertyChangeEvent evt) {
         if (connectionListeners != null) {
@@ -219,13 +221,19 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
+     * <p>getLock.</p>
+     *
      * @return lock for changing state operations
      */
     public Semaphore getLock() {
         return writeLock;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.Number} object
+     */
     public Number getStreamId() {
         return streamLocal.get();
     }
@@ -257,7 +265,9 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void uninitialize() {
         // unregister client
         if (log.isTraceEnabled()) {
@@ -270,47 +280,83 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getType() {
         return type.name().toLowerCase();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a Duty object
+     */
     public Duty getDuty() {
         return duty;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param duty a Duty object
+     */
     public void setDuty(Duty duty) {
         this.duty = duty;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getHost() {
         return host;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getRemoteAddress() {
         return remoteAddress;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<String> getRemoteAddresses() {
         return remoteAddresses;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getRemotePort() {
         return remotePort;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPath() {
         return path;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getSessionId() {
         return sessionId;
     }
@@ -329,7 +375,11 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         this.client = client;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.IClient} object
+     */
     public IClient getClient() {
         return client;
     }
@@ -344,6 +394,11 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         return client != null ? client.getId().hashCode() : -1;
     }
 
+    /**
+     * <p>setId.</p>
+     *
+     * @param clientId a int
+     */
     @Deprecated
     public void setId(int clientId) {
         log.warn("Setting of a client id is deprecated, use IClient to manipulate the id", new Exception("RTMPConnection.setId is deprecated"));
@@ -360,11 +415,9 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
-     * Connect to another scope on server
+     * {@inheritDoc}
      *
-     * @param newScope
-     *            New scope
-     * @return true on success, false otherwise
+     * Connect to another scope on server
      */
     public boolean connect(IScope newScope) {
         return connect(newScope, null);
@@ -460,37 +513,34 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
-     * Notified on event
+     * {@inheritDoc}
      *
-     * @param event
-     *            Event
+     * Notified on event
      */
     public void notifyEvent(IEvent event) {
         log.debug("Event notify was not handled: {}", event);
     }
 
     /**
-     * Dispatches event
+     * {@inheritDoc}
      *
-     * @param event
-     *            Event
+     * Dispatches event
      */
     public void dispatchEvent(IEvent event) {
         log.debug("Event notify was not dispatched: {}", event);
     }
 
     /**
-     * Handles event
+     * {@inheritDoc}
      *
-     * @param event
-     *            Event
-     * @return true if associated scope was able to handle event, false otherwise
+     * Handles event
      */
     public boolean handleEvent(IEvent event) {
         return getScope().handleEvent(event);
     }
 
     /**
+     * <p>Getter for the field <code>basicScopes</code>.</p>
      *
      * @return basic scopes
      */
@@ -534,18 +584,21 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
+     * <p>getReadBytes.</p>
      *
      * @return bytes read
      */
     public abstract long getReadBytes();
 
     /**
+     * <p>getWrittenBytes.</p>
      *
      * @return bytes written
      */
     public abstract long getWrittenBytes();
 
     /**
+     * <p>Getter for the field <code>readMessages</code>.</p>
      *
      * @return messages read
      */
@@ -554,6 +607,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
+     * <p>Getter for the field <code>writtenMessages</code>.</p>
      *
      * @return messages written
      */
@@ -562,6 +616,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
+     * <p>Getter for the field <code>droppedMessages</code>.</p>
      *
      * @return dropped messages
      */
@@ -625,7 +680,11 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         return 0;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a long
+     */
     public long getClientBytesRead() {
         return 0;
     }
@@ -634,6 +693,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -645,6 +705,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

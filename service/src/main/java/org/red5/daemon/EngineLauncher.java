@@ -21,6 +21,8 @@ import org.red5.server.Shutdown;
 
 /**
  * Launch the Engine from a variety of sources, either through a main() or invoked through Apache Daemon.
+ *
+ * @author mondain
  */
 public class EngineLauncher implements Daemon {
 
@@ -75,6 +77,9 @@ public class EngineLauncher implements Daemon {
         }
     }
 
+    /**
+     * <p>windowsStart.</p>
+     */
     public void windowsStart() {
         System.out.println("windowsStart called");
         initialize();
@@ -89,6 +94,9 @@ public class EngineLauncher implements Daemon {
         }
     }
 
+    /**
+     * <p>windowsStop.</p>
+     */
     public void windowsStop() {
         System.out.println("windowsStop called");
         terminate();
@@ -99,6 +107,7 @@ public class EngineLauncher implements Daemon {
     }
 
     // Implementing the Daemon interface is not required for Windows but is for Linux
+    /** {@inheritDoc} */
     @Override
     public void init(DaemonContext ctx) throws Exception {
         System.out.println("Daemon init");
@@ -107,18 +116,21 @@ public class EngineLauncher implements Daemon {
         System.out.printf("Args: %s%n", Arrays.toString(commandLineArgs));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void start() {
         System.out.println("Daemon start");
         initialize();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void stop() {
         System.out.println("Daemon stop");
         terminate();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() {
         System.out.println("Daemon destroy");

@@ -7,6 +7,11 @@
  */
 package org.red5.io.sctp.packet.chunks;
 
+/**
+ * <p>ChunkType class.</p>
+ *
+ * @author mondain
+ */
 public enum ChunkType {
 
     DATA(0), // Payload Data
@@ -31,6 +36,11 @@ public enum ChunkType {
         this.value = value;
     }
 
+    /**
+     * <p>Getter for the field <code>value</code>.</p>
+     *
+     * @return a int
+     */
     public int getValue() {
         return value;
     }

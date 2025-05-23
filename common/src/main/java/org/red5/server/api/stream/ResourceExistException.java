@@ -7,22 +7,45 @@
 
 package org.red5.server.api.stream;
 
+/**
+ * <p>ResourceExistException class.</p>
+ *
+ * @author mondain
+ */
 public class ResourceExistException extends Exception {
     private static final long serialVersionUID = 443389396219999143L;
 
-    /** Constructs a new ResourceExistException. */
+    /**
+     * Constructs a new ResourceExistException.
+     */
     public ResourceExistException() {
         super();
     }
 
+    /**
+     * <p>Constructor for ResourceExistException.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     * @param cause a {@link java.lang.Throwable} object
+     */
     public ResourceExistException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * <p>Constructor for ResourceExistException.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     */
     public ResourceExistException(String message) {
         super(message);
     }
 
+    /**
+     * <p>Constructor for ResourceExistException.</p>
+     *
+     * @param cause a {@link java.lang.Throwable} object
+     */
     public ResourceExistException(Throwable cause) {
         super(cause);
     }

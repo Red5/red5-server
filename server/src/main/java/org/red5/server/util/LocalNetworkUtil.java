@@ -13,6 +13,11 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+/**
+ * <p>LocalNetworkUtil class.</p>
+ *
+ * @author mondain
+ */
 public class LocalNetworkUtil {
 
     /**

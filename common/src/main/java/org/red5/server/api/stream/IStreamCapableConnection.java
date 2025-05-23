@@ -24,7 +24,7 @@ public interface IStreamCapableConnection extends IConnection {
      * Return a reserved stream id for use. According to FCS/FMS regulation, the base is 1.
      *
      * @return Reserved stream id
-     * @throws IndexOutOfBoundsException
+     * @throws java.lang.IndexOutOfBoundsException
      *             when it is impossible to reserve new stream
      */
     Number reserveStreamId() throws IndexOutOfBoundsException;
@@ -35,7 +35,7 @@ public interface IStreamCapableConnection extends IConnection {
      * @param streamId
      *            supplied stream id
      * @return Reserved stream id
-     * @throws IndexOutOfBoundsException
+     * @throws java.lang.IndexOutOfBoundsException
      *             when it is impossible to reserve new stream
      */
     Number reserveStreamId(Number streamId) throws IndexOutOfBoundsException;
@@ -101,6 +101,11 @@ public interface IStreamCapableConnection extends IConnection {
      */
     long getPendingVideoMessages(Number streamId);
 
+    /**
+     * <p>getStreamsMap.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
     Map<Number, IClientStream> getStreamsMap();
 
 }

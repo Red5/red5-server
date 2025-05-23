@@ -7,6 +7,11 @@
 
 package org.red5.server.api.stream;
 
+/**
+ * <p>IStreamHandler interface.</p>
+ *
+ * @author mondain
+ */
 public interface IStreamHandler {
 
     /**

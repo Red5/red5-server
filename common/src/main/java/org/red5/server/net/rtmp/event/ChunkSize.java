@@ -13,6 +13,8 @@ import java.io.ObjectOutput;
 
 /**
  * Chunk size event
+ *
+ * @author mondain
  */
 public class ChunkSize extends BaseEvent {
 
@@ -23,6 +25,9 @@ public class ChunkSize extends BaseEvent {
      */
     private int size;
 
+    /**
+     * <p>Constructor for ChunkSize.</p>
+     */
     public ChunkSize() {
         super(Type.SYSTEM);
     }
@@ -99,12 +104,14 @@ public class ChunkSize extends BaseEvent {
         return timestamp;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         size = in.readInt();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

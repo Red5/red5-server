@@ -29,10 +29,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Works with client-side shared object
+ *
+ * @author mondain
  */
 @SuppressWarnings("unchecked")
 public class ClientSharedObject extends SharedObject implements IClientSharedObject, IEventDispatcher {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(ClientSharedObject.class);
 
     /**
@@ -65,10 +68,9 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
     }
 
     /**
-     * Connect the shared object using the passed connection.
+     * {@inheritDoc}
      *
-     * @param conn
-     *            Attach SO to given connection
+     * Connect the shared object using the passed connection.
      */
     public void connect(IConnection conn) {
         if (conn instanceof RTMPConnection) {
@@ -86,7 +88,9 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void disconnect() {
         if (isConnected()) {
             SharedObjectMessage msg = new SharedObjectMessage(name, 0, isPersistent());
@@ -98,7 +102,11 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isConnected() {
         return initialSyncReceived;
     }
@@ -347,7 +355,11 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
         return handlers.get(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getServiceHandlerNames() {
         return Collections.unmodifiableSet(handlers.keySet());
     }

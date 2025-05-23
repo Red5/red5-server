@@ -23,6 +23,11 @@ public final class ChildFirstClassLoader extends URLClassLoader {
 
     private ClassLoader system;
 
+    /**
+     * <p>Constructor for ChildFirstClassLoader.</p>
+     *
+     * @param urls an array of {@link java.net.URL} objects
+     */
     public ChildFirstClassLoader(URL[] urls) {
         super(urls);
         this.parent = super.getParent();
@@ -32,6 +37,12 @@ public final class ChildFirstClassLoader extends URLClassLoader {
         dumpClassLoaderNames();
     }
 
+    /**
+     * <p>Constructor for ChildFirstClassLoader.</p>
+     *
+     * @param urls an array of {@link java.net.URL} objects
+     * @param parent a {@link java.lang.ClassLoader} object
+     */
     public ChildFirstClassLoader(URL[] urls, ClassLoader parent) {
         super(urls, parent);
         this.parent = parent;
@@ -48,20 +59,18 @@ public final class ChildFirstClassLoader extends URLClassLoader {
         System.out.printf("[ChildFirstClassLoader] Classloaders:\nSystem %s\nParents Parent %s\nParent %s\nThis class %s\nTCL %s\n\n", system, parentParent, this.parent, ChildFirstClassLoader.class.getClassLoader(), Thread.currentThread().getContextClassLoader());
     }
 
+    /** {@inheritDoc} */
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         return loadClass(name, false);
     }
 
     /**
+     * {@inheritDoc}
+     *
      * We override the parent-first behavior established by java.lang.Classloader.
      * <p>
      * The implementation is surprisingly straightforward.
-     *
-     * @param name the name of the class to load, should not be null
-     * @param resolve flag that indicates whether the class should be resolved
-     * @return the loaded class, never null
-     * @throws ClassNotFoundException if the class could not be loaded
      */
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
@@ -118,10 +127,9 @@ public final class ChildFirstClassLoader extends URLClassLoader {
     }
 
     /**
-     * Override the parent-first resource loading model established by java.lang.Classloader with child-first behavior.
+     * {@inheritDoc}
      *
-     * @param name the name of the resource to load, should not be null
-     * @return a {@link URL} for the resource, or null if it could not be found
+     * Override the parent-first resource loading model established by java.lang.Classloader with child-first behavior.
      */
     @Override
     public URL getResource(String name) {

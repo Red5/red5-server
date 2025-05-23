@@ -16,9 +16,12 @@ import jakarta.websocket.SendResult;
 
 /**
  * This is the server side {@link jakarta.websocket.RemoteEndpoint} implementation - i.e. what the server uses to send data to the client.
+ *
+ * @author mondain
  */
 public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
+    /** Constant <code>SENDRESULT_OK</code> */
     protected static final SendResult SENDRESULT_OK = new SendResult(null, null);
 
     private final SocketWrapperBase<?> socketWrapper;
@@ -35,6 +38,12 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
     private volatile boolean close;
 
+    /**
+     * <p>Constructor for WsRemoteEndpointImplServer.</p>
+     *
+     * @param socketWrapper a {@link org.apache.tomcat.util.net.SocketWrapperBase} object
+     * @param upgradeInfo a {@link org.apache.coyote.http11.upgrade.UpgradeInfo} object
+     */
     public WsRemoteEndpointImplServer(SocketWrapperBase<?> socketWrapper, UpgradeInfo upgradeInfo) {
         this.socketWrapper = socketWrapper;
         this.upgradeInfo = upgradeInfo;
@@ -42,11 +51,13 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         this.wsWriteTimeout = new WsWriteTimeout();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected final boolean isMasked() {
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void doWrite(SendHandler handler, long blockingWriteTimeoutExpiry, ByteBuffer... buffers) {
         if (blockingWriteTimeoutExpiry == -1) {
@@ -82,12 +93,18 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void updateStats(long payloadLength) {
         upgradeInfo.addMsgsSent(1);
         upgradeInfo.addBytesSent(payloadLength);
     }
 
+    /**
+     * <p>onWritePossible.</p>
+     *
+     * @param useDispatch a boolean
+     */
     public void onWritePossible(boolean useDispatch) {
         ByteBuffer[] buffers = this.buffers;
         if (buffers == null) {
@@ -136,6 +153,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void doClose() {
         if (handler != null) {
@@ -148,12 +166,18 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         wsWriteTimeout.unregister(this);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected ReentrantLock getLock() {
         // for a lack of better implementation, we use the socket wrapper lock
         return socketWrapper.getLock();
     }
 
+    /**
+     * <p>Getter for the field <code>timeoutExpiry</code>.</p>
+     *
+     * @return a long
+     */
     protected long getTimeoutExpiry() {
         return timeoutExpiry;
     }
@@ -162,6 +186,11 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
      * Currently this is only called from the background thread so we could just call clearHandler() with useDispatch == false but the method parameter was added in case other callers
      * started to use this method to make sure that those callers think through what the correct value of useDispatch is for them.
      */
+    /**
+     * <p>onTimeout.</p>
+     *
+     * @param useDispatch a boolean
+     */
     protected void onTimeout(boolean useDispatch) {
         if (handler != null) {
             clearHandler(new SocketTimeoutException(), useDispatch);
@@ -169,6 +198,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         close();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void setTransformation(Transformation transformation) {
         // Overridden purely so it is visible to other classes in this package

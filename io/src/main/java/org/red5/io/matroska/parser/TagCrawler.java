@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * class able to walk through the webm file and pass parsed tags to registered handlers
  *
+ * @author mondain
  */
 public class TagCrawler {
     private static Logger log = LoggerFactory.getLogger(TagCrawler.class);
@@ -31,14 +32,13 @@ public class TagCrawler {
 
     /**
      * Constructor
-     *
      */
     public TagCrawler() {
         skipHandler = createSkipHandler();
     }
 
     /**
-     * Method to add {@link TagHandler}
+     * Method to add {@link org.red5.io.matroska.parser.TagHandler}
      *
      * @param name
      *            - unique name of tag handler
@@ -52,7 +52,7 @@ public class TagCrawler {
     }
 
     /**
-     * Method to remove {@link TagHandler}
+     * Method to remove {@link org.red5.io.matroska.parser.TagHandler}
      *
      * @param name
      *            - unique name of tag handler
@@ -66,7 +66,7 @@ public class TagCrawler {
     }
 
     /**
-     * Method to get {@link TagHandler} by tag, can be overridden to change the logic of handler searching
+     * Method to get {@link org.red5.io.matroska.parser.TagHandler} by tag, can be overridden to change the logic of handler searching
      *
      * @param tag
      *            - tag to be handled
@@ -102,9 +102,9 @@ public class TagCrawler {
      *
      * @param input
      *            - input stream to process
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of any IO errors
-     * @throws ConverterException
+     * @throws org.red5.io.matroska.ConverterException
      *             - in case of any conversion errorss
      */
     public void process(InputStream input) throws IOException, ConverterException {

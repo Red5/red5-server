@@ -23,6 +23,11 @@ import org.w3c.dom.Document;
  */
 public interface Output {
 
+    /**
+     * <p>putString.</p>
+     *
+     * @param string a {@link java.lang.String} object
+     */
     void putString(String string);
 
     // Basic Data Types
@@ -58,6 +63,9 @@ public interface Output {
      */
     void writeDate(Date date);
 
+    /**
+     * <p>writeNull.</p>
+     */
     void writeNull();
 
     /**

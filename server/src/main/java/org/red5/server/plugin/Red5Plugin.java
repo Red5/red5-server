@@ -23,11 +23,19 @@ public abstract class Red5Plugin implements IRed5Plugin {
 
     protected Server server;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void doStart() throws Exception {
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void doStop() throws Exception {
     }
 
@@ -37,7 +45,11 @@ public abstract class Red5Plugin implements IRed5Plugin {
     public void init() {
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getName() {
         return null;
     }

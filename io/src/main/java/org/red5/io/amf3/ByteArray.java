@@ -371,6 +371,7 @@ public class ByteArray implements IDataInput, IDataOutput {
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return toString().hashCode();
@@ -380,6 +381,7 @@ public class ByteArray implements IDataInput, IDataOutput {
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -399,9 +401,9 @@ public class ByteArray implements IDataInput, IDataOutput {
     }
 
     /**
-     * Return string representation of the array's contents.
+     * {@inheritDoc}
      *
-     * @return string representation of array's contents.
+     * Return string representation of the array's contents.
      */
     @Override
     public String toString() {

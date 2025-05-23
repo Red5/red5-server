@@ -9,9 +9,16 @@ package org.red5.client.net.rtmp;
 
 /**
  * Client connection exception handler
+ *
+ * @author mondain
  */
 public interface ClientExceptionHandler {
 
+    /**
+     * <p>handleException.</p>
+     *
+     * @param throwable a {@link java.lang.Throwable} object
+     */
     void handleException(Throwable throwable);
 
 }

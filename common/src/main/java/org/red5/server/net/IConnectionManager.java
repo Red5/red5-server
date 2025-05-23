@@ -9,6 +9,12 @@ package org.red5.server.net;
 
 import java.util.Collection;
 
+/**
+ * <p>IConnectionManager interface.</p>
+ *
+ * @param <T> type of connection
+ * @author Paul Gregoire (mondain@gmail.com)
+ */
 public interface IConnectionManager<T> {
 
     /**

@@ -172,7 +172,9 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
      */
     private WeakReference<IRecordingListener> recordingListener;
 
-    /** Constructs a new ServerStream. */
+    /**
+     * Constructs a new ServerStream.
+     */
     public ServerStream() {
         defaultController = new SimplePlaylistController();
         items = new CopyOnWriteArrayList<>();
@@ -212,27 +214,46 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void removeAllItems() {
         currentItemIndex = 0;
         items.clear();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getItemSize() {
         return items.size();
     }
 
+    /**
+     * <p>Getter for the field <code>items</code>.</p>
+     *
+     * @return a {@link java.util.concurrent.CopyOnWriteArrayList} object
+     */
     public CopyOnWriteArrayList<IPlayItem> getItems() {
         return items;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getCurrentItemIndex() {
         return currentItemIndex;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.stream.IPlayItem} object
+     */
     public IPlayItem getCurrentItem() {
         return currentItem;
     }
@@ -246,7 +267,9 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void previousItem() {
         stop();
         moveToPrevious();
@@ -257,7 +280,11 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         play(item);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean hasMoreItems() {
         int nextItem = currentItemIndex + 1;
         if (nextItem >= items.size() && !isRepeat) {
@@ -267,7 +294,9 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void nextItem() {
         stop();
         moveToNext();
@@ -289,7 +318,11 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         play(item);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isRandom() {
         return isRandom;
     }
@@ -299,7 +332,11 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         isRandom = random;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isRewind() {
         return isRewind;
     }
@@ -309,7 +346,11 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         isRewind = rewind;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isRepeat() {
         return isRepeat;
     }
@@ -389,7 +430,11 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getSaveFilename() {
         if (recordingListener != null) {
             return recordingListener.get().getFileName();
@@ -397,12 +442,20 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.messaging.IProvider} object
+     */
     public IProvider getProvider() {
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPublishedName() {
         return publishedName;
     }
@@ -482,7 +535,9 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings("incomplete-switch")
     public void pause() {
         switch (state.get()) {
@@ -505,7 +560,9 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void close() {
         if (PLAYING_OR_PAUSED.contains(state.get())) {
             stop();
@@ -527,12 +584,11 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Pipe connection event handler. There are two types of pipe connection events so far, provider push connection event and provider disconnection event.
      *
      * Pipe events handling is the most common way of working with pipes.
-     *
-     * @param event
-     *            Pipe connection event context
      */
     public void onPipeConnectionEvent(PipeConnectionEvent event) {
         switch (event.getType()) {
@@ -898,14 +954,21 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         }
     }
 
+    /** {@inheritDoc} */
     public void addStreamListener(IStreamListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * <p>getStreamListeners.</p>
+     *
+     * @return a {@link java.util.Collection} object
+     */
     public Collection<IStreamListener> getStreamListeners() {
         return listeners;
     }
 
+    /** {@inheritDoc} */
     public void removeStreamListener(IStreamListener listener) {
         listeners.remove(listener);
     }
@@ -914,6 +977,7 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "ServerStream [publishedName=" + publishedName + ", controller=" + controller + ", defaultController=" + defaultController + ", isRewind=" + isRewind + ", isRandom=" + isRandom + ", isRepeat=" + isRepeat + ", items=" + items + ", currentItemIndex=" + currentItemIndex + ", currentItem=" + currentItem + ", providerService=" + providerService + ", scheduler=" + scheduler + ", liveJobName=" + liveJobName

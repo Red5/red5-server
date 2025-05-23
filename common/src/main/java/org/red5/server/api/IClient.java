@@ -11,11 +11,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.red5.server.adapter.IApplication;
 import org.red5.server.api.scope.IScope;
 
 /**
- * The client object represents a single client. One client may have multiple connections to different scopes on the same host. In some ways the client object is like a HTTP session. You can create IClient objects with {@link IClientRegistry#newClient(Object[])}
+ * The client object represents a single client. One client may have multiple connections to different scopes on the same host. In some ways the client object is like a HTTP session. You can create IClient objects with {@link org.red5.server.api.IClientRegistry#newClient(Object[])}
  *
  *
  * NOTE: I removed session, since client serves the same purpose as a client with attributes
@@ -37,7 +36,7 @@ public interface IClient extends IAttributeStore {
      * params
      * </pre>
      *
-     * object of {@link IApplication#appConnect(IConnection, Object[])} method, that contains 2nd all the rest values you pass to
+     * object of {@link org.red5.server.adapter.IApplication#appConnect(IConnection, Object[])} method, that contains 2nd all the rest values you pass to
      *
      * <pre>
      * NetConnection.connect

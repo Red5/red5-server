@@ -43,6 +43,8 @@ public class StatusObjectService implements StatusCodes, InitializingBean {
 
     /**
      * Initialization
+     *
+     * @throws java.lang.Exception if any.
      */
     public void afterPropertiesSet() throws Exception {
         log.trace("Loading and caching status objects");

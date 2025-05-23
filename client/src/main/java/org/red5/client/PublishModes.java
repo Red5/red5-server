@@ -18,16 +18,19 @@ package org.red5.client;
  * recording it. If a file with a name that matches the value passed to the name parameter exists, it is deleted.
  *
  * @author Stoian Ivanov (s.ivanov_at_teracomm.bg)
- *
  */
 public final class PublishModes {
 
+    /** Constant <code>LIVE="live"</code> */
     public static final String LIVE = "live";
 
+    /** Constant <code>RECORD="record"</code> */
     public static final String RECORD = "record";
 
+    /** Constant <code>APPEND="append"</code> */
     public static final String APPEND = "append";
 
+    /** Constant <code>APPENDWITHGAP="appendWithGap"</code> */
     public static final String APPENDWITHGAP = "appendWithGap";
 
 }

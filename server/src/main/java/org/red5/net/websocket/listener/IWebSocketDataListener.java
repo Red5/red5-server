@@ -12,6 +12,8 @@ import org.red5.net.websocket.model.WSMessage;
 
 /**
  * Listener for WebSocket events.
+ *
+ * @author mondain
  */
 public interface IWebSocketDataListener {
 
@@ -25,14 +27,14 @@ public interface IWebSocketDataListener {
     /**
      * Sets the protocol for which this listener is interested.
      *
-     * @param protocol
+     * @param protocol a {@link java.lang.String} object
      */
     public void setProtocol(String protocol);
 
     /**
      * Dispatch message.
      *
-     * @param message
+     * @param message a {@link org.red5.net.websocket.model.WSMessage} object
      */
     public void onWSMessage(WSMessage message);
 

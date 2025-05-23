@@ -32,6 +32,7 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
  */
 public class RTMPClient extends BaseRTMPClientHandler {
 
+    /** Constant <code>CONNECTOR_WORKER_TIMEOUT=7000</code> */
     protected static final int CONNECTOR_WORKER_TIMEOUT = 7000; // milliseconds
 
     // I/O handler
@@ -46,7 +47,9 @@ public class RTMPClient extends BaseRTMPClientHandler {
     // Connected IoSession
     protected IoSession session;
 
-    /** Constructs a new RTMPClient. */
+    /**
+     * Constructs a new RTMPClient.
+     */
     public RTMPClient() {
         ioHandler = new RTMPMinaIoHandler();
         ioHandler.setHandler(this);
@@ -120,11 +123,9 @@ public class RTMPClient extends BaseRTMPClientHandler {
     }
 
     /**
-     * Sets the RTMP protocol, the default is "rtmp". If "rtmps" or "rtmpt" are required, the appropriate client type should be selected.
+     * {@inheritDoc}
      *
-     * @param protocol
-     *            the protocol to set
-     * @throws Exception thrown
+     * Sets the RTMP protocol, the default is "rtmp". If "rtmps" or "rtmpt" are required, the appropriate client type should be selected.
      */
     @Override
     public void setProtocol(String protocol) throws Exception {

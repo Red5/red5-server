@@ -23,9 +23,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base IScopeHandler implementation
+ *
+ * @author mondain
  */
 public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(CoreHandler.class);
 
     /** {@inheritDoc} */
@@ -34,13 +37,9 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
     }
 
     /**
-     * Connects client to the scope
+     * {@inheritDoc}
      *
-     * @param conn
-     *            Client connection
-     * @param scope
-     *            Scope
-     * @return true if client was registered within scope, false otherwise
+     * Connects client to the scope
      */
     public boolean connect(IConnection conn, IScope scope) {
         return connect(conn, scope, null);
@@ -132,13 +131,9 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
     }
 
     /**
-     * Remote method invocation
+     * {@inheritDoc}
      *
-     * @param conn
-     *            Connection to invoke method on
-     * @param call
-     *            Service call context
-     * @return true on success
+     * Remote method invocation
      */
     public boolean serviceCall(IConnection conn, IServiceCall call) {
         final IContext context = conn.getScope().getContext();

@@ -14,6 +14,8 @@ import org.red5.server.api.stream.IPlaylistController;
 
 /**
  * Simple playlist controller implementation
+ *
+ * @author mondain
  */
 public class SimplePlaylistController implements IPlaylistController {
 

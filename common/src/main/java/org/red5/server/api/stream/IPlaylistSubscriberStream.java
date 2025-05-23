@@ -11,6 +11,8 @@ import org.red5.server.api.statistics.IPlaylistSubscriberStreamStatistics;
 
 /**
  * IPlaylistSubscriberStream has methods of both ISubscriberStream and IPlaylist but adds nothing new
+ *
+ * @author mondain
  */
 public interface IPlaylistSubscriberStream extends ISubscriberStream, IPlaylist {
 

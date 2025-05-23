@@ -39,6 +39,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPEIoFilter.class);
 
+    /** {@inheritDoc} */
     @Override
     public void messageReceived(NextFilter nextFilter, IoSession session, Object obj) throws Exception {
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
@@ -212,6 +213,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
         handler.connectionOpened(conn);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void filterWrite(NextFilter nextFilter, IoSession session, WriteRequest request) throws Exception {
         // grab the message

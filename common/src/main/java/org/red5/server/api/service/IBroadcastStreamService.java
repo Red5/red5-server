@@ -12,8 +12,14 @@ import java.util.Set;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.stream.IBroadcastStream;
 
+/**
+ * <p>IBroadcastStreamService interface.</p>
+ *
+ * @author mondain
+ */
 public interface IBroadcastStreamService {
 
+    /** Constant <code>BROADCAST_STREAM_SERVICE="broadcastStreamService"</code> */
     public final static String BROADCAST_STREAM_SERVICE = "broadcastStreamService";
 
     /**
@@ -50,7 +56,7 @@ public interface IBroadcastStreamService {
     /**
      * Returns broadcast streams registered on the scope.
      *
-     * @param scope
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
      * @return set of broadcast streams or empty if none exist
      */
     Set<IBroadcastStream> getBroadcastStreams(IScope scope);

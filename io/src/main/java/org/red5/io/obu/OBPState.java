@@ -1,5 +1,10 @@
 package org.red5.io.obu;
 
+/**
+ * <p>OBPState class.</p>
+ *
+ * @author mondain
+ */
 public class OBPState {
 
     public OBPFrameHeader prev;

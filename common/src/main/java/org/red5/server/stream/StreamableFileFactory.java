@@ -18,10 +18,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Creates streamable file services
+ *
+ * @author mondain
  */
 public class StreamableFileFactory implements IStreamableFileFactory {
 
     // Initialize Logging
+    /** Constant <code>logger</code> */
     public static Logger logger = LoggerFactory.getLogger(StreamableFileFactory.class);
 
     private Set<IStreamableFileService> services = new HashSet<>();
@@ -50,7 +53,11 @@ public class StreamableFileFactory implements IStreamableFileFactory {
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<IStreamableFileService> getServices() {
         logger.debug("StreamableFileFactory get services");
         return services;

@@ -77,8 +77,8 @@ public class Proxy implements IClientListener {
     /**
      * Starts the process of proxying data.
      *
-     * @param publishName
-     * @param publishMode
+     * @param publishName a {@link java.lang.String} object
+     * @param publishMode a {@link java.lang.String} object
      */
     public void start(String publishName, String publishMode) {
         this.publishName = publishName;
@@ -117,7 +117,7 @@ public class Proxy implements IClientListener {
     /**
      * Sets the host to proxy to.
      *
-     * @param host
+     * @param host a {@link java.lang.String} object
      */
     public void setHost(String host) {
         this.host = host;
@@ -126,7 +126,7 @@ public class Proxy implements IClientListener {
     /**
      * Sets the port to proxy to.
      *
-     * @param port
+     * @param port a int
      */
     public void setPort(int port) {
         this.port = port;
@@ -135,7 +135,7 @@ public class Proxy implements IClientListener {
     /**
      * Sets the applicaiton to proxy to.
      *
-     * @param app
+     * @param app a {@link java.lang.String} object
      */
     public void setApp(String app) {
         this.app = app;
@@ -165,7 +165,9 @@ public class Proxy implements IClientListener {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void stopListening() {
         log.debug("stopListening, client is finished providing data");
         stop();

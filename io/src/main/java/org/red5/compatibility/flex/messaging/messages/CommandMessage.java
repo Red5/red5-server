@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
  *
  * @see <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a>
  * @see <a href="http://flex.apache.org/asdoc/mx/messaging/messages/CommandMessage.html">Apache Flex</a>
- *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
  * @author Paul Gregoire (mondain@gmail.com)
@@ -30,6 +29,7 @@ public class CommandMessage extends AsyncMessage {
 
     private static final long serialVersionUID = 8805045741686625945L;
 
+    /** Constant <code>OPERATION_FLAG=1</code> */
     protected static byte OPERATION_FLAG = 1;
 
     public String messageRefType;
@@ -37,6 +37,9 @@ public class CommandMessage extends AsyncMessage {
     /** Command id to execute. */
     public int operation = Constants.UNKNOWN_OPERATION;
 
+    /**
+     * <p>Constructor for CommandMessage.</p>
+     */
     public CommandMessage() {
         this.messageId = UUID.randomUUID().toString();
         this.timestamp = System.currentTimeMillis();
@@ -52,16 +55,27 @@ public class CommandMessage extends AsyncMessage {
         result.append(operation);
     }
 
+    /**
+     * <p>Getter for the field <code>operation</code>.</p>
+     *
+     * @return a int
+     */
     public int getOperation() {
         return operation;
     }
 
+    /**
+     * <p>Setter for the field <code>operation</code>.</p>
+     *
+     * @param operation a int
+     */
     public void setOperation(int operation) {
         this.operation = operation;
     }
 
     static Logger log = LoggerFactory.getLogger(CommandMessage.class);
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         log.debug("CommandMessage - Read external");
@@ -99,6 +113,7 @@ public class CommandMessage extends AsyncMessage {
         log.debug("Operation: {}", operation);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         super.writeExternal(out);

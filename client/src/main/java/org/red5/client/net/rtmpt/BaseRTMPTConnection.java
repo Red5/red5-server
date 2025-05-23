@@ -26,6 +26,11 @@ import org.red5.server.net.rtmpt.codec.RTMPTProtocolEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>Abstract BaseRTMPTConnection class.</p>
+ *
+ * @author mondain
+ */
 public abstract class BaseRTMPTConnection extends RTMPConnection {
 
     private static final Logger log = LoggerFactory.getLogger(BaseRTMPTConnection.class);
@@ -103,6 +108,11 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
      */
     private volatile IRTMPHandler handler;
 
+    /**
+     * <p>Constructor for BaseRTMPTConnection.</p>
+     *
+     * @param type a {@link java.lang.String} object
+     */
     public BaseRTMPTConnection(String type) {
         super(type);
         this.buffer = IoBuffer.allocate(2048);
@@ -151,10 +161,9 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
     }
 
     /**
-     * Send raw data down the connection.
+     * {@inheritDoc}
      *
-     * @param packet
-     *            the buffer containing the raw data
+     * Send raw data down the connection.
      */
     @Override
     public void writeRaw(IoBuffer packet) {
@@ -179,6 +188,11 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         return pendingMessages.size();
     }
 
+    /**
+     * <p>setSessionId.</p>
+     *
+     * @param sessionId a {@link java.lang.String} object
+     */
     public void setSessionId(String sessionId) {
         log.debug("Overriding generated session id {} with {}", this.sessionId, sessionId);
         this.clientSessionId = sessionId;
@@ -189,6 +203,7 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         //}
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getSessionId() {
         if (clientSessionId == null) {
@@ -217,10 +232,9 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
     }
 
     /**
-     * Send RTMP packet down the connection.
+     * {@inheritDoc}
      *
-     * @param packet
-     *            the packet to send
+     * Send RTMP packet down the connection.
      */
     @Override
     public void write(final Packet packet) {
@@ -250,6 +264,12 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         }
     }
 
+    /**
+     * <p>foldPendingMessages.</p>
+     *
+     * @param targetSize a int
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     protected IoBuffer foldPendingMessages(int targetSize) {
         if (pendingMessages.isEmpty()) {
             return null;
@@ -280,15 +300,26 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setHandler(IRTMPHandler handler) {
         this.handler = handler;
     }
 
+    /**
+     * <p>Setter for the field <code>decoder</code>.</p>
+     *
+     * @param decoder a {@link org.red5.server.net.rtmp.codec.RTMPProtocolDecoder} object
+     */
     public void setDecoder(RTMPProtocolDecoder decoder) {
         this.decoder = (RTMPTProtocolDecoder) decoder;
     }
 
+    /**
+     * <p>Setter for the field <code>encoder</code>.</p>
+     *
+     * @param encoder a {@link org.red5.server.net.rtmp.codec.RTMPProtocolEncoder} object
+     */
     public void setEncoder(RTMPProtocolEncoder encoder) {
         this.encoder = (RTMPTProtocolEncoder) encoder;
     }

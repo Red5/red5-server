@@ -14,6 +14,8 @@ import org.red5.media.processor.IPostProcessor;
 
 /**
  * Writes tags to a file
+ *
+ * @author mondain
  */
 public interface ITagWriter {
 
@@ -46,7 +48,7 @@ public interface ITagWriter {
     /**
      * Writes the header bytes
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             I/O exception
      */
     public void writeHeader() throws IOException;
@@ -68,7 +70,7 @@ public interface ITagWriter {
      * @param data
      *            Byte data
      * @return <code>true</code> on success, <code>false</code> otherwise
-     * @throws IOException
+     * @throws java.io.IOException
      *             I/O exception
      */
     public boolean writeTag(byte type, IoBuffer data) throws IOException;
@@ -79,7 +81,7 @@ public interface ITagWriter {
      * @param tag
      *            Tag to write
      * @return <code>true</code> on success, <code>false</code> otherwise
-     * @throws IOException
+     * @throws java.io.IOException
      *             I/O exception
      */
     public boolean writeTag(ITag tag) throws IOException;

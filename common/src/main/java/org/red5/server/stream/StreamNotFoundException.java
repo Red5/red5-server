@@ -9,10 +9,17 @@ package org.red5.server.stream;
 
 /**
  * Throw when stream can't be found
+ *
+ * @author mondain
  */
 public class StreamNotFoundException extends Exception {
     private static final long serialVersionUID = 812106823615971891L;
 
+    /**
+     * <p>Constructor for StreamNotFoundException.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     */
     public StreamNotFoundException(String name) {
         super(String.format("Stream %s not found", name));
     }

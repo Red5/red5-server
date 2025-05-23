@@ -7,6 +7,11 @@
 
 package org.red5.server.api.event;
 
+/**
+ * <p>IEventHandler interface.</p>
+ *
+ * @author mondain
+ */
 public interface IEventHandler {
 
     /**

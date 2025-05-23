@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * @see <a href="https://chromium.googlesource.com/external/webrtc/+/HEAD/modules/rtp_rtcp/source/video_rtp_depacketizer_av1.cc">WebRTC AV1 RTP Depacketizer</a>
  *
  * Thanks to the Alliance for Open Media for providing the AV1 RTP specification and Pion for the Go implementation.
- *
  * @author Paul Gregoire
  */
 public class AV1Packetizer {
@@ -116,7 +115,7 @@ public class AV1Packetizer {
      *
      * @param payload AV1 payload
      * @return number of OBU elements
-     * @throws Exception on error
+     * @throws java.lang.Exception on error
      */
     public int depacketize(byte[] payload) throws Exception {
         if (payload == null) {
@@ -256,9 +255,9 @@ public class AV1Packetizer {
     /**
      * Packetizes a list of AV1 OBU, consisting of a sequence header and one or more OBU elements.
      *
-     * @param obuElements list of OBUInfo
      * @param mtu         maximum transmission unit
      * @return list of packets
+     * @param obuInfos a {@link java.util.List} object
      */
     public List<byte[]> packetize(List<OBUInfo> obuInfos, int mtu) {
         LinkedList<byte[]> payloads = new LinkedList<>();
@@ -316,34 +315,70 @@ public class AV1Packetizer {
         firstPacketInFrame = lastPacketInFrame = startSequence = false;
     }
 
+    /**
+     * <p>getOBUElements.</p>
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<byte[]> getOBUElements() {
         return OBUElements;
     }
 
+    /**
+     * <p>isFirstPacketInFrame.</p>
+     *
+     * @return a boolean
+     */
     public boolean isFirstPacketInFrame() {
         return firstPacketInFrame;
     }
 
+    /**
+     * <p>Setter for the field <code>firstPacketInFrame</code>.</p>
+     *
+     * @param firstPacketInFrame a boolean
+     */
     public void setFirstPacketInFrame(boolean firstPacketInFrame) {
         this.firstPacketInFrame = firstPacketInFrame;
     }
 
+    /**
+     * <p>isLastPacketInFrame.</p>
+     *
+     * @return a boolean
+     */
     public boolean isLastPacketInFrame() {
         return lastPacketInFrame;
     }
 
+    /**
+     * <p>Setter for the field <code>lastPacketInFrame</code>.</p>
+     *
+     * @param lastPacketInFrame a boolean
+     */
     public void setLastPacketInFrame(boolean lastPacketInFrame) {
         this.lastPacketInFrame = lastPacketInFrame;
     }
 
+    /**
+     * <p>isStartSequence.</p>
+     *
+     * @return a boolean
+     */
     public boolean isStartSequence() {
         return startSequence;
     }
 
+    /**
+     * <p>Setter for the field <code>startSequence</code>.</p>
+     *
+     * @param startSequence a boolean
+     */
     public void setStartSequence(boolean startSequence) {
         this.startSequence = startSequence;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "AV1Packetizer [OBUElements=" + OBUElements + "]";

@@ -64,7 +64,9 @@ public interface IFrameDropper {
      */
     void sendPacket(RTMPMessage message);
 
-    /** Reset the frame dropper. */
+    /**
+     * Reset the frame dropper.
+     */
     void reset();
 
     /**

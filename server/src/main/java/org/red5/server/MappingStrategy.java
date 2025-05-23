@@ -11,6 +11,8 @@ import org.red5.server.api.IMappingStrategy;
 
 /**
  * Basic mapping strategy implementation. This one uses slash as filesystem path separator, '.service' postfix for services naming, '.handler' for handlers naming and 'default' string as default application name.
+ *
+ * @author mondain
  */
 public class MappingStrategy implements IMappingStrategy {
     /**
@@ -49,11 +51,9 @@ public class MappingStrategy implements IMappingStrategy {
     }
 
     /**
-     * Resolves resource prefix from path. Default application used as root when path is specified.
+     * {@inheritDoc}
      *
-     * @param path
-     *            Path
-     * @return Resource prefix according to this naming strategy
+     * Resolves resource prefix from path. Default application used as root when path is specified.
      */
     public String mapResourcePrefix(String path) {
         if (path == null || path.equals(ROOT)) {
@@ -64,11 +64,9 @@ public class MappingStrategy implements IMappingStrategy {
     }
 
     /**
-     * Resolves scope handler name for path. Default application used as root when path is specified.
+     * {@inheritDoc}
      *
-     * @param path
-     *            Path
-     * @return Scope handler name according to this naming strategy
+     * Resolves scope handler name for path. Default application used as root when path is specified.
      */
     public String mapScopeHandlerName(String path) {
         if (path == null || path.equals(ROOT)) {
@@ -79,11 +77,9 @@ public class MappingStrategy implements IMappingStrategy {
     }
 
     /**
-     * Resolves service filename name from name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Service name
-     * @return Service filename according to this naming strategy
+     * Resolves service filename name from name
      */
     public String mapServiceName(String name) {
         return name + SERVICE;

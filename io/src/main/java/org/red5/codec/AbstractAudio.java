@@ -11,11 +11,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract audio codec implementation.
  *
+ * @author mondain
  */
 public class AbstractAudio implements IAudioStreamCodec {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger("Audio");
 
+    /** Constant <code>isTrace=log.isTraceEnabled()</code> */
+    /** Constant <code>isDebug=log.isDebugEnabled()</code> */
     protected static boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     protected AudioCodec codec;
@@ -48,30 +52,36 @@ public class AbstractAudio implements IAudioStreamCodec {
     // audio codec specific attributes
     protected transient ConcurrentMap<String, String> attributes = new ConcurrentHashMap<>();
 
+    /** {@inheritDoc} */
     @Override
     public AudioCodec getCodec() {
         return codec;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return codec.name();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setTrackId(int trackId) {
         this.trackId = trackId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getTrackId() {
         return trackId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void reset() {
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
@@ -107,59 +117,79 @@ public class AbstractAudio implements IAudioStreamCodec {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data) {
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data, int timestamp, boolean amf) {
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IoBuffer getDecoderConfiguration() {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isEnhanced() {
         return enhanced;
     }
 
+    /** {@inheritDoc} */
     @Override
     public AvMultitrackType getMultitrackType() {
         return multitrackType;
     }
 
+    /** {@inheritDoc} */
     @Override
     public AudioPacketType getPacketType() {
         return packetType;
     }
 
+    /**
+     * <p>Setter for the field <code>sampleRate</code>.</p>
+     *
+     * @param sampleRate a int
+     */
     public void setSampleRate(int sampleRate) {
         this.sampleRate = sampleRate;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getSampleRate() {
         return sampleRate;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getSampleSizeInBits() {
         return sampleSizeInBits;
     }
 
+    /**
+     * <p>Setter for the field <code>channels</code>.</p>
+     *
+     * @param channels a int
+     */
     public void setChannels(int channels) {
         this.channels = channels;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getChannels() {
         return channels;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isSigned() {
         return signed;
@@ -168,8 +198,8 @@ public class AbstractAudio implements IAudioStreamCodec {
     /**
      * Sets an attribute directly on the codec instance.
      *
-     * @param key
-     * @param value
+     * @param key a {@link java.lang.String} object
+     * @param value a {@link java.lang.String} object
      */
     public void setAttribute(String key, String value) {
         attributes.put(key, value);
@@ -178,13 +208,14 @@ public class AbstractAudio implements IAudioStreamCodec {
     /**
      * Returns the attribute for a given key.
      *
-     * @param key
+     * @param key a {@link java.lang.String} object
      * @return String value
      */
     public String getAttribute(String key) {
         return attributes.get(key);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -197,6 +228,7 @@ public class AbstractAudio implements IAudioStreamCodec {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -219,6 +251,7 @@ public class AbstractAudio implements IAudioStreamCodec {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         if (enhanced) {

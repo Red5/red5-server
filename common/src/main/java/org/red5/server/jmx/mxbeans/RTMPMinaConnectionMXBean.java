@@ -9,9 +9,19 @@ package org.red5.server.jmx.mxbeans;
 
 import javax.management.MXBean;
 
+/**
+ * <p>RTMPMinaConnectionMXBean interface.</p>
+ *
+ * @author mondain
+ */
 @MXBean
 public interface RTMPMinaConnectionMXBean extends RTMPConnectionMXBean {
 
+    /**
+     * <p>invokeMethod.</p>
+     *
+     * @param method a {@link java.lang.String} object
+     */
     public void invokeMethod(String method);
 
 }

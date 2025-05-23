@@ -53,6 +53,7 @@ public class WebSocketPlugin extends Red5Plugin {
 
     private static Logger log = LoggerFactory.getLogger(WebSocketPlugin.class);
 
+    /** Constant <code>NAME="WebSocketPlugin"</code> */
     public final static String NAME = "WebSocketPlugin";
 
     // Shared executor
@@ -75,6 +76,9 @@ public class WebSocketPlugin extends Red5Plugin {
 
     private ScopeListenerAdapter scopeListener;
 
+    /**
+     * <p>Constructor for WebSocketPlugin.</p>
+     */
     public WebSocketPlugin() {
         log.trace("WebSocketPlugin ctor");
     }
@@ -206,7 +210,7 @@ public class WebSocketPlugin extends Red5Plugin {
     /**
      * Submit a task for execution.
      *
-     * @param task
+     * @param task a {@link java.lang.Runnable} object
      * @return Future
      */
     public static Future<?> submit(Runnable task) {
@@ -228,7 +232,7 @@ public class WebSocketPlugin extends Red5Plugin {
     /**
      * Returns the application scope for a given path.
      *
-     * @param path
+     * @param path a {@link java.lang.String} object
      * @return IScope
      */
     public IScope getApplicationScope(String path) {
@@ -241,7 +245,7 @@ public class WebSocketPlugin extends Red5Plugin {
     /**
      * Returns a WebSocketScopeManager for a given scope.
      *
-     * @param scope
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
      * @return WebSocketScopeManager if registered for the given scope and null otherwise
      */
     public WebSocketScopeManager getManager(IScope scope) {
@@ -251,7 +255,7 @@ public class WebSocketPlugin extends Red5Plugin {
     /**
      * Returns a WebSocketScopeManager for a given path.
      *
-     * @param path
+     * @param path a {@link java.lang.String} object
      * @return WebSocketScopeManager if registered for the given path and null otherwise
      */
     public WebSocketScopeManager getManager(String path) {
@@ -294,7 +298,7 @@ public class WebSocketPlugin extends Red5Plugin {
     /**
      * Returns a DefaultWsServerContainer for a given path.
      *
-     * @param path
+     * @param path a {@link java.lang.String} object
      * @return DefaultWsServerContainer
      */
     public DefaultWsServerContainer getWsServerContainer(String path) {
@@ -315,26 +319,56 @@ public class WebSocketPlugin extends Red5Plugin {
         super.setApplication(application);
     }
 
+    /**
+     * <p>isSameOriginPolicy.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isSameOriginPolicy() {
         return sameOriginPolicy;
     }
 
+    /**
+     * <p>Setter for the field <code>sameOriginPolicy</code>.</p>
+     *
+     * @param sameOriginPolicy a boolean
+     */
     public void setSameOriginPolicy(boolean sameOriginPolicy) {
         WebSocketPlugin.sameOriginPolicy = sameOriginPolicy;
     }
 
+    /**
+     * <p>isCrossOriginPolicy.</p>
+     *
+     * @return a boolean
+     */
     public static boolean isCrossOriginPolicy() {
         return crossOriginPolicy;
     }
 
+    /**
+     * <p>Setter for the field <code>crossOriginPolicy</code>.</p>
+     *
+     * @param crossOriginPolicy a boolean
+     */
     public void setCrossOriginPolicy(boolean crossOriginPolicy) {
         WebSocketPlugin.crossOriginPolicy = crossOriginPolicy;
     }
 
+    /**
+     * <p>Getter for the field <code>allowedOrigins</code>.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public static String[] getAllowedOrigins() {
         return allowedOrigins;
     }
 
+    /**
+     * <p>Setter for the field <code>allowedOrigins</code>.</p>
+     *
+     * @param allowedOrigins an array of {@link java.lang.String} objects
+     */
     public void setAllowedOrigins(String[] allowedOrigins) {
         WebSocketPlugin.allowedOrigins = allowedOrigins;
         log.info("allowedOrigins: {}", Arrays.toString(WebSocketPlugin.allowedOrigins));
@@ -353,7 +387,7 @@ public class WebSocketPlugin extends Red5Plugin {
     /**
      * Returns a new instance of WsServerContainer if one does not already exist.
      *
-     * @param servletContext
+     * @param servletContext a {@link jakarta.servlet.ServletContext} object
      * @return WsServerContainer
      */
     public static ServerContainer getWsServerContainerInstance(ServletContext servletContext) {

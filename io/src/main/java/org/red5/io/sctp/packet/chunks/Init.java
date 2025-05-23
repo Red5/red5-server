@@ -18,6 +18,11 @@ import org.red5.io.sctp.IServerChannelControl;
 import org.red5.io.sctp.SctpException;
 import org.red5.io.sctp.packet.SctpPacket;
 
+/**
+ * <p>Init class.</p>
+ *
+ * @author mondain
+ */
 public class Init extends Chunk {
 
     // initiateTag(4 byte) + advertisedReceiverWindowCredit(4 byte) + numberOfOutboundStreams(2 byte) + numberOfInboundStreams(2 byte) + TSN(4 byte)
@@ -33,6 +38,12 @@ public class Init extends Chunk {
 
     private int initialTSN;
 
+    /**
+     * <p>Constructor for Init.</p>
+     *
+     * @param initialTSN a int
+     * @param initiateTag a int
+     */
     public Init(int initialTSN, int initiateTag) {
         super(ChunkType.INIT, (byte) 0x00);
         super.setLength(getSize());
@@ -43,6 +54,14 @@ public class Init extends Chunk {
         this.numberOfOutboundStreams = IAssociationControl.DEFAULT_NUMBER_OF_OUTBOUND_STREAM;
     }
 
+    /**
+     * <p>Constructor for Init.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     * @throws org.red5.io.sctp.SctpException if any.
+     */
     public Init(final byte[] data, int offset, int length) throws SctpException {
         super(data, offset, length);
         ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset + CHUNK_HEADER_SIZE, data.length - (offset + CHUNK_HEADER_SIZE));
@@ -54,6 +73,7 @@ public class Init extends Chunk {
         initialTSN = byteBuffer.getInt();
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getBytes() {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE);
@@ -71,31 +91,58 @@ public class Init extends Chunk {
         return result;
     }
 
+    /**
+     * <p>Getter for the field <code>initiateTag</code>.</p>
+     *
+     * @return a int
+     */
     public int getInitiateTag() {
         return initiateTag;
     }
 
+    /**
+     * <p>Getter for the field <code>advertisedReceiverWindowCredit</code>.</p>
+     *
+     * @return a int
+     */
     public int getAdvertisedReceiverWindowCredit() {
         return advertisedReceiverWindowCredit;
     }
 
+    /**
+     * <p>Getter for the field <code>numberOfOutboundStreams</code>.</p>
+     *
+     * @return a int
+     */
     public int getNumberOfOutboundStreams() {
         return numberOfOutboundStreams;
     }
 
+    /**
+     * <p>Getter for the field <code>numberOfInboundStreams</code>.</p>
+     *
+     * @return a int
+     */
     public int getNumberOfInboundStreams() {
         return numberOfInboundStreams;
     }
 
+    /**
+     * <p>Getter for the field <code>initialTSN</code>.</p>
+     *
+     * @return a int
+     */
     public int getInitialTSN() {
         return initialTSN;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getSize() {
         return MANDATORY_FIELD_SIZE + super.getSize();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(InetSocketAddress address, IServerChannelControl server) throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException {
         IAssociationControl association = server.getPendingChannel(address);
@@ -114,6 +161,7 @@ public class Init extends Chunk {
         server.send(packet, address);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(IAssociationControl association) throws SctpException {
         throw new SctpException("init chunk : association already exist in pending pool");

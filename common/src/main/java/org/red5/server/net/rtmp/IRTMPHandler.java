@@ -11,6 +11,8 @@ import org.red5.server.net.rtmp.message.Packet;
 
 /**
  * RTMP events handler
+ *
+ * @author mondain
  */
 public interface IRTMPHandler {
 
@@ -29,7 +31,7 @@ public interface IRTMPHandler {
      *            Connection
      * @param packet
      *            Packet containing an RTMP message
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on exception
      */
     void messageReceived(RTMPConnection conn, Packet packet) throws Exception;

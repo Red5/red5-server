@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 
 /**
  * Stream of playlist subscriber
+ *
+ * @author mondain
  */
 public class PlaylistSubscriberStream extends AbstractClientStream implements IPlaylistSubscriberStream, IPlaylistSubscriberStreamStatistics {
 
@@ -120,7 +122,9 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
      */
     private int maxSequentialPendingVideoFrames = 10;
 
-    /** Constructs a new PlaylistSubscriberStream. */
+    /**
+     * Constructs a new PlaylistSubscriberStream.
+     */
     public PlaylistSubscriberStream() {
     }
 
@@ -163,7 +167,9 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         this.underrunTrigger = underrunTrigger;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void start() {
         //ensure the play engine exists
         if (engine == null) {
@@ -209,7 +215,11 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         onChange(StreamState.STARTED);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @throws java.io.IOException if any.
+     */
     public void play() throws IOException {
         // Return if playlist is empty
         if (!items.isEmpty()) {
@@ -262,7 +272,9 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void stop() {
         if (log.isDebugEnabled()) {
             log.debug("stop");
@@ -287,7 +299,9 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void close() {
         if (log.isDebugEnabled()) {
             log.debug("close");
@@ -305,7 +319,11 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isPaused() {
         return state.get() == StreamState.PAUSED;
     }
@@ -335,14 +353,18 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void removeAllItems() {
         // we try to stop the engine first
         stop();
         items.clear();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void previousItem() {
         stop();
         moveToPrevious();
@@ -381,7 +403,11 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         } while (!items.isEmpty());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean hasMoreItems() {
         int nextItem = currentItemIndex + 1;
         if (nextItem >= items.size() && !repeat) {
@@ -391,7 +417,9 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void nextItem() {
         moveToNext();
         if (currentItemIndex == -1) {
@@ -453,7 +481,11 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isRandom() {
         return random;
     }
@@ -463,7 +495,11 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         this.random = random;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isRewind() {
         return rewind;
     }
@@ -473,7 +509,11 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         this.rewind = rewind;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isRepeat() {
         return repeat;
     }
@@ -533,18 +573,28 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         this.controller = controller;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getItemSize() {
         return items.size();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getCurrentItemIndex() {
         return currentItemIndex;
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.stream.IPlayItem} object
      */
     public IPlayItem getCurrentItem() {
         return getItem(getCurrentItemIndex());
@@ -601,6 +651,9 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
 
     /**
      * {@inheritDoc}
+     *
+     * @param state a {@link org.red5.server.api.stream.StreamState} object
+     * @param changed a {@link java.lang.Object} object
      */
     public void onChange(final StreamState state, final Object... changed) {
         final IConnection conn = Red5.getConnectionLocal();
@@ -777,17 +830,29 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.statistics.IPlaylistSubscriberStreamStatistics} object
+     */
     public IPlaylistSubscriberStreamStatistics getStatistics() {
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a long
+     */
     public long getCreationTime() {
         return creationTime;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getCurrentTimestamp() {
         int lastMessageTs = engine.getLastMessageTimestamp();
         /* XXX(paul) I think this is incorrect
@@ -803,12 +868,20 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
         return 0;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a long
+     */
     public long getBytesSent() {
         return bytesSent;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a double
+     */
     public double getEstimatedBufferFill() {
         // check to see if any messages have been sent
         int lastMessageTs = engine.getLastMessageTimestamp();
@@ -829,6 +902,8 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
     }
 
     /**
+     * <p>Setter for the field <code>maxPendingVideoFrames</code>.</p>
+     *
      * @param maxPendingVideoFrames
      *            the maxPendingVideoFrames to set
      */
@@ -837,6 +912,8 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
     }
 
     /**
+     * <p>Setter for the field <code>maxSequentialPendingVideoFrames</code>.</p>
+     *
      * @param maxSequentialPendingVideoFrames
      *            the maxSequentialPendingVideoFrames to set
      */

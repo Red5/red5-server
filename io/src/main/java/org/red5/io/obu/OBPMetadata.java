@@ -1,5 +1,10 @@
 package org.red5.io.obu;
 
+/**
+ * <p>OBPMetadata class.</p>
+ *
+ * @author mondain
+ */
 public class OBPMetadata {
     public OBPMetadataType metadataType;
 

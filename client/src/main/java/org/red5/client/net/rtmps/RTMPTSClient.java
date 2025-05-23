@@ -21,12 +21,16 @@ public class RTMPTSClient extends RTMPTClient {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPTSClient.class);
 
+    /**
+     * <p>Constructor for RTMPTSClient.</p>
+     */
     public RTMPTSClient() {
         protocol = "rtmps";
         codecFactory = new RTMPTCodecFactory();
         codecFactory.init();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected synchronized void startConnector(String server, int port) {
         connector = new RTMPTSClientConnector(server, port, this);

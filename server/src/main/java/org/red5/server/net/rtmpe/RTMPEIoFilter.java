@@ -40,6 +40,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
 
     private static boolean isTrace = log.isTraceEnabled();
 
+    /** {@inheritDoc} */
     @Override
     public void messageReceived(NextFilter nextFilter, IoSession session, Object obj) throws Exception {
         if (isTrace) {
@@ -181,6 +182,7 @@ public class RTMPEIoFilter extends IoFilterAdapter {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void filterWrite(NextFilter nextFilter, IoSession session, WriteRequest request) throws Exception {
         log.trace("filterWrite nextFilter: {} session: {} request: {}", nextFilter, session, request);

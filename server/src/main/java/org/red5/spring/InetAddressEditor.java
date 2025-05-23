@@ -29,9 +29,9 @@ public class InetAddressEditor extends PropertyEditorSupport {
 
     @Override
     /**
-     * Converts String IP address to InetAddress object.
+     * {@inheritDoc}
      *
-     * @param textValue ex. "255.255.222.255"
+     * Converts String IP address to InetAddress object.
      */
     public void setAsText(String textValue) {
         log.trace("setAsText: {}", textValue);
@@ -72,9 +72,9 @@ public class InetAddressEditor extends PropertyEditorSupport {
     }
 
     /**
-     * Get text representation of the value.
+     * {@inheritDoc}
      *
-     * @return InetAddress text.
+     * Get text representation of the value.
      */
     @Override
     public String getAsText() {

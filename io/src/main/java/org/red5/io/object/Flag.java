@@ -9,6 +9,8 @@ package org.red5.io.object;
 
 /**
  * Serial flag options.
+ *
+ * @author mondain
  */
 public enum Flag {
     Enabled, Disabled, Default

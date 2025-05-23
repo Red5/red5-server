@@ -46,6 +46,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     // holds handshake modification implementations
     private CopyOnWriteArraySet<HandshakeModifier> handshakeModifiers = new CopyOnWriteArraySet<>();
 
+    /** {@inheritDoc} */
     @Override
     public <T> T getEndpointInstance(Class<T> clazz) throws InstantiationException {
         log.debug("getEndpointInstance: {}", clazz.getName());
@@ -60,6 +61,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNegotiatedSubprotocol(List<String> supported, List<String> requested) {
         log.debug("getNegotiatedSubprotocol - supported: {} requested: {}", supported, requested);
@@ -76,6 +78,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         return "";
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
         log.debug("getNegotiatedExtensions - installed: {} requested: {}", installed, requested);
@@ -92,6 +95,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean checkOrigin(String originHeaderValue) {
         log.debug("checkOrigin: {}", originHeaderValue);
@@ -109,6 +113,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
         //log.debug("modifyHandshake - config: {} req: {} resp: {}", sec, request, response);
@@ -188,22 +193,47 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         super.modifyHandshake(sec, request, response);
     }
 
+    /**
+     * <p>Getter for the field <code>applicationScope</code>.</p>
+     *
+     * @return a {@link org.red5.server.api.scope.IScope} object
+     */
     public IScope getApplicationScope() {
         return applicationScope;
     }
 
+    /**
+     * <p>Setter for the field <code>applicationScope</code>.</p>
+     *
+     * @param applicationScope a {@link org.red5.server.api.scope.IScope} object
+     */
     public void setApplicationScope(IScope applicationScope) {
         this.applicationScope = applicationScope;
     }
 
+    /**
+     * <p>isCrossOriginPolicy.</p>
+     *
+     * @return a boolean
+     */
     public boolean isCrossOriginPolicy() {
         return crossOriginPolicy;
     }
 
+    /**
+     * <p>Setter for the field <code>crossOriginPolicy</code>.</p>
+     *
+     * @param crossOriginPolicy a boolean
+     */
     public void setCrossOriginPolicy(boolean crossOriginPolicy) {
         this.crossOriginPolicy = crossOriginPolicy;
     }
 
+    /**
+     * <p>Getter for the field <code>allowedOrigins</code>.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public String[] getAllowedOrigins() {
         return allowedOrigins;
     }
@@ -211,7 +241,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     /**
      * Sets the allowed origins for this instance.
      *
-     * @param allowedOrigins
+     * @param allowedOrigins an array of {@link java.lang.String} objects
      */
     public void setAllowedOrigins(String[] allowedOrigins) {
         this.allowedOrigins = allowedOrigins;
@@ -221,7 +251,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     /**
      * Adds a HandshakeModifier implementation to the instances modifiers.
      *
-     * @param modifier
+     * @param modifier a {@link org.red5.net.websocket.server.HandshakeModifier} object
      * @return true if added and false otherwise
      */
     public boolean addHandshakeModifier(HandshakeModifier modifier) {
@@ -231,7 +261,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     /**
      * Removes a HandshakeModifier implementation from the instances modifiers.
      *
-     * @param modifier
+     * @param modifier a {@link org.red5.net.websocket.server.HandshakeModifier} object
      * @return true if removed and false otherwise
      */
     public boolean removeHandshakeModifier(HandshakeModifier modifier) {

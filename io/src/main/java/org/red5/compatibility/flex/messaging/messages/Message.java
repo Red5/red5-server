@@ -9,32 +9,50 @@ package org.red5.compatibility.flex.messaging.messages;
 
 import java.util.Map;
 
+/**
+ * <p>Message interface.</p>
+ *
+ * @author mondain
+ */
 public interface Message {
 
+    /** Constant <code>NEEDS_CONFIG_HEADER="DSNeedsConfig"</code> */
     public static final String NEEDS_CONFIG_HEADER = "DSNeedsConfig";
 
+    /** Constant <code>POLL_WAIT_HEADER="DSPollWait"</code> */
     public static final String POLL_WAIT_HEADER = "DSPollWait";
 
+    /** Constant <code>PRESERVE_DURABLE_HEADER="DSPreserveDurable"</code> */
     public static final String PRESERVE_DURABLE_HEADER = "DSPreserveDurable";
 
+    /** Constant <code>REMOVE_SUBSCRIPTIONS="DSRemSub"</code> */
     public static final String REMOVE_SUBSCRIPTIONS = "DSRemSub";
 
+    /** Constant <code>SELECTOR_HEADER="DSSelector"</code> */
     public static final String SELECTOR_HEADER = "DSSelector";
 
+    /** Constant <code>SUBSCRIPTION_INVALIDATED_HEADER="DSSubscriptionInvalidated"</code> */
     public static final String SUBSCRIPTION_INVALIDATED_HEADER = "DSSubscriptionInvalidated";
 
+    /** Constant <code>SUBTOPIC_SEPARATOR="_;_"</code> */
     public static final String SUBTOPIC_SEPARATOR = "_;_";
 
+    /** Constant <code>MESSAGING_VERSION="DSMessagingVersion"</code> */
     public static final String MESSAGING_VERSION = "DSMessagingVersion";
 
+    /** Constant <code>DESTINATION_CLIENT_ID_HEADER="DSDstClientId"</code> */
     public static final String DESTINATION_CLIENT_ID_HEADER = "DSDstClientId";
 
+    /** Constant <code>ENDPOINT_HEADER="DSEndpoint"</code> */
     public static final String ENDPOINT_HEADER = "DSEndpoint";
 
+    /** Constant <code>FLEX_CLIENT_ID_HEADER="DSId"</code> */
     public static final String FLEX_CLIENT_ID_HEADER = "DSId";
 
+    /** Constant <code>REMOTE_CREDENTIALS_HEADER="DSRemoteCredentials"</code> */
     public static final String REMOTE_CREDENTIALS_HEADER = "DSRemoteCredentials";
 
+    /** Constant <code>SYNC_HEADER="sync"</code> */
     public static final String SYNC_HEADER = "sync";
 
     /**

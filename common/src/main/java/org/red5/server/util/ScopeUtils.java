@@ -23,6 +23,8 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Collection of utilities for working with scopes
+ *
+ * @author mondain
  */
 public class ScopeUtils {
 
@@ -125,19 +127,7 @@ public class ScopeUtils {
      *            Scope
      * @param ancestor
      *            Scope to check
-     * @return
-     *
-     *         <pre>
-     *         true
-     *         </pre>
-     *
-     *         if ancestor scope is really an ancestor of scope passed as from parameter,
-     *
-     *         <pre>
-     *         false
-     *         </pre>
-     *
-     *         otherwise.
+     * @return a boolean
      */
     public static boolean isAncestor(IBasicScope from, IBasicScope ancestor) {
         IBasicScope current = from;
@@ -155,19 +145,7 @@ public class ScopeUtils {
      *
      * @param scope
      *            Scope to check
-     * @return
-     *
-     *         <pre>
-     *         true
-     *         </pre>
-     *
-     *         if scope is root scope (top level scope),
-     *
-     *         <pre>
-     *         false
-     *         </pre>
-     *
-     *         otherwise.
+     * @return a boolean
      */
     public static boolean isRoot(IBasicScope scope) {
         return !scope.hasParent();
@@ -181,19 +159,7 @@ public class ScopeUtils {
      *
      * @param scope
      *            Scope to check
-     * @return
-     *
-     *         <pre>
-     *         true
-     *         </pre>
-     *
-     *         if scope is the global scope,
-     *
-     *         <pre>
-     *         false
-     *         </pre>
-     *
-     *         otherwise.
+     * @return a boolean
      */
     public static boolean isGlobal(IBasicScope scope) {
         return scope.getType().equals(ScopeType.GLOBAL);
@@ -204,19 +170,7 @@ public class ScopeUtils {
      *
      * @param scope
      *            Scope to check
-     * @return
-     *
-     *         <pre>
-     *         true
-     *         </pre>
-     *
-     *         if scope is an application scope,
-     *
-     *         <pre>
-     *         false
-     *         </pre>
-     *
-     *         otherwise.
+     * @return a boolean
      */
     public static boolean isApp(IBasicScope scope) {
         return scope.getType().equals(ScopeType.APPLICATION);
@@ -227,19 +181,7 @@ public class ScopeUtils {
      *
      * @param scope
      *            Scope to check
-     * @return
-     *
-     *         <pre>
-     *         true
-     *         </pre>
-     *
-     *         if scope is a room scope,
-     *
-     *         <pre>
-     *         false
-     *         </pre>
-     *
-     *         otherwise.
+     * @return a boolean
      */
     public static boolean isRoom(IBasicScope scope) {
         return scope.getType().equals(ScopeType.ROOM);
@@ -306,6 +248,14 @@ public class ScopeUtils {
         return getScopeService(scope, intf, null);
     }
 
+    /**
+     * <p>getScopeService.</p>
+     *
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
+     * @param intf a {@link java.lang.Class} object
+     * @param checkHandler a boolean
+     * @return a {@link java.lang.Object} object
+     */
     public static Object getScopeService(IScope scope, Class<?> intf, boolean checkHandler) {
         return getScopeService(scope, intf, null, checkHandler);
     }
@@ -325,6 +275,15 @@ public class ScopeUtils {
         return getScopeService(scope, intf, defaultClass, true);
     }
 
+    /**
+     * <p>getScopeService.</p>
+     *
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
+     * @param intf a {@link java.lang.Class} object
+     * @param defaultClass a {@link java.lang.Class} object
+     * @param checkHandler a boolean
+     * @return a {@link java.lang.Object} object
+     */
     public static Object getScopeService(IScope scope, Class<?> intf, Class<?> defaultClass, boolean checkHandler) {
         if (scope == null || intf == null) {
             return null;

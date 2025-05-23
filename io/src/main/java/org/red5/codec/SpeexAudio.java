@@ -21,6 +21,7 @@ public class SpeexAudio extends AbstractAudio {
         codec = AudioCodec.SPEEX;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return CODEC_NAME;

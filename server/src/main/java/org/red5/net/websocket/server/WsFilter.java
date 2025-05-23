@@ -24,6 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Handles the initial HTTP connection for WebSocket connections.
+ *
+ * @author mondain
  */
 public class WsFilter implements Filter {
 
@@ -31,6 +33,7 @@ public class WsFilter implements Filter {
 
     private DefaultWsServerContainer sc;
 
+    /** {@inheritDoc} */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         ServletContext ctx = filterConfig.getServletContext();
@@ -43,6 +46,7 @@ public class WsFilter implements Filter {
         log.debug("init completed - sc: {}", sc);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String contextPath = request.getServletContext().getContextPath();
@@ -85,6 +89,7 @@ public class WsFilter implements Filter {
         UpgradeUtil.doUpgrade(sc, req, resp, mappingResult.getConfig(), mappingResult.getPathParams());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() {
         // NO-OP

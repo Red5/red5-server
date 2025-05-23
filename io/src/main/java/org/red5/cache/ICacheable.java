@@ -15,7 +15,6 @@ import org.apache.mina.core.buffer.IoBuffer;
  * Base interface for objects that can be made cacheable.
  *
  * @see ICacheStore
- *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */

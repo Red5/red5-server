@@ -36,9 +36,9 @@ public interface IMP4 extends IStreamableFile {
      *
      * @param metadata
      *            Metadata object
-     * @throws FileNotFoundException
+     * @throws java.io.FileNotFoundException
      *             File not found
-     * @throws IOException
+     * @throws java.io.IOException
      *             Any other I/O exception
      */
     public void setMetaData(IMetaData<?, ?> metadata) throws FileNotFoundException, IOException;
@@ -55,7 +55,7 @@ public interface IMP4 extends IStreamableFile {
      * Returns a map of the metadata
      *
      * @return metadata File metadata
-     * @throws FileNotFoundException
+     * @throws java.io.FileNotFoundException
      *             File not found
      */
     public IMetaData<?, ?> getMetaData() throws FileNotFoundException;
@@ -85,7 +85,7 @@ public interface IMP4 extends IStreamableFile {
     /**
      * Refreshes the headers. Usually used after data is added to the mp4 file
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             Any I/O exception
      */
     public void refreshHeaders() throws IOException;
@@ -93,7 +93,7 @@ public interface IMP4 extends IStreamableFile {
     /**
      * Flushes Header
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             Any I/O exception
      */
     public void flushHeaders() throws IOException;

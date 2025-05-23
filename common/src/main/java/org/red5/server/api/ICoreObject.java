@@ -16,7 +16,6 @@ import org.red5.server.api.event.IEventListener;
  *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
- *
  */
 public interface ICoreObject extends IEventDispatcher, IEventHandler, IEventListener {
 

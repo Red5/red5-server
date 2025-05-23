@@ -20,12 +20,32 @@ import javax.management.MXBean;
 @MXBean
 public interface AttributeStoreMXBean {
 
+    /**
+     * <p>getAttributeNames.</p>
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getAttributeNames();
 
+    /**
+     * <p>hasAttribute.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @return a boolean
+     */
     public boolean hasAttribute(String name);
 
+    /**
+     * <p>removeAttribute.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @return a boolean
+     */
     public boolean removeAttribute(String name);
 
+    /**
+     * <p>removeAttributes.</p>
+     */
     public void removeAttributes();
 
 }

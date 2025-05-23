@@ -64,15 +64,29 @@ public final class WarDeployer implements ApplicationContextAware {
     }
 
     @Deprecated(since = "2.0.9", forRemoval = true)
+    /**
+     * <p>Constructor for WarDeployer.</p>
+     */
     public WarDeployer() {
         log.warn("Use via constructor or as a Spring bean is deprecated");
         webappsDirectory = new File("webapps");
     }
 
+    /**
+     * <p>Constructor for WarDeployer.</p>
+     *
+     * @param webappsDirectory a {@link java.io.File} object
+     */
     public WarDeployer(File webappsDirectory) {
         this(webappsDirectory, false);
     }
 
+    /**
+     * <p>Constructor for WarDeployer.</p>
+     *
+     * @param webappsDirectory a {@link java.io.File} object
+     * @param expandWars a boolean
+     */
     public WarDeployer(File webappsDirectory, boolean expandWars) {
         log.info("Starting WarDeployer - webapps directory: {}", webappsDirectory.getAbsolutePath());
         // set the webapp folder
@@ -156,6 +170,11 @@ public final class WarDeployer implements ApplicationContextAware {
         }
     }
 
+    /**
+     * <p>stop.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void stop() throws Exception {
         if (future != null) {
             future.cancel(true);
@@ -163,10 +182,20 @@ public final class WarDeployer implements ApplicationContextAware {
         scheduler.shutdownNow();
     }
 
+    /**
+     * <p>Setter for the field <code>checkInterval</code>.</p>
+     *
+     * @param checkInterval a int
+     */
     public void setCheckInterval(int checkInterval) {
         this.checkInterval = checkInterval;
     }
 
+    /**
+     * <p>Getter for the field <code>checkInterval</code>.</p>
+     *
+     * @return a int
+     */
     public int getCheckInterval() {
         return checkInterval;
     }
@@ -219,6 +248,7 @@ public final class WarDeployer implements ApplicationContextAware {
         }
     }
 
+    /** {@inheritDoc} */
     @Deprecated(since = "2.0.9", forRemoval = true)
     @SuppressWarnings("null")
     @Override

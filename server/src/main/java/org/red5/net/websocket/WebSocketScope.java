@@ -46,20 +46,30 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     protected String path = "default";
 
+    /**
+     * <p>Constructor for WebSocketScope.</p>
+     */
     public WebSocketScope() {
     }
 
+    /**
+     * <p>Constructor for WebSocketScope.</p>
+     *
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
+     */
     public WebSocketScope(IScope scope) {
         log.debug("Creating WebSocket scope for: {}", scope);
         setScope(scope);
         setPath(String.format("/%s", scope.getName()));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void afterPropertiesSet() throws Exception {
         register();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() throws Exception {
         unregister();
@@ -107,7 +117,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
     /**
      * Returns a connection matching the given HttpSession id.
      *
-     * @param id
+     * @param id a {@link java.lang.String} object
      * @return WebSocketConnection for the given id or null if not found
      */
     public WebSocketConnection getConnectionBySessionId(String id) {
@@ -149,7 +159,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
     /**
      * Sets the associated scope.
      *
-     * @param scope
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
      */
     public void setScope(IScope scope) {
         this.scope = scope;
@@ -160,7 +170,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
     /**
      * Sets the path.
      *
-     * @param path
+     * @param path a {@link java.lang.String} object
      */
     public void setPath(String path) {
         this.path = path; // /room/name
@@ -253,7 +263,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
     /**
      * Checks for a listener by class type.
      *
-     * @param clazz
+     * @param clazz a {@link java.lang.Class} object
      * @return true if one exists and false otherwise
      */
     public boolean hasListener(Class<?> clazz) {
@@ -272,7 +282,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
     /**
      * Message received from client and passed on to the listeners.
      *
-     * @param message
+     * @param message a {@link org.red5.net.websocket.model.WSMessage} object
      */
     public void onMessage(WSMessage message) {
         log.trace("Listeners: {}", listeners.size());
@@ -285,6 +295,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -293,6 +304,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -310,6 +322,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "WebSocketScope [path=" + path + ", listeners=" + listeners.size() + ", connections=" + conns.size() + "]";

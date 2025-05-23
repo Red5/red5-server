@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
  * Default RtmpSampleAccess bean
  *
  * @see org.red5.server.api.stream.IRtmpSampleAccess
+ * @author mondain
  */
 public class RtmpSampleAccess implements IRtmpSampleAccess {
 

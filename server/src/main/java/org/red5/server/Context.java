@@ -37,9 +37,12 @@ import org.springframework.core.io.Resource;
  * <p>
  * This is basic context implementation used by Red5.
  * </p>
+ *
+ * @author mondain
  */
 public class Context implements IContext, ApplicationContextAware, ContextMXBean {
 
+    /** Constant <code>logger</code> */
     public static final Logger logger = LoggerFactory.getLogger(Context.class);
 
     /**
@@ -124,24 +127,18 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
-     * Resolves scope using scope resolver collaborator
+     * {@inheritDoc}
      *
-     * @param path
-     *            Path to resolve
-     * @return Scope resolution result
+     * Resolves scope using scope resolver collaborator
      */
     public IScope resolveScope(String path) {
         return scopeResolver.resolveScope(path);
     }
 
     /**
-     * Resolves scope from given root using scope resolver.
+     * {@inheritDoc}
      *
-     * @param root
-     *            Scope to start from.
-     * @param path
-     *            Path to resolve.
-     * @return Scope resolution result.
+     * Resolves scope from given root using scope resolver.
      */
     public IScope resolveScope(IScope root, String path) {
         return scopeResolver.resolveScope(root, path);
@@ -208,10 +205,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
-     * Setter for application context
+     * {@inheritDoc}
      *
-     * @param context
-     *            App context
+     * Setter for application context
      */
     @SuppressWarnings({ "resource", "null" })
     public void setApplicationContext(ApplicationContext context) {
@@ -241,10 +237,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
-     * Setter for context path. Adds a slash at the end of path if there isn't one
+     * {@inheritDoc}
      *
-     * @param contextPath
-     *            Context path
+     * Setter for context path. Adds a slash at the end of path if there isn't one
      */
     public void setContextPath(String contextPath) {
         if (!contextPath.endsWith("/")) {
@@ -281,15 +276,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
-     * Look up service by name
+     * {@inheritDoc}
      *
-     * @param serviceName
-     *            Service name
-     * @return Service object
-     * @throws ServiceNotFoundException
-     *             When service found but null
-     * @throws NoSuchBeanDefinitionException
-     *             When bean with given name doesn't exist
+     * Look up service by name
      */
     @SuppressWarnings("null")
     public Object lookupService(String serviceName) {
@@ -302,13 +291,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
-     * Look up scope handler for context path
+     * {@inheritDoc}
      *
-     * @param contextPath
-     *            Context path
-     * @return Scope handler
-     * @throws ScopeHandlerNotFoundException
-     *             If there's no handler for given context path
+     * Look up scope handler for context path
      */
     public IScopeHandler lookupScopeHandler(String contextPath) {
         IScopeHandler scopeHandler = null;
@@ -338,14 +323,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Return array or resource that match given pattern
-     *
-     * @param pattern
-     *            Pattern to check against
-     * @return Array of Resource objects
-     * @throws IOException
-     *             On I/O exception
-     *
      * @see org.springframework.core.io.Resource
      */
     @SuppressWarnings("null")
@@ -354,12 +334,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Return resource by path
-     *
-     * @param path
-     *            Resource path
-     * @return Resource
-     *
      * @see org.springframework.core.io.Resource
      */
     @SuppressWarnings("null")
@@ -368,14 +345,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Resolve scope from host and path
-     *
-     * @param host
-     *            Host
-     * @param path
-     *            Path
-     * @return Scope
-     *
      * @see org.red5.server.api.scope.IScope
      * @see org.red5.server.scope.Scope
      */
@@ -383,21 +355,16 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
         return scopeResolver.resolveScope(path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     public boolean hasBean(String beanId) {
         return applicationContext.containsBean(beanId);
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Return bean instantiated by bean factory
-     *
-     * @param beanId
-     *            Bean name
-     * @return Instantiated bean
-     *
      * @see org.springframework.beans.factory.BeanFactory
      */
     @SuppressWarnings("null")
@@ -418,12 +385,9 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Return core Red5 service instantiated by core context bean factory
-     *
-     * @param beanId
-     *            Bean name
-     * @return Core Red5 service instantiated
-     *
      * @see org.springframework.beans.factory.BeanFactory
      */
     @SuppressWarnings("null")
@@ -431,6 +395,11 @@ public class Context implements IContext, ApplicationContextAware, ContextMXBean
         return coreContext.getBean(beanId);
     }
 
+    /**
+     * <p>setCoreBeanFactory.</p>
+     *
+     * @param core a {@link org.springframework.beans.factory.BeanFactory} object
+     */
     public void setCoreBeanFactory(BeanFactory core) {
         coreContext = core;
     }

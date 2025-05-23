@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * IPendingServiceCall is a call that have a list of callbacks.
  *
- *
+ * @author mondain
  */
 public interface IPendingServiceCall extends IServiceCall {
 

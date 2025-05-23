@@ -7,6 +7,11 @@
 
 package org.red5.server.net.protocol;
 
+/**
+ * <p>ProtocolException class.</p>
+ *
+ * @author mondain
+ */
 public class ProtocolException extends RuntimeException {
 
     /**

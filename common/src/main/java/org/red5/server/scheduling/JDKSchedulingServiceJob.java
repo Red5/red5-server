@@ -34,6 +34,12 @@ public class JDKSchedulingServiceJob implements Runnable {
     // set this flag to prevent removal within the internal run() of the scheduled job
     private final boolean autoRemove;
 
+    /**
+     * <p>Constructor for JDKSchedulingServiceJob.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param dataMap a {@link java.util.Map} object
+     */
     public JDKSchedulingServiceJob(String name, Map<String, Object> dataMap) {
         this.jobDataMap = dataMap;
         log.debug("Set job data map: {}", jobDataMap);
@@ -41,6 +47,13 @@ public class JDKSchedulingServiceJob implements Runnable {
         this.autoRemove = true;
     }
 
+    /**
+     * <p>Constructor for JDKSchedulingServiceJob.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param dataMap a {@link java.util.Map} object
+     * @param autoRemove a boolean
+     */
     public JDKSchedulingServiceJob(String name, Map<String, Object> dataMap, boolean autoRemove) {
         this.jobDataMap = dataMap;
         log.debug("Set job data map: {}", jobDataMap);
@@ -48,6 +61,9 @@ public class JDKSchedulingServiceJob implements Runnable {
         this.autoRemove = autoRemove;
     }
 
+    /**
+     * <p>run.</p>
+     */
     public void run() {
         //log.debug("execute");
         ISchedulingService service = (ISchedulingService) jobDataMap.get(ISchedulingService.SCHEDULING_SERVICE);

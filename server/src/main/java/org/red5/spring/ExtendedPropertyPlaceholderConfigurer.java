@@ -24,14 +24,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
- * An extension of {@link PropertyPlaceholderConfigurer}. Provides runtime additions of properties and wildcard location lookups.
+ * An extension of {@link org.springframework.beans.factory.config.PropertyPlaceholderConfigurer}. Provides runtime additions of properties and wildcard location lookups.
  *
  * Properties can be added at runtime by using the static {@link #addGlobalProperty} before* the bean definition is instantiated in the ApplicationContext. A property added by {@link #addGlobalProperty} will get merged into properties specified by the bean definition, overriding keys that overlap.
  *
- * wildcard locations can be used instead of locations, if both are declared the last will override. Wildcard locations are handled by {@link #setWildcardLocations(String[])}, using {@link PathMatchingResourcePatternResolver} for matching locations. For wildcard locations that matches multiple Properties files, they are merged in by alphabetical filename order.
+ * wildcard locations can be used instead of locations, if both are declared the last will override. Wildcard locations are handled by {@link #setWildcardLocations(String[])}, using {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver} for matching locations. For wildcard locations that matches multiple Properties files, they are merged in by alphabetical filename order.
  *
  * @author Michael Guymon (michael.guymon@gmail.com)
- *
  */
 @SuppressWarnings("deprecation")
 public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer {
@@ -42,6 +41,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
     private Properties mergedProperties;
 
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     @Override
     protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props) throws BeansException {
@@ -55,20 +55,20 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
     }
 
     /**
-     * Merged {@link Properties} created by {@link #processProperties}
+     * Merged {@link java.util.Properties} created by {@link #processProperties}
      *
-     * @return {@link Properties}
+     * @return {@link java.util.Properties}
      */
     public Properties getMergedProperties() {
         return mergedProperties;
     }
 
     /**
-     * String[] of wildcard locations of properties that are converted to Resource[] using using {@link PathMatchingResourcePatternResolver}
+     * String[] of wildcard locations of properties that are converted to Resource[] using using {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}
      *
      * @param locations
      *            String[]
-     * @throws IOException
+     * @throws java.io.IOException
      *             on IO exception
      */
     @SuppressWarnings("null")

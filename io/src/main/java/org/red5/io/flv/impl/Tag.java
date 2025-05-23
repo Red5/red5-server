@@ -14,7 +14,6 @@ import org.red5.io.ITag;
  * A Tag represents the contents or payload of a FLV file.
  *
  * @see <a href="https://code.google.com/p/red5/wiki/FLV#FLV_Tag">FLV Tag</a>
- *
  * @author The Red5 Project
  * @author Dominick Accattato (daccattato@gmail.com)
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
@@ -78,7 +77,9 @@ public class Tag implements ITag {
         this.previousTagSize = previousTagSize;
     }
 
-    /** Constructs a new Tag. */
+    /**
+     * Constructs a new Tag.
+     */
     public Tag() {
 
     }
@@ -102,18 +103,16 @@ public class Tag implements ITag {
         this.bitflags = bitflags;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public IoBuffer getData() {
         return null;
     }
 
     /**
-     * Return the body IoBuffer
+     * {@inheritDoc}
      *
-     * @return Tag body
+     * Return the body IoBuffer
      */
     @Override
     public IoBuffer getBody() {
@@ -121,9 +120,9 @@ public class Tag implements ITag {
     }
 
     /**
-     * Return the size of the body
+     * {@inheritDoc}
      *
-     * @return Tag body size
+     * Return the size of the body
      */
     @Override
     public int getBodySize() {
@@ -131,9 +130,9 @@ public class Tag implements ITag {
     }
 
     /**
-     * Get the data type
+     * {@inheritDoc}
      *
-     * @return Tag data type
+     * Get the data type
      */
     @Override
     public byte getDataType() {
@@ -141,9 +140,9 @@ public class Tag implements ITag {
     }
 
     /**
-     * Return the timestamp
+     * {@inheritDoc}
      *
-     * @return Tag timestamp
+     * Return the timestamp
      */
     @Override
     public int getTimestamp() {
@@ -151,9 +150,9 @@ public class Tag implements ITag {
     }
 
     /**
-     * Return previous tag size
+     * {@inheritDoc}
      *
-     * @return Previous tag size
+     * Return previous tag size
      */
     @Override
     public int getPreviousTagSize() {
@@ -161,9 +160,9 @@ public class Tag implements ITag {
     }
 
     /**
-     * Prints out the contents of the tag
+     * {@inheritDoc}
      *
-     * @return Tag contents
+     * Prints out the contents of the tag
      */
     @Override
     public String toString() {

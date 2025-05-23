@@ -50,6 +50,7 @@ import ch.qos.logback.classic.LoggerContext;
 public class WarLoaderServlet extends ContextLoaderListener {
 
     // Initialize Logging
+    /** Constant <code>logger</code> */
     public static final Logger logger = Red5LoggerFactory.getLogger(WarLoaderServlet.class);
 
     private static ArrayList<ServletContext> registeredContexts = new ArrayList<ServletContext>(3);
@@ -73,6 +74,8 @@ public class WarLoaderServlet extends ContextLoaderListener {
     private Server server;
 
     /**
+     * {@inheritDoc}
+     *
      * Main entry point for the Red5 Server as a war
      */
     // Notification that the web application is ready to process requests
@@ -125,6 +128,11 @@ public class WarLoaderServlet extends ContextLoaderListener {
     /*
      * Registers a subcontext with red5
      */
+    /**
+     * <p>registerSubContext.</p>
+     *
+     * @param webAppKey a {@link java.lang.String} object
+     */
     @SuppressWarnings("null")
     public void registerSubContext(String webAppKey) {
         // get the sub contexts - servlet context
@@ -161,6 +169,8 @@ public class WarLoaderServlet extends ContextLoaderListener {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Clearing the in-memory configuration parameters, we will receive notification that the servlet context is about to be shut down
      */
     @SuppressWarnings("null")

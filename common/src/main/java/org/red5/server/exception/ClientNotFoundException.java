@@ -9,6 +9,8 @@ package org.red5.server.exception;
 
 /**
  * Client not found
+ *
+ * @author mondain
  */
 public class ClientNotFoundException extends RuntimeException {
 

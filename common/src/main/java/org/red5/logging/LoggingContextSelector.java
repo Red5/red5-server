@@ -43,8 +43,14 @@ public class LoggingContextSelector implements ContextSelector {
 
     private volatile String contextConfigFile;
 
+    /** Constant <code>KEY_APP_NAME="application-name"</code> */
     public final static String KEY_APP_NAME = "application-name";
 
+    /**
+     * <p>Constructor for LoggingContextSelector.</p>
+     *
+     * @param context a {@link ch.qos.logback.classic.LoggerContext} object
+     */
     public LoggingContextSelector(LoggerContext context) {
         if (DEFAULT_CONTEXT == null) {
             if (Red5LoggerFactory.DEBUG) {
@@ -71,6 +77,11 @@ public class LoggingContextSelector implements ContextSelector {
         }
     }
 
+    /**
+     * <p>getLoggerContext.</p>
+     *
+     * @return a {@link ch.qos.logback.classic.LoggerContext} object
+     */
     public LoggerContext getLoggerContext() {
         if (Red5LoggerFactory.DEBUG) {
             System.out.println("getLoggerContext request");
@@ -90,6 +101,7 @@ public class LoggingContextSelector implements ContextSelector {
         return context;
     }
 
+    /** {@inheritDoc} */
     public LoggerContext getLoggerContext(String contextName) {
         if (Red5LoggerFactory.DEBUG) {
             System.out.printf("getLoggerContext request for %s in context map %s%n", contextName, contextMap.containsKey(contextName));
@@ -141,6 +153,13 @@ public class LoggingContextSelector implements ContextSelector {
         return context;
     }
 
+    /**
+     * <p>getLoggerContext.</p>
+     *
+     * @param contextName a {@link java.lang.String} object
+     * @param url a {@link java.net.URL} object
+     * @return a {@link ch.qos.logback.classic.LoggerContext} object
+     */
     public LoggerContext getLoggerContext(String contextName, URL url) {
         if (Red5LoggerFactory.DEBUG) {
             System.out.printf("getLoggerContext request for %s in context map %s url: %s%n", contextName, contextMap.containsKey(contextName), url);
@@ -174,10 +193,21 @@ public class LoggingContextSelector implements ContextSelector {
         return context;
     }
 
+    /**
+     * <p>getDefaultLoggerContext.</p>
+     *
+     * @return a {@link ch.qos.logback.classic.LoggerContext} object
+     */
     public LoggerContext getDefaultLoggerContext() {
         return DEFAULT_CONTEXT;
     }
 
+    /**
+     * <p>attachLoggerContext.</p>
+     *
+     * @param contextName a {@link java.lang.String} object
+     * @param loggerContext a {@link ch.qos.logback.classic.LoggerContext} object
+     */
     public void attachLoggerContext(String contextName, LoggerContext loggerContext) {
         if (Red5LoggerFactory.DEBUG) {
             System.out.printf("Adding logger context: %s to map for context: %s%n", loggerContext.getName(), contextName);
@@ -185,14 +215,25 @@ public class LoggingContextSelector implements ContextSelector {
         contextMap.put(contextName, loggerContext);
     }
 
+    /** {@inheritDoc} */
     public LoggerContext detachLoggerContext(String contextName) {
         return contextMap.remove(contextName);
     }
 
+    /**
+     * <p>getContextNames.</p>
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<String> getContextNames() {
         return List.copyOf(contextMap.keySet());
     }
 
+    /**
+     * <p>Setter for the field <code>contextConfigFile</code>.</p>
+     *
+     * @param contextConfigFile a {@link java.lang.String} object
+     */
     public void setContextConfigFile(String contextConfigFile) {
         this.contextConfigFile = contextConfigFile;
     }
@@ -218,6 +259,9 @@ public class LoggingContextSelector implements ContextSelector {
         threadLocal.set(context);
     }
 
+    /**
+     * <p>removeLocalContext.</p>
+     */
     public void removeLocalContext() {
         threadLocal.remove();
     }

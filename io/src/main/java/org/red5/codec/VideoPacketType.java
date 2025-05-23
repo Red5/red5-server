@@ -1,5 +1,10 @@
 package org.red5.codec;
 
+/**
+ * <p>VideoPacketType class.</p>
+ *
+ * @author mondain
+ */
 public enum VideoPacketType {
 
     SequenceStart((byte) 0), CodedFrames((byte) 0x01), SequenceEnd((byte) 0x02),
@@ -24,10 +29,21 @@ public enum VideoPacketType {
         this.packetType = packetType;
     }
 
+    /**
+     * <p>Getter for the field <code>packetType</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getPacketType() {
         return packetType;
     }
 
+    /**
+     * <p>valueOf.</p>
+     *
+     * @param packetType a int
+     * @return a {@link org.red5.codec.VideoPacketType} object
+     */
     public static VideoPacketType valueOf(int packetType) {
         for (VideoPacketType vpt : values()) {
             if (vpt.getPacketType() == packetType) {

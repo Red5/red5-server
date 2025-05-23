@@ -20,6 +20,8 @@ import org.red5.server.so.ISharedObjectMessage;
 
 /**
  * Event decoder decodes event objects from incoming byte buffer.
+ *
+ * @author mondain
  */
 public interface IEventDecoder {
 

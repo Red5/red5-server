@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handles all RTMP protocol events fired by the MINA framework.
+ *
+ * @author mondain
  */
 public class RTMPMinaIoHandler extends IoHandlerAdapter {
 
@@ -322,6 +324,8 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     }
 
     /**
+     * <p>setCodecFactory.</p>
+     *
      * @param codecFactory
      *            the codecFactory to set
      */
@@ -330,6 +334,11 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         log.warn("This option is deprecated, the codec factory is now contained within the RTMPEIoFilter");
     }
 
+    /**
+     * <p>createRTMPMinaConnection.</p>
+     *
+     * @return a {@link org.red5.server.net.rtmp.RTMPMinaConnection} object
+     */
     protected RTMPMinaConnection createRTMPMinaConnection() {
         return (RTMPMinaConnection) RTMPConnManager.getInstance().createConnection(RTMPMinaConnection.class);
     }

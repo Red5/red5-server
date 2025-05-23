@@ -206,6 +206,8 @@ public class FilePersistence extends RamPersistence {
     }
 
     /**
+     * <p>Setter for the field <code>checkForEmptyDirectories</code>.</p>
+     *
      * @param checkForEmptyDirectories
      *            the checkForEmptyDirectories to set
      */
@@ -214,6 +216,8 @@ public class FilePersistence extends RamPersistence {
     }
 
     /**
+     * <p>Getter for the field <code>persistenceInterval</code>.</p>
+     *
      * @return the persistenceInterval
      */
     public int getPersistenceInterval() {
@@ -221,6 +225,8 @@ public class FilePersistence extends RamPersistence {
     }
 
     /**
+     * <p>Setter for the field <code>persistenceInterval</code>.</p>
+     *
      * @param persistenceInterval
      *            the persistenceInterval to set
      */
@@ -473,19 +479,7 @@ public class FilePersistence extends RamPersistence {
      *
      * @param object
      *            Persistable object
-     * @return
-     *
-     *         <pre>
-     *         true
-     *         </pre>
-     *
-     *         on success,
-     *
-     *         <pre>
-     *         false
-     *         </pre>
-     *
-     *         otherwise
+     * @return a boolean
      */
     @SuppressWarnings("null")
     protected boolean saveObject(IPersistable object) {

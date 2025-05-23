@@ -14,6 +14,8 @@ import org.red5.io.IStreamableFile;
 
 /**
  * Provides access to files that can be streamed.
+ *
+ * @author mondain
  */
 public interface IStreamableFileService {
 
@@ -71,7 +73,7 @@ public interface IStreamableFileService {
      * @param file
      *            File resource
      * @return Streamable file resource
-     * @throws IOException
+     * @throws java.io.IOException
      *             Thrown if there were problems accessing given file
      */
     public IStreamableFile getStreamableFile(File file) throws IOException;

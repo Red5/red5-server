@@ -43,9 +43,9 @@ public interface IClientRegistry {
      * @param params
      *            the parameters the client passed during connection
      * @return the new client
-     * @throws ClientNotFoundException
+     * @throws org.red5.server.exception.ClientNotFoundException
      *             no client could be created from the passed parameters
-     * @throws ClientRejectedException
+     * @throws org.red5.server.exception.ClientRejectedException
      *             the client is not allowed to connect
      */
     public IClient newClient(Object[] params) throws ClientNotFoundException, ClientRejectedException;
@@ -56,7 +56,7 @@ public interface IClientRegistry {
      * @param id
      *            the id of the client to return
      * @return the client object
-     * @throws ClientNotFoundException
+     * @throws org.red5.server.exception.ClientNotFoundException
      *             no client with the passed id exists
      */
     public IClient lookupClient(String id) throws ClientNotFoundException;

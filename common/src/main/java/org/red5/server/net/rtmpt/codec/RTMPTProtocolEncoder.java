@@ -15,9 +15,12 @@ import org.red5.server.net.rtmp.status.Status;
 
 /**
  * RTMPT protocol encoder.
+ *
+ * @author mondain
  */
 public class RTMPTProtocolEncoder extends RTMPProtocolEncoder {
 
+    /** {@inheritDoc} */
     @Override
     protected void encodeCommand(IoBuffer out, ICommand command) {
         // if we get an InsufficientBW message for the client, we'll reduce the base tolerance and set drop live to true

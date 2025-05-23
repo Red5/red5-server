@@ -9,6 +9,8 @@ package org.red5.server.exception;
 
 /**
  * Stream control exception
+ *
+ * @author mondain
  */
 public class StreamControlException extends RuntimeException {
 

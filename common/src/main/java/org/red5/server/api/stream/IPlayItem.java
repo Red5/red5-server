@@ -11,6 +11,8 @@ import org.red5.server.messaging.IMessageInput;
 
 /**
  * Playlist item. Each playlist item has name, start time, length in milliseconds and message input source.
+ *
+ * @author mondain
  */
 public interface IPlayItem {
 

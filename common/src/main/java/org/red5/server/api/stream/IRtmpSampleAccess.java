@@ -9,8 +9,14 @@ package org.red5.server.api.stream;
 
 import org.red5.server.api.scope.IScope;
 
+/**
+ * <p>IRtmpSampleAccess interface.</p>
+ *
+ * @author mondain
+ */
 public interface IRtmpSampleAccess {
 
+    /** Constant <code>BEAN_NAME="rtmpSampleAccess"</code> */
     public static String BEAN_NAME = "rtmpSampleAccess";
 
     /**

@@ -13,6 +13,8 @@ import java.io.ObjectOutput;
 
 /**
  * Bytes read event
+ *
+ * @author mondain
  */
 public class BytesRead extends BaseEvent {
 
@@ -23,6 +25,9 @@ public class BytesRead extends BaseEvent {
      */
     private int bytesRead;
 
+    /**
+     * <p>Constructor for BytesRead.</p>
+     */
     public BytesRead() {
         super(Type.STREAM_CONTROL);
     }
@@ -82,12 +87,14 @@ public class BytesRead extends BaseEvent {
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         bytesRead = in.readInt();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

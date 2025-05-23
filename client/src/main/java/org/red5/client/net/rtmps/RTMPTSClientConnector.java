@@ -41,11 +41,19 @@ public class RTMPTSClientConnector extends RTMPTClientConnector {
         httpClient = HttpConnectionUtil.getSecureClient();
     }
 
+    /**
+     * <p>Constructor for RTMPTSClientConnector.</p>
+     *
+     * @param server a {@link java.lang.String} object
+     * @param port a int
+     * @param client a {@link org.red5.client.net.rtmps.RTMPTSClient} object
+     */
     public RTMPTSClientConnector(String server, int port, RTMPTSClient client) {
         targetHost = new HttpHost(server, port, "https");
         this.client = client;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void run() {
         HttpPost post = null;

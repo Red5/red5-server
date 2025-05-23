@@ -11,6 +11,8 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Scope not found, thrown when child scope wasn't found.
+ *
+ * @author mondain
  */
 public class ScopeNotFoundException extends RuntimeException {
 

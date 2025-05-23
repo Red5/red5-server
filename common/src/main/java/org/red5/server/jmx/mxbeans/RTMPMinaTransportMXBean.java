@@ -10,21 +10,56 @@ package org.red5.server.jmx.mxbeans;
 import javax.management.MXBean;
 
 /**
+ * <p>RTMPMinaTransportMXBean interface.</p>
  *
+ * @author mondain
  */
 @MXBean
 public interface RTMPMinaTransportMXBean {
+    /**
+     * <p>setIoThreads.</p>
+     *
+     * @param ioThreads a int
+     */
     public void setIoThreads(int ioThreads);
 
+    /**
+     * <p>setTcpNoDelay.</p>
+     *
+     * @param tcpNoDelay a boolean
+     */
     public void setTcpNoDelay(boolean tcpNoDelay);
 
+    /**
+     * <p>setUseHeapBuffers.</p>
+     *
+     * @param useHeapBuffers a boolean
+     */
     public void setUseHeapBuffers(boolean useHeapBuffers);
 
+    /**
+     * <p>getAddress.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getAddress();
 
+    /**
+     * <p>getStatistics.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getStatistics();
 
+    /**
+     * <p>start.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void start() throws Exception;
 
+    /**
+     * <p>stop.</p>
+     */
     public void stop();
 }

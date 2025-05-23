@@ -20,16 +20,21 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import org.red5.io.matroska.dtd.CompoundTag;
 import org.red5.io.matroska.dtd.Tag;
 import org.red5.io.matroska.dtd.TagFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>ParserUtils class.</p>
+ *
+ * @author mondain
+ */
 public class ParserUtils {
 
     private static Logger log = LoggerFactory.getLogger(ParserUtils.class);
 
+    /** Constant <code>BIT_IN_BYTE=8</code> */
     public static final int BIT_IN_BYTE = 8;
 
     /**
@@ -40,7 +45,7 @@ public class ParserUtils {
      * @param size
      *            - size of the value in bytes
      * @return - parsed value as long
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public static long parseInteger(InputStream inputStream, final int size) throws IOException {
@@ -63,8 +68,8 @@ public class ParserUtils {
      *            - stream to get value
      * @param size
      *            - size of the value in bytes
-     * @return - parsed value as {@link String}
-     * @throws IOException
+     * @return - parsed value as {@link java.lang.String}
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public static String parseString(InputStream inputStream, final int size) throws IOException {
@@ -87,7 +92,7 @@ public class ParserUtils {
      * @param size
      *            - size of the value in bytes
      * @return - parsed value as double
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public static double parseFloat(InputStream inputStream, final int size) throws IOException {
@@ -104,16 +109,16 @@ public class ParserUtils {
     }
 
     /**
-     * method used to parse subelements of {@link CompoundTag}
+     * method used to parse subelements of {@link org.red5.io.matroska.dtd.CompoundTag}
      *
      * @param inputStream
      *            - stream to get value
      * @param size
      *            - size of the value in bytes
      * @return - parsed tag
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
-     * @throws ConverterException
+     * @throws org.red5.io.matroska.ConverterException
      *             - in case of any conversion exception
      */
     public static ArrayList<Tag> parseMasterElement(InputStream inputStream, final int size) throws IOException, ConverterException {
@@ -138,7 +143,7 @@ public class ParserUtils {
      * @param size
      *            - size of the value in bytes
      * @return - parsed value as array of bytes
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public static byte[] parseBinary(InputStream inputStream, final int size) throws IOException {
@@ -152,12 +157,12 @@ public class ParserUtils {
     }
 
     /**
-     * method to parse {@link VINT}
+     * method to parse {@link org.red5.io.matroska.VINT}
      *
      * @param inputStream
      *            - stream to get value
      * @return - parsed value
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public static VINT readVINT(InputStream inputStream) throws IOException {
@@ -211,9 +216,9 @@ public class ParserUtils {
      * @param inputStream
      *            - stream to get value
      * @return tag, without parsing tag data, because it delegate to an tag itself
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
-     * @throws ConverterException
+     * @throws org.red5.io.matroska.ConverterException
      *             - in case of any conversion exception
      */
     public static Tag parseTag(InputStream inputStream) throws IOException, ConverterException {
@@ -249,7 +254,7 @@ public class ParserUtils {
      *            - size to skip
      * @param input
      *            - input stream to process
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public static void skip(long size, InputStream input) throws IOException {

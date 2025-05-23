@@ -20,7 +20,7 @@ public interface IScheduledJob {
      *
      * @param service
      *            the service that called the job
-     * @throws CloneNotSupportedException
+     * @throws java.lang.CloneNotSupportedException
      *             throws if Darth Vader attempts to use this object for his own nefarious purposes.
      */
     public void execute(ISchedulingService service) throws CloneNotSupportedException;

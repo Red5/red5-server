@@ -1,5 +1,10 @@
 package org.red5.codec;
 
+/**
+ * <p>AudioPacketType class.</p>
+ *
+ * @author mondain
+ */
 public enum AudioPacketType {
 
     SequenceStart((byte) 0), CodedFrames((byte) 0x01),
@@ -36,10 +41,21 @@ public enum AudioPacketType {
         this.packetType = packetType;
     }
 
+    /**
+     * <p>Getter for the field <code>packetType</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getPacketType() {
         return packetType;
     }
 
+    /**
+     * <p>valueOf.</p>
+     *
+     * @param packetType a int
+     * @return a {@link org.red5.codec.AudioPacketType} object
+     */
     public static AudioPacketType valueOf(int packetType) {
         for (AudioPacketType apt : values()) {
             if (apt.getPacketType() == packetType) {

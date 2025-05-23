@@ -14,6 +14,7 @@ package org.red5.server.stream;
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface ITokenBucketService {
+    /** Constant <code>KEY="TokenBucketService"</code> */
     public static final String KEY = "TokenBucketService";
 
     /**

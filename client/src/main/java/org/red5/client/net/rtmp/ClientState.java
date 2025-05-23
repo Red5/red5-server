@@ -9,6 +9,8 @@ package org.red5.client.net.rtmp;
 
 /**
  * Represents the current state of the client.
+ *
+ * @author mondain
  */
 public enum ClientState {
 

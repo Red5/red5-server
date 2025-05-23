@@ -13,6 +13,8 @@ import java.io.ObjectOutput;
 
 /**
  * Server bandwidth event. Also known as a Window Acknowledgement size message.
+ *
+ * @author mondain
  */
 public class ServerBW extends BaseEvent {
 
@@ -23,6 +25,9 @@ public class ServerBW extends BaseEvent {
      */
     private int bandwidth;
 
+    /**
+     * <p>Constructor for ServerBW.</p>
+     */
     public ServerBW() {
     }
 
@@ -74,12 +79,14 @@ public class ServerBW extends BaseEvent {
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         bandwidth = in.readInt();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

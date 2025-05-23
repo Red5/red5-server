@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base abstract class for all RTMP events
+ *
+ * @author mondain
  */
 public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable {
 
@@ -66,6 +68,9 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
      */
     protected AtomicInteger refcount = new AtomicInteger(1);
 
+    /**
+     * <p>Constructor for BaseEvent.</p>
+     */
     public BaseEvent() {
         // set a default type
         this(Type.SERVER, null);
@@ -97,31 +102,54 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a Type object
+     */
     public Type getType() {
         return type;
     }
 
+    /**
+     * <p>Setter for the field <code>type</code>.</p>
+     *
+     * @param type a Type object
+     */
     @Deprecated(since = "1.3.26")
     public void setType(Type type) {
         //this.type = type;
         throw new UnsupportedOperationException("Type is immutable");
     }
 
+    /**
+     * <p>Getter for the field <code>sourceType</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getSourceType() {
         return sourceType;
     }
 
+    /** {@inheritDoc} */
     public void setSourceType(byte sourceType) {
         this.sourceType = sourceType;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.Object} object
+     */
     public Object getObject() {
         return object;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.net.rtmp.message.Header} object
+     */
     public Header getHeader() {
         return header;
     }
@@ -131,12 +159,20 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         this.header = header;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean hasSource() {
         return source != null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.event.IEventListener} object
+     */
     public IEventListener getSource() {
         return source;
     }
@@ -146,10 +182,18 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         this.source = source;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a byte
+     */
     public abstract byte getDataType();
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTimestamp() {
         return timestamp;
     }
@@ -159,7 +203,9 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         this.timestamp = timestamp;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings("all")
     public void retain() {
         if (allocationDebugging) {
@@ -171,7 +217,9 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings("all")
     public void release() {
         if (allocationDebugging) {
@@ -190,6 +238,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
      */
     protected abstract void releaseInternal();
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -200,6 +249,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -218,6 +268,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = Type.valueOf(in.readUTF());
@@ -228,6 +279,7 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         if (log.isTraceEnabled()) {

@@ -21,6 +21,11 @@ import org.red5.io.sctp.SctpException;
 import org.red5.io.sctp.IAssociationControl.State;
 import org.red5.io.sctp.packet.SctpPacket;
 
+/**
+ * <p>InitAck class.</p>
+ *
+ * @author mondain
+ */
 public final class InitAck extends Chunk {
 
     private static final int MANDATORY_FIELD_SIZE = 16;
@@ -39,6 +44,14 @@ public final class InitAck extends Chunk {
 
     byte[] stateCookieBytes;
 
+    /**
+     * <p>Constructor for InitAck.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     * @throws org.red5.io.sctp.SctpException if any.
+     */
     public InitAck(final byte[] data, int offset, int length) throws SctpException {
         super(data, offset, length);
         assert length - offset - CHUNK_HEADER_SIZE > MANDATORY_FIELD_SIZE;
@@ -51,6 +64,16 @@ public final class InitAck extends Chunk {
         stateCookie = new StateCookie(data, offset + MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE, length - (MANDATORY_FIELD_SIZE + CHUNK_HEADER_SIZE));
     }
 
+    /**
+     * <p>Constructor for InitAck.</p>
+     *
+     * @param initiateTag a int
+     * @param initialTSN a int
+     * @param stateCookie a {@link org.red5.io.sctp.packet.chunks.StateCookie} object
+     * @param mac a {@link javax.crypto.Mac} object
+     * @throws java.security.InvalidKeyException if any.
+     * @throws java.security.NoSuchAlgorithmException if any.
+     */
     public InitAck(int initiateTag, int initialTSN, StateCookie stateCookie, Mac mac) throws InvalidKeyException, NoSuchAlgorithmException {
         super(ChunkType.INIT_ACK, (byte) 0x00);
         this.initiateTag = initiateTag;
@@ -63,6 +86,7 @@ public final class InitAck extends Chunk {
         super.setLength(MANDATORY_FIELD_SIZE + stateCookieBytes.length + super.getSize());
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getBytes() {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MANDATORY_FIELD_SIZE + super.getSize() + stateCookieBytes.length);
@@ -81,11 +105,13 @@ public final class InitAck extends Chunk {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getSize() {
         return MANDATORY_FIELD_SIZE + stateCookie.getSize() + super.getSize();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(IAssociationControl channel) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SctpException {
         if (channel.getState() != State.COOKIE_WAIT) {
@@ -99,27 +125,53 @@ public final class InitAck extends Chunk {
         channel.setState(State.COOKIE_ECHOED);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(InetSocketAddress address, IServerChannelControl server) throws SctpException {
         throw new SctpException("init ack chunk : not using with server");
     }
 
+    /**
+     * <p>Getter for the field <code>initiateTag</code>.</p>
+     *
+     * @return a int
+     */
     public int getInitiateTag() {
         return initiateTag;
     }
 
+    /**
+     * <p>Getter for the field <code>advertisedReceiverWindowCredit</code>.</p>
+     *
+     * @return a int
+     */
     public int getAdvertisedReceiverWindowCredit() {
         return advertisedReceiverWindowCredit;
     }
 
+    /**
+     * <p>Getter for the field <code>numberOfOutboundStreams</code>.</p>
+     *
+     * @return a int
+     */
     public int getNumberOfOutboundStreams() {
         return numberOfOutboundStreams;
     }
 
+    /**
+     * <p>Getter for the field <code>numberOfInboundStreams</code>.</p>
+     *
+     * @return a int
+     */
     public int getNumberOfInboundStreams() {
         return numberOfInboundStreams;
     }
 
+    /**
+     * <p>Getter for the field <code>initialTSN</code>.</p>
+     *
+     * @return a int
+     */
     public int getInitialTSN() {
         return initialTSN;
     }

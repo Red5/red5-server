@@ -214,9 +214,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Reads the data type
+     * {@inheritDoc}
      *
-     * @return byte Data type
+     * Reads the data type
      */
     @Override
     public byte readDataType() {
@@ -328,9 +328,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Reads a null (value)
+     * {@inheritDoc}
      *
-     * @return Object null
+     * Reads a null (value)
      */
     @Override
     public Object readNull() {
@@ -338,9 +338,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Reads a boolean
+     * {@inheritDoc}
      *
-     * @return boolean Boolean value
+     * Reads a boolean
      */
     @Override
     public Boolean readBoolean() {
@@ -348,9 +348,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Reads a Number
+     * {@inheritDoc}
      *
-     * @return Number Number
+     * Reads a Number
      */
     @Override
     public Number readNumber() {
@@ -382,9 +382,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Reads a string
+     * {@inheritDoc}
      *
-     * @return String String
+     * Reads a string
      */
     @Override
     public String readString() {
@@ -447,19 +447,25 @@ public class Input extends org.red5.io.amf.Input {
         return string;
     }
 
+    /**
+     * <p>Getter for the field <code>refStorage</code>.</p>
+     *
+     * @return a {@link org.red5.io.amf3.Input.RefStorage} object
+     */
     public RefStorage getRefStorage() {
         return refStorage;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getString() {
         return readString();
     }
 
     /**
-     * Returns a date
+     * {@inheritDoc}
      *
-     * @return Date Date object
+     * Returns a date
      */
     @Override
     public Date readDate() {
@@ -477,9 +483,9 @@ public class Input extends org.red5.io.amf.Input {
     // Array
 
     /**
-     * Returns an array
+     * {@inheritDoc}
      *
-     * @return int Length of array
+     * Returns an array
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -580,12 +586,14 @@ public class Input extends org.red5.io.amf.Input {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object readMap() {
         //throw new UnsupportedOperationException("AMF3 doesn't support maps");
         return super.readMap();
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings({ "unchecked", "rawtypes", "null", "serial" })
     @Override
     public Object readObject() {
@@ -855,9 +863,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Read ByteArray object.
+     * {@inheritDoc}
      *
-     * @return ByteArray object
+     * Read ByteArray object.
      */
     @Override
     public ByteArray readByteArray() {
@@ -872,9 +880,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Read Vector&lt;Integer&gt; object.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Integer&gt; object
+     * Read Vector&lt;Integer&gt; object.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -896,9 +904,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Read Vector&lt;uint&gt; object.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Long&gt; object
+     * Read Vector&lt;uint&gt; object.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -924,9 +932,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Read Vector&lt;Number&gt; object.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Double&gt; object
+     * Read Vector&lt;Number&gt; object.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -952,9 +960,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Read Vector&lt;Object&gt; object.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Object&gt; object
+     * Read Vector&lt;Object&gt; object.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -1015,9 +1023,9 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Reads Custom
+     * {@inheritDoc}
      *
-     * @return Object Custom type object
+     * Reads Custom
      */
     @Override
     public Object readCustom() {

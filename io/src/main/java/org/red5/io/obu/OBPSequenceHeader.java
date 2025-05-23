@@ -1,5 +1,10 @@
 package org.red5.io.obu;
 
+/**
+ * <p>OBPSequenceHeader class.</p>
+ *
+ * @author mondain
+ */
 public class OBPSequenceHeader {
     public byte seqProfile;
 

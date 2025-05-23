@@ -64,9 +64,9 @@ public class HexCharset extends Charset {
     }
 
     /**
-     * Constructs a new encoder for this charset.
+     * {@inheritDoc}
      *
-     * @return A new encoder for this charset
+     * Constructs a new encoder for this charset.
      */
     @Override
     public CharsetEncoder newEncoder() {
@@ -74,9 +74,9 @@ public class HexCharset extends Charset {
     }
 
     /**
-     * Constructs a new decoder for this charset.
+     * {@inheritDoc}
      *
-     * @return A new decoder for this charset
+     * Constructs a new decoder for this charset.
      */
     @Override
     public CharsetDecoder newDecoder() {
@@ -84,6 +84,8 @@ public class HexCharset extends Charset {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Tells whether or not this charset contains the given charset.
      *
      * <p>
@@ -97,8 +99,6 @@ public class HexCharset extends Charset {
      *
      * <p>
      * This method computes an approximation of the containment relation: If it returns true then the given charset is known to be contained by this charset; if it returns false, however, then it is not necessarily the case that the given charset is not contained in this charset.
-     *
-     * @return true if, and only if, the given charset is contained in this charset
      */
     @Override
     public boolean contains(Charset cs) {

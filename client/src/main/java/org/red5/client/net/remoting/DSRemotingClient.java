@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DSRemotingClient extends RemotingClient {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(DSRemotingClient.class);
 
     /** The datasource id (assigned by the server). DsId */
@@ -68,10 +69,20 @@ public class DSRemotingClient extends RemotingClient {
         log.debug("DSRemotingClient created  - url: {}", url);
     }
 
+    /**
+     * <p>Getter for the field <code>dataSourceId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getDataSourceId() {
         return dataSourceId;
     }
 
+    /**
+     * <p>Setter for the field <code>dataSourceId</code>.</p>
+     *
+     * @param dataSourceId a {@link java.lang.String} object
+     */
     public void setDataSourceId(String dataSourceId) {
         this.dataSourceId = dataSourceId;
     }
@@ -141,10 +152,9 @@ public class DSRemotingClient extends RemotingClient {
     }
 
     /**
-     * Process any headers sent in the response.
+     * {@inheritDoc}
      *
-     * @param in
-     *            Byte buffer with response data
+     * Process any headers sent in the response.
      */
     @SuppressWarnings("null")
     @Override
@@ -262,13 +272,9 @@ public class DSRemotingClient extends RemotingClient {
     }
 
     /**
-     * Invoke a method synchronously on the remoting server.
+     * {@inheritDoc}
      *
-     * @param method
-     *            Method name
-     * @param params
-     *            Parameters passed to method
-     * @return the result of the method call
+     * Invoke a method synchronously on the remoting server.
      */
     @SuppressWarnings("null")
     @Override
@@ -340,6 +346,11 @@ public class DSRemotingClient extends RemotingClient {
         data.position(pos);
     }
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects
+     */
     @SuppressWarnings("rawtypes")
     public static void main(String[] args) {
         //blazeds my-polling-amf http://localhost:8400/meta/messagebroker/amfpolling

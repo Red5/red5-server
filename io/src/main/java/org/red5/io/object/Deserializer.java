@@ -34,6 +34,11 @@ public class Deserializer {
     private Deserializer() {
     }
 
+    /**
+     * <p>loadBlackList.</p>
+     *
+     * @throws java.io.IOException if any.
+     */
     public synchronized static void loadBlackList() throws IOException {
         try (InputStream is = Deserializer.class.getClassLoader().getResourceAsStream("org/red5/io/object/black-list.properties")) {
             Properties bl = new Properties();

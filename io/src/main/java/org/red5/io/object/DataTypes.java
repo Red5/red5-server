@@ -120,10 +120,13 @@ public class DataTypes {
      */
     public static final byte CORE_VECTOR_INT = 0x0D + 0x30; //61
 
+    /** Constant <code>CORE_VECTOR_UINT=0x0E + 0x30</code> */
     public static final byte CORE_VECTOR_UINT = 0x0E + 0x30; //62
 
+    /** Constant <code>CORE_VECTOR_NUMBER=0x0F + 0x30</code> */
     public static final byte CORE_VECTOR_NUMBER = 0x0F + 0x30; //63
 
+    /** Constant <code>CORE_VECTOR_OBJECT=0x10 + 0x30</code> */
     public static final byte CORE_VECTOR_OBJECT = 0x10 + 0x30; //64
 
     // Some helper methods..

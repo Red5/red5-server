@@ -22,17 +22,32 @@ public final class UnsignedLong extends UnsignedNumber {
 
     private byte[] value = new byte[8];
 
+    /**
+     * <p>Constructor for UnsignedLong.</p>
+     *
+     * @param c a byte
+     */
     public UnsignedLong(byte c) {
         Arrays.fill(value, (byte) 0);
         value[7] = c;
     }
 
+    /**
+     * <p>Constructor for UnsignedLong.</p>
+     *
+     * @param c a short
+     */
     public UnsignedLong(short c) {
         Arrays.fill(value, (byte) 0);
         value[6] = (byte) ((c >> 8) & 0xFF);
         value[7] = (byte) (c & 0xFF);
     }
 
+    /**
+     * <p>Constructor for UnsignedLong.</p>
+     *
+     * @param c a int
+     */
     public UnsignedLong(int c) {
         Arrays.fill(value, (byte) 0);
         value[4] = (byte) ((c >> 24) & 0xFF);
@@ -41,6 +56,11 @@ public final class UnsignedLong extends UnsignedNumber {
         value[7] = (byte) (c & 0xFF);
     }
 
+    /**
+     * <p>Constructor for UnsignedLong.</p>
+     *
+     * @param c a long
+     */
     public UnsignedLong(long c) {
         value[0] = (byte) ((c >> 56) & 0xFF);
         value[1] = (byte) ((c >> 48) & 0xFF);
@@ -66,10 +86,23 @@ public final class UnsignedLong extends UnsignedNumber {
         Arrays.fill(value, (byte) 0);
     }
 
+    /**
+     * <p>fromBytes.</p>
+     *
+     * @param c an array of {@link byte} objects
+     * @return a {@link org.red5.io.object.UnsignedLong} object
+     */
     public static UnsignedLong fromBytes(byte[] c) {
         return fromBytes(c, 0);
     }
 
+    /**
+     * <p>fromBytes.</p>
+     *
+     * @param c an array of {@link byte} objects
+     * @param offset a int
+     * @return a {@link org.red5.io.object.UnsignedLong} object
+     */
     public static UnsignedLong fromBytes(byte[] c, int offset) {
         UnsignedLong number = new UnsignedLong();
         if ((c.length - offset) < 8)
@@ -80,10 +113,23 @@ public final class UnsignedLong extends UnsignedNumber {
         return number;
     }
 
+    /**
+     * <p>fromString.</p>
+     *
+     * @param c a {@link java.lang.String} object
+     * @return a {@link org.red5.io.object.UnsignedLong} object
+     */
     public static UnsignedLong fromString(String c) {
         return fromString(c, 10);
     }
 
+    /**
+     * <p>fromString.</p>
+     *
+     * @param c a {@link java.lang.String} object
+     * @param radix a int
+     * @return a {@link org.red5.io.object.UnsignedLong} object
+     */
     public static UnsignedLong fromString(String c, int radix) {
         UnsignedLong number = new UnsignedLong();
 
@@ -96,11 +142,13 @@ public final class UnsignedLong extends UnsignedNumber {
         return number;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getBytes() {
         return value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         if ((byte) ((value[0] >> 7) & 0x01) == 1) {
@@ -115,26 +163,31 @@ public final class UnsignedLong extends UnsignedNumber {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public int intValue() {
         return ((value[4] << 24) & 0xFF000000 | (value[5] << 16) & 0xFF0000 | (value[6] << 8) & 0xFF00 | (value[7] & 0xFF));
     }
 
+    /** {@inheritDoc} */
     @Override
     public long longValue() {
         return (((long) value[0] << 56) & 0xFF00000000000000L | ((long) value[1] << 48) & 0xFF000000000000L | ((long) value[2] << 40) & 0xFF0000000000L | ((long) value[3] << 32) & 0xFF00000000L | ((long) value[4] << 24) & 0xFF000000L | ((long) value[5] << 16) & 0xFF0000L | ((long) value[6] << 8) & 0xFF00L | ((value[7]) & 0xFFL));
     }
 
+    /** {@inheritDoc} */
     @Override
     public float floatValue() {
         return longValue();
     }
 
+    /** {@inheritDoc} */
     @Override
     public double doubleValue() {
         return longValue();
     }
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(UnsignedNumber other) {
         byte[] otherValue = other.getBytes();
@@ -155,6 +208,7 @@ public final class UnsignedLong extends UnsignedNumber {
         return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object other) {
         if (other instanceof UnsignedLong) {
@@ -170,6 +224,7 @@ public final class UnsignedLong extends UnsignedNumber {
             return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         int hashCode = 0;
@@ -180,6 +235,7 @@ public final class UnsignedLong extends UnsignedNumber {
         return hashCode;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shiftRight(int nBits) {
         if (nBits > 64 || nBits < 0)
@@ -194,6 +250,7 @@ public final class UnsignedLong extends UnsignedNumber {
             value[i] = 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void shiftLeft(int nBits) {
         if (nBits > 64 || nBits < 0)

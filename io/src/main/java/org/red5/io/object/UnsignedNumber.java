@@ -8,6 +8,8 @@
 package org.red5.io.object;
 
 /**
+ * <p>Abstract UnsignedNumber class.</p>
+ *
  * @author Matteo Merli (matteo.merli@gmail.com)
  */
 public abstract class UnsignedNumber extends Number {
@@ -37,21 +39,41 @@ public abstract class UnsignedNumber extends Number {
      */
     public abstract void shiftLeft(int nBits);
 
+    /** {@inheritDoc} */
     @Override
     public abstract String toString();
 
+    /**
+     * <p>compareTo.</p>
+     *
+     * @param other a {@link org.red5.io.object.UnsignedNumber} object
+     * @return a int
+     */
     public abstract int compareTo(UnsignedNumber other);
 
+    /** {@inheritDoc} */
     @Override
     public abstract boolean equals(Object other);
 
+    /** {@inheritDoc} */
     @Override
     public abstract int hashCode();
 
+    /**
+     * <p>toHexString.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String toHexString() {
         return toHexString(false);
     }
 
+    /**
+     * <p>toHexString.</p>
+     *
+     * @param pad a boolean
+     * @return a {@link java.lang.String} object
+     */
     public String toHexString(boolean pad) {
         StringBuilder sb = new StringBuilder();
         boolean started = false;
@@ -71,5 +93,6 @@ public abstract class UnsignedNumber extends Number {
         return sb.toString();
     }
 
+    /** Constant <code>hexLetters</code> */
     protected static final char[] hexLetters = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 }

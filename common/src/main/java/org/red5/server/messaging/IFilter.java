@@ -9,6 +9,8 @@ package org.red5.server.messaging;
 
 /**
  * Filter marker interface groups consumer and provider interfaces
+ *
+ * @author mondain
  */
 public interface IFilter extends IConsumer, IProvider {
 

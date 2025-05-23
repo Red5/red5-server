@@ -20,7 +20,6 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
      *
      * @param name
      *            Cue point name
-     *
      */
     public void setName(String name);
 
@@ -28,7 +27,6 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
      * Gets the name
      *
      * @return name Cue point name
-     *
      */
     public String getName();
 
@@ -37,7 +35,6 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
      *
      * @param type
      *            Cue point type
-     *
      */
     public void setType(String type);
 
@@ -45,7 +42,6 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
      * Gets the type
      *
      * @return type Cue point type
-     *
      */
     public String getType();
 
@@ -54,7 +50,6 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
      *
      * @param d
      *            Timestamp
-     *
      */
     public void setTime(double d);
 
@@ -62,7 +57,6 @@ public interface IMetaCue extends IMeta, Comparable<Object> {
      * Gets the time
      *
      * @return time Timestamp
-     *
      */
     public double getTime();
 }

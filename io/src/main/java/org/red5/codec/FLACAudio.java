@@ -14,7 +14,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  *
  * Stores the decoder configuration.
  *
- * Free Lossless Audio Codec - <https://xiph.org/flac/format.html>
+ * <a href="https://xiph.org/flac/format.html">Free Lossless Audio Codec</a>
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -29,11 +29,13 @@ public class FLACAudio extends AbstractAudio {
         codec = AudioCodec.FLAC;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void reset() {
         privateData = null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
         if (data.limit() == 0) {
@@ -46,6 +48,7 @@ public class FLACAudio extends AbstractAudio {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data) {
         if (data.hasRemaining()) {
@@ -70,6 +73,7 @@ public class FLACAudio extends AbstractAudio {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IoBuffer getDecoderConfiguration() {
         if (privateData == null) {

@@ -30,7 +30,7 @@ public class Bootstrap {
      *
      * @param args
      *            command line arguments
-     * @throws Exception
+     * @throws java.lang.Exception
      *             if error occurs
      */
     public static void main(String[] args) throws Exception {

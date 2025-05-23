@@ -17,9 +17,12 @@ import org.red5.server.messaging.IMessageInput;
 
 /**
  * Central unit to get access to different types of provider inputs
+ *
+ * @author mondain
  */
 public interface IProviderService extends IScopeService {
 
+    /** Constant <code>BEAN_NAME="providerService"</code> */
     public final static String BEAN_NAME = "providerService";
 
     enum INPUT_TYPE {

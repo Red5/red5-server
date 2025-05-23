@@ -28,8 +28,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 
+/**
+ * <p>DebugProxyHandler class.</p>
+ *
+ * @author mondain
+ */
 public class DebugProxyHandler extends IoHandlerAdapter implements ResourceLoaderAware {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(DebugProxyHandler.class);
 
     private ResourceLoader loader;

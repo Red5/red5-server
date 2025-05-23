@@ -53,13 +53,16 @@ public abstract class RTMPHandshake implements IHandshake {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
+    /** Constant <code>HANDSHAKE_TYPES</code> */
     public final static String[] HANDSHAKE_TYPES = { "Undefined0", "Undefined1", "Undefined2", "RTMP", "Undefined4", "Undefined5", "RTMPE", "Undefined7", "RTMPE XTEA", "RTMPE BLOWFISH" };
 
+    /** Constant <code>GENUINE_FMS_KEY</code> */
     public static final byte[] GENUINE_FMS_KEY = { (byte) 0x47, (byte) 0x65, (byte) 0x6e, (byte) 0x75, (byte) 0x69, (byte) 0x6e, (byte) 0x65, (byte) 0x20, (byte) 0x41, (byte) 0x64, (byte) 0x6f, (byte) 0x62, (byte) 0x65, (byte) 0x20, (byte) 0x46, (byte) 0x6c, (byte) 0x61, (byte) 0x73, (byte) 0x68, (byte) 0x20, (byte) 0x4d, (byte) 0x65, (byte) 0x64, (byte) 0x69, (byte) 0x61, (byte) 0x20, (byte) 0x53, (byte) 0x65,
             (byte) 0x72, (byte) 0x76, (byte) 0x65, (byte) 0x72, (byte) 0x20, (byte) 0x30, (byte) 0x30, (byte) 0x31, // Genuine Adobe Flash Media Server 001
             (byte) 0xf0, (byte) 0xee, (byte) 0xc2, (byte) 0x4a, (byte) 0x80, (byte) 0x68, (byte) 0xbe, (byte) 0xe8, (byte) 0x2e, (byte) 0x00, (byte) 0xd0, (byte) 0xd1, (byte) 0x02, (byte) 0x9e, (byte) 0x7e, (byte) 0x57, (byte) 0x6e, (byte) 0xec, (byte) 0x5d, (byte) 0x2d, (byte) 0x29, (byte) 0x80, (byte) 0x6f, (byte) 0xab, (byte) 0x93, (byte) 0xb8, (byte) 0xe6, (byte) 0x36, (byte) 0xcf, (byte) 0xeb, (byte) 0x31,
             (byte) 0xae }; // 68
 
+    /** Constant <code>GENUINE_FP_KEY</code> */
     public static final byte[] GENUINE_FP_KEY = { (byte) 0x47, (byte) 0x65, (byte) 0x6E, (byte) 0x75, (byte) 0x69, (byte) 0x6E, (byte) 0x65, (byte) 0x20, (byte) 0x41, (byte) 0x64, (byte) 0x6F, (byte) 0x62, (byte) 0x65, (byte) 0x20, (byte) 0x46, (byte) 0x6C, (byte) 0x61, (byte) 0x73, (byte) 0x68, (byte) 0x20, (byte) 0x50, (byte) 0x6C, (byte) 0x61, (byte) 0x79, (byte) 0x65, (byte) 0x72, (byte) 0x20, (byte) 0x30,
             (byte) 0x30, (byte) 0x31, // Genuine Adobe Flash Player 001
             (byte) 0xF0, (byte) 0xEE, (byte) 0xC2, (byte) 0x4A, (byte) 0x80, (byte) 0x68, (byte) 0xBE, (byte) 0xE8, (byte) 0x2E, (byte) 0x00, (byte) 0xD0, (byte) 0xD1, (byte) 0x02, (byte) 0x9E, (byte) 0x7E, (byte) 0x57, (byte) 0x6E, (byte) 0xEC, (byte) 0x5D, (byte) 0x2D, (byte) 0x29, (byte) 0x80, (byte) 0x6F, (byte) 0xAB, (byte) 0x93, (byte) 0xB8, (byte) 0xE6, (byte) 0x36, (byte) 0xCF, (byte) 0xEB, (byte) 0x31,
@@ -108,14 +111,19 @@ public abstract class RTMPHandshake implements IHandshake {
             { (byte) 0x2b, (byte) 0x97, (byte) 0x11, (byte) 0x8b, (byte) 0xd9, (byte) 0x4e, (byte) 0xd9, (byte) 0xdf, (byte) 0x20, (byte) 0xe3, (byte) 0x9c, (byte) 0x10, (byte) 0xe6, (byte) 0xa1, (byte) 0x35, (byte) 0x21, (byte) 0x11, (byte) 0xf9, (byte) 0x13, (byte) 0x0d, (byte) 0x0b, (byte) 0x24, (byte) 0x65, (byte) 0xb2 },
             { (byte) 0x53, (byte) 0x6a, (byte) 0x4c, (byte) 0x54, (byte) 0xac, (byte) 0x8b, (byte) 0x9b, (byte) 0xb8, (byte) 0x97, (byte) 0x29, (byte) 0xfc, (byte) 0x60, (byte) 0x2c, (byte) 0x5b, (byte) 0x3a, (byte) 0x85, (byte) 0x68, (byte) 0xb5, (byte) 0xaa, (byte) 0x6a, (byte) 0x44, (byte) 0xcd, (byte) 0x3f, (byte) 0xa7 } };
 
+    /** Constant <code>DH_MODULUS</code> */
     protected static final BigInteger DH_MODULUS = new BigInteger(1, DH_MODULUS_BYTES);
 
+    /** Constant <code>DH_BASE</code> */
     protected static final BigInteger DH_BASE = BigInteger.valueOf(2);
 
+    /** Constant <code>DIGEST_LENGTH=32</code> */
     protected static final int DIGEST_LENGTH = 32;
 
+    /** Constant <code>KEY_LENGTH=128</code> */
     protected static final int KEY_LENGTH = 128;
 
+    /** Constant <code>random</code> */
     protected static final Random random = new Random();
 
     protected KeyAgreement keyAgreement;
@@ -157,10 +165,18 @@ public abstract class RTMPHandshake implements IHandshake {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    /**
+     * <p>Constructor for RTMPHandshake.</p>
+     */
     public RTMPHandshake() {
         this((byte) 0);
     }
 
+    /**
+     * <p>Constructor for RTMPHandshake.</p>
+     *
+     * @param handshakeType a byte
+     */
     public RTMPHandshake(byte handshakeType) {
         // set the handshake type
         setHandshakeType(handshakeType);
@@ -205,11 +221,21 @@ public abstract class RTMPHandshake implements IHandshake {
         }
     }
 
+    /**
+     * <p>initXteaEncryption.</p>
+     *
+     * @param keyId a int
+     */
     protected void initXteaEncryption(int keyId) {
         xtea = new XTEAEngine();
         xtea.init(true, new KeyParameter(XTEA_KEYS[keyId]));
     }
 
+    /**
+     * <p>initBlowfishEncryption.</p>
+     *
+     * @param keyId a int
+     */
     protected void initBlowfishEncryption(int keyId) {
         blowfish = new BlowfishEngine();
         blowfish.init(true, new KeyParameter(BLOWFISH_KEYS[keyId]));
@@ -567,8 +593,7 @@ public abstract class RTMPHandshake implements IHandshake {
      *            array to get signature
      * @param offset
      *            offset to start from
-     * @param keyid
-     *            index of XTEA key
+     * @param keyId a int
      */
     public void getXteaSignature(byte[] array, int offset, int keyId) {
         int num_rounds = 32;

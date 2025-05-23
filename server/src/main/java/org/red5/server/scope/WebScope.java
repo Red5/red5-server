@@ -38,6 +38,8 @@ import jakarta.servlet.ServletContext;
  * </p>
  *
  * Red5 server implementation instance and ServletContext are injected as well.
+ *
+ * @author mondain
  */
 @ManagedResource
 public class WebScope extends Scope implements ServletContextAware, WebScopeMXBean, InitializingBean, DisposableBean {
@@ -96,11 +98,13 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
         type = ScopeType.APPLICATION;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void afterPropertiesSet() throws Exception {
         register();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() throws Exception {
         unregister();
@@ -150,10 +154,9 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
     }
 
     /**
-     * Servlet context
+     * {@inheritDoc}
      *
-     * @param servletContext
-     *            Servlet context
+     * Servlet context
      */
     @SuppressWarnings("null")
     public void setServletContext(ServletContext servletContext) {
@@ -161,10 +164,9 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
     }
 
     /**
-     * Setter for context path
+     * {@inheritDoc}
      *
-     * @param contextPath
-     *            Context path
+     * Setter for context path
      */
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
@@ -172,9 +174,9 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
     }
 
     /**
-     * Return scope context path
+     * {@inheritDoc}
      *
-     * @return Scope context path
+     * Return scope context path
      */
     @Override
     public String getContextPath() {
@@ -182,10 +184,9 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
     }
 
     /**
-     * Setter for virtual hosts. Creates array of hostnames.
+     * {@inheritDoc}
      *
-     * @param virtualHosts
-     *            Virtual hosts list as string
+     * Setter for virtual hosts. Creates array of hostnames.
      */
     public void setVirtualHosts(String virtualHosts) {
         this.virtualHosts = virtualHosts;

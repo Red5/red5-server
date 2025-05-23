@@ -56,9 +56,7 @@ public class MP4Service extends BaseStreamableFileService implements IMP4Service
         return extension;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public IStreamableFile getStreamableFile(File file) throws IOException {
         return new MP4(file);

@@ -91,6 +91,12 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
      */
     public Set<String> getScopeNames();
 
+    /**
+     * <p>getBasicScopeNames.</p>
+     *
+     * @param type a {@link org.red5.server.api.scope.ScopeType} object
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getBasicScopeNames(ScopeType type);
 
     /**
@@ -127,7 +133,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
     public IScope getScope(String name);
 
     /**
-     * Get a set of connected clients. You can get the connections by passing the scope to the clients {@link IClient#getConnections()} method.
+     * Get a set of connected clients. You can get the connections by passing the scope to the clients {@link org.red5.server.api.IClient#getConnections()} method.
      *
      * @return Set containing all connected clients
      * @see org.red5.server.api.IClient#getConnections(IScope)
@@ -137,7 +143,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
     /**
      * Get a connection iterator. You can call remove, and the connection will be closed.
      *
-     * @deprecated Use {@link IScope#getClientConnections()} instead
+     * @deprecated Use {@link org.red5.server.api.scope.IScope#getClientConnections()} instead
      * @return Iterator holding all connections
      */
     @Deprecated
@@ -153,7 +159,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
     /**
      * Lookup connections.
      *
-     * @deprecated Use {@link IScope#lookupConnection(IClient)} instead
+     * @deprecated Use {@link org.red5.server.api.scope.IScope#lookupConnection(IClient)} instead
      * @param client object
      * @return Set of connection objects (read-only)
      */

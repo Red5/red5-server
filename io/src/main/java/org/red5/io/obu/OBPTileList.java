@@ -1,5 +1,10 @@
 package org.red5.io.obu;
 
+/**
+ * <p>OBPTileList class.</p>
+ *
+ * @author mondain
+ */
 public class OBPTileList {
     public byte outputFrameWidthInTilesMinus1;
 

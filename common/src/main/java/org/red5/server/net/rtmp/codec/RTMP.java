@@ -16,9 +16,12 @@ import org.red5.server.net.rtmp.message.Packet;
 
 /**
  * RTMP is the RTMP protocol state representation.
+ *
+ * @author mondain
  */
 public class RTMP {
 
+    /** Constant <code>states</code> */
     public static final String[] states = { "connect", "handshake", "connected", "error", "disconnecting", "disconnected" };
 
     /**
@@ -117,6 +120,8 @@ public class RTMP {
     }
 
     /**
+     * <p>isEncrypted.</p>
+     *
      * @return the encrypted
      */
     public boolean isEncrypted() {
@@ -124,6 +129,8 @@ public class RTMP {
     }
 
     /**
+     * <p>Setter for the field <code>encrypted</code>.</p>
+     *
      * @param encrypted
      *            the encrypted to set
      */
@@ -334,10 +341,22 @@ public class RTMP {
         this.encoding = encoding;
     }
 
+    /**
+     * <p>setLastFullTimestampWritten.</p>
+     *
+     * @param channelId a int
+     * @param timer a int
+     */
     public void setLastFullTimestampWritten(int channelId, int timer) {
         getChannelInfo(channelId).setWriteTimestamp(timer);
     }
 
+    /**
+     * <p>getLastFullTimestampWritten.</p>
+     *
+     * @param channelId a int
+     * @return a int
+     */
     public int getLastFullTimestampWritten(int channelId) {
         return getChannelInfo(channelId).getWriteTimestamp();
     }
@@ -380,6 +399,7 @@ public class RTMP {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "RTMP [state=" + states[state] + ", encrypted=" + encrypted + ", readChunkSize=" + readChunkSize + ", writeChunkSize=" + writeChunkSize + ", encoding=" + encoding + "]";

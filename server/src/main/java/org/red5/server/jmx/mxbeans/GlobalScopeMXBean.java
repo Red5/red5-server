@@ -18,6 +18,9 @@ import javax.management.MXBean;
 @MXBean
 public interface GlobalScopeMXBean extends ScopeMXBean {
 
+    /**
+     * <p>register.</p>
+     */
     public void register();
 
 }

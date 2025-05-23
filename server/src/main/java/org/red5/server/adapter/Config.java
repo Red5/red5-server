@@ -23,10 +23,20 @@ public final class Config {
      */
     private List<String> filterNames = Collections.EMPTY_LIST;
 
+    /**
+     * <p>Getter for the field <code>filterNames</code>.</p>
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<String> getFilterNames() {
         return filterNames;
     }
 
+    /**
+     * <p>Setter for the field <code>filterNames</code>.</p>
+     *
+     * @param filterNames a {@link java.util.List} object
+     */
     public void setFilterNames(List<String> filterNames) {
         this.filterNames = filterNames;
     }

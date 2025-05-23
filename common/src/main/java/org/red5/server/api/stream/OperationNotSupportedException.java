@@ -10,6 +10,7 @@ package org.red5.server.api.stream;
 /**
  * The requested operation is not supported by the stream.
  *
+ * @author mondain
  */
 public class OperationNotSupportedException extends Exception {
 

@@ -14,6 +14,19 @@ import java.util.List;
 import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.dtd.Tag;
 
+/**
+ * <p>MatroskaParser interface.</p>
+ *
+ * @author mondain
+ */
 public interface MatroskaParser {
+    /**
+     * <p>parse.</p>
+     *
+     * @param inputStream a {@link java.io.InputStream} object
+     * @return a {@link java.util.List} object
+     * @throws java.io.IOException if any.
+     * @throws org.red5.io.matroska.ConverterException if any.
+     */
     List<Tag> parse(InputStream inputStream) throws IOException, ConverterException;
 }

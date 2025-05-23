@@ -15,14 +15,19 @@ package org.red5.server.api.stream;
  */
 public interface IClientStream extends IStream {
 
+    /** Constant <code>MODE_READ="read"</code> */
     public static final String MODE_READ = "read";
 
+    /** Constant <code>MODE_RECORD="record"</code> */
     public static final String MODE_RECORD = "record";
 
+    /** Constant <code>MODE_APPEND="append"</code> */
     public static final String MODE_APPEND = "append";
 
+    /** Constant <code>MODE_LIVE="live"</code> */
     public static final String MODE_LIVE = "live";
 
+    /** Constant <code>MODE_PUBLISH="publish"</code> */
     public static final String MODE_PUBLISH = "publish";
 
     /**

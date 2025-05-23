@@ -11,6 +11,8 @@ import org.apache.tomcat.websocket.BackgroundProcessManager;
 /**
  * Provides timeouts for asynchronous web socket writes. On the server side we only have access to {@link jakarta.servlet.ServletOutputStream}
  * and {@link jakarta.servlet.ServletInputStream} so there is no way to set a timeout for writes to the client.
+ *
+ * @author mondain
  */
 public class WsWriteTimeout implements BackgroundProcess {
 
@@ -22,6 +24,7 @@ public class WsWriteTimeout implements BackgroundProcess {
 
     private volatile int processPeriod = 1;
 
+    /** {@inheritDoc} */
     @Override
     public void backgroundProcess() {
         // This method gets called once a second.
@@ -42,6 +45,7 @@ public class WsWriteTimeout implements BackgroundProcess {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setProcessPeriod(int period) {
         this.processPeriod = period;
@@ -57,6 +61,11 @@ public class WsWriteTimeout implements BackgroundProcess {
         return processPeriod;
     }
 
+    /**
+     * <p>register.</p>
+     *
+     * @param endpoint a {@link org.red5.net.websocket.server.WsRemoteEndpointImplServer} object
+     */
     public void register(WsRemoteEndpointImplServer endpoint) {
         boolean result = endpoints.add(endpoint);
         if (result) {
@@ -67,6 +76,11 @@ public class WsWriteTimeout implements BackgroundProcess {
         }
     }
 
+    /**
+     * <p>unregister.</p>
+     *
+     * @param endpoint a {@link org.red5.net.websocket.server.WsRemoteEndpointImplServer} object
+     */
     public void unregister(WsRemoteEndpointImplServer endpoint) {
         boolean result = endpoints.remove(endpoint);
         if (result) {

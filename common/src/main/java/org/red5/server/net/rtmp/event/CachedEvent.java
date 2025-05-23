@@ -32,6 +32,8 @@ public class CachedEvent implements IStreamPacket {
     private IoBuffer data;
 
     /**
+     * <p>Getter for the field <code>timestamp</code>.</p>
+     *
      * @return the timestamp
      */
     public int getTimestamp() {
@@ -39,6 +41,8 @@ public class CachedEvent implements IStreamPacket {
     }
 
     /**
+     * <p>Setter for the field <code>timestamp</code>.</p>
+     *
      * @param timestamp
      *            the timestamp to set
      */
@@ -47,6 +51,8 @@ public class CachedEvent implements IStreamPacket {
     }
 
     /**
+     * <p>Getter for the field <code>receivedTime</code>.</p>
+     *
      * @return the receivedTime
      */
     public long getReceivedTime() {
@@ -54,6 +60,8 @@ public class CachedEvent implements IStreamPacket {
     }
 
     /**
+     * <p>Setter for the field <code>receivedTime</code>.</p>
+     *
      * @param receivedTime
      *            the receivedTime to set
      */
@@ -62,6 +70,8 @@ public class CachedEvent implements IStreamPacket {
     }
 
     /**
+     * <p>Getter for the field <code>dataType</code>.</p>
+     *
      * @return the dataType
      */
     public byte getDataType() {
@@ -69,6 +79,8 @@ public class CachedEvent implements IStreamPacket {
     }
 
     /**
+     * <p>Setter for the field <code>dataType</code>.</p>
+     *
      * @param dataType
      *            the dataType to set
      */
@@ -77,6 +89,8 @@ public class CachedEvent implements IStreamPacket {
     }
 
     /**
+     * <p>Getter for the field <code>data</code>.</p>
+     *
      * @return the data
      */
     public IoBuffer getData() {
@@ -84,6 +98,8 @@ public class CachedEvent implements IStreamPacket {
     }
 
     /**
+     * <p>Setter for the field <code>data</code>.</p>
+     *
      * @param data
      *            the data to set
      */
@@ -95,6 +111,7 @@ public class CachedEvent implements IStreamPacket {
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -108,6 +125,7 @@ public class CachedEvent implements IStreamPacket {
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

@@ -11,6 +11,8 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Scope is currently shutting down.
+ *
+ * @author mondain
  */
 public class ScopeShuttingDownException extends RuntimeException {
 

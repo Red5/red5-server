@@ -20,6 +20,8 @@ import org.red5.server.api.service.IServiceCall;
 
 /**
  * Base scope handler implementation. Meant to be subclassed.
+ *
+ * @author mondain
  */
 public abstract class AbstractScopeAdapter implements IScopeHandler {
 
@@ -218,7 +220,14 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
         // nothing
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
+     * @param params an array of {@link java.lang.Object} objects
+     * @return a boolean
+     */
     public boolean connect(IConnection conn, IScope scope, Object[] params) {
         return canConnect;
     }
@@ -288,6 +297,11 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
         return null;
     }
 
+    /**
+     * <p>getScope.</p>
+     *
+     * @return a {@link org.red5.server.api.scope.IScope} object
+     */
     public abstract IScope getScope();
 
 }

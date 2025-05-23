@@ -129,6 +129,7 @@ public class FileKeyFrameMetaCache implements IKeyFrameMetaCache {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void removeKeyFrameMeta(File file) {
         String filename = String.format("%s.meta", file.getAbsolutePath());

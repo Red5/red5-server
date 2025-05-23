@@ -10,8 +10,20 @@ package org.red5.io.utils;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
+/**
+ * <p>ArrayUtils class.</p>
+ *
+ * @author mondain
+ */
 public final class ArrayUtils {
 
+    /**
+     * <p>getArray.</p>
+     *
+     * @param type a {@link java.lang.Class} object
+     * @param count a int
+     * @return a {@link java.lang.Object} object
+     */
     public static Object getArray(Class<?> type, int count) {
         if (byte.class.isAssignableFrom(type)) {
             return new byte[count];
@@ -36,6 +48,13 @@ public final class ArrayUtils {
         }
     }
 
+    /**
+     * <p>fillArray.</p>
+     *
+     * @param type a {@link java.lang.Class} object
+     * @param collection a {@link java.util.Collection} object
+     * @return a {@link java.lang.Object} object
+     */
     @SuppressWarnings({ "rawtypes" })
     public static Object fillArray(Class<?> type, Collection collection) {
         if (byte.class.isAssignableFrom(type)) {
@@ -59,6 +78,14 @@ public final class ArrayUtils {
         }
     }
 
+    /**
+     * <p>fillArray.</p>
+     *
+     * @param type a {@link java.lang.Class} object
+     * @param array a {@link java.lang.Object} object
+     * @param collection a {@link java.util.Collection} object
+     * @return a {@link java.lang.Object} object
+     */
     @SuppressWarnings({ "rawtypes" })
     public static Object fillArray(Class<?> type, Object array, Collection collection) {
         if (byte.class.isAssignableFrom(type)) {
@@ -230,6 +257,12 @@ public final class ArrayUtils {
         return oa;
     }
 
+    /**
+     * <p>getGenericType.</p>
+     *
+     * @param nested a {@link java.lang.Class} object
+     * @return a {@link java.lang.Class} object
+     */
     public static Class<?> getGenericType(Class<?> nested) {
         if (nested == byte.class) {
             nested = Byte.class;

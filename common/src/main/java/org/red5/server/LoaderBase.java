@@ -86,7 +86,6 @@ public abstract class LoaderBase implements ApplicationContextAware {
      *
      * @param path
      *            path
-     *
      * @return Red5 application context
      */
     public static IApplicationContext getRed5ApplicationContext(String path) {
@@ -100,7 +99,6 @@ public abstract class LoaderBase implements ApplicationContextAware {
      *
      * @param path
      *            path
-     *
      * @param context
      *            Red5 application context
      */
@@ -120,7 +118,6 @@ public abstract class LoaderBase implements ApplicationContextAware {
      *
      * @param path
      *            path
-     *
      * @return Red5 application context
      */
     public static IApplicationContext removeRed5ApplicationContext(String path) {
@@ -139,12 +136,9 @@ public abstract class LoaderBase implements ApplicationContextAware {
     }
 
     /**
-     * Setter for application context.
+     * {@inheritDoc}
      *
-     * @param context
-     *            Application context
-     * @throws BeansException
-     *             Abstract superclass for all exceptions thrown in the beans package and subpackages
+     * Setter for application context.
      */
     @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext context) throws BeansException {

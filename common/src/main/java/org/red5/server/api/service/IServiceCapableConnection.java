@@ -12,6 +12,8 @@ import org.red5.server.net.rtmp.status.Status;
 
 /**
  * Connection that has options to invoke and handle remote calls
+ *
+ * @author mondain
  */
 // TODO: this should really extend IServiceInvoker
 public interface IServiceCapableConnection extends IConnection {

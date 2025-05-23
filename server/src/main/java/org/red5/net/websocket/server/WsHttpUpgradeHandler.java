@@ -34,6 +34,8 @@ import jakarta.websocket.server.ServerEndpointConfig;
 
 /**
  * Servlet 3.1 HTTP upgrade handler for WebSocket connections.
+ *
+ * @author mondain
  */
 public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
@@ -84,15 +86,32 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     private transient WebSocketScope scope;
 
+    /**
+     * <p>Constructor for WsHttpUpgradeHandler.</p>
+     */
     public WsHttpUpgradeHandler() {
         applicationClassLoader = Thread.currentThread().getContextClassLoader();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setSocketWrapper(SocketWrapperBase<?> socketWrapper) {
         this.socketWrapper = socketWrapper;
     }
 
+    /**
+     * <p>preInit.</p>
+     *
+     * @param ep a {@link jakarta.websocket.Endpoint} object
+     * @param endpointConfig a {@link jakarta.websocket.EndpointConfig} object
+     * @param wsc a {@link org.red5.net.websocket.server.DefaultWsServerContainer} object
+     * @param handshakeRequest a {@link org.red5.net.websocket.server.WsHandshakeRequest} object
+     * @param negotiatedExtensionsPhase2 a {@link java.util.List} object
+     * @param subProtocol a {@link java.lang.String} object
+     * @param transformation a {@link org.apache.tomcat.websocket.Transformation} object
+     * @param pathParameters a {@link java.util.Map} object
+     * @param secure a boolean
+     */
     public void preInit(Endpoint ep, EndpointConfig endpointConfig, DefaultWsServerContainer wsc, WsHandshakeRequest handshakeRequest, List<Extension> negotiatedExtensionsPhase2, String subProtocol, Transformation transformation, Map<String, String> pathParameters, boolean secure) {
         this.ep = ep;
         this.endpointConfig = (ServerEndpointConfig) endpointConfig;
@@ -119,6 +138,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void init(WebConnection connection) {
         if (ep != null) {
@@ -178,6 +198,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public SocketState upgradeDispatch(SocketEvent status) {
         switch (status) {
@@ -222,16 +243,19 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void pause() {
         // NO-OP
     }
 
+    /** {@inheritDoc} */
     @Override
     public UpgradeInfo getUpgradeInfo() {
         return upgradeInfo;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() {
         if (connection != null) {
@@ -282,19 +306,18 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setSslSupport(SSLSupport sslSupport) {
         // NO-OP. WebSocket has no requirement to access the TLS information associated with the underlying connection.
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Check to see if the timeout has expired and process a timeout if that is the case. Note: The name of this method
      * originated with the Servlet 3.0 asynchronous processing but evolved over time to represent a timeout that is
      * triggered independently of the socket read/write timeouts.
-     *
-     * @param now
-     *            - The time (as returned by System.currentTimeMillis() to use as the current time to determine whether
-     * the timeout has expired. If negative, the timeout will always be treated as if it has expired.
      */
     @Override
     public void timeoutAsync(long now) {

@@ -51,8 +51,18 @@ public interface IMetaData<K, V> extends IMeta {
      */
     public void setVideoCodecId(int id);
 
+    /**
+     * <p>getAudioCodecId.</p>
+     *
+     * @return a int
+     */
     public int getAudioCodecId();
 
+    /**
+     * <p>setAudioCodecId.</p>
+     *
+     * @param id a int
+     */
     public void setAudioCodecId(int id);
 
     /**

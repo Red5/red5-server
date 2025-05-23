@@ -14,6 +14,8 @@ import org.red5.server.api.event.IEvent;
 
 /**
  * Queue of connection events
+ *
+ * @author mondain
  */
 public interface IConnectionEventQueue {
 

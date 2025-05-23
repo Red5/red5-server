@@ -15,6 +15,7 @@ package org.red5.server.messaging;
  */
 public interface IPassive {
 
+    /** Constant <code>KEY="IPassive.class.getName()"</code> */
     public static final String KEY = IPassive.class.getName();
 
 }

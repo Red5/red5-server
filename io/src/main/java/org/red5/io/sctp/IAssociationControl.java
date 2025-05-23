@@ -11,29 +11,69 @@ import java.io.IOException;
 
 import org.red5.io.sctp.packet.SctpPacket;
 
+/**
+ * <p>IAssociationControl interface.</p>
+ *
+ * @author mondain
+ */
 public interface IAssociationControl {
 
     public static enum State {
         CLOSED, COOKIE_WAIT, COOKIE_ECHOED, ESTABLISHED
     }
 
+    /** Constant <code>VALID_COOKIE_TIME=60</code> */
     static final int VALID_COOKIE_TIME = 60; // in seconds
 
+    /** Constant <code>DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT=1024</code> */
     static final int DEFAULT_ADVERTISE_RECEIVE_WINDOW_CREDIT = 1024;
 
+    /** Constant <code>DEFAULT_NUMBER_OF_OUTBOUND_STREAM=1</code> */
     static final int DEFAULT_NUMBER_OF_OUTBOUND_STREAM = 1;
 
+    /** Constant <code>DEFAULT_NUMBER_OF_INBOUND_STREAM=1</code> */
     static final int DEFAULT_NUMBER_OF_INBOUND_STREAM = 1;
 
+    /**
+     * <p>getState.</p>
+     *
+     * @return a {@link org.red5.io.sctp.IAssociationControl.State} object
+     */
     State getState();
 
+    /**
+     * <p>setState.</p>
+     *
+     * @param state a {@link org.red5.io.sctp.IAssociationControl.State} object
+     */
     void setState(State state);
 
+    /**
+     * <p>getDestinationPort.</p>
+     *
+     * @return a int
+     */
     int getDestinationPort();
 
+    /**
+     * <p>getSourcePort.</p>
+     *
+     * @return a int
+     */
     int getSourcePort();
 
+    /**
+     * <p>sendPacket.</p>
+     *
+     * @param packet a {@link org.red5.io.sctp.packet.SctpPacket} object
+     * @throws java.io.IOException if any.
+     */
     void sendPacket(SctpPacket packet) throws IOException;
 
+    /**
+     * <p>getVerificationTag.</p>
+     *
+     * @return a int
+     */
     int getVerificationTag();
 }

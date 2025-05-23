@@ -57,6 +57,8 @@ import org.red5.server.util.ScopeUtils;
 
 /**
  * RTMP events handler.
+ *
+ * @author mondain
  */
 public class RTMPHandler extends BaseRTMPHandler {
 
@@ -102,15 +104,27 @@ public class RTMPHandler extends BaseRTMPHandler {
         this.statusObjectService = statusObjectService;
     }
 
+    /**
+     * <p>isUnvalidatedConnectionAllowed.</p>
+     *
+     * @return a boolean
+     */
     public boolean isUnvalidatedConnectionAllowed() {
         return unvalidatedConnectionAllowed;
     }
 
+    /**
+     * <p>Setter for the field <code>unvalidatedConnectionAllowed</code>.</p>
+     *
+     * @param unvalidatedConnectionAllowed a boolean
+     */
     public void setUnvalidatedConnectionAllowed(boolean unvalidatedConnectionAllowed) {
         this.unvalidatedConnectionAllowed = unvalidatedConnectionAllowed;
     }
 
     /**
+     * <p>isDispatchStreamActions.</p>
+     *
      * @return the dispatchStreamActions
      */
     public boolean isDispatchStreamActions() {
@@ -118,6 +132,8 @@ public class RTMPHandler extends BaseRTMPHandler {
     }
 
     /**
+     * <p>Setter for the field <code>dispatchStreamActions</code>.</p>
+     *
      * @param dispatchStreamActions
      *            the dispatchStreamActions to set
      */
@@ -496,6 +512,12 @@ public class RTMPHandler extends BaseRTMPHandler {
         }
     }
 
+    /**
+     * <p>getStatus.</p>
+     *
+     * @param code a {@link java.lang.String} object
+     * @return a {@link org.red5.server.net.rtmp.status.StatusObject} object
+     */
     public StatusObject getStatus(String code) {
         return statusObjectService.getStatusObject(code);
     }
@@ -622,6 +644,9 @@ public class RTMPHandler extends BaseRTMPHandler {
         }
     }
 
+    /**
+     * <p>onBWDone.</p>
+     */
     protected void onBWDone() {
         log.debug("onBWDone");
     }

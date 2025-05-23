@@ -14,6 +14,11 @@ import org.red5.io.sctp.SctpException;
 /*
  * see https://tools.ietf.org/html/rfc4960#section-3.1
  */
+/**
+ * <p>SctpHeader class.</p>
+ *
+ * @author mondain
+ */
 public final class SctpHeader {
 
     private int sourcePort;
@@ -27,6 +32,14 @@ public final class SctpHeader {
     // sourcePort(2 byte) + destinationPort(2 byte) + verificationTag(4 byte) + checksum(4 byte)
     private static final int HEADER_SIZE = 12;
 
+    /**
+     * <p>Constructor for SctpHeader.</p>
+     *
+     * @param sourcePort a int
+     * @param destinationPort a int
+     * @param verificationTag a int
+     * @param checksum a int
+     */
     public SctpHeader(int sourcePort, int destinationPort, int verificationTag, int checksum) {
         this.sourcePort = sourcePort;
         this.destinationPort = destinationPort;
@@ -34,6 +47,14 @@ public final class SctpHeader {
         this.checksum = checksum;
     }
 
+    /**
+     * <p>Constructor for SctpHeader.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     * @throws org.red5.io.sctp.SctpException if any.
+     */
     public SctpHeader(final byte[] data, int offset, int length) throws SctpException {
         if (length < HEADER_SIZE) {
             throw new SctpException("not enough data for parsing Sctp header : " + data);
@@ -45,10 +66,20 @@ public final class SctpHeader {
         checksum = byteBuffer.getInt();
     }
 
+    /**
+     * <p>getSize.</p>
+     *
+     * @return a int
+     */
     public int getSize() {
         return HEADER_SIZE;
     }
 
+    /**
+     * <p>getBytes.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
     public byte[] getBytes() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE);
         byteBuffer.putShort((short) getSourcePort());
@@ -59,14 +90,29 @@ public final class SctpHeader {
         return byteBuffer.array();
     }
 
+    /**
+     * <p>Getter for the field <code>sourcePort</code>.</p>
+     *
+     * @return a int
+     */
     public int getSourcePort() {
         return sourcePort;
     }
 
+    /**
+     * <p>Getter for the field <code>destinationPort</code>.</p>
+     *
+     * @return a int
+     */
     public int getDestinationPort() {
         return destinationPort;
     }
 
+    /**
+     * <p>Getter for the field <code>verificationTag</code>.</p>
+     *
+     * @return a int
+     */
     public int getVerificationTag() {
         return verificationTag;
     }

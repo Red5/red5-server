@@ -77,8 +77,11 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 @ManagedResource(objectName = "org.red5.server:type=Scope", description = "Scope")
 public class Scope extends BasicScope implements IScope, IScopeStatistics, ScopeMXBean {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Scope.class);
 
+    /** Constant <code>isDebug=log.isDebugEnabled()</code> */
+    /** Constant <code>isTrace=log.isTraceEnabled()</code> */
     protected static boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
 
     /**
@@ -185,11 +188,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Add child scope to this scope
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Child scope
-     * @return true on success (if scope has handler and it accepts child scope addition), false otherwise
+     * Add child scope to this scope
      */
     public boolean addChildScope(IBasicScope scope) {
         log.debug("Add child: {}", scope);
@@ -226,11 +227,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Connect to scope
+     * {@inheritDoc}
      *
-     * @param conn
-     *            Connection object
-     * @return true on success, false otherwise
+     * Connect to scope
      */
     public boolean connect(IConnection conn) {
         return connect(conn, null);
@@ -295,11 +294,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Create child scope of room type, with the given name.
+     * {@inheritDoc}
      *
-     * @param name
-     *            child scope name
-     * @return true on success, false otherwise
+     * Create child scope of room type, with the given name.
      */
     public boolean createChildScope(String name) {
         // quick lookup by name
@@ -315,7 +312,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /**
      * Destroys scope
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on error
      */
     public void destroy() throws Exception {
@@ -337,10 +334,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Disconnect connection from scope
+     * {@inheritDoc}
      *
-     * @param conn
-     *            Connection object
+     * Disconnect connection from scope
      */
     public void disconnect(IConnection conn) {
         log.debug("Disconnect: {}", conn);
@@ -418,46 +414,64 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return attributes.removeAttribute(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getAttributeNames() {
         return attributes.getAttributeNames();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> getAttributes() {
         return attributes.getAttributes();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getActiveClients() {
         return clients.size();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getActiveConnections() {
         return connectionStats.getCurrent();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getActiveSubscopes() {
         return subscopeStats.getCurrent();
     }
 
     /**
-     * Return the broadcast scope for a given name.
+     * {@inheritDoc}
      *
-     * @param name
-     *            name
-     * @return broadcast scope or null if not found
+     * Return the broadcast scope for a given name.
      */
     public IBroadcastScope getBroadcastScope(String name) {
         return (IBroadcastScope) children.getBasicScope(ScopeType.BROADCAST, name);
     }
 
     /**
-     * Return the broadcast streams for this scope.
+     * {@inheritDoc}
      *
-     * @return broadcast streams or empty if not found
+     * Return the broadcast streams for this scope.
      */
     @Override
     public Set<IBroadcastStream> getBroadcastStreams() {
@@ -467,35 +481,27 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Return base scope with given name.
+     * {@inheritDoc}
      *
-     * @param name
-     *            Scope name
-     * @return Basic scope object
+     * Return base scope with given name.
      */
     public IBasicScope getBasicScope(String name) {
         return children.getBasicScope(ScopeType.UNDEFINED, name);
     }
 
     /**
-     * Return base scope of given type with given name.
+     * {@inheritDoc}
      *
-     * @param type
-     *            Scope type
-     * @param name
-     *            Scope name
-     * @return Basic scope object
+     * Return base scope of given type with given name.
      */
     public IBasicScope getBasicScope(ScopeType type, String name) {
         return children.getBasicScope(type, name);
     }
 
     /**
-     * Return basic scope names matching given type.
+     * {@inheritDoc}
      *
-     * @param type
-     *            Scope type
-     * @return set of scope names
+     * Return basic scope names matching given type.
      */
     public Set<String> getBasicScopeNames(ScopeType type) {
         if (type != null) {
@@ -546,7 +552,11 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return clients;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Collection} object
+     */
     @Deprecated
     public Collection<Set<IConnection>> getConnections() {
         Collection<Set<IConnection>> result = new ArrayList<Set<IConnection>>(3);
@@ -554,7 +564,11 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return result;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<IConnection> getClientConnections() {
         Set<IConnection> result = new HashSet<IConnection>(3);
         log.debug("Client count: {}", clients.size());
@@ -634,15 +648,19 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a long
+     */
     public long getCreationTime() {
         return creationTime;
     }
 
     /**
-     * return scope depth
+     * {@inheritDoc}
      *
-     * @return Scope depth
+     * return scope depth
      */
     @Override
     public int getDepth() {
@@ -672,25 +690,37 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getMaxClients() {
         return connectionStats.getMax();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getMaxConnections() {
         return connectionStats.getMax();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getMaxSubscopes() {
         return subscopeStats.getMax();
     }
 
     /**
-     * Return parent scope
+     * {@inheritDoc}
      *
-     * @return Parent scope
+     * Return parent scope
      */
     @Override
     public IScope getParent() {
@@ -698,9 +728,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Return scope path calculated from parent path and parent scope name
+     * {@inheritDoc}
      *
-     * @return Scope path
+     * Return scope path calculated from parent path and parent scope name
      */
     @Override
     public String getPath() {
@@ -712,11 +742,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Return resource located at given path
+     * {@inheritDoc}
      *
-     * @param path
-     *            Resource path
-     * @return Resource
+     * Return resource located at given path
      */
     @SuppressWarnings("null")
     public Resource getResource(String path) {
@@ -727,13 +755,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Return array of resources from path string, usually used with pattern path
+     * {@inheritDoc}
      *
-     * @param path
-     *            Resources path
-     * @return Resources
-     * @throws IOException
-     *             I/O exception
+     * Return array of resources from path string, usually used with pattern path
      */
     @SuppressWarnings("null")
     public Resource[] getResources(String path) throws IOException {
@@ -744,11 +768,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Return child scope by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Scope name
-     * @return Child scope with given name
+     * Return child scope by name
      */
     public IScope getScope(String name) {
         IBasicScope child = children.getBasicScope(ScopeType.UNDEFINED, name);
@@ -773,11 +795,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Return service handler by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Handler name
-     * @return Service handler with given name
+     * Return service handler by name
      */
     public Object getServiceHandler(String name) {
         Map<String, Object> serviceHandlers = getServiceHandlers(false);
@@ -826,33 +846,47 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return serviceHandlers;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.statistics.IScopeStatistics} object
+     */
     public IScopeStatistics getStatistics() {
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     @Deprecated
     public int getTotalClients() {
         return connectionStats.getTotal();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTotalConnections() {
         return connectionStats.getTotal();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTotalSubscopes() {
         return subscopeStats.getTotal();
     }
 
     /**
-     * Handles event. To be implemented in subclasses.
+     * {@inheritDoc}
      *
-     * @param event
-     *            Event to handle
-     * @return true on success, false otherwise
+     * Handles event. To be implemented in subclasses.
      */
     @Override
     public boolean handleEvent(IEvent event) {
@@ -860,11 +894,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Check whether scope has child scope with given name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Child scope name
-     * @return true if scope has child node with given name, false otherwise
+     * Check whether scope has child scope with given name
      */
     public boolean hasChildScope(String name) {
         log.debug("Has child scope? {} in {}", name, this);
@@ -872,13 +904,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Check whether scope has child scope with given name and type
+     * {@inheritDoc}
      *
-     * @param type
-     *            Child scope type
-     * @param name
-     *            Child scope name
-     * @return true if scope has child node with given name and type, false otherwise
+     * Check whether scope has child scope with given name and type
      */
     public boolean hasChildScope(ScopeType type, String name) {
         log.debug("Has child scope? {} in {}", name, this);
@@ -904,9 +932,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Check if scope has parent scope
+     * {@inheritDoc}
      *
-     * @return true if scope has parent scope, false otherwise`
+     * Check if scope has parent scope
      */
     @Override
     public boolean hasParent() {
@@ -968,6 +996,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Here for JMX only, uses isEnabled()
+     *
+     * @return a boolean
      */
     public boolean getEnabled() {
         return isEnabled();
@@ -984,18 +1014,17 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /**
      * Here for JMX only, uses isEnabled()
+     *
+     * @return a boolean
      */
     public boolean getRunning() {
         return isRunning();
     }
 
     /**
-     * Register service handler by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Service handler name
-     * @param handler
-     *            Service handler
+     * Register service handler by name
      */
     public void registerServiceHandler(String name, Object handler) {
         Map<String, Object> serviceHandlers = getServiceHandlers();
@@ -1003,10 +1032,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Removes child scope
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Child scope to remove
+     * Removes child scope
      */
     public void removeChildScope(IBasicScope scope) {
         log.debug("removeChildScope: {}", scope);
@@ -1029,20 +1057,18 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Setter for autostart flag
+     * {@inheritDoc}
      *
-     * @param autoStart
-     *            Autostart flag value
+     * Setter for autostart flag
      */
     public void setAutoStart(boolean autoStart) {
         this.autoStart = autoStart;
     }
 
     /**
-     * Setter for child load path. Should be implemented in subclasses?
+     * {@inheritDoc}
      *
-     * @param pattern
-     *            Load path pattern
+     * Setter for child load path. Should be implemented in subclasses?
      */
     public void setChildLoadPath(String pattern) {
 
@@ -1060,20 +1086,18 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Set scope depth
+     * {@inheritDoc}
      *
-     * @param depth
-     *            Scope depth
+     * Set scope depth
      */
     public void setDepth(int depth) {
         this.depth = depth;
     }
 
     /**
-     * Enable or disable scope by setting enable flag
+     * {@inheritDoc}
      *
-     * @param enabled
-     *            Enable flag value
+     * Enable or disable scope by setting enable flag
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -1094,10 +1118,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Setter for scope name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Scope name
+     * Setter for scope name
      */
     @Override
     public final void setName(String name) {
@@ -1128,12 +1151,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Set scope persistence class
+     * {@inheritDoc}
      *
-     * @param persistenceClass
-     *            Scope's persistence class
-     * @throws Exception
-     *             Exception
+     * Set scope persistence class
      */
     public void setPersistenceClass(String persistenceClass) throws Exception {
         this.persistenceClass = persistenceClass;
@@ -1203,16 +1223,16 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "Scope [name=" + getName() + ", path=" + getPath() + ", type=" + type + ", autoStart=" + autoStart + ", creationTime=" + creationTime + ", depth=" + getDepth() + ", enabled=" + enabled + ", running=" + running + "]";
     }
 
     /**
-     * Unregisters service handler by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Service handler name
+     * Unregisters service handler by name
      */
     public void unregisterServiceHandler(String name) {
         Map<String, Object> serviceHandlers = getServiceHandlers(false);
@@ -1239,6 +1259,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     //for debugging
+    /**
+     * <p>dump.</p>
+     */
     public void dump() {
         if (isTrace) {
             log.trace("Scope: {} {}", this.getClass().getName(), this);
@@ -1259,6 +1282,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         }
     }
 
+    /**
+     * <p>registerJMX.</p>
+     */
     protected void registerJMX() {
         // register with jmx
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -1277,6 +1303,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         }
     }
 
+    /**
+     * <p>unregisterJMX.</p>
+     */
     protected void unregisterJMX() {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         if (oName != null && mbs.isRegistered(oName)) {
@@ -1316,6 +1345,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return new Scope(parent, type, name, persistent);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -1325,6 +1355,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

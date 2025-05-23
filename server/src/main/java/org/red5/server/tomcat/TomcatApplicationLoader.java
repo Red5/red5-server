@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 public class TomcatApplicationLoader implements IApplicationLoader {
 
     // Initialize Logging
+    /** Constant <code>log</code> */
     protected static Logger log = Red5LoggerFactory.getLogger(TomcatApplicationLoader.class);
 
     /** Store reference to embedded Tomcat engine. */
@@ -39,8 +40,9 @@ public class TomcatApplicationLoader implements IApplicationLoader {
     /**
      * Wrap Tomcat engine and host.
      *
-     * @param embedded
-     * @param host
+     * @param embedded a {@link org.apache.catalina.startup.Tomcat} object
+     * @param host a {@link org.apache.catalina.Host} object
+     * @param rootCtx a {@link org.springframework.context.ApplicationContext} object
      */
     protected TomcatApplicationLoader(Tomcat embedded, Host host, ApplicationContext rootCtx) {
         this.embedded = embedded;
@@ -48,7 +50,11 @@ public class TomcatApplicationLoader implements IApplicationLoader {
         this.rootCtx = rootCtx;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.springframework.context.ApplicationContext} object
+     */
     public ApplicationContext getRootContext() {
         log.debug("getRootContext");
         return rootCtx;

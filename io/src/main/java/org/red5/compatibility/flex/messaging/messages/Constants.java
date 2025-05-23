@@ -27,6 +27,7 @@ public class Constants {
     /** Update given attributes from a data message. */
     public static final int DATA_OPERATION_UPDATE_ATTRIBUTES = 3;
 
+    /** Constant <code>CLIENT_SYNC_OPERATION=4</code> */
     public static final int CLIENT_SYNC_OPERATION = 4;
 
     /** Operation id of ping commands. */
@@ -35,20 +36,25 @@ public class Constants {
     /** Update destination based on nested DataMessage packet. */
     public static final int DATA_OPERATION_UPDATE = 7;
 
+    /** Constant <code>CLUSTER_REQUEST_OPERATION=7</code> */
     public static final int CLUSTER_REQUEST_OPERATION = 7;
 
     /** Operation id of authentication commands. */
     public static final int LOGIN_OPERATION = 8;
 
+    /** Constant <code>LOGOUT_OPERATION=9</code> */
     public static final int LOGOUT_OPERATION = 9;
 
     /** Set all attributes from a data message. */
     public static final int DATA_OPERATION_SET = 10;
 
+    /** Constant <code>SUBSCRIPTION_INVALIDATE_OPERATION=10</code> */
     public static final int SUBSCRIPTION_INVALIDATE_OPERATION = 10;
 
+    /** Constant <code>MULTI_SUBSCRIBE_OPERATION=11</code> */
     public static final int MULTI_SUBSCRIBE_OPERATION = 11;
 
+    /** Constant <code>UNKNOWN_OPERATION=10000</code> */
     public static final int UNKNOWN_OPERATION = 10000;
 
 }

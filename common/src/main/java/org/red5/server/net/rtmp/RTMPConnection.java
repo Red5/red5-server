@@ -93,17 +93,24 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 /**
  * RTMP connection. Stores information about client streams, data transfer channels, pending RPC calls, bandwidth configuration, AMF
  * encoding type (AMF0/AMF3), connection state (is alive, last ping time and ping result) and session.
+ *
+ * @author mondain
  */
 public abstract class RTMPConnection extends BaseConnection implements IStreamCapableConnection, IServiceCapableConnection {
 
+    /** Constant <code>RTMP_SESSION_ID="rtmp.sessionid"</code> */
     public static final String RTMP_SESSION_ID = "rtmp.sessionid";
 
+    /** Constant <code>RTMP_HANDSHAKE="rtmp.handshake"</code> */
     public static final String RTMP_HANDSHAKE = "rtmp.handshake";
 
+    /** Constant <code>RTMP_BUFFER="rtmp.buffer"</code> */
     public static final String RTMP_BUFFER = "rtmp.buffer";
 
+    /** Constant <code>RTMP_CONN_MANAGER="rtmp.connection.manager"</code> */
     public static final String RTMP_CONN_MANAGER = "rtmp.connection.manager";
 
+    /** Constant <code>RTMP_HANDLER</code> */
     public static final Object RTMP_HANDLER = "rtmp.handler";
 
     /**
@@ -142,6 +149,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     public static final String RTMPE_CIPHER_OUT = "rtmpe.cipher.out";
 
     // ~320 streams seems like a sufficient max amount of streams for a single connection
+    /** Constant <code>MAX_RESERVED_STREAMS=320</code> */
     public static final double MAX_RESERVED_STREAMS = 320;
 
     /**
@@ -396,18 +404,38 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         running = new AtomicBoolean(false);
     }
 
+    /**
+     * <p>Setter for the field <code>handler</code>.</p>
+     *
+     * @param handler a {@link org.red5.server.net.rtmp.IRTMPHandler} object
+     */
     public void setHandler(IRTMPHandler handler) {
         this.handler = handler;
     }
 
+    /**
+     * <p>Getter for the field <code>handler</code>.</p>
+     *
+     * @return a {@link org.red5.server.net.rtmp.IRTMPHandler} object
+     */
     public IRTMPHandler getHandler() {
         return handler;
     }
 
+    /**
+     * <p>Getter for the field <code>state</code>.</p>
+     *
+     * @return a {@link org.red5.server.net.rtmp.codec.RTMP} object
+     */
     public RTMP getState() {
         return state;
     }
 
+    /**
+     * <p>getStateCode.</p>
+     *
+     * @return a byte
+     */
     public byte getStateCode() {
         return state.getState();
     }
@@ -415,7 +443,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     /**
      * Sets the state by code and fires property chanage notifications.
      *
-     * @param stateCode
+     * @param stateCode a byte
      */
     public void setStateCode(byte stateCode) {
         if (isTrace) {
@@ -431,19 +459,36 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         }
     }
 
+    /**
+     * <p>getIoSession.</p>
+     *
+     * @return a {@link org.apache.mina.core.session.IoSession} object
+     */
     public IoSession getIoSession() {
         return null;
     }
 
+    /**
+     * <p>setEncrypted.</p>
+     *
+     * @param encrypted a boolean
+     */
     public void setEncrypted(boolean encrypted) {
         state.setEncrypted(encrypted);
     }
 
+    /**
+     * <p>isEncrypted.</p>
+     *
+     * @return a boolean
+     */
     public boolean isEncrypted() {
         return state.isEncrypted();
     }
 
     /**
+     * <p>Getter for the field <code>decoderLock</code>.</p>
+     *
      * @return the decoderLock
      */
     public Semaphore getDecoderLock() {
@@ -451,6 +496,8 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
+     * <p>Getter for the field <code>encoderLock</code>.</p>
+     *
      * @return the decoderLock
      */
     public Semaphore getEncoderLock() {
@@ -458,6 +505,8 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
+     * <p>Getter for the field <code>decoderState</code>.</p>
+     *
      * @return the decoderState
      */
     public RTMPDecodeState getDecoderState() {
@@ -495,6 +544,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean connect(IScope newScope, Object[] params) {
         if (isDebug) {
@@ -742,11 +792,20 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         return streams.values();
     }
 
+    /**
+     * <p>getStreamsMap.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<Number, IClientStream> getStreamsMap() {
         return Collections.unmodifiableMap(streams);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.Number} object
+     */
     public Number reserveStreamId() {
         double d = 1.0d;
         for (; d < MAX_RESERVED_STREAMS; d++) {
@@ -800,9 +859,9 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
-     * Returns whether or not the connection has been idle for a maximum period.
+     * {@inheritDoc}
      *
-     * @return true if max idle period has been exceeded, false otherwise
+     * Returns whether or not the connection has been idle for a maximum period.
      */
     @Override
     public boolean isIdle() {
@@ -820,9 +879,9 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
-     * Check whether connection is alive
+     * {@inheritDoc}
      *
-     * @return true if connection is scope bound and state is not DISCONNECTED, false otherwise
+     * Check whether connection is alive
      */
     @Override
     public boolean isConnected() {
@@ -830,9 +889,9 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
-     * Returns whether or not the connection is disconnected.
+     * {@inheritDoc}
      *
-     * @return true if connection is not scope bound and state is DISCONNECTED, false otherwise
+     * Returns whether or not the connection is disconnected.
      */
     @Override
     public boolean isDisconnected() {
@@ -882,6 +941,11 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         return null;
     }
 
+    /**
+     * <p>addClientStream.</p>
+     *
+     * @param stream a {@link org.red5.server.api.stream.IClientStream} object
+     */
     public void addClientStream(IClientStream stream) {
         if (reservedStreams.add(stream.getStreamId().doubleValue())) {
             registerStream(stream);
@@ -891,6 +955,11 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         }
     }
 
+    /**
+     * <p>removeClientStream.</p>
+     *
+     * @param streamId a {@link java.lang.Number} object
+     */
     public void removeClientStream(Number streamId) {
         unreserveStreamId(streamId);
     }
@@ -1092,10 +1161,9 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
-     * Dispatches event
+     * {@inheritDoc}
      *
-     * @param event
-     *            Event
+     * Dispatches event
      */
     @Override
     public void dispatchEvent(IEvent event) {
@@ -1264,7 +1332,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         pendingCalls.put(invokeId, call);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param call a {@link org.red5.server.api.service.IServiceCall} object
+     * @param channel a int
+     */
     public void invoke(IServiceCall call, int channel) {
         // if play or publish update our chunk sizes
         if ("playpublish".contains(call.getServiceMethodName())) {
@@ -1291,17 +1364,31 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         getChannel(channel).write(invoke);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param method a {@link java.lang.String} object
+     */
     public void invoke(String method) {
         invoke(method, null, null);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param method a {@link java.lang.String} object
+     * @param params an array of {@link java.lang.Object} objects
+     */
     public void invoke(String method, Object[] params) {
         invoke(method, params, null);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param method a {@link java.lang.String} object
+     * @param callback a {@link org.red5.server.api.service.IPendingServiceCallback} object
+     */
     public void invoke(String method, IPendingServiceCallback callback) {
         invoke(method, null, callback);
     }
@@ -1315,12 +1402,21 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         invoke(call);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param call a {@link org.red5.server.api.service.IServiceCall} object
+     */
     public void notify(IServiceCall call) {
         notify(call, 3);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param call a {@link org.red5.server.api.service.IServiceCall} object
+     * @param channel a int
+     */
     public void notify(IServiceCall call, int channel) {
         Notify notify = new Notify();
         notify.setCall(call);
@@ -1332,7 +1428,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         notify(method, null);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param method a {@link java.lang.String} object
+     * @param params an array of {@link java.lang.Object} objects
+     */
     public void notify(String method, Object[] params) {
         IServiceCall call = new Call(method, params);
         notify(call);
@@ -1434,6 +1535,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         return messageTypeToName(headerDataType);
     }
 
+    /**
+     * <p>messageTypeToName.</p>
+     *
+     * @param headerDataType a byte
+     * @return a {@link java.lang.String} object
+     */
     public String messageTypeToName(byte headerDataType) {
         switch (headerDataType) {
             case Constants.TYPE_AGGREGATE:
@@ -1608,7 +1715,9 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void ping() {
         long newPingTime = System.currentTimeMillis();
         if (isDebug) {
@@ -1663,7 +1772,11 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         return (int) (lastPingSentOn.get() - lastPongReceivedOn.get());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getLastPingTime() {
         return lastPingRoundTripTime.get();
     }
@@ -1707,16 +1820,28 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
+     * <p>Getter for the field <code>scheduler</code>.</p>
+     *
      * @return the scheduler
      */
     public ThreadPoolTaskScheduler getScheduler() {
         return scheduler;
     }
 
+    /**
+     * <p>Getter for the field <code>executor</code>.</p>
+     *
+     * @return a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor} object
+     */
     public ThreadPoolTaskExecutor getExecutor() {
         return executor;
     }
 
+    /**
+     * <p>Setter for the field <code>executor</code>.</p>
+     *
+     * @param executor a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor} object
+     */
     public void setExecutor(ThreadPoolTaskExecutor executor) {
         this.executor = executor;
     }
@@ -1762,6 +1887,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         deferredResults.remove(result);
     }
 
+    /**
+     * <p>rememberStreamBufferDuration.</p>
+     *
+     * @param streamId a int
+     * @param bufferDuration a int
+     */
     public void rememberStreamBufferDuration(int streamId, int bufferDuration) {
         streamBuffers.put(streamId, bufferDuration);
     }
@@ -1776,82 +1907,182 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         this.maxHandshakeTimeout = maxHandshakeTimeout;
     }
 
+    /**
+     * <p>Getter for the field <code>maxHandlingTimeout</code>.</p>
+     *
+     * @return a long
+     */
     public long getMaxHandlingTimeout() {
         return maxHandlingTimeout;
     }
 
+    /**
+     * <p>Setter for the field <code>maxHandlingTimeout</code>.</p>
+     *
+     * @param maxHandlingTimeout a long
+     */
     public void setMaxHandlingTimeout(long maxHandlingTimeout) {
         this.maxHandlingTimeout = maxHandlingTimeout;
     }
 
+    /**
+     * <p>Getter for the field <code>maxPollTimeout</code>.</p>
+     *
+     * @return a long
+     */
     public long getMaxPollTimeout() {
         return maxPollTimeout;
     }
 
+    /**
+     * <p>Setter for the field <code>maxPollTimeout</code>.</p>
+     *
+     * @param maxPollTimeout a long
+     */
     public void setMaxPollTimeout(long maxPollTimeout) {
         this.maxPollTimeout = maxPollTimeout;
     }
 
+    /**
+     * <p>Getter for the field <code>channelsInitalCapacity</code>.</p>
+     *
+     * @return a int
+     */
     public int getChannelsInitalCapacity() {
         return channelsInitalCapacity;
     }
 
+    /**
+     * <p>Setter for the field <code>channelsInitalCapacity</code>.</p>
+     *
+     * @param channelsInitalCapacity a int
+     */
     public void setChannelsInitalCapacity(int channelsInitalCapacity) {
         this.channelsInitalCapacity = channelsInitalCapacity;
     }
 
+    /**
+     * <p>Getter for the field <code>channelsConcurrencyLevel</code>.</p>
+     *
+     * @return a int
+     */
     public int getChannelsConcurrencyLevel() {
         return channelsConcurrencyLevel;
     }
 
+    /**
+     * <p>Setter for the field <code>channelsConcurrencyLevel</code>.</p>
+     *
+     * @param channelsConcurrencyLevel a int
+     */
     public void setChannelsConcurrencyLevel(int channelsConcurrencyLevel) {
         this.channelsConcurrencyLevel = channelsConcurrencyLevel;
     }
 
+    /**
+     * <p>Getter for the field <code>streamsInitalCapacity</code>.</p>
+     *
+     * @return a int
+     */
     public int getStreamsInitalCapacity() {
         return streamsInitalCapacity;
     }
 
+    /**
+     * <p>Setter for the field <code>streamsInitalCapacity</code>.</p>
+     *
+     * @param streamsInitalCapacity a int
+     */
     public void setStreamsInitalCapacity(int streamsInitalCapacity) {
         this.streamsInitalCapacity = streamsInitalCapacity;
     }
 
+    /**
+     * <p>Getter for the field <code>streamsConcurrencyLevel</code>.</p>
+     *
+     * @return a int
+     */
     public int getStreamsConcurrencyLevel() {
         return streamsConcurrencyLevel;
     }
 
+    /**
+     * <p>Setter for the field <code>streamsConcurrencyLevel</code>.</p>
+     *
+     * @param streamsConcurrencyLevel a int
+     */
     public void setStreamsConcurrencyLevel(int streamsConcurrencyLevel) {
         this.streamsConcurrencyLevel = streamsConcurrencyLevel;
     }
 
+    /**
+     * <p>Getter for the field <code>pendingCallsInitalCapacity</code>.</p>
+     *
+     * @return a int
+     */
     public int getPendingCallsInitalCapacity() {
         return pendingCallsInitalCapacity;
     }
 
+    /**
+     * <p>Setter for the field <code>pendingCallsInitalCapacity</code>.</p>
+     *
+     * @param pendingCallsInitalCapacity a int
+     */
     public void setPendingCallsInitalCapacity(int pendingCallsInitalCapacity) {
         this.pendingCallsInitalCapacity = pendingCallsInitalCapacity;
     }
 
+    /**
+     * <p>Getter for the field <code>pendingCallsConcurrencyLevel</code>.</p>
+     *
+     * @return a int
+     */
     public int getPendingCallsConcurrencyLevel() {
         return pendingCallsConcurrencyLevel;
     }
 
+    /**
+     * <p>Setter for the field <code>pendingCallsConcurrencyLevel</code>.</p>
+     *
+     * @param pendingCallsConcurrencyLevel a int
+     */
     public void setPendingCallsConcurrencyLevel(int pendingCallsConcurrencyLevel) {
         this.pendingCallsConcurrencyLevel = pendingCallsConcurrencyLevel;
     }
 
+    /**
+     * <p>Getter for the field <code>reservedStreamsInitalCapacity</code>.</p>
+     *
+     * @return a int
+     */
     public int getReservedStreamsInitalCapacity() {
         return reservedStreamsInitalCapacity;
     }
 
+    /**
+     * <p>Setter for the field <code>reservedStreamsInitalCapacity</code>.</p>
+     *
+     * @param reservedStreamsInitalCapacity a int
+     */
     public void setReservedStreamsInitalCapacity(int reservedStreamsInitalCapacity) {
         this.reservedStreamsInitalCapacity = reservedStreamsInitalCapacity;
     }
 
+    /**
+     * <p>Getter for the field <code>reservedStreamsConcurrencyLevel</code>.</p>
+     *
+     * @return a int
+     */
     public int getReservedStreamsConcurrencyLevel() {
         return reservedStreamsConcurrencyLevel;
     }
 
+    /**
+     * <p>Setter for the field <code>reservedStreamsConcurrencyLevel</code>.</p>
+     *
+     * @param reservedStreamsConcurrencyLevel a int
+     */
     public void setReservedStreamsConcurrencyLevel(int reservedStreamsConcurrencyLevel) {
         this.reservedStreamsConcurrencyLevel = reservedStreamsConcurrencyLevel;
     }
@@ -1867,6 +2098,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         // unused
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getProtocol() {
         return "rtmp";

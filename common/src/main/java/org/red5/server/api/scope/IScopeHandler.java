@@ -110,7 +110,6 @@ public interface IScopeHandler extends IEventHandler {
      *            The connection object
      * @param call
      *            The call object.
-     *
      * @return true to allow, false to deny
      */
     boolean serviceCall(IConnection conn, IServiceCall call);

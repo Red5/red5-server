@@ -23,7 +23,7 @@ public interface IMessageOutput {
      *
      * @param message
      *            Message to be pushed.
-     * @throws IOException
+     * @throws java.io.IOException
      *             If message could not be written.
      */
     void pushMessage(IMessage message) throws IOException;

@@ -17,6 +17,12 @@ import org.apache.mina.core.buffer.IoBuffer;
  */
 public class SerializeUtils {
 
+    /**
+     * <p>ByteBufferToByteArray.</p>
+     *
+     * @param buf a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @return an array of {@link byte} objects
+     */
     public static byte[] ByteBufferToByteArray(IoBuffer buf) {
         byte[] byteBuf = new byte[buf.limit()];
         int pos = buf.position();
@@ -26,6 +32,12 @@ public class SerializeUtils {
         return byteBuf;
     }
 
+    /**
+     * <p>NioByteBufferToByteArray.</p>
+     *
+     * @param buf a {@link java.nio.ByteBuffer} object
+     * @return an array of {@link byte} objects
+     */
     public static byte[] NioByteBufferToByteArray(ByteBuffer buf) {
         byte[] byteBuf = new byte[buf.limit()];
         int pos = buf.position();
@@ -35,11 +47,23 @@ public class SerializeUtils {
         return byteBuf;
     }
 
+    /**
+     * <p>ByteArrayToByteBuffer.</p>
+     *
+     * @param byteBuf an array of {@link byte} objects
+     * @param buf a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public static void ByteArrayToByteBuffer(byte[] byteBuf, IoBuffer buf) {
         buf.put(byteBuf);
         buf.flip();
     }
 
+    /**
+     * <p>ByteArrayToNioByteBuffer.</p>
+     *
+     * @param byteBuf an array of {@link byte} objects
+     * @param buf a {@link java.nio.ByteBuffer} object
+     */
     public static void ByteArrayToNioByteBuffer(byte[] byteBuf, ByteBuffer buf) {
         buf.put(byteBuf);
         buf.flip();

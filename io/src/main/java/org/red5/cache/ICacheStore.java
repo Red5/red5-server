@@ -17,7 +17,6 @@ import java.util.Iterator;
  * @see <a href="http://java.sun.com/developer/technicalArticles/ALT/RefObj/">Reference Objects and Garbage Collection</a>
  * @see <a href="http://www.onjava.com/pub/a/onjava/2002/10/02/javanio.html?page=3">Top Ten New Things You Can Do with NIO</a>
  * @see <a href="http://csci.csusb.edu/turner/archive/courses/aiit2004/proxy_cache_solution.html">Proxy Cache Solution</a>
- *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */

@@ -18,14 +18,35 @@ import javax.management.MXBean;
 @MXBean
 public interface WebScopeMXBean extends ScopeMXBean {
 
+    /**
+     * <p>setContextPath.</p>
+     *
+     * @param contextPath a {@link java.lang.String} object
+     */
     public void setContextPath(String contextPath);
 
+    /**
+     * <p>setVirtualHosts.</p>
+     *
+     * @param virtualHosts a {@link java.lang.String} object
+     */
     public void setVirtualHosts(String virtualHosts);
 
+    /**
+     * <p>register.</p>
+     */
     public void register();
 
+    /**
+     * <p>unregister.</p>
+     */
     public void unregister();
 
+    /**
+     * <p>isShuttingDown.</p>
+     *
+     * @return a boolean
+     */
     public boolean isShuttingDown();
 
 }

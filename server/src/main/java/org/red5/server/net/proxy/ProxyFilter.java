@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Proxy filter
+ *
+ * @author mondain
  */
 public class ProxyFilter extends IoFilterAdapter {
     /**

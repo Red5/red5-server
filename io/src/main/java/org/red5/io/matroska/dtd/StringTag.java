@@ -20,6 +20,7 @@ import org.red5.io.matroska.VINT;
  *
  * String tag is class able to store strings
  *
+ * @author mondain
  */
 public class StringTag extends Tag {
     private String value = "";
@@ -28,12 +29,11 @@ public class StringTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
      *            - the id of tag to be created
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public StringTag(String name, VINT id) throws IOException {
@@ -44,7 +44,6 @@ public class StringTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -53,24 +52,20 @@ public class StringTag extends Tag {
      *            - the size of tag to be created
      * @param inputStream
      *            - stream to read tag data from
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public StringTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
         super(name, id, size, inputStream);
     }
 
-    /**
-     * @see Tag#parse(InputStream)
-     */
+    /** {@inheritDoc} */
     @Override
     public void parse(InputStream inputStream) throws IOException {
         value = ParserUtils.parseString(inputStream, (int) getSize());
     }
 
-    /**
-     * @see Tag#putValue(ByteBuffer)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void putValue(ByteBuffer bb) throws IOException {
         bb.put(value.getBytes("UTF-8"));
@@ -91,7 +86,7 @@ public class StringTag extends Tag {
      * @param value
      *            - value to be set
      * @return - this for chaining
-     * @throws UnsupportedEncodingException
+     * @throws java.io.UnsupportedEncodingException
      *             - in case UTF-8 encoding is not supported
      */
     public StringTag setValue(String value) throws UnsupportedEncodingException {
@@ -104,6 +99,8 @@ public class StringTag extends Tag {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * method to get "pretty" represented {@link Tag}
      */
     @Override

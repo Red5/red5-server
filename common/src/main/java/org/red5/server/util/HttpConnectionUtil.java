@@ -112,9 +112,9 @@ public class HttpConnectionUtil {
      *
      * @param response
      *            http response
-     * @throws IOException
+     * @throws java.io.IOException
      *             on IO error
-     * @throws ParseException
+     * @throws org.apache.http.ParseException
      *             on parse error
      */
     public static void handleError(HttpResponse response) throws ParseException, IOException {
@@ -126,6 +126,8 @@ public class HttpConnectionUtil {
     }
 
     /**
+     * <p>Getter for the field <code>connectionTimeout</code>.</p>
+     *
      * @return the connectionTimeout
      */
     public int getConnectionTimeout() {
@@ -133,6 +135,8 @@ public class HttpConnectionUtil {
     }
 
     /**
+     * <p>Setter for the field <code>connectionTimeout</code>.</p>
+     *
      * @param connectionTimeout
      *            the connectionTimeout to set
      */

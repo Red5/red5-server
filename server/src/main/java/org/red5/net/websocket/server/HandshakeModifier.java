@@ -13,8 +13,8 @@ public class HandshakeModifier {
     /**
      * Modifies the handshake request and / or response.
      *
-     * @param request
-     * @param response
+     * @param request a {@link jakarta.websocket.server.HandshakeRequest} object
+     * @param response a {@link jakarta.websocket.HandshakeResponse} object
      */
     public void modifyHandshake(HandshakeRequest request, HandshakeResponse response) {
     }

@@ -9,6 +9,8 @@ package org.red5.server.api;
 
 /**
  * This interface encapsulates the mapping strategy used by the context.
+ *
+ * @author mondain
  */
 public interface IMappingStrategy {
 

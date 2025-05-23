@@ -12,6 +12,8 @@ import org.red5.io.amf3.IDataOutput;
 
 /**
  * Runtime status object
+ *
+ * @author mondain
  */
 public class RuntimeStatusObject extends StatusObject {
 
@@ -25,7 +27,9 @@ public class RuntimeStatusObject extends StatusObject {
      */
     protected int clientid = 0;
 
-    /** Constructs a new RuntimeStatusObject. */
+    /**
+     * Constructs a new RuntimeStatusObject.
+     */
     public RuntimeStatusObject() {
         super();
     }
@@ -102,6 +106,7 @@ public class RuntimeStatusObject extends StatusObject {
         this.details = details;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         super.readExternal(in);
@@ -109,6 +114,7 @@ public class RuntimeStatusObject extends StatusObject {
         details = (String) in.readObject();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         super.writeExternal(out);

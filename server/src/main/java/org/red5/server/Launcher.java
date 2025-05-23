@@ -25,7 +25,7 @@ public class Launcher {
     /**
      * Launch Red5 under it's own classloader
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on error
      */
     public void launch() throws Exception {

@@ -36,6 +36,11 @@ public class MP4Frame implements Comparable<MP4Frame> {
         return type;
     }
 
+    /**
+     * <p>Setter for the field <code>type</code>.</p>
+     *
+     * @param type a byte
+     */
     public void setType(byte type) {
         this.type = type;
     }
@@ -49,6 +54,11 @@ public class MP4Frame implements Comparable<MP4Frame> {
         return offset;
     }
 
+    /**
+     * <p>Setter for the field <code>offset</code>.</p>
+     *
+     * @param offset a long
+     */
     public void setOffset(long offset) {
         this.offset = offset;
     }
@@ -62,6 +72,11 @@ public class MP4Frame implements Comparable<MP4Frame> {
         return size;
     }
 
+    /**
+     * <p>Setter for the field <code>size</code>.</p>
+     *
+     * @param size a int
+     */
     public void setSize(int size) {
         this.size = size;
     }
@@ -75,11 +90,18 @@ public class MP4Frame implements Comparable<MP4Frame> {
         return time;
     }
 
+    /**
+     * <p>Setter for the field <code>time</code>.</p>
+     *
+     * @param time a double
+     */
     public void setTime(double time) {
         this.time = time;
     }
 
     /**
+     * <p>Getter for the field <code>timeOffset</code>.</p>
+     *
      * @return the timeOffset
      */
     public int getTimeOffset() {
@@ -87,6 +109,8 @@ public class MP4Frame implements Comparable<MP4Frame> {
     }
 
     /**
+     * <p>Setter for the field <code>timeOffset</code>.</p>
+     *
      * @param timeOffset
      *            the timeOffset to set
      */
@@ -103,10 +127,16 @@ public class MP4Frame implements Comparable<MP4Frame> {
         return keyFrame;
     }
 
+    /**
+     * <p>Setter for the field <code>keyFrame</code>.</p>
+     *
+     * @param keyFrame a boolean
+     */
     public void setKeyFrame(boolean keyFrame) {
         this.keyFrame = keyFrame;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -116,6 +146,7 @@ public class MP4Frame implements Comparable<MP4Frame> {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -132,6 +163,7 @@ public class MP4Frame implements Comparable<MP4Frame> {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("MP4Frame type=");
@@ -150,6 +182,8 @@ public class MP4Frame implements Comparable<MP4Frame> {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * The frames are expected to be sorted by their timestamp
      */
     @Override

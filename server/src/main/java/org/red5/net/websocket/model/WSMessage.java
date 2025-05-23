@@ -39,19 +39,41 @@ public class WSMessage {
     // creation time
     private long timeStamp = System.currentTimeMillis();
 
+    /**
+     * <p>Constructor for WSMessage.</p>
+     */
     public WSMessage() {
         payload = IoBuffer.allocate(0);
     }
 
+    /**
+     * <p>Constructor for WSMessage.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     * @throws java.io.UnsupportedEncodingException if any.
+     */
     public WSMessage(String message) throws UnsupportedEncodingException {
         payload = IoBuffer.wrap(message.getBytes("UTF8"));
     }
 
+    /**
+     * <p>Constructor for WSMessage.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     * @param conn a {@link org.red5.net.websocket.WebSocketConnection} object
+     * @throws java.io.UnsupportedEncodingException if any.
+     */
     public WSMessage(String message, WebSocketConnection conn) throws UnsupportedEncodingException {
         setPayload(IoBuffer.wrap(message.getBytes("UTF8")));
         setConnection(conn);
     }
 
+    /**
+     * <p>Constructor for WSMessage.</p>
+     *
+     * @param payload a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @param conn a {@link org.red5.net.websocket.WebSocketConnection} object
+     */
     public WSMessage(IoBuffer payload, WebSocketConnection conn) {
         setPayload(payload);
         setConnection(conn);
@@ -61,24 +83,44 @@ public class WSMessage {
      * Returns the payload data as a UTF8 string.
      *
      * @return string
-     * @throws UnsupportedEncodingException
+     * @throws java.io.UnsupportedEncodingException
      */
     public String getMessageAsString() throws UnsupportedEncodingException {
         return new String(payload.array(), "UTF8").trim();
     }
 
+    /**
+     * <p>Getter for the field <code>messageType</code>.</p>
+     *
+     * @return a {@link org.red5.net.websocket.model.WSMessage.MessageType} object
+     */
     public MessageType getMessageType() {
         return messageType;
     }
 
+    /**
+     * <p>Setter for the field <code>messageType</code>.</p>
+     *
+     * @param messageType a {@link org.red5.net.websocket.model.WSMessage.MessageType} object
+     */
     public void setMessageType(MessageType messageType) {
         this.messageType = messageType;
     }
 
+    /**
+     * <p>Getter for the field <code>connection</code>.</p>
+     *
+     * @return a {@link org.red5.net.websocket.WebSocketConnection} object
+     */
     public WebSocketConnection getConnection() {
         return connection.get();
     }
 
+    /**
+     * <p>Setter for the field <code>connection</code>.</p>
+     *
+     * @param connection a {@link org.red5.net.websocket.WebSocketConnection} object
+     */
     public void setConnection(WebSocketConnection connection) {
         this.connection = new WeakReference<WebSocketConnection>(connection);
         // set the connections path on the message
@@ -94,6 +136,11 @@ public class WSMessage {
         return payload.flip();
     }
 
+    /**
+     * <p>Setter for the field <code>payload</code>.</p>
+     *
+     * @param payload a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public void setPayload(IoBuffer payload) {
         this.payload = payload;
     }
@@ -101,7 +148,7 @@ public class WSMessage {
     /**
      * Adds additional payload data.
      *
-     * @param additionalPayload
+     * @param additionalPayload a {@link org.apache.mina.core.buffer.IoBuffer} object
      */
     public void addPayload(IoBuffer additionalPayload) {
         if (payload == null) {
@@ -114,7 +161,7 @@ public class WSMessage {
     /**
      * Adds additional payload data.
      *
-     * @param additionalPayload
+     * @param additionalPayload an array of {@link byte} objects
      */
     public void addPayload(byte[] additionalPayload) {
         if (payload == null) {
@@ -124,22 +171,43 @@ public class WSMessage {
         this.payload.put(additionalPayload);
     }
 
+    /**
+     * <p>isPayloadComplete.</p>
+     *
+     * @return a boolean
+     */
     public boolean isPayloadComplete() {
         return !payload.hasRemaining();
     }
 
+    /**
+     * <p>Getter for the field <code>timeStamp</code>.</p>
+     *
+     * @return a long
+     */
     public long getTimeStamp() {
         return timeStamp;
     }
 
+    /**
+     * <p>Getter for the field <code>path</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * <p>Setter for the field <code>path</code>.</p>
+     *
+     * @param path a {@link java.lang.String} object
+     */
     public void setPath(String path) {
         this.path = path;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "WSMessage [messageType=" + messageType + ", timeStamp=" + timeStamp + ", path=" + path + ", payload=" + payload + "]";

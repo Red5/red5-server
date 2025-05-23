@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
  * Calculates the bandwidth between the client and server. The checks originate from the server.
  *
  * @see <a href='http://help.adobe.com/en_US/FlashMediaServer/3.5_Deving/WS5b3ccc516d4fbf351e63e3d11a0773d56e-7ffa.html'>FMS 3.5 Bandwidth Doc</a>
- *
  * @author The Red5 Project
  * @author Dan Rossi
  * @author Paul Gregoire
@@ -69,10 +68,12 @@ public class ServerClientDetection implements IPendingServiceCallback, IBandwidt
 
     private byte[] payload1 = new byte[1024 * 32];
 
+    /** {@inheritDoc} */
     public void checkBandwidth(IConnection conn) {
         calculateClientBw(conn);
     }
 
+    /** {@inheritDoc} */
     public void calculateClientBw(IConnection conn) {
         log.debug("calculateClientBw: {} ", conn);
         // set local connection ref
@@ -90,6 +91,8 @@ public class ServerClientDetection implements IPendingServiceCallback, IBandwidt
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Handle callback from service call.
      */
     public void resultReceived(IPendingServiceCall call) {
@@ -185,6 +188,9 @@ public class ServerClientDetection implements IPendingServiceCallback, IBandwidt
         }
     }
 
+    /**
+     * <p>onServerClientBWCheck.</p>
+     */
     public void onServerClientBWCheck() {
         log.debug("onServerClientBWCheck");
         calculateClientBw(Red5.getConnectionLocal());

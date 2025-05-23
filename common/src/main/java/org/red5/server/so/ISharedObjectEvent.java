@@ -9,6 +9,8 @@ package org.red5.server.so;
 
 /**
  * One update event for a shared object received through a connection.
+ *
+ * @author mondain
  */
 public interface ISharedObjectEvent {
 

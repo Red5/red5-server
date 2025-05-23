@@ -51,7 +51,7 @@ public interface IClientBroadcastStream extends IClientStream, IBroadcastStream 
     /**
      * Adds a stream name subscribe-side alias.
      *
-     * @param alias
+     * @param alias a {@link java.lang.String} object
      * @return true if added to the aliases, false otherwise
      */
     boolean addAlias(String alias);
@@ -73,7 +73,7 @@ public interface IClientBroadcastStream extends IClientStream, IBroadcastStream 
     /**
      * Returns whether or not a given subscribe-side alias exists.
      *
-     * @param alias
+     * @param alias a {@link java.lang.String} object
      * @return true if found and false otherwise
      */
     boolean containsAlias(String alias);

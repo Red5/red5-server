@@ -34,9 +34,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Client is an abstraction representing user connected to Red5 application. Clients are tied to connections and registered in ClientRegistry
+ *
+ * @author mondain
  */
 public class Client extends AttributeStore implements IClient {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Client.class);
 
     /**
@@ -157,11 +160,9 @@ public class Client extends AttributeStore implements IClient {
     }
 
     /**
-     * Return client connections to given scope
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Scope
-     * @return Set of connections for that scope
+     * Return client connections to given scope
      */
     public Set<IConnection> getConnections(IScope scope) {
         if (scope == null) {
@@ -197,6 +198,7 @@ public class Client extends AttributeStore implements IClient {
     }
 
     /**
+     * <p>getScopes.</p>
      *
      * @return scopes on this client
      */
@@ -297,7 +299,11 @@ public class Client extends AttributeStore implements IClient {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isBandwidthChecked() {
         return bandwidthChecked;
     }
@@ -327,7 +333,9 @@ public class Client extends AttributeStore implements IClient {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void checkBandwidth() {
         log.debug("Check bandwidth");
         bandwidthChecked = true;
@@ -336,7 +344,12 @@ public class Client extends AttributeStore implements IClient {
         detection.checkBandwidth(Red5.getConnectionLocal());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param params an array of {@link java.lang.Object} objects
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> checkBandwidthUp(Object[] params) {
         if (log.isDebugEnabled()) {
             log.debug("Check bandwidth: {}", Arrays.toString(params));
@@ -349,11 +362,9 @@ public class Client extends AttributeStore implements IClient {
     }
 
     /**
-     * Allows for reconstruction via CompositeData.
+     * {@inheritDoc}
      *
-     * @param cd
-     *            composite data
-     * @return Client class instance
+     * Allows for reconstruction via CompositeData.
      */
     public static Client from(CompositeData cd) {
         Client instance = null;
@@ -383,6 +394,7 @@ public class Client extends AttributeStore implements IClient {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         if (id == null) {
@@ -392,11 +404,9 @@ public class Client extends AttributeStore implements IClient {
     }
 
     /**
-     * Check clients equality by id
+     * {@inheritDoc}
      *
-     * @param obj
-     *            Object to check against
-     * @return true if clients ids are the same, false otherwise
+     * Check clients equality by id
      */
     @Override
     public boolean equals(Object obj) {
@@ -406,10 +416,7 @@ public class Client extends AttributeStore implements IClient {
         return false;
     }
 
-    /**
-     *
-     * @return string representation of client
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "Client: " + id;

@@ -20,7 +20,7 @@ public interface IRed5Realm {
     /**
      * Sets a servlet context.
      *
-     * @param servletContext
+     * @param servletContext a {@link jakarta.servlet.ServletContext} object
      */
     void setServletContext(ServletContext servletContext);
 
@@ -34,7 +34,7 @@ public interface IRed5Realm {
     /**
      * Sets an application context.
      *
-     * @param applicationContext
+     * @param applicationContext a {@link org.springframework.context.ApplicationContext} object
      */
     void setApplicationContext(ApplicationContext applicationContext);
 

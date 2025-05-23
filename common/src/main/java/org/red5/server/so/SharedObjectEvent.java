@@ -12,6 +12,11 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * <p>SharedObjectEvent class.</p>
+ *
+ * @author mondain
+ */
 public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Comparable<SharedObjectEvent> {
 
     private static final long serialVersionUID = -4129018814289863535L;
@@ -36,10 +41,14 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
      */
     private Object value;
 
+    /**
+     * <p>Constructor for SharedObjectEvent.</p>
+     */
     public SharedObjectEvent() {
     }
 
     /**
+     * <p>Constructor for SharedObjectEvent.</p>
      *
      * @param type
      *            type
@@ -54,21 +63,38 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
         this.value = value;
     }
 
+    /**
+     * <p>getTimestamp.</p>
+     *
+     * @return a long
+     */
     public long getTimestamp() {
         return ts;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getKey() {
         return key;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a Type object
+     */
     public Type getType() {
         return type;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.Object} object
+     */
     public Object getValue() {
         return value;
     }
@@ -77,6 +103,7 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -91,6 +118,7 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -124,6 +152,7 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
         return String.format("SharedObjectEvent(%s, key: %s value: %s)", getType(), getKey(), getValue());
     }
 
+    /** {@inheritDoc} */
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = Type.valueOf(in.readUTF());
         key = (String) in.readUTF();
@@ -131,6 +160,7 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
         ts = in.readLong();
     }
 
+    /** {@inheritDoc} */
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(type.name());
         out.writeUTF(key);
@@ -138,6 +168,7 @@ public class SharedObjectEvent implements ISharedObjectEvent, Externalizable, Co
         out.writeLong(ts);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(SharedObjectEvent other) {
         return Long.compare(this.ts, other.getTimestamp());

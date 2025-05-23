@@ -24,6 +24,8 @@ import org.red5.server.stream.IStreamData;
 
 /**
  * Stream notification event. The invoke / transaction id is "always" equal to zero for a Notify.
+ *
+ * @author mondain
  */
 public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, IStreamPacket {
 
@@ -56,7 +58,9 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
 
     private String action;
 
-    /** Constructs a new Notify */
+    /**
+     * Constructs a new Notify
+     */
     public Notify() {
         super(Type.SERVICE_CALL);
     }
@@ -95,7 +99,11 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
         this.action = action;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a byte
+     */
     public byte getDataType() {
         return dataType;
     }
@@ -129,7 +137,11 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
         return this.call;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public IoBuffer getData() {
         return data;
     }
@@ -169,10 +181,20 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
         this.connectionParams = connectionParams;
     }
 
+    /**
+     * <p>Setter for the field <code>action</code>.</p>
+     *
+     * @param onCueOrOnMeta a {@link java.lang.String} object
+     */
     public void setAction(String onCueOrOnMeta) {
         this.action = onCueOrOnMeta;
     }
 
+    /**
+     * <p>Getter for the field <code>action</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getAction() {
         return action;
     }
@@ -232,6 +254,7 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
         }
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -250,6 +273,7 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -270,6 +294,8 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
      * Duplicate this Notify message to future injection Serialize to memory and deserialize, safe way.
      *
      * @return duplicated Notify event
+     * @throws java.io.IOException if any.
+     * @throws java.lang.ClassNotFoundException if any.
      */
     public Notify duplicate() throws IOException, ClassNotFoundException {
         Notify result = new Notify();

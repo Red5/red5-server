@@ -16,10 +16,27 @@ import org.apache.mina.core.buffer.IoBuffer;
  */
 public interface IHandshake {
 
+    /**
+     * <p>doHandshake.</p>
+     *
+     * @param input a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public IoBuffer doHandshake(IoBuffer input);
 
+    /**
+     * <p>validate.</p>
+     *
+     * @param handshake an array of {@link byte} objects
+     * @return a boolean
+     */
     public boolean validate(byte[] handshake);
 
+    /**
+     * <p>useEncryption.</p>
+     *
+     * @return a boolean
+     */
     public boolean useEncryption();
 
 }

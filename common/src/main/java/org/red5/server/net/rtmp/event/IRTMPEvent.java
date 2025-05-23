@@ -11,6 +11,11 @@ import org.red5.server.api.event.IEvent;
 import org.red5.server.api.event.IEventListener;
 import org.red5.server.net.rtmp.message.Header;
 
+/**
+ * <p>IRTMPEvent interface.</p>
+ *
+ * @author mondain
+ */
 public interface IRTMPEvent extends IEvent {
 
     /**

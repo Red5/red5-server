@@ -67,15 +67,23 @@ public class Stax2DomBuilder {
      * @param r
      *            Stream reader from which input is read.
      * @return <code>Document</code> - DOM document object.
-     * @throws ParserConfigurationException
+     * @throws javax.xml.parsers.ParserConfigurationException
      *             if parse is not configured
-     * @throws XMLStreamException
+     * @throws javax.xml.stream.XMLStreamException
      *             If the reader threw such exception (to indicate a parsing or I/O problem)
      */
     public Document build(XMLStreamReader r) throws ParserConfigurationException, XMLStreamException {
         return build(r, DocumentBuilderFactory.newInstance().newDocumentBuilder());
     }
 
+    /**
+     * <p>build.</p>
+     *
+     * @param r a {@link javax.xml.stream.XMLStreamReader} object
+     * @param docbuilder a {@link javax.xml.parsers.DocumentBuilder} object
+     * @return a {@link org.w3c.dom.Document} object
+     * @throws javax.xml.stream.XMLStreamException if any.
+     */
     public Document build(XMLStreamReader r, DocumentBuilder docbuilder) throws XMLStreamException {
         Document doc = docbuilder.newDocument();
         build(r, doc);
@@ -89,7 +97,7 @@ public class Stax2DomBuilder {
      *            Stream reader from which input is read.
      * @param doc
      *            <code>Document</code> - DOM document object.
-     * @throws XMLStreamException
+     * @throws javax.xml.stream.XMLStreamException
      *             If the reader threw such exception (to indicate a parsing or I/O problem)
      */
     public void build(XMLStreamReader r, Document doc) throws XMLStreamException {
@@ -103,7 +111,7 @@ public class Stax2DomBuilder {
      *            Stream reader to use for reading the document from which to build the tree
      * @param doc
      *            JDOM <code>Document</code> being built.
-     * @throws XMLStreamException
+     * @throws javax.xml.stream.XMLStreamException
      *             for fun
      */
     protected void buildTree(XMLStreamReader r, Document doc) throws XMLStreamException {
@@ -249,6 +257,13 @@ public class Stax2DomBuilder {
 
     // // // Overridable helper methods:
 
+    /**
+     * <p>getQualified.</p>
+     *
+     * @param prefix a {@link java.lang.String} object
+     * @param localName a {@link java.lang.String} object
+     * @return a {@link java.lang.String} object
+     */
     protected String getQualified(String prefix, String localName) {
         /*
          * This mostly/only helps with empty/text-only elements... might make sense to do 'real' caching...
@@ -261,6 +276,12 @@ public class Stax2DomBuilder {
         return qn;
     }
 
+    /**
+     * <p>checkReaderSettings.</p>
+     *
+     * @param r a {@link javax.xml.stream.XMLStreamReader} object
+     * @throws javax.xml.stream.XMLStreamException if any.
+     */
     protected void checkReaderSettings(XMLStreamReader r) throws XMLStreamException {
         Object o = r.getProperty(XMLInputFactory.IS_NAMESPACE_AWARE);
         /*

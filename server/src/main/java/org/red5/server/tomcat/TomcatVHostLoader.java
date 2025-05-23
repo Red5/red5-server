@@ -75,9 +75,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     private String defaultApplicationContextId = "default.context";
 
     /**
-     * Initialization.
+     * {@inheritDoc}
      *
-     * @throws ServletException
+     * Initialization.
      */
     @SuppressWarnings("null")
     @Override
@@ -212,6 +212,8 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Un-initialization.
      */
     @Override
@@ -247,10 +249,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     }
 
     /**
-     * Starts a web application and its red5 (spring) component. This is basically a stripped down version of init().
+     * {@inheritDoc}
      *
-     * @return true on success
-     * @throws ServletException
+     * Starts a web application and its red5 (spring) component. This is basically a stripped down version of init().
      */
     @SuppressWarnings("null")
     public boolean startWebApplication(String applicationName) throws ServletException {
@@ -369,10 +370,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     }
 
     /**
-     * Adds an alias to the current host.
+     * {@inheritDoc}
      *
-     * @param alias
-     *            alias
+     * Adds an alias to the current host.
      */
     public void addAlias(String alias) {
         log.debug("Adding alias: {}", alias);
@@ -380,10 +380,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     }
 
     /**
-     * Removes an alias from the current host.
+     * {@inheritDoc}
      *
-     * @param alias
-     *            Alias
+     * Removes an alias from the current host.
      */
     public void removeAlias(String alias) {
         log.debug("Removing alias: {}", alias);
@@ -397,10 +396,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     }
 
     /**
-     * Adds a valve to the current host.
+     * {@inheritDoc}
      *
-     * @param valve
-     *            Valve
+     * Adds a valve to the current host.
      */
     public void addValve(Valve valve) {
         log.debug("Adding valve: {}", valve);
@@ -409,10 +407,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     }
 
     /**
-     * Removes a valve from the current host.
+     * {@inheritDoc}
      *
-     * @param valveInfo
-     *            Valve Information.
+     * Removes a valve from the current host.
      */
     public void removeValve(String valveInfo) {
         log.debug("Removing valve: {}", valveInfo);
@@ -429,11 +426,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     }
 
     /**
-     * Set additional contexts.
+     * {@inheritDoc}
      *
-     * @param contexts
-     *            Map of contexts
-     * @throws ServletException
+     * Set additional contexts.
      */
     @Override
     public void setContexts(Map<String, String> contexts) throws ServletException {
@@ -443,70 +438,125 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
         }
     }
 
+    /**
+     * <p>Getter for the field <code>name</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * <p>Getter for the field <code>domain</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getDomain() {
         return domain;
     }
 
+    /** {@inheritDoc} */
     public void setDomain(String domain) {
         this.domain = domain;
     }
 
+    /**
+     * <p>Getter for the field <code>webappRoot</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getWebappRoot() {
         return webappRoot;
     }
 
+    /** {@inheritDoc} */
     public void setWebappRoot(String webappRoot) {
         this.webappRoot = webappRoot;
     }
 
+    /**
+     * <p>Getter for the field <code>autoDeploy</code>.</p>
+     *
+     * @return a boolean
+     */
     public boolean getAutoDeploy() {
         return autoDeploy;
     }
 
+    /** {@inheritDoc} */
     public void setAutoDeploy(boolean autoDeploy) {
         this.autoDeploy = autoDeploy;
     }
 
+    /**
+     * <p>Getter for the field <code>liveDeploy</code>.</p>
+     *
+     * @return a boolean
+     */
     public boolean getLiveDeploy() {
         return liveDeploy;
     }
 
+    /** {@inheritDoc} */
     public void setLiveDeploy(boolean liveDeploy) {
         this.liveDeploy = liveDeploy;
     }
 
+    /**
+     * <p>Getter for the field <code>startChildren</code>.</p>
+     *
+     * @return a boolean
+     */
     public boolean getStartChildren() {
         return startChildren;
     }
 
+    /** {@inheritDoc} */
     public void setStartChildren(boolean startChildren) {
         this.startChildren = startChildren;
     }
 
+    /**
+     * <p>Getter for the field <code>unpackWARs</code>.</p>
+     *
+     * @return a boolean
+     */
     public boolean getUnpackWARs() {
         return unpackWARs;
     }
 
+    /** {@inheritDoc} */
     public void setUnpackWARs(boolean unpackWARs) {
         this.unpackWARs = unpackWARs;
     }
 
+    /**
+     * <p>Getter for the field <code>defaultApplicationContextId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getDefaultApplicationContextId() {
         return defaultApplicationContextId;
     }
 
+    /**
+     * <p>Setter for the field <code>defaultApplicationContextId</code>.</p>
+     *
+     * @param defaultApplicationContextId a {@link java.lang.String} object
+     */
     public void setDefaultApplicationContextId(String defaultApplicationContextId) {
         this.defaultApplicationContextId = defaultApplicationContextId;
     }
 
+    /**
+     * <p>registerJMX.</p>
+     */
     protected void registerJMX() {
         // register with jmx
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -523,6 +573,9 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
         }
     }
 
+    /**
+     * <p>unregisterJMX.</p>
+     */
     protected void unregisterJMX() {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         try {

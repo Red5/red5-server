@@ -11,10 +11,17 @@ import javax.management.MXBean;
 
 /**
  * Red5 shutdown hook
+ *
+ * @author mondain
  */
 @MXBean
 public interface ShutdownMXBean {
 
+    /**
+     * <p>destroy.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void destroy() throws Exception;
 
 }

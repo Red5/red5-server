@@ -34,10 +34,16 @@ public class StatisticsService implements IStatisticsService {
 
     private IScope globalScope;
 
+    /**
+     * <p>Setter for the field <code>globalScope</code>.</p>
+     *
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
+     */
     public void setGlobalScope(IScope scope) {
         globalScope = scope;
     }
 
+    /** {@inheritDoc} */
     public ISharedObject getScopeStatisticsSO(IScope scope) {
         ISharedObjectService soService = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, false);
         return soService.getSharedObject(scope, SCOPE_STATS_SO_NAME, false);
@@ -58,21 +64,29 @@ public class StatisticsService implements IStatisticsService {
         return scope;
     }
 
+    /**
+     * <p>getScopes.</p>
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getScopes() {
         return getScopes(null);
     }
 
+    /** {@inheritDoc} */
     public Set<String> getScopes(String path) throws ScopeNotFoundException {
         IScope scope = getScope(path);
         Set<String> result = scope.getScopeNames();
         return result;
     }
 
+    /** {@inheritDoc} */
     public ISharedObject getSharedObjectStatisticsSO(IScope scope) {
         ISharedObjectService soService = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, false);
         return soService.getSharedObject(scope, SO_STATS_SO_NAME, false);
     }
 
+    /** {@inheritDoc} */
     public Set<ISharedObjectStatistics> getSharedObjects(String path) {
         IScope scope = getScope(path);
         ISharedObjectService soService = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, false);
@@ -84,12 +98,14 @@ public class StatisticsService implements IStatisticsService {
         return result;
     }
 
+    /** {@inheritDoc} */
     public void updateScopeStatistics(String path) throws ScopeNotFoundException {
         IScope scope = getScope(path);
         ISharedObject so = getScopeStatisticsSO(Red5.getConnectionLocal().getScope());
         so.setAttribute(path, scope.getAttributes());
     }
 
+    /** {@inheritDoc} */
     public void updateSharedObjectStatistics(String path, String name) throws ScopeNotFoundException, SharedObjectException {
         IScope scope = getScope(path);
         ISharedObjectService soService = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, false);

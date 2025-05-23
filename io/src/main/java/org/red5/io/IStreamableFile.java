@@ -11,6 +11,8 @@ import java.io.IOException;
 
 /**
  * Interface represents streamable file with tag reader and writers (one for plain mode and one for append)
+ *
+ * @author mondain
  */
 public interface IStreamableFile {
 

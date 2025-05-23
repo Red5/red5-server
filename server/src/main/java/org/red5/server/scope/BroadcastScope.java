@@ -27,6 +27,8 @@ import org.red5.server.stream.IProviderService;
 
 /**
  * Scope type for publishing that deals with pipe connection events, like async message listening in JMS
+ *
+ * @author mondain
  */
 public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipeConnectionListener {
 
@@ -65,10 +67,9 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
     }
 
     /**
-     * Register pipe connection event listener with this scope's pipe. A listener that wants to listen to events when provider/consumer connects to or disconnects from a specific pipe.
+     * {@inheritDoc}
      *
-     * @param listener
-     *            Pipe connection event listener
+     * Register pipe connection event listener with this scope's pipe. A listener that wants to listen to events when provider/consumer connects to or disconnects from a specific pipe.
      * @see org.red5.server.messaging.IPipeConnectionListener
      */
     public void addPipeConnectionListener(IPipeConnectionListener listener) {
@@ -76,10 +77,9 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
     }
 
     /**
-     * Unregisters pipe connection event listener with this scope's pipe
+     * {@inheritDoc}
      *
-     * @param listener
-     *            Pipe connection event listener
+     * Unregisters pipe connection event listener with this scope's pipe
      * @see org.red5.server.messaging.IPipeConnectionListener
      */
     public void removePipeConnectionListener(IPipeConnectionListener listener) {
@@ -97,11 +97,9 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
     }
 
     /**
-     * Pull message with timeout
+     * {@inheritDoc}
      *
-     * @param wait
-     *            Timeout
-     * @return Message object
+     * Pull message with timeout
      * @see org.red5.server.messaging.IMessage
      */
     public IMessage pullMessage(long wait) {
@@ -109,24 +107,18 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
     }
 
     /**
-     * Connect scope's pipe to given consumer
+     * {@inheritDoc}
      *
-     * @param consumer
-     *            Consumer
-     * @param paramMap
-     *            Parameters passed with connection
-     * @return true on success, false otherwise
+     * Connect scope's pipe to given consumer
      */
     public boolean subscribe(IConsumer consumer, Map<String, Object> paramMap) {
         return !removed && pipe.subscribe(consumer, paramMap);
     }
 
     /**
-     * Disconnects scope's pipe from given consumer
+     * {@inheritDoc}
      *
-     * @param consumer
-     *            Consumer
-     * @return true on success, false otherwise
+     * Disconnects scope's pipe from given consumer
      */
     public boolean unsubscribe(IConsumer consumer) {
         return pipe.unsubscribe(consumer);
@@ -142,48 +134,36 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
     }
 
     /**
-     * Send out-of-band ("special") control message
+     * {@inheritDoc}
      *
-     * @param consumer
-     *            Consumer, may be used in concrete implementations
-     * @param oobCtrlMsg
-     *            Out-of-band control message
+     * Send out-of-band ("special") control message
      */
     public void sendOOBControlMessage(IConsumer consumer, OOBControlMessage oobCtrlMsg) {
         pipe.sendOOBControlMessage(consumer, oobCtrlMsg);
     }
 
     /**
-     * Push a message to this output endpoint. May block the pusher when output can't handle the message at the time.
+     * {@inheritDoc}
      *
-     * @param message
-     *            Message to be pushed
-     * @throws IOException
-     *             If message could not be pushed
+     * Push a message to this output endpoint. May block the pusher when output can't handle the message at the time.
      */
     public void pushMessage(IMessage message) throws IOException {
         pipe.pushMessage(message);
     }
 
     /**
-     * Connect scope's pipe with given provider
+     * {@inheritDoc}
      *
-     * @param provider
-     *            Provider
-     * @param paramMap
-     *            Parameters passed on connection
-     * @return true on success, false otherwise
+     * Connect scope's pipe with given provider
      */
     public boolean subscribe(IProvider provider, Map<String, Object> paramMap) {
         return !removed && pipe.subscribe(provider, paramMap);
     }
 
     /**
-     * Disconnects scope's pipe from given provider
+     * {@inheritDoc}
      *
-     * @param provider
-     *            Provider
-     * @return true on success, false otherwise
+     * Disconnects scope's pipe from given provider
      */
     public boolean unsubscribe(IProvider provider) {
         return pipe.unsubscribe(provider);
@@ -199,22 +179,18 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
     }
 
     /**
-     * Send out-of-band ("special") control message
+     * {@inheritDoc}
      *
-     * @param provider
-     *            Provider, may be used in concrete implementations
-     * @param oobCtrlMsg
-     *            Out-of-band control message
+     * Send out-of-band ("special") control message
      */
     public void sendOOBControlMessage(IProvider provider, OOBControlMessage oobCtrlMsg) {
         pipe.sendOOBControlMessage(provider, oobCtrlMsg);
     }
 
     /**
-     * Pipe connection event handler
+     * {@inheritDoc}
      *
-     * @param event
-     *            Pipe connection event
+     * Pipe connection event handler
      */
     public void onPipeConnectionEvent(PipeConnectionEvent event) {
         // Switch event type
@@ -245,16 +221,17 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
 
     /**
      * Returns the client broadcast stream
+     *
+     * @return a {@link org.red5.server.api.stream.IClientBroadcastStream} object
      */
     public IClientBroadcastStream getClientBroadcastStream() {
         return clientBroadcastStream;
     }
 
     /**
-     * Sets the client broadcast stream
+     * {@inheritDoc}
      *
-     * @param clientBroadcastStream
-     *            stream
+     * Sets the client broadcast stream
      */
     public void setClientBroadcastStream(IClientBroadcastStream clientBroadcastStream) {
         if (this.clientBroadcastStream != null) {
@@ -271,6 +248,7 @@ public class BroadcastScope extends BasicScope implements IBroadcastScope, IPipe
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "BroadcastScope [clientBroadcastStream=" + clientBroadcastStream + ", compCounter=" + compCounter + ", removed=" + removed + "]";

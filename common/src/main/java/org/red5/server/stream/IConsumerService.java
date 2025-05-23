@@ -12,8 +12,11 @@ import org.red5.server.messaging.IMessageOutput;
 
 /**
  * Service for consumer objects, used to get pushed messages at consumer endpoint.
+ *
+ * @author mondain
  */
 public interface IConsumerService {
+    /** Constant <code>KEY="consumerService"</code> */
     public static final String KEY = "consumerService";
 
     /**

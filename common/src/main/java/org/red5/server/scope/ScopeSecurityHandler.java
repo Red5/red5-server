@@ -26,22 +26,34 @@ public class ScopeSecurityHandler implements IScopeSecurityHandler {
 
     protected boolean scopeAllowed = true;
 
+    /** {@inheritDoc} */
     @Override
     public boolean allowed(IConnection conn) {
         log.debug("Allowing: {} connection: {}", connectionAllowed, conn);
         return connectionAllowed;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean allowed(IScope scope) {
         log.debug("Allowing: {} scope: {}", scopeAllowed, scope);
         return scopeAllowed;
     }
 
+    /**
+     * <p>Setter for the field <code>connectionAllowed</code>.</p>
+     *
+     * @param connectionAllowed a boolean
+     */
     public void setConnectionAllowed(boolean connectionAllowed) {
         this.connectionAllowed = connectionAllowed;
     }
 
+    /**
+     * <p>Setter for the field <code>scopeAllowed</code>.</p>
+     *
+     * @param scopeAllowed a boolean
+     */
     public void setScopeAllowed(boolean scopeAllowed) {
         this.scopeAllowed = scopeAllowed;
     }

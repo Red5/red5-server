@@ -112,11 +112,9 @@ public interface IAttributeStore extends AttributeStoreMXBean {
     public Object getAttribute(String name, Object defaultValue);
 
     /**
-     * Check the object has an attribute.
+     * {@inheritDoc}
      *
-     * @param name
-     *            the name of the attribute to check
-     * @return true if the attribute exists otherwise false
+     * Check the object has an attribute.
      */
     public boolean hasAttribute(String name);
 
@@ -130,11 +128,9 @@ public interface IAttributeStore extends AttributeStoreMXBean {
     boolean hasAttribute(Enum<?> enm);
 
     /**
-     * Remove an attribute.
+     * {@inheritDoc}
      *
-     * @param name
-     *            the name of the attribute to remove
-     * @return true if the attribute was found and removed otherwise false
+     * Remove an attribute.
      */
     public boolean removeAttribute(String name);
 

@@ -258,10 +258,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     /**
-     * Dispatches event
+     * {@inheritDoc}
      *
-     * @param event
-     *            Event to dispatch
+     * Dispatches event
      */
     @SuppressWarnings("null")
     public void dispatchEvent(IEvent event) {
@@ -405,22 +404,38 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getActiveSubscribers() {
         return subscriberStats.getCurrent();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a long
+     */
     public long getBytesReceived() {
         return bytesReceived;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getCurrentTimestamp() {
         return (int) latestTimeStamp;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getMaxSubscribers() {
         return subscriberStats.getMax();
     }
@@ -435,10 +450,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     /**
-     * Setter for stream published name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Name that used for publishing. Set at client side when begin to broadcast with NetStream#publish.
+     * Setter for stream published name
      */
     public void setPublishedName(String name) {
         log.debug("setPublishedName: {}", name);
@@ -463,12 +477,20 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         this.parameters = params;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, String> getParameters() {
         return parameters;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getSaveFilename() {
         if (recordingListener != null) {
             return recordingListener.get().getFileName();
@@ -476,17 +498,27 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.statistics.IClientBroadcastStreamStatistics} object
+     */
     public IClientBroadcastStreamStatistics getStatistics() {
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTotalSubscribers() {
         return subscriberStats.getTotal();
     }
 
     /**
+     * <p>isAutomaticRecording.</p>
+     *
      * @return the automaticRecording
      */
     public boolean isAutomaticRecording() {
@@ -494,6 +526,8 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     /**
+     * <p>Setter for the field <code>automaticRecording</code>.</p>
+     *
      * @param automaticRecording
      *            the automaticRecording to set
      */
@@ -502,6 +536,8 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     /**
+     * <p>Setter for the field <code>registerJMX</code>.</p>
+     *
      * @param registerJMX
      *            the registerJMX to set
      */
@@ -591,14 +627,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     /**
-     * Out-of-band control message handler
+     * {@inheritDoc}
      *
-     * @param source
-     *            OOB message source
-     * @param pipe
-     *            Pipe that used to send OOB message
-     * @param oobCtrlMsg
-     *            Out-of-band control message
+     * Out-of-band control message handler
      */
     public void onOOBControlMessage(IMessageComponent source, IPipe pipe, OOBControlMessage oobCtrlMsg) {
         String target = oobCtrlMsg.getTarget();
@@ -616,10 +647,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     /**
-     * Pipe connection event handler
+     * {@inheritDoc}
      *
-     * @param event
-     *            Pipe connection event
+     * Pipe connection event handler
      */
     @SuppressWarnings("unused")
     public void onPipeConnectionEvent(PipeConnectionEvent event) {
@@ -663,25 +693,17 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     }
 
     /**
-     * Currently not implemented
+     * {@inheritDoc}
      *
-     * @param pipe
-     *            Pipe
-     * @param message
-     *            Message
+     * Currently not implemented
      */
     public void pushMessage(IPipe pipe, IMessage message) {
     }
 
     /**
-     * Save broadcasted stream.
+     * {@inheritDoc}
      *
-     * @param name
-     *            Stream name
-     * @param isAppend
-     *            Append mode
-     * @throws IOException
-     *             File could not be created/written to
+     * Save broadcasted stream.
      */
     public void saveAs(String name, boolean isAppend) throws IOException {
         //log.debug("SaveAs - name: {} append: {}", name, isAppend);
@@ -785,6 +807,8 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
 
     /**
      * Sends record failed notifications
+     *
+     * @param reason a {@link java.lang.String} object
      */
     protected void sendRecordFailedNotify(String reason) {
         Status failedStatus = new Status(StatusCodes.NS_RECORD_FAILED);
@@ -842,6 +866,11 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         }
     }
 
+    /**
+     * <p>sendStartNotifications.</p>
+     *
+     * @param source a {@link org.red5.server.api.event.IEventListener} object
+     */
     protected void sendStartNotifications(IEventListener source) {
         if (sendStartNotification) {
             // notify handler that stream starts recording/publishing
@@ -903,7 +932,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         setState(StreamState.STARTED);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void startPublishing() {
         // We send the start messages before the first packet is received.
         // This is required so FME actually starts publishing.
@@ -919,7 +950,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void stop() {
         //log.info("Stream stop: {}", publishedName);
         setState(StreamState.STOPPED);
@@ -945,6 +978,11 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         }
     }
 
+    /**
+     * <p>isRecording.</p>
+     *
+     * @return a boolean
+     */
     public boolean isRecording() {
         return recordingListener != null && recordingListener.get().isRecording();
     }
@@ -954,7 +992,11 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         listeners.add(listener);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Collection} object
+     */
     public Collection<IStreamListener> getStreamListeners() {
         return listeners;
     }
@@ -977,6 +1019,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         return RecordingListener.getRecordFile(scope, name);
     }
 
+    /**
+     * <p>registerJMX.</p>
+     */
     protected void registerJMX() {
         if (registerJMX && StringUtils.isNotEmpty(publishedName) && !"false".equals(publishedName)) {
             // register with jmx
@@ -993,6 +1038,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         }
     }
 
+    /**
+     * <p>unregisterJMX.</p>
+     */
     protected void unregisterJMX() {
         if (registerJMX) {
             if (StringUtils.isNotEmpty(publishedName) && !"false".equals(publishedName)) {
@@ -1008,6 +1056,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addAlias(String alias) {
         log.debug("Adding alias: {}", alias);
@@ -1021,6 +1070,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean hasAlias() {
         if (aliases != null && !aliases.isEmpty()) {
@@ -1029,6 +1079,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getAlias() {
         String alias = null;
@@ -1045,6 +1096,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         return alias;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean containsAlias(String alias) {
         if (aliases != null && !aliases.isEmpty()) {
@@ -1053,6 +1105,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Set<String> getAliases() {
         if (aliases != null) {
@@ -1061,6 +1114,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         return Collections.emptySet();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setNameAlias(String nameAlias) {
         // remove any existing registration
@@ -1073,11 +1127,13 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         this.nameAlias = nameAlias;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNameAlias() {
         return nameAlias;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean aliasRegistered(String alias) {
         return localAliases.contains(alias);

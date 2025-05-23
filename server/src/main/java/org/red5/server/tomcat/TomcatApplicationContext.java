@@ -27,6 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class TomcatApplicationContext implements IApplicationContext {
 
+    /** Constant <code>log</code> */
     protected static Logger log = Red5LoggerFactory.getLogger(TomcatApplicationContext.class);
 
     /** Store a reference to the Tomcat webapp context. */
@@ -35,7 +36,7 @@ public class TomcatApplicationContext implements IApplicationContext {
     /**
      * Wrap the passed Tomcat webapp context.
      *
-     * @param context
+     * @param context a {@link org.apache.catalina.Context} object
      */
     protected TomcatApplicationContext(Context context) {
         log.debug("new context: {}", context);

@@ -200,14 +200,9 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
-     * Push message through pipe
+     * {@inheritDoc}
      *
-     * @param pipe
-     *            Pipe
-     * @param message
-     *            Message to push
-     * @throws IOException
-     *             if message could not be written
+     * Push message through pipe
      */
     @SuppressWarnings("rawtypes")
     public void pushMessage(IPipe pipe, IMessage message) throws IOException {
@@ -384,23 +379,17 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
-     * Out-of-band control message handler
+     * {@inheritDoc}
      *
-     * @param source
-     *            Source of message
-     * @param pipe
-     *            Pipe that is used to transmit OOB message
-     * @param oobCtrlMsg
-     *            OOB control message
+     * Out-of-band control message handler
      */
     public void onOOBControlMessage(IMessageComponent source, IPipe pipe, OOBControlMessage oobCtrlMsg) {
     }
 
     /**
-     * Pipe connection event handler
+     * {@inheritDoc}
      *
-     * @param event
-     *            Pipe connection event
+     * Pipe connection event handler
      */
     @SuppressWarnings("incomplete-switch")
     public void onPipeConnectionEvent(PipeConnectionEvent event) {
@@ -690,10 +679,9 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
-     * Sets a video decoder configuration; some codecs require this, such as AVC.
+     * {@inheritDoc}
      *
-     * @param decoderConfig
-     *            video codec configuration
+     * Sets a video decoder configuration; some codecs require this, such as AVC.
      */
     public void setVideoDecoderConfiguration(IRTMPEvent decoderConfig) {
         if (decoderConfig instanceof IStreamData) {
@@ -703,10 +691,9 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
-     * Sets a audio decoder configuration; some codecs require this, such as AAC.
+     * {@inheritDoc}
      *
-     * @param decoderConfig
-     *            audio codec configuration
+     * Sets a audio decoder configuration; some codecs require this, such as AAC.
      */
     public void setAudioDecoderConfiguration(IRTMPEvent decoderConfig) {
         if (decoderConfig instanceof IStreamData) {
@@ -794,6 +781,8 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
+     * <p>Getter for the field <code>schedulerThreadSize</code>.</p>
+     *
      * @return the schedulerThreadSize
      */
     public int getSchedulerThreadSize() {
@@ -801,6 +790,8 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
+     * <p>Setter for the field <code>schedulerThreadSize</code>.</p>
+     *
      * @param schedulerThreadSize
      *            the schedulerThreadSize to set
      */
@@ -818,6 +809,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
         this.mode = mode;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() throws Exception {
         if (scheduledExecutorService != null) {

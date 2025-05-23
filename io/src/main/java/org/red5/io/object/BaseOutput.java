@@ -63,7 +63,6 @@ public class BaseOutput {
 
     /**
      * BaseOutput Constructor
-     *
      */
     protected BaseOutput() {
         refMap = new HashMap<>();

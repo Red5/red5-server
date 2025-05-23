@@ -216,7 +216,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      *
      * @param f
      *            File input stream
-     * @throws IOException
+     * @throws java.io.IOException
      *             on IO exception
      */
     @SuppressWarnings("null")
@@ -243,6 +243,8 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
 
     /**
      * This handles the moov atom being at the beginning or end of the file, so the mdat may also be before or after the moov atom.
+     *
+     * @param dataSource a {@link org.jcodec.common.io.SeekableByteChannel} object
      */
     public void parseMovie(SeekableByteChannel dataSource) {
         try {
@@ -727,9 +729,9 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     }
 
     /**
-     * Get the total readable bytes in a file or IoBuffer.
+     * {@inheritDoc}
      *
-     * @return Total readable bytes
+     * Get the total readable bytes in a file or IoBuffer.
      */
     @Override
     public long getTotalBytes() {
@@ -761,27 +763,21 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         return hasVideo;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public IStreamableFile getFile() {
         // TODO wondering if we need to have a reference
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int getOffset() {
         // XXX what's the difference from getBytesRead
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public long getBytesRead() {
         // XXX should summarize the total bytes read or
@@ -795,17 +791,25 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         return duration;
     }
 
+    /**
+     * <p>Getter for the field <code>videoCodecId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getVideoCodecId() {
         return videoCodecId;
     }
 
+    /**
+     * <p>Getter for the field <code>audioCodecId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getAudioCodecId() {
         return audioCodecId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasMoreTags() {
         return currentFrame < frames.size();
@@ -1000,6 +1004,8 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Packages media data for return to providers
      */
     @Override
@@ -1285,10 +1291,9 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     }
 
     /**
-     * Put the current position to pos. The caller must ensure the pos is a valid one.
+     * {@inheritDoc}
      *
-     * @param pos
-     *            position to move to in file / channel
+     * Put the current position to pos. The caller must ensure the pos is a valid one.
      */
     @Override
     public void position(long pos) {
@@ -1318,9 +1323,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         log.debug("Setting current frame: {}", currentFrame);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void close() {
         log.debug("Close");
@@ -1338,18 +1341,34 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         }
     }
 
+    /**
+     * <p>Setter for the field <code>videoCodecId</code>.</p>
+     *
+     * @param videoCodecId a {@link java.lang.String} object
+     */
     public void setVideoCodecId(String videoCodecId) {
         this.videoCodecId = videoCodecId;
     }
 
+    /**
+     * <p>Setter for the field <code>audioCodecId</code>.</p>
+     *
+     * @param audioCodecId a {@link java.lang.String} object
+     */
     public void setAudioCodecId(String audioCodecId) {
         this.audioCodecId = audioCodecId;
     }
 
+    /**
+     * <p>readTagHeader.</p>
+     *
+     * @return a {@link org.red5.io.ITag} object
+     */
     public ITag readTagHeader() {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public KeyFrameMeta analyzeKeyFrames() {
         KeyFrameMeta result = new KeyFrameMeta();

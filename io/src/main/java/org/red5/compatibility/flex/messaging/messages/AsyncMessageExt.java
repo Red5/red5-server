@@ -21,21 +21,40 @@ public class AsyncMessageExt extends AsyncMessage implements IExternalizable {
 
     private AsyncMessage message;
 
+    /**
+     * <p>Constructor for AsyncMessageExt.</p>
+     */
     public AsyncMessageExt() {
     }
 
+    /**
+     * <p>Constructor for AsyncMessageExt.</p>
+     *
+     * @param message a {@link org.red5.compatibility.flex.messaging.messages.AsyncMessage} object
+     */
     public AsyncMessageExt(AsyncMessage message) {
         this.setMessage(message);
     }
 
+    /**
+     * <p>Setter for the field <code>message</code>.</p>
+     *
+     * @param message a {@link org.red5.compatibility.flex.messaging.messages.AsyncMessage} object
+     */
     public void setMessage(AsyncMessage message) {
         this.message = message;
     }
 
+    /**
+     * <p>Getter for the field <code>message</code>.</p>
+     *
+     * @return a {@link org.red5.compatibility.flex.messaging.messages.AsyncMessage} object
+     */
     public AsyncMessage getMessage() {
         return message;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput output) {
         if (this.message != null) {

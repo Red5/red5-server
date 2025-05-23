@@ -47,6 +47,7 @@ public class LoggerContextFilter implements Filter {
 
     private String contextName;
 
+    /** {@inheritDoc} */
     public void init(FilterConfig config) throws ServletException {
         ServletContext servletContext = config.getServletContext();
         contextName = servletContext.getContextPath().replaceAll("/", "");
@@ -60,6 +61,7 @@ public class LoggerContextFilter implements Filter {
         }
     }
 
+    /** {@inheritDoc} */
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         LoggerContext context = (LoggerContext) request.getServletContext().getAttribute(Red5LoggerFactory.LOGGER_CONTEXT_ATTRIBUTE);
         // get the selector
@@ -75,6 +77,9 @@ public class LoggerContextFilter implements Filter {
         ((LoggingContextSelector) selector).removeLocalContext();
     }
 
+    /**
+     * <p>destroy.</p>
+     */
     public void destroy() {
     }
 }

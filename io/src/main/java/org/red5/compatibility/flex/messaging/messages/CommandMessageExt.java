@@ -21,13 +21,22 @@ public class CommandMessageExt extends CommandMessage implements IExternalizable
 
     private CommandMessage message;
 
+    /**
+     * <p>Constructor for CommandMessageExt.</p>
+     */
     public CommandMessageExt() {
     }
 
+    /**
+     * <p>Constructor for CommandMessageExt.</p>
+     *
+     * @param message a {@link org.red5.compatibility.flex.messaging.messages.CommandMessage} object
+     */
     public CommandMessageExt(CommandMessage message) {
         this.message = message;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         if (this.message != null) {

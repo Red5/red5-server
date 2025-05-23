@@ -34,22 +34,31 @@ public class OBUParser {
 
     private static final Set<Integer> VALID_OBU_TYPES = Set.of(SEQUENCE_HEADER.getValue(), TEMPORAL_DELIMITER.getValue(), FRAME_HEADER.getValue(), TILE_GROUP.getValue(), METADATA.getValue(), FRAME.getValue(), REDUNDANT_FRAME_HEADER.getValue(), TILE_LIST.getValue(), PADDING.getValue());
 
+    /** Constant <code>OBU_START_FRAGMENT_BIT=(byte) 0b1000_0000</code> */
     public static final byte OBU_START_FRAGMENT_BIT = (byte) 0b1000_0000; // 0b1'0000'000
 
+    /** Constant <code>OBU_END_FRAGMENT_BIT=0b0100_0000</code> */
     public static final byte OBU_END_FRAGMENT_BIT = 0b0100_0000;
 
+    /** Constant <code>OBU_START_SEQUENCE_BIT=0b0000_1000</code> */
     public static final byte OBU_START_SEQUENCE_BIT = 0b0000_1000;
 
+    /** Constant <code>OBU_COUNT_MASK=0b0011_0000</code> */
     public static final byte OBU_COUNT_MASK = 0b0011_0000;
 
+    /** Constant <code>OBU_TYPE_MASK=0b0111_1000</code> */
     public static final byte OBU_TYPE_MASK = 0b0111_1000;
 
+    /** Constant <code>OBU_SIZE_PRESENT_BIT=0b0000_0010</code> */
     public static final byte OBU_SIZE_PRESENT_BIT = 0b0000_0010; // 0b0'0000'010
 
+    /** Constant <code>OBU_EXT_BIT=0b0000_0100</code> */
     public static final byte OBU_EXT_BIT = 0b0000_0100; // 0b0'0000'100
 
+    /** Constant <code>OBU_EXT_S1T1_BIT=0b0010_1000</code> */
     public static final byte OBU_EXT_S1T1_BIT = 0b0010_1000; // 0b001'01'000
 
+    /** Constant <code>OBU_TYPE_SHIFT=3</code> */
     public static final byte OBU_TYPE_SHIFT = 3;
 
     // constexpr uint8_t kAv1ObuTypeSequenceHeader = 1 << 3;
@@ -83,6 +92,15 @@ public class OBUParser {
     * Returns:
     *     0 on success, -1 on error.
     */
+    /**
+     * <p>getNextObu.</p>
+     *
+     * @param buf an array of {@link byte} objects
+     * @param offset a int
+     * @param bufSize a int
+     * @return a {@link org.red5.io.obu.OBUInfo} object
+     * @throws org.red5.io.obu.OBUParseException if any.
+     */
     public static OBUInfo getNextObu(byte[] buf, int offset, int bufSize) throws OBUParseException {
         log.trace("getNextObu - buffer length: {} size: {} offset: {}", buf.length, bufSize, offset);
         if (bufSize < 1) {
@@ -143,6 +161,14 @@ public class OBUParser {
      *
      * Returns:
      *     0 on success, -1 on error.
+     */
+    /**
+     * <p>parseSequenceHeader.</p>
+     *
+     * @param buf an array of {@link byte} objects
+     * @param bufSize a int
+     * @return a {@link org.red5.io.obu.OBPSequenceHeader} object
+     * @throws org.red5.io.obu.OBUParseException if any.
      */
     public static OBPSequenceHeader parseSequenceHeader(byte[] buf, int bufSize) throws OBUParseException {
         BitReader br = new BitReader(buf, bufSize);
@@ -923,6 +949,20 @@ public class OBUParser {
      * Returns:
      *     0 on success, -1 on error.
      */
+    /**
+     * <p>parseFrame.</p>
+     *
+     * @param buf an array of {@link byte} objects
+     * @param bufSize a int
+     * @param seq a {@link org.red5.io.obu.OBPSequenceHeader} object
+     * @param state a {@link org.red5.io.obu.OBPState} object
+     * @param temporalId a int
+     * @param spatialId a int
+     * @param fh a {@link org.red5.io.obu.OBPFrameHeader} object
+     * @param tileGroup a {@link org.red5.io.obu.OBPTileGroup} object
+     * @param SeenFrameHeader a {@link java.util.concurrent.atomic.AtomicBoolean} object
+     * @throws org.red5.io.obu.OBUParseException if any.
+     */
     public static void parseFrame(byte[] buf, int bufSize, OBPSequenceHeader seq, OBPState state, int temporalId, int spatialId, OBPFrameHeader fh, OBPTileGroup tileGroup, AtomicBoolean SeenFrameHeader) throws OBUParseException {
         int startBitPos = 0, endBitPos, headerBytes;
         int ret = parseFrameHeader(buf, bufSize, seq, state, temporalId, spatialId, fh, SeenFrameHeader);
@@ -1013,6 +1053,14 @@ public class OBUParser {
     * Returns:
     *     0 on success, -1 on error.
     */
+    /**
+     * <p>parseMetadata.</p>
+     *
+     * @param buf an array of {@link byte} objects
+     * @param bufSize a int
+     * @return a {@link org.red5.io.obu.OBPMetadata} object
+     * @throws org.red5.io.obu.OBUParseException if any.
+     */
     public static OBPMetadata parseMetadata(byte[] buf, int bufSize) throws OBUParseException {
         OBPMetadata metadata = new OBPMetadata();
         int consumed;
@@ -1119,6 +1167,14 @@ public class OBUParser {
     * Returns:
     *     0 on success, -1 on error.
     */
+    /**
+     * <p>parseTileList.</p>
+     *
+     * @param buf an array of {@link byte} objects
+     * @param bufSize a long
+     * @return a {@link org.red5.io.obu.OBPTileList} object
+     * @throws org.red5.io.obu.OBUParseException if any.
+     */
     public static OBPTileList parseTileList(byte[] buf, long bufSize) throws OBUParseException {
         OBPTileList tileList = new OBPTileList();
         int pos = 0;
@@ -2005,7 +2061,7 @@ public class OBUParser {
      * first OBU element is an OBU fragment that is a continuation of an OBU fragment from the previous packet, and
      * MUST be set to 0 otherwise.
      *
-     * @param aggregationHeader
+     * @param aggregationHeader a byte
      * @return true if the given byte starts a fragment
      */
     public static boolean startsWithFragment(byte aggregationHeader) {
@@ -2016,7 +2072,7 @@ public class OBUParser {
      * Returns true if the given byte ends a fragment. This is denoted as Y in the spec: MUST be set to 1 if the last
      * OBU element is an OBU fragment that will continue in the next packet, and MUST be set to 0 otherwise.
      *
-     * @param aggregationHeader
+     * @param aggregationHeader a byte
      * @return true if the given byte ends a fragment
      */
     public static boolean endsWithFragment(byte aggregationHeader) {
@@ -2027,7 +2083,7 @@ public class OBUParser {
      * Returns true if the given byte is the starts a new sequence. This denoted as N in the spec: MUST be set to 1 if
      * the packet is the first packet of a coded video sequence, and MUST be set to 0 otherwise.
      *
-     * @param aggregationHeader
+     * @param aggregationHeader a byte
      * @return true if the given byte starts a new sequence
      */
     public static boolean startsNewCodedVideoSequence(byte aggregationHeader) {
@@ -2037,7 +2093,7 @@ public class OBUParser {
     /**
      * Returns expected number of OBU's.
      *
-     * @param aggregationHeader
+     * @param aggregationHeader a byte
      * @return expected number of OBU's
      */
     public static int obuCount(byte aggregationHeader) {
@@ -2047,7 +2103,7 @@ public class OBUParser {
     /**
      * Returns the OBU type from the given byte.
      *
-     * @param obuHeader
+     * @param obuHeader a byte
      * @return the OBU type
      */
     public static int obuType(byte obuHeader) {
@@ -2057,7 +2113,7 @@ public class OBUParser {
     /**
      * Returns whether or not the OBU has an extension.
      *
-     * @param obuHeader
+     * @param obuHeader a byte
      * @return true if the OBU has an extension
      */
     public static boolean obuHasExtension(byte obuHeader) {
@@ -2067,7 +2123,7 @@ public class OBUParser {
     /**
      * Returns whether or not the OBU has a size.
      *
-     * @param obuHeader
+     * @param obuHeader a byte
      * @return true if the OBU has a size
      */
     public static boolean obuHasSize(byte obuHeader) {

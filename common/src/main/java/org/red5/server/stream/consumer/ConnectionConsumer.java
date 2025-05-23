@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMP connection consumer.
+ *
+ * @author mondain
  */
 public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionListener {
 

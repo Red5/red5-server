@@ -13,6 +13,8 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 
 /**
  * RTMP message
+ *
+ * @author mondain
  */
 public class RTMPMessage extends AbstractMessage {
 

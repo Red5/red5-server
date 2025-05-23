@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class CacheImpl implements ICacheStore, ApplicationContextAware {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(CacheImpl.class);
 
     private static volatile CacheImpl instance;
@@ -91,6 +92,9 @@ public class CacheImpl implements ICacheStore, ApplicationContextAware {
         return instance;
     }
 
+    /**
+     * <p>init.</p>
+     */
     public void init() {
         log.info("Loading generic object cache");
         log.debug("Appcontext: {}", applicationContext.toString());
@@ -108,6 +112,13 @@ public class CacheImpl implements ICacheStore, ApplicationContextAware {
         return Collections.unmodifiableCollection(CACHE.values()).iterator();
     }
 
+    /**
+     * <p>offer.</p>
+     *
+     * @param key a {@link java.lang.String} object
+     * @param obj a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @return a boolean
+     */
     public boolean offer(String key, IoBuffer obj) {
         return offer(key, new CacheableImpl(obj));
     }
@@ -160,6 +171,12 @@ public class CacheImpl implements ICacheStore, ApplicationContextAware {
         }
     }
 
+    /**
+     * <p>put.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param obj a {@link org.red5.cache.ICacheable} object
+     */
     protected void put(String name, ICacheable obj) {
         // set the objects name
         obj.setName(name);

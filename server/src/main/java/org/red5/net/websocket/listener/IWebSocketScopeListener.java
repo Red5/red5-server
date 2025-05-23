@@ -10,16 +10,48 @@ package org.red5.net.websocket.listener;
 import org.red5.net.websocket.WebSocketConnection;
 import org.red5.net.websocket.WebSocketScope;
 
+/**
+ * <p>IWebSocketScopeListener interface.</p>
+ *
+ * @author mondain
+ */
 public interface IWebSocketScopeListener {
 
+    /**
+     * <p>scopeCreated.</p>
+     *
+     * @param wsScope a {@link org.red5.net.websocket.WebSocketScope} object
+     */
     void scopeCreated(WebSocketScope wsScope);
 
+    /**
+     * <p>scopeAdded.</p>
+     *
+     * @param wsScope a {@link org.red5.net.websocket.WebSocketScope} object
+     */
     void scopeAdded(WebSocketScope wsScope);
 
+    /**
+     * <p>scopeRemoved.</p>
+     *
+     * @param wsScope a {@link org.red5.net.websocket.WebSocketScope} object
+     */
     void scopeRemoved(WebSocketScope wsScope);
 
+    /**
+     * <p>connectionAdded.</p>
+     *
+     * @param wsScope a {@link org.red5.net.websocket.WebSocketScope} object
+     * @param wsConn a {@link org.red5.net.websocket.WebSocketConnection} object
+     */
     void connectionAdded(WebSocketScope wsScope, WebSocketConnection wsConn);
 
+    /**
+     * <p>connectionRemoved.</p>
+     *
+     * @param wsScope a {@link org.red5.net.websocket.WebSocketScope} object
+     * @param wsConn a {@link org.red5.net.websocket.WebSocketConnection} object
+     */
     void connectionRemoved(WebSocketScope wsScope, WebSocketConnection wsConn);
 
     /**

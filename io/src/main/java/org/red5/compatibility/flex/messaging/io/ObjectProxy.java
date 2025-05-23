@@ -37,7 +37,9 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
     /** The proxied object. */
     private Map<T, V> item;
 
-    /** Create new empty proxy. */
+    /**
+     * Create new empty proxy.
+     */
     public ObjectProxy() {
         this(new HashMap<T, V>());
     }
@@ -66,78 +68,76 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
     }
 
     /**
-     * Return string representation of the proxied object.
+     * {@inheritDoc}
      *
-     * @return string
+     * Return string representation of the proxied object.
      */
     @Override
     public String toString() {
         return item.toString();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void clear() {
         item.clear();
     }
 
     /**
-     * Check if proxied object has a given property.
+     * {@inheritDoc}
      *
-     * @param name
-     *            name
-     * @return boolean
+     * Check if proxied object has a given property.
      */
     @Override
     public boolean containsKey(Object name) {
         return item.containsKey(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean containsValue(Object value) {
         return item.containsValue(value);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Set<Entry<T, V>> entrySet() {
         return Collections.unmodifiableSet(item.entrySet());
     }
 
     /**
-     * Return the value of a property.
+     * {@inheritDoc}
      *
-     * @param name
-     *            name
-     * @return value
+     * Return the value of a property.
      */
     @Override
     public V get(Object name) {
         return item.get(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isEmpty() {
         return item.isEmpty();
     }
 
+    /** {@inheritDoc} */
     @Override
     public Set<T> keySet() {
         return item.keySet();
     }
 
     /**
-     * Change a property of the proxied object.
+     * {@inheritDoc}
      *
-     * @param name
-     *            name
-     * @param value
-     *            value
-     * @return old value
+     * Change a property of the proxied object.
      */
     @Override
     public V put(T name, V value) {
         return item.put(name, value);
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void putAll(Map values) {
@@ -145,28 +145,30 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
     }
 
     /**
-     * Remove a property from the proxied object.
+     * {@inheritDoc}
      *
-     * @param name
-     *            name
-     * @return old value
+     * Remove a property from the proxied object.
      */
     @Override
     public V remove(Object name) {
         return item.remove(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int size() {
         return item.size();
     }
 
+    /** {@inheritDoc} */
     @Override
     public Collection<V> values() {
         return Collections.unmodifiableCollection(item.values());
     }
 
     /**
+     * <p>Getter for the field <code>uid</code>.</p>
+     *
      * @return the uid
      */
     public String getUid() {
@@ -174,6 +176,8 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
     }
 
     /**
+     * <p>Setter for the field <code>uid</code>.</p>
+     *
      * @param uid
      *            the uid to set
      */
@@ -182,6 +186,8 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
     }
 
     /**
+     * <p>Getter for the field <code>type</code>.</p>
+     *
      * @return the type
      */
     public Object getType() {
@@ -189,6 +195,8 @@ public class ObjectProxy<T, V> implements Map<T, V>, IExternalizable {
     }
 
     /**
+     * <p>Setter for the field <code>type</code>.</p>
+     *
      * @param type
      *            the type to set
      */

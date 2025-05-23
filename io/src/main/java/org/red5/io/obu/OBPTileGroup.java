@@ -1,5 +1,10 @@
 package org.red5.io.obu;
 
+/**
+ * <p>OBPTileGroup class.</p>
+ *
+ * @author mondain
+ */
 public class OBPTileGroup {
     public short numTiles;
 

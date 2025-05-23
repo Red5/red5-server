@@ -19,6 +19,11 @@ import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.VINT;
 
+/**
+ * <p>CompoundTag class.</p>
+ *
+ * @author mondain
+ */
 public class CompoundTag extends Tag {
     private Map<String, Tag> subElements = new HashMap<>();
 
@@ -26,12 +31,11 @@ public class CompoundTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
      *            - the id of tag to be created
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public CompoundTag(String name, VINT id) throws IOException {
@@ -42,7 +46,6 @@ public class CompoundTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -51,30 +54,21 @@ public class CompoundTag extends Tag {
      *            - the size of tag to be created
      * @param inputStream
      *            - stream to read tag data from
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public CompoundTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
         super(name, id, size, inputStream);
     }
 
-    /**
-     * @see Tag#readData(InputStream)
-     *
-     * @param inputStream
-     *            - stream to read tag data from
-     * @throws IOException
-     *             - in case of any IO errors
-     */
+    /** {@inheritDoc} */
     @Override
     public void readData(InputStream inputStream) throws IOException {
         // we save RAM here
         return;
     }
 
-    /**
-     * @see Tag#parse(InputStream)
-     */
+    /** {@inheritDoc} */
     @Override
     public void parse(InputStream inputStream) throws IOException, ConverterException {
         for (Tag tag : ParserUtils.parseMasterElement(inputStream, (int) getSize())) {
@@ -82,14 +76,13 @@ public class CompoundTag extends Tag {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public int totalSize() {
         return (int) (id.getLength() + size.getLength() + (!subElements.isEmpty() ? size.getValue() : 0));
     }
 
-    /**
-     * @see Tag#putValue(ByteBuffer)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void putValue(ByteBuffer bb) throws IOException {
         for (Tag tag : subElements.values()) {
@@ -98,10 +91,10 @@ public class CompoundTag extends Tag {
     }
 
     /**
-     * method to add child tag to this {@link CompoundTag}, updates the size on add
+     * method to add child tag to this {@link org.red5.io.matroska.dtd.CompoundTag}, updates the size on add
      *
      * @param ch
-     *            - child {@link Tag} to be added
+     *            - child {@link org.red5.io.matroska.dtd.Tag} to be added
      * @return - this for chaining
      */
     public CompoundTag add(Tag ch) {
@@ -117,15 +110,28 @@ public class CompoundTag extends Tag {
         return this;
     }
 
+    /**
+     * <p>getNumberOfSubElements.</p>
+     *
+     * @return a int
+     */
     public int getNumberOfSubElements() {
         return subElements.size();
     }
 
+    /**
+     * <p>get.</p>
+     *
+     * @param tagName a {@link java.lang.String} object
+     * @return a {@link org.red5.io.matroska.dtd.Tag} object
+     */
     public Tag get(String tagName) {
         return subElements.get(tagName);
     }
 
     /**
+     * {@inheritDoc}
+     *
      * method to get "pretty" represented {@link Tag}
      */
     @Override

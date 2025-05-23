@@ -14,6 +14,8 @@ import org.red5.server.api.stream.IStreamCapableConnection;
 
 /**
  * Abstract base for client streams
+ *
+ * @author mondain
  */
 public abstract class AbstractClientStream extends AbstractStream implements IClientStream {
 
@@ -101,16 +103,19 @@ public abstract class AbstractClientStream extends AbstractStream implements ICl
     }
 
     /**
-     * Sets the broadcasting streams name.
+     * {@inheritDoc}
      *
-     * @param broadcastStreamPublishName
-     *            name of the broadcasting stream
+     * Sets the broadcasting streams name.
      */
     public void setBroadcastStreamPublishName(String broadcastStreamPublishName) {
         this.broadcastStreamPublishName = broadcastStreamPublishName;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getBroadcastStreamPublishName() {
         return broadcastStreamPublishName;
     }

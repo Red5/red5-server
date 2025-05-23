@@ -11,6 +11,8 @@ import org.red5.server.api.event.IEvent;
 
 /**
  * Source for streams
+ *
+ * @author mondain
  */
 public interface IStreamSource {
     /**

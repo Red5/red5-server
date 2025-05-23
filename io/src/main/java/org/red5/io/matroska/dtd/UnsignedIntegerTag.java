@@ -21,6 +21,7 @@ import org.red5.io.matroska.VINT;
  *
  * UnsignedInteger tag is class able to store long
  *
+ * @author mondain
  */
 public class UnsignedIntegerTag extends Tag {
     private long value;
@@ -29,12 +30,11 @@ public class UnsignedIntegerTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
      *            - the id of tag to be created
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public UnsignedIntegerTag(String name, VINT id) throws IOException {
@@ -45,7 +45,6 @@ public class UnsignedIntegerTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -54,24 +53,20 @@ public class UnsignedIntegerTag extends Tag {
      *            - the size of tag to be created
      * @param inputStream
      *            - stream to read tag data from
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public UnsignedIntegerTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
         super(name, id, size, inputStream);
     }
 
-    /**
-     * @see Tag#parse(InputStream)
-     */
+    /** {@inheritDoc} */
     @Override
     public void parse(InputStream inputStream) throws IOException {
         value = ParserUtils.parseInteger(inputStream, (int) getSize());
     }
 
-    /**
-     * @see Tag#putValue(ByteBuffer)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void putValue(ByteBuffer bb) throws IOException {
         bb.put(ParserUtils.getBytes(value, getSize()));
@@ -106,6 +101,8 @@ public class UnsignedIntegerTag extends Tag {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * method to get "pretty" represented {@link Tag}
      */
     @Override

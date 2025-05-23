@@ -14,6 +14,7 @@ import org.red5.io.matroska.dtd.Tag;
 /**
  * Interface for all classes able to consume webm Tag.
  *
+ * @author mondain
  */
 public interface TagConsumer {
     /**
@@ -21,7 +22,7 @@ public interface TagConsumer {
      *
      * @param tag
      *            - tag to be processed
-     * @throws IOException
+     * @throws java.io.IOException
      *             - exception accured during processing
      */
     void consume(Tag tag) throws IOException;

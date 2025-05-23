@@ -210,14 +210,18 @@ public class RecordingListener implements IRecordingListener {
         return recording.get();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void start() {
         // start the worker
         eqj = new EventQueueJob();
         eventQueueJobName = scheduler.addScheduledJob(3000, eqj);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void stop() {
         // set the record flag to false
         if (recording.compareAndSet(true, false)) {
@@ -322,17 +326,29 @@ public class RecordingListener implements IRecordingListener {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isRecording() {
         return recording.get();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isAppending() {
         return appending;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.stream.consumer.FileConsumer} object
+     */
     public FileConsumer getFileConsumer() {
         return recordingConsumer;
     }
@@ -342,7 +358,11 @@ public class RecordingListener implements IRecordingListener {
         this.recordingConsumer = recordingConsumer;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getFileName() {
         return fileName;
     }

@@ -14,7 +14,6 @@ package org.red5.io.amf3;
  *
  * @see <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a>
  * @see <a href="http://download.macromedia.com/pub/labs/amf/amf3_spec_121207.pdf">Official Adobe AMF3 Specification</a>
- *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  * @author Joachim Bauch (jojo@struktur.de)

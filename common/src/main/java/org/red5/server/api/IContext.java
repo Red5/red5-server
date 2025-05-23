@@ -18,9 +18,11 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 /**
  * The current context, this object basically wraps the Spring context or in the case of the .Net version, any similar system.
  *
+ * @author mondain
  */
 public interface IContext extends ResourcePatternResolver {
 
+    /** Constant <code>ID="red5.context"</code> */
     public static final String ID = "red5.context";
 
     /**
@@ -53,7 +55,7 @@ public interface IContext extends ResourcePatternResolver {
     IPersistenceStore getPersistanceStore();
 
     /**
-     * Returns scope handler (object that handle all actions related to the scope) by path. See {@link IScopeHandler} for details.
+     * Returns scope handler (object that handle all actions related to the scope) by path. See {@link org.red5.server.api.scope.IScopeHandler} for details.
      *
      * @param path
      *            Path of scope handler
@@ -62,7 +64,7 @@ public interface IContext extends ResourcePatternResolver {
     IScopeHandler lookupScopeHandler(String path);
 
     /**
-     * Returns scope by path. You can think of IScope as of tree items, used to separate context and resources between users. See {@link IScope} for more details.
+     * Returns scope by path. You can think of IScope as of tree items, used to separate context and resources between users. See {@link org.red5.server.api.scope.IScope} for more details.
      *
      * @param path
      *            Path of scope
@@ -71,7 +73,7 @@ public interface IContext extends ResourcePatternResolver {
     IScope resolveScope(String path);
 
     /**
-     * Returns scope by path from given root. You can think of IScope as of tree items, used to separate context and resources between users. See {@link IScope} for more details.
+     * Returns scope by path from given root. You can think of IScope as of tree items, used to separate context and resources between users. See {@link org.red5.server.api.scope.IScope} for more details.
      *
      * @param root
      *            Root to start from

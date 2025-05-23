@@ -19,6 +19,7 @@ public class MP3Audio extends AbstractAudio {
         codec = AudioCodec.MP3;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return codec.name();

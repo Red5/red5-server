@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Aggregate data event
+ *
+ * @author mondain
  */
 public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Aggregate>, IStreamPacket {
 
@@ -44,7 +46,9 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
      */
     private byte dataType = TYPE_AGGREGATE;
 
-    /** Constructs a new Aggregate. */
+    /**
+     * Constructs a new Aggregate.
+     */
     public Aggregate() {
         this(IoBuffer.allocate(0).flip());
     }
@@ -87,19 +91,38 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
         return dataType;
     }
 
+    /**
+     * <p>Setter for the field <code>dataType</code>.</p>
+     *
+     * @param dataType a byte
+     */
     public void setDataType(byte dataType) {
         this.dataType = dataType;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public IoBuffer getData() {
         return data;
     }
 
+    /**
+     * <p>Setter for the field <code>data</code>.</p>
+     *
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public void setData(IoBuffer data) {
         this.data = data;
     }
 
+    /**
+     * <p>Setter for the field <code>data</code>.</p>
+     *
+     * @param data an array of {@link byte} objects
+     */
     public void setData(byte[] data) {
         this.data = IoBuffer.allocate(data.length);
         this.data.put(data).flip();
@@ -216,6 +239,7 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -227,6 +251,7 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -241,6 +266,8 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
      * Duplicate this message / event.
      *
      * @return duplicated event
+     * @throws java.io.IOException if any.
+     * @throws java.lang.ClassNotFoundException if any.
      */
     public Aggregate duplicate() throws IOException, ClassNotFoundException {
         Aggregate result = new Aggregate();

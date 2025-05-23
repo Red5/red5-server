@@ -81,7 +81,7 @@ public interface IStatisticsService {
      * @param path
      *            Path to start looking for scopes.
      * @return list of scope names
-     * @throws ScopeNotFoundException
+     * @throws org.red5.server.exception.ScopeNotFoundException
      *             if the path on the server doesn't exist
      */
     public Set<String> getScopes(String path) throws ScopeNotFoundException;
@@ -91,7 +91,7 @@ public interface IStatisticsService {
      *
      * @param path
      *            Path to scope to update.
-     * @throws ScopeNotFoundException
+     * @throws org.red5.server.exception.ScopeNotFoundException
      *             if the given scope doesn't exist
      */
     public void updateScopeStatistics(String path) throws ScopeNotFoundException;
@@ -112,9 +112,9 @@ public interface IStatisticsService {
      *            Path to scope that contains the shared object.
      * @param name
      *            Name of shared object to update.
-     * @throws ScopeNotFoundException
+     * @throws org.red5.server.exception.ScopeNotFoundException
      *             if the given scope doesn't exist
-     * @throws SharedObjectException
+     * @throws org.red5.server.exception.SharedObjectException
      *             if no shared object with the given name exists
      */
     public void updateSharedObjectStatistics(String path, String name) throws ScopeNotFoundException, SharedObjectException;

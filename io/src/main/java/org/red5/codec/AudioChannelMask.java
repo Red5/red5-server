@@ -3,7 +3,8 @@ package org.red5.codec;
 /**
  * Mask used to indicate which channels are present in the stream.
  *
- * @link <https://en.wikipedia.org/wiki/Surround_sound#Standard_speaker_channels>
+ * @see <a href="https://en.wikipedia.org/wiki/Surround_sound#Standard_speaker_channels">Standard_speaker_channels</a>
+ * @author mondain@gmail.com
  */
 public enum AudioChannelMask {
 
@@ -20,6 +21,11 @@ public enum AudioChannelMask {
         this.mask = mask;
     }
 
+    /**
+     * <p>Getter for the field <code>mask</code>.</p>
+     *
+     * @return a int
+     */
     public int getMask() {
         return mask;
     }

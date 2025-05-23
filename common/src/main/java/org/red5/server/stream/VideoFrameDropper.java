@@ -35,17 +35,22 @@ import org.slf4j.LoggerFactory;
  */
 public class VideoFrameDropper implements IFrameDropper {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(VideoFrameDropper.class.getName());
 
     /** Current state. */
     private int state;
 
-    /** Constructs a new VideoFrameDropper. */
+    /**
+     * Constructs a new VideoFrameDropper.
+     */
     public VideoFrameDropper() {
         reset();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void reset() {
         reset(SEND_ALL);
     }

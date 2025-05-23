@@ -15,11 +15,20 @@ import org.red5.server.api.service.IStreamableFileService;
 
 /**
  * Scope service extension that provides method to get streamable file services set
+ *
+ * @author mondain
  */
 public interface IStreamableFileFactory extends IScopeService {
 
+    /** Constant <code>BEAN_NAME="streamableFileFactory"</code> */
     public static String BEAN_NAME = "streamableFileFactory";
 
+    /**
+     * <p>getService.</p>
+     *
+     * @param fp a {@link java.io.File} object
+     * @return a {@link org.red5.server.api.service.IStreamableFileService} object
+     */
     public abstract IStreamableFileService getService(File fp);
 
     /**

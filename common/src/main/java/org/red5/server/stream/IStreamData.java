@@ -13,6 +13,10 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * Stream data packet
+ *
+ * @param <T>
+ *            type of the stream data
+ * @author mondain
  */
 public interface IStreamData<T> {
 
@@ -27,9 +31,9 @@ public interface IStreamData<T> {
      * Creates a byte accurate copy.
      *
      * @return duplicate of the current data item
-     * @throws IOException
+     * @throws java.io.IOException
      *             on error
-     * @throws ClassNotFoundException
+     * @throws java.lang.ClassNotFoundException
      *             on class not found
      */
     IStreamData<T> duplicate() throws IOException, ClassNotFoundException;

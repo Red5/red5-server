@@ -16,17 +16,27 @@ public class SWFResponse extends Ping {
 
     private byte[] bytes;
 
+    /**
+     * <p>Constructor for SWFResponse.</p>
+     */
     public SWFResponse() {
         super();
         this.eventType = Ping.PONG_SWF_VERIFY;
     }
 
+    /**
+     * <p>Constructor for SWFResponse.</p>
+     *
+     * @param bytes an array of {@link byte} objects
+     */
     public SWFResponse(byte[] bytes) {
         this();
         this.bytes = bytes;
     }
 
     /**
+     * <p>Getter for the field <code>bytes</code>.</p>
+     *
      * @return the bytes
      */
     public byte[] getBytes() {
@@ -34,6 +44,8 @@ public class SWFResponse extends Ping {
     }
 
     /**
+     * <p>Setter for the field <code>bytes</code>.</p>
+     *
      * @param bytes
      *            the bytes to set
      */
@@ -41,6 +53,7 @@ public class SWFResponse extends Ping {
         this.bytes = bytes;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -51,6 +64,7 @@ public class SWFResponse extends Ping {
         in.read(bytes);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -62,6 +76,7 @@ public class SWFResponse extends Ping {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "SWFResponse [bytes=" + Arrays.toString(bytes) + "]";

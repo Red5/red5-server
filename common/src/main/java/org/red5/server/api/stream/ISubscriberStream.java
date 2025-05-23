@@ -13,12 +13,14 @@ import org.red5.server.api.scheduling.IScheduledJob;
 
 /**
  * ISubscriberStream is a stream from subscriber's point of view. That is, it provides methods for common stream operations like play, pause or seek.
+ *
+ * @author mondain
  */
 public interface ISubscriberStream extends IClientStream {
     /**
      * Start playing.
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             if an IO error occurred while starting to play the stream
      */
     void play() throws IOException;
@@ -49,7 +51,7 @@ public interface ISubscriberStream extends IClientStream {
      *
      * @param position
      *            Position for seek in millisecond.
-     * @throws OperationNotSupportedException
+     * @throws org.red5.server.api.stream.OperationNotSupportedException
      *             if the stream doesn't support seeking.
      */
     void seek(int position) throws OperationNotSupportedException;

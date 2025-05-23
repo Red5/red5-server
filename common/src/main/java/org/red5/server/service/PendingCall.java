@@ -17,6 +17,8 @@ import org.red5.server.api.service.IPendingServiceCallback;
 
 /**
  * Pending call is remote call operation that is in pending state. Remote calls to services are asynchronous, that is, after call but before result callback remote calls are in pending state.
+ *
+ * @author mondain
  */
 public class PendingCall extends Call implements IPendingServiceCall {
 
@@ -30,6 +32,9 @@ public class PendingCall extends Call implements IPendingServiceCall {
      */
     private HashSet<IPendingServiceCallback> callbacks = new HashSet<IPendingServiceCallback>();
 
+    /**
+     * <p>Constructor for PendingCall.</p>
+     */
     public PendingCall() {
     }
 
@@ -71,14 +76,14 @@ public class PendingCall extends Call implements IPendingServiceCall {
 
     /**
      * {@inheritDoc}
+     *
+     * @return a {@link java.lang.Object} object
      */
     public Object getResult() {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void setResult(Object result) {
         this.result = result;
         if (this.status == STATUS_PENDING || this.status == STATUS_SUCCESS_NULL || this.status == STATUS_SUCCESS_RESULT) {
@@ -96,17 +101,23 @@ public class PendingCall extends Call implements IPendingServiceCall {
         callbacks.remove(callback);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<IPendingServiceCallback> getCallbacks() {
         return callbacks;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         super.readExternal(in);
         result = in.readObject();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         super.writeExternal(out);

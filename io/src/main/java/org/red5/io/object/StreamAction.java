@@ -22,6 +22,7 @@ public enum StreamAction {
             "getStreamLength"), CUSTOM("");
 
     // presize to fit all enums in
+    /** Constant <code>map</code> */
     private final static Map<String, StreamAction> map = new HashMap<>(StreamAction.values().length);
 
     // the stream action this enum is for
@@ -31,10 +32,21 @@ public enum StreamAction {
         this.actionString = actionString;
     }
 
+    /**
+     * <p>Getter for the field <code>actionString</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getActionString() {
         return actionString;
     }
 
+    /**
+     * <p>getEnum.</p>
+     *
+     * @param actionString a {@link java.lang.String} object
+     * @return a {@link org.red5.io.object.StreamAction} object
+     */
     public static StreamAction getEnum(String actionString) {
         // fill the map if its empty
         if (map.isEmpty()) {
@@ -52,14 +64,27 @@ public enum StreamAction {
         return CUSTOM;
     }
 
+    /**
+     * <p>equals.</p>
+     *
+     * @param action a {@link org.red5.io.object.StreamAction} object
+     * @return a boolean
+     */
     public boolean equals(StreamAction action) {
         return action.getActionString().equals(actionString);
     }
 
+    /**
+     * <p>equals.</p>
+     *
+     * @param actionString a {@link java.lang.String} object
+     * @return a boolean
+     */
     public boolean equals(String actionString) {
         return getActionString().equals(actionString);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return actionString;

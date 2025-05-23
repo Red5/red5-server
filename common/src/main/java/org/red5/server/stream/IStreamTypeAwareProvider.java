@@ -14,10 +14,10 @@ import org.red5.server.messaging.IProvider;
  *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
- *
  */
 public interface IStreamTypeAwareProvider extends IProvider {
 
+    /** Constant <code>KEY="IStreamTypeAwareProvider.class.getName("{trunked}</code> */
     public static final String KEY = IStreamTypeAwareProvider.class.getName();
 
     /**

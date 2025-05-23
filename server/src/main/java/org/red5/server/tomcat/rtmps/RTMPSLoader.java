@@ -45,21 +45,16 @@ public class RTMPSLoader extends RTMPTLoader {
     protected Engine rtmpsEngine;
 
     /**
-     * Setter for server
+     * {@inheritDoc}
      *
-     * @param server
-     *            Value to set for property 'server'.
+     * Setter for server
      */
     public void setServer(IServer server) {
         log.debug("RTMPS setServer");
         this.server = server;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws ServletException
-     */
+    /** {@inheritDoc} */
     @Override
     public void start() throws ServletException {
         log.info("Loading RTMPS context");

@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
  *
  * factory for creating matroska tags, it use property file - matroska_type_definition_config.properties with structure:
  *   long id = "name provided specification","java class representing tag data"
+ *
+ * @author mondain
  */
 public class TagFactory {
 
@@ -50,6 +52,15 @@ public class TagFactory {
         }
     }
 
+    /**
+     * <p>createTag.</p>
+     *
+     * @param id a {@link org.red5.io.matroska.VINT} object
+     * @param size a {@link org.red5.io.matroska.VINT} object
+     * @param inputStream a {@link java.io.InputStream} object
+     * @return a {@link org.red5.io.matroska.dtd.Tag} object
+     * @throws org.red5.io.matroska.ConverterException if any.
+     */
     public static Tag createTag(VINT id, VINT size, InputStream inputStream) throws ConverterException {
         Tag tag = null;
         NameTag nt = tagsById.get(id.getBinary());
@@ -66,6 +77,13 @@ public class TagFactory {
         return tag;
     }
 
+    /**
+     * <p>createTag.</p>
+     *
+     * @param tagName a {@link java.lang.String} object
+     * @return a {@link org.red5.io.matroska.dtd.Tag} object
+     * @throws org.red5.io.matroska.ConverterException if any.
+     */
     public static Tag createTag(String tagName) throws ConverterException {
         log.debug("Tag: " + tagName);
         IdTag it = tagsByName.get(tagName);
@@ -83,6 +101,14 @@ public class TagFactory {
         return null;
     }
 
+    /**
+     * <p>create.</p>
+     *
+     * @param tagName a {@link java.lang.String} object
+     * @param <T> a T class
+     * @return a T object
+     * @throws org.red5.io.matroska.ConverterException if any.
+     */
     @SuppressWarnings("unchecked")
     public static <T> T create(String tagName) throws ConverterException {
         return (T) createTag(tagName);

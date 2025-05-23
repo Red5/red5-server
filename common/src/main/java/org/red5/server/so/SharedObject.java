@@ -49,9 +49,12 @@ import org.slf4j.LoggerFactory;
  * persisted to storage. Shared objects have name identifiers and a path. In this implementation we use IPersistenceStore to delegate all
  * (de)serialization work. SOs store data as a "name-value" store. Each value in can be a complex object or map. All access to methods that
  * change properties in the SO must be properly synchronized for multithreaded access.
+ *
+ * @author mondain
  */
 public class SharedObject extends AttributeStore implements ISharedObjectStatistics, IPersistable, Constants {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(SharedObject.class);
 
     /**
@@ -151,7 +154,9 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
      */
     protected volatile AtomicBoolean closed = new AtomicBoolean(false);
 
-    /** Constructs a new SharedObject. */
+    /**
+     * Constructs a new SharedObject.
+     */
     public SharedObject() {
         // This is used by the persistence framework
         super();
@@ -164,9 +169,8 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
      *
      * @param input
      *            Input source
-     * @throws IOException
+     * @throws java.io.IOException
      *             I/O exception
-     *
      * @see org.red5.io.object.Input
      */
     public SharedObject(Input input) throws IOException {
@@ -246,7 +250,11 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
         setStore(storage);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getName() {
         return name;
     }
@@ -256,7 +264,11 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
         throw new UnsupportedOperationException(String.format("Name change not supported; current name: %s", getName()));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPath() {
         return path;
     }
@@ -266,17 +278,29 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
         this.path = path;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getType() {
         return ScopeType.SHARED_OBJECT.toString();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a long
+     */
     public long getLastModified() {
         return lastModified;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isPersistent() {
         return persistent;
     }
@@ -713,7 +737,11 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
         this.storage = store;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.persistence.IPersistenceStore} object
+     */
     public IPersistenceStore getStore() {
         return storage;
     }
@@ -780,53 +808,94 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
         }
     }
 
+    /**
+     * <p>isClosed.</p>
+     *
+     * @return a boolean
+     */
     public boolean isClosed() {
         return closed.get();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a long
+     */
     public long getCreationTime() {
         return creationTime;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTotalListeners() {
         return listenerStats.getTotal();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     @Deprecated
     public int getMaxListeners() {
         return listenerStats.getTotal();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getActiveListeners() {
         return listenerStats.getCurrent();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTotalChanges() {
         return changeStats.intValue();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTotalDeletes() {
         return deleteStats.intValue();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getTotalSends() {
         return sendStats.intValue();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param dirty a boolean
+     */
     public void setDirty(boolean dirty) {
         log.trace("setDirty: {}", dirty);
         notifyModified();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param name a {@link java.lang.String} object
+     */
     public void setDirty(String name) {
         log.trace("setDirty: {}", name);
         // get uses read lock, no need to do locking here

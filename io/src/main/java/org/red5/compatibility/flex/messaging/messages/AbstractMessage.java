@@ -79,71 +79,85 @@ public class AbstractMessage implements Message, Serializable {
         result.append(destination);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getBody() {
         return body;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getClientId() {
         return clientId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getDestination() {
         return destination;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getHeader(String name) {
         return headers.get(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, Object> getHeaders() {
         return headers;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getMessageId() {
         return messageId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public long getTimestamp() {
         return timestamp;
     }
 
+    /** {@inheritDoc} */
     @Override
     public long getTimeToLive() {
         return timeToLive;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean headerExists(String name) {
         return headers.containsKey(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setBody(Object value) {
         body = value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setClientId(String value) {
         clientId = value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setDestination(String value) {
         destination = value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setHeader(String name, Object value) {
         headers.put(name, value);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setHeaders(Map<String, Object> value) {
         if (!headers.isEmpty()) {
@@ -152,25 +166,28 @@ public class AbstractMessage implements Message, Serializable {
         headers.putAll(value);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setMessageId(String value) {
         messageId = value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setTimestamp(long value) {
         timestamp = value;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setTimeToLive(long value) {
         timeToLive = value;
     }
 
     /**
-     * Return string representation of the message.
+     * {@inheritDoc}
      *
-     * @return value
+     * Return string representation of the message.
      */
     @Override
     public String toString() {
@@ -184,6 +201,12 @@ public class AbstractMessage implements Message, Serializable {
 
     static Logger log = LoggerFactory.getLogger(AbstractMessage.class);
 
+    /**
+     * <p>readFlags.</p>
+     *
+     * @param input a {@link org.red5.io.amf3.IDataInput} object
+     * @return an array of {@link short} objects
+     */
     protected short[] readFlags(IDataInput input) {
         boolean hasNextFlag = true;
         short[] flagsArray = new short[2];
@@ -208,6 +231,11 @@ public class AbstractMessage implements Message, Serializable {
         return flagsArray;
     }
 
+    /**
+     * <p>readExternal.</p>
+     *
+     * @param input a {@link org.red5.io.amf3.IDataInput} object
+     */
     @SuppressWarnings("rawtypes")
     public void readExternal(IDataInput input) {
         log.debug("AbstractMessage - Read external");
@@ -293,6 +321,11 @@ public class AbstractMessage implements Message, Serializable {
         }
     }
 
+    /**
+     * <p>writeExternal.</p>
+     *
+     * @param output a {@link org.red5.io.amf3.IDataOutput} object
+     */
     public void writeExternal(IDataOutput output) {
         short flags = 0;
 

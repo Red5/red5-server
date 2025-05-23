@@ -222,30 +222,65 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
         this.truststorePath = path;
     }
 
+    /**
+     * <p>Getter for the field <code>cipherSuites</code>.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public String[] getCipherSuites() {
         return cipherSuites;
     }
 
+    /**
+     * <p>Setter for the field <code>cipherSuites</code>.</p>
+     *
+     * @param cipherSuites an array of {@link java.lang.String} objects
+     */
     public void setCipherSuites(String[] cipherSuites) {
         this.cipherSuites = cipherSuites;
     }
 
+    /**
+     * <p>Getter for the field <code>protocols</code>.</p>
+     *
+     * @return an array of {@link java.lang.String} objects
+     */
     public String[] getProtocols() {
         return protocols;
     }
 
+    /**
+     * <p>Setter for the field <code>protocols</code>.</p>
+     *
+     * @param protocols an array of {@link java.lang.String} objects
+     */
     public void setProtocols(String[] protocols) {
         this.protocols = protocols;
     }
 
+    /**
+     * <p>Setter for the field <code>useClientMode</code>.</p>
+     *
+     * @param useClientMode a boolean
+     */
     public void setUseClientMode(boolean useClientMode) {
         this.useClientMode = useClientMode;
     }
 
+    /**
+     * <p>Setter for the field <code>needClientAuth</code>.</p>
+     *
+     * @param needClientAuth a boolean
+     */
     public void setNeedClientAuth(boolean needClientAuth) {
         this.needClientAuth = needClientAuth;
     }
 
+    /**
+     * <p>Setter for the field <code>wantClientAuth</code>.</p>
+     *
+     * @param wantClientAuth a boolean
+     */
     public void setWantClientAuth(boolean wantClientAuth) {
         this.wantClientAuth = wantClientAuth;
     }

@@ -17,11 +17,14 @@ import org.slf4j.Logger;
  * Miscellaneous I/O utility methods
  *
  * @see <a href="http://www.cs.utsa.edu/~wagner/laws/Abytes.html">Unsigned bytes in Java</a>
+ * @author mondain
  */
 public class IOUtils {
 
+    /** Constant <code>CHARSET</code> */
     public final static Charset CHARSET = Charset.forName("UTF-8");
 
+    /** Constant <code>CHARSET_ASCII</code> */
     public final static Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
     /**
@@ -242,7 +245,7 @@ public class IOUtils {
     /**
      * Return fourcc as a byte array.
      *
-     * @param fourcc
+     * @param fourcc a {@link java.lang.String} object
      * @return byte array representation of fourcc
      */
     public static byte[] makeFourccBytes(String fourcc) {
@@ -253,7 +256,7 @@ public class IOUtils {
     /**
      * Return fourcc as an integer.
      *
-     * @param fourcc
+     * @param fourcc a {@link java.lang.String} object
      * @return integer representation of fourcc
      */
     public static int makeFourcc(String fourcc) {
@@ -269,13 +272,18 @@ public class IOUtils {
     /**
      * Return fourcc as a string.
      *
-     * @param fourcc
+     * @param fourcc a int
      * @return string representation of fourcc
      */
     public static String getFourccString(int fourcc) {
         return new String(new char[] { (char) (fourcc & 0xff), (char) ((fourcc >> 8) & 0xff), (char) ((fourcc >> 16) & 0xff), (char) ((fourcc >> 24) & 0xff) });
     }
 
+    /**
+     * <p>main.</p>
+     *
+     * @param args an array of {@link java.lang.String} objects
+     */
     public static void main(String[] args) {
         ByteBuffer buf = ByteBuffer.allocate(4);
         IOUtils.writeExtendedMediumInt(buf, 1234567890);

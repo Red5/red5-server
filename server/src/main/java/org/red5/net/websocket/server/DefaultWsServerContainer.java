@@ -40,9 +40,11 @@ import org.slf4j.LoggerFactory;
  * Provides a per class loader (i.e. per web application) instance of a ServerContainer. Web application wide defaults may be configured by setting the
  * following servlet context initialization parameters to the desired values.
  * <ul>
- * <li>{@link Constants#BINARY_BUFFER_SIZE_SERVLET_CONTEXT_INIT_PARAM}</li>
- * <li>{@link Constants#TEXT_BUFFER_SIZE_SERVLET_CONTEXT_INIT_PARAM}</li>
+ * <li>{@link org.apache.tomcat.websocket.server.Constants#BINARY_BUFFER_SIZE_SERVLET_CONTEXT_INIT_PARAM}</li>
+ * <li>{@link org.apache.tomcat.websocket.server.Constants#TEXT_BUFFER_SIZE_SERVLET_CONTEXT_INIT_PARAM}</li>
  * </ul>
+ *
+ * @author mondain
  */
 public class DefaultWsServerContainer extends WsWebSocketContainer implements ServerContainer {
 
@@ -66,6 +68,11 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
 
     private volatile CopyOnWriteArraySet<String> registeredEndpointPaths = new CopyOnWriteArraySet<>();
 
+    /**
+     * <p>Constructor for DefaultWsServerContainer.</p>
+     *
+     * @param servletContext a {@link jakarta.servlet.ServletContext} object
+     */
     public DefaultWsServerContainer(ServletContext servletContext) {
         log.debug("ctor - context: {}", servletContext);
         this.servletContext = servletContext;
@@ -82,13 +89,14 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
     }
 
     /**
-     * Published the provided endpoint implementation at the specified path with the specified configuration. {@link #org.apache.tomcat.websocket.server.WsServerContainer(ServletContext)}
-     * must be called before calling this method.
+     * {@inheritDoc}
      *
-     * @param sec
-     *            The configuration to use when creating endpoint instances
-     * @throws DeploymentException
-     *             if the endpoint cannot be published as requested
+     * Published the provided endpoint implementation at the specified path with the specified configuration.
+     *
+     * @see org.apache.tomcat.websocket.server.WsServerContainer#addEndpoint(ServerEndpointConfig)
+     * @param sec a {@link jakarta.websocket.server.ServerEndpointConfig} object
+     * @throws jakarta.websocket.DeploymentException if any.
+     * @throws java.lang.IllegalStateException if the container is not started
      */
     @Override
     public void addEndpoint(ServerEndpointConfig sec) throws DeploymentException {
@@ -133,10 +141,9 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
     }
 
     /**
-     * Provides the equivalent of {@link #addEndpoint(ServerEndpointConfig)} for publishing plain old java objects (POJOs) that have been annotated as WebSocket endpoints.
+     * {@inheritDoc}
      *
-     * @param pojo
-     *            The annotated POJO
+     * Provides the equivalent of {@link #addEndpoint(ServerEndpointConfig)} for publishing plain old java objects (POJOs) that have been annotated as WebSocket endpoints.
      */
     @Override
     public void addEndpoint(Class<?> pojo) throws DeploymentException {
@@ -168,24 +175,12 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Until the WebSocket specification provides such a mechanism, this Tomcat proprietary method is provided to enable applications to programmatically
      * determine whether or not to upgrade an individual request to WebSocket.
      * <p>
      * Note: This method is not used by Tomcat but is used directly by third-party code and must not be removed.
-     *
-     * @param request
-     *            The request object to be upgraded
-     * @param response
-     *            The response object to be populated with the result of the upgrade
-     * @param sec
-     *            The server endpoint to use to process the upgrade request
-     * @param pathParams
-     *            The path parameters associated with the upgrade request
-     *
-     * @throws DeploymentException
-     *             If an error prevents the upgrade from taking place
-     * @throws IOException
-     *             If an I/O error occurs during the upgrade process
      */
     @Override
     public void upgradeHttpToWebSocket(Object request, Object response, ServerEndpointConfig sec, Map<String, String> pathParams) throws IOException, DeploymentException {
@@ -197,6 +192,12 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         }
     }
 
+    /**
+     * <p>findMapping.</p>
+     *
+     * @param path a {@link java.lang.String} object
+     * @return a {@link org.red5.net.websocket.server.WsMappingResult} object
+     */
     public WsMappingResult findMapping(String path) {
         log.debug("findMapping: {}", path);
         // Prevent registering additional endpoints once the first attempt has been made to use one
@@ -242,10 +243,16 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         return new WsMappingResult(sec, pathParams);
     }
 
+    /**
+     * <p>Getter for the field <code>registeredEndpointPaths</code>.</p>
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getRegisteredEndpointPaths() {
         return Collections.unmodifiableSet(registeredEndpointPaths);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void backgroundProcess() {
         // some comments say 1s others say 10s
@@ -313,6 +320,11 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
         }
     }
 
+    /**
+     * <p>closeAuthenticatedSession.</p>
+     *
+     * @param httpSessionId a {@link java.lang.String} object
+     */
     public void closeAuthenticatedSession(String httpSessionId) {
         Set<WsSession> wsSessions = authenticatedSessions.remove(httpSessionId);
         if (wsSessions != null && !wsSessions.isEmpty()) {

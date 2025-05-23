@@ -72,10 +72,16 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
      */
     protected PlayEngine engine;
 
+    /** {@inheritDoc} */
     public void setPlayItem(IPlayItem item) {
         this.item = item;
     }
 
+    /**
+     * <p>play.</p>
+     *
+     * @throws java.io.IOException if any.
+     */
     public void play() throws IOException {
         try {
             engine.play(item);
@@ -102,7 +108,9 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void stop() {
         try {
             engine.stop();
@@ -120,6 +128,11 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
         }
     }
 
+    /**
+     * <p>isPaused.</p>
+     *
+     * @return a boolean
+     */
     public boolean isPaused() {
         return state.get() == StreamState.PAUSED;
     }
@@ -186,6 +199,9 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
         this.underrunTrigger = underrunTrigger;
     }
 
+    /**
+     * <p>start.</p>
+     */
     public void start() {
         //ensure the play engine exists
         if (engine == null) {
@@ -227,6 +243,9 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
         onChange(StreamState.STARTED);
     }
 
+    /**
+     * <p>close.</p>
+     */
     public void close() {
         engine.close();
         onChange(StreamState.CLOSED);
@@ -241,6 +260,9 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
 
     /**
      * {@inheritDoc}
+     *
+     * @param state a {@link org.red5.server.api.stream.StreamState} object
+     * @param changed a {@link java.lang.Object} object
      */
     public void onChange(final StreamState state, final Object... changed) {
         Notifier notifier = null;

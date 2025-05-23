@@ -23,9 +23,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Mina protocol encoder for RTMP.
+ *
+ * @author mondain
  */
 public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(RTMPMinaProtocolEncoder.class);
 
     private RTMPProtocolEncoder encoder = new RTMPProtocolEncoder();
@@ -131,6 +134,8 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
     }
 
     /**
+     * <p>Getter for the field <code>targetChunkSize</code>.</p>
+     *
      * @return the targetChunkSize
      */
     public int getTargetChunkSize() {
@@ -138,6 +143,8 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
     }
 
     /**
+     * <p>Setter for the field <code>targetChunkSize</code>.</p>
+     *
      * @param targetChunkSize
      *            the targetChunkSize to set
      */

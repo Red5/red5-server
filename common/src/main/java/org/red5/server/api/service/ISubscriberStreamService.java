@@ -11,8 +11,14 @@ import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.IScopeService;
 import org.red5.server.api.stream.ISubscriberStream;
 
+/**
+ * <p>ISubscriberStreamService interface.</p>
+ *
+ * @author mondain
+ */
 public interface ISubscriberStreamService extends IScopeService {
 
+    /** Constant <code>BEAN_NAME="subscriberStreamService"</code> */
     public static String BEAN_NAME = "subscriberStreamService";
 
     /**

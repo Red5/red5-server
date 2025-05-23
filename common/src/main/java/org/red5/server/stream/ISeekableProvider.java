@@ -11,8 +11,11 @@ import org.red5.server.messaging.IProvider;
 
 /**
  * Provider that is seekable
+ *
+ * @author mondain
  */
 public interface ISeekableProvider extends IProvider {
+    /** Constant <code>KEY="ISeekableProvider.class.getName()"</code> */
     public static final String KEY = ISeekableProvider.class.getName();
 
     /**

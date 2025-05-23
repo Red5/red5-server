@@ -42,9 +42,7 @@ public class FLVService extends BaseStreamableFileService implements IFLVService
         return ".flv";
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public IStreamableFile getStreamableFile(File file) throws IOException {
         return new FLV(file, generateMetadata);

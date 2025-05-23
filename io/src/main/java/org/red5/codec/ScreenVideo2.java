@@ -236,6 +236,7 @@ public class ScreenVideo2 extends AbstractVideo {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public FrameData[] getKeyframes() {
         return blockCount > 0 ? new FrameData[] { new FrameData(getKeyframe()) } : new FrameData[0];

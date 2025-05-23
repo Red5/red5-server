@@ -11,22 +11,59 @@ import javax.management.MXBean;
 
 /**
  * Red5 applications loader
+ *
+ * @author mondain
  */
 @MXBean
 public interface ContextLoaderMXBean extends ShutdownMXBean {
 
+    /**
+     * <p>setContextsConfig.</p>
+     *
+     * @param contextsConfig a {@link java.lang.String} object
+     */
     public void setContextsConfig(String contextsConfig);
 
+    /**
+     * <p>init.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void init() throws Exception;
 
+    /**
+     * <p>shutdown.</p>
+     */
     public void shutdown();
 
+    /**
+     * <p>setParentContext.</p>
+     *
+     * @param parentContextKey a {@link java.lang.String} object
+     * @param appContextId a {@link java.lang.String} object
+     */
     public void setParentContext(String parentContextKey, String appContextId);
 
+    /**
+     * <p>getContextsConfig.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getContextsConfig();
 
+    /**
+     * <p>loadContext.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param config a {@link java.lang.String} object
+     */
     public void loadContext(String name, String config);
 
+    /**
+     * <p>unloadContext.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     */
     public void unloadContext(String name);
 
 }

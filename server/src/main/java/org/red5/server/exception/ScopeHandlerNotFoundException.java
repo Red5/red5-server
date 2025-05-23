@@ -9,6 +9,8 @@ package org.red5.server.exception;
 
 /**
  * Scope handler not found. Thrown when scope handler with given name can't be found
+ *
+ * @author mondain
  */
 public class ScopeHandlerNotFoundException extends RuntimeException {
 

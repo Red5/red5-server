@@ -18,6 +18,11 @@ import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.codec.RTMPMinaProtocolDecoder;
 import org.red5.server.net.rtmp.codec.RTMPMinaProtocolEncoder;
 
+/**
+ * <p>RTMPMinaCodecFactory class.</p>
+ *
+ * @author mondain
+ */
 public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
 
     private RTMPMinaProtocolDecoder clientDecoder;

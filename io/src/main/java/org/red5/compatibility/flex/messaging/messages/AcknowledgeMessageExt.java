@@ -21,21 +21,40 @@ public class AcknowledgeMessageExt extends AcknowledgeMessage implements IExtern
 
     private AcknowledgeMessage message;
 
+    /**
+     * <p>Constructor for AcknowledgeMessageExt.</p>
+     */
     public AcknowledgeMessageExt() {
     }
 
+    /**
+     * <p>Constructor for AcknowledgeMessageExt.</p>
+     *
+     * @param message a {@link org.red5.compatibility.flex.messaging.messages.AcknowledgeMessage} object
+     */
     public AcknowledgeMessageExt(AcknowledgeMessage message) {
         this.setMessage(message);
     }
 
+    /**
+     * <p>Setter for the field <code>message</code>.</p>
+     *
+     * @param message a {@link org.red5.compatibility.flex.messaging.messages.AcknowledgeMessage} object
+     */
     public void setMessage(AcknowledgeMessage message) {
         this.message = message;
     }
 
+    /**
+     * <p>Getter for the field <code>message</code>.</p>
+     *
+     * @return a {@link org.red5.compatibility.flex.messaging.messages.AcknowledgeMessage} object
+     */
     public AcknowledgeMessage getMessage() {
         return message;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput output) {
         if (this.message != null) {

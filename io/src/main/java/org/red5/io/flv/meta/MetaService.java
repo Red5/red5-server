@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MetaService implements IMetaService {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(MetaService.class);
 
     /**
@@ -51,14 +52,17 @@ public class MetaService implements IMetaService {
         super();
     }
 
+    /**
+     * <p>Constructor for MetaService.</p>
+     *
+     * @param poFil a {@link java.io.File} object
+     */
     public MetaService(File poFil) {
         this();
         this.file = poFil;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     @Override
     public void write(IMetaData<?, ?> meta) throws IOException {
@@ -244,9 +248,7 @@ public class MetaService implements IMetaService {
         return (int) (metaCue.getTime() * 1000.00);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void writeMetaData(IMetaData<?, ?> metaData) {
         IMetaCue meta = (MetaCue<?, ?>) metaData;
@@ -255,25 +257,18 @@ public class MetaService implements IMetaService {
         Serializer.serialize(out, meta);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void writeMetaCue() {
     }
 
-    /**
-     * @return Returns the file.
-     */
+    /** {@inheritDoc} */
     @Override
     public File getFile() {
         return file;
     }
 
-    /**
-     * @param file
-     *            The file to set.
-     */
+    /** {@inheritDoc} */
     @Override
     public void setFile(File file) {
         this.file = file;

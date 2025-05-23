@@ -32,6 +32,11 @@ import org.apache.tomcat.websocket.pojo.PojoEndpointServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>UpgradeUtil class.</p>
+ *
+ * @author mondain
+ */
 public class UpgradeUtil {
 
     private static final Logger log = LoggerFactory.getLogger(UpgradeUtil.class);
@@ -68,6 +73,17 @@ public class UpgradeUtil {
         return ((request instanceof HttpServletRequest) && (response instanceof HttpServletResponse) && Constants.UPGRADE_HEADER_VALUE.equalsIgnoreCase(((HttpServletRequest) request).getHeader(Constants.UPGRADE_HEADER_NAME)));
     }
 
+    /**
+     * <p>doUpgrade.</p>
+     *
+     * @param sc a {@link org.red5.net.websocket.server.DefaultWsServerContainer} object
+     * @param req a {@link jakarta.servlet.http.HttpServletRequest} object
+     * @param resp a {@link jakarta.servlet.http.HttpServletResponse} object
+     * @param sec a {@link jakarta.websocket.server.ServerEndpointConfig} object
+     * @param pathParams a {@link java.util.Map} object
+     * @throws jakarta.servlet.ServletException if any.
+     * @throws java.io.IOException if any.
+     */
     public static void doUpgrade(DefaultWsServerContainer sc, HttpServletRequest req, HttpServletResponse resp, ServerEndpointConfig sec, Map<String, String> pathParams) throws ServletException, IOException {
         log.debug("doUpgrade - sc: {} sec: {} params: {}", sc, sec, pathParams);
         // Validate the rest of the headers and reject the request if that validation fails

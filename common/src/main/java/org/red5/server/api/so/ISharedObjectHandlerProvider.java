@@ -14,7 +14,6 @@ import org.red5.server.api.service.IServiceHandlerProvider;
  *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
- *
  */
 public interface ISharedObjectHandlerProvider extends IServiceHandlerProvider {
 
@@ -27,6 +26,8 @@ public interface ISharedObjectHandlerProvider extends IServiceHandlerProvider {
     public void registerServiceHandler(Object handler);
 
     /**
+     * {@inheritDoc}
+     *
      * Unregister the shared object handler for calls without a service name.
      */
     public void unregisterServiceHandler(String name);

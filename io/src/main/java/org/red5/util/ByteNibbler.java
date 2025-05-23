@@ -13,15 +13,31 @@ public class ByteNibbler {
 
     private int dataIndex = 0, bitIndex = 0;
 
+    /**
+     * <p>Constructor for ByteNibbler.</p>
+     *
+     * @param b a byte
+     */
     public ByteNibbler(byte b) {
         data = new byte[1];
         data[0] = (byte) (b & 0xff);
     }
 
+    /**
+     * <p>Constructor for ByteNibbler.</p>
+     *
+     * @param b an array of {@link byte} objects
+     */
     public ByteNibbler(byte[] b) {
         data = b;
     }
 
+    /**
+     * <p>Constructor for ByteNibbler.</p>
+     *
+     * @param b1 a byte
+     * @param b2 a byte
+     */
     public ByteNibbler(byte b1, byte b2) {
         bitIndex = 0;
         data = new byte[2];
@@ -32,12 +48,12 @@ public class ByteNibbler {
     /**
      * This methods reads bits from high to low.
      * <p>
-     * Reading 2 bits will return an integer where the returned value has a potential maximum of 1<<2.
+     * Reading 2 bits will return an integer where the returned value has a potential maximum of 1«2.
      * </p>
      *
      * @param numBits
      *            The number of bits to read.
-     * @return Returns an integer with a max value up to ( 1 << bits read )
+     * @return Returns an integer with a max value up to ( 1 « bits read )
      */
     public int nibble(int numBits) {
         int ret = 0;
@@ -61,6 +77,12 @@ public class ByteNibbler {
         return (b & (1 << bit)) != 0;
     }
 
+    /**
+     * <p>toHexString.</p>
+     *
+     * @param ba an array of {@link byte} objects
+     * @return a {@link java.lang.String} object
+     */
     public static String toHexString(byte[] ba) {
         StringBuilder hex = new StringBuilder(ba.length * 2);
         for (byte b : ba) {
@@ -69,6 +91,12 @@ public class ByteNibbler {
         return hex.toString();
     }
 
+    /**
+     * <p>toBinaryString.</p>
+     *
+     * @param ba an array of {@link byte} objects
+     * @return a {@link java.lang.String} object
+     */
     public static String toBinaryString(byte[] ba) {
         StringBuilder binary = new StringBuilder(ba.length * 8);
         for (byte b : ba) {

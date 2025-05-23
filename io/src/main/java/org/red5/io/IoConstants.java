@@ -10,6 +10,7 @@ package org.red5.io;
 /**
  * Constants found in FLV files / streams.
  *
+ * @author mondain
  */
 public interface IoConstants {
     /**

@@ -24,6 +24,9 @@ import org.red5.io.amf3.IExternalizable;
 @Anonymous
 public class StatusObject implements IExternalizable {
 
+    /** Constant <code>ERROR="error"</code> */
+    /** Constant <code>STATUS="status"</code> */
+    /** Constant <code>WARNING="warning"</code> */
     public static final String ERROR = "error", STATUS = "status", WARNING = "warning";
 
     protected String code;
@@ -36,15 +39,30 @@ public class StatusObject implements IExternalizable {
 
     protected Map<String, Object> additional;
 
-    /** Constructs a new StatusObject. */
+    /**
+     * Constructs a new StatusObject.
+     */
     public StatusObject() {
     }
 
+    /**
+     * <p>Constructor for StatusObject.</p>
+     *
+     * @param code a {@link java.lang.String} object
+     * @param level a {@link java.lang.String} object
+     */
     public StatusObject(String code, String level) {
         this.code = code;
         this.level = level;
     }
 
+    /**
+     * <p>Constructor for StatusObject.</p>
+     *
+     * @param code a {@link java.lang.String} object
+     * @param level a {@link java.lang.String} object
+     * @param description a {@link java.lang.String} object
+     */
     public StatusObject(String code, String level, String description) {
         this.code = code;
         this.level = level;
@@ -127,6 +145,12 @@ public class StatusObject implements IExternalizable {
         return application;
     }
 
+    /**
+     * <p>Setter for the field <code>additional</code>.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param value a {@link java.lang.Object} object
+     */
     public void setAdditional(String name, Object value) {
         if (!"code,level,description,application".contains(name)) {
             if (additional == null) {
@@ -154,6 +178,7 @@ public class StatusObject implements IExternalizable {
         return String.format("Status code: %s level: %s description: %s", code, level, description);
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override
     public void readExternal(IDataInput in) {
@@ -164,6 +189,7 @@ public class StatusObject implements IExternalizable {
         additional = (Map<String, Object>) in.readObject();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         out.writeUTF(code);

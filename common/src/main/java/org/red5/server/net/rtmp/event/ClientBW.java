@@ -13,6 +13,8 @@ import java.io.ObjectOutput;
 
 /**
  * Client bandwidth event. Also known as a Peer Bandwidth message.
+ *
+ * @author mondain
  */
 public class ClientBW extends BaseEvent {
 
@@ -34,10 +36,19 @@ public class ClientBW extends BaseEvent {
      */
     private byte limitType;
 
+    /**
+     * <p>Constructor for ClientBW.</p>
+     */
     public ClientBW() {
         super(Type.STREAM_CONTROL);
     }
 
+    /**
+     * <p>Constructor for ClientBW.</p>
+     *
+     * @param bandwidth a int
+     * @param limitType a byte
+     */
     public ClientBW(int bandwidth, byte limitType) {
         this();
         this.bandwidth = bandwidth;
@@ -100,6 +111,7 @@ public class ClientBW extends BaseEvent {
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -107,6 +119,7 @@ public class ClientBW extends BaseEvent {
         limitType = in.readByte();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

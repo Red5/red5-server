@@ -46,6 +46,7 @@ import org.w3c.dom.Document;
  */
 public class Output extends org.red5.io.amf.Output {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Output.class);
 
     /**
@@ -87,6 +88,9 @@ public class Output extends org.red5.io.amf.Output {
         return buf;
     }
 
+    /**
+     * <p>writeAMF3.</p>
+     */
     protected void writeAMF3() {
         if (amf3_mode == 0) {
             buf.put(AMF.TYPE_AMF3_OBJECT);
@@ -107,6 +111,11 @@ public class Output extends org.red5.io.amf.Output {
         buf.put(AMF3.TYPE_NULL);
     }
 
+    /**
+     * <p>putInteger.</p>
+     *
+     * @param value a long
+     */
     protected void putInteger(long value) {
         if ((value >= -268435456) && (value <= 268435455)) {
             value &= 0x1FFFFFFF;
@@ -130,6 +139,7 @@ public class Output extends org.red5.io.amf.Output {
         }
     }
 
+    /** {@inheritDoc} */
     protected static byte[] encodeString(String string) {
         Element element = getStringCache().get(string);
         byte[] encoded = (element == null ? null : (byte[]) element.getObjectValue());
@@ -142,6 +152,12 @@ public class Output extends org.red5.io.amf.Output {
         return encoded;
     }
 
+    /**
+     * <p>putString.</p>
+     *
+     * @param str a {@link java.lang.String} object
+     * @param encoded an array of {@link byte} objects
+     */
     protected void putString(String str, byte[] encoded) {
         final int len = encoded.length;
         Integer pos = stringReferences.get(str);
@@ -563,10 +579,9 @@ public class Output extends org.red5.io.amf.Output {
     }
 
     /**
-     * Write a Vector&lt;int&gt;.
+     * {@inheritDoc}
      *
-     * @param vector
-     *            vector
+     * Write a Vector&lt;int&gt;.
      */
     @Override
     public void writeVectorInt(Vector<Integer> vector) {
@@ -595,10 +610,9 @@ public class Output extends org.red5.io.amf.Output {
     }
 
     /**
-     * Write a Vector&lt;uint&gt;.
+     * {@inheritDoc}
      *
-     * @param vector
-     *            vector
+     * Write a Vector&lt;uint&gt;.
      */
     @Override
     public void writeVectorUInt(Vector<Long> vector) {
@@ -621,10 +635,9 @@ public class Output extends org.red5.io.amf.Output {
     }
 
     /**
-     * Write a Vector&lt;Number&gt;.
+     * {@inheritDoc}
      *
-     * @param vector
-     *            vector
+     * Write a Vector&lt;Number&gt;.
      */
     @Override
     public void writeVectorNumber(Vector<Double> vector) {
@@ -644,10 +657,9 @@ public class Output extends org.red5.io.amf.Output {
     }
 
     /**
-     * Write a Vector&lt;Object&gt;.
+     * {@inheritDoc}
      *
-     * @param vector
-     *            vector
+     * Write a Vector&lt;Object&gt;.
      */
     @Override
     public void writeVectorObject(Vector<Object> vector) {

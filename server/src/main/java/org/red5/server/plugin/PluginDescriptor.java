@@ -26,42 +26,92 @@ public final class PluginDescriptor {
 
     private Map<String, Object> properties;
 
+    /**
+     * <p>Getter for the field <code>pluginName</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPluginName() {
         return pluginName;
     }
 
+    /**
+     * <p>Setter for the field <code>pluginName</code>.</p>
+     *
+     * @param pluginName a {@link java.lang.String} object
+     */
     public void setPluginName(String pluginName) {
         this.pluginName = pluginName;
     }
 
+    /**
+     * <p>Getter for the field <code>pluginType</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPluginType() {
         return pluginType;
     }
 
+    /**
+     * <p>Setter for the field <code>pluginType</code>.</p>
+     *
+     * @param pluginType a {@link java.lang.String} object
+     */
     public void setPluginType(String pluginType) {
         this.pluginType = pluginType;
     }
 
+    /**
+     * <p>Getter for the field <code>method</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getMethod() {
         return method;
     }
 
+    /**
+     * <p>Setter for the field <code>method</code>.</p>
+     *
+     * @param method a {@link java.lang.String} object
+     */
     public void setMethod(String method) {
         this.method = method;
     }
 
+    /**
+     * <p>Getter for the field <code>methodReturnType</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getMethodReturnType() {
         return methodReturnType;
     }
 
+    /**
+     * <p>Setter for the field <code>methodReturnType</code>.</p>
+     *
+     * @param methodReturnType a {@link java.lang.String} object
+     */
     public void setMethodReturnType(String methodReturnType) {
         this.methodReturnType = methodReturnType;
     }
 
+    /**
+     * <p>Getter for the field <code>properties</code>.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> getProperties() {
         return properties;
     }
 
+    /**
+     * <p>Setter for the field <code>properties</code>.</p>
+     *
+     * @param properties a {@link java.util.Map} object
+     */
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }

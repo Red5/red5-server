@@ -42,14 +42,21 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
     private static int executorQueueCapacity = 32;
 
     // whether or not to use the ThreadPoolTaskExecutor for incoming messages
+    /** Constant <code>enableTaskExecutor=true</code> */
     protected static boolean enableTaskExecutor = true;
 
+    /** Constant <code>instance</code> */
     protected static IConnectionManager<BaseConnection> instance;
 
     protected ConcurrentMap<String, BaseConnection> connMap = new ConcurrentHashMap<>();
 
     protected AtomicInteger conns = new AtomicInteger();
 
+    /**
+     * <p>Getter for the field <code>instance</code>.</p>
+     *
+     * @return a {@link org.red5.server.net.IConnectionManager} object
+     */
     public static IConnectionManager<BaseConnection> getInstance() {
         if (instance == null) {
             instance = new RTMPClientConnManager();
@@ -99,10 +106,9 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
     }
 
     /**
-     * Returns a connection for a given session id.
+     * {@inheritDoc}
      *
-     * @param sessionId session id
-     * @return connection if found and null otherwise
+     * Returns a connection for a given session id.
      */
     @Override
     public BaseConnection getConnectionBySessionId(String sessionId) {
@@ -165,7 +171,7 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
      *
      * @param cls class
      * @return connection
-     * @throws Exception thrown
+     * @throws java.lang.Exception thrown
      */
     public RTMPConnection createConnectionInstance(Class<?> cls) throws Exception {
         RTMPConnection conn = null;
@@ -192,22 +198,47 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
         return conn;
     }
 
+    /**
+     * <p>Setter for the field <code>maxHandshakeTimeout</code>.</p>
+     *
+     * @param maxHandshakeTimeout a int
+     */
     public static void setMaxHandshakeTimeout(int maxHandshakeTimeout) {
         RTMPClientConnManager.maxHandshakeTimeout = maxHandshakeTimeout;
     }
 
+    /**
+     * <p>Setter for the field <code>maxInactivity</code>.</p>
+     *
+     * @param maxInactivity a int
+     */
     public static void setMaxInactivity(int maxInactivity) {
         RTMPClientConnManager.maxInactivity = maxInactivity;
     }
 
+    /**
+     * <p>Setter for the field <code>pingInterval</code>.</p>
+     *
+     * @param pingInterval a int
+     */
     public static void setPingInterval(int pingInterval) {
         RTMPClientConnManager.pingInterval = pingInterval;
     }
 
+    /**
+     * <p>Setter for the field <code>executorQueueCapacity</code>.</p>
+     *
+     * @param executorQueueCapacity a int
+     */
     public static void setExecutorQueueCapacity(int executorQueueCapacity) {
         RTMPClientConnManager.executorQueueCapacity = executorQueueCapacity;
     }
 
+    /**
+     * <p>Setter for the field <code>enableTaskExecutor</code>.</p>
+     *
+     * @param enableTaskExecutor a boolean
+     */
     public static void setEnableTaskExecutor(boolean enableTaskExecutor) {
         RTMPClientConnManager.enableTaskExecutor = enableTaskExecutor;
     }

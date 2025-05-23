@@ -15,9 +15,11 @@ import org.red5.server.api.scope.IScopeService;
 /**
  * Service that manages shared objects for given scope.
  *
+ * @author mondain
  */
 public interface ISharedObjectService extends IScopeService {
 
+    /** Constant <code>BEAN_NAME="sharedObjectService"</code> */
     public static String BEAN_NAME = "sharedObjectService";
 
     /**

@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
 /**
  * StatefulScopeWrappingAdapter class wraps stateful IScope functionality. That is, it has attributes that you can work with, subscopes, associated resources and connections.
  *
+ * @author mondain
  */
 public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implements IScopeAware, IAttributeStore {
 
@@ -75,7 +76,12 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
         this.plugins = plugins;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param name a {@link java.lang.String} object
+     * @return a {@link java.lang.Object} object
+     */
     public Object getAttribute(String name) {
         return scope.getAttribute(name);
     }
@@ -94,7 +100,11 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
         return value;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getAttributeNames() {
         return scope.getAttributeNames();
     }
@@ -128,7 +138,9 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
         return removeAttribute(enm.name());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void removeAttributes() {
         Set<String> names = scope.getAttributeNames();
         for (String name : names) {
@@ -136,7 +148,11 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int size() {
         return scope != null ? scope.getAttributeNames().size() : 0;
     }
@@ -163,7 +179,12 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
         return (successes == attributes.size());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param attributes a {@link java.util.Map} object
+     * @return a boolean
+     */
     public boolean setAttributes(Map<String, Object> attributes) {
         int successes = 0;
         for (Map.Entry<String, Object> entry : attributes.entrySet()) {
@@ -311,7 +332,7 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
      * @param pattern
      *            Resource pattern
      * @return Returns array of resources
-     * @throws IOException
+     * @throws java.io.IOException
      *             I/O exception
      */
     @SuppressWarnings("null")

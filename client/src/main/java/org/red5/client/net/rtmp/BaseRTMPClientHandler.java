@@ -55,6 +55,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Base class for clients (RTMP and RTMPT)
+ *
+ * @author mondain
  */
 public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements IRTMPClient {
 
@@ -147,6 +149,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      */
     protected ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
+    /**
+     * <p>Constructor for BaseRTMPClientHandler.</p>
+     */
     protected BaseRTMPClientHandler() {
     }
 
@@ -161,14 +166,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     protected abstract void startConnector(String server, int port);
 
     /**
-     * Connect RTMP client to server's application via given port
+     * {@inheritDoc}
      *
-     * @param server
-     *            Server
-     * @param port
-     *            Connection port
-     * @param application
-     *            Application at that server
+     * Connect RTMP client to server's application via given port
      */
     @Override
     public void connect(String server, int port, String application) {
@@ -177,16 +177,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Connect RTMP client to server's application via given port with given connection callback
+     * {@inheritDoc}
      *
-     * @param server
-     *            Server
-     * @param port
-     *            Connection port
-     * @param application
-     *            Application at that server
-     * @param connectCallback
-     *            Connection callback
+     * Connect RTMP client to server's application via given port with given connection callback
      */
     @Override
     public void connect(String server, int port, String application, IPendingServiceCallback connectCallback) {
@@ -195,16 +188,10 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Creates the default connection parameters collection. Many implementations of this handler will create a tcUrl if not found, it is
      * created with the current server url.
-     *
-     * @param server
-     *            the server location
-     * @param port
-     *            the port for the protocol
-     * @param application
-     *            the application name at the given server
-     * @return connection parameters map
      */
     @Override
     public Map<String, Object> makeDefaultConnectionParams(String server, int port, String application) {
@@ -228,14 +215,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Connect RTMP client to server via given port and with given connection parameters
+     * {@inheritDoc}
      *
-     * @param server
-     *            Server
-     * @param port
-     *            Connection port
-     * @param connectionParams
-     *            Connection parameters
+     * Connect RTMP client to server via given port and with given connection parameters
      */
     @Override
     public void connect(String server, int port, Map<String, Object> connectionParams) {
@@ -244,16 +226,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Connect RTMP client to server's application via given port
+     * {@inheritDoc}
      *
-     * @param server
-     *            Server
-     * @param port
-     *            Connection port
-     * @param connectionParams
-     *            Connection parameters
-     * @param connectCallback
-     *            Connection callback
+     * Connect RTMP client to server's application via given port
      */
     @Override
     public void connect(String server, int port, Map<String, Object> connectionParams, IPendingServiceCallback connectCallback) {
@@ -261,18 +236,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Connect RTMP client to server's application via given port
+     * {@inheritDoc}
      *
-     * @param server
-     *            Server
-     * @param port
-     *            Connection port
-     * @param connectionParams
-     *            Connection parameters
-     * @param connectCallback
-     *            Connection callback
-     * @param connectCallArguments
-     *            Arguments for 'connect' call
+     * Connect RTMP client to server's application via given port
      */
     @Override
     public void connect(String server, int port, Map<String, Object> connectionParams, IPendingServiceCallback connectCallback, Object[] connectCallArguments) {
@@ -288,10 +254,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Register object that provides methods that can be called by the server.
+     * {@inheritDoc}
      *
-     * @param serviceProvider
-     *            Service provider
+     * Register object that provides methods that can be called by the server.
      */
     @Override
     public void setServiceProvider(Object serviceProvider) {
@@ -299,10 +264,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Sets a handler for connection close.
+     * {@inheritDoc}
      *
-     * @param connectionClosedHandler
-     *            close handler
+     * Sets a handler for connection close.
      */
     @Override
     public void setConnectionClosedHandler(Runnable connectionClosedHandler) {
@@ -311,10 +275,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Sets a handler for exceptions.
+     * {@inheritDoc}
      *
-     * @param exceptionHandler
-     *            exception handler
+     * Sets a handler for exceptions.
      */
     @Override
     public void setExceptionHandler(ClientExceptionHandler exceptionHandler) {
@@ -323,13 +286,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Connect to client shared object.
+     * {@inheritDoc}
      *
-     * @param name
-     *            Client shared object name
-     * @param persistent
-     *            SO persistence flag
-     * @return Client shared object instance
+     * Connect to client shared object.
      */
     @Override
     public IClientSharedObject getSharedObject(String name, boolean persistent) {
@@ -493,12 +452,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Invoke a method on the server.
+     * {@inheritDoc}
      *
-     * @param method
-     *            Method name
-     * @param callback
-     *            Callback handler
+     * Invoke a method on the server.
      */
     @Override
     public void invoke(String method, IPendingServiceCallback callback) {
@@ -515,14 +471,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Invoke a method on the server and pass parameters.
+     * {@inheritDoc}
      *
-     * @param method
-     *            Method
-     * @param params
-     *            Method call parameters
-     * @param callback
-     *            Callback object
+     * Invoke a method on the server and pass parameters.
      */
     @Override
     public void invoke(String method, Object[] params, IPendingServiceCallback callback) {
@@ -538,6 +489,8 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Disconnect the first connection in the connection map
      */
     @Override
@@ -549,6 +502,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void createStream(IPendingServiceCallback callback) {
         log.debug("createStream - callback: {}", callback);
@@ -556,24 +510,42 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         invoke("createStream", null, wrapper);
     }
 
+    /**
+     * <p>releaseStream.</p>
+     *
+     * @param callback a {@link org.red5.server.api.service.IPendingServiceCallback} object
+     * @param params an array of {@link java.lang.Object} objects
+     */
     public void releaseStream(IPendingServiceCallback callback, Object[] params) {
         log.debug("releaseStream - callback: {}", callback);
         IPendingServiceCallback wrapper = new ReleaseStreamCallBack(callback);
         invoke("releaseStream", params, wrapper);
     }
 
+    /**
+     * <p>deleteStream.</p>
+     *
+     * @param callback a {@link org.red5.server.api.service.IPendingServiceCallback} object
+     */
     public void deleteStream(IPendingServiceCallback callback) {
         log.debug("deleteStream - callback: {}", callback);
         IPendingServiceCallback wrapper = new DeleteStreamCallBack(callback);
         invoke("deleteStream", null, wrapper);
     }
 
+    /**
+     * <p>subscribe.</p>
+     *
+     * @param callback a {@link org.red5.server.api.service.IPendingServiceCallback} object
+     * @param params an array of {@link java.lang.Object} objects
+     */
     public void subscribe(IPendingServiceCallback callback, Object[] params) {
         log.debug("subscribe - callback: {}", callback);
         IPendingServiceCallback wrapper = new SubscribeStreamCallBack(callback);
         invoke("FCSubscribe", params, wrapper);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void publish(Number streamId, String name, String mode, INetStreamEventHandler handler) {
         log.debug("publish - stream id: {}, name: {}, mode: {}", streamId, name, mode);
@@ -597,6 +569,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         conn.invoke(pendingCall, getChannelForStreamId(streamId));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void unpublish(Number streamId) {
         log.debug("unpublish stream {}", streamId);
@@ -608,6 +581,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         conn.invoke(pendingCall, getChannelForStreamId(streamId));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void publishStreamData(Number streamId, IMessage message) {
         // get the stream data by index of the list
@@ -624,6 +598,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void play(Number streamId, String name, int start, int length) {
         log.debug("play stream {}, name: {}, start {}, length {}", new Object[] { streamId, name, start, length });
@@ -650,6 +625,8 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Dynamic streaming play method.
      *
      * The following properties are supported on the play options:
@@ -680,7 +657,6 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      *             SWAP : String = "swap" - Replaces a content stream with a different content stream and maintains the rest of the playlist.
      *             SWITCH : String = "switch" - Switches from playing one stream to another stream, typically with streams of the same content.
      * </pre>
-     *
      * @see <a href="https://web.archive.org/web/20150911224454/http://www.adobe.com/devnet/adobe-media-server/articles/dynstream_actionscript.html">ActionScript guide to dynamic
      *      streaming</a>
      * @see <a href=
@@ -758,6 +734,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public void connectionClosed(RTMPConnection conn) {
         log.debug("connectionClosed");
@@ -904,7 +881,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      *
      * @param protocol
      *            the data protocol to use.
-     * @throws Exception
+     * @throws java.lang.Exception
      *             thrown
      */
     public void setProtocol(String protocol) throws Exception {
@@ -932,9 +909,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Returns the connection associated with this client.
+     * {@inheritDoc}
      *
-     * @return conn connection
+     * Returns the connection associated with this client.
      */
     @Override
     public RTMPConnection getConnection() {
@@ -979,6 +956,8 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
+     * <p>Getter for the field <code>connectionParams</code>.</p>
+     *
      * @return the connectionParams
      */
     public Map<String, Object> getConnectionParams() {
@@ -986,10 +965,9 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     }
 
     /**
-     * Setter for stream event dispatcher (useful for saving playing stream to file)
+     * {@inheritDoc}
      *
-     * @param streamEventDispatcher
-     *            event dispatcher
+     * Setter for stream event dispatcher (useful for saving playing stream to file)
      */
     @Override
     public void setStreamEventDispatcher(IEventDispatcher streamEventDispatcher) {

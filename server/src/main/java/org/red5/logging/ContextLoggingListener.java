@@ -38,6 +38,7 @@ import jakarta.servlet.ServletContextListener;
  */
 public class ContextLoggingListener implements ServletContextListener {
 
+    /** {@inheritDoc} */
     public void contextInitialized(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
         String contextName = servletContext.getContextPath().replaceAll("/", "");
@@ -91,6 +92,7 @@ public class ContextLoggingListener implements ServletContextListener {
         }
     }
 
+    /** {@inheritDoc} */
     public void contextDestroyed(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext();
         LoggerContext context = (LoggerContext) servletContext.getAttribute(Red5LoggerFactory.LOGGER_CONTEXT_ATTRIBUTE);

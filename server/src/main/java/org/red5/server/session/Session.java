@@ -12,7 +12,6 @@ import org.red5.server.api.session.ISession;
 /**
  * Represents the most basic type of "Session", loosely modeled after the HTTP Session used in J2EE applications.
  *
- *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -42,49 +41,91 @@ public class Session implements ISession {
         active = true;
     }
 
+    /**
+     * <p>Constructor for Session.</p>
+     */
     public Session() {
     }
 
+    /**
+     * <p>Constructor for Session.</p>
+     *
+     * @param sessionId a {@link java.lang.String} object
+     */
     public Session(String sessionId) {
         this.sessionId = sessionId;
     }
 
+    /**
+     * <p>Getter for the field <code>created</code>.</p>
+     *
+     * @return a long
+     */
     public long getCreated() {
         return created;
     }
 
+    /**
+     * <p>Getter for the field <code>sessionId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * <p>reset.</p>
+     */
     public void reset() {
         clientId = null;
     }
 
+    /**
+     * <p>isActive.</p>
+     *
+     * @return a boolean
+     */
     public boolean isActive() {
         return active;
     }
 
+    /**
+     * <p>end.</p>
+     */
     public void end() {
         active = false;
     }
 
+    /**
+     * <p>Getter for the field <code>clientId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getClientId() {
         return clientId;
     }
 
+    /** {@inheritDoc} */
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
 
+    /** {@inheritDoc} */
     public void setDestinationDirectory(String destinationDirectory) {
         this.destinationDirectory = destinationDirectory;
     }
 
+    /**
+     * <p>Getter for the field <code>destinationDirectory</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getDestinationDirectory() {
         return destinationDirectory;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -93,6 +134,7 @@ public class Session implements ISession {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

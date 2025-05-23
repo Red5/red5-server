@@ -33,9 +33,12 @@ import org.springframework.core.style.ToStringCreator;
 
 /**
  * Red5 server core class implementation.
+ *
+ * @author mondain
  */
 public class Server implements IServer, ApplicationContextAware, InitializingBean, DisposableBean {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Server.class);
 
     /**
@@ -76,10 +79,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
     public long notificationDelay = 5L;
 
     /**
-     * Setter for Spring application context
+     * {@inheritDoc}
      *
-     * @param applicationContext
-     *            Application context
+     * Setter for Spring application context
      */
     @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) {
@@ -89,6 +91,8 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Initialization section.
+     *
+     * @throws java.lang.Exception if any.
      */
     public void afterPropertiesSet() throws Exception {
         Server.schedulingService = (ISchedulingService) applicationContext.getBean(ISchedulingService.BEAN_NAME);
@@ -96,6 +100,8 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
 
     /**
      * Destruction section.
+     *
+     * @throws java.lang.Exception if any.
      */
     public void destroy() throws Exception {
     }
@@ -114,13 +120,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
     }
 
     /**
-     * Does global scope lookup for host name and context path
+     * {@inheritDoc}
      *
-     * @param hostName
-     *            Host name
-     * @param contextPath
-     *            Context path
-     * @return Global scope
+     * Does global scope lookup for host name and context path
      */
     public IGlobalScope lookupGlobal(String hostName, String contextPath) {
         log.trace("{}", this);
@@ -165,11 +167,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
     }
 
     /**
-     * Return global scope by name
+     * {@inheritDoc}
      *
-     * @param name
-     *            Global scope name
-     * @return Global scope
+     * Return global scope by name
      */
     public IGlobalScope getGlobal(String name) {
         if (name == null) {
@@ -179,10 +179,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
     }
 
     /**
-     * Register global scope
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Global scope to register
+     * Register global scope
      */
     public void registerGlobal(IGlobalScope scope) {
         log.trace("Registering global scope: {}", scope.getName(), scope);
@@ -190,15 +189,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
     }
 
     /**
-     * Map key (host + / + context path) and global scope name
+     * {@inheritDoc}
      *
-     * @param hostName
-     *            Host name
-     * @param contextPath
-     *            Context path
-     * @param globalName
-     *            Global scope name
-     * @return true if mapping was added, false if already exist
+     * Map key (host + / + context path) and global scope name
      */
     public boolean addMapping(String hostName, String contextPath, String globalName) {
         log.info("Add mapping global: {} host: {} context: {}", new Object[] { globalName, hostName, contextPath });
@@ -208,13 +201,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
     }
 
     /**
-     * Remove mapping with given key
+     * {@inheritDoc}
      *
-     * @param hostName
-     *            Host name
-     * @param contextPath
-     *            Context path
-     * @return true if mapping was removed, false if key doesn't exist
+     * Remove mapping with given key
      */
     public boolean removeMapping(String hostName, String contextPath) {
         log.info("Remove mapping host: {} context: {}", hostName, contextPath);
@@ -265,9 +254,9 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
     }
 
     /**
-     * String representation of server
+     * {@inheritDoc}
      *
-     * @return String representation of server
+     * String representation of server
      */
     @SuppressWarnings("null")
     @Override
@@ -280,7 +269,11 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
         scopeListeners.add(listener);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param listener a {@link org.red5.server.api.listeners.IConnectionListener} object
+     */
     public void addListener(IConnectionListener listener) {
         connectionListeners.add(listener);
     }
@@ -290,7 +283,11 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
         scopeListeners.remove(listener);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param listener a {@link org.red5.server.api.listeners.IConnectionListener} object
+     */
     public void removeListener(IConnectionListener listener) {
         connectionListeners.remove(listener);
     }

@@ -15,7 +15,7 @@ import org.red5.io.IoConstants;
  *
  * Stores the decoder configuration.
  *
- * Advanced Audio Coding - <https://en.wikipedia.org/wiki/Advanced_Audio_Coding>
+ * <a href="https://en.wikipedia.org/wiki/Advanced_Audio_Coding">Advanced Audio Coding</a>
  * The following AAC profiles, denoted by their object types, are supported
  * 1 = main profile
  * 2 = low complexity, a.k.a., LC
@@ -27,6 +27,7 @@ import org.red5.io.IoConstants;
  */
 public class AACAudio extends AbstractAudio {
 
+    /** Constant <code>AAC_SAMPLERATES</code> */
     public static final int[] AAC_SAMPLERATES = { 96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350 };
 
     /**

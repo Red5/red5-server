@@ -19,6 +19,8 @@ import org.apache.tomcat.util.res.StringManager;
 
 /**
  * Represents the request that this session was opened under.
+ *
+ * @author mondain
  */
 public class WsHandshakeRequest implements HandshakeRequest {
 
@@ -38,6 +40,12 @@ public class WsHandshakeRequest implements HandshakeRequest {
 
     private volatile HttpServletRequest request;
 
+    /**
+     * <p>Constructor for WsHandshakeRequest.</p>
+     *
+     * @param request a {@link jakarta.servlet.http.HttpServletRequest} object
+     * @param pathParams a {@link java.util.Map} object
+     */
     public WsHandshakeRequest(HttpServletRequest request, Map<String, String> pathParams) {
         this.request = request;
         queryString = request.getQueryString();
@@ -65,31 +73,37 @@ public class WsHandshakeRequest implements HandshakeRequest {
         headers = Collections.unmodifiableMap(newHeaders);
     }
 
+    /** {@inheritDoc} */
     @Override
     public URI getRequestURI() {
         return requestUri;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, List<String>> getParameterMap() {
         return parameterMap;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getQueryString() {
         return queryString;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Principal getUserPrincipal() {
         return userPrincipal;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, List<String>> getHeaders() {
         return headers;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isUserInRole(String role) {
         if (request == null) {
@@ -98,6 +112,7 @@ public class WsHandshakeRequest implements HandshakeRequest {
         return request.isUserInRole(role);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getHttpSession() {
         return httpSession;

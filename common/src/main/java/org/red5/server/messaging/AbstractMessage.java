@@ -13,6 +13,7 @@ import java.util.Map;
  * Abstract base for all messages
  *
  * @see org.red5.server.messaging.IMessage
+ * @author mondain
  */
 public class AbstractMessage implements IMessage {
 
@@ -24,7 +25,11 @@ public class AbstractMessage implements IMessage {
 
     protected Map<?, ?> extraHeaders;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getMessageID() {
         return messageID;
     }
@@ -34,7 +39,11 @@ public class AbstractMessage implements IMessage {
         this.messageID = id;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getCorrelationID() {
         return correlationID;
     }
@@ -44,7 +53,11 @@ public class AbstractMessage implements IMessage {
         this.correlationID = id;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getMessageType() {
         return messageType;
     }

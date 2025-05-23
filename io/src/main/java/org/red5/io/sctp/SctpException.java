@@ -7,6 +7,11 @@
  */
 package org.red5.io.sctp;
 
+/**
+ * <p>SctpException class.</p>
+ *
+ * @author mondain
+ */
 public class SctpException extends Exception {
 
     /**
@@ -14,10 +19,18 @@ public class SctpException extends Exception {
      */
     private static final long serialVersionUID = 1L;
 
+    /**
+     * <p>Constructor for SctpException.</p>
+     */
     public SctpException() {
         super();
     }
 
+    /**
+     * <p>Constructor for SctpException.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     */
     public SctpException(String message) {
         super(message);
     }

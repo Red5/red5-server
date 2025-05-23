@@ -16,6 +16,7 @@ import java.io.IOException;
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface IPushableConsumer extends IConsumer {
+    /** Constant <code>KEY="IPushableConsumer.class.getName()"</code> */
     public static final String KEY = IPushableConsumer.class.getName();
 
     /**
@@ -25,7 +26,7 @@ public interface IPushableConsumer extends IConsumer {
      *            Pipe
      * @param message
      *            Message
-     * @throws IOException
+     * @throws java.io.IOException
      *             if message could not be written
      */
     void pushMessage(IPipe pipe, IMessage message) throws IOException;

@@ -33,6 +33,11 @@ import org.red5.server.stream.provider.FileProvider;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 
+/**
+ * <p>ProviderService class.</p>
+ *
+ * @author mondain
+ */
 public class ProviderService implements IProviderService {
 
     private static final Logger log = Red5LoggerFactory.getLogger(ProviderService.class);
@@ -233,7 +238,11 @@ public class ProviderService implements IProviderService {
         return file;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isLiveWaitSupport() {
         return liveWaitSupport;
     }

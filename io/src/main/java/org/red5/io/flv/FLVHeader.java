@@ -14,7 +14,6 @@ import org.apache.mina.core.buffer.IoBuffer;
  * FLVHeader parses out the contents of a FLV video file and returns the Header data
  *
  * @see <a href="https://code.google.com/p/red5/wiki/FLV#FLV_Header">FLV Header</a>
- *
  * @author The Red5 Project
  * @author Dominick Accattato (daccattato@gmail.com)
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
@@ -93,9 +92,9 @@ public class FLVHeader {
     }
 
     /**
-     * Overrides the toString method so that a FLVHeader can be represented by its datatypes
+     * {@inheritDoc}
      *
-     * @return String String representation
+     * Overrides the toString method so that a FLVHeader can be represented by its datatypes
      */
     @Override
     public String toString() {
@@ -227,6 +226,11 @@ public class FLVHeader {
         buffer.flip();
     }
 
+    /**
+     * <p>write.</p>
+     *
+     * @param buffer a {@link java.nio.ByteBuffer} object
+     */
     public void write(ByteBuffer buffer) {
         // FLV
         buffer.put(signature);

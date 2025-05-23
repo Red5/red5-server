@@ -46,6 +46,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Stream service
+ *
+ * @author mondain
  */
 public class StreamService implements IStreamService {
 
@@ -71,11 +73,18 @@ public class StreamService implements IStreamService {
         }
     };
 
+    /**
+     * <p>Constructor for StreamService.</p>
+     */
     public StreamService() {
         // default constructor to prevent verify from complaining when extended.
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.Number} object
+     */
     public Number createStream() {
         IConnection conn = Red5.getConnectionLocal();
         log.trace("createStream connection: {}", conn.getSessionId());
@@ -153,6 +162,8 @@ public class StreamService implements IStreamService {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Close stream. This method can close both IClientBroadcastStream (coming from Flash Player to Red5) and ISubscriberStream (from Red5
      * to Flash Player). Corresponding application handlers (streamSubscriberClose, etc.) are called as if close was initiated by Flash
      * Player.
@@ -178,11 +189,6 @@ public class StreamService implements IStreamService {
      *
      * When stream is closed, corresponding NetStream status will be sent to stream provider / consumers. Implementation is based on Red5's
      * StreamService.close()
-     *
-     * @param conn
-     *            client connection
-     * @param streamId
-     *            stream ID (number: 1,2,...)
      */
     public void closeStream(IConnection conn, Number streamId) {
         log.info("closeStream  stream id: {} connection: {}", streamId, conn.getSessionId());
@@ -252,12 +258,9 @@ public class StreamService implements IStreamService {
     }
 
     /**
-     * Pause at given position. Required as "pausePlayback" can be "null" if no flag is passed by the client
+     * {@inheritDoc}
      *
-     * @param pausePlayback
-     *            Pause playback or not
-     * @param position
-     *            Pause position
+     * Pause at given position. Required as "pausePlayback" can be "null" if no flag is passed by the client
      */
     public void pause(Boolean pausePlayback, int position) {
         IConnection conn = Red5.getConnectionLocal();
@@ -462,7 +465,11 @@ public class StreamService implements IStreamService {
         play(name, -2000, -1000, true);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param dontStop a {@link java.lang.Boolean} object
+     */
     public void play(Boolean dontStop) {
         log.debug("Play without stop: {}", dontStop);
         if (!dontStop) {
@@ -792,7 +799,11 @@ public class StreamService implements IStreamService {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param name a {@link java.lang.String} object
+     */
     public void publish(String name) {
         publish(name, IClientStream.MODE_LIVE);
     }
@@ -918,10 +929,20 @@ public class StreamService implements IStreamService {
         }
     }
 
+    /**
+     * <p>Setter for the field <code>stripTypePrefix</code>.</p>
+     *
+     * @param stripTypePrefix a boolean
+     */
     public void setStripTypePrefix(boolean stripTypePrefix) {
         this.stripTypePrefix = stripTypePrefix;
     }
 
+    /**
+     * <p>Setter for the field <code>nameAliasingEnabled</code>.</p>
+     *
+     * @param nameAliasingEnabled a boolean
+     */
     public void setNameAliasingEnabled(boolean nameAliasingEnabled) {
         this.nameAliasingEnabled = nameAliasingEnabled;
     }

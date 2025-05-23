@@ -16,6 +16,8 @@ import org.red5.io.utils.HexDump;
 
 /**
  * Unknown event
+ *
+ * @author mondain
  */
 public class Unknown extends BaseEvent {
     private static final long serialVersionUID = -1352770037962252975L;
@@ -30,6 +32,9 @@ public class Unknown extends BaseEvent {
      */
     protected byte dataType;
 
+    /**
+     * <p>Constructor for Unknown.</p>
+     */
     public Unknown() {
     }
 
@@ -83,6 +88,7 @@ public class Unknown extends BaseEvent {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -95,6 +101,7 @@ public class Unknown extends BaseEvent {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

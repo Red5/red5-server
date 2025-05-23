@@ -21,6 +21,7 @@ import org.red5.server.api.scope.IScopeService;
  */
 public interface ISchedulingService extends IScopeService {
 
+    /** Constant <code>BEAN_NAME="schedulingService"</code> */
     public static String BEAN_NAME = "schedulingService";
 
     /**

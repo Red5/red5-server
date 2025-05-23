@@ -169,14 +169,9 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     }
 
     /**
-     * Push message through pipe
+     * {@inheritDoc}
      *
-     * @param pipe
-     *            Pipe
-     * @param message
-     *            Message to push
-     * @throws IOException
-     *             if message could not be written
+     * Push message through pipe
      */
     @SuppressWarnings("rawtypes")
     public void pushMessage(IPipe pipe, IMessage message) throws IOException {
@@ -321,23 +316,17 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     }
 
     /**
-     * Out-of-band control message handler
+     * {@inheritDoc}
      *
-     * @param source
-     *            Source of message
-     * @param pipe
-     *            Pipe that is used to transmit OOB message
-     * @param oobCtrlMsg
-     *            OOB control message
+     * Out-of-band control message handler
      */
     public void onOOBControlMessage(IMessageComponent source, IPipe pipe, OOBControlMessage oobCtrlMsg) {
     }
 
     /**
-     * Pipe connection event handler
+     * {@inheritDoc}
      *
-     * @param event
-     *            Pipe connection event
+     * Pipe connection event handler
      */
     @SuppressWarnings("incomplete-switch")
     public void onPipeConnectionEvent(PipeConnectionEvent event) {
@@ -585,14 +574,17 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
         this.mode = mode;
     }
 
+    /** {@inheritDoc} */
     public void setAudioDecoderConfiguration(IRTMPEvent audioConfig) {
         // no-op
     }
 
+    /** {@inheritDoc} */
     public void setVideoDecoderConfiguration(IRTMPEvent videoConfig) {
         // no-op
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() throws Exception {
         if (executor != null) {

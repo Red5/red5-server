@@ -30,14 +30,22 @@ public abstract class BaseStreamableFileService implements IStreamableFileServic
     public void setPrefix(String prefix) {
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public abstract String getPrefix();
 
     /** {@inheritDoc} */
     public void setExtension(String extension) {
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public abstract String getExtension();
 
     /** {@inheritDoc} */

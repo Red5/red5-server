@@ -9,11 +9,18 @@ package org.red5.server.exception;
 
 /**
  * Generic Scope exception.
+ *
+ * @author mondain
  */
 public class ScopeException extends RuntimeException {
 
     private static final long serialVersionUID = -8512088658139011L;
 
+    /**
+     * <p>Constructor for ScopeException.</p>
+     *
+     * @param string a {@link java.lang.String} object
+     */
     public ScopeException(String string) {
         super(string);
     }

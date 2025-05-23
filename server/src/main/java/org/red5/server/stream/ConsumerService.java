@@ -17,6 +17,8 @@ import org.red5.server.stream.consumer.ConnectionConsumer;
 
 /**
  * Basic consumer service implementation. Used to get pushed messages at consumer endpoint.
+ *
+ * @author mondain
  */
 public class ConsumerService implements IConsumerService {
 

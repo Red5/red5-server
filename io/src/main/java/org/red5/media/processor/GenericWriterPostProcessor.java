@@ -27,6 +27,7 @@ public class GenericWriterPostProcessor implements IPostProcessor {
 
     private File file;
 
+    /** {@inheritDoc} */
     @Override
     public void init(Object... objs) {
         log.info("init: {}", Arrays.toString(objs));
@@ -34,6 +35,7 @@ public class GenericWriterPostProcessor implements IPostProcessor {
         file = new File(objs[0].toString());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void run() {
         if (file != null) {

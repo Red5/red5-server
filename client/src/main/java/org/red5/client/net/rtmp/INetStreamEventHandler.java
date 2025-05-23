@@ -11,7 +11,14 @@ import org.red5.server.net.rtmp.event.Notify;
 
 /**
  * Notify handler for client-side stream
+ *
+ * @author mondain
  */
 public interface INetStreamEventHandler {
+    /**
+     * <p>onStreamEvent.</p>
+     *
+     * @param notify a {@link org.red5.server.net.rtmp.event.Notify} object
+     */
     void onStreamEvent(Notify notify);
 }

@@ -19,6 +19,9 @@ public class FlexStreamSend extends Notify {
 
     private static final long serialVersionUID = -4226252245996614504L;
 
+    /**
+     * <p>Constructor for FlexStreamSend.</p>
+     */
     public FlexStreamSend() {
         super();
         dataType = TYPE_FLEX_STREAM_SEND;

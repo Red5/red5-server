@@ -278,7 +278,7 @@ public enum AudioCodec {
     /**
      * Returns the four character code for this codec.
      *
-     * @return
+     * @return a {@link java.lang.String} object
      */
     public String getMimeType() {
         return mimeType;
@@ -311,6 +311,11 @@ public enum AudioCodec {
         return null;
     }
 
+    /**
+     * <p>Getter for the field <code>configured</code>.</p>
+     *
+     * @return a {@link java.util.EnumSet} object
+     */
     public static EnumSet<AudioCodec> getConfigured() {
         return configured;
     }

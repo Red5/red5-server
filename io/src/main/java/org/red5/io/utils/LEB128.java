@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
  * This class encodes and decodes integers in the LEB128 compression format.
  *
  * Reference examples:
+ *
  * @see <a href="https://github.com/pion/rtp/blob/master/codecs/av1/obu/leb128.go">leb128.go</a>
  * @see <a href="https://github.com/hathibelagal-dev/LEB128/blob/master/lib/leb128.dart">leb128.dart</a>
- *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -25,8 +25,10 @@ public final class LEB128 {
 
     private static Logger log = LoggerFactory.getLogger(LEB128.class);
 
+    /** Constant <code>SEVEN_LSB_BITMASK=0b01111111</code> */
     public static final int SEVEN_LSB_BITMASK = 0b01111111; // 0x7F
 
+    /** Constant <code>MSB_BITMASK=0b10000000</code> */
     public static final int MSB_BITMASK = 0b10000000; // 0x80
 
     /**
@@ -53,6 +55,12 @@ public final class LEB128 {
         return out;
     }
 
+    /**
+     * <p>encode.</p>
+     *
+     * @param value an array of {@link byte} objects
+     * @return a int
+     */
     public static int encode(byte[] value) {
         int out = 0;
         for (int i = 0; i < value.length; i++) {
@@ -111,7 +119,7 @@ public final class LEB128 {
     /**
      * Decodes an LEB128 unsigned integer from a byte array into a regular int.
      *
-     * @param value
+     * @param value an array of {@link byte} objects
      * @return LEB128Result
      */
     public static LEB128Result decode(byte[] value) {
@@ -132,6 +140,12 @@ public final class LEB128 {
         return result;
     }
 
+    /**
+     * <p>hexBytesToUnsignedInt.</p>
+     *
+     * @param hex an array of {@link byte} objects
+     * @return a int
+     */
     public static int hexBytesToUnsignedInt(byte[] hex) {
         //log.trace("Hex length: {}", hex.length);
         IoBuffer buf = IoBuffer.wrap(hex);

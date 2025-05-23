@@ -64,20 +64,28 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMP protocol decoder.
+ *
+ * @author mondain
  */
 public class RTMPProtocolDecoder implements Constants, IEventDecoder {
 
+    /** Constant <code>log</code> */
     protected static final Logger log = LoggerFactory.getLogger(RTMPProtocolDecoder.class);
 
+    /** Constant <code>isTrace=log.isTraceEnabled()</code> */
+    /** Constant <code>isDebug=log.isDebugEnabled()</code> */
     protected static final boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     // close when header errors occur
     protected boolean closeOnHeaderError;
 
     // maximum size for an RTMP packet in Mb
+    /** Constant <code>MAX_PACKET_SIZE=3145728</code> */
     protected static int MAX_PACKET_SIZE = 3145728; // 3MB
 
-    /** Constructs a new RTMPProtocolDecoder. */
+    /**
+     * Constructs a new RTMPProtocolDecoder.
+     */
     public RTMPProtocolDecoder() {
     }
 
@@ -169,7 +177,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
      * 2. ProtocolState : the decoder was unable to decode the whole object, refer to the protocol state
      * 3. Object : something was decoded, continue
      * </pre>
-     * @throws ProtocolException
+     * @throws org.red5.server.net.protocol.ProtocolException
      *             on error
      */
     public Object decode(RTMPConnection conn, RTMPDecodeState state, IoBuffer in) throws ProtocolException {
@@ -584,6 +592,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         return message;
     }
 
+    /**
+     * <p>decodeAbort.</p>
+     *
+     * @param in a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @return a {@link org.red5.server.net.rtmp.event.IRTMPEvent} object
+     */
     public IRTMPEvent decodeAbort(IoBuffer in) {
         return new Abort(in.getInt());
     }
@@ -815,11 +829,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     }
 
     /**
-     * Decodes ping event.
+     * {@inheritDoc}
      *
-     * @param in
-     *            IoBuffer
-     * @return Ping event
+     * Decodes ping event.
      */
     public Ping decodePing(IoBuffer in) {
         Ping ping = null;
@@ -1006,11 +1018,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     }
 
     /**
-     * Decodes FlexMessage event.
+     * {@inheritDoc}
      *
-     * @param in
-     *            IoBuffer
-     * @return FlexMessage event
+     * Decodes FlexMessage event.
      */
     public FlexMessage decodeFlexMessage(IoBuffer in) {
         if (isDebug) {

@@ -84,12 +84,17 @@ public class ImmutableTag implements ITag {
         return timestamp;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setTimestamp(int timestamp) {
         this.timestamp = timestamp;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public IoBuffer getData() {
         return IoBuffer.wrap(body);
     }
@@ -121,26 +126,30 @@ public class ImmutableTag implements ITag {
         return previousTagSize;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setBody(IoBuffer body) {
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setBodySize(int size) {
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setDataType(byte datatype) {
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setPreviousTagSize(int size) {
     }
 
     /**
-     * Prints out the contents of the tag
+     * {@inheritDoc}
      *
-     * @return Tag contents
+     * Prints out the contents of the tag
      */
     @Override
     public String toString() {
@@ -152,10 +161,25 @@ public class ImmutableTag implements ITag {
         return ret;
     }
 
+    /**
+     * <p>build.</p>
+     *
+     * @param dataType a byte
+     * @param timestamp a int
+     * @return a {@link org.red5.server.stream.consumer.ImmutableTag} object
+     */
     public static ImmutableTag build(byte dataType, int timestamp) {
         return ImmutableTag.build(dataType, timestamp, null);
     }
 
+    /**
+     * <p>build.</p>
+     *
+     * @param dataType a byte
+     * @param timestamp a int
+     * @param data a {@link java.lang.Object} object
+     * @return a {@link org.red5.server.stream.consumer.ImmutableTag} object
+     */
     public static ImmutableTag build(byte dataType, int timestamp, Object data) {
         if (data != null) {
             if (data instanceof IoBuffer) {
@@ -176,6 +200,14 @@ public class ImmutableTag implements ITag {
         }
     }
 
+    /**
+     * <p>build.</p>
+     *
+     * @param dataType a byte
+     * @param timestamp a int
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @return a {@link org.red5.server.stream.consumer.ImmutableTag} object
+     */
     public static ImmutableTag build(byte dataType, int timestamp, IoBuffer data) {
         if (data != null) {
             byte[] body = new byte[data.remaining()];
@@ -188,6 +220,15 @@ public class ImmutableTag implements ITag {
         }
     }
 
+    /**
+     * <p>build.</p>
+     *
+     * @param dataType a byte
+     * @param timestamp a int
+     * @param data an array of {@link byte} objects
+     * @param previousTagSize a int
+     * @return a {@link org.red5.server.stream.consumer.ImmutableTag} object
+     */
     public static ImmutableTag build(byte dataType, int timestamp, byte[] data, int previousTagSize) {
         if (data != null) {
             byte[] body = new byte[data.length];
@@ -198,6 +239,15 @@ public class ImmutableTag implements ITag {
         }
     }
 
+    /**
+     * <p>build.</p>
+     *
+     * @param dataType a byte
+     * @param timestamp a int
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @param previousTagSize a int
+     * @return a {@link org.red5.server.stream.consumer.ImmutableTag} object
+     */
     public static ImmutableTag build(byte dataType, int timestamp, IoBuffer data, int previousTagSize) {
         if (data != null) {
             byte[] body = new byte[data.remaining()];

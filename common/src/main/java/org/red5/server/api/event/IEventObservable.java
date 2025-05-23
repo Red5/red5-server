@@ -11,6 +11,8 @@ import java.util.Set;
 
 /**
  * IEventObservable hold functionality of the well-known Observer pattern, that is it has a list of objects that listen to events.
+ *
+ * @author mondain
  */
 public interface IEventObservable {
 

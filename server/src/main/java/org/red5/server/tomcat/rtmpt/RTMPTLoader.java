@@ -72,11 +72,7 @@ public class RTMPTLoader extends TomcatLoader {
         this.server = server;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws ServletException
-     */
+    /** {@inheritDoc} */
     @Override
     public void start() throws ServletException {
         log.info("Loading RTMPT context");

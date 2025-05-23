@@ -20,10 +20,18 @@ public class NotAllowedException extends RuntimeException {
      */
     private static final long serialVersionUID = -7552833324276839926L;
 
+    /**
+     * <p>Constructor for NotAllowedException.</p>
+     */
     public NotAllowedException() {
         super();
     }
 
+    /**
+     * <p>Constructor for NotAllowedException.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     */
     public NotAllowedException(String message) {
         super(message);
     }

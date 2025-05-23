@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class to specifically handle client side situations.
+ *
+ * @author mondain
  */
 public class RTMPClientProtocolEncoder extends RTMPProtocolEncoder {
 
@@ -26,12 +28,9 @@ public class RTMPClientProtocolEncoder extends RTMPProtocolEncoder {
     }
 
     /**
-     * Encode notification event and fill given byte buffer.
+     * {@inheritDoc}
      *
-     * @param out
-     *            Byte buffer to fill
-     * @param command
-     *            Notification event
+     * Encode notification event and fill given byte buffer.
      */
     @Override
     protected void encodeCommand(IoBuffer out, ICommand command) {

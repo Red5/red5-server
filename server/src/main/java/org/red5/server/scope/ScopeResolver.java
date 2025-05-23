@@ -22,9 +22,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Resolves scopes from path
+ *
+ * @author mondain
  */
 public class ScopeResolver implements IScopeResolver {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(ScopeResolver.class);
 
     /**
@@ -52,11 +55,9 @@ public class ScopeResolver implements IScopeResolver {
     }
 
     /**
-     * Return scope associated with given path
+     * {@inheritDoc}
      *
-     * @param path
-     *            Scope path
-     * @return Scope object
+     * Return scope associated with given path
      */
     public IScope resolveScope(String path) {
         // start from global scope
@@ -64,13 +65,9 @@ public class ScopeResolver implements IScopeResolver {
     }
 
     /**
-     * Return scope associated with given path from given root scope.
+     * {@inheritDoc}
      *
-     * @param root
-     *            Scope to start from
-     * @param path
-     *            Scope path
-     * @return Scope object
+     * Return scope associated with given path from given root scope.
      */
     public IScope resolveScope(IScope root, String path) {
         log.debug("resolveScope - root: {} path: {}", root, path);

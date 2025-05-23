@@ -35,6 +35,7 @@ public class RTMPUtils implements Constants {
     }
 
     /**
+     * <p>writeMediumInt.</p>
      *
      * @param out
      *            output buffer

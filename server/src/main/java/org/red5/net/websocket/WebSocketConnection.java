@@ -43,7 +43,6 @@ import jakarta.websocket.Session;
  * This class represents a WebSocket connection with a client (browser).
  *
  * @see <a href="https://tools.ietf.org/html/rfc6455">rfc6455</a>
- *
  * @author Paul Gregoire
  */
 public class WebSocketConnection extends AttributeStore implements Comparable<WebSocketConnection> {
@@ -106,6 +105,12 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     // send future for when async is enabled
     private Future<Void> sendFuture;
 
+    /**
+     * <p>Constructor for WebSocketConnection.</p>
+     *
+     * @param scope a {@link org.red5.net.websocket.WebSocketScope} object
+     * @param session a {@link jakarta.websocket.Session} object
+     */
     public WebSocketConnection(WebSocketScope scope, Session session) {
         log.debug("New WebSocket - scope: {} session: {}", scope, session);
         // set the scope for ease of use later
@@ -188,8 +193,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      *
      * @param data
      *            string / text data
-     * @throws UnsupportedEncodingException
-     * @throws IOException
+     * @throws java.io.UnsupportedEncodingException
+     * @throws java.io.IOException
      */
     public void send(String data) throws UnsupportedEncodingException, IOException {
         if (isDebug) {
@@ -239,8 +244,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sends binary data to the client.
      *
-     * @param buf
-     * @throws IOException
+     * @param buf an array of {@link byte} objects
+     * @throws java.io.IOException
      */
     public void send(byte[] buf) throws IOException {
         if (isDebug) {
@@ -282,9 +287,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sends a ping to the client.
      *
-     * @param buf
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @param buf an array of {@link byte} objects
+     * @throws java.io.IOException
+     * @throws java.lang.IllegalArgumentException
      */
     public void sendPing(byte[] buf) throws IllegalArgumentException, IOException {
         if (isTrace) {
@@ -305,9 +310,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sends a pong back to the client; normally in response to a ping.
      *
-     * @param buf
-     * @throws IOException
-     * @throws IllegalArgumentException
+     * @param buf an array of {@link byte} objects
+     * @throws java.io.IOException
+     * @throws java.lang.IllegalArgumentException
      */
     public void sendPong(byte[] buf) throws IllegalArgumentException, IOException {
         if (isTrace) {
@@ -386,7 +391,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Async send is enabled in non-Windows based systems; this provides a means to override it.
      *
-     * @param useAsync
+     * @param useAsync a boolean
      */
     public static void setUseAsync(boolean useAsync) {
         if (!useAsync) {
@@ -405,6 +410,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     /**
+     * <p>isConnected.</p>
+     *
      * @return the connected
      */
     public boolean isConnected() {
@@ -420,6 +427,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     /**
+     * <p>Getter for the field <code>host</code>.</p>
+     *
      * @return the host
      */
     public String getHost() {
@@ -427,6 +436,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     /**
+     * <p>Setter for the field <code>host</code>.</p>
+     *
      * @param host
      *            the host to set
      */
@@ -435,6 +446,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     /**
+     * <p>Getter for the field <code>origin</code>.</p>
+     *
      * @return the origin
      */
     public String getOrigin() {
@@ -442,6 +455,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     }
 
     /**
+     * <p>Setter for the field <code>origin</code>.</p>
+     *
      * @param origin
      *            the origin to set
      */
@@ -462,11 +477,18 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         return false;
     }
 
+    /**
+     * <p>Getter for the field <code>path</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPath() {
         return path;
     }
 
     /**
+     * <p>Setter for the field <code>path</code>.</p>
+     *
      * @param path
      *            the path to set
      */
@@ -490,7 +512,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sets / overrides this connections HttpSession id.
      *
-     * @param httpSessionId
+     * @param httpSessionId a {@link java.lang.String} object
      * @deprecated Session id read from WSSession
      */
     @Deprecated(since = "1.2.26")
@@ -521,7 +543,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sets the incoming headers.
      *
-     * @param headers
+     * @param headers a {@link java.util.Map} object
      */
     public void setHeaders(Map<String, List<String>> headers) {
         if (headers != null && !headers.isEmpty()) {
@@ -554,14 +576,29 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
     }
 
+    /**
+     * <p>Getter for the field <code>headers</code>.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, List<String>> getHeaders() {
         return headers;
     }
 
+    /**
+     * <p>Getter for the field <code>querystringParameters</code>.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> getQuerystringParameters() {
         return querystringParameters;
     }
 
+    /**
+     * <p>Setter for the field <code>querystringParameters</code>.</p>
+     *
+     * @param querystringParameters a {@link java.util.Map} object
+     */
     public void setQuerystringParameters(Map<String, Object> querystringParameters) {
         if (this.querystringParameters == null) {
             this.querystringParameters = new ConcurrentHashMap<>();
@@ -590,7 +627,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sets the extensions.
      *
-     * @param extensions
+     * @param extensions a {@link java.util.Map} object
      */
     public void setExtensions(Map<String, Object> extensions) {
         this.extensions = extensions;
@@ -635,28 +672,54 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sets the protocol.
      *
-     * @param protocol
+     * @param protocol a {@link java.lang.String} object
      */
     public void setProtocol(String protocol) {
         this.protocol = protocol;
     }
 
+    /**
+     * <p>Getter for the field <code>sendTimeout</code>.</p>
+     *
+     * @return a long
+     */
     public static long getSendTimeout() {
         return sendTimeout;
     }
 
+    /**
+     * <p>Setter for the field <code>sendTimeout</code>.</p>
+     *
+     * @param sendTimeout a long
+     */
     public static void setSendTimeout(long sendTimeout) {
         WebSocketConnection.sendTimeout = sendTimeout;
     }
 
+    /**
+     * <p>Getter for the field <code>readTimeout</code>.</p>
+     *
+     * @return a long
+     */
     public static long getReadTimeout() {
         return readTimeout;
     }
 
+    /**
+     * <p>Setter for the field <code>readTimeout</code>.</p>
+     *
+     * @param readTimeout a long
+     */
     public static void setReadTimeout(long readTimeout) {
         WebSocketConnection.readTimeout = readTimeout;
     }
 
+    /**
+     * <p>setUserProperty.</p>
+     *
+     * @param key a {@link java.lang.String} object
+     * @param value a {@link java.lang.Object} object
+     */
     public void setUserProperty(String key, Object value) {
         WsSession wsSession = getWsSession();
         if (wsSession != null) {
@@ -664,6 +727,12 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         }
     }
 
+    /**
+     * <p>getUserProperty.</p>
+     *
+     * @param key a {@link java.lang.String} object
+     * @return a {@link java.lang.Object} object
+     */
     public Object getUserProperty(String key) {
         WsSession wsSession = getWsSession();
         if (wsSession.getUserProperties().get(key) != null) {
@@ -672,50 +741,88 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         return null;
     }
 
+    /**
+     * <p>setWsSessionTimeout.</p>
+     *
+     * @param idleTimeout a long
+     */
     public void setWsSessionTimeout(long idleTimeout) {
         if (wsSession != null) {
             wsSession.setMaxIdleTimeout(idleTimeout);
         }
     }
 
+    /**
+     * <p>Getter for the field <code>wsSession</code>.</p>
+     *
+     * @return a {@link org.apache.tomcat.websocket.WsSession} object
+     */
     public WsSession getWsSession() {
         return wsSession != null ? wsSession : null;
     }
 
+    /**
+     * <p>Getter for the field <code>readBytes</code>.</p>
+     *
+     * @return a long
+     */
     public long getReadBytes() {
         return readBytes;
     }
 
+    /**
+     * <p>updateReadBytes.</p>
+     *
+     * @param read a long
+     */
     public void updateReadBytes(long read) {
         log.debug("updateReadBytes: {} by: {}", readBytes, read);
         readBytesUpdater.addAndGet(this, read);
         // read time is updated on WsSession by WsFrameBase when the read is performed
     }
 
+    /**
+     * <p>Getter for the field <code>writtenBytes</code>.</p>
+     *
+     * @return a long
+     */
     public long getWrittenBytes() {
         return writtenBytes;
     }
 
+    /**
+     * <p>updateWriteBytes.</p>
+     *
+     * @param wrote a long
+     */
     public void updateWriteBytes(long wrote) {
         log.debug("updateWriteBytes: {} by: {}", writtenBytes, wrote);
         writeBytesUpdater.addAndGet(this, wrote);
         // write time is updated on WsSession by WsRemoteEndpointImplBase when the write is performed
     }
 
+    /**
+     * <p>Getter for the field <code>wsSessionId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getWsSessionId() {
         return wsSessionId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(WebSocketConnection that) {
         return Integer.compare(hashCode, that.hashCode);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return hashCode;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -728,6 +835,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
         return hashCode == other.hashCode();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         if (wsSessionId != null) {

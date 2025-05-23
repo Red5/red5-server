@@ -16,18 +16,28 @@ import org.red5.io.sctp.IAssociationControl;
 import org.red5.io.sctp.IServerChannelControl;
 import org.red5.io.sctp.SctpException;
 
+/**
+ * <p>CookieAck class.</p>
+ *
+ * @author mondain
+ */
 public class CookieAck extends Chunk {
 
+    /**
+     * <p>Constructor for CookieAck.</p>
+     */
     public CookieAck() {
         super(ChunkType.COOKIE_ACK, (byte) 0x00, (short) CHUNK_HEADER_SIZE);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(IAssociationControl channel) throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException {
         // TODO Auto-generated method stub
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public void apply(InetSocketAddress address, IServerChannelControl server) throws SctpException, InvalidKeyException, NoSuchAlgorithmException, IOException {
         // TODO Auto-generated method stub

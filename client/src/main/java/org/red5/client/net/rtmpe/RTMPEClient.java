@@ -56,7 +56,9 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
         protocol = "rtmpe";
     }
 
-    /** Constructs a new RTMPEClient */
+    /**
+     * Constructs a new RTMPEClient
+     */
     public RTMPEClient() {
         super();
         log.debug("Creating client for RTMPE connection");
@@ -80,6 +82,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
         super.disconnect();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void handleException(Throwable throwable) {
         log.error("{}", new Object[] { throwable.getCause() });
@@ -88,7 +91,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
     /**
      * Adds a listener for receiving rtmp events.
      *
-     * @param clientListener
+     * @param clientListener a {@link org.red5.client.net.rtmp.IClientListener} object
      */
     public void addClientListener(IClientListener clientListener) {
         clientListeners.add(clientListener);
@@ -176,8 +179,9 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
     /**
      * Callback method fired when a NetStatusEvent is detected.
      *
-     * {@link http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/NetStatusEvent.html}
-     * @param status
+     * @see <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/events/NetStatusEvent.html">NetStatusEvent</a>
+     *
+     * @param status a {@link java.lang.Object} object
      */
     public void onStatus(Object status) {
         log.debug("onStatus - status: {}", status);
@@ -208,9 +212,9 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
     }
 
     /**
-     * Callback method fired when a Notify or other stream event is detected.
+     * {@inheritDoc}
      *
-     * @param notify
+     * Callback method fired when a Notify or other stream event is detected.
      */
     @Override
     public void onStreamEvent(Notify notify) {
@@ -220,8 +224,9 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
     /**
      * Callback method fired when a MetadataEvent is detected.
      *
-     * {@link http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/events/MetadataEvent.html}
-     * {@link http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/controls/VideoDisplay.html#metadata}
+     * @see <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/events/MetadataEvent.html">MetadataEvent</a>
+     * @see <a href="http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/mx/controls/VideoDisplay.html#metadata">VideoDisplay</a>
+     *
      * @param object metadata from a stream.
      */
     public void onMetaData(Object object) {
@@ -286,7 +291,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
     /**
      * Creates a proxy.
      *
-     * @param client
+     * @param client a {@link org.red5.client.net.rtmpe.RTMPEClient} object
      * @param host destination host
      * @param port destination port
      * @param app destination application
@@ -308,7 +313,7 @@ public class RTMPEClient extends RTMPClient implements INetStreamEventHandler, C
     /**
      * Creates a writer.
      *
-     * @param client
+     * @param client a {@link org.red5.client.net.rtmpe.RTMPEClient} object
      * @return writer
      */
     public static Writer createWriter(RTMPEClient client) {

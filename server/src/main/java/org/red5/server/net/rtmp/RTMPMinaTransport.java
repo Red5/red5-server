@@ -114,6 +114,11 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         }
     }
 
+    /**
+     * <p>start.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void start() throws Exception {
         initIOHandler();
         IoBuffer.setUseDirectBuffer(!useHeapBuffers); // this is global, oh well
@@ -218,6 +223,9 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         }
     }
 
+    /**
+     * <p>stop.</p>
+     */
     public void stop() {
         log.info("RTMP Mina Transport stop");
         // first we unbind to prevent new connections
@@ -239,11 +247,21 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         }
     }
 
+    /**
+     * <p>setAddress.</p>
+     *
+     * @param address a {@link java.lang.String} object
+     */
     public void setAddress(String address) {
         addresses.add(address);
         log.info("RTMP will be bound to {}", address);
     }
 
+    /**
+     * <p>Setter for the field <code>addresses</code>.</p>
+     *
+     * @param addrs a {@link java.util.List} object
+     */
     public void setAddresses(List<String> addrs) {
         for (String addr : addrs) {
             addresses.add(addr);
@@ -251,15 +269,23 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         log.info("RTMP will be bound to {}", addresses);
     }
 
+    /**
+     * <p>Setter for the field <code>ioHandler</code>.</p>
+     *
+     * @param rtmpIOHandler a {@link org.apache.mina.core.service.IoHandlerAdapter} object
+     */
     public void setIoHandler(IoHandlerAdapter rtmpIOHandler) {
         this.ioHandler = rtmpIOHandler;
     }
 
+    /** {@inheritDoc} */
     public void setIoThreads(int ioThreads) {
         this.ioThreads = ioThreads;
     }
 
     /**
+     * <p>Setter for the field <code>sendBufferSize</code>.</p>
+     *
      * @param sendBufferSize
      *            the sendBufferSize to set
      */
@@ -268,6 +294,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
     }
 
     /**
+     * <p>Setter for the field <code>receiveBufferSize</code>.</p>
+     *
      * @param receiveBufferSize
      *            the receiveBufferSize to set
      */
@@ -275,15 +303,27 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         this.receiveBufferSize = receiveBufferSize;
     }
 
+    /**
+     * <p>Getter for the field <code>maxReadBufferSize</code>.</p>
+     *
+     * @return a int
+     */
     public int getMaxReadBufferSize() {
         return maxReadBufferSize;
     }
 
+    /**
+     * <p>Setter for the field <code>maxReadBufferSize</code>.</p>
+     *
+     * @param maxReadBufferSize a int
+     */
     public void setMaxReadBufferSize(int maxReadBufferSize) {
         this.maxReadBufferSize = maxReadBufferSize;
     }
 
     /**
+     * <p>Setter for the field <code>trafficClass</code>.</p>
+     *
      * @param trafficClass
      *            the trafficClass to set
      */
@@ -292,6 +332,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
     }
 
     /**
+     * <p>Setter for the field <code>backlog</code>.</p>
+     *
      * @param backlog
      *            the backlog to set
      */
@@ -300,6 +342,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
     }
 
     /**
+     * <p>Setter for the field <code>thoughputCalcInterval</code>.</p>
+     *
      * @param thoughputCalcInterval
      *            the thoughputCalcInterval to set
      */
@@ -308,6 +352,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
     }
 
     /**
+     * <p>Setter for the field <code>executorKeepAliveTime</code>.</p>
+     *
      * @param executorKeepAliveTime
      *            the executorKeepAliveTime to set
      */
@@ -315,19 +361,36 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         this.executorKeepAliveTime = executorKeepAliveTime;
     }
 
+    /**
+     * <p>Setter for the field <code>enableDefaultAcceptor</code>.</p>
+     *
+     * @param enableDefaultAcceptor a boolean
+     */
     public void setEnableDefaultAcceptor(boolean enableDefaultAcceptor) {
         this.enableDefaultAcceptor = enableDefaultAcceptor;
     }
 
+    /**
+     * <p>Setter for the field <code>initialPoolSize</code>.</p>
+     *
+     * @param initialPoolSize a int
+     */
     public void setInitialPoolSize(int initialPoolSize) {
         this.initialPoolSize = initialPoolSize;
     }
 
+    /**
+     * <p>Setter for the field <code>maxPoolSize</code>.</p>
+     *
+     * @param maxPoolSize a int
+     */
     public void setMaxPoolSize(int maxPoolSize) {
         this.maxPoolSize = maxPoolSize;
     }
 
     /**
+     * <p>Setter for the field <code>maxProcessorPoolSize</code>.</p>
+     *
      * @param maxProcessorPoolSize
      *            the maxProcessorPoolSize to set
      */
@@ -335,11 +398,14 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         this.maxProcessorPoolSize = maxProcessorPoolSize;
     }
 
+    /** {@inheritDoc} */
     public void setTcpNoDelay(boolean tcpNoDelay) {
         this.tcpNoDelay = tcpNoDelay;
     }
 
     /**
+     * <p>Setter for the field <code>keepAlive</code>.</p>
+     *
      * @param keepAlive
      *            the keepAlive to set
      */
@@ -347,11 +413,14 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         this.keepAlive = keepAlive;
     }
 
+    /** {@inheritDoc} */
     public void setUseHeapBuffers(boolean useHeapBuffers) {
         this.useHeapBuffers = useHeapBuffers;
     }
 
     /**
+     * <p>isEnableMinaLogFilter.</p>
+     *
      * @return the enableMinaLogFilter
      */
     public boolean isEnableMinaLogFilter() {
@@ -359,6 +428,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
     }
 
     /**
+     * <p>Setter for the field <code>enableMinaLogFilter</code>.</p>
+     *
      * @param enableMinaLogFilter
      *            the enableMinaLogFilter to set
      */
@@ -367,6 +438,8 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
     }
 
     /**
+     * <p>Setter for the field <code>enableMinaMonitor</code>.</p>
+     *
      * @param enableMinaMonitor
      *            the enableMinaMonitor to set
      */
@@ -374,11 +447,18 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         this.enableMinaMonitor = enableMinaMonitor;
     }
 
+    /**
+     * <p>Setter for the field <code>minaPollInterval</code>.</p>
+     *
+     * @param minaPollInterval a int
+     */
     public void setMinaPollInterval(int minaPollInterval) {
         this.minaPollInterval = minaPollInterval;
     }
 
     /**
+     * <p>setReaderIdleTime.</p>
+     *
      * @param readerIdleTime
      *            the readerIdleTime to set
      */
@@ -500,6 +580,11 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
         return json.toString();
     }
 
+    /**
+     * <p>toString.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String toString() {
         return String.format("RTMP Mina Transport %s", addresses.toString());
     }

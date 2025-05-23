@@ -9,6 +9,8 @@ package org.red5.server.exception;
 
 /**
  * Thrown when server can't be found
+ *
+ * @author mondain
  */
 public class ServiceNotFoundException extends RuntimeException {
 

@@ -9,6 +9,8 @@ package org.red5.server.exception;
 
 /**
  * Thrown on stream data exception
+ *
+ * @author mondain
  */
 public class StreamDataException extends RuntimeException {
 

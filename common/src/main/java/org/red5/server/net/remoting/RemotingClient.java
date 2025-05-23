@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RemotingClient implements IRemotingClient {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(RemotingClient.class);
 
     /** Default timeout to use. */
@@ -98,10 +99,20 @@ public class RemotingClient implements IRemotingClient {
         log.debug("RemotingClient created  - url: {} timeout: {}", url, timeout);
     }
 
+    /**
+     * <p>Getter for the field <code>poolSize</code>.</p>
+     *
+     * @return a int
+     */
     public int getPoolSize() {
         return poolSize;
     }
 
+    /**
+     * <p>Setter for the field <code>poolSize</code>.</p>
+     *
+     * @param poolSize a int
+     */
     public void setPoolSize(int poolSize) {
         this.poolSize = poolSize;
         executor = Executors.newFixedThreadPool(poolSize);

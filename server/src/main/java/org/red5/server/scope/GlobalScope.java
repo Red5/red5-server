@@ -21,6 +21,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  * @see org.red5.server.api.scope.IGlobalScope
  * @see org.red5.server.api.scope.IScope
  * @see org.red5.server.scope.Scope
+ * @author mondain
  */
 @ManagedResource
 public class GlobalScope extends Scope implements IGlobalScope, GlobalScopeMXBean {
@@ -33,11 +34,7 @@ public class GlobalScope extends Scope implements IGlobalScope, GlobalScopeMXBea
         name = "default";
     }
 
-    /**
-     *
-     * @param persistenceClass Persistent class name
-     * @throws Exception Exception
-     */
+    /** {@inheritDoc} */
     @Override
     public void setPersistenceClass(String persistenceClass) throws Exception {
         this.persistenceClass = persistenceClass;
@@ -46,9 +43,9 @@ public class GlobalScope extends Scope implements IGlobalScope, GlobalScopeMXBea
     }
 
     /**
-     * Get persistence store for scope
+     * {@inheritDoc}
      *
-     * @return Persistence store
+     * Get persistence store for scope
      */
     @Override
     public IPersistenceStore getStore() {

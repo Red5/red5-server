@@ -10,17 +10,27 @@ package org.red5.client.net.rtmpt;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.server.api.IConnection;
 
+/**
+ * <p>RTMPTClientConnection class.</p>
+ *
+ * @author mondain
+ */
 public class RTMPTClientConnection extends BaseRTMPTConnection {
 
+    /**
+     * <p>Constructor for RTMPTClientConnection.</p>
+     */
     public RTMPTClientConnection() {
         super(IConnection.Type.PERSISTENT.name().toLowerCase());
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void onInactive() {
         this.close();
     }
 
+    /** {@inheritDoc} */
     @Override
     public IoBuffer getPendingMessages(int targetSize) {
         return foldPendingMessages(targetSize);

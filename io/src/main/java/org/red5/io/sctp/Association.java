@@ -20,6 +20,11 @@ import java.util.Random;
 import org.red5.io.sctp.packet.SctpPacket;
 import org.red5.io.sctp.packet.chunks.Init;
 
+/**
+ * <p>Association class.</p>
+ *
+ * @author mondain
+ */
 public class Association implements IAssociationControl {
 
     @SuppressWarnings("unused")
@@ -42,6 +47,15 @@ public class Association implements IAssociationControl {
 
     private Random random;
 
+    /**
+     * <p>Constructor for Association.</p>
+     *
+     * @param random a {@link java.util.Random} object
+     * @param sourceAddress a {@link java.net.InetSocketAddress} object
+     * @param initialTSN a int
+     * @param verificationTag a int
+     * @throws java.net.SocketException if any.
+     */
     public Association(final Random random, InetSocketAddress sourceAddress, int initialTSN, int verificationTag) throws SocketException {
         this.random = random;
         setState(State.CLOSED);
@@ -50,6 +64,13 @@ public class Association implements IAssociationControl {
         creationTimestamp = new Timestamp(System.currentTimeMillis());
     }
 
+    /**
+     * <p>Constructor for Association.</p>
+     *
+     * @param random a {@link java.util.Random} object
+     * @param sourceAddress a {@link java.net.InetSocketAddress} object
+     * @throws java.net.SocketException if any.
+     */
     public Association(final Random random, InetSocketAddress sourceAddress) throws SocketException {
         this.random = random;
         setState(State.CLOSED);
@@ -58,6 +79,16 @@ public class Association implements IAssociationControl {
         creationTimestamp = new Timestamp(System.currentTimeMillis());
     }
 
+    /**
+     * <p>setUp.</p>
+     *
+     * @param address a {@link java.net.InetSocketAddress} object
+     * @return a boolean
+     * @throws java.io.IOException if any.
+     * @throws org.red5.io.sctp.SctpException if any.
+     * @throws java.security.InvalidKeyException if any.
+     * @throws java.security.NoSuchAlgorithmException if any.
+     */
     public boolean setUp(InetSocketAddress address) throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
         destination = address;
 
@@ -94,44 +125,65 @@ public class Association implements IAssociationControl {
         return state == State.ESTABLISHED;
     }
 
+    /** {@inheritDoc} */
     @Override
     public State getState() {
         return state;
     }
 
+    /**
+     * <p>Setter for the field <code>source</code>.</p>
+     *
+     * @param source a {@link java.net.DatagramSocket} object
+     */
     public void setSource(DatagramSocket source) {
         this.source = source;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getVerificationTag() {
         return verificationTagDestination;
     }
 
+    /**
+     * <p>getVerificationTagItself.</p>
+     *
+     * @return a int
+     */
     public int getVerificationTagItself() {
         return verificationTagSource;
     }
 
+    /**
+     * <p>setVerificationTagItself.</p>
+     *
+     * @param verificationTagItself a int
+     */
     public void setVerificationTagItself(int verificationTagItself) {
         this.verificationTagSource = verificationTagItself;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setState(State state) {
         this.state = state;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendPacket(SctpPacket packet) throws IOException {
         byte[] data = packet.getBytes();
         source.send(new DatagramPacket(data, data.length));
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getDestinationPort() {
         return destination.getPort();
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getSourcePort() {
         return source.getLocalPort();

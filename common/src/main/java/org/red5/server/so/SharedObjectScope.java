@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Special scope for shared objects
+ *
+ * @author mondain
  */
 public class SharedObjectScope extends BasicScope implements ISharedObject, StatusCodes {
 
@@ -191,7 +193,11 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         securityHandlers.remove(handler);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<ISharedObjectSecurity> getSharedObjectSecurity() {
         return Collections.unmodifiableSet(securityHandlers);
     }
@@ -214,16 +220,29 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return so.get().getPath();
     }
 
+    /**
+     * <p>setPath.</p>
+     *
+     * @param path a {@link java.lang.String} object
+     */
     public void setPath(String path) {
         so.get().setPath(path);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isPersistent() {
         return so.get().isPersistent();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getVersion() {
         return so.get().getVersion();
     }
@@ -298,6 +317,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return success;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean removeAttribute(Enum<?> enm) {
         return removeAttribute(enm.name());
@@ -314,7 +334,11 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int size() {
         return so.get() != null ? so.get().getAttributeNames().size() : 0;
     }
@@ -372,6 +396,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return so.get().hasAttribute(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean hasAttribute(Enum<?> enm) {
         return hasAttribute(enm.name());
@@ -383,6 +408,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return so.get().getAttribute(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object getAttribute(Enum<?> enm) {
         return getAttribute(enm.name());
@@ -466,7 +492,11 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return so.get().getStringAttribute(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> getData() {
         return so.get().getData();
     }
@@ -688,6 +718,7 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return success;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean setAttribute(Enum<?> enm, Object value) {
         return setAttribute(enm.name(), value);
@@ -740,6 +771,9 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         handlers.put(name, handler);
     }
 
+    /**
+     * <p>unregisterServiceHandler.</p>
+     */
     public void unregisterServiceHandler() {
         unregisterServiceHandler("");
     }
@@ -760,12 +794,20 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return handlers.get(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<String> getServiceHandlerNames() {
         return Collections.unmodifiableSet(handlers.keySet());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean clear() {
         boolean success = so.get().clear();
         if (success) {
@@ -776,7 +818,9 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return success;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void close() {
         // close the internal SO
         so.get().close();
@@ -786,7 +830,11 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         so.set(null);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.statistics.ISharedObjectStatistics} object
+     */
     public ISharedObjectStatistics getStatistics() {
         return so.get();
     }

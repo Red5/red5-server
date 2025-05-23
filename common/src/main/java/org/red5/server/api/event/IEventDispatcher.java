@@ -9,6 +9,8 @@ package org.red5.server.api.event;
 
 /**
  * IEventDispatcher interface implementations dispatch events
+ *
+ * @author mondain
  */
 public interface IEventDispatcher {
 

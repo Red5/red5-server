@@ -12,6 +12,7 @@ import org.red5.server.api.IConnection;
 import org.red5.server.api.scope.IScope;
 
 /**
+ * <p>ApplicationLifecycle class.</p>
  *
  * @author Dominick Accattato (daccattato@gmail.com)
  */
@@ -21,6 +22,13 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @seeorg.red5.server.adapter.IApplication#appConnect(org.red5.server.api. IConnection, java.lang.Object[])
      */
+    /**
+     * <p>appConnect.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     * @param params an array of {@link java.lang.Object} objects
+     * @return a boolean
+     */
     public boolean appConnect(IConnection conn, Object[] params) {
         return true;
     }
@@ -29,6 +37,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#appDisconnect(org.red5.server.api .IConnection)
      */
+    /** {@inheritDoc} */
     public void appDisconnect(IConnection conn) {
     }
 
@@ -36,6 +45,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#appJoin(org.red5.server.api.IClient, org.red5.server.api.IScope)
      */
+    /** {@inheritDoc} */
     public boolean appJoin(IClient client, IScope app) {
         return true;
     }
@@ -44,6 +54,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#appLeave(org.red5.server.api.IClient , org.red5.server.api.IScope)
      */
+    /** {@inheritDoc} */
     public void appLeave(IClient client, IScope app) {
     }
 
@@ -51,6 +62,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#appStart(org.red5.server.api.IScope)
      */
+    /** {@inheritDoc} */
     public boolean appStart(IScope app) {
         return true;
     }
@@ -59,12 +71,20 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#appStop(org.red5.server.api.IScope)
      */
+    /** {@inheritDoc} */
     public void appStop(IScope app) {
     }
 
     /*
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#roomConnect(org.red5.server.api. IConnection, java.lang.Object[])
+     */
+    /**
+     * <p>roomConnect.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     * @param params an array of {@link java.lang.Object} objects
+     * @return a boolean
      */
     public boolean roomConnect(IConnection conn, Object[] params) {
         return true;
@@ -74,6 +94,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#roomDisconnect(org.red5.server.api .IConnection)
      */
+    /** {@inheritDoc} */
     public void roomDisconnect(IConnection conn) {
 
     }
@@ -82,6 +103,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#roomJoin(org.red5.server.api.IClient , org.red5.server.api.IScope)
      */
+    /** {@inheritDoc} */
     public boolean roomJoin(IClient client, IScope room) {
         return true;
     }
@@ -90,6 +112,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#roomLeave(org.red5.server.api.IClient , org.red5.server.api.IScope)
      */
+    /** {@inheritDoc} */
     public void roomLeave(IClient client, IScope room) {
     }
 
@@ -97,6 +120,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#roomStart(org.red5.server.api.IScope )
      */
+    /** {@inheritDoc} */
     public boolean roomStart(IScope room) {
         return true;
     }
@@ -105,6 +129,7 @@ public class ApplicationLifecycle implements IApplication {
      * (non-Javadoc)
      * @see org.red5.server.adapter.IApplication#roomStop(org.red5.server.api.IScope)
      */
+    /** {@inheritDoc} */
     public void roomStop(IScope room) {
     }
 

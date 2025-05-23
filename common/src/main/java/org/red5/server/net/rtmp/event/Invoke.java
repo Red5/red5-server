@@ -18,6 +18,8 @@ import org.red5.server.api.service.IPendingServiceCall;
 
 /**
  * Remote invocation event
+ *
+ * @author mondain
  */
 public class Invoke extends Notify {
 
@@ -27,7 +29,9 @@ public class Invoke extends Notify {
         dataType = TYPE_INVOKE;
     }
 
-    /** Constructs a new Invoke. */
+    /**
+     * Constructs a new Invoke.
+     */
     public Invoke() {
     }
 
@@ -86,9 +90,9 @@ public class Invoke extends Notify {
     }
 
     /**
-     * Duplicate this Invoke message to future injection. Serialize to memory and deserialize, safe way.
+     * {@inheritDoc}
      *
-     * @return duplicated Invoke event
+     * Duplicate this Invoke message to future injection. Serialize to memory and deserialize, safe way.
      */
     @Override
     public Invoke duplicate() throws IOException, ClassNotFoundException {

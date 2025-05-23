@@ -14,9 +14,18 @@ import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.dtd.Tag;
 
 /**
- * Any class able to handle {@link Tag} using {@link InputStream} given
+ * Any class able to handle {@link org.red5.io.matroska.dtd.Tag} using {@link java.io.InputStream} given
  *
+ * @author mondain
  */
 public interface TagHandler {
+    /**
+     * <p>handle.</p>
+     *
+     * @param tag a {@link org.red5.io.matroska.dtd.Tag} object
+     * @param input a {@link java.io.InputStream} object
+     * @throws java.io.IOException if any.
+     * @throws org.red5.io.matroska.ConverterException if any.
+     */
     void handle(Tag tag, InputStream input) throws IOException, ConverterException;
 }

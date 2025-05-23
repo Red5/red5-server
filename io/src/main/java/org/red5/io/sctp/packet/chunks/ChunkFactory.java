@@ -9,7 +9,21 @@ package org.red5.io.sctp.packet.chunks;
 
 import org.red5.io.sctp.SctpException;
 
+/**
+ * <p>ChunkFactory class.</p>
+ *
+ * @author mondain
+ */
 public class ChunkFactory {
+    /**
+     * <p>createChunk.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     * @return a {@link org.red5.io.sctp.packet.chunks.Chunk} object
+     * @throws org.red5.io.sctp.SctpException if any.
+     */
     public static Chunk createChunk(final byte[] data, int offset, int length) throws SctpException {
         assert length > 0;
         switch (ChunkType.values()[data[offset]]) {

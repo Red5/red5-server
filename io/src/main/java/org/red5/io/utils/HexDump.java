@@ -21,7 +21,6 @@ public class HexDump {
     /**
      * Method prettyPrintHex
      *
-     *
      * @param bbToConvert
      *            ByteBuffer to encode
      * @return Hexdump string
@@ -32,7 +31,6 @@ public class HexDump {
 
     /**
      * Method prettyPrintHex
-     *
      *
      * @param baToConvert
      *            Array of bytes to encode
@@ -50,7 +48,6 @@ public class HexDump {
 
     /**
      * Method prettyPrintHex
-     *
      *
      * @param sToConvert
      *            string to convert
@@ -139,6 +136,7 @@ public class HexDump {
      *            The new BitDigits value
      * @exception Exception
      *                Description of Exception
+     * @throws java.lang.Exception if any.
      */
     public static void setBitDigits(char[] bd) throws Exception {
 
@@ -729,6 +727,12 @@ public class HexDump {
         return new String(buf);
     }
 
+    /**
+     * <p>formatHexDump.</p>
+     *
+     * @param in a {@link java.lang.String} object
+     * @return a {@link java.lang.String} object
+     */
     public static String formatHexDump(String in) {
         int chunk = 60;
         StringBuilder out = new StringBuilder();

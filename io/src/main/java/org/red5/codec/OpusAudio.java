@@ -14,7 +14,7 @@ import org.red5.io.IoConstants;
  *
  * Opus has no decoder configuration; its all in-band.
  *
- * Opus audio - <https://opus-codec.org/>
+ * <a href="https://opus-codec.org/">Opus audio</a>
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -46,11 +46,13 @@ public class OpusAudio extends AbstractAudio {
         codec = AudioCodec.OPUS;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return CODEC_NAME;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
@@ -109,23 +111,44 @@ public class OpusAudio extends AbstractAudio {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IoBuffer getDecoderConfiguration() {
         return IoBuffer.wrap(new byte[] { (byte) index, (byte) channels });
     }
 
+    /**
+     * <p>Getter for the field <code>index</code>.</p>
+     *
+     * @return a int
+     */
     public int getIndex() {
         return index;
     }
 
+    /**
+     * <p>Setter for the field <code>index</code>.</p>
+     *
+     * @param index a int
+     */
     public void setIndex(int index) {
         this.index = index;
     }
 
+    /**
+     * <p>isNeedConfig.</p>
+     *
+     * @return a boolean
+     */
     public boolean isNeedConfig() {
         return needConfig;
     }
 
+    /**
+     * <p>Setter for the field <code>needConfig</code>.</p>
+     *
+     * @param needConfig a boolean
+     */
     public void setNeedConfig(boolean needConfig) {
         this.needConfig = needConfig;
     }

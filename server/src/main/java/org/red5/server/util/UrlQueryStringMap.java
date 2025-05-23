@@ -9,12 +9,14 @@ import java.util.HashMap;
  *            key
  * @param <V>
  *            value
- *
  * @author Paul Gregoire
  */
 @SuppressWarnings("serial")
 public final class UrlQueryStringMap<K, V> extends HashMap<K, V> {
 
+    /**
+     * <p>Constructor for UrlQueryStringMap.</p>
+     */
     public UrlQueryStringMap() {
         super();
     }

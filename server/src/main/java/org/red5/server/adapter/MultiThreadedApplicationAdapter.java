@@ -72,7 +72,7 @@ import org.slf4j.Logger;
  * ApplicationAdapter class serves as a base class for your Red5 applications. It provides methods to work with SharedObjects and streams,
  * as well as connections and scheduling services. <br>
  * ApplicationAdapter is an application level IScope. To handle streaming processes in your application you should implement
- * {@link IStreamAwareScopeHandler} interface and implement handling methods. <br>
+ * {@link org.red5.server.api.stream.IStreamAwareScopeHandler} interface and implement handling methods. <br>
  * Application adapter provides you with useful event handlers that can be used to intercept streams, authorize users, etc. Also, all
  * methods added in subclasses can be called from client side with NetConnection.call method. Unlike to Flash Media server which requires
  * you to keep methods on Client object at server side, Red5 offers much more convenient way to add methods <br>
@@ -177,7 +177,11 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         publishSecurity.remove(handler);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<IStreamPublishSecurity> getStreamPublishSecurity() {
         return publishSecurity;
     }
@@ -192,7 +196,11 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         playbackSecurity.remove(handler);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<IStreamPlaybackSecurity> getStreamPlaybackSecurity() {
         return playbackSecurity;
     }
@@ -207,13 +215,17 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         sharedObjectSecurity.remove(handler);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<ISharedObjectSecurity> getSharedObjectSecurity() {
         return sharedObjectSecurity;
     }
 
     /**
-     * Reject the currently connecting client without a special error message. This method throws {@link ClientRejectedException} exception.
+     * Reject the currently connecting client without a special error message. This method throws {@link org.red5.server.exception.ClientRejectedException} exception.
      *
      * @return never returns
      * @throws org.red5.server.exception.ClientRejectedException
@@ -231,7 +243,6 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * @param reason
      *            Additional error message to return to client-side Flex/Flash application
      * @return never returns
-     *
      * @throws org.red5.server.exception.ClientRejectedException
      *             Thrown when client connection must be rejected by application logic
      */
@@ -241,8 +252,8 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
 
     /**
      * Returns connection result for given scope and parameters. Whether the scope is room or app level scope, this method distinguishes it
-     * and acts accordingly. You override {@link ApplicationAdapter#appConnect(IConnection, Object[])} or
-     * {@link ApplicationAdapter#roomConnect(IConnection, Object[])} in your application to make it act the way you want.
+     * and acts accordingly. You override {@link org.red5.server.adapter.ApplicationAdapter#appConnect(IConnection, Object[])} or
+     * {@link org.red5.server.adapter.ApplicationAdapter#roomConnect(IConnection, Object[])} in your application to make it act the way you want.
      *
      * @param conn
      *            Connection object
@@ -260,27 +271,11 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Returns connection result for given scope and parameters. Whether the scope is room or app level scope, this method distinguishes it
      * and acts accordingly. You override {@link ApplicationAdapter#appConnect(IConnection, Object[])} or
      * {@link ApplicationAdapter#roomConnect(IConnection, Object[])} in your application to make it act the way you want.
-     *
-     * @param conn
-     *            Connection object
-     * @param scope
-     *            Scope
-     * @param params
-     *            List of params passed to connection handler
-     * @return <code>
-     * true
-     * </code>
-     *
-     *         if connect is successful,
-     *
-     *         <code>
-     * false
-     * </code>
-     *
-     *         otherwise
      */
     @Override
     public boolean connect(IConnection conn, IScope scope, Object[] params) {
@@ -313,21 +308,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Starts scope. Scope can be both application or room level.
-     *
-     * @param scope
-     *            Scope object
-     * @return <code>
-     * true
-     * </code>
-     *
-     *         if scope can be started,
-     *
-     *         <code>
-     * false
-     * </code>
-     *
-     *         otherwise. See {@link AbstractScopeAdapter#start(IScope)} for details.
      */
     @Override
     public boolean start(IScope scope) {
@@ -411,13 +394,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Returns disconnection result for given scope and parameters. Whether the scope is room or app level scope, this method distinguishes
      * it and acts accordingly.
-     *
-     * @param conn
-     *            Connection object
-     * @param scope
-     *            Scope
      */
     @Override
     public void disconnect(IConnection conn, IScope scope) {
@@ -442,12 +422,11 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Stops scope handling (that is, stops application if given scope is app level scope and stops room handling if given scope has lower
      * scope level). This method calls {@link ApplicationAdapter#appStop(IScope)} or {@link ApplicationAdapter#roomStop(IScope)} handlers
      * respectively.
-     *
-     * @param scope
-     *            Scope to stop
      */
     @Override
     public void stop(IScope scope) {
@@ -467,14 +446,11 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Adds client to scope. Scope can be both application or room. Can be applied to both application scope and scopes of lower level. This
      * method calls {@link ApplicationAdapter#appJoin(IClient, IScope)} or {@link ApplicationAdapter#roomJoin(IClient, IScope)} handlers
      * respectively.
-     *
-     * @param client
-     *            Client object
-     * @param scope
-     *            Scope object
      */
     @Override
     public boolean join(IClient client, IScope scope) {
@@ -489,13 +465,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Disconnects client from scope. Can be applied to both application scope and scopes of lower level. This method calls
      * {@link ApplicationAdapter#appLeave(IClient, IScope)} or {@link ApplicationAdapter#roomLeave(IClient, IScope)} handlers respectively.
-     *
-     * @param client
-     *            Client object
-     * @param scope
-     *            Scope object
      */
     @Override
     public void leave(IClient client, IScope scope) {
@@ -509,22 +482,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Called once on scope (that is, application or application room) start. You override {@link ApplicationAdapter#appStart(IScope)} or
      * {@link ApplicationAdapter#roomStart(IScope)} in your application to make it act the way you want.
-     *
-     * @param app
-     *            Application scope object
-     * @return <code>
-     * true
-     * </code>
-     *
-     *         if scope can be started,
-     *
-     *         <code>
-     * false
-     * </code>
-     *
-     *         otherwise
      */
     public boolean appStart(IScope app) {
         log.debug("appStart: {}", app);
@@ -537,10 +498,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Handler method. Called when application is stopped.
+     * {@inheritDoc}
      *
-     * @param app
-     *            Scope object
+     * Handler method. Called when application is stopped.
      */
     public void appStop(IScope app) {
         log.debug("appStop: {}", app);
@@ -550,11 +510,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Handler method. Called when room scope is started.
+     * {@inheritDoc}
      *
-     * @param room
-     *            Room scope
-     * @return Boolean value
+     * Handler method. Called when room scope is started.
      */
     public boolean roomStart(IScope room) {
         log.debug("roomStart: {}", room);
@@ -568,10 +526,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Handler method. Called when room scope is stopped.
+     * {@inheritDoc}
      *
-     * @param room
-     *            Room scope.
+     * Handler method. Called when room scope is stopped.
      */
     public void roomStop(IScope room) {
         log.debug("roomStop: {}", room);
@@ -628,6 +585,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean appConnect(WebSocketConnection wsConn, Object[] params) {
         log.debug("appConnect: {}", wsConn);
@@ -646,7 +604,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      *
      * method.
      *
-     * See {@link ApplicationAdapter#appConnect(IConnection, Object[])} for code example.
+     * See {@link org.red5.server.adapter.ApplicationAdapter#appConnect(IConnection, Object[])} for code example.
      *
      * @param conn
      *            Connection object
@@ -665,10 +623,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Handler method. Called every time client disconnects from the application.
+     * {@inheritDoc}
      *
-     * @param conn
-     *            Disconnected connection object
+     * Handler method. Called every time client disconnects from the application.
      */
     public void appDisconnect(IConnection conn) {
         log.debug("appDisconnect: {}", conn);
@@ -677,6 +634,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean appDisconnect(WebSocketConnection wsConn) {
         log.debug("appDisconnect: {}", wsConn);
@@ -684,10 +642,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Handler method. Called every time client disconnects from the room.
+     * {@inheritDoc}
      *
-     * @param conn
-     *            Disconnected connection object
+     * Handler method. Called every time client disconnects from the room.
      */
     public void roomDisconnect(IConnection conn) {
         log.debug("roomDisconnect: {}", conn);
@@ -696,6 +653,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         }
     }
 
+    /** {@inheritDoc} */
     public boolean appJoin(IClient client, IScope app) {
         log.debug("appJoin: {} >> {}", client, app);
         for (IApplication listener : listeners) {
@@ -707,12 +665,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Handler method. Called every time client leaves application scope.
+     * {@inheritDoc}
      *
-     * @param client
-     *            Client object that left
-     * @param app
-     *            Application scope
+     * Handler method. Called every time client leaves application scope.
      */
     public void appLeave(IClient client, IScope app) {
         log.debug("appLeave: {} << {}", client, app);
@@ -721,6 +676,7 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         }
     }
 
+    /** {@inheritDoc} */
     public boolean roomJoin(IClient client, IScope room) {
         log.debug("roomJoin: {} >> {}", client, room);
         for (IApplication listener : listeners) {
@@ -732,12 +688,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Handler method. Called every time client leaves room scope.
+     * {@inheritDoc}
      *
-     * @param client
-     *            Disconnected client object
-     * @param room
-     *            Room scope
+     * Handler method. Called every time client leaves room scope.
      */
     public void roomLeave(IClient client, IScope room) {
         log.debug("roomLeave: {} << {}", client, room);
@@ -771,6 +724,8 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /* Wrapper around ISharedObjectService */
 
     /**
+     * {@inheritDoc}
+     *
      * Creates a new shared object for given scope. Server-side shared objects (also known as Remote SO) are special kind of objects those
      * variable are synchronized between clients. To get an instance of RSO at client-side, use
      *
@@ -786,14 +741,6 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * </code>
      *
      * ), otherwise prefer usage of transient for extra performance.
-     *
-     * @param scope
-     *            Scope that shared object belongs to
-     * @param name
-     *            Name of SharedObject
-     * @param persistent
-     *            Whether SharedObject instance should be persistent or not
-     * @return true if SO was created, false otherwise
      */
     public boolean createSharedObject(IScope scope, String name, boolean persistent) {
         ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
@@ -801,13 +748,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Returns shared object from given scope by name.
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Scope that shared object belongs to
-     * @param name
-     *            Name of SharedObject
-     * @return Shared object instance with name given
+     * Returns shared object from given scope by name.
      */
     public ISharedObject getSharedObject(IScope scope, String name) {
         ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
@@ -815,15 +758,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Returns shared object from given scope by name.
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Scope that shared object belongs to
-     * @param name
-     *            Name of SharedObject
-     * @param persistent
-     *            Whether SharedObject instance should be persistent or not
-     * @return Shared object instance with name given
+     * Returns shared object from given scope by name.
      */
     public ISharedObject getSharedObject(IScope scope, String name, boolean persistent) {
         ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
@@ -831,10 +768,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Returns available SharedObject names as List
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Scope that SO belong to
+     * Returns available SharedObject names as List
      */
     public Set<String> getSharedObjectNames(IScope scope) {
         ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
@@ -842,12 +778,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Checks whether there's a SO with given scope and name
+     * {@inheritDoc}
      *
-     * @param scope
-     *            Scope that SO belong to
-     * @param name
-     *            Name of SharedObject
+     * Checks whether there's a SO with given scope and name
      */
     public boolean hasSharedObject(IScope scope, String name) {
         ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
@@ -902,6 +835,8 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Returns list of stream names broadcasted in scope. Broadcast stream name is somewhat different from server stream name. Server stream
      * name is just an ID assigned by Red5 to every created stream. Broadcast stream name is the name that is being used to subscribe to the
      * stream at client side, that is, in
@@ -911,24 +846,15 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
      * </code>
      *
      * call.
-     *
-     * @param scope
-     *            Scope to retrieve broadcasted stream names
-     * @return List of broadcasted stream names.
      */
     public Set<String> getBroadcastStreamNames(IScope scope) {
         return getProviderService().getBroadcastStreamNames(scope);
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Check whether scope has VOD stream with given name or not
-     *
-     * @param scope
-     *            Scope
-     * @param name
-     *            VOD stream name
-     *
-     * @return true if scope has VOD stream with given name, false otherwise.
      */
     public boolean hasOnDemandStream(IScope scope, String name) {
         IMessageInput msgIn = getProviderService().getVODProviderInput(scope, name);
@@ -939,15 +865,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Returns VOD stream with given name from specified scope.
-     *
-     * @param scope
-     *            Scope object
-     * @param name
-     *            VOD stream name
-     *
-     * @return IOnDemandStream object that represents stream that can be played on demand, seekable and so forth. See
-     *         {@link IOnDemandStream} for details.
      */
     public IOnDemandStream getOnDemandStream(IScope scope, String name) {
         log.warn("This won't work until the refactoring of the streaming code is complete");
@@ -956,14 +876,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Returns subscriber stream with given name from specified scope. Subscriber stream is a stream that clients can subscribe to.
-     *
-     * @param scope
-     *            Scope
-     * @param name
-     *            Stream name
-     *
-     * @return ISubscriberStream object
      */
     public ISubscriberStream getSubscriberStream(IScope scope, String name) {
         log.warn("This won't work until the refactoring of the streaming code is complete");
@@ -972,15 +887,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Wrapper around ISchedulingService, adds a scheduled job to be run periodically. We store this service in the scope as it can be
      * shared across all rooms of the applications.
-     *
-     * @param interval
-     *            Time interval to run the scheduled job
-     * @param job
-     *            Scheduled job object
-     *
-     * @return Name of the scheduled job
      */
     public String addScheduledJob(int interval, IScheduledJob job) {
         if (schedulingService == null) {
@@ -991,14 +901,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Adds a scheduled job that's gonna be executed once. Please note that the jobs are not saved if Red5 is restarted in the meantime.
-     *
-     * @param timeDelta
-     *            Time offset in milliseconds from the current date when given job should be run
-     * @param job
-     *            Scheduled job object
-     *
-     * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(long timeDelta, IScheduledJob job) {
         if (schedulingService == null) {
@@ -1008,15 +913,10 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Adds a scheduled job that's gonna be executed once on given date. Please note that the jobs are not saved if Red5 is restarted in the
      * meantime.
-     *
-     * @param date
-     *            When to run scheduled job
-     * @param job
-     *            Scheduled job object
-     *
-     * @return Name of the scheduled job
      */
     public String addScheduledOnceJob(Date date, IScheduledJob job) {
         if (schedulingService == null) {
@@ -1026,15 +926,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Adds a scheduled job which starts after the specified delay period and fires periodically.
+     * {@inheritDoc}
      *
-     * @param interval
-     *            time in milliseconds between two notifications of the job
-     * @param job
-     *            the job to trigger periodically
-     * @param delay
-     *            time in milliseconds to pass before first execution.
-     * @return the name of the scheduled job
+     * Adds a scheduled job which starts after the specified delay period and fires periodically.
      */
     public String addScheduledJobAfterDelay(int interval, IScheduledJob job, int delay) {
         if (schedulingService == null) {
@@ -1045,10 +939,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Pauses a scheduled job
+     * {@inheritDoc}
      *
-     * @param name
-     *            Scheduled job name
+     * Pauses a scheduled job
      */
     public void pauseScheduledJob(String name) {
         if (schedulingService == null) {
@@ -1058,10 +951,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Resumes a scheduled job
+     * {@inheritDoc}
      *
-     * @param name
-     *            Scheduled job name
+     * Resumes a scheduled job
      */
     public void resumeScheduledJob(String name) {
         if (schedulingService == null) {
@@ -1071,10 +963,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Removes scheduled job from scheduling service list
+     * {@inheritDoc}
      *
-     * @param name
-     *            Scheduled job name
+     * Removes scheduled job from scheduling service list
      */
     public void removeScheduledJob(String name) {
         if (schedulingService == null) {
@@ -1236,10 +1127,9 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     }
 
     /**
-     * Notification that a broadcasting stream is closing.
+     * {@inheritDoc}
      *
-     * @param stream
-     *            stream
+     * Notification that a broadcasting stream is closing.
      */
     public void streamBroadcastClose(IBroadcastStream stream) {
         // log w3c connect event
@@ -1285,14 +1175,17 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         }
     }
 
+    /** {@inheritDoc} */
     public void streamBroadcastStart(IBroadcastStream stream) {
     }
 
+    /** {@inheritDoc} */
     public void streamPlayItemPlay(ISubscriberStream stream, IPlayItem item, boolean isLive) {
         // log w3c connect event
         log.info("W3C x-category:stream x-event:play c-ip:{} x-sname:{} x-name:{}", new Object[] { Red5.getConnectionLocal().getRemoteAddress(), stream.getName(), item.getName() });
     }
 
+    /** {@inheritDoc} */
     public void streamPlayItemStop(ISubscriberStream stream, IPlayItem item) {
         // since there is a fair amount of processing below we will check log
         // level prior to proceeding
@@ -1333,44 +1226,52 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         }
     }
 
+    /** {@inheritDoc} */
     public void streamPlayItemPause(ISubscriberStream stream, IPlayItem item, int position) {
         // log w3c connect event
         log.info("W3C x-category:stream x-event:pause c-ip:{} x-sname:{}", Red5.getConnectionLocal().getRemoteAddress(), stream.getName());
     }
 
+    /** {@inheritDoc} */
     public void streamPlayItemResume(ISubscriberStream stream, IPlayItem item, int position) {
         // log w3c connect event
         log.info("W3C x-category:stream x-event:unpause c-ip:{} x-sname:{}", Red5.getConnectionLocal().getRemoteAddress(), stream.getName());
     }
 
+    /** {@inheritDoc} */
     public void streamPlayItemSeek(ISubscriberStream stream, IPlayItem item, int position) {
         // Override if necessary.
     }
 
+    /** {@inheritDoc} */
     public void streamPublishStart(IBroadcastStream stream) {
         // log w3c connect event
         IConnection connection = Red5.getConnectionLocal();
         log.info("W3C x-category:stream x-event:publish c-ip:{} x-sname:{} x-name:{}", new Object[] { connection != null ? connection.getRemoteAddress() : "0.0.0.0", stream.getName(), stream.getPublishedName() });
     }
 
+    /** {@inheritDoc} */
     public void streamRecordStart(IBroadcastStream stream) {
         // log w3c connect event
         IConnection connection = Red5.getConnectionLocal();
         log.info("W3C x-category:stream x-event:record-start c-ip:{} x-sname:{} x-file-name:{}", new Object[] { connection != null ? connection.getRemoteAddress() : "0.0.0.0", stream.getName(), stream.getSaveFilename() });
     }
 
+    /** {@inheritDoc} */
     public void streamRecordStop(IBroadcastStream stream) {
         // log w3c connect event
         IConnection connection = Red5.getConnectionLocal();
         log.info("W3C x-category:stream x-event:record-stop c-ip:{} x-sname:{} x-file-name:{}", new Object[] { connection != null ? connection.getRemoteAddress() : "0.0.0.0", stream.getName(), stream.getSaveFilename() });
     }
 
+    /** {@inheritDoc} */
     public void streamSubscriberClose(ISubscriberStream stream) {
         // log w3c connect event
         IConnection conn = Red5.getConnectionLocal();
         log.info("W3C x-category:stream x-event:stop c-ip:{} cs-bytes:{} sc-bytes:{} x-sname:{}", new Object[] { conn.getRemoteAddress(), conn.getReadBytes(), conn.getWrittenBytes(), stream.getName() });
     }
 
+    /** {@inheritDoc} */
     public void streamSubscriberStart(ISubscriberStream stream) {
         // log w3c connect event
         log.info("W3C x-category:stream x-event:play c-ip:{} x-sname:{}", Red5.getConnectionLocal().getRemoteAddress(), stream.getName());
@@ -1379,14 +1280,14 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
     /**
      * RTMFP peer connect event handler.
      *
-     * @link https://datatracker.ietf.org/doc/html/rfc7425#section-5.3.3
-     * @link https://github.com/zenomt/rtmfp-cpp/blob/main/include/rtmfp/rtmfp.hpp
-     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7425#section-5.3.3">RFC 7425</a>
+     * @see <a href="https://github.com/zenomt/rtmfp-cpp/blob/main/include/rtmfp/rtmfp.hpp">RTMFP</a>
      */
     public void setPeerInfo() {
         log.debug("setPeerInfo");
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean handleEvent(IEvent event) {
         log.debug("handleEvent: {}", event);

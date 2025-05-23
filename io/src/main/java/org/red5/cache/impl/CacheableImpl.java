@@ -22,6 +22,7 @@ public class CacheableImpl implements ICacheable {
 
     private static final long serialVersionUID = 1539954562379472856L;
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(CacheableImpl.class);
 
     private byte[] bytes;
@@ -30,6 +31,11 @@ public class CacheableImpl implements ICacheable {
 
     private boolean cached;
 
+    /**
+     * <p>Constructor for CacheableImpl.</p>
+     *
+     * @param obj a {@link java.lang.Object} object
+     */
     public CacheableImpl(Object obj) {
         IoBuffer tmp = IoBuffer.allocate(128).setAutoExpand(true);
         tmp.putObject(obj);
@@ -41,6 +47,11 @@ public class CacheableImpl implements ICacheable {
         tmp = null;
     }
 
+    /**
+     * <p>Constructor for CacheableImpl.</p>
+     *
+     * @param buffer a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public CacheableImpl(IoBuffer buffer) {
         if (log.isDebugEnabled()) {
             log.debug("Buffer is direct: {} capacity: {}", buffer.isDirect(), buffer.capacity());
@@ -56,6 +67,9 @@ public class CacheableImpl implements ICacheable {
         buffer = null;
     }
 
+    /**
+     * <p>addRequest.</p>
+     */
     public void addRequest() {
         log.info("Adding request for: {}", name);
     }

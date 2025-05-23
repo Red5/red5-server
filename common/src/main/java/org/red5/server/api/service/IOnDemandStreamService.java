@@ -11,8 +11,14 @@ import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.IScopeService;
 import org.red5.server.api.stream.IOnDemandStream;
 
+/**
+ * <p>IOnDemandStreamService interface.</p>
+ *
+ * @author mondain
+ */
 public interface IOnDemandStreamService extends IScopeService {
 
+    /** Constant <code>BEAN_NAME="onDemandStreamService"</code> */
     public static String BEAN_NAME = "onDemandStreamService";
 
     /**

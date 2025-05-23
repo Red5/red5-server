@@ -27,46 +27,147 @@ import javax.management.openmbean.CompositeData;
 @MXBean
 public interface ConnectionMXBean {
 
+    /**
+     * <p>getType.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getType();
 
+    /**
+     * <p>isConnected.</p>
+     *
+     * @return a boolean
+     */
     public boolean isConnected();
 
+    /**
+     * <p>close.</p>
+     */
     public void close();
 
+    /**
+     * <p>getConnectParams.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> getConnectParams();
 
+    /**
+     * <p>getClient.</p>
+     *
+     * @return a {@link javax.management.openmbean.CompositeData} object
+     */
     public CompositeData getClient();
 
+    /**
+     * <p>getHost.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getHost();
 
+    /**
+     * <p>getRemoteAddress.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getRemoteAddress();
 
+    /**
+     * <p>getRemoteAddresses.</p>
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<String> getRemoteAddresses();
 
+    /**
+     * <p>getRemotePort.</p>
+     *
+     * @return a int
+     */
     public int getRemotePort();
 
+    /**
+     * <p>getPath.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getPath();
 
+    /**
+     * <p>getSessionId.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getSessionId();
 
+    /**
+     * <p>getReadBytes.</p>
+     *
+     * @return a long
+     */
     public long getReadBytes();
 
+    /**
+     * <p>getWrittenBytes.</p>
+     *
+     * @return a long
+     */
     public long getWrittenBytes();
 
+    /**
+     * <p>getReadMessages.</p>
+     *
+     * @return a long
+     */
     public long getReadMessages();
 
+    /**
+     * <p>getWrittenMessages.</p>
+     *
+     * @return a long
+     */
     public long getWrittenMessages();
 
+    /**
+     * <p>getDroppedMessages.</p>
+     *
+     * @return a long
+     */
     public long getDroppedMessages();
 
+    /**
+     * <p>getPendingMessages.</p>
+     *
+     * @return a long
+     */
     public long getPendingMessages();
 
+    /**
+     * <p>ping.</p>
+     */
     public void ping();
 
+    /**
+     * <p>getLastPingTime.</p>
+     *
+     * @return a int
+     */
     public int getLastPingTime();
 
+    /**
+     * <p>getScope.</p>
+     *
+     * @return a {@link javax.management.openmbean.CompositeData} object
+     */
     public CompositeData getScope();
 
+    /**
+     * <p>getBasicScopes.</p>
+     *
+     * @return a {@link java.util.Iterator} object
+     */
     public Iterator<CompositeData> getBasicScopes();
 
 }

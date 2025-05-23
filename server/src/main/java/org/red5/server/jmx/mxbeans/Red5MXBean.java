@@ -18,12 +18,32 @@ import javax.management.MXBean;
 @MXBean
 public interface Red5MXBean {
 
+    /**
+     * <p>getConnection.</p>
+     *
+     * @return a {@link org.red5.server.jmx.mxbeans.ConnectionMXBean} object
+     */
     public ConnectionMXBean getConnection();
 
+    /**
+     * <p>getScope.</p>
+     *
+     * @return a {@link org.red5.server.jmx.mxbeans.ScopeMXBean} object
+     */
     public ScopeMXBean getScope();
 
+    /**
+     * <p>getClient.</p>
+     *
+     * @return a {@link org.red5.server.jmx.mxbeans.ClientMXBean} object
+     */
     public ClientMXBean getClient();
 
+    /**
+     * <p>getContext.</p>
+     *
+     * @return a {@link org.red5.server.jmx.mxbeans.ContextMXBean} object
+     */
     public ContextMXBean getContext();
 
 }

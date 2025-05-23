@@ -1,5 +1,10 @@
 package org.red5.codec;
 
+/**
+ * <p>VideoFrameType class.</p>
+ *
+ * @author mondain
+ */
 public enum VideoFrameType {
 
     RESERVED((byte) 0x00), // Reserved
@@ -26,10 +31,21 @@ public enum VideoFrameType {
         this.value = value;
     }
 
+    /**
+     * <p>Getter for the field <code>value</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getValue() {
         return value;
     }
 
+    /**
+     * <p>valueOf.</p>
+     *
+     * @param value a int
+     * @return a {@link org.red5.codec.VideoFrameType} object
+     */
     public static VideoFrameType valueOf(int value) {
         for (VideoFrameType type : values()) {
             if (type.value == value) {

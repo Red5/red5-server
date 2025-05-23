@@ -10,14 +10,25 @@ package org.red5.server.stream.bandwidth;
 import org.red5.server.api.IConnection;
 
 /**
+ * <p>IBandwidthDetection interface.</p>
  *
  * @author The Red5 Project
  * @author Dan Rossi
  */
 public interface IBandwidthDetection {
 
+    /**
+     * <p>checkBandwidth.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     */
     public void checkBandwidth(IConnection conn);
 
+    /**
+     * <p>calculateClientBw.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     */
     public void calculateClientBw(IConnection conn);
 
 }

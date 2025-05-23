@@ -39,6 +39,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
 /**
+ * <p>Output class.</p>
  *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
@@ -47,6 +48,7 @@ import net.sf.ehcache.Element;
  */
 public class Output extends BaseOutput implements org.red5.io.object.Output {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Output.class);
 
     private static Cache stringCache;
@@ -106,6 +108,12 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return false;
     }
 
+    /**
+     * <p>checkWriteReference.</p>
+     *
+     * @param obj a {@link java.lang.Object} object
+     * @return a boolean
+     */
     protected boolean checkWriteReference(Object obj) {
         if (hasReference(obj)) {
             writeReference(obj);
@@ -333,6 +341,15 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         }
     }
 
+    /**
+     * <p>serializeField.</p>
+     *
+     * @param objectClass a {@link java.lang.Class} object
+     * @param keyName a {@link java.lang.String} object
+     * @param field a {@link java.lang.reflect.Field} object
+     * @param getter a {@link java.lang.reflect.Method} object
+     * @return a boolean
+     */
     @SuppressWarnings("unchecked")
     protected boolean serializeField(Class<?> objectClass, String keyName, Field field, Method getter) {
         // to prevent, NullPointerExceptions, get the element first and check if it's null
@@ -352,6 +369,13 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return serialize;
     }
 
+    /**
+     * <p>getField.</p>
+     *
+     * @param objectClass a {@link java.lang.Class} object
+     * @param keyName a {@link java.lang.String} object
+     * @return a {@link java.lang.reflect.Field} object
+     */
     @SuppressWarnings("unchecked")
     protected Field getField(Class<?> objectClass, String keyName) {
         //again, to prevent null pointers, check if the element exists first.
@@ -381,6 +405,14 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return field;
     }
 
+    /**
+     * <p>getGetter.</p>
+     *
+     * @param objectClass a {@link java.lang.Class} object
+     * @param beanMap a {@link org.apache.commons.beanutils.BeanMap} object
+     * @param keyName a {@link java.lang.String} object
+     * @return a {@link java.lang.reflect.Method} object
+     */
     @SuppressWarnings("unchecked")
     protected Method getGetter(Class<?> objectClass, BeanMap beanMap, String keyName) {
         //check element to prevent null pointer
@@ -581,10 +613,18 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return this.buf;
     }
 
+    /**
+     * <p>reset.</p>
+     */
     public void reset() {
         clearReferences();
     }
 
+    /**
+     * <p>Getter for the field <code>stringCache</code>.</p>
+     *
+     * @return a {@link net.sf.ehcache.Cache} object
+     */
     protected static Cache getStringCache() {
         if (stringCache == null) {
             stringCache = getCacheManager().getCache("org.red5.io.amf.Output.stringCache");
@@ -592,6 +632,11 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return stringCache;
     }
 
+    /**
+     * <p>Getter for the field <code>serializeCache</code>.</p>
+     *
+     * @return a {@link net.sf.ehcache.Cache} object
+     */
     protected static Cache getSerializeCache() {
         if (serializeCache == null) {
             serializeCache = getCacheManager().getCache("org.red5.io.amf.Output.serializeCache");
@@ -599,6 +644,11 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return serializeCache;
     }
 
+    /**
+     * <p>Getter for the field <code>fieldCache</code>.</p>
+     *
+     * @return a {@link net.sf.ehcache.Cache} object
+     */
     protected static Cache getFieldCache() {
         if (fieldCache == null) {
             fieldCache = getCacheManager().getCache("org.red5.io.amf.Output.fieldCache");
@@ -606,6 +656,11 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return fieldCache;
     }
 
+    /**
+     * <p>Getter for the field <code>getterCache</code>.</p>
+     *
+     * @return a {@link net.sf.ehcache.Cache} object
+     */
     protected static Cache getGetterCache() {
         if (getterCache == null) {
             getterCache = getCacheManager().getCache("org.red5.io.amf.Output.getterCache");
@@ -613,6 +668,9 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         return getterCache;
     }
 
+    /**
+     * <p>destroyCache.</p>
+     */
     public static void destroyCache() {
         if (cacheManager != null) {
             cacheManager.shutdown();

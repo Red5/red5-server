@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract video codec implementation.
  *
+ * @author mondain
  */
 public class AbstractVideo implements IVideoStreamCodec {
 
@@ -76,26 +77,31 @@ public class AbstractVideo implements IVideoStreamCodec {
     // video codec specific attributes
     protected transient ConcurrentMap<String, String> attributes = new ConcurrentHashMap<>();
 
+    /** {@inheritDoc} */
     @Override
     public VideoCodec getCodec() {
         return codec;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return codec.name();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setTrackId(int trackId) {
         this.trackId = trackId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getTrackId() {
         return trackId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void reset() {
     }
@@ -111,11 +117,13 @@ public class AbstractVideo implements IVideoStreamCodec {
         numInterframes.set(0);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canDropFrames() {
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
@@ -150,17 +158,19 @@ public class AbstractVideo implements IVideoStreamCodec {
                 log.info("Codec is not enhanced, codec id: {} frame type: {}", codec.getId(), frameType);
                 result = ((flg & IoConstants.MASK_VIDEO_CODEC) == codec.getId());
             }
+            data.rewind();
         }
-        data.rewind();
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data) {
         // not an ideal implementation, but it works when there's no timestamp supplied
         return addData(data, (keyframeTimestamp + 1));
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data, int timestamp) {
         //Starting true, since null data or un-rewound data may be an accident.
@@ -307,7 +317,7 @@ public class AbstractVideo implements IVideoStreamCodec {
     /**
      * Get the track codec for the given data.
      *
-     * @param data
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
      * @return Video codec
      */
     protected IVideoStreamCodec getTrackCodec(IoBuffer data) {
@@ -328,11 +338,13 @@ public class AbstractVideo implements IVideoStreamCodec {
         return trackCodec;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addData(IoBuffer data, int timestamp, boolean amf) {
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IoBuffer getDecoderConfiguration() {
         return null;
@@ -370,10 +382,20 @@ public class AbstractVideo implements IVideoStreamCodec {
         return null;
     }
 
+    /**
+     * <p>isBufferInterframes.</p>
+     *
+     * @return a boolean
+     */
     public boolean isBufferInterframes() {
         return bufferInterframes;
     }
 
+    /**
+     * <p>Setter for the field <code>bufferInterframes</code>.</p>
+     *
+     * @param bufferInterframes a boolean
+     */
     public void setBufferInterframes(boolean bufferInterframes) {
         this.bufferInterframes = bufferInterframes;
         if (bufferInterframes && interframes == null) {
@@ -381,21 +403,25 @@ public class AbstractVideo implements IVideoStreamCodec {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isEnhanced() {
         return enhanced;
     }
 
+    /** {@inheritDoc} */
     @Override
     public AvMultitrackType getMultitrackType() {
         return multitrackType;
     }
 
+    /** {@inheritDoc} */
     @Override
     public VideoFrameType getFrameType() {
         return frameType;
     }
 
+    /** {@inheritDoc} */
     @Override
     public VideoPacketType getPacketType() {
         return packetType;
@@ -404,8 +430,8 @@ public class AbstractVideo implements IVideoStreamCodec {
     /**
      * Sets an attribute directly on the codec instance.
      *
-     * @param key
-     * @param value
+     * @param key a {@link java.lang.String} object
+     * @param value a {@link java.lang.String} object
      */
     public void setAttribute(String key, String value) {
         attributes.put(key, value);
@@ -414,7 +440,7 @@ public class AbstractVideo implements IVideoStreamCodec {
     /**
      * Returns the attribute for a given key.
      *
-     * @param key
+     * @param key a {@link java.lang.String} object
      * @return String value
      */
     public String getAttribute(String key) {
@@ -425,7 +451,7 @@ public class AbstractVideo implements IVideoStreamCodec {
      * Returns a track codec for the given track index. This is only good for a single track as it will return the
      * first codec found. In a multi-track scenario, the proper look-up should be done by the track's fourcc.
      *
-     * @param trackIndex
+     * @param trackIndex a int
      * @return Video codec at the index or null if no track exist
      */
     public VideoCodec getTrackCodec(int trackIndex) {
@@ -439,6 +465,7 @@ public class AbstractVideo implements IVideoStreamCodec {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -448,6 +475,7 @@ public class AbstractVideo implements IVideoStreamCodec {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -464,6 +492,7 @@ public class AbstractVideo implements IVideoStreamCodec {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         if (enhanced) {

@@ -34,10 +34,21 @@ public enum RTMPType {
         this.type = (byte) type;
     }
 
+    /**
+     * <p>Getter for the field <code>type</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getType() {
         return type;
     }
 
+    /**
+     * <p>valueOf.</p>
+     *
+     * @param dataType a byte
+     * @return a {@link java.lang.String} object
+     */
     public static String valueOf(byte dataType) {
         int idx = (int) dataType - 1;
         if (idx < RTMPType.values().length) {

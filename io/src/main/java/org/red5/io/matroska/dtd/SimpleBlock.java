@@ -18,6 +18,7 @@ import org.red5.io.matroska.VINT;
 /**
  * Tag representing complex block of different tags
  *
+ * @author mondain
  */
 public class SimpleBlock extends Tag {
     private VINT trackNumber;
@@ -32,12 +33,11 @@ public class SimpleBlock extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
      *            - the id of tag to be created
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public SimpleBlock(String name, VINT id) throws IOException {
@@ -48,7 +48,6 @@ public class SimpleBlock extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -57,16 +56,14 @@ public class SimpleBlock extends Tag {
      *            - the size of tag to be created
      * @param inputStream
      *            - stream to read tag data from
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public SimpleBlock(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
         super(name, id, size, inputStream);
     }
 
-    /**
-     * @see Tag#parse(InputStream)
-     */
+    /** {@inheritDoc} */
     @Override
     public void parse(InputStream inputStream) throws IOException, ConverterException {
         trackNumber = ParserUtils.readVINT(inputStream);
@@ -75,9 +72,7 @@ public class SimpleBlock extends Tag {
         binary = ParserUtils.parseBinary(inputStream, (int) getSize() - 4);
     }
 
-    /**
-     * @see Tag#putValue(ByteBuffer)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void putValue(ByteBuffer bb) throws IOException {
         bb.put(trackNumber.encode());
@@ -123,6 +118,8 @@ public class SimpleBlock extends Tag {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * method to get "pretty" represented {@link Tag}
      */
     @Override

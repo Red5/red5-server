@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class able to parse webm Tags from file
  *
+ * @author mondain
  */
 public class WebmReader implements Closeable {
 
@@ -43,7 +44,7 @@ public class WebmReader implements Closeable {
      *            - file to be read
      * @param processor
      *            - handler for the tags found
-     * @throws FileNotFoundException
+     * @throws java.io.FileNotFoundException
      *             - will be thrown if file not found
      */
     public WebmReader(File file, TagConsumer processor) throws FileNotFoundException {
@@ -119,9 +120,9 @@ public class WebmReader implements Closeable {
     /**
      * will process given file and send all tags found to the consumer
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of any exception during reading and/or consumeng
-     * @throws ConverterException
+     * @throws org.red5.io.matroska.ConverterException
      *             - in case of any error during conversions
      */
     public void process() throws IOException, ConverterException {
@@ -129,6 +130,8 @@ public class WebmReader implements Closeable {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Will close all opened resources
      */
     @Override

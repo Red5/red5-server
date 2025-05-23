@@ -12,7 +12,6 @@ package org.red5.server.api.service;
  *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
- *
  */
 public interface IPendingServiceCallback {
 

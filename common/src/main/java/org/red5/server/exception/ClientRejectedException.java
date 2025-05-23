@@ -10,6 +10,7 @@ package org.red5.server.exception;
 /**
  * The client is not allowed to connect. Reason that provided with this exception is sent to client-side status event description.
  *
+ * @author mondain
  */
 public class ClientRejectedException extends RuntimeException {
 
@@ -18,7 +19,9 @@ public class ClientRejectedException extends RuntimeException {
     @SuppressWarnings("all")
     private Object reason;
 
-    /** Constructs a new ClientRejectedException. */
+    /**
+     * Constructs a new ClientRejectedException.
+     */
     public ClientRejectedException() {
         this("Client rejected");
     }

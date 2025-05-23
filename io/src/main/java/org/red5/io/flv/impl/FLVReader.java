@@ -132,7 +132,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      *
      * @param f
      *            File
-     * @throws IOException
+     * @throws java.io.IOException
      *             on error
      */
     public FLVReader(File f) throws IOException {
@@ -146,7 +146,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      *            File input stream
      * @param generateMetadata
      *            <code>true</code> if metadata generation required, <code>false</code> otherwise
-     * @throws IOException
+     * @throws java.io.IOException
      *             on error
      */
     public FLVReader(File f, boolean generateMetadata) throws IOException {
@@ -169,7 +169,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      *
      * @param channel
      *            file channel
-     * @throws IOException
+     * @throws java.io.IOException
      *             on error
      */
     @SuppressWarnings("null")
@@ -207,6 +207,11 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         postInitialize();
     }
 
+    /**
+     * <p>setKeyFrameCache.</p>
+     *
+     * @param keyframeCache a {@link org.red5.io.IKeyFrameMetaCache} object
+     */
     public void setKeyFrameCache(IKeyFrameMetaCache keyframeCache) {
         FLVReader.keyframeCache = keyframeCache;
     }
@@ -235,9 +240,9 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     }
 
     /**
-     * Get the total readable bytes in a file or ByteBuffer.
+     * {@inheritDoc}
      *
-     * @return Total readable bytes
+     * Get the total readable bytes in a file or ByteBuffer.
      */
     @Override
     public long getTotalBytes() {
@@ -490,27 +495,21 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public IStreamableFile getFile() {
         // TODO wondering if we need to have a reference
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int getOffset() {
         // XXX what's the difference from getBytesRead
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public long getBytesRead() {
         // XXX should summarize the total bytes read or
@@ -524,6 +523,11 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         return duration;
     }
 
+    /**
+     * <p>getVideoCodecId.</p>
+     *
+     * @return a int
+     */
     public int getVideoCodecId() {
         if (keyframeMeta != null) {
             return keyframeMeta.videoCodecId;
@@ -531,6 +535,11 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         return -1;
     }
 
+    /**
+     * <p>getAudioCodecId.</p>
+     *
+     * @return a int
+     */
     public int getAudioCodecId() {
         if (keyframeMeta != null) {
             return keyframeMeta.audioCodecId;
@@ -538,9 +547,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         return -1;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasMoreTags() {
         try {
@@ -702,9 +709,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         return tag;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void close() {
         log.debug("Reader close: {}", file.getName());
@@ -731,9 +736,9 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     }
 
     /**
-     * Key frames analysis may be used as a utility method so synchronize it.
+     * {@inheritDoc}
      *
-     * @return Keyframe metadata
+     * Key frames analysis may be used as a utility method so synchronize it.
      */
     @Override
     public KeyFrameMeta analyzeKeyFrames() {
@@ -869,10 +874,9 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     }
 
     /**
-     * Put the current position to pos. The caller must ensure the pos is a valid one (eg. not sit in the middle of a frame).
+     * {@inheritDoc}
      *
-     * @param pos
-     *            New position in file. Pass <code>Long.MAX_VALUE</code> to seek to end of file.
+     * Put the current position to pos. The caller must ensure the pos is a valid one (eg. not sit in the middle of a frame).
      */
     @Override
     public void position(long pos) {

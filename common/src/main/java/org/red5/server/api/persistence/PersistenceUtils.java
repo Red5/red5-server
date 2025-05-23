@@ -56,7 +56,7 @@ public class PersistenceUtils {
      * @param className
      *            Name of persistence class
      * @return IPersistence store object that provides methods for persistence object handling
-     * @throws Exception
+     * @throws java.lang.Exception
      *             if error
      */
     public static IPersistenceStore getPersistenceStore(ResourcePatternResolver resolver, String className) throws Exception {

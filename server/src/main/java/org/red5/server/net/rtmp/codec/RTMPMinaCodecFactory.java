@@ -18,6 +18,8 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * RTMP codec factory.
+ *
+ * @author mondain
  */
 public class RTMPMinaCodecFactory implements ProtocolCodecFactory, ApplicationContextAware, InitializingBean {
 
@@ -33,6 +35,11 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory, ApplicationCo
      */
     protected RTMPMinaProtocolEncoder encoder = new RTMPMinaProtocolEncoder();
 
+    /**
+     * <p>afterPropertiesSet.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void afterPropertiesSet() throws Exception {
         decoder = (RTMPMinaProtocolDecoder) appCtx.getBean("minaDecoder");
         encoder = (RTMPMinaProtocolEncoder) appCtx.getBean("minaEncoder");
@@ -48,6 +55,7 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory, ApplicationCo
         return encoder;
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

@@ -23,6 +23,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * Shared object service
+ *
+ * @author mondain
  */
 public class SharedObjectService implements ISharedObjectService {
 
@@ -59,6 +61,8 @@ public class SharedObjectService implements ISharedObjectService {
     }
 
     /**
+     * <p>setMaximumEventsPerUpdate.</p>
+     *
      * @param maximumEventsPerUpdate
      *            the maximumEventsPerUpdate to set
      */
@@ -77,6 +81,8 @@ public class SharedObjectService implements ISharedObjectService {
     }
 
     /**
+     * <p>Setter for the field <code>scheduler</code>.</p>
+     *
      * @param scheduler
      *            the scheduler to set
      */

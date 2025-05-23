@@ -12,6 +12,8 @@ import org.red5.server.messaging.IMessageInput;
 
 /**
  * Simple playlist item implementation
+ *
+ * @author mondain
  */
 public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
@@ -78,6 +80,8 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
 
     /**
      * Returns boolean value that specifies whether item can be played
+     *
+     * @return a long
      */
     public long getStart() {
         return start;
@@ -103,6 +107,8 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
     }
 
     /**
+     * <p>Getter for the field <code>created</code>.</p>
+     *
      * @return the created
      */
     public long getCreated() {
@@ -110,6 +116,8 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
     }
 
     /**
+     * <p>Setter for the field <code>created</code>.</p>
+     *
      * @param created
      *            the created to set
      */
@@ -117,6 +125,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
         this.created = created;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -126,6 +135,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -145,6 +155,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(SimplePlayItem that) {
         if (created > that.getCreated()) {
@@ -187,6 +198,7 @@ public class SimplePlayItem implements IPlayItem, Comparable<SimplePlayItem> {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "SimplePlayItem [created=" + created + ", name=" + name + ", start=" + start + ", length=" + length + "]";

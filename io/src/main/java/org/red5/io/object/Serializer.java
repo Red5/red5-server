@@ -38,6 +38,7 @@ import org.w3c.dom.Document;
  */
 public class Serializer {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Serializer.class);
 
     private Serializer() {

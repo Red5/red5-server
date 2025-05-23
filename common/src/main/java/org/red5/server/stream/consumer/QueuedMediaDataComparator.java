@@ -13,6 +13,7 @@ import org.red5.io.ITag;
  */
 public class QueuedMediaDataComparator implements Comparator<QueuedMediaData> {
 
+    /** {@inheritDoc} */
     @Override
     public int compare(QueuedMediaData o1, QueuedMediaData o2) {
         int result = 0;

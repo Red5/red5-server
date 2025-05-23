@@ -47,25 +47,42 @@ public class OutboundHandshake extends RTMPHandshake {
     // whether or not verification is mandatory
     private boolean forceVerification;
 
+    /**
+     * <p>Constructor for OutboundHandshake.</p>
+     */
     public OutboundHandshake() {
         super(RTMPConnection.RTMP_NON_ENCRYPTED);
     }
 
+    /**
+     * <p>Constructor for OutboundHandshake.</p>
+     *
+     * @param handshakeType a byte
+     */
     public OutboundHandshake(byte handshakeType) {
         super(handshakeType);
     }
 
+    /**
+     * <p>Constructor for OutboundHandshake.</p>
+     *
+     * @param handshakeType a byte
+     * @param algorithm a int
+     */
     public OutboundHandshake(byte handshakeType, int algorithm) {
         this(handshakeType);
         this.algorithm = algorithm;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IoBuffer doHandshake(IoBuffer input) {
         throw new UnsupportedOperationException("Not used, call server response decoders directly");
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Creates the servers handshake bytes
      */
     @Override
@@ -90,6 +107,7 @@ public class OutboundHandshake extends RTMPHandshake {
      * C0 = 0x03 (client handshake type - 0x03, 0x06, 0x08, or 0x09)
      * C1 = 1536 bytes from the client
      * </pre>
+     *
      * @return outgoing handshake C0+C1
      */
     public IoBuffer generateClientRequest1() {
@@ -179,6 +197,7 @@ public class OutboundHandshake extends RTMPHandshake {
      * S1 = 1536 bytes from the server
      * C2 = Copy of S1 bytes
      * </pre>
+     *
      * @param in incoming handshake S1
      * @return client response C2
      */
@@ -287,8 +306,9 @@ public class OutboundHandshake extends RTMPHandshake {
      * <pre>
      * S2 = Copy of C1 bytes
      * </pre>
-     * @param in incoming handshake S2
+     *
      * @return true if validation passes and false otherwise
+     * @param buf a {@link org.apache.mina.core.buffer.IoBuffer} object
      */
     public boolean decodeServerResponse2(IoBuffer buf) {
         byte[] s2 = new byte[Constants.HANDSHAKE_SIZE];
@@ -301,8 +321,9 @@ public class OutboundHandshake extends RTMPHandshake {
      * <pre>
      * S2 = Copy of C1 bytes
      * </pre>
-     * @param in incoming handshake S2
+     *
      * @return true if validation passes and false otherwise
+     * @param s2 an array of {@link byte} objects
      */
     public boolean decodeServerResponse2(byte[] s2) {
         log.debug("decodeServerResponse2");
@@ -383,10 +404,9 @@ public class OutboundHandshake extends RTMPHandshake {
     }
 
     /**
-     * Determines the validation scheme for given input.
+     * {@inheritDoc}
      *
-     * @param handshake the handshake bytes from the server
-     * @return true if server used a supported validation scheme, false if unsupported
+     * Determines the validation scheme for given input.
      */
     @Override
     public boolean validate(byte[] handshake) {
@@ -455,10 +475,20 @@ public class OutboundHandshake extends RTMPHandshake {
         log.info("Verification - size: {}, hash: {}", swfSize, Hex.encodeHexString(swfHash));
     }
 
+    /**
+     * <p>getHandshakeBytes.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
     public byte[] getHandshakeBytes() {
         return c1;
     }
 
+    /**
+     * <p>Setter for the field <code>forceVerification</code>.</p>
+     *
+     * @param forceVerification a boolean
+     */
     public void setForceVerification(boolean forceVerification) {
         this.forceVerification = forceVerification;
     }

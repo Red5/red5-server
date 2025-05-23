@@ -8,25 +8,44 @@
 package org.red5.server.api.stream;
 
 /**
- * @author daccattato
+ * <p>ResourceNotFoundException class.</p>
  *
+ * @author daccattato
  */
 public class ResourceNotFoundException extends Exception {
     private static final long serialVersionUID = -1963629259187714996L;
 
-    /** Constructs a new ResourceNotFoundException. */
+    /**
+     * Constructs a new ResourceNotFoundException.
+     */
     public ResourceNotFoundException() {
         super();
     }
 
+    /**
+     * <p>Constructor for ResourceNotFoundException.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     * @param cause a {@link java.lang.Throwable} object
+     */
     public ResourceNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * <p>Constructor for ResourceNotFoundException.</p>
+     *
+     * @param message a {@link java.lang.String} object
+     */
     public ResourceNotFoundException(String message) {
         super(message);
     }
 
+    /**
+     * <p>Constructor for ResourceNotFoundException.</p>
+     *
+     * @param cause a {@link java.lang.Throwable} object
+     */
     public ResourceNotFoundException(Throwable cause) {
         super(cause);
     }

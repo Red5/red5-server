@@ -65,7 +65,9 @@ public class RTMPSClient extends RTMPClient {
      */
     private String keyStoreType = "PKCS12";
 
-    /** Constructs a new RTMPClient. */
+    /**
+     * Constructs a new RTMPClient.
+     */
     public RTMPSClient() {
         protocol = "rtmps";
         ioHandler = new RTMPSClientIoHandler();
@@ -105,7 +107,7 @@ public class RTMPSClient extends RTMPClient {
      * @param password keystore password
      * @param keystorePath path to keystore file
      * @param truststorePath path to truststore file
-     * @throws IOException
+     * @throws java.io.IOException
      */
     public RTMPSClient(String keyStoreType, String password, String keystorePath, String truststorePath) throws IOException {
         protocol = "rtmps";
@@ -117,6 +119,7 @@ public class RTMPSClient extends RTMPClient {
         ioHandler.setHandler(this);
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings({ "rawtypes" })
     @Override
     protected void startConnector(String server, int port) {
@@ -161,6 +164,11 @@ public class RTMPSClient extends RTMPClient {
         this.keyStoreType = keyStoreType;
     }
 
+    /**
+     * <p>Setter for the field <code>cipherSuites</code>.</p>
+     *
+     * @param cipherSuites an array of {@link java.lang.String} objects
+     */
     public static void setCipherSuites(String[] cipherSuites) {
         RTMPSClient.cipherSuites = cipherSuites;
     }

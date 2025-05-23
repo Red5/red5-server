@@ -60,12 +60,27 @@ public class DefaultStreamFilenameGenerator implements IStreamFilenameGenerator 
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
+     * @param name a {@link java.lang.String} object
+     * @param type a GenerationType object
+     * @return a {@link java.lang.String} object
+     */
     public String generateFilename(IScope scope, String name, GenerationType type) {
         return generateFilename(scope, name, null, type);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
+     * @param name a {@link java.lang.String} object
+     * @param extension a {@link java.lang.String} object
+     * @param type a GenerationType object
+     * @return a {@link java.lang.String} object
+     */
     public String generateFilename(IScope scope, String name, String extension, GenerationType type) {
         String result = getStreamDirectory(scope) + name;
         if (extension != null && !extension.equals("")) {

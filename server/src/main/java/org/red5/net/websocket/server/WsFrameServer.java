@@ -18,6 +18,11 @@ import org.apache.tomcat.websocket.WsSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>WsFrameServer class.</p>
+ *
+ * @author mondain
+ */
 public class WsFrameServer extends WsFrameBase {
 
     // tomcat requires this log internally
@@ -33,6 +38,15 @@ public class WsFrameServer extends WsFrameBase {
 
     private final ClassLoader applicationClassLoader;
 
+    /**
+     * <p>Constructor for WsFrameServer.</p>
+     *
+     * @param socketWrapper a {@link org.apache.tomcat.util.net.SocketWrapperBase} object
+     * @param upgradeInfo a {@link org.apache.coyote.http11.upgrade.UpgradeInfo} object
+     * @param wsSession a {@link org.apache.tomcat.websocket.WsSession} object
+     * @param transformation a {@link org.apache.tomcat.websocket.Transformation} object
+     * @param applicationClassLoader a {@link java.lang.ClassLoader} object
+     */
     public WsFrameServer(SocketWrapperBase<?> socketWrapper, UpgradeInfo upgradeInfo, WsSession wsSession, Transformation transformation, ClassLoader applicationClassLoader) {
         super(wsSession, transformation);
         this.socketWrapper = socketWrapper;
@@ -75,35 +89,41 @@ public class WsFrameServer extends WsFrameBase {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void updateStats(long payloadLength) {
         upgradeInfo.addMsgsReceived(1);
         upgradeInfo.addBytesReceived(payloadLength);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean isMasked() {
         // Data is from the client so it should be masked
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected Transformation getTransformation() {
         // Overridden to make it visible to other classes in this package
         return super.getTransformation();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean isOpen() {
         // Overridden to make it visible to other classes in this package
         return super.isOpen();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected Log getLog() {
         return tomcatLog;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void sendMessageText(boolean last) throws WsIOException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -116,6 +136,7 @@ public class WsFrameServer extends WsFrameBase {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void sendMessageBinary(ByteBuffer msg, boolean last) throws WsIOException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -128,6 +149,7 @@ public class WsFrameServer extends WsFrameBase {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void resumeProcessing() {
         socketWrapper.processSocket(SocketEvent.OPEN_READ, true);

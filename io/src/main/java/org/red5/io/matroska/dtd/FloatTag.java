@@ -19,6 +19,7 @@ import org.red5.io.matroska.VINT;
  *
  * Float tag is class able to store 4 byte float or 8 byte double, stores double by default
  *
+ * @author mondain
  */
 public class FloatTag extends Tag {
     private double value;
@@ -27,12 +28,11 @@ public class FloatTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
      *            - the id of tag to be created
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public FloatTag(String name, VINT id) throws IOException {
@@ -43,7 +43,6 @@ public class FloatTag extends Tag {
      * Constructor
      *
      * @see Tag#Tag(String, VINT, VINT, InputStream)
-     *
      * @param name
      *            - the name of tag to be created
      * @param id
@@ -52,24 +51,20 @@ public class FloatTag extends Tag {
      *            - the size of tag to be created
      * @param inputStream
      *            - stream to read tag data from
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public FloatTag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
         super(name, id, size, inputStream);
     }
 
-    /**
-     * @see Tag#parse(InputStream)
-     */
+    /** {@inheritDoc} */
     @Override
     public void parse(InputStream inputStream) throws IOException {
         value = ParserUtils.parseFloat(inputStream, (int) getSize());
     }
 
-    /**
-     * @see Tag#putValue(ByteBuffer)
-     */
+    /** {@inheritDoc} */
     @Override
     protected void putValue(ByteBuffer bb) throws IOException {
         if (getSize() == 4) {
@@ -102,6 +97,8 @@ public class FloatTag extends Tag {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * method to get "pretty" represented {@link Tag}
      */
     @Override

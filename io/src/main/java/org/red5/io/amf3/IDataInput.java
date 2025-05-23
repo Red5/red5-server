@@ -14,6 +14,7 @@ import java.nio.ByteOrder;
  *
  * @see IExternalizable#readExternal(IDataInput)
  * @see <a href="http://livedocs.adobe.com/flex/2/langref/flash/utils/IDataInput.html">Adobe Livedocs (external)</a>
+ * @author mondain
  */
 public interface IDataInput {
 

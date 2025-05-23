@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
  * Output stream that consists of audio, video and data channels
  *
  * @see org.red5.server.net.rtmp.Channel
+ * @author mondain
  */
 public class OutputStream {
     /**

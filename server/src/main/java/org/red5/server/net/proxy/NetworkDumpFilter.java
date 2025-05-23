@@ -17,9 +17,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Network dump filter, performs raw data and headers dump on message receive
+ *
+ * @author mondain
  */
 public class NetworkDumpFilter extends IoFilterAdapter {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(ProxyFilter.class);
 
     /**

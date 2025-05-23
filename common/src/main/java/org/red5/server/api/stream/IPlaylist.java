@@ -9,6 +9,8 @@ package org.red5.server.api.stream;
 
 /**
  * Playlist
+ *
+ * @author mondain
  */
 public interface IPlaylist {
     /**

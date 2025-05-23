@@ -32,12 +32,16 @@ public class RTMPTClient extends BaseRTMPClientHandler {
 
     protected RTMPTCodecFactory codecFactory;
 
+    /**
+     * <p>Constructor for RTMPTClient.</p>
+     */
     public RTMPTClient() {
         protocol = "rtmpt";
         codecFactory = new RTMPTCodecFactory();
         codecFactory.init();
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, Object> makeDefaultConnectionParams(String server, int port, String application) {
         Map<String, Object> params = super.makeDefaultConnectionParams(server, port, application);
@@ -47,6 +51,7 @@ public class RTMPTClient extends BaseRTMPClientHandler {
         return params;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected synchronized void startConnector(String server, int port) {
         connector = new RTMPTClientConnector(server, port, this);
@@ -137,6 +142,7 @@ public class RTMPTClient extends BaseRTMPClientHandler {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public synchronized void disconnect() {
         if (connector != null) {
@@ -146,10 +152,20 @@ public class RTMPTClient extends BaseRTMPClientHandler {
         super.disconnect();
     }
 
+    /**
+     * <p>getDecoder.</p>
+     *
+     * @return a {@link org.red5.server.net.rtmp.codec.RTMPProtocolDecoder} object
+     */
     public RTMPProtocolDecoder getDecoder() {
         return codecFactory.getRTMPDecoder();
     }
 
+    /**
+     * <p>getEncoder.</p>
+     *
+     * @return a {@link org.red5.server.net.rtmp.codec.RTMPProtocolEncoder} object
+     */
     public RTMPProtocolEncoder getEncoder() {
         return codecFactory.getRTMPEncoder();
     }

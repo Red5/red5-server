@@ -19,10 +19,27 @@ import jakarta.servlet.ServletException;
 @MXBean
 public interface LoaderMXBean extends ShutdownMXBean {
 
+    /**
+     * <p>startWebApplication.</p>
+     *
+     * @param application a {@link java.lang.String} object
+     * @return a boolean
+     * @throws jakarta.servlet.ServletException if any.
+     */
     public boolean startWebApplication(String application) throws ServletException;
 
+    /**
+     * <p>removeContext.</p>
+     *
+     * @param path a {@link java.lang.String} object
+     */
     public void removeContext(String path);
 
+    /**
+     * <p>destroy.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     public void destroy() throws Exception;
 
 }

@@ -14,6 +14,8 @@ import org.red5.io.amf3.IExternalizable;
 
 /**
  * Represents status object that are transferred between server and client
+ *
+ * @author mondain
  */
 @Anonymous
 public class Status implements StatusCodes, IExternalizable {
@@ -58,7 +60,9 @@ public class Status implements StatusCodes, IExternalizable {
      */
     protected Number clientid = -1d;
 
-    /** Constructs a new Status. */
+    /**
+     * Constructs a new Status.
+     */
     public Status() {
     }
 
@@ -200,6 +204,7 @@ public class Status implements StatusCodes, IExternalizable {
         return "Status: code: " + getCode() + " desc: " + getDescription() + " level: " + getLevel();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         clientid = (Number) in.readDouble();
@@ -209,6 +214,7 @@ public class Status implements StatusCodes, IExternalizable {
         level = (String) in.readUTF();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput out) {
         out.writeDouble(clientid.doubleValue());

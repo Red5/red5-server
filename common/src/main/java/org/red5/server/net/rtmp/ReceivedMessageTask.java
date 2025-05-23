@@ -32,6 +32,12 @@ public final class ReceivedMessageTask implements Callable<Packet>, Supplier<Pac
 
     private AtomicBoolean processing = new AtomicBoolean(false);
 
+    /**
+     * <p>Constructor for ReceivedMessageTask.</p>
+     *
+     * @param conn a {@link org.red5.server.net.rtmp.RTMPConnection} object
+     * @param packet a {@link org.red5.server.net.rtmp.message.Packet} object
+     */
     public ReceivedMessageTask(RTMPConnection conn, Packet packet) {
         this.conn = conn;
         this.packet = packet;
@@ -41,6 +47,8 @@ public final class ReceivedMessageTask implements Callable<Packet>, Supplier<Pac
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Older versions of Red5 used the {@link #call()} method to process incoming messages.
      */
     @Override
@@ -64,6 +72,8 @@ public final class ReceivedMessageTask implements Callable<Packet>, Supplier<Pac
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Newer versions of Red5 use the {@link #get()} method to process incoming messages.
      */
     @Override
@@ -87,15 +97,22 @@ public final class ReceivedMessageTask implements Callable<Packet>, Supplier<Pac
         return packet;
     }
 
+    /**
+     * <p>Getter for the field <code>packet</code>.</p>
+     *
+     * @return a {@link org.red5.server.net.rtmp.message.Packet} object
+     */
     public Packet getPacket() {
         return packet;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return hashCode;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -114,6 +131,7 @@ public final class ReceivedMessageTask implements Callable<Packet>, Supplier<Pac
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "[sessionId: " + conn.getSessionId() + ", processing: " + processing.get() + "]";

@@ -30,6 +30,11 @@ import javax.crypto.spec.SecretKeySpec;
 import org.red5.io.sctp.IAssociationControl.State;
 import org.red5.io.sctp.packet.SctpPacket;
 
+/**
+ * <p>SctpServerChanneOverUDP class.</p>
+ *
+ * @author mondain
+ */
 public class SctpServerChanneOverUDP extends SctpServerChannel implements IServerChannelControl {
 
     private final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -50,6 +55,13 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
 
     private final Mac messageAuthenticationCode;
 
+    /**
+     * <p>Constructor for SctpServerChanneOverUDP.</p>
+     *
+     * @param provider a {@link java.nio.channels.spi.SelectorProvider} object
+     * @throws java.security.NoSuchAlgorithmException if any.
+     * @throws java.security.InvalidKeyException if any.
+     */
     protected SctpServerChanneOverUDP(SelectorProvider provider) throws NoSuchAlgorithmException, InvalidKeyException {
         super(provider);
         SecretKeySpec secretKey = new SecretKeySpec(UUID.randomUUID().toString().getBytes(), MAC_ALGORITHM_NAME);
@@ -57,6 +69,7 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
         messageAuthenticationCode.init(secretKey);
     }
 
+    /** {@inheritDoc} */
     @Override
     public SctpChannel accept() throws IOException, SctpException, InvalidKeyException, NoSuchAlgorithmException {
         logger.setLevel(Level.INFO);
@@ -84,6 +97,7 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public SctpServerChannel bind(SocketAddress local, int backlog) throws IOException {
         maxNumberOfPendingChannels = backlog + 1;
@@ -96,11 +110,13 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Mac getMac() {
         return messageAuthenticationCode;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean addPendingChannel(InetSocketAddress address, int initialTSN, int verificationTag) throws SocketException {
         if (pendingAssociations.size() < maxNumberOfPendingChannels) {
@@ -112,66 +128,78 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IAssociationControl getPendingChannel(InetSocketAddress address) {
         return pendingAssociations.get(address);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getPort() {
         return serverSocket.getLocalPort();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void send(SctpPacket packet, InetSocketAddress address) throws IOException {
         byte[] data = packet.getBytes();
         serverSocket.send(new DatagramPacket(data, data.length, address));
     }
 
+    /** {@inheritDoc} */
     @Override
     public Random getRandom() {
         return random;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void removePendingChannel(InetSocketAddress address) {
         // TODO Auto-generated method stub
     }
 
+    /** {@inheritDoc} */
     @Override
     public SctpServerChannel bindAddress(InetAddress address) throws IOException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Set<SocketAddress> getAllLocalAddresses() throws IOException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void implCloseSelectableChannel() throws IOException {
         // TODO Auto-generated method stub
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void implConfigureBlocking(boolean block) throws IOException {
         // TODO Auto-generated method stub
     }
 
+    /** {@inheritDoc} */
     @Override
     public SctpServerChannel unbindAddress(InetAddress address) throws IOException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> SctpServerChannel setOption(SctpSocketOption<T> name, T value) throws IOException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Set<SctpSocketOption<?>> supportedOptions() {
         // TODO Auto-generated method stub

@@ -21,6 +21,7 @@ public class ULAWAudio extends AbstractAudio {
         codec = AudioCodec.PCM_MULAW;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return CODEC_NAME;

@@ -42,12 +42,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * Represents an RTMP connection using Mina.
  *
  * @see "http://mina.apache.org/report/trunk/apidocs/org/apache/mina/core/session/IoSession.html"
- *
  * @author Paul Gregoire
  */
 @ManagedResource
 public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnectionMXBean {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(RTMPMinaConnection.class);
 
     /**
@@ -71,12 +71,15 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
 
     protected boolean bandwidthDetection = true;
 
-    /** Constructs a new RTMPMinaConnection. */
+    /**
+     * Constructs a new RTMPMinaConnection.
+     */
     @ConstructorProperties(value = { "persistent" })
     public RTMPMinaConnection() {
         super(IConnection.Type.PERSISTENT.name().toLowerCase());
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean connect(IScope newScope, Object[] params) {
         log.debug("Connect scope: {}", newScope);
@@ -147,9 +150,9 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
-     * Return MINA I/O session.
+     * {@inheritDoc}
      *
-     * @return MINA O/I session, connection between two end-points
+     * Return MINA I/O session.
      */
     @Override
     public IoSession getIoSession() {
@@ -157,6 +160,8 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
+     * <p>Getter for the field <code>defaultServerBandwidth</code>.</p>
+     *
      * @return the defaultServerBandwidth
      */
     public int getDefaultServerBandwidth() {
@@ -164,6 +169,8 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
+     * <p>Setter for the field <code>defaultServerBandwidth</code>.</p>
+     *
      * @param defaultServerBandwidth
      *            the defaultServerBandwidth to set
      */
@@ -172,6 +179,8 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
+     * <p>Getter for the field <code>defaultClientBandwidth</code>.</p>
+     *
      * @return the defaultClientBandwidth
      */
     public int getDefaultClientBandwidth() {
@@ -179,6 +188,8 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
+     * <p>Setter for the field <code>defaultClientBandwidth</code>.</p>
+     *
      * @param defaultClientBandwidth
      *            the defaultClientBandwidth to set
      */
@@ -187,6 +198,8 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
+     * <p>getLimitType.</p>
+     *
      * @return the limitType
      */
     public int getLimitType() {
@@ -194,6 +207,8 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
+     * <p>setLimitType.</p>
+     *
      * @param limitType
      *            the limitType to set
      */
@@ -201,12 +216,15 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
         this.limitType = limitType;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setExecutor(ThreadPoolTaskExecutor executor) {
         this.executor = executor;
     }
 
     /**
+     * <p>isBandwidthDetection.</p>
+     *
      * @return the bandwidthDetection
      */
     public boolean isBandwidthDetection() {
@@ -214,6 +232,8 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     }
 
     /**
+     * <p>Setter for the field <code>bandwidthDetection</code>.</p>
+     *
      * @param bandwidthDetection
      *            the bandwidthDetection to set
      */
@@ -266,6 +286,7 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
         return 0;
     }
 
+    /** {@inheritDoc} */
     public void invokeMethod(String method) {
         invoke(method);
     }
@@ -420,6 +441,9 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
         }
     }
 
+    /**
+     * <p>registerJMX.</p>
+     */
     protected void registerJMX() {
         // register with jmx
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -447,6 +471,9 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
         }
     }
 
+    /**
+     * <p>unregisterJMX.</p>
+     */
     protected void unregisterJMX() {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         if (oName != null && mbs.isRegistered(oName)) {
@@ -459,6 +486,9 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
         }
     }
 
+    /**
+     * <p>dumpInfo.</p>
+     */
     public void dumpInfo() {
         log.trace("{} session: {} state: {} keep-alive running: {}", new Object[] { getClass().getSimpleName(), getSessionId(), RTMP.states[getStateCode()], running });
         log.trace("Decoder lock - permits: {} queue length: {}", decoderLock.availablePermits(), decoderLock.getQueueLength());

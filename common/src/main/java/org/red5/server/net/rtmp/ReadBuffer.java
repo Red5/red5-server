@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
  * Buffer for incoming data.
  *
  * @author Paul Gregoire (mondain@gmail.com)
- *
  */
 public class ReadBuffer {
 
@@ -101,6 +100,9 @@ public class ReadBuffer {
         return slice;
     }
 
+    /**
+     * <p>clearBuffer.</p>
+     */
     public void clearBuffer() {
         buffer.reset();
     }

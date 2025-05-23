@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MP4 implements IMP4 {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(MP4.class);
 
     private File file;
@@ -57,63 +58,47 @@ public class MP4 implements IMP4 {
          */
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasMetaData() {
         return metaData != null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public IMetaData<?, ?> getMetaData() throws FileNotFoundException {
         metaService.setFile(file);
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean hasKeyFrameData() {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setKeyFrameData(Map<?, ?> keyframedata) {
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public Map<?, ?> getKeyFrameData() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void refreshHeaders() throws IOException {
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void flushHeaders() throws IOException {
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagReader getReader() throws IOException {
         MP4Reader reader = null;
@@ -128,17 +113,13 @@ public class MP4 implements IMP4 {
         return reader;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagReader readerFromNearestKeyFrame(int seekPoint) {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagWriter getWriter() throws IOException {
         log.info("getWriter: {}", file);
@@ -146,9 +127,7 @@ public class MP4 implements IMP4 {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public ITagWriter writerFromNearestKeyFrame(int seekPoint) {
         return null;
@@ -174,6 +153,7 @@ public class MP4 implements IMP4 {
         metaService = service;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ITagWriter getAppendWriter() throws IOException {
         return null;

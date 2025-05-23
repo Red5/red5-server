@@ -56,6 +56,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTMP protocol encoder encodes RTMP messages and packets to byte buffers.
+ *
+ * @author mondain
  */
 public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
@@ -92,7 +94,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      * @param message
      *            Object to encode
      * @return IoBuffer with encoded data
-     * @throws Exception
+     * @throws java.lang.Exception
      *             Any decoding exception
      */
     public IoBuffer encode(Object message) throws Exception {
@@ -943,6 +945,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         return result;
     }
 
+    /**
+     * <p>encodeStreamMetadata.</p>
+     *
+     * @param metaData a {@link org.red5.server.net.rtmp.event.Notify} object
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public IoBuffer encodeStreamMetadata(Notify metaData) {
         final IoBuffer result = metaData.getData();
         return result;
@@ -1004,6 +1012,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         return out;
     }
 
+    /**
+     * <p>encodeFlexStreamSend.</p>
+     *
+     * @param msg a {@link org.red5.server.net.rtmp.event.FlexStreamSend} object
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public IoBuffer encodeFlexStreamSend(FlexStreamSend msg) {
         final IoBuffer result = msg.getData();
         return result;
@@ -1014,6 +1028,11 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         highestTolerance = baseTolerance + (long) (baseTolerance * 0.6);
     }
 
+    /**
+     * <p>Setter for the field <code>baseTolerance</code>.</p>
+     *
+     * @param baseTolerance a long
+     */
     public void setBaseTolerance(long baseTolerance) {
         this.baseTolerance = baseTolerance;
         // update high and low tolerance
@@ -1030,10 +1049,20 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         this.dropLiveFuture = dropLiveFuture;
     }
 
+    /**
+     * <p>Setter for the field <code>dropEncoded</code>.</p>
+     *
+     * @param dropEncoded a boolean
+     */
     public void setDropEncoded(boolean dropEncoded) {
         this.dropEncoded = dropEncoded;
     }
 
+    /**
+     * <p>Getter for the field <code>baseTolerance</code>.</p>
+     *
+     * @return a long
+     */
     public long getBaseTolerance() {
         return baseTolerance;
     }

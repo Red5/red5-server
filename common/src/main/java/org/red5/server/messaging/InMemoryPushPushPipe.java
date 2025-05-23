@@ -23,10 +23,18 @@ public class InMemoryPushPushPipe extends AbstractPipe {
 
     private static final Logger log = LoggerFactory.getLogger(InMemoryPushPushPipe.class);
 
+    /**
+     * <p>Constructor for InMemoryPushPushPipe.</p>
+     */
     public InMemoryPushPushPipe() {
         super();
     }
 
+    /**
+     * <p>Constructor for InMemoryPushPushPipe.</p>
+     *
+     * @param listener a {@link org.red5.server.messaging.IPipeConnectionListener} object
+     */
     public InMemoryPushPushPipe(IPipeConnectionListener listener) {
         this();
         addPipeConnectionListener(listener);
@@ -62,7 +70,11 @@ public class InMemoryPushPushPipe extends AbstractPipe {
         return success;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.messaging.IMessage} object
+     */
     public IMessage pullMessage() {
         return null;
     }
@@ -73,12 +85,9 @@ public class InMemoryPushPushPipe extends AbstractPipe {
     }
 
     /**
-     * Pushes a message out to all the PushableConsumers.
+     * {@inheritDoc}
      *
-     * @param message
-     *            the message to be pushed to consumers
-     * @throws IOException
-     *            In case IOException of some sort is occurred
+     * Pushes a message out to all the PushableConsumers.
      */
     public void pushMessage(IMessage message) throws IOException {
         if (log.isDebugEnabled()) {

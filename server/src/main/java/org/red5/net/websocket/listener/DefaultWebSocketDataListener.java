@@ -29,16 +29,19 @@ public class DefaultWebSocketDataListener extends WebSocketDataListener {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultWebSocketDataListener.class);
 
+    /** {@inheritDoc} */
     @Override
     public void onWSConnect(WebSocketConnection conn) {
         log.info("Connect: {}", conn);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onWSDisconnect(WebSocketConnection conn) {
         log.info("Disconnect: {}", conn);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onWSMessage(WSMessage message) {
         // assume we have text
@@ -67,6 +70,7 @@ public class DefaultWebSocketDataListener extends WebSocketDataListener {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void stop() {
         log.info("Stop");

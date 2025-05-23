@@ -11,11 +11,23 @@ import org.red5.server.messaging.IPipe;
 
 /**
  * Broadcast scope is marker interface that represents object that works as basic scope and has pipe connection event dispatching capabilities.
+ *
+ * @author mondain
  */
 public interface IBroadcastScope extends IBasicScope, IPipe {
 
+    /**
+     * <p>getClientBroadcastStream.</p>
+     *
+     * @return a {@link org.red5.server.api.stream.IClientBroadcastStream} object
+     */
     public IClientBroadcastStream getClientBroadcastStream();
 
+    /**
+     * <p>setClientBroadcastStream.</p>
+     *
+     * @param clientBroadcastStream a {@link org.red5.server.api.stream.IClientBroadcastStream} object
+     */
     public void setClientBroadcastStream(IClientBroadcastStream clientBroadcastStream);
 
 }

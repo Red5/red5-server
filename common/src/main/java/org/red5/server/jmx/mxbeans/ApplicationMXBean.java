@@ -21,28 +21,100 @@ import org.red5.server.api.scope.IScope;
 @MXBean
 public interface ApplicationMXBean {
 
+    /**
+     * <p>appStart.</p>
+     *
+     * @param app a {@link org.red5.server.api.scope.IScope} object
+     * @return a boolean
+     */
     public boolean appStart(IScope app);
 
+    /**
+     * <p>appConnect.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     * @param params an array of {@link java.lang.Object} objects
+     * @return a boolean
+     */
     public boolean appConnect(IConnection conn, Object[] params);
 
+    /**
+     * <p>appJoin.</p>
+     *
+     * @param client a {@link org.red5.server.api.IClient} object
+     * @param app a {@link org.red5.server.api.scope.IScope} object
+     * @return a boolean
+     */
     public boolean appJoin(IClient client, IScope app);
 
+    /**
+     * <p>appDisconnect.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     */
     public void appDisconnect(IConnection conn);
 
+    /**
+     * <p>appLeave.</p>
+     *
+     * @param client a {@link org.red5.server.api.IClient} object
+     * @param app a {@link org.red5.server.api.scope.IScope} object
+     */
     public void appLeave(IClient client, IScope app);
 
+    /**
+     * <p>appStop.</p>
+     *
+     * @param app a {@link org.red5.server.api.scope.IScope} object
+     */
     public void appStop(IScope app);
 
+    /**
+     * <p>roomStart.</p>
+     *
+     * @param room a {@link org.red5.server.api.scope.IScope} object
+     * @return a boolean
+     */
     public boolean roomStart(IScope room);
 
+    /**
+     * <p>roomConnect.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     * @param params an array of {@link java.lang.Object} objects
+     * @return a boolean
+     */
     public boolean roomConnect(IConnection conn, Object[] params);
 
+    /**
+     * <p>roomJoin.</p>
+     *
+     * @param client a {@link org.red5.server.api.IClient} object
+     * @param room a {@link org.red5.server.api.scope.IScope} object
+     * @return a boolean
+     */
     public boolean roomJoin(IClient client, IScope room);
 
+    /**
+     * <p>roomDisconnect.</p>
+     *
+     * @param conn a {@link org.red5.server.api.IConnection} object
+     */
     public void roomDisconnect(IConnection conn);
 
+    /**
+     * <p>roomLeave.</p>
+     *
+     * @param client a {@link org.red5.server.api.IClient} object
+     * @param room a {@link org.red5.server.api.scope.IScope} object
+     */
     public void roomLeave(IClient client, IScope room);
 
+    /**
+     * <p>roomStop.</p>
+     *
+     * @param room a {@link org.red5.server.api.scope.IScope} object
+     */
     public void roomStop(IScope room);
 
 }

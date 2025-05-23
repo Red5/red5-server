@@ -19,12 +19,25 @@ import org.red5.io.sctp.SctpException;
 import org.red5.io.sctp.packet.chunks.Chunk;
 import org.red5.io.sctp.packet.chunks.ChunkFactory;
 
+/**
+ * <p>SctpPacket class.</p>
+ *
+ * @author mondain
+ */
 public class SctpPacket {
 
     private SctpHeader header;
 
     private ArrayList<Chunk> chunks = new ArrayList<>();
 
+    /**
+     * <p>Constructor for SctpPacket.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     * @throws org.red5.io.sctp.SctpException if any.
+     */
     public SctpPacket(final byte[] data, int offset, int length) throws SctpException {
         header = new SctpHeader(data, offset, length);
         Chunk chunk = null;
@@ -36,23 +49,55 @@ public class SctpPacket {
         }
     }
 
+    /**
+     * <p>Constructor for SctpPacket.</p>
+     *
+     * @param sourcePort a int
+     * @param destinationPort a int
+     * @param verificationTag a int
+     * @param chunk a {@link org.red5.io.sctp.packet.chunks.Chunk} object
+     */
     public SctpPacket(int sourcePort, int destinationPort, int verificationTag, Chunk chunk) {
         header = new SctpHeader(sourcePort, destinationPort, verificationTag, 0);
         chunks.add(chunk);
     }
 
+    /**
+     * <p>apply.</p>
+     *
+     * @param address a {@link java.net.InetSocketAddress} object
+     * @param server a {@link org.red5.io.sctp.IServerChannelControl} object
+     * @throws org.red5.io.sctp.SctpException if any.
+     * @throws java.io.IOException if any.
+     * @throws java.security.InvalidKeyException if any.
+     * @throws java.security.NoSuchAlgorithmException if any.
+     */
     public void apply(InetSocketAddress address, IServerChannelControl server) throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException {
         for (Chunk chunk : chunks) {
             chunk.apply(address, server);
         }
     }
 
+    /**
+     * <p>apply.</p>
+     *
+     * @param association a {@link org.red5.io.sctp.IAssociationControl} object
+     * @throws org.red5.io.sctp.SctpException if any.
+     * @throws java.io.IOException if any.
+     * @throws java.security.InvalidKeyException if any.
+     * @throws java.security.NoSuchAlgorithmException if any.
+     */
     public void apply(IAssociationControl association) throws SctpException, IOException, InvalidKeyException, NoSuchAlgorithmException {
         for (Chunk chunk : chunks) {
             chunk.apply(association);
         }
     }
 
+    /**
+     * <p>getBytes.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
     public byte[] getBytes() {
         int resultSize = header.getSize();
 
@@ -71,10 +116,20 @@ public class SctpPacket {
         return result;
     }
 
+    /**
+     * <p>getSourcePort.</p>
+     *
+     * @return a int
+     */
     public int getSourcePort() {
         return header.getSourcePort();
     }
 
+    /**
+     * <p>getVerificationTag.</p>
+     *
+     * @return a int
+     */
     public int getVerificationTag() {
         return header.getVerificationTag();
     }

@@ -26,6 +26,8 @@ import org.red5.util.ByteNibbler;
 
 /**
  * Video data event
+ *
+ * @author mondain
  */
 public class VideoData extends BaseEvent implements IoConstants, IStreamData<VideoData>, IStreamPacket {
 
@@ -71,7 +73,9 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
      */
     //protected transient IVideoStreamCodec codec;
 
-    /** Constructs a new VideoData. */
+    /**
+     * Constructs a new VideoData.
+     */
     public VideoData() {
         this(IoBuffer.allocate(0).flip());
     }
@@ -114,10 +118,20 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         return dataType;
     }
 
+    /**
+     * <p>Getter for the field <code>data</code>.</p>
+     *
+     * @return a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public IoBuffer getData() {
         return data;
     }
 
+    /**
+     * <p>Setter for the field <code>data</code>.</p>
+     *
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
+     */
     public void setData(IoBuffer data) {
         if (codecId == -1 && data.remaining() > 0) {
             data.mark();
@@ -142,6 +156,11 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         this.data = data;
     }
 
+    /**
+     * <p>Setter for the field <code>data</code>.</p>
+     *
+     * @param data an array of {@link byte} objects
+     */
     public void setData(byte[] data) {
         // set some properties if we can
         if (codecId == -1 && data.length > 0) {
@@ -167,10 +186,20 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         setData(IoBuffer.wrap(data));
     }
 
+    /**
+     * <p>Getter for the field <code>codecId</code>.</p>
+     *
+     * @return a int
+     */
     public int getCodecId() {
         return codecId;
     }
 
+    /**
+     * <p>isConfig.</p>
+     *
+     * @return a boolean
+     */
     public boolean isConfig() {
         return config;
     }
@@ -184,6 +213,11 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         return frameType;
     }
 
+    /**
+     * <p>isKeyFrame.</p>
+     *
+     * @return a boolean
+     */
     public boolean isKeyFrame() {
         return frameType == VideoFrameType.KEYFRAME;
     }
@@ -197,14 +231,27 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         return packetType;
     }
 
+    /**
+     * <p>isEndOfSequence.</p>
+     *
+     * @return a boolean
+     */
     public boolean isEndOfSequence() {
         return packetType == VideoPacketType.SequenceEnd;
     }
 
+    /**
+     * <p>isEnhanced.</p>
+     *
+     * @return a boolean
+     */
     public boolean isEnhanced() {
         return enhanced;
     }
 
+    /**
+     * <p>reset.</p>
+     */
     public void reset() {
         releaseInternal();
     }
@@ -225,6 +272,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         config = false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -235,6 +283,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
@@ -258,6 +307,8 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
      * Duplicate this message / event.
      *
      * @return duplicated event
+     * @throws java.io.IOException if any.
+     * @throws java.lang.ClassNotFoundException if any.
      */
     public VideoData duplicate() throws IOException, ClassNotFoundException {
         VideoData result = new VideoData();

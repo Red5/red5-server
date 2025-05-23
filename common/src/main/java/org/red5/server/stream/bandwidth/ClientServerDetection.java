@@ -20,15 +20,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * <p>ClientServerDetection class.</p>
  *
  * @author The Red5 Project
  * @author Dan Rossi
  */
 public class ClientServerDetection implements IPendingServiceCallback {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(ClientServerDetection.class);
 
     /**
+     * {@inheritDoc}
+     *
      * Handle callback from service call.
      */
     public void resultReceived(IPendingServiceCall call) {
@@ -48,6 +52,12 @@ public class ClientServerDetection implements IPendingServiceCallback {
         return null;
     }
 
+    /**
+     * <p>checkBandwidth.</p>
+     *
+     * @param params an array of {@link java.lang.Object} objects
+     * @return a {@link java.util.Map} object
+     */
     public Map<String, Object> checkBandwidth(Object[] params) {
         final IStreamCapableConnection stats = getStats();
         Map<String, Object> statsValues = new HashMap<>();

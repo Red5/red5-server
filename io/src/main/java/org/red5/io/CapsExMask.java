@@ -17,10 +17,21 @@ public enum CapsExMask {
         mask = b;
     }
 
+    /**
+     * <p>Getter for the field <code>mask</code>.</p>
+     *
+     * @return a byte
+     */
     public byte getMask() {
         return mask;
     }
 
+    /**
+     * <p>fromMask.</p>
+     *
+     * @param b a byte
+     * @return a {@link java.util.EnumSet} object
+     */
     public static EnumSet<CapsExMask> fromMask(byte b) {
         EnumSet<CapsExMask> result = EnumSet.noneOf(CapsExMask.class);
         for (CapsExMask mask : values()) {
@@ -31,6 +42,12 @@ public enum CapsExMask {
         return result;
     }
 
+    /**
+     * <p>toMask.</p>
+     *
+     * @param set a {@link java.util.EnumSet} object
+     * @return a byte
+     */
     public static byte toMask(EnumSet<CapsExMask> set) {
         byte result = 0;
         for (CapsExMask mask : set) {
@@ -39,6 +56,11 @@ public enum CapsExMask {
         return result;
     }
 
+    /**
+     * <p>all.</p>
+     *
+     * @return a {@link java.util.EnumSet} object
+     */
     public static EnumSet<CapsExMask> all() {
         return EnumSet.allOf(CapsExMask.class);
     }

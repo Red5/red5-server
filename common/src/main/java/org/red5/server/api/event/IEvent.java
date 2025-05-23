@@ -9,6 +9,8 @@ package org.red5.server.api.event;
 
 /**
  * IEvent interfaces is the essential interface every Event should implement
+ *
+ * @author mondain
  */
 public interface IEvent {
 

@@ -102,6 +102,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
     // reference to the jee server
     private LoaderBase jeeServer;
 
+    /** {@inheritDoc} */
     @Override
     public void afterPropertiesSet() throws Exception {
         try {
@@ -119,6 +120,7 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() throws Exception {
         shutdownOrderly();
@@ -265,32 +267,63 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
         }
     }
 
+    /**
+     * <p>Setter for the field <code>port</code>.</p>
+     *
+     * @param port a int
+     */
     public void setPort(int port) {
         this.port = port;
     }
 
+    /**
+     * <p>Setter for the field <code>shutdownDelay</code>.</p>
+     *
+     * @param shutdownDelay a int
+     */
     public void setShutdownDelay(int shutdownDelay) {
         this.shutdownDelay = shutdownDelay;
     }
 
+    /**
+     * <p>Setter for the field <code>shutdownTokenFileName</code>.</p>
+     *
+     * @param shutdownTokenFileName a {@link java.lang.String} object
+     */
     public void setShutdownTokenFileName(String shutdownTokenFileName) {
         this.shutdownTokenFileName = shutdownTokenFileName;
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
+    /**
+     * <p>Setter for the field <code>coreContext</code>.</p>
+     *
+     * @param coreContext a {@link org.springframework.context.ApplicationContext} object
+     */
     public void setCoreContext(ApplicationContext coreContext) {
         this.coreContext = coreContext;
     }
 
+    /**
+     * <p>Setter for the field <code>commonContext</code>.</p>
+     *
+     * @param commonContext a {@link org.springframework.context.ApplicationContext} object
+     */
     public void setCommonContext(ApplicationContext commonContext) {
         this.commonContext = commonContext;
     }
 
+    /**
+     * <p>Setter for the field <code>contextLoader</code>.</p>
+     *
+     * @param contextLoader a {@link org.red5.server.ContextLoader} object
+     */
     public void setContextLoader(ContextLoader contextLoader) {
         this.contextLoader = contextLoader;
     }

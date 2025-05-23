@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides a means for locating methods within service classes using reflection.
+ *
+ * @author mondain
  */
 public class ReflectionUtils {
 
@@ -42,8 +44,8 @@ public class ReflectionUtils {
      *
      * @param service service to search for the method, if given
      * @param methodName method name to find
-     * @param args arguments
      * @return Method/params pairs or null if not found
+     * @param listArgs a {@link java.util.List} object
      */
     public static Object[] findMethod(Object service, String methodName, List<?> listArgs) {
         if (isDebug) {

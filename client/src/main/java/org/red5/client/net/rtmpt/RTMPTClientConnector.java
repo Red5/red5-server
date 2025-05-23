@@ -41,8 +41,10 @@ public class RTMPTClientConnector extends Thread {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPTClientConnector.class);
 
+    /** Constant <code>CONTENT_TYPE="application/x-fcs"</code> */
     protected static final String CONTENT_TYPE = "application/x-fcs";
 
+    /** Constant <code>ZERO_REQUEST_ENTITY</code> */
     protected static final ByteArrayEntity ZERO_REQUEST_ENTITY = new ByteArrayEntity(new byte[] { 0 });
 
     /**
@@ -66,15 +68,26 @@ public class RTMPTClientConnector extends Thread {
         httpClient = HttpConnectionUtil.getClient();
     }
 
+    /**
+     * <p>Constructor for RTMPTClientConnector.</p>
+     */
     protected RTMPTClientConnector() {
         // default ctor for extension purposes
     }
 
+    /**
+     * <p>Constructor for RTMPTClientConnector.</p>
+     *
+     * @param server a {@link java.lang.String} object
+     * @param port a int
+     * @param client a {@link org.red5.client.net.rtmpt.RTMPTClient} object
+     */
     public RTMPTClientConnector(String server, int port, RTMPTClient client) {
         targetHost = new HttpHost(server, port, "http");
         this.client = client;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void run() {
         HttpPost post = null;
@@ -148,6 +161,8 @@ public class RTMPTClientConnector extends Thread {
     }
 
     /**
+     * <p>Getter for the field <code>sessionId</code>.</p>
+     *
      * @return the sessionId
      */
     public String getSessionId() {
@@ -189,6 +204,11 @@ public class RTMPTClientConnector extends Thread {
         return conn;
     }
 
+    /**
+     * <p>finalizeConnection.</p>
+     *
+     * @throws java.io.IOException if any.
+     */
     protected void finalizeConnection() throws IOException {
         log.debug("Sending close post");
         HttpPost closePost = getPost(makeUrl("close"));
@@ -198,28 +218,58 @@ public class RTMPTClientConnector extends Thread {
         EntityUtils.consume(response.getEntity());
     }
 
+    /**
+     * <p>getPost.</p>
+     *
+     * @param uri a {@link java.lang.String} object
+     * @return a {@link org.apache.http.client.methods.HttpPost} object
+     */
     protected static HttpPost getPost(String uri) {
         HttpPost post = new HttpPost(uri);
         post.setProtocolVersion(HttpVersion.HTTP_1_1);
         return post;
     }
 
+    /**
+     * <p>makePost.</p>
+     *
+     * @param command a {@link java.lang.String} object
+     * @return a {@link org.apache.http.client.methods.HttpPost} object
+     */
     protected HttpPost makePost(String command) {
         HttpPost post = getPost(makeUrl(command));
         setCommonHeaders(post);
         return post;
     }
 
+    /**
+     * <p>makeUrl.</p>
+     *
+     * @param command a {@link java.lang.String} object
+     * @return a {@link java.lang.String} object
+     */
     protected String makeUrl(String command) {
         // use message count from connection
         return String.format("/%s/%s/%s", command, sessionId, messageCount++);
     }
 
+    /**
+     * <p>setCommonHeaders.</p>
+     *
+     * @param post a {@link org.apache.http.client.methods.HttpPost} object
+     */
     protected static void setCommonHeaders(HttpPost post) {
         post.addHeader("Connection", "Keep-Alive");
         post.addHeader("Cache-Control", "no-cache");
     }
 
+    /**
+     * <p>checkResponseCode.</p>
+     *
+     * @param response a {@link org.apache.http.HttpResponse} object
+     * @throws org.apache.http.ParseException if any.
+     * @throws java.io.IOException if any.
+     */
     protected static void checkResponseCode(HttpResponse response) throws ParseException, IOException {
         int code = response.getStatusLine().getStatusCode();
         if (code != HttpStatus.SC_OK) {
@@ -227,6 +277,11 @@ public class RTMPTClientConnector extends Thread {
         }
     }
 
+    /**
+     * <p>Setter for the field <code>stopRequested</code>.</p>
+     *
+     * @param stopRequested a boolean
+     */
     public void setStopRequested(boolean stopRequested) {
         this.stopRequested = stopRequested;
     }

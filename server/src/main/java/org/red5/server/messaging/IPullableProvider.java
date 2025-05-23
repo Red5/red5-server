@@ -16,9 +16,25 @@ import java.io.IOException;
  * @author Steven Gong (steven.gong@gmail.com)
  */
 public interface IPullableProvider extends IProvider {
+    /** Constant <code>KEY="IPullableProvider.class.getName()"</code> */
     public static final String KEY = IPullableProvider.class.getName();
 
+    /**
+     * <p>pullMessage.</p>
+     *
+     * @param pipe a {@link org.red5.server.messaging.IPipe} object
+     * @return a {@link org.red5.server.messaging.IMessage} object
+     * @throws java.io.IOException if any.
+     */
     IMessage pullMessage(IPipe pipe) throws IOException;
 
+    /**
+     * <p>pullMessage.</p>
+     *
+     * @param pipe a {@link org.red5.server.messaging.IPipe} object
+     * @param wait a long
+     * @return a {@link org.red5.server.messaging.IMessage} object
+     * @throws java.io.IOException if any.
+     */
     IMessage pullMessage(IPipe pipe, long wait) throws IOException;
 }

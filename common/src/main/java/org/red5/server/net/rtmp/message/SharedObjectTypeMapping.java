@@ -13,9 +13,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * SO event types mapping
+ *
+ * @author mondain
  */
 public class SharedObjectTypeMapping {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(SharedObjectTypeMapping.class);
 
     /**

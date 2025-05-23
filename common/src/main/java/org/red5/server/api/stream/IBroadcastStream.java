@@ -16,7 +16,6 @@ import org.red5.server.net.rtmp.event.Notify;
 /**
  * A broadcast stream is a stream source to be subscribed to by clients. To subscribe to a stream from your client Flash application use NetStream.play method. Broadcast stream can be saved at the server-side.
  *
- *
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  * @author Steven Gong (steven.gong@gmail.com)
@@ -30,11 +29,11 @@ public interface IBroadcastStream extends IStream {
      *            The path of the file relative to the scope.
      * @param isAppend
      *            Whether to append to the end of file.
-     * @throws IOException
+     * @throws java.io.IOException
      *             File could not be created/written to.
-     * @throws ResourceExistException
+     * @throws org.red5.server.api.stream.ResourceExistException
      *             Resource exist when trying to create.
-     * @throws ResourceNotFoundException
+     * @throws org.red5.server.api.stream.ResourceNotFoundException
      *             Resource not exist when trying to append.
      */
     void saveAs(String filePath, boolean isAppend) throws IOException, ResourceNotFoundException, ResourceExistException;
@@ -73,6 +72,7 @@ public interface IBroadcastStream extends IStream {
     String getPublishedName();
 
     /**
+     * <p>setPublishedName.</p>
      *
      * @param name
      *            Set stream publish name

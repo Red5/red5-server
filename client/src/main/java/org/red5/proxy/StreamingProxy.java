@@ -71,10 +71,18 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
     // task timer
     private static Timer timer;
 
+    /**
+     * <p>init.</p>
+     */
     public void init() {
         init(ClientType.RTMP);
     }
 
+    /**
+     * <p>init.</p>
+     *
+     * @param clientType a {@link org.red5.proxy.ClientType} object
+     */
     public void init(ClientType clientType) {
         switch (clientType) {
             case RTMPE:
@@ -94,6 +102,13 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         timer = new Timer();
     }
 
+    /**
+     * <p>start.</p>
+     *
+     * @param publishName a {@link java.lang.String} object
+     * @param publishMode a {@link java.lang.String} object
+     * @param params an array of {@link java.lang.Object} objects
+     */
     public void start(String publishName, String publishMode, Object[] params) {
         setState(StreamState.CONNECTING);
         this.publishName = publishName;
@@ -110,6 +125,9 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         rtmpClient.connect(host, port, defParams, this, params);
     }
 
+    /**
+     * <p>stop.</p>
+     */
     public void stop() {
         timer.cancel();
         if (state != StreamState.STOPPED) {
@@ -124,11 +142,13 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         rtmpClient.createStream(this);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onPipeConnectionEvent(PipeConnectionEvent event) {
         log.debug("onPipeConnectionEvent: {}", event);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void pushMessage(IPipe pipe, IMessage message) throws IOException {
         if (isPublished() && message instanceof RTMPMessage) {
@@ -140,6 +160,7 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onOOBControlMessage(IMessageComponent source, IPipe pipe, OOBControlMessage oobCtrlMsg) {
         log.debug("onOOBControlMessage: {}", oobCtrlMsg);
@@ -153,18 +174,34 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         rtmpClient.onBWDone(null);
     }
 
+    /**
+     * <p>Setter for the field <code>host</code>.</p>
+     *
+     * @param host a {@link java.lang.String} object
+     */
     public void setHost(String host) {
         this.host = host;
     }
 
+    /**
+     * <p>Setter for the field <code>port</code>.</p>
+     *
+     * @param port a int
+     */
     public void setPort(int port) {
         this.port = port;
     }
 
+    /**
+     * <p>Setter for the field <code>app</code>.</p>
+     *
+     * @param app a {@link java.lang.String} object
+     */
     public void setApp(String app) {
         this.app = app;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onStreamEvent(Notify notify) {
         log.debug("onStreamEvent: {}", notify);
@@ -182,6 +219,7 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void resultReceived(IPendingServiceCall call) {
         String method = call.getServiceMethodName();
@@ -207,6 +245,11 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         }
     }
 
+    /**
+     * <p>Setter for the field <code>state</code>.</p>
+     *
+     * @param state a {@link org.red5.proxy.StreamState} object
+     */
     protected void setState(StreamState state) {
         try {
             lock.acquire();
@@ -218,10 +261,20 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         }
     }
 
+    /**
+     * <p>Getter for the field <code>state</code>.</p>
+     *
+     * @return a {@link org.red5.proxy.StreamState} object
+     */
     protected StreamState getState() {
         return state;
     }
 
+    /**
+     * <p>setConnectionClosedHandler.</p>
+     *
+     * @param connectionClosedHandler a {@link java.lang.Runnable} object
+     */
     public void setConnectionClosedHandler(Runnable connectionClosedHandler) {
         log.debug("setConnectionClosedHandler: {}", connectionClosedHandler);
         if (rtmpClient != null) {
@@ -231,6 +284,11 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         }
     }
 
+    /**
+     * <p>setExceptionHandler.</p>
+     *
+     * @param exceptionHandler a {@link org.red5.client.net.rtmp.ClientExceptionHandler} object
+     */
     public void setExceptionHandler(ClientExceptionHandler exceptionHandler) {
         log.debug("setExceptionHandler: {}", exceptionHandler);
         if (rtmpClient != null) {
@@ -240,10 +298,20 @@ public class StreamingProxy implements IPushableConsumer, IPipeConnectionListene
         }
     }
 
+    /**
+     * <p>isPublished.</p>
+     *
+     * @return a boolean
+     */
     public boolean isPublished() {
         return getState().equals(StreamState.PUBLISHED);
     }
 
+    /**
+     * <p>isRunning.</p>
+     *
+     * @return a boolean
+     */
     public boolean isRunning() {
         return !getState().equals(StreamState.STOPPED);
     }

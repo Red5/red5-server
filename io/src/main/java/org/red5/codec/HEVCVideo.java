@@ -40,6 +40,7 @@ public class HEVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec 
         softReset();
     }
 
+    /** {@inheritDoc} */
     public void handleNonEnhanced(VideoFrameType type, IoBuffer data, int timestamp) {
         // get the codecs frame type
         data.rewind();
@@ -106,6 +107,7 @@ public class HEVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec 
         }
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("incomplete-switch")
     public void handleFrame(VideoPacketType packetType, VideoFrameType frameType, IoBuffer data, int timestamp) {
         switch (packetType) {

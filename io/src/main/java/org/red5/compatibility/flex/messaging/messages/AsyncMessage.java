@@ -25,8 +25,10 @@ public class AsyncMessage extends AbstractMessage {
 
     private static final long serialVersionUID = -3549535089417916783L;
 
+    /** Constant <code>CORRELATION_ID_FLAG=1</code> */
     protected static byte CORRELATION_ID_FLAG = 1;
 
+    /** Constant <code>CORRELATION_ID_BYTES_FLAG=2</code> */
     protected static byte CORRELATION_ID_BYTES_FLAG = 2;
 
     /** Id of message this message belongs to. */
@@ -42,16 +44,27 @@ public class AsyncMessage extends AbstractMessage {
         result.append(correlationId);
     }
 
+    /**
+     * <p>Setter for the field <code>correlationId</code>.</p>
+     *
+     * @param id a {@link java.lang.String} object
+     */
     public void setCorrelationId(String id) {
         correlationId = id;
     }
 
+    /**
+     * <p>Getter for the field <code>correlationId</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getCorrelationId() {
         return correlationId;
     }
 
     static Logger log = LoggerFactory.getLogger(AsyncMessage.class);
 
+    /** {@inheritDoc} */
     @Override
     public void readExternal(IDataInput in) {
         super.readExternal(in);
@@ -83,6 +96,7 @@ public class AsyncMessage extends AbstractMessage {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(IDataOutput output) {
         super.writeExternal(output);

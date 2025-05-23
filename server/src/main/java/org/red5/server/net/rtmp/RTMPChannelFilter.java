@@ -15,12 +15,23 @@ import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.ProtocolEncoderException;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 
+/**
+ * <p>RTMPChannelFilter class.</p>
+ *
+ * @author mondain
+ */
 public class RTMPChannelFilter extends ProtocolCodecFilter {
 
+    /**
+     * <p>Constructor for RTMPChannelFilter.</p>
+     *
+     * @param factory a {@link org.apache.mina.filter.codec.ProtocolCodecFactory} object
+     */
     public RTMPChannelFilter(ProtocolCodecFactory factory) {
         super(factory);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void messageSent(NextFilter nextFilter, IoSession session, WriteRequest writeRequest) throws Exception {
         if (writeRequest instanceof EndOfMessage) {
@@ -28,6 +39,7 @@ public class RTMPChannelFilter extends ProtocolCodecFilter {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void filterWrite(NextFilter nextFilter, IoSession session, WriteRequest writeRequest) throws Exception {
         Object message = writeRequest.getMessage();

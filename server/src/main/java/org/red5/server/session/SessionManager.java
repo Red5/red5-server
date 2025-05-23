@@ -42,8 +42,12 @@ public class SessionManager {
     private static ISchedulingService schedulingService;
 
     // Create a random generator
+    /** Constant <code>rnd</code> */
     public static final Random rnd = new Random();
 
+    /**
+     * <p>init.</p>
+     */
     public void init() {
         if (schedulingService != null) {
             // set to run once per hour
@@ -53,6 +57,11 @@ public class SessionManager {
         }
     }
 
+    /**
+     * <p>getSessionId.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public static String getSessionId() {
         //random int from 1 - 100000
         int part1 = rnd.nextInt(99999) + 1;
@@ -66,11 +75,22 @@ public class SessionManager {
         return sessionId;
     }
 
+    /**
+     * <p>createSession.</p>
+     *
+     * @return a {@link org.red5.server.api.session.ISession} object
+     */
     public static ISession createSession() {
         // create a new session
         return createSession(getSessionId());
     }
 
+    /**
+     * <p>createSession.</p>
+     *
+     * @param sessionId a {@link java.lang.String} object
+     * @return a {@link org.red5.server.api.session.ISession} object
+     */
     public static ISession createSession(String sessionId) {
         // create a new session
         Session session = new Session(sessionId);
@@ -80,23 +100,50 @@ public class SessionManager {
         return session;
     }
 
+    /**
+     * <p>getSession.</p>
+     *
+     * @param sessionId a {@link java.lang.String} object
+     * @return a {@link org.red5.server.api.session.ISession} object
+     */
     public static ISession getSession(String sessionId) {
         return sessions.get(sessionId);
     }
 
+    /**
+     * <p>removeSession.</p>
+     *
+     * @param sessionId a {@link java.lang.String} object
+     * @return a {@link org.red5.server.api.session.ISession} object
+     */
     public static ISession removeSession(String sessionId) {
         return sessions.remove(sessionId);
     }
 
+    /**
+     * <p>Getter for the field <code>destinationDirectory</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getDestinationDirectory() {
         return destinationDirectory;
     }
 
+    /**
+     * <p>Setter for the field <code>destinationDirectory</code>.</p>
+     *
+     * @param destinationDir a {@link java.lang.String} object
+     */
     public void setDestinationDirectory(String destinationDir) {
         log.debug("Setting session destination directory {}", destinationDir);
         SessionManager.destinationDirectory = destinationDir;
     }
 
+    /**
+     * <p>Setter for the field <code>maxLifetime</code>.</p>
+     *
+     * @param maxLifetime a {@link java.lang.String} object
+     */
     public void setMaxLifetime(String maxLifetime) {
         if (StringUtils.isNumeric(maxLifetime)) {
             SessionManager.maxLifetime = Long.valueOf(maxLifetime);
@@ -106,10 +153,21 @@ public class SessionManager {
         log.debug("Max lifetime set to {} ms", SessionManager.maxLifetime);
     }
 
+    /**
+     * <p>Setter for the field <code>schedulingService</code>.</p>
+     *
+     * @param schedulingService a {@link org.red5.server.api.scheduling.ISchedulingService} object
+     */
     public void setSchedulingService(ISchedulingService schedulingService) {
         SessionManager.schedulingService = schedulingService;
     }
 
+    /**
+     * <p>createHash.</p>
+     *
+     * @param str a {@link java.lang.String} object
+     * @return a {@link java.lang.String} object
+     */
     public static String createHash(String str) {
         return DigestUtils.md5Hex(str.getBytes());
     }

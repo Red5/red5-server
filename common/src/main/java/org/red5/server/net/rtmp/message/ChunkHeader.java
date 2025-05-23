@@ -23,9 +23,12 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * rtmp_specification_1.0.pdf (5.3.1.1 page 12)
  * </pre>
+ *
+ * @author mondain
  */
 public class ChunkHeader implements Constants, Cloneable, Externalizable {
 
+    /** Constant <code>log</code> */
     protected static final Logger log = LoggerFactory.getLogger(ChunkHeader.class);
 
     /**
@@ -172,17 +175,20 @@ public class ChunkHeader implements Constants, Cloneable, Externalizable {
         return header;
     }
 
+    /** {@inheritDoc} */
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         format = in.readByte();
         channelId = in.readInt();
         size = (byte) (channelId > 319 ? 3 : (channelId > 63 ? 2 : 1));
     }
 
+    /** {@inheritDoc} */
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeByte(format);
         out.writeInt(channelId);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         // if its new and props are un-set, just return that message

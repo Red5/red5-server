@@ -11,6 +11,8 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 /**
  * Represents a Video codec and its associated decoder configuration.
+ *
+ * @author mondain
  */
 public interface IVideoStreamCodec {
 
@@ -20,11 +22,15 @@ public interface IVideoStreamCodec {
     static final byte FLV_FRAME_KEY = 0x10;
 
     /**
+     * <p>getCodec.</p>
+     *
      * @return the codec type.
      */
     VideoCodec getCodec();
 
     /**
+     * <p>getName.</p>
+     *
      * @return the name of the video codec.
      */
     String getName();
@@ -72,8 +78,8 @@ public interface IVideoStreamCodec {
     /**
      * Add video data with a time stamp and a flag identifying the content as AMF or not.
      *
-     * @param data
-     * @param timestamp
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @param timestamp a int
      * @param amf if true, data is in AMF format otherwise its most likely from non-AMF source like RTP
      * @return true if data is added and false otherwise
      */
@@ -206,6 +212,8 @@ public interface IVideoStreamCodec {
 
     /**
      * Sets the track id.
+     *
+     * @param trackId a int
      */
     default void setTrackId(int trackId) {
     }

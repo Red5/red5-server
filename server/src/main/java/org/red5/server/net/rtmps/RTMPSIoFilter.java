@@ -34,6 +34,7 @@ public class RTMPSIoFilter extends RTMPEIoFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPSIoFilter.class);
 
+    /** {@inheritDoc} */
     @Override
     public void messageReceived(NextFilter nextFilter, IoSession session, Object obj) throws Exception {
         log.trace("messageReceived nextFilter: {} session: {} message: {}", nextFilter, session, obj);

@@ -124,6 +124,7 @@ public class SorensonVideo extends AbstractVideo {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public FrameData[] getKeyframes() {
         return dataCount > 0 ? new FrameData[] { new FrameData(getKeyframe()) } : new FrameData[0];

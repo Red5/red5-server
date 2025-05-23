@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Shared object event
+ *
+ * @author mondain
  */
 public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessage {
 
@@ -49,6 +51,9 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
      */
     private boolean persistent;
 
+    /**
+     * <p>Constructor for SharedObjectMessage.</p>
+     */
     public SharedObjectMessage() {
     }
 
@@ -99,7 +104,11 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
         return TYPE_SHARED_OBJECT;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a int
+     */
     public int getVersion() {
         return version;
     }
@@ -114,7 +123,11 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
         this.version = version;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getName() {
         return name;
     }
@@ -129,7 +142,11 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
         this.name = name;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isPersistent() {
         return persistent;
     }
@@ -154,32 +171,54 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
         return events.add(event);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param events a {@link java.util.List} object
+     */
     public void addEvents(List<ISharedObjectEvent> events) {
         this.events.addAll(events);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param events a {@link java.util.Queue} object
+     */
     public void addEvents(Queue<ISharedObjectEvent> events) {
         this.events.addAll(events);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @param events a {@link java.util.Set} object
+     */
     public void addEvents(Set<ISharedObjectEvent> events) {
         this.events.addAll(events);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a {@link java.util.Set} object
+     */
     public Set<ISharedObjectEvent> getEvents() {
         return events;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void clear() {
         events.clear();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean isEmpty() {
         return events.isEmpty();
     }
@@ -214,6 +253,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
         return sb.toString();
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings({ "unchecked" })
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -233,6 +273,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);

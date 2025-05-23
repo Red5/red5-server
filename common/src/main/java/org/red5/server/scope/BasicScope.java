@@ -31,9 +31,11 @@ import org.slf4j.LoggerFactory;
  *
  * @see org.red5.server.api.scope.IScope
  * @see org.red5.server.scope.Scope
+ * @author mondain
  */
 public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(BasicScope.class);
 
     /**
@@ -132,6 +134,8 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * {@inheritDoc}
+     *
+     * @return a boolean
      */
     public boolean hasParent() {
         return true;
@@ -139,12 +143,16 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * {@inheritDoc}
+     *
+     * @return a {@link org.red5.server.api.scope.IScope} object
      */
     public IScope getParent() {
         return parent;
     }
 
     /**
+     * <p>Getter for the field <code>type</code>.</p>
+     *
      * @return the type
      */
     public ScopeType getType() {
@@ -152,6 +160,8 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
     }
 
     /**
+     * <p>Getter for the field <code>name</code>.</p>
+     *
      * @return the name
      */
     public String getName() {
@@ -159,6 +169,8 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
     }
 
     /**
+     * <p>Getter for the field <code>store</code>.</p>
+     *
      * @return the store
      */
     public IPersistenceStore getStore() {
@@ -167,23 +179,23 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
 
     /**
      * {@inheritDoc}
+     *
+     * @return a int
      */
     public int getDepth() {
         return parent.getDepth() + 1;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public String getPath() {
         return String.format("%s/%s", parent.getPath(), parent.getName());
     }
 
     /**
-     * Sets the amount of time to keep the scope available after the last disconnect.
+     * {@inheritDoc}
      *
-     * @param keepDelay delay
+     * Sets the amount of time to keep the scope available after the last disconnect.
      */
     public void setKeepDelay(int keepDelay) {
         this.keepDelay = keepDelay;
@@ -199,9 +211,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
         return (type != null && !type.equals(ScopeType.UNDEFINED) && (name != null && !("").equals(name)));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean isConnectionAllowed(IConnection conn) {
         if (log.isDebugEnabled()) {
             log.debug("isConnectionAllowed: {}", conn);
@@ -225,9 +235,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean isScopeAllowed(IScope scope) {
         if (log.isDebugEnabled()) {
             log.debug("isScopeAllowed: {}", scope);
@@ -248,9 +256,7 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void setSecurityHandlers(Set<IScopeSecurityHandler> handlers) {
         if (securityHandlers == null) {
             securityHandlers = new CopyOnWriteArraySet<>();
@@ -263,10 +269,9 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
     }
 
     /**
-     * Add event listener to list of notified objects
+     * {@inheritDoc}
      *
-     * @param listener Listening object
-     * @return true if listener is added and false otherwise
+     * Add event listener to list of notified objects
      */
     public boolean addEventListener(IEventListener listener) {
         log.debug("addEventListener - scope: {} {}", getName(), listener);
@@ -274,11 +279,9 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
     }
 
     /**
-     * Remove event listener from list of listeners
+     * {@inheritDoc}
      *
-     * @param listener
-     *            Listener to remove
-     * @return true if listener is removed and false otherwise
+     * Remove event listener from list of listeners
      */
     public boolean removeEventListener(IEventListener listener) {
         log.debug("removeEventListener - scope: {} {}", getName(), listener);
@@ -323,28 +326,27 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
     }
 
     /**
-     * Handles event. To be implemented in subclass realization
+     * {@inheritDoc}
      *
-     * @param event Event context
-     * @return Event handling result
+     * Handles event. To be implemented in subclass realization
      */
     public boolean handleEvent(IEvent event) {
         return false;
     }
 
     /**
-     * Notifies listeners on event. Current implementation is empty. To be implemented in subclass realization
+     * {@inheritDoc}
      *
-     * @param event Event to broadcast
+     * Notifies listeners on event. Current implementation is empty. To be implemented in subclass realization
      */
     public void notifyEvent(IEvent event) {
 
     }
 
     /**
-     * Dispatches event (notifies all listeners)
+     * {@inheritDoc}
      *
-     * @param event Event to dispatch
+     * Dispatches event (notifies all listeners)
      */
     public void dispatchEvent(IEvent event) {
         for (IEventListener listener : listeners) {
@@ -368,10 +370,9 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
     }
 
     /**
-     * Equality is based on the scope's name and type.
+     * {@inheritDoc}
      *
-     * @param obj
-     *            object
+     * Equality is based on the scope's name and type.
      */
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -390,6 +391,12 @@ public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> 
         return true;
     }
 
+    /**
+     * <p>compareTo.</p>
+     *
+     * @param that a {@link org.red5.server.scope.BasicScope} object
+     * @return a int
+     */
     public int compareTo(BasicScope that) {
         if (equals(that)) {
             return 0;

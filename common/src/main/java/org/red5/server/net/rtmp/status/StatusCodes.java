@@ -9,6 +9,8 @@ package org.red5.server.net.rtmp.status;
 
 /**
  * Collection of commonly used constants with status codes. Descriptions provided as in FMS 2.0.1 documentation available at adobe.com with some minor additions and comments.
+ *
+ * @author mondain
  */
 public interface StatusCodes {
     /**

@@ -36,11 +36,13 @@ public abstract class WebSocketDataListener implements IWebSocketDataListener {
         this.protocol = protocol;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return localId;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

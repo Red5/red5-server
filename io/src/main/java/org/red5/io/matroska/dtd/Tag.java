@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for all webm tags
  *
+ * @author mondain
  */
 public abstract class Tag {
     static Logger log = LoggerFactory.getLogger(Tag.class);
@@ -34,13 +35,13 @@ public abstract class Tag {
     private byte[] data;
 
     /**
-     * Constructor, internally calls {@link Tag#Tag(String, VINT, VINT, InputStream)} to create tag with 0 size
+     * Constructor, internally calls {@link org.red5.io.matroska.dtd.Tag#Tag(String, VINT, VINT, InputStream)} to create tag with 0 size
      *
      * @param name
      *            - the name of tag to be created
      * @param id
      *            - the id of tag to be created
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of IO error
      */
     public Tag(String name, VINT id) throws IOException {
@@ -58,7 +59,7 @@ public abstract class Tag {
      *            - the size of tag to be created
      * @param inputStream
      *            - stream to read tag data from
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of any IO errors
      */
     public Tag(String name, VINT id, VINT size, InputStream inputStream) throws IOException {
@@ -73,9 +74,9 @@ public abstract class Tag {
      *
      * @param inputStream
      *            - stream to parse tag data from
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of any IO errors
-     * @throws ConverterException
+     * @throws org.red5.io.matroska.ConverterException
      *             - in case of any conversion errors
      */
     public abstract void parse(InputStream inputStream) throws IOException, ConverterException;
@@ -83,9 +84,9 @@ public abstract class Tag {
     /**
      * method to parse tag from inner bytes array - data
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of any IO errors
-     * @throws ConverterException
+     * @throws org.red5.io.matroska.ConverterException
      *             - in case of any conversion errors
      */
     public void parse() throws IOException, ConverterException {
@@ -96,7 +97,7 @@ public abstract class Tag {
      * method to read tag data from inputStream given
      *
      * @param inputStream InputStream
-     * @throws IOException
+     * @throws java.io.IOException
      *             - in case of any IO errors
      */
     public void readData(InputStream inputStream) throws IOException {
@@ -108,11 +109,11 @@ public abstract class Tag {
     }
 
     /**
-     * method to store tag value to {@link ByteBuffer} given
+     * method to store tag value to {@link java.nio.ByteBuffer} given
      *
      * @param bb
-     *            - {@link ByteBuffer} to store value
-     * @throws IOException
+     *            - {@link java.nio.ByteBuffer} to store value
+     * @throws java.io.IOException
      *             - in case of any IO errors
      */
     protected abstract void putValue(ByteBuffer bb) throws IOException;
@@ -120,7 +121,7 @@ public abstract class Tag {
     /**
      * getter for name
      *
-     * @return name of this {@link Tag}
+     * @return name of this {@link org.red5.io.matroska.dtd.Tag}
      */
     public String getName() {
         return name;
@@ -129,7 +130,7 @@ public abstract class Tag {
     /**
      * getter for id
      *
-     * @return id of this {@link Tag} as binary value of correspondent {@link VINT}
+     * @return id of this {@link org.red5.io.matroska.dtd.Tag} as binary value of correspondent {@link org.red5.io.matroska.VINT}
      */
     public long getId() {
         return id.getBinary();
@@ -138,7 +139,7 @@ public abstract class Tag {
     /**
      * getter for size
      *
-     * @return size of this {@link Tag} as value of correspondent {@link VINT}
+     * @return size of this {@link org.red5.io.matroska.dtd.Tag} as value of correspondent {@link org.red5.io.matroska.VINT}
      */
     public long getSize() {
         return size.getValue();
@@ -154,10 +155,10 @@ public abstract class Tag {
     }
 
     /**
-     * method to encode {@link Tag} as sequence of bytes
+     * method to encode {@link org.red5.io.matroska.dtd.Tag} as sequence of bytes
      *
-     * @return - encoded {@link Tag}
-     * @throws IOException
+     * @return - encoded {@link org.red5.io.matroska.dtd.Tag}
+     * @throws java.io.IOException
      *             - in case of any IO errors
      */
     public byte[] encode() throws IOException {
@@ -171,6 +172,8 @@ public abstract class Tag {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * method to get "pretty" represented {@link Tag}
      */
     @Override

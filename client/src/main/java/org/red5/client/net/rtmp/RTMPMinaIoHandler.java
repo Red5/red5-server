@@ -28,6 +28,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Handles all RTMP protocol events fired by the MINA framework.
+ *
+ * @author mondain
  */
 public class RTMPMinaIoHandler extends IoHandlerAdapter {
 
@@ -174,6 +176,11 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         this.enableSwfVerification = enableSwfVerification;
     }
 
+    /**
+     * <p>createRTMPMinaConnection.</p>
+     *
+     * @return a {@link org.red5.server.net.rtmp.RTMPMinaConnection} object
+     */
     protected RTMPMinaConnection createRTMPMinaConnection() {
         return (RTMPMinaConnection) RTMPClientConnManager.getInstance().createConnection(RTMPMinaConnection.class);
     }

@@ -21,7 +21,6 @@ import org.red5.io.object.Serializer;
  *
  * @author The Red5 Project
  * @author Joachim Bauch (jojo@struktur.de)
- *
  */
 public class DataOutput implements IDataOutput {
 

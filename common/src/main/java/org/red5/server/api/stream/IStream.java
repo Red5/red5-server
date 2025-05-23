@@ -12,11 +12,13 @@ import org.red5.server.api.scope.IScope;
 
 /**
  * Base interface for stream objects. A stream object is always associated with a scope.
+ *
+ * @author mondain
  */
 public interface IStream {
 
     /**
-     * Get the name of the stream. The name is unique across the server. This is just an id of the stream and NOT the name that is used at client side to subscribe to the stream. For that name, use {@link IBroadcastStream#getPublishedName()}
+     * Get the name of the stream. The name is unique across the server. This is just an id of the stream and NOT the name that is used at client side to subscribe to the stream. For that name, use {@link org.red5.server.api.stream.IBroadcastStream#getPublishedName()}
      *
      * @return the name of the stream
      */

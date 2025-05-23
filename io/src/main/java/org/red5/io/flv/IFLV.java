@@ -20,6 +20,8 @@ import org.red5.io.flv.meta.IMetaService;
 
 /**
  * Represents FLV file
+ *
+ * @author mondain
  */
 public interface IFLV extends IStreamableFile {
 
@@ -35,9 +37,9 @@ public interface IFLV extends IStreamableFile {
      *
      * @param metadata
      *            Metadata object
-     * @throws FileNotFoundException
+     * @throws java.io.FileNotFoundException
      *             File not found
-     * @throws IOException
+     * @throws java.io.IOException
      *             Any other I/O exception
      */
     @SuppressWarnings({ "rawtypes" })
@@ -55,7 +57,7 @@ public interface IFLV extends IStreamableFile {
      * Returns a map of the metadata
      *
      * @return metadata File metadata
-     * @throws FileNotFoundException
+     * @throws java.io.FileNotFoundException
      *             File not found
      */
     @SuppressWarnings({ "rawtypes" })
@@ -88,7 +90,7 @@ public interface IFLV extends IStreamableFile {
     /**
      * Refreshes the headers. Usually used after data is added to the flv file
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             Any I/O exception
      */
     public void refreshHeaders() throws IOException;
@@ -96,7 +98,7 @@ public interface IFLV extends IStreamableFile {
     /**
      * Flushes Header
      *
-     * @throws IOException
+     * @throws java.io.IOException
      *             Any I/O exception
      */
     public void flushHeaders() throws IOException;

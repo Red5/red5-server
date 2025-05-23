@@ -51,6 +51,9 @@ public class TomcatConnector {
 
     private boolean initialized;
 
+    /**
+     * <p>init.</p>
+     */
     public void init() {
         try {
             // create a connector
@@ -174,6 +177,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Getter for the field <code>connector</code>.</p>
+     *
      * @return the connector
      */
     public Connector getConnector() {
@@ -197,6 +202,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Getter for the field <code>connectionProperties</code>.</p>
+     *
      * @return the connectionProperties
      */
     public Map<String, String> getConnectionProperties() {
@@ -217,6 +224,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Getter for the field <code>connectorProperties</code>.</p>
+     *
      * @return the connectionProperties
      */
     public Map<String, String> getConnectorProperties() {
@@ -224,6 +233,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Setter for the field <code>protocol</code>.</p>
+     *
      * @param protocol
      *            the protocol to set
      */
@@ -232,6 +243,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Setter for the field <code>useIPVHosts</code>.</p>
+     *
      * @param useIPVHosts
      *            the useIPVHosts to set
      */
@@ -240,6 +253,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>setURIEncoding.</p>
+     *
      * @param uRIEncoding
      *            the uRIEncoding to set
      */
@@ -250,7 +265,7 @@ public class TomcatConnector {
     /**
      * The address and port to which we will bind the connector. If the port is not supplied the default of 5080 will be used. The address and port are to be separated by a colon ':'.
      *
-     * @param addressAndPort
+     * @param addressAndPort a {@link java.lang.String} object
      */
     public void setAddress(String addressAndPort) {
         try {
@@ -268,6 +283,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Getter for the field <code>address</code>.</p>
+     *
      * @return the socket address as string
      */
     public String getAddress() {
@@ -275,6 +292,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>getSocketAddress.</p>
+     *
      * @return the socket address
      */
     public InetSocketAddress getSocketAddress() {
@@ -282,6 +301,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Setter for the field <code>redirectPort</code>.</p>
+     *
      * @param redirectPort
      *            the redirectPort to set
      */
@@ -290,6 +311,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>isSecure.</p>
+     *
      * @return the secure
      */
     public boolean isSecure() {
@@ -297,6 +320,8 @@ public class TomcatConnector {
     }
 
     /**
+     * <p>Setter for the field <code>secure</code>.</p>
+     *
      * @param secure
      *            the secure to set
      */
@@ -308,6 +333,7 @@ public class TomcatConnector {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "TomcatConnector [connector=" + connector + ", connectionProperties=" + connectionProperties + ", address=" + address + "]";

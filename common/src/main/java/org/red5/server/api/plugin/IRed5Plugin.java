@@ -43,7 +43,7 @@ public interface IRed5Plugin {
     /**
      * Lifecycle method called when the plug-in is started.
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on start error
      */
     void doStart() throws Exception;
@@ -51,7 +51,7 @@ public interface IRed5Plugin {
     /**
      * Lifecycle method called when the plug-in is stopped.
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on stop error
      */
     void doStop() throws Exception;

@@ -15,7 +15,6 @@ import java.nio.charset.Charset;
  * For detailed specification please see the link below.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a>
- *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
  */

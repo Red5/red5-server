@@ -27,8 +27,18 @@ public interface JDKSchedulingServiceMXBean {
      */
     public String getJobName();
 
+    /**
+     * <p>removeScheduledJob.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     */
     public void removeScheduledJob(String name);
 
+    /**
+     * <p>getScheduledJobNames.</p>
+     *
+     * @return a {@link java.util.List} object
+     */
     public List<String> getScheduledJobNames();
 
 }

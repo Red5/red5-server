@@ -12,7 +12,6 @@ import java.io.Serializable;
 /**
  * Represents the most basic type of "Session", loosely modeled after the HTTP Session used in J2EE applications.
  *
- *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */

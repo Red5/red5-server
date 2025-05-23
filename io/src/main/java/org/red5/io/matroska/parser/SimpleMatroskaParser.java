@@ -16,8 +16,14 @@ import org.red5.io.matroska.ConverterException;
 import org.red5.io.matroska.ParserUtils;
 import org.red5.io.matroska.dtd.Tag;
 
+/**
+ * <p>SimpleMatroskaParser class.</p>
+ *
+ * @author mondain
+ */
 public class SimpleMatroskaParser implements MatroskaParser {
 
+    /** {@inheritDoc} */
     @Override
     public List<Tag> parse(InputStream inputStream) throws IOException, ConverterException {
 

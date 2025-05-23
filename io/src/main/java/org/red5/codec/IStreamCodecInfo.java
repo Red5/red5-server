@@ -9,6 +9,8 @@ package org.red5.codec;
 
 /**
  * Stream codec information
+ *
+ * @author mondain
  */
 public interface IStreamCodecInfo {
     /**
@@ -56,7 +58,7 @@ public interface IStreamCodecInfo {
     /**
      * Set audio codec.
      *
-     * @param codec
+     * @param codec a {@link org.red5.codec.IAudioStreamCodec} object
      */
     default void setAudioCodec(IAudioStreamCodec codec) {
     }
@@ -64,7 +66,7 @@ public interface IStreamCodecInfo {
     /**
      * Set video codec.
      *
-     * @param codec
+     * @param codec a {@link org.red5.codec.IVideoStreamCodec} object
      */
     default void setVideoCodec(IVideoStreamCodec codec) {
     }

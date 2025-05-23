@@ -23,7 +23,6 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
  *
  * @author The Red5 Project
  * @author Steven Gong (steven.gong@gmail.com)
- *
  * @see org.red5.server.messaging.IPipe
  */
 public abstract class AbstractPipe implements IPipe {
@@ -51,13 +50,9 @@ public abstract class AbstractPipe implements IPipe {
     private static ExecutorService taskExecutor;
 
     /**
-     * Connect consumer to this pipe. Doesn't allow to connect one consumer twice. Does register event listeners if instance of IPipeConnectionListener is given.
+     * {@inheritDoc}
      *
-     * @param consumer
-     *            Consumer
-     * @param paramMap
-     *            Parameters passed with connection, used in concrete pipe implementations
-     * @return true if consumer was added, false otherwise
+     * Connect consumer to this pipe. Doesn't allow to connect one consumer twice. Does register event listeners if instance of IPipeConnectionListener is given.
      */
     public boolean subscribe(IConsumer consumer, Map<String, Object> paramMap) {
         // pipe is possibly used by dozens of threads at once (like many subscribers for one server stream)
@@ -70,13 +65,9 @@ public abstract class AbstractPipe implements IPipe {
     }
 
     /**
-     * Connect provider to this pipe. Doesn't allow to connect one provider twice. Does register event listeners if instance of IPipeConnectionListener is given.
+     * {@inheritDoc}
      *
-     * @param provider
-     *            Provider
-     * @param paramMap
-     *            Parameters passed with connection, used in concrete pipe implementations
-     * @return true if provider was added, false otherwise
+     * Connect provider to this pipe. Doesn't allow to connect one provider twice. Does register event listeners if instance of IPipeConnectionListener is given.
      */
     public boolean subscribe(IProvider provider, Map<String, Object> paramMap) {
         boolean success = providers.addIfAbsent(provider);
@@ -88,11 +79,9 @@ public abstract class AbstractPipe implements IPipe {
     }
 
     /**
-     * Disconnects provider from this pipe. Fires pipe connection event.
+     * {@inheritDoc}
      *
-     * @param provider
-     *            Provider that should be removed
-     * @return true on success, false otherwise
+     * Disconnects provider from this pipe. Fires pipe connection event.
      */
     @SuppressWarnings("unlikely-arg-type")
     public boolean unsubscribe(IProvider provider) {
@@ -105,11 +94,9 @@ public abstract class AbstractPipe implements IPipe {
     }
 
     /**
-     * Disconnects consumer from this pipe. Fires pipe connection event.
+     * {@inheritDoc}
      *
-     * @param consumer
-     *            Consumer that should be removed
-     * @return true on success, false otherwise
+     * Disconnects consumer from this pipe. Fires pipe connection event.
      */
     @SuppressWarnings("unlikely-arg-type")
     public boolean unsubscribe(IConsumer consumer) {
@@ -122,32 +109,27 @@ public abstract class AbstractPipe implements IPipe {
     }
 
     /**
-     * Registers pipe connect events listener
+     * {@inheritDoc}
      *
-     * @param listener
-     *            Listener
+     * Registers pipe connect events listener
      */
     public void addPipeConnectionListener(IPipeConnectionListener listener) {
         listeners.add(listener);
     }
 
     /**
-     * Removes pipe connection listener
+     * {@inheritDoc}
      *
-     * @param listener
-     *            Listener
+     * Removes pipe connection listener
      */
     public void removePipeConnectionListener(IPipeConnectionListener listener) {
         listeners.remove(listener);
     }
 
     /**
-     * Send out-of-band ("special") control message to all consumers
+     * {@inheritDoc}
      *
-     * @param provider
-     *            Provider, may be used in concrete implementations
-     * @param oobCtrlMsg
-     *            Out-of-band control message
+     * Send out-of-band ("special") control message to all consumers
      */
     public void sendOOBControlMessage(IProvider provider, OOBControlMessage oobCtrlMsg) {
         for (IConsumer consumer : consumers) {
@@ -160,12 +142,9 @@ public abstract class AbstractPipe implements IPipe {
     }
 
     /**
-     * Send out-of-band ("special") control message to all providers
+     * {@inheritDoc}
      *
-     * @param consumer
-     *            Consumer, may be used in concrete implementations
-     * @param oobCtrlMsg
-     *            Out-of-band control message
+     * Send out-of-band ("special") control message to all providers
      */
     public void sendOOBControlMessage(IConsumer consumer, OOBControlMessage oobCtrlMsg) {
         for (IProvider provider : providers) {

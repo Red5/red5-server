@@ -38,8 +38,10 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
 
     private static final Logger log = LoggerFactory.getLogger(RTMPConnManager.class);
 
+    /** Constant <code>instance</code> */
     protected static IConnectionManager<BaseConnection> instance;
 
+    /** Constant <code>applicationContext</code> */
     protected static ApplicationContext applicationContext;
 
     protected ScheduledExecutorService executor;
@@ -52,6 +54,11 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
 
     protected boolean debug;
 
+    /**
+     * <p>Getter for the field <code>instance</code>.</p>
+     *
+     * @return a {@link org.red5.server.net.IConnectionManager} object
+     */
     public static IConnectionManager<BaseConnection> getInstance() {
         if (instance == null) {
             log.trace("Connection manager instance does not exist");
@@ -66,6 +73,9 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
         return instance;
     }
 
+    /**
+     * <p>createConnectionChecker.</p>
+     */
     public void createConnectionChecker() {
         executor = Executors.newScheduledThreadPool(1, new CustomizableThreadFactory("ConnectionChecker-"));
         // create a scheduled job to check for dead or hung connections
@@ -127,10 +137,9 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
     }
 
     /**
-     * Returns a connection for a given session id.
+     * {@inheritDoc}
      *
-     * @param sessionId session id
-     * @return connection if found and null otherwise
+     * Returns a connection for a given session id.
      */
     public BaseConnection getConnectionBySessionId(String sessionId) {
         log.trace("Getting connection by session id: {}", sessionId);
@@ -190,7 +199,7 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
      * @param cls
      *            class
      * @return connection
-     * @throws Exception
+     * @throws java.lang.Exception
      *             on error
      */
     public RTMPConnection createConnectionInstance(Class<?> cls) throws Exception {
@@ -204,6 +213,8 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
     }
 
     /**
+     * <p>Setter for the field <code>debug</code>.</p>
+     *
      * @param debug
      *            the debug to set
      */
@@ -211,11 +222,13 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
         this.debug = debug;
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         RTMPConnManager.applicationContext = applicationContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() throws Exception {
         if (checkerFuture != null && !checkerFuture.isDone()) {

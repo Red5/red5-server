@@ -36,6 +36,13 @@ public class FileUtil {
 
     private static Logger log = LoggerFactory.getLogger(FileUtil.class);
 
+    /**
+     * <p>copyFile.</p>
+     *
+     * @param source a {@link java.io.File} object
+     * @param dest a {@link java.io.File} object
+     * @throws java.io.IOException if any.
+     */
     public static void copyFile(File source, File dest) throws IOException {
         log.debug("Copy from {} to {}", source.getAbsoluteFile(), dest.getAbsoluteFile());
         FileInputStream fi = new FileInputStream(source);
@@ -73,10 +80,24 @@ public class FileUtil {
         mbuf = null;
     }
 
+    /**
+     * <p>copyFile.</p>
+     *
+     * @param source a {@link java.lang.String} object
+     * @param dest a {@link java.lang.String} object
+     * @throws java.io.IOException if any.
+     */
     public static void copyFile(String source, String dest) throws IOException {
         copyFile(new File(source), new File(dest));
     }
 
+    /**
+     * <p>moveFile.</p>
+     *
+     * @param source a {@link java.lang.String} object
+     * @param dest a {@link java.lang.String} object
+     * @throws java.io.IOException if any.
+     */
     public static void moveFile(String source, String dest) throws IOException {
         copyFile(source, dest);
         File src = new File(source);
@@ -98,7 +119,7 @@ public class FileUtil {
      *
      * @param directory
      *            directory to delete
-     * @throws IOException
+     * @throws java.io.IOException
      *             if directory cannot be deleted
      * @return true if directory was successfully deleted; false if directory did not exist
      */
@@ -149,7 +170,7 @@ public class FileUtil {
      * @param directory
      *            directory to make
      * @return whether a new directory was made
-     * @throws IOException
+     * @throws java.io.IOException
      *             if directory does not already exist or cannot be made
      */
     public static boolean makeDirectory(String directory) throws IOException {
@@ -164,9 +185,8 @@ public class FileUtil {
      * @param createParents
      *            whether to create all parents
      * @return true if directory was created; false if it already existed
-     * @throws IOException
+     * @throws java.io.IOException
      *             if we cannot create directory
-     *
      */
     public static boolean makeDirectory(String directory, boolean createParents) throws IOException {
         boolean created = false;
@@ -270,6 +290,13 @@ public class FileUtil {
         }
     }
 
+    /**
+     * <p>copy.</p>
+     *
+     * @param in a {@link java.io.InputStream} object
+     * @param out a {@link java.io.OutputStream} object
+     * @throws java.io.IOException if any.
+     */
     public static void copy(InputStream in, OutputStream out) throws IOException {
 
         synchronized (in) {

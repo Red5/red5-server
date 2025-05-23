@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class NoCacheImpl implements ICacheStore, ApplicationContextAware {
 
+    /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(NoCacheImpl.class);
 
     private static NoCacheImpl instance = new NoCacheImpl();
@@ -79,6 +80,13 @@ public class NoCacheImpl implements ICacheStore, ApplicationContextAware {
         return null;
     }
 
+    /**
+     * <p>offer.</p>
+     *
+     * @param key a {@link java.lang.String} object
+     * @param obj a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @return a boolean
+     */
     public boolean offer(String key, IoBuffer obj) {
         return false;
     }

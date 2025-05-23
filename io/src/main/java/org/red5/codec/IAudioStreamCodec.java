@@ -17,11 +17,15 @@ import org.apache.mina.core.buffer.IoBuffer;
 public interface IAudioStreamCodec {
 
     /**
+     * <p>getCodec.</p>
+     *
      * @return the codec type.
      */
     AudioCodec getCodec();
 
     /**
+     * <p>getName.</p>
+     *
      * @return the name of the audio codec.
      */
     String getName();
@@ -52,8 +56,8 @@ public interface IAudioStreamCodec {
     /**
      * Add audio data with a time stamp and a flag identifying the content as AMF or not.
      *
-     * @param data
-     * @param timestamp
+     * @param data a {@link org.apache.mina.core.buffer.IoBuffer} object
+     * @param timestamp a int
      * @param amf if true, data is in AMF format otherwise its most likely from non-AMF source like RTP
      * @return true if data is added and false otherwise
      */
@@ -133,6 +137,8 @@ public interface IAudioStreamCodec {
 
     /**
      * Sets the track id.
+     *
+     * @param trackId a int
      */
     default void setTrackId(int trackId) {
     }

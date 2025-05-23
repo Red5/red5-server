@@ -45,6 +45,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Pullable provider for files
+ *
+ * @author mondain
  */
 public class FileProvider implements IPassive, ISeekableProvider, IPullableProvider, IPipeConnectionListener, IStreamTypeAwareProvider {
     /**
@@ -110,7 +112,11 @@ public class FileProvider implements IPassive, ISeekableProvider, IPullableProvi
         this.start = start;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * @return a boolean
+     */
     public boolean hasVideo() {
         return (reader != null && reader.hasVideo());
     }

@@ -26,13 +26,13 @@ public interface IApplicationLoader {
      *            virtual hosts
      * @param directory
      *            directory
-     * @throws Exception
+     * @throws java.lang.Exception
      *             for fun
      */
     public void loadApplication(String contextPath, String virtualHosts, String directory) throws Exception;
 
     /**
-     * Return the root {@link ApplicationContext}.
+     * Return the root {@link org.springframework.context.ApplicationContext}.
      *
      * @return application context
      */

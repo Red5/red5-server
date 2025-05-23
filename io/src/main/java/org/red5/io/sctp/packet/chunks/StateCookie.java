@@ -12,6 +12,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 
+/**
+ * <p>StateCookie class.</p>
+ *
+ * @author mondain
+ */
 public class StateCookie {
 
     // layout:
@@ -54,6 +59,15 @@ public class StateCookie {
 
     private byte[] mac;
 
+    /**
+     * <p>Constructor for StateCookie.</p>
+     *
+     * @param verificationTag a int
+     * @param initialTSN a int
+     * @param advertisedReceiverWindowCredit a int
+     * @param numberOfOutboundStreams a int
+     * @param numberOfInboundStreams a int
+     */
     public StateCookie(int verificationTag, int initialTSN, int advertisedReceiverWindowCredit, int numberOfOutboundStreams, int numberOfInboundStreams) {
         this.verificationTag = verificationTag;
         this.advertisedReceiverWindowCredit = advertisedReceiverWindowCredit;
@@ -63,6 +77,13 @@ public class StateCookie {
         currentLifespan = LIFESPAN;
     }
 
+    /**
+     * <p>Constructor for StateCookie.</p>
+     *
+     * @param data an array of {@link byte} objects
+     * @param offset a int
+     * @param length a int
+     */
     public StateCookie(byte[] data, int offset, int length) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset, 4);
         int macLength = byteBuffer.getInt();
@@ -80,6 +101,14 @@ public class StateCookie {
         initialTSN = byteBuffer.getInt();
     }
 
+    /**
+     * <p>getBytes.</p>
+     *
+     * @param messageAuthenticationCode a {@link javax.crypto.Mac} object
+     * @return an array of {@link byte} objects
+     * @throws java.security.InvalidKeyException if any.
+     * @throws java.security.NoSuchAlgorithmException if any.
+     */
     public byte[] getBytes(Mac messageAuthenticationCode) throws InvalidKeyException, NoSuchAlgorithmException {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(HEADER_STATE_COOKIE_SIZE);
         byteBuffer.putLong(creationTimestamp);
@@ -107,26 +136,57 @@ public class StateCookie {
         return resultData;
     }
 
+    /**
+     * <p>isValid.</p>
+     *
+     * @param mac a {@link javax.crypto.Mac} object
+     * @return a boolean
+     */
     public boolean isValid(Mac mac) {
         return true;
     }
 
+    /**
+     * <p>Getter for the field <code>verificationTag</code>.</p>
+     *
+     * @return a int
+     */
     public int getVerificationTag() {
         return verificationTag;
     }
 
+    /**
+     * <p>Getter for the field <code>initialTSN</code>.</p>
+     *
+     * @return a int
+     */
     public int getInitialTSN() {
         return initialTSN;
     }
 
+    /**
+     * <p>Getter for the field <code>mac</code>.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
     public byte[] getMac() {
         return mac;
     }
 
+    /**
+     * <p>Getter for the field <code>currentLifespan</code>.</p>
+     *
+     * @return a short
+     */
     public short getCurrentLifespan() {
         return currentLifespan;
     }
 
+    /**
+     * <p>getSize.</p>
+     *
+     * @return a int
+     */
     public int getSize() {
         return HEADER_STATE_COOKIE_SIZE + mac.length + 4; // 4 for mac length
     }

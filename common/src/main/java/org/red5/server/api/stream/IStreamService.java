@@ -12,9 +12,12 @@ import org.red5.server.api.scope.IScopeService;
 
 /**
  * This interface represents the stream methods that can be called throug RTMP.
+ *
+ * @author mondain
  */
 public interface IStreamService extends IScopeService {
 
+    /** Constant <code>BEAN_NAME="streamService"</code> */
     public static String BEAN_NAME = "streamService";
 
     /**
@@ -125,6 +128,13 @@ public interface IStreamService extends IScopeService {
      */
     public void play(String name, int start, int length);
 
+    /**
+     * <p>play.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param start a {@link java.lang.Double} object
+     * @param length a {@link java.lang.Double} object
+     */
     default void play(String name, Double start, Double length) {
         play(name, start.intValue(), length.intValue());
     }
@@ -143,6 +153,14 @@ public interface IStreamService extends IScopeService {
      */
     public void play(String name, int start, int length, boolean flushPlaylist);
 
+    /**
+     * <p>play.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     * @param start a {@link java.lang.Double} object
+     * @param length a {@link java.lang.Double} object
+     * @param flushPlaylist a boolean
+     */
     default void play(String name, Double start, Double length, boolean flushPlaylist) {
         play(name, start.intValue(), length.intValue(), flushPlaylist);
     }

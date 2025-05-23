@@ -146,7 +146,7 @@ public class ServiceUtils {
      *            name of the method to invoke
      * @param params
      *            parameters to pass to the method
-     * @deprecated Use {@link ServiceUtils#invokeOnAllScopeConnections(IScope, String, Object[], IPendingServiceCallback)} instead
+     * @deprecated Use {@link org.red5.server.api.service.ServiceUtils#invokeOnAllScopeConnections(IScope, String, Object[], IPendingServiceCallback)} instead
      */
     @Deprecated
     public static void invokeOnAllConnections(IScope scope, String method, Object[] params) {
@@ -215,7 +215,7 @@ public class ServiceUtils {
      *            parameters to pass to the method
      * @param callback
      *            object to notify when result is received
-     * @deprecated Use {@link ServiceUtils#invokeOnAllScopeConnections(IScope, String, Object[], IPendingServiceCallback)} instead
+     * @deprecated Use {@link org.red5.server.api.service.ServiceUtils#invokeOnAllScopeConnections(IScope, String, Object[], IPendingServiceCallback)} instead
      */
     @Deprecated
     public static void invokeOnClient(IClient client, IScope scope, String method, Object[] params, IPendingServiceCallback callback) {
@@ -318,7 +318,7 @@ public class ServiceUtils {
      *            name of the method to notify
      * @param params
      *            parameters to pass to the method
-     * @deprecated Use {@link ServiceUtils#notifyOnAllScopeConnections(IScope, String, Object[])} instead
+     * @deprecated Use {@link org.red5.server.api.service.ServiceUtils#notifyOnAllScopeConnections(IScope, String, Object[])} instead
      */
     @Deprecated
     public static void notifyOnAllConnections(IScope scope, String method, Object[] params) {
@@ -351,7 +351,7 @@ public class ServiceUtils {
      *            name of the method to notify
      * @param params
      *            parameters to pass to the method
-     * @deprecated Use {@link ServiceUtils#notifyOnAllScopeConnections(IScope, String, Object[])} instead
+     * @deprecated Use {@link org.red5.server.api.service.ServiceUtils#notifyOnAllScopeConnections(IScope, String, Object[])} instead
      */
     @Deprecated
     public static void notifyOnClient(IClient client, IScope scope, String method, Object[] params) {

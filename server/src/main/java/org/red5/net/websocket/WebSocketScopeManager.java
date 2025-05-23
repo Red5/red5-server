@@ -61,12 +61,23 @@ public class WebSocketScopeManager {
     protected boolean copyListeners = true;
 
     // value for the websocket ping period/interval
+    /** Constant <code>websocketPingInterval=5000L</code> */
     public static long websocketPingInterval = 5000L;
 
+    /**
+     * <p>addListener.</p>
+     *
+     * @param listener a {@link org.red5.net.websocket.listener.IWebSocketScopeListener} object
+     */
     public void addListener(IWebSocketScopeListener listener) {
         scopeListeners.add(listener);
     }
 
+    /**
+     * <p>removeListener.</p>
+     *
+     * @param listener a {@link org.red5.net.websocket.listener.IWebSocketScopeListener} object
+     */
     public void removeListener(IWebSocketScopeListener listener) {
         scopeListeners.remove(listener);
     }
@@ -144,7 +155,7 @@ public class WebSocketScopeManager {
     /**
      * Adds a websocket scope.
      *
-     * @param webSocketScope
+     * @param webSocketScope a {@link org.red5.net.websocket.WebSocketScope} object
      * @return true if added and false otherwise
      */
     public boolean addWebSocketScope(WebSocketScope webSocketScope) {
@@ -207,7 +218,7 @@ public class WebSocketScopeManager {
     /**
      * Removes a websocket scope.
      *
-     * @param webSocketScope
+     * @param webSocketScope a {@link org.red5.net.websocket.WebSocketScope} object
      * @return true if removed and false otherwise
      */
     public boolean removeWebSocketScope(WebSocketScope webSocketScope) {
@@ -263,7 +274,7 @@ public class WebSocketScopeManager {
      *
      * @param listener
      *            IWebSocketDataListener
-     * @param path
+     * @param path a {@link java.lang.String} object
      */
     public void addListener(IWebSocketDataListener listener, String path) {
         log.trace("addListener: {}", listener);
@@ -280,7 +291,7 @@ public class WebSocketScopeManager {
      *
      * @param listener
      *            IWebSocketDataListener
-     * @param path
+     * @param path a {@link java.lang.String} object
      */
     public void removeListener(IWebSocketDataListener listener, String path) {
         log.trace("removeListener: {}", listener);
@@ -299,7 +310,7 @@ public class WebSocketScopeManager {
     /**
      * Create a web socket scope. Use the IWebSocketScopeListener interface to configure the created scope.
      *
-     * @param path
+     * @param path a {@link java.lang.String} object
      */
     public void makeScope(String path) {
         log.debug("makeScope: {}", path);
@@ -318,7 +329,7 @@ public class WebSocketScopeManager {
     /**
      * Create a web socket scope from a server IScope. Use the IWebSocketScopeListener interface to configure the created scope.
      *
-     * @param scope
+     * @param scope a {@link org.red5.server.api.scope.IScope} object
      */
     public void makeScope(IScope scope) {
         log.debug("makeScope: {}", scope);
@@ -432,7 +443,7 @@ public class WebSocketScopeManager {
     /**
      * Set the application scope for this manager.
      *
-     * @param appScope
+     * @param appScope a {@link org.red5.server.api.scope.IScope} object
      * @return true if added and false otherwise
      */
     public boolean setApplication(IScope appScope) {
@@ -442,10 +453,20 @@ public class WebSocketScopeManager {
         return activeRooms.add(appScope.getName());
     }
 
+    /**
+     * <p>Setter for the field <code>copyListeners</code>.</p>
+     *
+     * @param copy a boolean
+     */
     public void setCopyListeners(boolean copy) {
         this.copyListeners = copy;
     }
 
+    /**
+     * <p>Setter for the field <code>websocketPingInterval</code>.</p>
+     *
+     * @param websocketPingInterval a long
+     */
     public static void setWebsocketPingInterval(long websocketPingInterval) {
         if (websocketPingInterval < 0) {
             log.warn("Setting the ping interval to a negative value will disable the internal ping worker");
@@ -453,6 +474,7 @@ public class WebSocketScopeManager {
         WebSocketScopeManager.websocketPingInterval = websocketPingInterval;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return String.format("App scope: %s%nActive rooms: %s%nWS scopes: %s%nWS listeners: %s%n", appScope, activeRooms, scopes, scopeListeners);

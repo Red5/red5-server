@@ -53,10 +53,18 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
      */
     private String name;
 
+    /**
+     * <p>Constructor for ClientRegistry.</p>
+     */
     public ClientRegistry() {
     }
 
     //allows for setting a "name" to be used with jmx for lookup
+    /**
+     * <p>Constructor for ClientRegistry.</p>
+     *
+     * @param name a {@link java.lang.String} object
+     */
     public ClientRegistry(String name) {
         this.name = name;
         if (StringUtils.isNotBlank(this.name)) {
@@ -71,10 +79,9 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
     }
 
     /**
-     * Add client to registry
+     * {@inheritDoc}
      *
-     * @param client
-     *            Client to add
+     * Add client to registry
      */
     public void addClient(IClient client) {
         addClient(client.getId(), client);
@@ -92,6 +99,7 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
         }
     }
 
+    /** {@inheritDoc} */
     public Client getClient(String id) throws ClientNotFoundException {
         Client result = (Client) clients.get(id);
         if (result == null) {
@@ -102,6 +110,8 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
 
     /**
      * Returns a list of Clients.
+     *
+     * @return a {@link org.red5.server.ClientList} object
      */
     public ClientList<Client> getClientList() {
         ClientList<Client> list = new ClientList<Client>();
@@ -143,11 +153,9 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
     }
 
     /**
-     * Check whether registry has client with given id
+     * {@inheritDoc}
      *
-     * @param id
-     *            Client id
-     * @return true if client with given id was register with this registry, false otherwise
+     * Check whether registry has client with given id
      */
     public boolean hasClient(String id) {
         if (id == null) {
@@ -158,13 +166,9 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
     }
 
     /**
-     * Return client by id
+     * {@inheritDoc}
      *
-     * @param id
-     *            Client id
-     * @return Client object associated with given id
-     * @throws ClientNotFoundException
-     *             if we can't find client
+     * Return client by id
      */
     public IClient lookupClient(String id) throws ClientNotFoundException {
         return getClient(id);
@@ -176,9 +180,9 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
      * @param params
      *            Client params
      * @return Client object
-     * @throws ClientNotFoundException
+     * @throws org.red5.server.exception.ClientNotFoundException
      *             if client not found
-     * @throws ClientRejectedException
+     * @throws org.red5.server.exception.ClientRejectedException
      *             if client rejected
      */
     public IClient newClient(Object[] params) throws ClientNotFoundException, ClientRejectedException {

@@ -54,32 +54,44 @@ public interface IRecordingListener extends IStreamListener {
     public void packetReceived(IBroadcastStream stream, IStreamPacket packet);
 
     /**
+     * <p>isRecording.</p>
+     *
      * @return recording state, true if recording and false otherwise
      */
     public boolean isRecording();
 
     /**
+     * <p>isAppending.</p>
+     *
      * @return appending state, true if appending and false otherwise
      */
     public boolean isAppending();
 
     /**
+     * <p>getFileConsumer.</p>
+     *
      * @return the recordingConsumer
      */
     public FileConsumer getFileConsumer();
 
     /**
+     * <p>setFileConsumer.</p>
+     *
      * @param recordingConsumer
      *            the recordingConsumer to set
      */
     public void setFileConsumer(FileConsumer recordingConsumer);
 
     /**
+     * <p>getFileName.</p>
+     *
      * @return the fileName
      */
     public String getFileName();
 
     /**
+     * <p>setFileName.</p>
+     *
      * @param fileName
      *            the fileName to set
      */

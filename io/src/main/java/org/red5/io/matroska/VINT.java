@@ -13,17 +13,24 @@ import java.util.BitSet;
 
 /**
  * Variable size integer class <a href="http://matroska.org/technical/specs/rfc/index.html">EBML RFC</a>
+ *
+ * @author mondain
  */
 public class VINT {
 
+    /** Constant <code>MASK_BYTE_8=0b0000000011111111111111111111111111111111111111111111111111111111L</code> */
     public static final long MASK_BYTE_8 = 0b0000000011111111111111111111111111111111111111111111111111111111L;
 
+    /** Constant <code>MASK_BYTE_4=0b00001111111111111111111111111111</code> */
     public static final long MASK_BYTE_4 = 0b00001111111111111111111111111111;
 
+    /** Constant <code>MASK_BYTE_3=0b000111111111111111111111</code> */
     public static final long MASK_BYTE_3 = 0b000111111111111111111111;
 
+    /** Constant <code>MASK_BYTE_2=0b0011111111111111</code> */
     public static final long MASK_BYTE_2 = 0b0011111111111111;
 
+    /** Constant <code>MASK_BYTE_1=0b01111111</code> */
     public static final long MASK_BYTE_1 = 0b01111111;
 
     private long binary;
@@ -36,11 +43,11 @@ public class VINT {
      * Constructor
      *
      * @param binary
-     *            - binary value of this {@link VINT}, calculated from value if not specified
+     *            - binary value of this {@link org.red5.io.matroska.VINT}, calculated from value if not specified
      * @param length
-     *            - length of this {@link VINT}
+     *            - length of this {@link org.red5.io.matroska.VINT}
      * @param value
-     *            - value of this {@link VINT}
+     *            - value of this {@link org.red5.io.matroska.VINT}
      */
     public VINT(long binary, byte length, long value) {
         if (binary == 0L) {
@@ -82,15 +89,17 @@ public class VINT {
     }
 
     /**
-     * method to encode {@link VINT} as sequence of bytes
+     * method to encode {@link org.red5.io.matroska.VINT} as sequence of bytes
      *
-     * @return - encoded {@link VINT}
+     * @return - encoded {@link org.red5.io.matroska.VINT}
      */
     public byte[] encode() {
         return ParserUtils.getBytes(binary, length);
     }
 
     /**
+     * {@inheritDoc}
+     *
      * method to get "pretty" represented {@link VINT}
      */
     @Override
@@ -99,11 +108,11 @@ public class VINT {
     }
 
     /**
-     * method to construct {@link VINT} based on its binary representation
+     * method to construct {@link org.red5.io.matroska.VINT} based on its binary representation
      *
      * @param binary
-     *            - binary value of {@link VINT}
-     * @return {@link VINT} corresponding to this binary
+     *            - binary value of {@link org.red5.io.matroska.VINT}
+     * @return {@link org.red5.io.matroska.VINT} corresponding to this binary
      */
     public static VINT fromBinary(long binary) {
         BitSet bs = BitSet.valueOf(new long[] { binary });
@@ -124,11 +133,11 @@ public class VINT {
     }
 
     /**
-     * method to construct {@link VINT} based on its value
+     * method to construct {@link org.red5.io.matroska.VINT} based on its value
      *
      * @param value
-     *            - value of {@link VINT}
-     * @return {@link VINT} corresponding to this value
+     *            - value of {@link org.red5.io.matroska.VINT}
+     * @return {@link org.red5.io.matroska.VINT} corresponding to this value
      */
     public static VINT fromValue(long value) {
         BitSet bs = BitSet.valueOf(new long[] { value });

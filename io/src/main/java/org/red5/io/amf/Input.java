@@ -53,6 +53,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
 
     protected Logger log = LoggerFactory.getLogger(this.getClass());
 
+    /** Constant <code>classAliases</code> */
     protected static Map<String, String> classAliases = new HashMap<String, String>(3) {
         {
             put("DSA", "org.red5.compatibility.flex.messaging.messages.AsyncMessageExt");
@@ -80,9 +81,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads the data type.
+     * {@inheritDoc}
      *
-     * @return One of AMF class constants with type
+     * Reads the data type.
      * @see org.red5.io.amf.AMF
      */
     @Override
@@ -138,9 +139,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads a null.
+     * {@inheritDoc}
      *
-     * @return Object
+     * Reads a null.
      */
     @Override
     public Object readNull() {
@@ -148,9 +149,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads a boolean.
+     * {@inheritDoc}
      *
-     * @return boolean
+     * Reads a boolean.
      */
     @Override
     public Boolean readBoolean() {
@@ -158,9 +159,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads a Number. In ActionScript 1 and 2 Number type represents all numbers, both floats and integers.
+     * {@inheritDoc}
      *
-     * @return Number
+     * Reads a Number. In ActionScript 1 and 2 Number type represents all numbers, both floats and integers.
      */
     @Override
     public Number readNumber() {
@@ -179,9 +180,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads string from buffer
+     * {@inheritDoc}
      *
-     * @return String
+     * Reads string from buffer
      */
     @Override
     public String getString() {
@@ -198,9 +199,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads a string
+     * {@inheritDoc}
      *
-     * @return String
+     * Reads a string
      */
     @Override
     public String readString() {
@@ -247,9 +248,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Returns a date
+     * {@inheritDoc}
      *
-     * @return Date Decoded string object
+     * Returns a date
      */
     @Override
     public Date readDate() {
@@ -266,6 +267,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         return date;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object readArray(Type target) {
         log.debug("readArray - target: {}", target);
@@ -294,6 +296,8 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Read key - value pairs. This is required for the RecordSet deserializer.
      */
     @Override
@@ -324,6 +328,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object readMap() {
         // the maximum number used in this mixed array
@@ -462,9 +467,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads start object
+     * {@inheritDoc}
      *
-     * @return Read object
+     * Reads start object
      */
     @Override
     public Object readObject() {
@@ -538,9 +543,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads XML
+     * {@inheritDoc}
      *
-     * @return String XML as string
+     * Reads XML
      */
     @Override
     public Document readXML() {
@@ -556,9 +561,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads Custom
+     * {@inheritDoc}
      *
-     * @return Object Custom type object
+     * Reads Custom
      */
     @Override
     public Object readCustom() {
@@ -567,9 +572,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Read ByteArray object. This is not supported by the AMF0 deserializer.
+     * {@inheritDoc}
      *
-     * @return ByteArray object
+     * Read ByteArray object. This is not supported by the AMF0 deserializer.
      */
     @Override
     public ByteArray readByteArray() {
@@ -577,9 +582,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Read Vector&lt;int&gt; object. This is not supported by the AMF0 deserializer.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Integer&gt; object
+     * Read Vector&lt;int&gt; object. This is not supported by the AMF0 deserializer.
      */
     @Override
     public Vector<Integer> readVectorInt() {
@@ -587,9 +592,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Read Vector&lt;Long&gt; object. This is not supported by the AMF0 deserializer.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Long&gt; object
+     * Read Vector&lt;Long&gt; object. This is not supported by the AMF0 deserializer.
      */
     @Override
     public Vector<Long> readVectorUInt() {
@@ -597,9 +602,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Read Vector&lt;Number&gt; object. This is not supported by the AMF0 deserializer.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Double&gt; object
+     * Read Vector&lt;Number&gt; object. This is not supported by the AMF0 deserializer.
      */
     @Override
     public Vector<Double> readVectorNumber() {
@@ -607,9 +612,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Read Vector&lt;Object&gt; object. This is not supported by the AMF0 deserializer.
+     * {@inheritDoc}
      *
-     * @return Vector&lt;Object&gt; object
+     * Read Vector&lt;Object&gt; object. This is not supported by the AMF0 deserializer.
      */
     @Override
     public Vector<Object> readVectorObject() {
@@ -617,9 +622,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     }
 
     /**
-     * Reads Reference
+     * {@inheritDoc}
      *
-     * @return Object Read reference to object
+     * Reads Reference
      */
     @Override
     public Object readReference() {
@@ -632,6 +637,13 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         clearReferences();
     }
 
+    /**
+     * <p>getPropertyType.</p>
+     *
+     * @param instance a {@link java.lang.Object} object
+     * @param propertyName a {@link java.lang.String} object
+     * @return a {@link java.lang.reflect.Type} object
+     */
     protected Type getPropertyType(Object instance, String propertyName) {
         try {
             if (instance != null) {

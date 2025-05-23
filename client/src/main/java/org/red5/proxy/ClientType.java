@@ -7,6 +7,11 @@
 
 package org.red5.proxy;
 
+/**
+ * <p>ClientType class.</p>
+ *
+ * @author mondain
+ */
 public enum ClientType {
 
     RTMP, RTMPS, RTMPT, RTMPE;

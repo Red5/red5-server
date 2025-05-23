@@ -48,6 +48,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 @ManagedResource(objectName = "org.red5.server:name=contextLoader,type=ContextLoader", description = "ContextLoader")
 public class ContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ContextLoaderMXBean {
 
+    /** Constant <code>log</code> */
     protected static Logger log = Red5LoggerFactory.getLogger(ContextLoader.class);
 
     /**
@@ -78,7 +79,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
     /**
      * Registers with JMX and registers a shutdown hook.
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      *             I/O exception, casting exception and others
      */
     public void afterPropertiesSet() throws Exception {
@@ -91,6 +92,8 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Un-loads or un-initializes the contexts; this is a shutdown method for this loader.
+     *
+     * @throws java.lang.Exception if any.
      */
     public void destroy() throws Exception {
         log.info("ContextLoader un-init");
@@ -99,6 +102,8 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
 
     /**
      * Loads context settings from ResourceBundle (.properties file)
+     *
+     * @throws java.io.IOException if any.
      */
     @SuppressWarnings("null")
     public void init() throws IOException {
@@ -141,12 +146,9 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
     }
 
     /**
-     * Loads a context (Red5 application) and stores it in a context map, then adds it's beans to parent (that is, Red5)
+     * {@inheritDoc}
      *
-     * @param name
-     *            Context name
-     * @param config
-     *            Filename
+     * Loads a context (Red5 application) and stores it in a context map, then adds it's beans to parent (that is, Red5)
      */
     @SuppressWarnings("null")
     public void loadContext(String name, String config) {
@@ -197,10 +199,9 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
     }
 
     /**
-     * Unloads a context (Red5 application) and removes it from the context map, then removes it's beans from the parent (that is, Red5)
+     * {@inheritDoc}
      *
-     * @param name
-     *            Context name
+     * Unloads a context (Red5 application) and removes it from the context map, then removes it's beans from the parent (that is, Red5)
      */
     @SuppressWarnings("null")
     public void unloadContext(String name) {
@@ -281,12 +282,9 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
     }
 
     /**
-     * Sets a parent context for child context based on a given key.
+     * {@inheritDoc}
      *
-     * @param parentContextKey
-     *            key for the parent context
-     * @param appContextId
-     *            id of the child context
+     * Sets a parent context for child context based on a given key.
      */
     public void setParentContext(String parentContextKey, String appContextId) {
         log.debug("Set parent context {} on {}", parentContextKey, appContextId);
@@ -303,6 +301,9 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
         }
     }
 
+    /**
+     * <p>registerJMX.</p>
+     */
     protected void registerJMX() {
         // register with jmx
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -319,6 +320,9 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
         }
     }
 
+    /**
+     * <p>unregisterJMX.</p>
+     */
     protected void unregisterJMX() {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         try {
@@ -329,12 +333,7 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
         oName = null;
     }
 
-    /**
-     * @param applicationContext
-     *            Spring application context
-     * @throws BeansException
-     *             Top level exception for app context (that is, in fact, beans factory)
-     */
+    /** {@inheritDoc} */
     @SuppressWarnings("null")
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -360,15 +359,19 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
     }
 
     /**
-     * Setter for context config name
+     * {@inheritDoc}
      *
-     * @param contextsConfig
-     *            Context config name
+     * Setter for context config name
      */
     public void setContextsConfig(String contextsConfig) {
         this.contextsConfig = contextsConfig;
     }
 
+    /**
+     * <p>Getter for the field <code>contextsConfig</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
     public String getContextsConfig() {
         return contextsConfig;
     }

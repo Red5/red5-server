@@ -48,7 +48,7 @@ public class XMLUtils {
      * @param str
      *            String representation of XML
      * @return DOM object
-     * @throws IOException
+     * @throws java.io.IOException
      *             I/O exception
      */
     public static Document stringToDoc(String str) throws IOException {

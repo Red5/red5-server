@@ -14,6 +14,7 @@ import java.nio.ByteOrder;
  *
  * @see IExternalizable#writeExternal(IDataOutput)
  * @see <a href="http://livedocs.adobe.com/flex/2/langref/flash/utils/IDataOutput.html">Adobe Livedocs (external)</a>
+ * @author mondain
  */
 public interface IDataOutput {
 
@@ -145,7 +146,7 @@ public interface IDataOutput {
     public void writeUTF(String value);
 
     /**
-     * Write UTF-8 encoded string as byte array. This string is stored without informations about its length, so {@link IDataInput#readUTFBytes(int)} must be used to load it.
+     * Write UTF-8 encoded string as byte array. This string is stored without informations about its length, so {@link org.red5.io.amf3.IDataInput#readUTFBytes(int)} must be used to load it.
      *
      * @param value
      *            the string
