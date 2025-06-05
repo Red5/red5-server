@@ -34,11 +34,6 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     private static final long serialVersionUID = 5538859593815804830L;
 
     /**
-     * Video data
-     */
-    protected IoBuffer data;
-
-    /**
      * Data type
      */
     private final byte dataType = TYPE_VIDEO_DATA;
@@ -151,6 +146,8 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
                 packetType = VideoPacketType.valueOf(data.get());
             }
             data.reset();
+
+            config = (packetType == VideoPacketType.SequenceStart);
         }
 
         this.data = data;
@@ -303,6 +300,19 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
         }
     }
 
+    @Override
+    public BaseEvent forkedDuplicate() {
+
+        VideoData fork = new VideoData(super.concurrentDataCopy());
+        fork.setTimestamp(this.timestamp);
+        if (header != null) {
+            fork.setHeader(header.clone());
+        }
+        fork.setSource(this.getSource());
+        fork.setSourceType(this.getSourceType());
+        return fork;
+    }
+
     /**
      * Duplicate this message / event.
      *
@@ -342,5 +352,4 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     public String toString() {
         return String.format("Video - ts: %s length: %s", getTimestamp(), (data != null ? data.limit() : '0'));
     }
-
 }

@@ -23,11 +23,6 @@ public class Unknown extends BaseEvent {
     private static final long serialVersionUID = -1352770037962252975L;
 
     /**
-     * Event data
-     */
-    protected IoBuffer data;
-
-    /**
      * Type of data
      */
     protected byte dataType;

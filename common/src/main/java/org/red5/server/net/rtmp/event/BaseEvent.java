@@ -13,6 +13,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.server.api.event.IEventListener;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
@@ -33,10 +34,19 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
     // (2) make it aspect oriented
     private static final boolean allocationDebugging = false;
 
+    protected AtomicInteger forkRefs = new AtomicInteger();
+
     /**
      * Event type
      */
     private Type type;
+
+    /**
+     * Multi-threaded copy-able array.
+     */
+    protected ForkableData forkableData;
+
+    protected IoBuffer data;
 
     /**
      * Source type
@@ -85,6 +95,41 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
     public BaseEvent(Type type) {
         this(type, null);
     }
+
+    /**
+     * Creates a raw byte array which is used to allow concurrent non-blocking copying of this event.
+     * Owning thread should call addForkReference for each thread making a copy and copying threads should call removeForkReference.
+     * @return
+     */
+    public boolean prepareForkedDuplication() {
+        if (data != null && data.rewind().hasRemaining()) {
+            byte[] bytes = new byte[data.remaining()];
+            data.get(bytes);
+            data.rewind();
+            forkableData = new ForkableData(bytes);
+            return true;
+        }
+        return false;
+    }
+
+    protected IoBuffer concurrentDataCopy() {
+        return IoBuffer.wrap(forkableData.rawData).asReadOnlyBuffer();
+    }
+
+    public void addForkReference() {
+        forkRefs.incrementAndGet();
+    }
+
+    public void removeForkReference() {
+        int ref = forkRefs.decrementAndGet();
+        if (ref <= 0) {
+            forkableData = null;
+        }
+    }
+
+    public BaseEvent forkedDuplicate() {
+        return null;
+    };
 
     /**
      * Create new event of given type
@@ -288,6 +333,17 @@ public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable
         out.writeUTF(type.name());
         out.writeByte(sourceType);
         out.writeInt(timestamp);
+    }
+
+    /**
+     * Provides final field of bytes for mounting non-blocking concurrent read access.
+     */
+    private static class ForkableData {
+        final byte[] rawData;
+
+        private ForkableData(byte[] bytes) {
+            rawData = bytes;
+        }
     }
 
 }
