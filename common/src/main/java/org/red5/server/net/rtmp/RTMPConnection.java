@@ -1847,27 +1847,6 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
-     * Thread pool for guarding deadlocks
-     *
-     * @return the deadlockGuardScheduler
-     */
-    @Deprecated(since = "1.3.29", forRemoval = true)
-    public ThreadPoolTaskScheduler getDeadlockGuardScheduler() {
-        return null;
-    }
-
-    /**
-     * Thread pool for guarding deadlocks
-     *
-     * @param deadlockGuardScheduler
-     *            the deadlockGuardScheduler to set
-     */
-    @Deprecated(since = "1.3.29", forRemoval = true)
-    public void setDeadlockGuardScheduler(ThreadPoolTaskScheduler deadlockGuardScheduler) {
-        // unused
-    }
-
-    /**
      * Registers deferred result.
      *
      * @param result
@@ -2085,17 +2064,6 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      */
     public void setReservedStreamsConcurrencyLevel(int reservedStreamsConcurrencyLevel) {
         this.reservedStreamsConcurrencyLevel = reservedStreamsConcurrencyLevel;
-    }
-
-    /**
-     * Specify the size of queue that will trigger audio packet dropping, disabled if it's 0
-     *
-     * @param executorQueueSizeToDropAudioPackets
-     *            queue size
-     */
-    @Deprecated(since = "1.3.29", forRemoval = true)
-    public void setExecutorQueueSizeToDropAudioPackets(Integer executorQueueSizeToDropAudioPackets) {
-        // unused
     }
 
     /** {@inheritDoc} */

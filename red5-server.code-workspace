@@ -17,6 +17,9 @@
 		"java.jdt.ls.androidSupport.enabled": "off",
 		"java.maven.updateSnapshots": true,
 		"java.maven.downloadSources": true,
-		"scm.experimental.showHistoryGraph": true
+		"scm.experimental.showHistoryGraph": true,
+		"files.exclude": {
+			"apidocs": true,
+		}
 	}
 }
