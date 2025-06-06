@@ -11,6 +11,7 @@ import java.beans.ConstructorProperties;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -368,6 +369,22 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
      */
     public Map<String, Object> getConnectParams() {
         return Collections.unmodifiableMap(params);
+    }
+
+    /**
+     * Update connection parameters with given updates.
+     *
+     * @param updates
+     *            Updates to apply
+     * @return updated connection parameters
+     */
+    public Map<String, Object> updateConnectParams(Map<String, Object> updates) {
+        if (params != null) {
+            this.params.putAll(updates);
+        } else {
+            this.params = new HashMap<>(updates);
+        }
+        return getConnectParams();
     }
 
     /** {@inheritDoc} */
