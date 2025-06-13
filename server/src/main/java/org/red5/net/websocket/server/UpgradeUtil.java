@@ -45,6 +45,8 @@ public class UpgradeUtil {
 
     private static final byte[] WS_ACCEPT = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11".getBytes(StandardCharsets.ISO_8859_1);
 
+    public static boolean wsAllowCompression = true;
+
     private UpgradeUtil() {
         // Utility class. Hide default constructor.
     }
@@ -121,12 +123,13 @@ public class UpgradeUtil {
         }
         // Negotiation phase 1. By default this simply filters out the extensions that the server does not support but applications could
         // use a custom configurator to do more than this.
-        List<Extension> installedExtensions = null;
-        if (sec.getExtensions().size() == 0) {
-            installedExtensions = Constants.INSTALLED_EXTENSIONS;
-        } else {
-            installedExtensions = new ArrayList<>();
-            installedExtensions.addAll(sec.getExtensions());
+        List<Extension> installedExtensions = new ArrayList<>();
+
+        if (sec.getExtensions().size() > 0) {
+        	installedExtensions.addAll(sec.getExtensions());
+        }
+        // Enable permessage-deflate negotiation.  
+        if (wsAllowCompression ) {
             installedExtensions.addAll(Constants.INSTALLED_EXTENSIONS);
         }
         List<Extension> negotiatedExtensionsPhase1 = sec.getConfigurator().getNegotiatedExtensions(installedExtensions, extensionsRequested);

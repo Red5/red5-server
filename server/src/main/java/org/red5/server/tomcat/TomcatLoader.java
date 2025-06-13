@@ -40,6 +40,7 @@ import org.apache.catalina.realm.JAASRealm;
 import org.apache.catalina.realm.NullRealm;
 import org.apache.catalina.realm.RealmBase;
 import org.red5.net.websocket.WebSocketPlugin;
+import org.red5.net.websocket.server.UpgradeUtil;
 import org.red5.server.ContextLoader;
 import org.red5.server.LoaderBase;
 import org.red5.server.Server;
@@ -355,6 +356,10 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             // Use default webapps directory
             webappFolder = FileUtil.formatPath(serverRoot, "/webapps");
         }
+        
+        // To negotiate for web-socket compression or not. 
+        UpgradeUtil.wsAllowCompression = Boolean.valueOf(System.getProperty("ws.allow.compression", "true")); 
+        
         System.setProperty("red5.webapp.root", webappFolder);
         log.info("Application root: {}", webappFolder);
         // Root applications directory
