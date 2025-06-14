@@ -37,11 +37,6 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
     protected IServiceCall call;
 
     /**
-     * Event data
-     */
-    protected IoBuffer data;
-
-    /**
      * Event data type
      */
     protected byte dataType = TYPE_NOTIFY;
@@ -271,6 +266,21 @@ public class Notify extends BaseEvent implements ICommand, IStreamData<Notify>, 
         if (log.isTraceEnabled()) {
             log.trace("readExternal - transactionId: {} connectionParams: {} call: {}", transactionId, connectionParams, call);
         }
+    }
+
+    @Override
+    public BaseEvent forkedDuplicate() {
+
+        Notify fork = new Notify(super.concurrentDataCopy());
+        fork.setTimestamp(this.timestamp);
+        fork.setAction(action);
+        fork.setCall(call);
+        if (header != null) {
+            fork.setHeader(header.clone());
+        }
+        fork.setSource(this.getSource());
+        fork.setSourceType(this.getSourceType());
+        return fork;
     }
 
     /** {@inheritDoc} */

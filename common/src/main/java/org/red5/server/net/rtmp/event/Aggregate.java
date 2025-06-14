@@ -37,11 +37,6 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
     private static Logger log = LoggerFactory.getLogger(Aggregate.class);
 
     /**
-     * Data
-     */
-    protected IoBuffer data;
-
-    /**
      * Data type
      */
     private byte dataType = TYPE_AGGREGATE;

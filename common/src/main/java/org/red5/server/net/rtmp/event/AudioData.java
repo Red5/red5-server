@@ -31,8 +31,6 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
 
     private static final long serialVersionUID = -4102940670913999407L;
 
-    protected IoBuffer data;
-
     /**
      * Data type
      */
@@ -251,6 +249,19 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
         } else {
             out.writeObject(null);
         }
+    }
+
+    @Override
+    public BaseEvent forkedDuplicate() {
+
+        AudioData fork = new AudioData(super.concurrentDataCopy());
+        fork.setTimestamp(this.timestamp);
+        if (header != null) {
+            fork.setHeader(header.clone());
+        }
+        fork.setSource(this.getSource());
+        fork.setSourceType(this.getSourceType());
+        return fork;
     }
 
     /**
