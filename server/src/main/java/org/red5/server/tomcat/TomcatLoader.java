@@ -356,10 +356,10 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             // Use default webapps directory
             webappFolder = FileUtil.formatPath(serverRoot, "/webapps");
         }
-        
-        // To negotiate for web-socket compression or not. 
-        UpgradeUtil.wsAllowCompression = Boolean.valueOf(System.getProperty("ws.allow.compression", "true")); 
-        
+
+        // To negotiate for web-socket compression or not.
+        UpgradeUtil.wsAllowCompression = Boolean.valueOf(System.getProperty("ws.allow.compression", "true"));
+
         System.setProperty("red5.webapp.root", webappFolder);
         log.info("Application root: {}", webappFolder);
         // Root applications directory

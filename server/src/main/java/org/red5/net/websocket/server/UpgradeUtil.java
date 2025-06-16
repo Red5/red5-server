@@ -126,10 +126,10 @@ public class UpgradeUtil {
         List<Extension> installedExtensions = new ArrayList<>();
 
         if (sec.getExtensions().size() > 0) {
-        	installedExtensions.addAll(sec.getExtensions());
+            installedExtensions.addAll(sec.getExtensions());
         }
-        // Enable permessage-deflate negotiation.  
-        if (wsAllowCompression ) {
+        // Enable permessage-deflate negotiation.
+        if (wsAllowCompression) {
             installedExtensions.addAll(Constants.INSTALLED_EXTENSIONS);
         }
         List<Extension> negotiatedExtensionsPhase1 = sec.getConfigurator().getNegotiatedExtensions(installedExtensions, extensionsRequested);
