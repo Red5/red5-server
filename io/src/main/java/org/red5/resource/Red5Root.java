@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Utility class to resolve server root
+ * @author Andy Shaules
  */
 public class Red5Root {
 
@@ -27,8 +28,9 @@ public class Red5Root {
     /**
      * Get Root directory of server.
      * @return String path or throws exception.
+     * @throws RootResolutionException if server root cannot be resolved. 
      */
-    public static String get() throws UnknownError {
+    public static String get() throws RootResolutionException {
         if (homeDirectory == null) {
             lookupLock.lock();//After acquiring the lock, ensure the condition directing this thread to the lock is still true.
             try {
@@ -40,7 +42,7 @@ public class Red5Root {
             }
         }
         if (homeDirectory == null) {
-            throw new UnknownError("Server root path cannot be resolved from system/env properties or code location.");
+            throw new RootResolutionException("Server root path cannot be resolved from system/env properties or code location.");
         }
         return homeDirectory;
     }
