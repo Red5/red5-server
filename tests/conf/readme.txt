@@ -1,0 +1,1 @@
+Be aware that these two store files will only work for RTMPS endpoints that do not verify the validitity with a "real" CA. Thus they work a-okay for connecting to Red5 server.

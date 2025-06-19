@@ -40,12 +40,6 @@
             <type>bundle</type>
         </dependency>
         <dependency>
-            <groupId>org.apache.mina</groupId>
-            <artifactId>mina-integration-beans</artifactId>
-            <version>${mina.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
             <artifactId>commons-beanutils</artifactId>
             <groupId>commons-beanutils</groupId>
             <version>${commons-beanutils.version}</version>

@@ -74,8 +74,7 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
                 conn = createConnectionInstance(connCls);
                 // add to local map
                 connMap.put(conn.getSessionId(), conn);
-                log.trace("Connections: {}", conns.incrementAndGet());
-                log.trace("Connection created: {}", conn);
+                log.trace("Connections: {} created: {}", conns.incrementAndGet(), conn);
             } catch (Exception ex) {
                 log.warn("Exception creating connection", ex);
             }

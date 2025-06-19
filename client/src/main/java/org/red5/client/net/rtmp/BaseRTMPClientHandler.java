@@ -1037,17 +1037,17 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
                 } else if (callResult instanceof Map) {
                     Map<?, ?> map = (Map<?, ?>) callResult;
                     // XXX(paul) log out the map contents
-                    log.warn("CreateStreamCallBack resultReceived - map: {}", map);
+                    log.warn("{} resultReceived - map: {}", call.getClass().getSimpleName(), map);
                     if (map.containsKey("streamId")) {
                         Object tmpStreamId = map.get("streamId");
                         if (tmpStreamId instanceof Number) {
                             streamId = ((Number) tmpStreamId).intValue();
                         } else {
-                            log.warn("CreateStreamCallBack resultReceived - stream id is not a number: {}", tmpStreamId);
+                            log.warn("{} resultReceived - stream id is not a number: {}", call.getClass().getName(), tmpStreamId);
                         }
                     }
                 }
-                log.debug("CreateStreamCallBack resultReceived - stream id: {} call: {} connection: {}", streamId, call, conn);
+                log.debug("{} resultReceived - stream id: {} call: {} connection: {}", call.getClass().getName(), streamId, call, conn);
                 if (conn != null && streamId != -1) {
                     log.debug("Setting new net stream");
                     NetStream stream = new NetStream(streamEventDispatcher);
@@ -1062,7 +1062,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
                 }
                 wrapped.resultReceived(call);
             } else {
-                log.warn("CreateStreamCallBack resultReceived - call result is null");
+                log.warn("{} resultReceived - call result is null", call.getClass().getSimpleName());
             }
         }
     }
@@ -1078,6 +1078,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
         @Override
         public void resultReceived(IPendingServiceCall call) {
+            log.debug("ReleaseStreamCallBack resultReceived - call: {}", call);
             wrapped.resultReceived(call);
         }
     }
@@ -1093,6 +1094,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
 
         @Override
         public void resultReceived(IPendingServiceCall call) {
+            log.debug("DeleteStreamCallBack resultReceived - call: {}", call);
             // get the result as base object
             Object callResult = call.getResult();
             if (callResult != null) {

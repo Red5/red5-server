@@ -10,11 +10,12 @@ package org.red5.client.net.rtmps;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.IoFutureListener;
@@ -25,8 +26,6 @@ import org.red5.client.net.rtmp.ClientExceptionHandler;
 import org.red5.client.net.rtmp.RTMPClient;
 import org.red5.client.net.rtmp.RTMPMinaIoHandler;
 import org.red5.io.tls.TLSFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RTMPS client object (RTMPS Native)
@@ -43,17 +42,17 @@ import org.slf4j.LoggerFactory;
  */
 public class RTMPSClient extends RTMPClient {
 
-    private static final Logger log = LoggerFactory.getLogger(RTMPSClient.class);
-
     private static String[] cipherSuites;
 
     // I/O handler
-    private final RTMPSClientIoHandler ioHandler;
+    private RTMPSClientIoHandler ioHandler;
 
     /**
      * Password for accessing the keystore.
      */
-    private char[] password = "password123".toCharArray();
+    private char[] keystorePassword = "password123".toCharArray(), truststorePassword = "password123".toCharArray();
+
+    private String keystorePath, truststorePath;
 
     /**
      * Path to the keystore and truststore files.
@@ -65,13 +64,14 @@ public class RTMPSClient extends RTMPClient {
      */
     private String keyStoreType = "PKCS12";
 
+    {
+        protocol = "rtmps";
+    }
+
     /**
      * Constructs a new RTMPClient.
      */
     public RTMPSClient() {
-        protocol = "rtmps";
-        ioHandler = new RTMPSClientIoHandler();
-        ioHandler.setHandler(this);
         setExceptionHandler(new ClientExceptionHandler() {
             @Override
             public void handleException(Throwable throwable) {
@@ -92,11 +92,11 @@ public class RTMPSClient extends RTMPClient {
      * @param password keystore password
      */
     public RTMPSClient(String keyStoreType, String password) {
-        protocol = "rtmps";
         this.keyStoreType = keyStoreType;
-        this.password = password.toCharArray();
-        ioHandler = new RTMPSClientIoHandler();
-        ioHandler.setHandler(this);
+        // set the password for both keystore and truststore since only one is supplied
+        this.keystorePassword = this.truststorePassword = password.toCharArray();
+        // create the I/O handler
+        log.debug("RTMPSClient - keystoreType: {}, password: {}", keyStoreType, password);
     }
 
     /**
@@ -110,13 +110,37 @@ public class RTMPSClient extends RTMPClient {
      * @throws java.io.IOException
      */
     public RTMPSClient(String keyStoreType, String password, String keystorePath, String truststorePath) throws IOException {
-        protocol = "rtmps";
-        this.keyStoreType = keyStoreType;
-        this.password = password.toCharArray();
-        this.keystoreStream = Files.newInputStream(Paths.get(URI.create(keystorePath)));
-        this.truststoreStream = Files.newInputStream(Paths.get(URI.create(truststorePath)));
-        ioHandler = new RTMPSClientIoHandler();
-        ioHandler.setHandler(this);
+        this(keyStoreType, password, keystorePath, password, truststorePath);
+    }
+
+    /**
+     * Creates a new RTMPSClient with the given keystore type, passwords, and paths to store files. If the stores
+     * are inside a jar file, use the following format: jar:file:/path/to/your.jar!/path/to/file/in/jar
+     *
+     * @param keyStoreType keystore type
+     * @param keystorePassword keystore password
+     * @param keystorePath path to keystore file
+     * @param truststorePassword truststore password
+     * @param truststorePath path to truststore file
+     * @throws java.io.IOException
+     */
+    public RTMPSClient(String keyStoreType, String keystorePassword, String keystorePath, String truststorePassword, String truststorePath) throws IOException {
+        // set the password for both keystore and truststore since only one is supplied
+        this.keystorePassword = keystorePassword != null ? keystorePassword.toCharArray() : null;
+        if (truststorePassword == null || truststorePassword.isEmpty()) {
+            throw new IllegalArgumentException("Truststore password must not be null or empty");
+        }
+        // check the paths
+        if (truststorePath == null || truststorePath.isEmpty()) {
+            throw new IllegalArgumentException("Truststore path must not be null or empty");
+        }
+        this.keystorePath = keystorePath;
+        this.truststorePath = truststorePath;
+        // required for truststore
+        this.truststorePassword = truststorePassword.toCharArray();
+        // determine the keystore type based on the file extension; default to PKCS12
+        this.keyStoreType = keyStoreType == null ? "PKCS12" : truststorePath.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
+        log.debug("RTMPSClient - keystoreType: {}, keystorePath: {}, truststorePath: {}", keyStoreType, keystorePath, truststorePath);
     }
 
     /** {@inheritDoc} */
@@ -124,8 +148,78 @@ public class RTMPSClient extends RTMPClient {
     @Override
     protected void startConnector(String server, int port) {
         log.debug("startConnector - server: {} port: {}", server, port);
+        // if not set, check system properties for the keystore and truststore
+        if (keystorePath == null) {
+            // get the keystore path from system properties, default to "keystore.jks"
+            String kpath = System.getProperty("javax.net.ssl.keyStore");
+            if (kpath != null) {
+                keystorePath = kpath;
+            }
+            // get the password from system properties
+            String kpass = System.getProperty("javax.net.ssl.keyStorePassword");
+            if (kpass != null) {
+                keystorePassword = kpass.toCharArray();
+            }
+            log.debug("RTMPSClient - keystoreType: {}, keystorePath: {}", keyStoreType, keystorePath);
+        }
+        if (truststorePath == null) {
+            truststorePath = System.getProperty("javax.net.ssl.trustStore", "conf/rtmps_truststore.p12");
+            if (truststorePassword == null) {
+                truststorePassword = System.getProperty("javax.net.ssl.trustStorePassword", "password123").toCharArray();
+            }
+            keyStoreType = keyStoreType == null ? "PKCS12" : truststorePath.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
+            log.debug("RTMPSClient - keystoreType: {}, truststorePath: {}", keyStoreType, truststorePath);
+        }
+        // ensure the truststore has a certificate for the server we are connecting to
+        try {
+            // retrieve the certificate from the server and update the truststore
+            CertificateGrabber.retrieveCertificate(server, port);
+            P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s.pem", server));
+            log.info("Certificate retrieved and truststore updated for {}:{}", server, port);
+        } catch (Exception e) {
+            // log the error and attempt to retrieve the certificate from port 443
+            if (isDebug) {
+                log.debug("Error retrieving certificate from {}:{}", server, port, e);
+            } else {
+                log.warn("Error retrieving certificate from {}:{}", server, port);
+            }
+            // make an attempt to continue if 443 wasn't specified
+            if (port != 443) {
+                log.warn("Secondary attempt since standard port 443 wasn't used: {}", port);
+                try {
+                    // retrieve the certificate from the server and update the truststore
+                    CertificateGrabber.retrieveCertificate(server, 443);
+                    P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s.pem", server));
+                    log.info("Certificate retrieved and truststore updated for {}:{}", server, 443);
+                } catch (Exception e2) {
+                    if (isDebug) {
+                        log.debug("Error retrieving certificate from {}:{}", server, port, e2);
+                    } else {
+                        log.warn("Error retrieving certificate from {}:{}", server, port);
+                    }
+                }
+            }
+        }
+        // convert the paths to input streams
+        try {
+            if (keystorePath != null && !keystorePath.isEmpty()) {
+                keystoreStream = Files.newInputStream(Paths.get(keystorePath));
+            } else {
+                log.warn("Keystore path is null or empty, using system keystore");
+            }
+            // truststore path is required
+            truststoreStream = Files.newInputStream(Paths.get(truststorePath));
+        } catch (IOException e) {
+            log.error("Error reading keystore or truststore files", e);
+            throw new RuntimeException("Could not read keystore or truststore files", e);
+        }
+        // create the I/O handler
+        ioHandler = new RTMPSClientIoHandler();
+        ioHandler.setHandler(this);
+        // create the socket connector
         socketConnector = new NioSocketConnector();
         socketConnector.setHandler(ioHandler);
+        // connect with a timeout
         future = socketConnector.connect(new InetSocketAddress(server, port));
         future.addListener(new IoFutureListener() {
             @Override
@@ -152,7 +246,16 @@ public class RTMPSClient extends RTMPClient {
      * @param password keystore password
      */
     public void setKeyStorePassword(String password) {
-        this.password = password.toCharArray();
+        this.keystorePassword = password.toCharArray();
+    }
+
+    /**
+     * Password used to access the truststore file.
+     *
+     * @param password truststore password
+     */
+    public void setTrustStorePassword(String password) {
+        this.truststorePassword = password.toCharArray();
     }
 
     /**
@@ -182,9 +285,16 @@ public class RTMPSClient extends RTMPClient {
             // if we're using a input streams, pass them to the ctor
             SSLContext context = null;
             if (keystoreStream != null && truststoreStream != null) {
-                context = TLSFactory.getTLSContext(keyStoreType, password, keystoreStream, password, truststoreStream);
+                context = TLSFactory.getTLSContext(keyStoreType, keystorePassword, keystoreStream, truststorePassword, truststoreStream);
             } else {
-                context = TLSFactory.getTLSContext(keyStoreType, password);
+                KeyStore ts = KeyStore.getInstance(keyStoreType);
+                ts.load(truststoreStream, truststorePassword);
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+                tmf.init(ts);
+                context = SSLContext.getInstance("TLS");
+                context.init(null, // No key managers needed for client
+                        tmf.getTrustManagers(), // custom truststore
+                        new java.security.SecureRandom());
             }
             SslFilter sslFilter = new SslFilter(context);
             if (sslFilter != null) {

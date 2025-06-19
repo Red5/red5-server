@@ -11,8 +11,9 @@
 			"io",
 			"common",
 			"server",
-			"service",
 			"client",
+			"service",
+			"tests"
 		],
 		"java.jdt.ls.androidSupport.enabled": "off",
 		"java.maven.updateSnapshots": true,
