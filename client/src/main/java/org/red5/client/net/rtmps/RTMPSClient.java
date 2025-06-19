@@ -96,7 +96,7 @@ public class RTMPSClient extends RTMPClient {
         // set the password for both keystore and truststore since only one is supplied
         this.keystorePassword = this.truststorePassword = password.toCharArray();
         // create the I/O handler
-        log.debug("RTMPSClient - keystoreType: {}, password: {}", keyStoreType, password);
+        log.debug("RTMPSClient - keystoreType: {}", keyStoreType);
     }
 
     /**
