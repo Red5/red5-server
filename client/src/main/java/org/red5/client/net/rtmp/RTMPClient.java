@@ -134,4 +134,23 @@ public class RTMPClient extends BaseRTMPClientHandler {
             throw new Exception("Unsupported protocol specified, please use the correct client for the intended protocol");
         }
     }
+
+    /**
+     * Logs the contents of a map at debug level.
+     * This is useful for debugging purposes, especially when dealing with connection parameters or other
+     * configuration settings.
+     *
+     * @param map
+     * @param name
+     */
+    protected void logMap(Map<String, Object> map, String name) {
+        if (isDebug) {
+            log.debug("logMap------ {} -------", name);
+            for (String key : map.keySet()) {
+                Object obj = map.get(key);
+                log.debug("{} : {} ({})", key, obj, obj == null ? "--" : obj.getClass().getName());
+            }
+        }
+    }
+
 }
