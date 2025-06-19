@@ -7,28 +7,39 @@
 
 package org.red5.io.amf;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.annotations.Anonymous;
+import org.red5.cache.impl.CacheImpl;
+import org.red5.io.IoConstants;
 import org.red5.io.amf3.ByteArray;
 import org.red5.io.object.BaseOutput;
 import org.red5.io.object.RecordSet;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.XMLUtils;
+import org.red5.resource.Red5Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -51,6 +62,8 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Output.class);
 
+    private static ReentrantLock lookupLock = new ReentrantLock();
+
     private static Cache stringCache;
 
     private static Cache serializeCache;
@@ -62,16 +75,52 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     private static CacheManager cacheManager;
 
     private static CacheManager getCacheManager() {
+
         if (cacheManager == null) {
-            if (System.getProperty("red5.root") != null) {
-                try {
-                    cacheManager = new CacheManager(Paths.get(System.getProperty("red5.root"), "conf", "ehcache.xml").toString());
-                } catch (CacheException e) {
+            //Lock and load.
+            lookupLock.lock();//After acquiring the lock, ensure the condition directing this thread to the lock is still true.
+            try/*to*/ {
+                CREATE_CACHE_MANAGER: if (cacheManager == null) {
+                    String red5Root = System.getProperty("red5.root");//Exported system property set by application launch script with value of server's directory. //red5.config_root
+                    if (red5Root == null) {
+                        red5Root = System.getenv("PWD");//nix
+                        if (red5Root == null) {
+                            red5Root = System.getenv("RED5_HOME");//Exported system property set by application launch script with value of server's directory. //red5.config_root
+                            if (red5Root == null) {
+                                try {//Last resort. find this jar location of lib folder, and resolve root directory.
+                                    red5Root = Optional.of(Output.class).map(Class::getProtectionDomain).map(ProtectionDomain::getCodeSource).map(CodeSource::getLocation).map(location -> {
+                                        try {
+                                            return Paths.get(location.toURI());
+                                        } catch (Exception e) {
+                                            // Wrap URI-specific issues
+                                            throw new RuntimeException("Failed to convert URL to URI", e);
+                                        }
+                                    }).map(Path::getParent).map(Path::getParent).map(Path::toString).orElse(null);
+                                } catch (Throwable t) {
+                                    log.warn("Server home directory can not be resolved.");
+                                }
+                            }
+                        }
+                    }
+
+                    if (red5Root != null) {
+                        Path conf = Paths.get(red5Root, "conf", "ehcache.xml");
+                        if (conf.toFile().exists()) {
+                            try {
+                                cacheManager = new CacheManager(conf.toString());
+                                break CREATE_CACHE_MANAGER;
+                            } catch (CacheException e) {
+                                log.warn("", e);
+                            }
+                        }
+                    }
                     cacheManager = constructDefault();
                 }
-            } else {
-                // not a server, maybe running tests?
-                cacheManager = constructDefault();
+            } finally {
+                lookupLock.unlock();
+                if (cacheManager == null) {
+                    log.info("Failed to create CacheManager.");
+                }
             }
         }
         return cacheManager;
@@ -680,5 +729,4 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
             stringCache = null;
         }
     }
-
 }
