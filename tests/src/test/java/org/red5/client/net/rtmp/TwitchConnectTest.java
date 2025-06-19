@@ -60,7 +60,7 @@ public class TwitchConnectTest extends PublisherTest {
      * Test for publishing a stream to Twitch.
      * This method connects to the Twitch RTMP server, creates a stream, and publishes it.
      * It handles various stream events such as start, stop, and errors.
-     * 
+     *
      * Note: This test requires a valid Twitch account and a stream key.
      *
      * @throws InterruptedException if the thread is interrupted during execution

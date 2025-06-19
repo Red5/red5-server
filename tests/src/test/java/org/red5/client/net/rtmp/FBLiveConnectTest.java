@@ -65,10 +65,10 @@ public class FBLiveConnectTest extends PublisherTest {
      * This test connects to the Facebook live ingest server and publishes a stream using the provided stream key.
      * It uses RTMPSClient to handle the RTMPS connection and stream publishing.
      * The test will run for a limited time and then disconnect.
-     * 
+     *
      * Note: This test requires a valid Facebook account and a stream key.
      * The stream key can be obtained from the Facebook live video setup page.
-     * 
+     *
      * @throws InterruptedException
      */
     @Test

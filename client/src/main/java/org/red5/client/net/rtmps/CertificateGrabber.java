@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class to grab and save server certificates from a given host and port; useful for TLS connections to ensure
  * a server's certificate is trusted.
- * 
+ *
  * Usage:
  * Call the `retrieveCertificate` method with the desired host and port to save the server's certificate in PEM format.
- * 
+ *
  * @author Paul Gregoire
  */
 public class CertificateGrabber {
