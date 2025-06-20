@@ -31,6 +31,7 @@ import org.red5.io.object.BaseOutput;
 import org.red5.io.object.RecordSet;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.XMLUtils;
+import org.red5.resource.Red5Root;
 import org.red5.resource.RootResolutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,10 +76,10 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
                 CREATE_CACHE_MANAGER: if (cacheManager == null) {
                     String red5Root = null;
                     try {
-						red5Root = Red5Root.get();
-					} catch (RootResolutionException e) {
-						log.debug("",e);
-					}
+                        red5Root = Red5Root.get();
+                    } catch (RootResolutionException e) {
+                        log.debug("", e);
+                    }
 
                     if (red5Root != null) {
                         Path conf = Paths.get(red5Root, "conf", "ehcache.xml");

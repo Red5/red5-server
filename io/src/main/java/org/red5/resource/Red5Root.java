@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
  * @author Andy Shaules
  */
 public class Red5Root {
-	
-	protected static Logger log = LoggerFactory.getLogger(Red5Root.class);
-	
+
+    protected static Logger log = LoggerFactory.getLogger(Red5Root.class);
+
     private static final String PropertyRed5Root = "red5.root";
 
     private static final String VarRed5Home = "RED5_HOME";
@@ -30,11 +30,12 @@ public class Red5Root {
 
     private static ReentrantLock lookupLock = new ReentrantLock();
 
-    private static ThreadLocal<Throwable> lastError = ThreadLocal.withInitial(()->null); 
+    private static ThreadLocal<Throwable> lastError = ThreadLocal.withInitial(() -> null);
+
     /**
-     * Get Root directory of server. 
+     * Get Root directory of server.
      * @return String path or throws exception.
-     * @throws RootResolutionException if server root cannot be resolved. 
+     * @throws RootResolutionException if server root cannot be resolved.
      */
     public static String get() throws RootResolutionException {
         if (homeDirectory == null) {
@@ -48,15 +49,15 @@ public class Red5Root {
             }
         }
         if (homeDirectory == null) {
-        	if(lastError.get()!=null) {
-        		try {
-        			throw new RootResolutionException("Server root path cannot be resolved from system/env properties or code location.",lastError.get());
-        		}finally {
-        			lastError.remove();
-        		}
-        	}else {
-        		throw new RootResolutionException("Server root path cannot be resolved from system/env properties or code location.");
-        	}
+            if (lastError.get() != null) {
+                try {
+                    throw new RootResolutionException("Server root path cannot be resolved from system/env properties or code location.", lastError.get());
+                } finally {
+                    lastError.remove();
+                }
+            } else {
+                throw new RootResolutionException("Server root path cannot be resolved from system/env properties or code location.");
+            }
         }
         return homeDirectory;
     }
@@ -97,7 +98,7 @@ public class Red5Root {
                                 try {
                                     return Paths.get(location.toURI());
                                 } catch (Exception e) {
-                                	log.warn("",e);
+                                    log.warn("", e);
                                     // Wrap URI-specific issues
                                     throw new RuntimeException("Failed to convert URL to URI", e);
                                 }
@@ -108,8 +109,8 @@ public class Red5Root {
             }
         } catch (Throwable t) {
             //Catch everything possible
-        	lastError.set(t);//Bubble it to the caller gracefully.
-        	log.debug("",t);
+            lastError.set(t);//Bubble it to the caller gracefully.
+            log.debug("", t);
         }
         return path;
     }
