@@ -11,6 +11,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -29,6 +31,7 @@ import org.red5.io.object.BaseOutput;
 import org.red5.io.object.RecordSet;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.XMLUtils;
+import org.red5.resource.RootResolutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -51,6 +54,8 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Output.class);
 
+    private static ReentrantLock lookupLock = new ReentrantLock();
+
     private static Cache stringCache;
 
     private static Cache serializeCache;
@@ -62,16 +67,37 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     private static CacheManager cacheManager;
 
     private static CacheManager getCacheManager() {
+
         if (cacheManager == null) {
-            if (System.getProperty("red5.root") != null) {
-                try {
-                    cacheManager = new CacheManager(Paths.get(System.getProperty("red5.root"), "conf", "ehcache.xml").toString());
-                } catch (CacheException e) {
+            //Lock and load.
+            lookupLock.lock();//After acquiring the lock, ensure the condition directing this thread to the lock is still true.
+            try/*to*/ {
+                CREATE_CACHE_MANAGER: if (cacheManager == null) {
+                    String red5Root = null;
+                    try {
+						red5Root = Red5Root.get();
+					} catch (RootResolutionException e) {
+						log.debug("",e);
+					}
+
+                    if (red5Root != null) {
+                        Path conf = Paths.get(red5Root, "conf", "ehcache.xml");
+                        if (conf.toFile().exists()) {
+                            try {
+                                cacheManager = new CacheManager(conf.toString());
+                                break CREATE_CACHE_MANAGER;
+                            } catch (CacheException e) {
+                                log.warn("", e);
+                            }
+                        }
+                    }
                     cacheManager = constructDefault();
                 }
-            } else {
-                // not a server, maybe running tests?
-                cacheManager = constructDefault();
+            } finally {
+                lookupLock.unlock();
+                if (cacheManager == null) {
+                    log.info("Failed to create CacheManager.");
+                }
             }
         }
         return cacheManager;
@@ -680,5 +706,4 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
             stringCache = null;
         }
     }
-
 }
