@@ -31,7 +31,6 @@ import org.red5.io.object.BaseOutput;
 import org.red5.io.object.RecordSet;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.XMLUtils;
-import org.red5.resource.Red5Root;
 import org.red5.resource.RootResolutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
