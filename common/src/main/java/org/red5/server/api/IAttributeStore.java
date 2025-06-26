@@ -57,6 +57,17 @@ public interface IAttributeStore extends AttributeStoreMXBean {
     boolean setAttribute(final Enum<?> enm, final Object value);
 
     /**
+     * Set an attribute on this object if it is not already set.
+     *
+     * @param name
+     *            the name of the attribute
+     * @param value
+     *            the value of the attribute
+     * @return previous value or null if it was absent
+     */
+    Object setAttributeIfAbsent(final String name, final Object value);
+
+    /**
      * Set multiple attributes on this object.
      *
      * @param values
