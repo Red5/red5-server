@@ -25,14 +25,14 @@ public interface IAttributeStore extends AttributeStoreMXBean {
      *
      * @return set containing all attribute names
      */
-    public Set<String> getAttributeNames();
+    Set<String> getAttributeNames();
 
     /**
      * Get the attributes. The resulting map will be read-only.
      *
      * @return map containing all attributes
      */
-    public Map<String, Object> getAttributes();
+    Map<String, Object> getAttributes();
 
     /**
      * Set an attribute on this object.
@@ -43,7 +43,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
      *            the new value of the attribute
      * @return true if the attribute value changed otherwise false
      */
-    public boolean setAttribute(String name, Object value);
+    boolean setAttribute(String name, Object value);
 
     /**
      * Set an attribute on this object.
@@ -74,7 +74,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
      *            the attributes to set
      * @return true if the attribute values changed otherwise false
      */
-    public boolean setAttributes(Map<String, Object> values);
+    boolean setAttributes(Map<String, Object> values);
 
     /**
      * Set multiple attributes on this object.
@@ -83,7 +83,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
      *            the attributes to set
      * @return true if the attribute values changed otherwise false
      */
-    public boolean setAttributes(IAttributeStore values);
+    boolean setAttributes(IAttributeStore values);
 
     /**
      * Return the value for a given attribute.
@@ -92,7 +92,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
      *            the name of the attribute to get
      * @return the attribute value or null if the attribute doesn't exist
      */
-    public Object getAttribute(String name);
+    Object getAttribute(String name);
 
     /**
      * Return the value for a given attribute.
@@ -120,14 +120,14 @@ public interface IAttributeStore extends AttributeStoreMXBean {
      *            the value of the attribute to set if the attribute doesn't exist
      * @return the attribute value
      */
-    public Object getAttribute(String name, Object defaultValue);
+    Object getAttribute(String name, Object defaultValue);
 
     /**
      * {@inheritDoc}
      *
      * Check the object has an attribute.
      */
-    public boolean hasAttribute(String name);
+    boolean hasAttribute(String name);
 
     /**
      * Check the object has an attribute.
@@ -143,7 +143,7 @@ public interface IAttributeStore extends AttributeStoreMXBean {
      *
      * Remove an attribute.
      */
-    public boolean removeAttribute(String name);
+    boolean removeAttribute(String name);
 
     /**
      * Remove an attribute.
@@ -157,13 +157,13 @@ public interface IAttributeStore extends AttributeStoreMXBean {
     /**
      * Remove all attributes.
      */
-    public void removeAttributes();
+    void removeAttributes();
 
     /**
      * Size of the attribute store.
      *
      * @return count of attributes
      */
-    public int size();
+    int size();
 
 }

@@ -29,7 +29,6 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
 
 import org.apache.commons.lang3.StringUtils;
-import org.red5.server.AttributeStore;
 import org.red5.server.Server;
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
@@ -148,11 +147,6 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * Statistics about sub-scopes.
      */
     protected final transient StatisticsCounter subscopeStats = new StatisticsCounter();
-
-    /**
-     * Storage for scope attributes
-     */
-    protected final AttributeStore attributes = new AttributeStore();
 
     /**
      * Mbean object name.
@@ -392,44 +386,6 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 log.error("Exception during dispatching event: {}", event, e);
             }
         });
-    }
-
-    /** {@inheritDoc} */
-    public Object getAttribute(String name) {
-        return attributes.getAttribute(name);
-    }
-
-    /** {@inheritDoc} */
-    public boolean setAttribute(String name, Object value) {
-        return attributes.setAttribute(name, value);
-    }
-
-    /** {@inheritDoc} */
-    public boolean hasAttribute(String name) {
-        return attributes.hasAttribute(name);
-    }
-
-    /** {@inheritDoc} */
-    public boolean removeAttribute(String name) {
-        return attributes.removeAttribute(name);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return a {@link java.util.Set} object
-     */
-    public Set<String> getAttributeNames() {
-        return attributes.getAttributeNames();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return a {@link java.util.Map} object
-     */
-    public Map<String, Object> getAttributes() {
-        return attributes.getAttributes();
     }
 
     /**

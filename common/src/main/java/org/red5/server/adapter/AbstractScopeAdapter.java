@@ -7,14 +7,19 @@
 
 package org.red5.server.adapter;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.red5.server.api.IAttributeStore;
+import org.red5.server.api.ICastingAttributeStore;
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.api.event.IEvent;
 import org.red5.server.api.scope.IBasicScope;
 import org.red5.server.api.scope.IScope;
+import org.red5.server.api.scope.IScopeAware;
 import org.red5.server.api.scope.IScopeHandler;
 import org.red5.server.api.service.IServiceCall;
 
@@ -23,9 +28,12 @@ import org.red5.server.api.service.IServiceCall;
  *
  * @author mondain
  */
-public abstract class AbstractScopeAdapter implements IScopeHandler {
+public abstract class AbstractScopeAdapter implements IScopeAware, IScopeHandler, ICastingAttributeStore {
 
-    //private static Logger log = LoggerFactory.getLogger(AbstractScopeAdapter.class);
+    /**
+     * Wrapped scope
+     */
+    protected volatile IScope scope;
 
     /**
      * Can start flag.
@@ -128,6 +136,25 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
      * otherwise
      */
     private boolean canHandleEvent = true;
+
+    /**
+     * Setter for wrapped scope
+     *
+     * @param scope
+     *            Scope to wrap
+     */
+    public void setScope(IScope scope) {
+        this.scope = scope;
+    }
+
+    /**
+     * Getter for wrapped scope
+     *
+     * @return Wrapped scope
+     */
+    public IScope getScope() {
+        return scope;
+    }
 
     /**
      * Setter for can start flag.
@@ -297,11 +324,186 @@ public abstract class AbstractScopeAdapter implements IScopeHandler {
         return null;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public Object getAttribute(String name) {
+        return scope.getAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Object getAttribute(Enum<?> enm) {
+        return getAttribute(enm.name());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Object getAttribute(String name, Object defaultValue) {
+        Object value = scope.getAttribute(name);
+        if (value == null) {
+            value = defaultValue;
+        }
+        return value;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<String> getAttributeNames() {
+        return scope.getAttributeNames();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Map<String, Object> getAttributes() {
+        return scope.getAttributes();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean hasAttribute(String name) {
+        return scope.hasAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean hasAttribute(Enum<?> enm) {
+        return hasAttribute(enm.name());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean removeAttribute(String name) {
+        return scope.removeAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean removeAttribute(Enum<?> enm) {
+        return removeAttribute(enm.name());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void removeAttributes() {
+        Set<String> names = scope.getAttributeNames();
+        for (String name : names) {
+            scope.removeAttribute(name);
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean setAttribute(String name, Object value) {
+        return scope.setAttribute(name, value);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean setAttribute(Enum<?> enm, Object value) {
+        return setAttribute(enm.name(), value);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean setAttributes(IAttributeStore attributes) {
+        int successes = 0;
+        for (Map.Entry<String, Object> entry : attributes.getAttributes().entrySet()) {
+            if (scope.setAttribute(entry.getKey(), entry.getValue())) {
+                successes++;
+            }
+        }
+        // expect every value to have been added
+        return (successes == attributes.size());
+    }
+
     /**
-     * <p>getScope.</p>
+     * {@inheritDoc}
      *
-     * @return a {@link org.red5.server.api.scope.IScope} object
+     * @param attributes a {@link java.util.Map} object
+     * @return a boolean
      */
-    public abstract IScope getScope();
+    @Override
+    public boolean setAttributes(Map<String, Object> attributes) {
+        int successes = 0;
+        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+            if (scope.setAttribute(entry.getKey(), entry.getValue())) {
+                successes++;
+            }
+        }
+        // expect every value to have been added
+        return (successes == attributes.size());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Object setAttributeIfAbsent(String name, Object value) {
+        return scope.setAttributeIfAbsent(name, value);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Boolean getBoolAttribute(String name) {
+        return scope.getBoolAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Byte getByteAttribute(String name) {
+        return scope.getByteAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Double getDoubleAttribute(String name) {
+        return scope.getDoubleAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Integer getIntAttribute(String name) {
+        return scope.getIntAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<?> getListAttribute(String name) {
+        return scope.getListAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Long getLongAttribute(String name) {
+        return scope.getLongAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Map<?, ?> getMapAttribute(String name) {
+        return scope.getMapAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<?> getSetAttribute(String name) {
+        return scope.getSetAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Short getShortAttribute(String name) {
+        return scope.getShortAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String getStringAttribute(String name) {
+        return scope.getStringAttribute(name);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int size() {
+        return scope != null ? scope.getAttributeNames().size() : 0;
+    }
 
 }

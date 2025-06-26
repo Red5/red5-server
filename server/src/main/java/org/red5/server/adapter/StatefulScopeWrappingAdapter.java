@@ -10,15 +10,12 @@ package org.red5.server.adapter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.red5.server.api.IAttributeStore;
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.IContext;
 import org.red5.server.api.scope.IScope;
-import org.red5.server.api.scope.IScopeAware;
 import org.red5.server.plugin.PluginDescriptor;
 import org.springframework.core.io.Resource;
 
@@ -27,35 +24,12 @@ import org.springframework.core.io.Resource;
  *
  * @author mondain
  */
-public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implements IScopeAware, IAttributeStore {
-
-    //private static Logger log = LoggerFactory.getLogger(StatefulScopeWrappingAdapter.class);
-
-    /**
-     * Wrapped scope
-     */
-    protected volatile IScope scope;
+public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter {
 
     /**
      * List of plug-in descriptors
      */
     protected List<PluginDescriptor> plugins;
-
-    /** {@inheritDoc} */
-    public void setScope(IScope scope) {
-        //log.trace("setScope: {}", scope.getName());
-        this.scope = scope;
-    }
-
-    /**
-     * Getter for wrapped scope
-     *
-     * @return Wrapped scope
-     */
-    public IScope getScope() {
-        //log.trace("getScope: {}", scope.getName());
-        return scope;
-    }
 
     /**
      * Returns any plug-ins descriptors added
@@ -74,126 +48,6 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter implement
      */
     public void setPlugins(List<PluginDescriptor> plugins) {
         this.plugins = plugins;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param name a {@link java.lang.String} object
-     * @return a {@link java.lang.Object} object
-     */
-    public Object getAttribute(String name) {
-        return scope.getAttribute(name);
-    }
-
-    /** {@inheritDoc} */
-    public Object getAttribute(Enum<?> enm) {
-        return getAttribute(enm.name());
-    }
-
-    /** {@inheritDoc} */
-    public Object getAttribute(String name, Object defaultValue) {
-        Object value = scope.getAttribute(name);
-        if (value == null) {
-            value = defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return a {@link java.util.Set} object
-     */
-    public Set<String> getAttributeNames() {
-        return scope.getAttributeNames();
-    }
-
-    /**
-     * Wrapper for Scope#getAttributes
-     *
-     * @return Scope attributes map
-     */
-    public Map<String, Object> getAttributes() {
-        return scope.getAttributes();
-    }
-
-    /** {@inheritDoc} */
-    public boolean hasAttribute(String name) {
-        return scope.hasAttribute(name);
-    }
-
-    /** {@inheritDoc} */
-    public boolean hasAttribute(Enum<?> enm) {
-        return hasAttribute(enm.name());
-    }
-
-    /** {@inheritDoc} */
-    public boolean removeAttribute(String name) {
-        return scope.removeAttribute(name);
-    }
-
-    /** {@inheritDoc} */
-    public boolean removeAttribute(Enum<?> enm) {
-        return removeAttribute(enm.name());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void removeAttributes() {
-        Set<String> names = scope.getAttributeNames();
-        for (String name : names) {
-            scope.removeAttribute(name);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return a int
-     */
-    public int size() {
-        return scope != null ? scope.getAttributeNames().size() : 0;
-    }
-
-    /** {@inheritDoc} */
-    public boolean setAttribute(String name, Object value) {
-        return scope.setAttribute(name, value);
-    }
-
-    /** {@inheritDoc} */
-    public boolean setAttribute(Enum<?> enm, Object value) {
-        return setAttribute(enm.name(), value);
-    }
-
-    /** {@inheritDoc} */
-    public boolean setAttributes(IAttributeStore attributes) {
-        int successes = 0;
-        for (Map.Entry<String, Object> entry : attributes.getAttributes().entrySet()) {
-            if (scope.setAttribute(entry.getKey(), entry.getValue())) {
-                successes++;
-            }
-        }
-        // expect every value to have been added
-        return (successes == attributes.size());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param attributes a {@link java.util.Map} object
-     * @return a boolean
-     */
-    public boolean setAttributes(Map<String, Object> attributes) {
-        int successes = 0;
-        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-            if (scope.setAttribute(entry.getKey(), entry.getValue())) {
-                successes++;
-            }
-        }
-        // expect every value to have been added
-        return (successes == attributes.size());
     }
 
     /**
