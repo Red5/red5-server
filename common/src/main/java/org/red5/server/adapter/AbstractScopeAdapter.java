@@ -341,9 +341,12 @@ public abstract class AbstractScopeAdapter implements IScopeAware, IScopeHandler
     /** {@inheritDoc} */
     @Override
     public Object getAttribute(String name, Object defaultValue) {
-        Object value = scope.getAttribute(name);
+        // this sets the attribute if it does not exist and returns the default value
+        // if it already existed, the existing value is returned
+        Object value = scope.setAttributeIfAbsent(name, defaultValue);
         if (value == null) {
-            value = defaultValue;
+            // if the value was not set, return the default value
+            return defaultValue;
         }
         return value;
     }

@@ -21,6 +21,15 @@ public interface IScopeAware {
      * @param scope
      *            Scope for this object
      */
-    public void setScope(IScope scope);
+    void setScope(IScope scope);
+
+    /**
+     * Get the scope the object is located in.
+     *
+     * @return Scope for this object
+     */
+    default IScope getScope() {
+        return null;
+    }
 
 }
