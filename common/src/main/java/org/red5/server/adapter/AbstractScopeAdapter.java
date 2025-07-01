@@ -153,6 +153,7 @@ public abstract class AbstractScopeAdapter implements IScopeAware, IScopeHandler
      *
      * @return Wrapped scope
      */
+    @Override
     public IScope getScope() {
         return scope;
     }
