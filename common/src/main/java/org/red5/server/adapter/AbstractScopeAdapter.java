@@ -143,6 +143,7 @@ public abstract class AbstractScopeAdapter implements IScopeAware, IScopeHandler
      * @param scope
      *            Scope to wrap
      */
+    @Override
     public void setScope(IScope scope) {
         this.scope = scope;
     }
