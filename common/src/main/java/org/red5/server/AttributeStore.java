@@ -236,6 +236,18 @@ public class AttributeStore implements ICastingAttributeStore {
 
     /**
      * {@inheritDoc}
+     */
+    public Object setAttributeIfAbsent(final String name, final Object value) {
+        log.trace("setAttributeIfAbsent({}, {})", name, value);
+        if (name == null || value == null) {
+            return null;
+        }
+        // putIfAbsent returns the previous value or null if it was absent
+        return attributes.putIfAbsent(name, value);
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * @param values a {@link java.util.Map} object
      * @return a boolean

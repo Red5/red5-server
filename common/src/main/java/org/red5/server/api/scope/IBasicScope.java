@@ -9,6 +9,7 @@ package org.red5.server.api.scope;
 
 import java.util.Set;
 
+import org.red5.server.api.ICastingAttributeStore;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.ICoreObject;
 import org.red5.server.api.event.IEventObservable;
@@ -20,7 +21,7 @@ import org.red5.server.api.persistence.IPersistenceStore;
  * @author The Red5 Project
  * @author Luke Hubbard (luke@codegent.com)
  */
-public interface IBasicScope extends ICoreObject, IEventObservable {
+public interface IBasicScope extends ICoreObject, ICastingAttributeStore, IEventObservable {
 
     /**
      * Does this scope have a parent? You can think of scopes as of tree items where scope may have a parent and children (child).

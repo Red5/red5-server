@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.red5.server.AttributeStore;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.event.IEvent;
 import org.red5.server.api.event.IEventListener;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @see org.red5.server.scope.Scope
  * @author mondain
  */
-public abstract class BasicScope implements IBasicScope, Comparable<BasicScope> {
+public abstract class BasicScope extends AttributeStore implements IBasicScope, Comparable<BasicScope> {
 
     /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(BasicScope.class);
