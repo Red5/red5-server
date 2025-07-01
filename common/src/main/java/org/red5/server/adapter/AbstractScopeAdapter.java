@@ -387,10 +387,7 @@ public abstract class AbstractScopeAdapter implements IScopeAware, IScopeHandler
     /** {@inheritDoc} */
     @Override
     public void removeAttributes() {
-        Set<String> names = scope.getAttributeNames();
-        for (String name : names) {
-            scope.removeAttribute(name);
-        }
+        scope.removeAttributes();
     }
 
     /** {@inheritDoc} */
