@@ -38,6 +38,7 @@ import org.red5.server.net.rtmp.event.ClientBW;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.event.SWFResponse;
 import org.red5.server.net.rtmp.event.ServerBW;
 import org.red5.server.net.rtmp.message.Header;
@@ -51,7 +52,6 @@ import org.red5.server.so.SharedObjectMessage;
 import org.red5.server.stream.AbstractClientStream;
 import org.red5.server.stream.OutputStream;
 import org.red5.server.stream.consumer.ConnectionConsumer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Base class for clients (RTMP and RTMPT)
@@ -150,6 +150,11 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     protected ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
     /**
+     * User agent for the client
+     */
+    protected String userAgent = "FMLE/3.0 (compatible; FMSc/1.0)";
+
+    /**
      * <p>Constructor for BaseRTMPClientHandler.</p>
      */
     protected BaseRTMPClientHandler() {
@@ -197,20 +202,20 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     public Map<String, Object> makeDefaultConnectionParams(String server, int port, String application) {
         Map<String, Object> params = new ObjectMap<>();
         params.put("app", application);
+        params.put("type", "nonprivate");
+        params.put("flashVer", userAgent);
+        params.put("tcUrl", String.format("%s://%s:%s/%s", protocol, server, port, application));
+        //params.put("swfUrl", params.get("tcUrl"));
         params.put("objectEncoding", Integer.valueOf(0));
         params.put("fpad", Boolean.FALSE);
-        params.put("flashVer", "FMLE/3.0 (compatible; Red5Client)"); // old value WIN 11,2,202,235
         params.put("audioCodecs", Integer.valueOf(0x0FFF)); // old value 3575 = 0x0E0F
         params.put("videoFunction", Integer.valueOf(1));
         params.put("pageUrl", null);
         params.put("path", application);
         params.put("capabilities", Integer.valueOf(15));
-        params.put("swfUrl", null);
         params.put("videoCodecs", Integer.valueOf(0x00FF)); // old value 252 = 0x0FC
         params.put("audioFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
-        //params.put("audioFourCcInfoMap", Collections.singletonMap(AudioCodec.AAC.getFourcc(), Integer.valueOf(4)));
         params.put("videoFourCcInfoMap", Collections.singletonMap("*", Integer.valueOf(4)));
-        //params.put("videoFourCcInfoMap", Collections.singletonMap(VideoCodec.AVC.getFourcc(), Integer.valueOf(4)));
         return params;
     }
 
@@ -320,21 +325,22 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     @Override
     protected void onPing(RTMPConnection conn, Channel channel, Header source, Ping ping) {
         log.trace("onPing");
-        switch (ping.getEventType()) {
-            case Ping.PING_CLIENT:
-            case Ping.STREAM_BEGIN:
-            case Ping.RECORDED_STREAM:
-            case Ping.STREAM_PLAYBUFFER_CLEAR:
+        PingType pingType = PingType.getType(ping.getEventType());
+        switch (pingType) {
+            case PING_CLIENT:
+            case STREAM_BEGIN:
+            case RECORDED_STREAM:
+            case STREAM_PLAYBUFFER_CLEAR:
                 // the server wants to measure the RTT
                 Ping pong = new Ping();
-                pong.setEventType(Ping.PONG_SERVER);
+                pong.setEventType(PingType.PONG_SERVER);
                 pong.setValue2((int) (System.currentTimeMillis() & 0xffffffff));
                 conn.ping(pong);
                 break;
-            case Ping.STREAM_DRY:
+            case STREAM_DRY:
                 log.debug("Stream indicates there is no data available");
                 break;
-            case Ping.CLIENT_BUFFER:
+            case CLIENT_BUFFER:
                 // set the client buffer
                 IClientStream stream = null;
                 // get the stream id
@@ -355,17 +361,17 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
                     log.info("Remembering client buffer on stream: {}", buffer);
                 }
                 break;
-            case Ping.PING_SWF_VERIFY:
+            case PING_SWF_VERIFY:
                 log.debug("SWF verification ping");
                 // TODO get the swf verification bytes from the handshake
                 SWFResponse swfPong = new SWFResponse(new byte[42]);
                 conn.ping(swfPong);
                 break;
-            case Ping.BUFFER_EMPTY:
+            case BUFFER_EMPTY:
                 log.debug("Buffer empty ping");
 
                 break;
-            case Ping.BUFFER_FULL:
+            case BUFFER_FULL:
                 log.debug("Buffer full ping");
 
                 break;
@@ -606,7 +612,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
             // get the channel
             int channel = getChannelForStreamId(streamId);
             // send our requested buffer size
-            ping(Ping.CLIENT_BUFFER, streamId, 2000);
+            ping(PingType.CLIENT_BUFFER, streamId, 2000);
             // send our request for a/v
             PendingCall receiveAudioCall = new PendingCall("receiveAudio");
             conn.invoke(receiveAudioCall, channel);
@@ -708,6 +714,10 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      *            ping parameter
      */
     public void ping(short pingType, Number streamId, int param) {
+        conn.ping(new Ping(PingType.getType(pingType), streamId, param));
+    }
+
+    public void ping(PingType pingType, Number streamId, int param) {
         conn.ping(new Ping(pingType, streamId, param));
     }
 
@@ -897,15 +907,6 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     public void setConnection(RTMPConnection conn) {
         this.conn = conn;
         this.conn.setHandler(this);
-        if (conn.getExecutor() == null) {
-            // setup executor
-            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-            executor.setCorePoolSize(1);
-            executor.setDaemon(true);
-            executor.setMaxPoolSize(1);
-            executor.initialize();
-            conn.setExecutor(executor);
-        }
     }
 
     /**

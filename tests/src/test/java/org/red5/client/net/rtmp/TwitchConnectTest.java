@@ -3,7 +3,6 @@ package org.red5.client.net.rtmp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.red5.client.net.rtmps.RTMPSClient;
 import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.event.IEvent;
 import org.red5.server.api.event.IEventDispatcher;
@@ -25,9 +24,11 @@ public class TwitchConnectTest extends PublisherTest {
     public void setUp() throws Exception {
         super.setUp();
         log.info("Setting up TwitchConnectTest");
+        // set system properties for the RTMP handshake
+        System.setProperty("use.fp9.handshake", "false"); // false to use the older handshake
         // set system properties for keystore and truststore as Twitch
         System.setProperty("javax.net.ssl.trustStorePassword", "password123");
-        System.setProperty("javax.net.ssl.trustStore", "conf/rtmps_truststore.p12");
+        System.setProperty("javax.net.ssl.trustStore", "tests/conf/rtmps_truststore.p12");
         // set up debug logging for SSL
         System.setProperty("javax.net.debug", "ssl");
         // debug
@@ -39,10 +40,14 @@ public class TwitchConnectTest extends PublisherTest {
             System.setProperty("javax.net.debug", "ssl,handshake,verbose,data,keymanager,trustmanager,record,plaintext");
         }
         // Twitch ingest server details
-        host = "ingest.global-contribute.live-video.net";
+        //host = "ingest.global-contribute.live-video.net";
+        host = "lax.contribute.live-video.net"; // Los Angeles region
         port = 1935;
         app = "app";
-        streamKey = "live_107484810_EdWk5R6WYyT8XIfL7JLBi2RY86ZMyc"; // replace with your own stream key
+        // validate against the local Red5 server
+        //host = "localhost";
+        //app = "live";
+        streamKey = "live_107484810_wnHKDftISXEIATEbGlCL2vmV5Xxxxnope"; // replace with your own stream key
         log.info("Stream key: {}", streamKey);
     }
 
@@ -63,21 +68,33 @@ public class TwitchConnectTest extends PublisherTest {
      *
      * Note: This test requires a valid Twitch account and a stream key.
      *
+     * A working order for Twitch streaming is as follows:
+     * 1. Connect to the Twitch RTMP server - connect
+     * 2. Release the stream before publishing - releaseStream
+     * 3. Prepare the stream for publishing - FCPublish
+     * 4. Create the stream - createStream
+     * 5. Publish the stream - publish
+     * Once the stream is published, it can be used to send video/audio data. When done, it should be unpublished using
+     * FCUnpublish.
+     *
+     * Lastly, it seems best to use the unversioned RTMP connection handshake, instead of newer styles.
+     *
      * @throws InterruptedException if the thread is interrupted during execution
      */
     @Test
     public void testPublish() throws InterruptedException {
         log.info("\ntestPublish");
-        client = new RTMPSClient();
+        client = new RTMPClient();
         client.setConnectionClosedHandler(() -> {
             log.info("Test - exit");
         });
-        client.setExceptionHandler(new ClientExceptionHandler() {
+        ClientExceptionHandler clientExceptionHandler = new ClientExceptionHandler() {
             @Override
             public void handleException(Throwable throwable) {
-                throwable.printStackTrace();
+                log.warn("Exception in handleException", throwable);
             }
-        });
+        };
+        client.setExceptionHandler(clientExceptionHandler);
         client.setStreamEventDispatcher(new IEventDispatcher() {
             @Override
             public void dispatchEvent(IEvent event) {
@@ -97,29 +114,9 @@ public class TwitchConnectTest extends PublisherTest {
                 switch (code) {
                     case StatusCodes.NS_PUBLISH_START:
                         log.info("Publishing stream: {}", streamKey);
-                        publishing = true;
-                        executor.submit(() -> {
-                            client.invoke("FCPublish", new Object[] { streamKey }, new IPendingServiceCallback() {
-                                @Override
-                                public void resultReceived(IPendingServiceCall call) {
-                                    Object result = call.getResult();
-                                    log.info("FCPublish result: {}", result);
-                                }
-                            });
-                        });
                         break;
                     case StatusCodes.NS_UNPUBLISHED_SUCCESS:
                         log.info("Publishing stopped, stream: {}", streamKey);
-                        publishing = false;
-                        executor.submit(() -> {
-                            client.invoke("FCUnpublish", new Object[] { streamKey }, new IPendingServiceCallback() {
-                                @Override
-                                public void resultReceived(IPendingServiceCall call) {
-                                    Object result = call.getResult();
-                                    log.info("FCUnpublish result: {}", result);
-                                }
-                            });
-                        });
                         break;
                     case StatusCodes.NC_CALL_FAILED:
                         log.warn("Failed to publish stream: {}", map.get("description"));
@@ -138,46 +135,85 @@ public class TwitchConnectTest extends PublisherTest {
         IPendingServiceCallback connectCallback = new IPendingServiceCallback() {
             @Override
             public void resultReceived(IPendingServiceCall call) {
-                log.info("connectCallback");
-                ObjectMap<?, ?> map = (ObjectMap<?, ?>) call.getResult();
-                String code = (String) map.get("code");
-                log.info("Response code: {}", code);
-                if (StatusCodes.NC_CONNECT_SUCCESS.equals(code)) {
-                    log.info("Connected to Twitch server");
-                    executor.submit(() -> {
+                String method = call.getServiceMethodName();
+                log.debug("resultReceived: {}", method);
+                // use self for this callback for reusability
+                final IPendingServiceCallback self = this;
+                switch (method) {
+                    case "connect":
+                        log.info("Connected to Twitch server");
+                        // set the source type attribute on our connection
+                        //client.getConnection().setAttribute("sourceType", "RTMP");
+                        // Thread.ofVirtual().uncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                        //     @Override
+                        //     public void uncaughtException(Thread t, Throwable e) {
+                        //         log.error("Uncaught exception in thread: {}", t.getName(), e);
+                        //         clientExceptionHandler.handleException(e);
+                        //     }
+                        // }).start(() -> {
+                        //     // check for onBWDone
+                        //     log.debug("Bandwidth check done: {}", client.isBandwidthCheckDone());
+                        //     // initiate the stream creation
+                        //     client.createStream(self);
+                        // });
                         // release the stream before publishing
-                        client.releaseStream(new IPendingServiceCallback() {
-                            @Override
-                            public void resultReceived(IPendingServiceCall call) {
-                                log.info("Stream released: {}", call.getResult());
-                                client.createStream(new IPendingServiceCallback() {
-                                    @Override
-                                    public void resultReceived(IPendingServiceCall call) {
-                                        streamId = (Double) call.getResult();
-                                        log.info("Stream created: {}", streamId);
-                                        client.publish(streamId, streamKey, "live", netStreamEventHandler);
-                                    }
-                                });
-                            }
-                        }, new Object[] { streamKey });
-                    });
-                } else if (StatusCodes.NC_CONNECT_REJECTED.equals(code)) {
-                    System.out.printf("Rejected: %s\n", map.get("description"));
-                    client.disconnect();
-                    finished.set(true);
-                } else {
-                    log.warn("Unexpected response code: {}", code);
-                    finished.set(true);
+                        Thread.ofVirtual().start(() -> {
+                            log.info("Releasing stream: {}", streamKey);
+                            client.invoke("releaseStream", new Object[] { streamKey }, self);
+                        });
+                        //client.releaseStream(self, new Object[] { streamKey });
+                        // prepare the stream for publishing, skip releaseStream
+                        //client.invoke("FCPublish", new Object[] { streamKey }, self);
+                        break;
+                    case "releaseStream":
+                        log.info("Stream released: {}", streamKey);
+                        Thread.ofVirtual().start(() -> {
+                            client.invoke("FCPublish", new Object[] { streamKey }, self);
+                        });
+                        break;
+                    case "FCPublish":
+                        log.info("FCPublish called for stream: {}", streamKey);
+                        // now we can create the stream
+                        Thread.ofVirtual().start(() -> {
+                            client.createStream(self);
+                        });
+                        break;
+                    case "createStream":
+                        log.info("Created stream for: {}", streamKey);
+                        streamId = (Double) call.getResult();
+                        log.info("Stream created with ID: {}", streamId);
+                        // now we can publish
+                        Thread.ofVirtual().start(() -> {
+                            client.publish(streamId, streamKey, "live", netStreamEventHandler);
+                        });
+                        break;
+                    case "publish":
+                        log.info("Stream published: {}", streamKey);
+                        publishing = true;
+                        break;
+                    case "FCUnpublish":
+                        log.info("Stream unpublished: {}", streamKey);
+                        publishing = false;
+                        break;
+                    default:
+                        log.warn("Unexpected result: {}", method, call.getArguments());
+                        //client.invoke("FCUnpublish", new Object[] { streamKey }, self);
+                        client.disconnect();
+                        finished.set(true);
                 }
             }
         };
         // connect
+        log.info("Connecting to Twitch server at {}:{}", host, port);
+        // connect to the Twitch RTMP server
         client.connect(host, port, app, connectCallback);
+        log.info("Preparing to publish stream: {}", streamKey);
         executor.submit(() -> {
             while (!publishing) {
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
+                    log.warn("Interrupted while waiting for publishing to start", e);
                 }
             }
             do {
@@ -190,12 +226,14 @@ public class TwitchConnectTest extends PublisherTest {
                         Thread.sleep(3L);
                     }
                 } catch (Exception e1) {
-                    log.warn("streaming error {}", e1);
+                    log.warn("Streaming error {}", e1);
                 }
             } while (!que.isEmpty());
             client.unpublish(streamId);
         });
+        log.info("Waiting for publish to complete");
         Thread.currentThread().join(30000L);
+        log.info("Publish complete, disconnecting client");
         client.disconnect();
         log.info("Test - end");
     }
@@ -208,6 +246,8 @@ public class TwitchConnectTest extends PublisherTest {
             test.tearDown();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            System.exit(0);
         }
     }
 

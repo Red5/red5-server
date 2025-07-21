@@ -59,6 +59,7 @@ import org.red5.server.net.rtmp.event.AudioData;
 import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
@@ -1079,7 +1080,7 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      */
     private void sendClearPing() {
         Ping eof = new Ping();
-        eof.setEventType(Ping.STREAM_PLAYBUFFER_CLEAR);
+        eof.setEventType(PingType.STREAM_PLAYBUFFER_CLEAR);
         eof.setValue2(streamId);
         // eos
         RTMPMessage eofMsg = RTMPMessage.build(eof);
@@ -1092,14 +1093,14 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     private void sendReset() {
         if (pullMode) {
             Ping recorded = new Ping();
-            recorded.setEventType(Ping.RECORDED_STREAM);
+            recorded.setEventType(PingType.RECORDED_STREAM);
             recorded.setValue2(streamId);
             // recorded
             RTMPMessage recordedMsg = RTMPMessage.build(recorded);
             doPushMessage(recordedMsg);
         }
         Ping begin = new Ping();
-        begin.setEventType(Ping.STREAM_BEGIN);
+        begin.setEventType(PingType.STREAM_BEGIN);
         begin.setValue2(streamId);
         // begin
         RTMPMessage beginMsg = RTMPMessage.build(begin);

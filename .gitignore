@@ -18,3 +18,4 @@ ci/Red5-release-steps.md
 
 *.crt
 *.pem
+tests/conf/rtmps_truststore.p12

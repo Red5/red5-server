@@ -31,7 +31,7 @@ public class FBLiveConnectTest extends PublisherTest {
         log.info("Setting up FBLiveConnectTest");
         // set system properties for keystore and truststore as Facebook live requires SSL/TLS
         System.setProperty("javax.net.ssl.trustStorePassword", "password123");
-        System.setProperty("javax.net.ssl.trustStore", "conf/rtmps_truststore.p12");
+        System.setProperty("javax.net.ssl.trustStore", "tests/conf/rtmps_truststore.p12");
         // set up debugging logging for SSL
         System.setProperty("javax.net.debug", "ssl");
         // debug

@@ -8,7 +8,7 @@ import org.red5.client.util.PropertiesReader;
 import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IPendingServiceCallback;
-import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 
 public class RTMPSClientTest {
 
@@ -60,10 +60,10 @@ public class RTMPSClientTest {
                                     Number streamId = (Number) call.getResult();
                                     // live buffer 0.5s / vod buffer 4s
                                     if (Boolean.valueOf(PropertiesReader.getProperty("rtmps.live"))) {
-                                        client.ping(Ping.CLIENT_BUFFER, streamId, 500);
+                                        client.ping(PingType.CLIENT_BUFFER, streamId, 500);
                                         client.play(streamId, PropertiesReader.getProperty("rtmps.name"), -1, -1);
                                     } else {
-                                        client.ping(Ping.CLIENT_BUFFER, streamId, 4000);
+                                        client.ping(PingType.CLIENT_BUFFER, streamId, 4000);
                                         client.play(streamId, PropertiesReader.getProperty("rtmps.name"), 0, -1);
                                     }
                                 }

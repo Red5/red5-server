@@ -22,7 +22,6 @@ import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Responsible for management and creation of RTMP based connections.
@@ -38,8 +37,6 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
     private static int maxInactivity = 60000;
 
     private static int pingInterval = 0;
-
-    private static int executorQueueCapacity = 32;
 
     // whether or not to use the ThreadPoolTaskExecutor for incoming messages
     /** Constant <code>enableTaskExecutor=true</code> */
@@ -112,15 +109,14 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
     @Override
     public BaseConnection getConnectionBySessionId(String sessionId) {
         log.debug("Getting connection by session id: {}", sessionId);
-        if (connMap.containsKey(sessionId)) {
-            return connMap.get(sessionId);
-        } else {
+        BaseConnection conn = connMap.get(sessionId);
+        if (conn == null) {
             log.warn("Connection not found for {}", sessionId);
             if (log.isTraceEnabled()) {
                 log.trace("Connections ({}) {}", connMap.size(), connMap.values());
             }
         }
-        return null;
+        return conn;
     }
 
     /** {@inheritDoc} */
@@ -184,16 +180,6 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
         conn.setMaxHandshakeTimeout(maxHandshakeTimeout);
         conn.setMaxInactivity(maxInactivity);
         conn.setPingInterval(pingInterval);
-        if (enableTaskExecutor) {
-            // setup executor
-            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-            executor.setCorePoolSize(1);
-            executor.setDaemon(true);
-            executor.setMaxPoolSize(1);
-            executor.setQueueCapacity(executorQueueCapacity);
-            executor.initialize();
-            conn.setExecutor(executor);
-        }
         return conn;
     }
 
@@ -229,8 +215,10 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
      *
      * @param executorQueueCapacity a int
      */
+    @Deprecated(forRemoval = true, since = "2.0.20")
     public static void setExecutorQueueCapacity(int executorQueueCapacity) {
-        RTMPClientConnManager.executorQueueCapacity = executorQueueCapacity;
+        // XXX(paul) deprecating this in favor of a virtual thread executor
+        log.warn("Setting executor queue capacity is deprecated, use virtual threads instead");
     }
 
     /**

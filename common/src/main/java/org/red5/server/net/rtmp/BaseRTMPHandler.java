@@ -33,6 +33,7 @@ import org.red5.server.net.rtmp.event.Unknown;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.message.Packet;
+import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusCodes;
 import org.red5.server.so.SharedObjectMessage;
 import org.slf4j.Logger;
@@ -172,7 +173,9 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
 
     /** {@inheritDoc} */
     public void connectionClosed(RTMPConnection conn) {
-        log.debug("connectionClosed: {}", conn.getSessionId());
+        if (isDebug) {
+            log.debug("Connection closed: {}", conn);
+        }
         if (conn.getStateCode() != RTMP.STATE_DISCONNECTED) {
             // inform any callbacks for pending calls that the connection is closed
             conn.sendPendingServiceCallsCloseError();
@@ -355,5 +358,17 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
      *            Shared object message
      */
     protected abstract void onSharedObject(RTMPConnection conn, Channel channel, Header source, SharedObjectMessage message);
+
+    /**
+     * Status event handler.
+     *
+     * @param status
+     *            Status event context
+     */
+    protected void onStatus(Status status) {
+        if (isDebug) {
+            log.debug("onStatus - code: {} description: {}", status.getCode(), status.getDescription());
+        }
+    }
 
 }

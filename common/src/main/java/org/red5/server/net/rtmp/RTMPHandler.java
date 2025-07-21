@@ -41,6 +41,7 @@ import org.red5.server.net.rtmp.codec.RTMP;
 import org.red5.server.net.rtmp.event.ChunkSize;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.event.SetBuffer;
 import org.red5.server.net.rtmp.event.StreamActionEvent;
 import org.red5.server.net.rtmp.message.Header;
@@ -367,7 +368,7 @@ public class RTMPHandler extends BaseRTMPHandler {
                                             pc.setResult(result);
                                         }
                                         // Measure initial round-trip time after connecting
-                                        conn.ping(new Ping(Ping.STREAM_BEGIN, 0, -1));
+                                        conn.ping(new Ping(PingType.STREAM_BEGIN, 0, -1));
                                     } else {
                                         log.debug("Connect failed");
                                         call.setStatus(Call.STATUS_ACCESS_DENIED);
@@ -525,8 +526,9 @@ public class RTMPHandler extends BaseRTMPHandler {
     /** {@inheritDoc} */
     @Override
     protected void onPing(RTMPConnection conn, Channel channel, Header source, Ping ping) {
-        switch (ping.getEventType()) {
-            case Ping.CLIENT_BUFFER:
+        PingType pingType = PingType.getType(ping.getEventType());
+        switch (pingType) {
+            case CLIENT_BUFFER:
                 SetBuffer setBuffer = (SetBuffer) ping;
                 // get the stream id
                 int streamId = setBuffer.getStreamId();
@@ -549,7 +551,7 @@ public class RTMPHandler extends BaseRTMPHandler {
                     log.debug("Remembering client buffer on stream: {}", buffer);
                 }
                 break;
-            case Ping.PONG_SERVER:
+            case PONG_SERVER:
                 // This is the response to an IConnection.ping request
                 conn.pingReceived(ping);
                 break;

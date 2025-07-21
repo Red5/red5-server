@@ -20,28 +20,28 @@ public interface IRTMPClient {
      *
      * @param connectionClosedHandler a {@link java.lang.Runnable} object
      */
-    public void setConnectionClosedHandler(Runnable connectionClosedHandler);
+    void setConnectionClosedHandler(Runnable connectionClosedHandler);
 
     /**
      * <p>setExceptionHandler.</p>
      *
      * @param exceptionHandler a {@link org.red5.client.net.rtmp.ClientExceptionHandler} object
      */
-    public void setExceptionHandler(ClientExceptionHandler exceptionHandler);
+    void setExceptionHandler(ClientExceptionHandler exceptionHandler);
 
     /**
      * <p>setStreamEventDispatcher.</p>
      *
      * @param streamEventDispatcher a {@link org.red5.server.api.event.IEventDispatcher} object
      */
-    public void setStreamEventDispatcher(IEventDispatcher streamEventDispatcher);
+    void setStreamEventDispatcher(IEventDispatcher streamEventDispatcher);
 
     /**
      * <p>setServiceProvider.</p>
      *
      * @param serviceProvider a {@link java.lang.Object} object
      */
-    public void setServiceProvider(Object serviceProvider);
+    void setServiceProvider(Object serviceProvider);
 
     /**
      * <p>connect.</p>
@@ -50,7 +50,7 @@ public interface IRTMPClient {
      * @param port a int
      * @param application a {@link java.lang.String} object
      */
-    public void connect(String server, int port, String application);
+    void connect(String server, int port, String application);
 
     /**
      * <p>connect.</p>
@@ -60,7 +60,7 @@ public interface IRTMPClient {
      * @param application a {@link java.lang.String} object
      * @param connectCallback a {@link org.red5.server.api.service.IPendingServiceCallback} object
      */
-    public void connect(String server, int port, String application, IPendingServiceCallback connectCallback);
+    void connect(String server, int port, String application, IPendingServiceCallback connectCallback);
 
     /**
      * <p>connect.</p>
@@ -69,7 +69,7 @@ public interface IRTMPClient {
      * @param port a int
      * @param connectionParams a {@link java.util.Map} object
      */
-    public void connect(String server, int port, Map<String, Object> connectionParams);
+    void connect(String server, int port, Map<String, Object> connectionParams);
 
     /**
      * <p>connect.</p>
@@ -79,7 +79,7 @@ public interface IRTMPClient {
      * @param connectionParams a {@link java.util.Map} object
      * @param connectCallback a {@link org.red5.server.api.service.IPendingServiceCallback} object
      */
-    public void connect(String server, int port, Map<String, Object> connectionParams, IPendingServiceCallback connectCallback);
+    void connect(String server, int port, Map<String, Object> connectionParams, IPendingServiceCallback connectCallback);
 
     /**
      * <p>connect.</p>
@@ -90,7 +90,7 @@ public interface IRTMPClient {
      * @param connectCallback a {@link org.red5.server.api.service.IPendingServiceCallback} object
      * @param connectCallArguments an array of {@link java.lang.Object} objects
      */
-    public void connect(String server, int port, Map<String, Object> connectionParams, IPendingServiceCallback connectCallback, Object[] connectCallArguments);
+    void connect(String server, int port, Map<String, Object> connectionParams, IPendingServiceCallback connectCallback, Object[] connectCallArguments);
 
     /**
      * <p>invoke.</p>
@@ -98,7 +98,7 @@ public interface IRTMPClient {
      * @param method a {@link java.lang.String} object
      * @param callback a {@link org.red5.server.api.service.IPendingServiceCallback} object
      */
-    public void invoke(String method, IPendingServiceCallback callback);
+    void invoke(String method, IPendingServiceCallback callback);
 
     /**
      * <p>invoke.</p>
@@ -107,19 +107,19 @@ public interface IRTMPClient {
      * @param params an array of {@link java.lang.Object} objects
      * @param callback a {@link org.red5.server.api.service.IPendingServiceCallback} object
      */
-    public void invoke(String method, Object[] params, IPendingServiceCallback callback);
+    void invoke(String method, Object[] params, IPendingServiceCallback callback);
 
     /**
      * <p>disconnect.</p>
      */
-    public void disconnect();
+    void disconnect();
 
     /**
      * <p>createStream.</p>
      *
      * @param callback a {@link org.red5.server.api.service.IPendingServiceCallback} object
      */
-    public void createStream(IPendingServiceCallback callback);
+    void createStream(IPendingServiceCallback callback);
 
     /**
      * <p>publish.</p>
@@ -129,14 +129,14 @@ public interface IRTMPClient {
      * @param mode a {@link java.lang.String} object
      * @param handler a {@link org.red5.client.net.rtmp.INetStreamEventHandler} object
      */
-    public void publish(Number streamId, String name, String mode, INetStreamEventHandler handler);
+    void publish(Number streamId, String name, String mode, INetStreamEventHandler handler);
 
     /**
      * <p>unpublish.</p>
      *
      * @param streamId a {@link java.lang.Number} object
      */
-    public void unpublish(Number streamId);
+    void unpublish(Number streamId);
 
     /**
      * <p>publishStreamData.</p>
@@ -144,7 +144,7 @@ public interface IRTMPClient {
      * @param streamId a {@link java.lang.Number} object
      * @param message a {@link org.red5.server.messaging.IMessage} object
      */
-    public void publishStreamData(Number streamId, IMessage message);
+    void publishStreamData(Number streamId, IMessage message);
 
     /**
      * <p>play.</p>
@@ -154,7 +154,7 @@ public interface IRTMPClient {
      * @param start a int
      * @param length a int
      */
-    public void play(Number streamId, String name, int start, int length);
+    void play(Number streamId, String name, int start, int length);
 
     /**
      * <p>play2.</p>
@@ -162,7 +162,7 @@ public interface IRTMPClient {
      * @param streamId a {@link java.lang.Number} object
      * @param playOptions a {@link java.util.Map} object
      */
-    public void play2(Number streamId, Map<String, ?> playOptions);
+    void play2(Number streamId, Map<String, ?> playOptions);
 
     /**
      * <p>getSharedObject.</p>
@@ -171,7 +171,7 @@ public interface IRTMPClient {
      * @param persistent a boolean
      * @return a {@link org.red5.server.api.so.IClientSharedObject} object
      */
-    public IClientSharedObject getSharedObject(String name, boolean persistent);
+    IClientSharedObject getSharedObject(String name, boolean persistent);
 
     /**
      * <p>makeDefaultConnectionParams.</p>
@@ -181,12 +181,12 @@ public interface IRTMPClient {
      * @param application a {@link java.lang.String} object
      * @return a {@link java.util.Map} object
      */
-    public Map<String, Object> makeDefaultConnectionParams(String server, int port, String application);
+    Map<String, Object> makeDefaultConnectionParams(String server, int port, String application);
 
     /**
      * <p>getConnection.</p>
      *
      * @return a {@link org.red5.server.net.rtmp.RTMPConnection} object
      */
-    public RTMPConnection getConnection();
+    RTMPConnection getConnection();
 }

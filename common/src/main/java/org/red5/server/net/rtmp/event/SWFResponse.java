@@ -21,7 +21,7 @@ public class SWFResponse extends Ping {
      */
     public SWFResponse() {
         super();
-        this.eventType = Ping.PONG_SWF_VERIFY;
+        this.eventType = PingType.getType(PingType.PONG_SWF_VERIFY);
     }
 
     /**

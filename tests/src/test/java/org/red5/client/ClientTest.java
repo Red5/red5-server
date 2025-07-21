@@ -14,6 +14,7 @@ import org.red5.server.net.rtmp.Channel;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.status.StatusCodes;
 
@@ -87,10 +88,10 @@ public class ClientTest extends RTMPClient {
             Number streamId = (Number) call.getResult();
             // live buffer 0.5s / vod buffer 4s
             if (Boolean.valueOf(PropertiesReader.getProperty("live"))) {
-                conn.ping(new Ping(Ping.CLIENT_BUFFER, streamId, 500));
+                conn.ping(new Ping(PingType.CLIENT_BUFFER, streamId, 500));
                 play(streamId, PropertiesReader.getProperty("name"), -1, -1);
             } else {
-                conn.ping(new Ping(Ping.CLIENT_BUFFER, streamId, 4000));
+                conn.ping(new Ping(PingType.CLIENT_BUFFER, streamId, 4000));
                 play(streamId, PropertiesReader.getProperty("name"), 0, -1);
             }
         }

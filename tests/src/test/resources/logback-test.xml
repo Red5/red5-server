@@ -15,16 +15,24 @@
             <pattern>%d{ISO8601} [%thread] %-5level %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="DEBUG">
+    <root level="TRACE">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
+    <logger name="org.red5.io.flv.impl.FLVReader" level="OFF" />
+    <!--
     <logger name="org.red5.server.api.Red5" level="INFO" />
+    <logger name="org.red5.server.net.rtmp.codec" level="TRACE" />
+    <logger name="org.red5.server.net.rtmp.RTMPConnection" level="TRACE" />
+    <logger name="org.red5.server.net.rtmp.RTMPMinaConnection" level="TRACE" />
+    <logger name="org.red5.io.amf" level="INFO" />
     <logger name="org.red5.io.flv.impl.FLVReader" level="WARN" />
-    <logger name="org.red5.client.net.rtmp.OutboundHandshake" level="WARN" />
+    <logger name="org.red5.client.net" level="TRACE" />
+    <logger name="org.red5.client.net.rtmp.OutboundHandshake" level="TRACE" />
     <logger name="org.red5.client.net.rtmp.InboundHandshake" level="WARN" />
     <logger name="org.red5.client.net.rtmp.FBLiveConnectTest" level="DEBUG" />
     <logger name="org.red5.client.net.rtmp.TwitchConnectTest" level="DEBUG" />
     <logger name="org.red5.client.net.rtmp.YouTubeConnectTest" level="DEBUG" />
+    -->
     <logger name="net.sf.ehcache" level="WARN" />
 </configuration>

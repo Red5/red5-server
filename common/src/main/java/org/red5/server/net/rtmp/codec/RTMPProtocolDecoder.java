@@ -41,6 +41,7 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.event.SWFResponse;
 import org.red5.server.net.rtmp.event.ServerBW;
 import org.red5.server.net.rtmp.event.SetBuffer;
@@ -841,16 +842,16 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             log.trace("Ping dump: {}", hexDump);
         }
         // control type
-        short type = in.getShort();
-        switch (type) {
-            case Ping.CLIENT_BUFFER:
+        PingType pingType = PingType.getType(in.getShort());
+        switch (pingType) {
+            case CLIENT_BUFFER:
                 ping = new SetBuffer(in.getInt(), in.getInt());
                 break;
-            case Ping.PING_SWF_VERIFY:
+            case PING_SWF_VERIFY:
                 // only contains the type (2 bytes)
-                ping = new Ping(type);
+                ping = new Ping(pingType);
                 break;
-            case Ping.PONG_SWF_VERIFY:
+            case PONG_SWF_VERIFY:
                 byte[] bytes = new byte[42];
                 in.get(bytes);
                 ping = new SWFResponse(bytes);
@@ -859,8 +860,11 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 //STREAM_BEGIN, STREAM_PLAYBUFFER_CLEAR, STREAM_DRY, RECORDED_STREAM
                 //PING_CLIENT, PONG_SERVER
                 //BUFFER_EMPTY, BUFFER_FULL
-                ping = new Ping(type, in.getInt());
+                ping = new Ping(pingType, in.getInt());
                 break;
+        }
+        if (isTrace) {
+            log.trace("Ping: {}", ping);
         }
         return ping;
     }

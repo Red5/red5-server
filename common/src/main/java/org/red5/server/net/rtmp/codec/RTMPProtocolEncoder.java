@@ -36,6 +36,7 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.event.SWFResponse;
 import org.red5.server.net.rtmp.event.ServerBW;
 import org.red5.server.net.rtmp.event.SetBuffer;
@@ -221,7 +222,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         RTMPConnection conn = (RTMPConnection) Red5.getConnectionLocal();
         if (message instanceof Ping) {
             final Ping pingMessage = (Ping) message;
-            if (pingMessage.getEventType() == Ping.STREAM_PLAYBUFFER_CLEAR) {
+            if (PingType.STREAM_PLAYBUFFER_CLEAR.equals(PingType.getType(pingMessage.getEventType()))) {
                 // client buffer cleared, make sure to reset timestamps for this stream
                 final int channel = conn.getChannelIdForStreamId(pingMessage.getValue2());
                 log.trace("Ping stream id: {} channel id: {}", pingMessage.getValue2(), channel);
@@ -868,11 +869,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
     public IoBuffer encodePing(Ping ping) {
         int len;
         short type = ping.getEventType();
-        switch (type) {
-            case Ping.CLIENT_BUFFER:
+        PingType pingType = PingType.getType(type);
+        switch (pingType) {
+            case CLIENT_BUFFER:
                 len = 10;
                 break;
-            case Ping.PONG_SWF_VERIFY:
+            case PONG_SWF_VERIFY:
                 len = 44;
                 break;
             default:
@@ -880,18 +882,18 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         }
         final IoBuffer out = IoBuffer.allocate(len);
         out.putShort(type);
-        switch (type) {
-            case Ping.STREAM_BEGIN:
-            case Ping.STREAM_PLAYBUFFER_CLEAR:
-            case Ping.STREAM_DRY:
-            case Ping.RECORDED_STREAM:
-            case Ping.PING_CLIENT:
-            case Ping.PONG_SERVER:
-            case Ping.BUFFER_EMPTY:
-            case Ping.BUFFER_FULL:
+        switch (pingType) {
+            case STREAM_BEGIN:
+            case STREAM_PLAYBUFFER_CLEAR:
+            case STREAM_DRY:
+            case RECORDED_STREAM:
+            case PING_CLIENT:
+            case PONG_SERVER:
+            case BUFFER_EMPTY:
+            case BUFFER_FULL:
                 out.putInt(ping.getValue2().intValue());
                 break;
-            case Ping.CLIENT_BUFFER:
+            case CLIENT_BUFFER:
                 if (ping instanceof SetBuffer) {
                     SetBuffer setBuffer = (SetBuffer) ping;
                     out.putInt(setBuffer.getStreamId());
@@ -901,14 +903,17 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                     out.putInt(ping.getValue3());
                 }
                 break;
-            case Ping.PING_SWF_VERIFY:
+            case PING_SWF_VERIFY:
                 break;
-            case Ping.PONG_SWF_VERIFY:
+            case PONG_SWF_VERIFY:
                 out.put(((SWFResponse) ping).getBytes());
+                break;
+            default:
+                // ignore other pings here
                 break;
         }
         // this may not be needed anymore
-        if (ping.getValue4() != Ping.UNDEFINED) {
+        if (ping.getValue4() != -1) {
             out.putInt(ping.getValue4());
         }
         return out;
