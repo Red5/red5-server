@@ -471,14 +471,22 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setTimerDelta(timeDelta);
                 break;
             case HEADER_CONTINUE: // TYPE_3_RELATIVE
-                // Validate that we have a previous header to inherit from
                 if (lastHeader == null) {
-                    log.error("Type 3 header received without previous header on channel {}", channelId);
-                    return null;
+                    log.warn("Type 3 header received without previous header on channel {} - creating minimal header", channelId);
+                    // Create a minimal header to maintain compatibility
+                    Header minimalHeader = new Header();
+                    minimalHeader.setChannelId(channelId);
+                    minimalHeader.setTimerBase(0);
+                    minimalHeader.setTimerDelta(0);
+                    minimalHeader.setSize(0);
+                    minimalHeader.setDataType((byte) 0);
+                    minimalHeader.setStreamId(0);
+                    rtmp.setLastReadHeader(channelId, minimalHeader);
+                    lastHeader = minimalHeader;
                 }
-                // Additional validation: ensure Type 3 headers are used appropriately
+                // Log unusual Type 3 header usage but don't block it
                 if (in.position() == 0) {
-                    log.warn("Type 3 header used for new message on channel {} - potential stream confusion attack", channelId);
+                    log.debug("Type 3 header used for new message on channel {} - unusual but allowed", channelId);
                 }
                 // read the extended timestamp if we have the indication that it exists
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID

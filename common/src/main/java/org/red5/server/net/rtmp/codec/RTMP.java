@@ -308,8 +308,11 @@ public class RTMP {
      *            Value to set for property 'readChunkSize'.
      */
     public void setReadChunkSize(int readChunkSize) {
-        if (readChunkSize < MIN_CHUNK_SIZE || readChunkSize > MAX_CHUNK_SIZE) {
-            throw new IllegalArgumentException("Invalid chunk size: " + readChunkSize + " (must be between " + MIN_CHUNK_SIZE + " and " + MAX_CHUNK_SIZE + ")");
+        // Allow common streaming client chunk sizes while maintaining security bounds
+        if (readChunkSize < 32 || readChunkSize > MAX_CHUNK_SIZE) {
+            if (readChunkSize < 1 || readChunkSize > 16777215) { // RTMP spec limits
+                throw new IllegalArgumentException("Invalid chunk size: " + readChunkSize + " (must be between 1 and 16777215)");
+            }
         }
         this.readChunkSize = readChunkSize;
     }
@@ -330,8 +333,11 @@ public class RTMP {
      *            Write chunk size
      */
     public void setWriteChunkSize(int writeChunkSize) {
-        if (writeChunkSize < MIN_CHUNK_SIZE || writeChunkSize > MAX_CHUNK_SIZE) {
-            throw new IllegalArgumentException("Invalid chunk size: " + writeChunkSize + " (must be between " + MIN_CHUNK_SIZE + " and " + MAX_CHUNK_SIZE + ")");
+        // Allow common streaming client chunk sizes while maintaining security bounds
+        if (writeChunkSize < 32 || writeChunkSize > MAX_CHUNK_SIZE) {
+            if (writeChunkSize < 1 || writeChunkSize > 16777215) { // RTMP spec limits
+                throw new IllegalArgumentException("Invalid chunk size: " + writeChunkSize + " (must be between 1 and 16777215)");
+            }
         }
         this.writeChunkSize = writeChunkSize;
     }
