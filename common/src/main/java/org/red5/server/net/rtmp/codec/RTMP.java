@@ -21,6 +21,14 @@ import org.red5.server.net.rtmp.message.Packet;
  */
 public class RTMP {
 
+    public static final int DEFAULT_CHUNK_SIZE = 128;
+
+    public static final int MIN_CHUNK_SIZE = 128;
+
+    public static final int MAX_CHUNK_SIZE = 65536;
+
+    public static final int HANDSHAKE_SIZE = 1536;
+
     /** Constant <code>states</code> */
     public static final String[] states = { "connect", "handshake", "connected", "error", "disconnecting", "disconnected" };
 
@@ -300,6 +308,9 @@ public class RTMP {
      *            Value to set for property 'readChunkSize'.
      */
     public void setReadChunkSize(int readChunkSize) {
+        if (readChunkSize < MIN_CHUNK_SIZE || readChunkSize > MAX_CHUNK_SIZE) {
+            throw new IllegalArgumentException("Invalid chunk size: " + readChunkSize + " (must be between " + MIN_CHUNK_SIZE + " and " + MAX_CHUNK_SIZE + ")");
+        }
         this.readChunkSize = readChunkSize;
     }
 
@@ -319,6 +330,9 @@ public class RTMP {
      *            Write chunk size
      */
     public void setWriteChunkSize(int writeChunkSize) {
+        if (writeChunkSize < MIN_CHUNK_SIZE || writeChunkSize > MAX_CHUNK_SIZE) {
+            throw new IllegalArgumentException("Invalid chunk size: " + writeChunkSize + " (must be between " + MIN_CHUNK_SIZE + " and " + MAX_CHUNK_SIZE + ")");
+        }
         this.writeChunkSize = writeChunkSize;
     }
 

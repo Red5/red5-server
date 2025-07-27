@@ -447,7 +447,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 break;
             case HEADER_SAME_SOURCE: // type 1 - 7 bytes
                 // delta type
-                timeDelta = (int) RTMPUtils.diffTimestamps(header.getTimer(), lastHeader.getTimer());
+                timeDelta = calculateTimestampDelta(header.getTimer(), lastHeader.getTimer());
                 header.setTimerDelta(timeDelta);
                 // write the time delta 24-bit 3 bytes
                 RTMPUtils.writeMediumInt(buf, Math.min(timeDelta, MEDIUM_INT_MAX));
@@ -465,7 +465,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 break;
             case HEADER_TIMER_CHANGE: // type 2 - 3 bytes
                 // delta type
-                timeDelta = (int) RTMPUtils.diffTimestamps(header.getTimer(), lastHeader.getTimer());
+                timeDelta = calculateTimestampDelta(header.getTimer(), lastHeader.getTimer());
                 header.setTimerDelta(timeDelta);
                 // write the time delta 24-bit 3 bytes
                 RTMPUtils.writeMediumInt(buf, Math.min(timeDelta, MEDIUM_INT_MAX));
@@ -1026,6 +1026,27 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
     public IoBuffer encodeFlexStreamSend(FlexStreamSend msg) {
         final IoBuffer result = msg.getData();
         return result;
+    }
+
+    /**
+     * Calculate timestamp delta with proper rollover handling.
+     *
+     * @param currentTimestamp current timestamp
+     * @param lastTimestamp previous timestamp
+     * @return calculated delta, handling 32-bit rollover
+     */
+    private int calculateTimestampDelta(int currentTimestamp, int lastTimestamp) {
+        long delta = (long) currentTimestamp - (long) lastTimestamp;
+        // Handle 32-bit rollover - if delta is negative, timestamp wrapped around
+        if (delta < 0) {
+            delta += 0x100000000L; // Add 2^32 for rollover
+        }
+        // Clamp to valid range to prevent overflow issues
+        if (delta > 0xFFFFFFFFL) {
+            log.warn("Timestamp delta too large: {}, resetting to 0", delta);
+            delta = 0;
+        }
+        return (int) delta;
     }
 
     private void updateTolerance() {

@@ -376,7 +376,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             in.position(startPostion);
             return null;
         }
-
+        // get the last read header for this channel
         Header lastHeader = rtmp.getLastReadHeader(channelId);
         if (isTrace) {
             log.trace("{} lastHeader: {}", Header.HeaderType.values()[headerSize], lastHeader);
@@ -395,13 +395,21 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 return null;
             }
         }
-        //        if (isTrace) {
-        //            log.trace("headerLength: {}", headerLength);
-        //        }
-
         int timeBase = 0, timeDelta = 0;
         Header header = new Header();
         header.setChannelId(channelId);
+        if (lastHeader != null) {
+            // time base from last header
+            timeBase = lastHeader.getTimerBase();
+            // inherit the stream id from the last header
+            header.setStreamId(lastHeader.getStreamId());
+            // inherit the data type from the last header
+            header.setDataType(lastHeader.getDataType());
+            // inherit the size from the last header
+            header.setSize(lastHeader.getSize());
+            // inherit the extended flag from the last header
+            header.setExtended(lastHeader.isExtended());
+        }
         switch (headerSize) {
             case HEADER_NEW: // type 0
                 // an absolute time value
@@ -428,13 +436,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setTimerDelta(timeDelta);
                 break;
             case HEADER_SAME_SOURCE: // type 1
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
                 // a delta time value
                 timeDelta = RTMPUtils.readUnsignedMediumInt(in);
                 header.setSize(RTMPUtils.readUnsignedMediumInt(in));
                 header.setDataType(in.get());
-                header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
                     headerLength += 4;
@@ -451,13 +456,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setTimerDelta(timeDelta);
                 break;
             case HEADER_TIMER_CHANGE: // type 2
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
                 // a delta time value
                 timeDelta = RTMPUtils.readUnsignedMediumInt(in);
-                header.setSize(lastHeader.getSize());
-                header.setDataType(lastHeader.getDataType());
-                header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
                     headerLength += 4;
@@ -473,13 +473,16 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
                 break;
-            case HEADER_CONTINUE: // type 3
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
-                timeDelta = lastHeader.getTimerDelta();
-                header.setSize(lastHeader.getSize());
-                header.setDataType(lastHeader.getDataType());
-                header.setStreamId(lastHeader.getStreamId());
+            case HEADER_CONTINUE: // TYPE_3_RELATIVE
+                // Validate that we have a previous header to inherit from
+                if (lastHeader == null) {
+                    log.error("Type 3 header received without previous header on channel {}", channelId);
+                    return null;
+                }
+                // Additional validation: ensure Type 3 headers are used appropriately
+                if (in.position() == 0) {
+                    log.warn("Type 3 header used for new message on channel {} - potential stream confusion attack", channelId);
+                }
                 // read the extended timestamp if we have the indication that it exists
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID
                 // indicated the presence of an extended timestamp field
