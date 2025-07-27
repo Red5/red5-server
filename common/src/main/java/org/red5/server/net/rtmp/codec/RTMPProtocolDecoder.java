@@ -425,8 +425,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeBase = (int) (ext ^ (ext >>> 32));
+                    timeBase = (int) in.getUnsignedInt();
                     if (isTrace) {
                         log.trace("Extended time read: {}", timeBase);
                     }
@@ -448,8 +447,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeDelta = (int) (ext ^ (ext >>> 32));
+                    timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
@@ -466,8 +464,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeDelta = (int) (ext ^ (ext >>> 32));
+                    timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
@@ -493,12 +490,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    int timeExt = (int) (ext ^ (ext >>> 32));
+                    timeBase = (int) in.getUnsignedInt();
                     if (isTrace) {
-                        log.trace("Extended time read: {} {}", ext, timeExt);
+                        log.trace("Extended time read: {}", timeBase);
                     }
-                    timeBase = timeExt;
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
