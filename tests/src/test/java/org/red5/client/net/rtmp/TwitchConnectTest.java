@@ -1,19 +1,11 @@
 package org.red5.client.net.rtmp;
 
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
-import org.red5.client.net.rtmps.RTMPSClient;
 import org.red5.io.utils.ObjectMap;
 
 /**
  * Tests for connecting to Twitch servers.
- *
- * Issues discovered:
- * - Twitch doesn't support FCPublish/FCUnpublish commands
- * - releaseStream may return error status but should be ignored
- * - Simple workflow: connect -> createStream -> publish works best
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -43,7 +35,7 @@ public class TwitchConnectTest extends PublisherTest {
         host = "lax.contribute.live-video.net"; // Los Angeles region
         port = 1935;
         app = "app"; // Standard RTMP application name for Twitch
-        streamKey = "live_107484810_QSnKJKfaSjFigTqRQ1o0Y38ggXhgks"; // Stream key for publish command
+        streamKey = "live_107484810_QSnKJKfaSjFigTqRQ1o0Y38ggnope"; // Stream key for publish command
         log.info("Stream key: {}", streamKey);
         // NOTE: This test requires a valid/active Twitch stream key to work properly
         // Twitch-specific configuration: Use standard workflow without FC commands
