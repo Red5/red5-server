@@ -67,7 +67,14 @@ public class CertificateGrabber {
             // Save the certificate
             if (certs != null && certs.length > 0) {
                 X509Certificate cert = (X509Certificate) certs[0];
-                saveCertificate(cert, String.format("%s.pem", host));
+                // check for path to store the certificate
+                String truststorePath = System.getProperty("javax.net.ssl.trustStore");
+                if (truststorePath == null || truststorePath.isEmpty()) {
+                    throw new IllegalStateException("Truststore path is not set. Please set 'javax.net.ssl.trustStore' system property.");
+                }
+                String pemPath = truststorePath.substring(0, truststorePath.lastIndexOf('/'));
+                log.info("CertificateGrabber - pemPath: {}", pemPath);
+                saveCertificate(cert, String.format("%s/%s.pem", pemPath, host));
                 log.debug("Certificate subject: {} issuer: {}\n serial number: {}\n valid from: {} to: {}", cert.getSubjectX500Principal(), cert.getIssuerX500Principal(), cert.getSerialNumber(), cert.getNotBefore(), cert.getNotAfter());
             }
         }

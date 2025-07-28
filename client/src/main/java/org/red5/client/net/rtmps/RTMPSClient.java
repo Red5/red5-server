@@ -170,11 +170,14 @@ public class RTMPSClient extends RTMPClient {
             keyStoreType = keyStoreType == null ? "PKCS12" : truststorePath.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
             log.debug("RTMPSClient - keystoreType: {}, truststorePath: {}", keyStoreType, truststorePath);
         }
+        // strip the end of the truststore path to use it for saving the pem file
+        String pemPath = truststorePath.substring(0, truststorePath.lastIndexOf('/'));
+        log.info("RTMPSClient - pemPath: {}", pemPath);
         // ensure the truststore has a certificate for the server we are connecting to
         try {
             // retrieve the certificate from the server and update the truststore
             CertificateGrabber.retrieveCertificate(server, port);
-            P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s.pem", server));
+            P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s/%s.pem", pemPath, server));
             log.info("Certificate retrieved and truststore updated for {}:{}", server, port);
         } catch (Exception e) {
             // log the error and attempt to retrieve the certificate from port 443
@@ -189,7 +192,7 @@ public class RTMPSClient extends RTMPClient {
                 try {
                     // retrieve the certificate from the server and update the truststore
                     CertificateGrabber.retrieveCertificate(server, 443);
-                    P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s.pem", server));
+                    P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s/%s.pem", pemPath, server));
                     log.info("Certificate retrieved and truststore updated for {}:{}", server, 443);
                 } catch (Exception e2) {
                     if (isDebug) {
