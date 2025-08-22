@@ -130,7 +130,16 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         IRTMPEvent message = packet.getMessage();
         if (message instanceof ChunkSize) {
             ChunkSize chunkSizeMsg = (ChunkSize) message;
-            ((RTMPConnection) Red5.getConnectionLocal()).getState().setWriteChunkSize(chunkSizeMsg.getSize());
+            int requestedChunkSize = chunkSizeMsg.getSize();
+            
+            // Validate chunk size to prevent security vulnerabilities
+            if (requestedChunkSize < Constants.MIN_CHUNK_SIZE || requestedChunkSize > Constants.MAX_CHUNK_SIZE) {
+                log.warn("Invalid chunk size for encoding: {}. Must be between {} and {}. Ignoring.", 
+                        requestedChunkSize, Constants.MIN_CHUNK_SIZE, Constants.MAX_CHUNK_SIZE);
+                // Do not set the invalid chunk size - keep the existing one
+            } else {
+                ((RTMPConnection) Red5.getConnectionLocal()).getState().setWriteChunkSize(requestedChunkSize);
+            }
         }
         // normally the message is expected not to be dropped
         if (!dropMessage(channelId, message)) {

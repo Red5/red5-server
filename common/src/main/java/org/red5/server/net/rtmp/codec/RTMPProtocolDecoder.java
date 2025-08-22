@@ -320,7 +320,16 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             packet.setMessage(message);
             if (message instanceof ChunkSize) {
                 ChunkSize chunkSizeMsg = (ChunkSize) message;
-                rtmp.setReadChunkSize(chunkSizeMsg.getSize());
+                int requestedChunkSize = chunkSizeMsg.getSize();
+                
+                // Validate chunk size to prevent security vulnerabilities
+                if (requestedChunkSize < Constants.MIN_CHUNK_SIZE || requestedChunkSize > Constants.MAX_CHUNK_SIZE) {
+                    log.warn("Invalid chunk size received: {}. Must be between {} and {}. Ignoring.", 
+                            requestedChunkSize, Constants.MIN_CHUNK_SIZE, Constants.MAX_CHUNK_SIZE);
+                    // Do not set the invalid chunk size - keep the existing one
+                } else {
+                    rtmp.setReadChunkSize(requestedChunkSize);
+                }
             } else if (message instanceof Abort) {
                 log.debug("Abort packet detected");
                 // client is aborting a message, reset the packet because the next chunk will start a new packet

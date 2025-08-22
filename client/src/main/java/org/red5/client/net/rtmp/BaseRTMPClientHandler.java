@@ -41,6 +41,7 @@ import org.red5.server.net.rtmp.event.Ping;
 import org.red5.server.net.rtmp.event.SWFResponse;
 import org.red5.server.net.rtmp.event.ServerBW;
 import org.red5.server.net.rtmp.message.Header;
+import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.status.StatusCodes;
 import org.red5.server.service.Call;
 import org.red5.server.service.MethodNotFoundException;
@@ -309,10 +310,20 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     @Override
     protected void onChunkSize(RTMPConnection conn, Channel channel, Header source, ChunkSize chunkSize) {
         log.debug("onChunkSize");
+        int requestedChunkSize = chunkSize.getSize();
+        
+        // Validate chunk size to prevent security vulnerabilities
+        if (requestedChunkSize < Constants.MIN_CHUNK_SIZE || requestedChunkSize > Constants.MAX_CHUNK_SIZE) {
+            log.warn("Invalid chunk size received: {}. Must be between {} and {}. Ignoring.", 
+                    requestedChunkSize, Constants.MIN_CHUNK_SIZE, Constants.MAX_CHUNK_SIZE);
+            // Do not set the invalid chunk size - keep the existing one
+            return;
+        }
+        
         // set read and write chunk sizes
         RTMP state = conn.getState();
-        state.setReadChunkSize(chunkSize.getSize());
-        state.setWriteChunkSize(chunkSize.getSize());
+        state.setReadChunkSize(requestedChunkSize);
+        state.setWriteChunkSize(requestedChunkSize);
         log.info("ChunkSize configured: {}", chunkSize);
     }
 

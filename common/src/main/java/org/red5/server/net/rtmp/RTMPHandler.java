@@ -44,6 +44,7 @@ import org.red5.server.net.rtmp.event.Ping;
 import org.red5.server.net.rtmp.event.SetBuffer;
 import org.red5.server.net.rtmp.event.StreamActionEvent;
 import org.red5.server.net.rtmp.message.Header;
+import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusObject;
 import org.red5.server.net.rtmp.status.StatusObjectService;
@@ -146,6 +147,15 @@ public class RTMPHandler extends BaseRTMPHandler {
     protected void onChunkSize(RTMPConnection conn, Channel channel, Header source, ChunkSize chunkSize) {
         int requestedChunkSize = chunkSize.getSize();
         log.debug("Chunk size: {}", requestedChunkSize);
+        
+        // Validate chunk size to prevent security vulnerabilities
+        if (requestedChunkSize < Constants.MIN_CHUNK_SIZE || requestedChunkSize > Constants.MAX_CHUNK_SIZE) {
+            log.warn("Invalid chunk size received: {}. Must be between {} and {}. Ignoring.", 
+                    requestedChunkSize, Constants.MIN_CHUNK_SIZE, Constants.MAX_CHUNK_SIZE);
+            // Do not set the invalid chunk size - keep the existing one
+            return;
+        }
+        
         // set chunk size on the connection
         RTMP state = conn.getState();
         // set only the read chunk size since it came from the client
