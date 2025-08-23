@@ -615,8 +615,14 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
     /** {@inheritDoc} */
     public IoBuffer encodeChunkSize(ChunkSize chunkSize) {
+        int size = chunkSize.getSize();
+        // Validate chunk size for librtmp compatibility
+        if (size < 1 || size > 65536) {
+            log.warn("Invalid chunk size: {}. Clamping to librtmp-compatible range [128, 65536]", size);
+            size = Math.max(128, Math.min(size, 65536));
+        }
         final IoBuffer out = IoBuffer.allocate(4);
-        out.putInt(chunkSize.getSize());
+        out.putInt(size);
         return out;
     }
 

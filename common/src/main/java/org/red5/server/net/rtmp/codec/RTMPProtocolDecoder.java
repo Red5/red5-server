@@ -472,8 +472,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 break;
             case HEADER_CONTINUE: // TYPE_3_RELATIVE
                 if (lastHeader == null) {
-                    log.warn("Type 3 header received without previous header on channel {} - creating minimal header", channelId);
-                    // Create a minimal header to maintain compatibility
+                    // For librtmp compatibility, be more lenient with Type 3 headers
+                    // Some librtmp implementations may send Type 3 headers without prior headers
+                    log.warn("Type 3 header received without prior header on channel {}. Creating minimal header for compatibility.", channelId);
+                    // Create a minimal header with defaults that librtmp would expect
                     Header minimalHeader = new Header();
                     minimalHeader.setChannelId(channelId);
                     minimalHeader.setTimerBase(0);
@@ -481,7 +483,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     minimalHeader.setSize(0);
                     minimalHeader.setDataType((byte) 0);
                     minimalHeader.setStreamId(0);
-                    rtmp.setLastReadHeader(channelId, minimalHeader);
+                    minimalHeader.setExtended(false);
                     lastHeader = minimalHeader;
                 }
                 // Log unusual Type 3 header usage but don't block it
@@ -648,6 +650,11 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     public ChunkSize decodeChunkSize(IoBuffer in) {
         int chunkSize = in.getInt();
         log.debug("Decoded chunk size: {}", chunkSize);
+        // Validate chunk size according to RTMP spec and librtmp compatibility
+        // librtmp uses default chunk size of 128, max of 65536
+        if (chunkSize < 1 || chunkSize > 65536) {
+            throw new ProtocolException("Invalid chunk size: " + chunkSize + ". Must be between 1 and 65536 for librtmp compatibility.");
+        }
         return new ChunkSize(chunkSize);
     }
 
@@ -1011,7 +1018,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // need to debug this further
                 /*
                  * IoBuffer buf = IoBuffer.allocate(64); buf.setAutoExpand(true); Output out = null; if (encoding == Encoding.AMF3) { out = new org.red5.io.amf3.Output(buf); } else { out = new
-                 * Output(buf); } out.writeString(action); out.writeMap(params); buf.flip(); // instance a notify with action ret = new Notify(buf, action);
+                 * Output(buf); }
+                 * out.writeString(action);
+                 * out.writeMap(params);
+                 * buf.flip();
+                 * // instance a notify with action
+                 * ret = new Notify(buf, action);
                  */
                 // go back to the beginning
                 in.reset();
