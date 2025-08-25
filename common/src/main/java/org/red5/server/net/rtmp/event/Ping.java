@@ -38,9 +38,7 @@ public class Ping extends BaseEvent {
 
         /**
          * <p>getType.</p>
-         *
-         * @param type a short
-         * @return a {@link org.red5.server.net.rtmp.event.Ping.Type} object
+         * @return a {@link org.red5.server.net.rtmp.event.Ping.PingType} object
          */
         public static PingType getType(int type) {
             switch (type) {
