@@ -36,7 +36,6 @@ import org.red5.server.net.rtmp.message.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Represents an RTMP connection using Mina.
@@ -214,12 +213,6 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
      */
     public void setLimitType(int limitType) {
         this.limitType = limitType;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setExecutor(ThreadPoolTaskExecutor executor) {
-        this.executor = executor;
     }
 
     /**

@@ -391,9 +391,7 @@ public class OutboundHandshake extends RTMPHandshake {
             if (!(result = verifyDigest(digestPosServer, s1, GENUINE_FMS_KEY, 36))) {
                 log.warn("Server digest verification failed");
                 // if we dont mind that verification routines failed
-                if (!forceVerification) {
-                    return true;
-                }
+                result = !forceVerification;
             } else {
                 log.debug("Server digest verified");
             }

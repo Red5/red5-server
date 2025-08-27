@@ -2,17 +2,7 @@ package org.red5.client.net.rtmp;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-import org.red5.client.net.rtmps.RTMPSClient;
 import org.red5.io.utils.ObjectMap;
-import org.red5.server.api.event.IEvent;
-import org.red5.server.api.event.IEventDispatcher;
-import org.red5.server.api.service.IPendingServiceCall;
-import org.red5.server.api.service.IPendingServiceCallback;
-import org.red5.server.api.service.IServiceCall;
-import org.red5.server.net.rtmp.event.Notify;
-import org.red5.server.net.rtmp.status.StatusCodes;
-import org.red5.server.stream.message.RTMPMessage;
 
 /**
  * Tests for connecting to Twitch servers.
@@ -25,11 +15,13 @@ public class TwitchConnectTest extends PublisherTest {
     public void setUp() throws Exception {
         super.setUp();
         log.info("Setting up TwitchConnectTest");
+        // set system properties for the RTMP handshake
+        System.setProperty("use.fp9.handshake", "false"); // false to use the older handshake
         // set system properties for keystore and truststore as Twitch
         System.setProperty("javax.net.ssl.trustStorePassword", "password123");
-        System.setProperty("javax.net.ssl.trustStore", "conf/rtmps_truststore.p12");
+        System.setProperty("javax.net.ssl.trustStore", "tests/conf/rtmps_truststore.p12");
         // set up debug logging for SSL
-        System.setProperty("javax.net.debug", "ssl");
+        //System.setProperty("javax.net.debug", "ssl");
         // debug
         if (log.isDebugEnabled()) {
             //System.setProperty("javax.net.debug", "ssl,handshake,verbose,data,keymanager,record"); // keyStore focused
@@ -39,11 +31,35 @@ public class TwitchConnectTest extends PublisherTest {
             System.setProperty("javax.net.debug", "ssl,handshake,verbose,data,keymanager,trustmanager,record,plaintext");
         }
         // Twitch ingest server details
-        host = "ingest.global-contribute.live-video.net";
+        //host = "ingest.global-contribute.live-video.net";
+        host = "lax.contribute.live-video.net"; // Los Angeles region
         port = 1935;
-        app = "app";
-        streamKey = "live_107484810_EdWk5R6WYyT8XIfL7JLBi2RY86ZMyc"; // replace with your own stream key
+        app = "app"; // Standard RTMP application name for Twitch
+        streamKey = "live_107484810_QSnKJKfaSjFigTqRQ1o0Y38ggnope"; // Stream key for publish command
         log.info("Stream key: {}", streamKey);
+        // NOTE: This test requires a valid/active Twitch stream key to work properly
+        // Twitch-specific configuration: Use standard workflow without FC commands
+        // Twitch workflow: connect -> releaseStream (optional) -> createStream -> publish
+        setStartWithReleaseStream(true); // Try releaseStream first (ignore if it fails)
+        setUseFCCommands(true);
+        // Set up connection parameters for Twitch
+        ObjectMap<String, Object> params = new ObjectMap<>();
+        params.put("app", app);
+        params.put("type", "nonprivate");
+        params.put("flashVer", "FMLE/3.0 (compatible; FMSc/1.0)"); // OBS-like user agent
+        params.put("tcUrl", "rtmp://" + host + ":" + port + "/" + app);
+        params.put("objectEncoding", Integer.valueOf(0)); // AMF0 encoding
+        params.put("fpad", Boolean.FALSE);
+        params.put("audioCodecs", Integer.valueOf(3575)); // Standard OBS audio codecs
+        params.put("videoCodecs", Integer.valueOf(252)); // Standard OBS video codecs
+        params.put("videoFunction", Integer.valueOf(1));
+        params.put("capabilities", Integer.valueOf(15));
+        // Add swfUrl which some servers expect
+        params.put("swfUrl", params.get("tcUrl") + "/swf/Red5Publisher.swf");
+        params.put("pageUrl", "");
+        params.put("streamKey", streamKey); // Use the Twitch stream key for publishing
+        // Set the connection parameters in the test instance
+        setConnectionParams(params);
     }
 
     @After
@@ -63,151 +79,31 @@ public class TwitchConnectTest extends PublisherTest {
      *
      * Note: This test requires a valid Twitch account and a stream key.
      *
-     * @throws InterruptedException if the thread is interrupted during execution
+     * A working order for Twitch streaming is as follows:
+     * 1. Connect to the Twitch RTMP server - connect
+     * 2. Release the stream before publishing - releaseStream
+     * 3. Prepare the stream for publishing - FCPublish
+     * 4. Create the stream - createStream
+     * 5. Publish the stream - publish
+     * Once the stream is published, it can be used to send video/audio data. When done, it should be unpublished using
+     * FCUnpublish.
+     *
+     * Lastly, it seems best to use the unversioned RTMP connection handshake, instead of newer styles.
+     *
      */
-    @Test
-    public void testPublish() throws InterruptedException {
-        log.info("\ntestPublish");
-        client = new RTMPSClient();
-        client.setConnectionClosedHandler(() -> {
-            log.info("Test - exit");
-        });
-        client.setExceptionHandler(new ClientExceptionHandler() {
-            @Override
-            public void handleException(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
-        client.setStreamEventDispatcher(new IEventDispatcher() {
-            @Override
-            public void dispatchEvent(IEvent event) {
-                log.info("ClientStream.dispachEvent: {}", event);
-            }
-        });
-        final INetStreamEventHandler netStreamEventHandler = new INetStreamEventHandler() {
-            @Override
-            public void onStreamEvent(Notify notify) {
-                log.info("ClientStream.onStreamEvent: {}", notify);
-                IServiceCall call = notify.getCall();
-                String methodName = call.getServiceMethodName();
-                log.debug("Method: {}", methodName);
-                ObjectMap<?, ?> map = (ObjectMap<?, ?>) call.getArguments()[0];
-                String code = (String) map.get("code");
-                log.debug("Code: {}", code);
-                switch (code) {
-                    case StatusCodes.NS_PUBLISH_START:
-                        log.info("Publishing stream: {}", streamKey);
-                        publishing = true;
-                        executor.submit(() -> {
-                            client.invoke("FCPublish", new Object[] { streamKey }, new IPendingServiceCallback() {
-                                @Override
-                                public void resultReceived(IPendingServiceCall call) {
-                                    Object result = call.getResult();
-                                    log.info("FCPublish result: {}", result);
-                                }
-                            });
-                        });
-                        break;
-                    case StatusCodes.NS_UNPUBLISHED_SUCCESS:
-                        log.info("Publishing stopped, stream: {}", streamKey);
-                        publishing = false;
-                        executor.submit(() -> {
-                            client.invoke("FCUnpublish", new Object[] { streamKey }, new IPendingServiceCallback() {
-                                @Override
-                                public void resultReceived(IPendingServiceCall call) {
-                                    Object result = call.getResult();
-                                    log.info("FCUnpublish result: {}", result);
-                                }
-                            });
-                        });
-                        break;
-                    case StatusCodes.NC_CALL_FAILED:
-                        log.warn("Failed to publish stream: {}", map.get("description"));
-                        finished.set(true);
-                        break;
-                    case StatusCodes.NS_PUBLISH_BADNAME:
-                        log.warn("Bad name for stream: {}", map.get("description"));
-                        finished.set(true);
-                        break;
-                    default:
-                        log.warn("Unhandled code: {} for method: {}", code, methodName);
-                }
-            }
-        };
-        client.setStreamEventHandler(netStreamEventHandler);
-        IPendingServiceCallback connectCallback = new IPendingServiceCallback() {
-            @Override
-            public void resultReceived(IPendingServiceCall call) {
-                log.info("connectCallback");
-                ObjectMap<?, ?> map = (ObjectMap<?, ?>) call.getResult();
-                String code = (String) map.get("code");
-                log.info("Response code: {}", code);
-                if (StatusCodes.NC_CONNECT_SUCCESS.equals(code)) {
-                    log.info("Connected to Twitch server");
-                    executor.submit(() -> {
-                        // release the stream before publishing
-                        client.releaseStream(new IPendingServiceCallback() {
-                            @Override
-                            public void resultReceived(IPendingServiceCall call) {
-                                log.info("Stream released: {}", call.getResult());
-                                client.createStream(new IPendingServiceCallback() {
-                                    @Override
-                                    public void resultReceived(IPendingServiceCall call) {
-                                        streamId = (Double) call.getResult();
-                                        log.info("Stream created: {}", streamId);
-                                        client.publish(streamId, streamKey, "live", netStreamEventHandler);
-                                    }
-                                });
-                            }
-                        }, new Object[] { streamKey });
-                    });
-                } else if (StatusCodes.NC_CONNECT_REJECTED.equals(code)) {
-                    System.out.printf("Rejected: %s\n", map.get("description"));
-                    client.disconnect();
-                    finished.set(true);
-                } else {
-                    log.warn("Unexpected response code: {}", code);
-                    finished.set(true);
-                }
-            }
-        };
-        // connect
-        client.connect(host, port, app, connectCallback);
-        executor.submit(() -> {
-            while (!publishing) {
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException e) {
-                }
-            }
-            do {
-                try {
-                    RTMPMessage message = que.poll();
-                    if (message != null && client != null) {
-                        log.debug("Publishing message: {}", message);
-                        client.publishStreamData(streamId, message);
-                    } else {
-                        Thread.sleep(3L);
-                    }
-                } catch (Exception e1) {
-                    log.warn("streaming error {}", e1);
-                }
-            } while (!que.isEmpty());
-            client.unpublish(streamId);
-        });
-        Thread.currentThread().join(30000L);
-        client.disconnect();
-        log.info("Test - end");
-    }
 
     public static void main(String[] args) {
         TwitchConnectTest test = new TwitchConnectTest();
+        // Twitch allows both RTMP and RTMPS connections
+        test.setSecure(false);
         try {
             test.setUp();
             test.testPublish();
             test.tearDown();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            System.exit(0);
         }
     }
 

@@ -22,7 +22,7 @@ public class SetBuffer extends Ping {
      */
     public SetBuffer() {
         super();
-        this.eventType = Ping.CLIENT_BUFFER;
+        this.eventType = PingType.getType(PingType.CLIENT_BUFFER);
     }
 
     /**

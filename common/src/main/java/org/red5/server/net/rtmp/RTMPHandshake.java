@@ -39,8 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates and validates the RTMP handshake response for Flash Players. Client versions equal to or greater than Flash 9,0,124,0 require a
- * nonzero value as the fifth byte of the handshake request.
+ * Generates and validates the RTMP handshake response for Flash Players. Client versions equal to or greater than
+ * Flash 9,0,124,0 require a nonzero value as the fifth byte of the handshake request.
  *
  * @author Jacinto Shy II (jacinto.m.shy@ieee.org)
  * @author Steven Zimmer (stevenlzimmer@gmail.com)
@@ -158,7 +158,7 @@ public abstract class RTMPHandshake implements IHandshake {
     protected int algorithm = 1;
 
     // start as an fp of at least version 9.0.115.0
-    protected boolean fp9Handshake = true;
+    protected boolean fp9Handshake = System.getProperty("use.fp9.handshake", "true").equals("true");
 
     static {
         // add bouncycastle security provider
@@ -180,9 +180,6 @@ public abstract class RTMPHandshake implements IHandshake {
     public RTMPHandshake(byte handshakeType) {
         // set the handshake type
         setHandshakeType(handshakeType);
-        // whether or not to use later handshake version
-        fp9Handshake = "true".equals(System.getProperty("use.fp9.handshake", "true"));
-        //log.trace("Use fp9 handshake? {}", fp9Handshake);
         // create our handshake bytes
         createHandshakeBytes();
     }
@@ -720,6 +717,20 @@ public abstract class RTMPHandshake implements IHandshake {
      */
     public byte[] getSwfVerificationBytes() {
         return swfVerificationBytes;
+    }
+
+    public boolean isFp9Handshake() {
+        return fp9Handshake;
+    }
+
+    /**
+     * Sets whether or not to use the Flash Player 9 handshake; implies a versioned handshake.
+     *
+     * @param fp9Handshake
+     *            true if fp9 handshake should be used, false otherwise
+     */
+    public void setFp9Handshake(boolean fp9Handshake) {
+        this.fp9Handshake = fp9Handshake;
     }
 
 }

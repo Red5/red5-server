@@ -16,7 +16,6 @@ import org.apache.mina.core.session.IoSession;
 import org.red5.client.net.rtmpe.RTMPEClient;
 import org.red5.client.net.rtmpe.RTMPEIoFilter;
 import org.red5.server.BaseConnection;
-import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPHandshake;
@@ -38,7 +37,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     private boolean enableSwfVerification;
 
     /**
-     * RTMP events handler
+     * RTMP events handler, the rtmp client in this case.
      */
     protected BaseRTMPClientHandler handler;
 
@@ -50,6 +49,11 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         session.getFilterChain().addFirst("rtmpeFilter", new RTMPEIoFilter());
         // create a connection
         RTMPMinaConnection conn = createRTMPMinaConnection();
+        // disable scheduler via system property
+        if (System.getProperty("red5.scheduler.disable") != null) {
+            log.debug("Disabling scheduler for RTMPMinaIoHandler");
+            conn.setScheduler(null);
+        }
         // set the session on the connection
         conn.setIoSession(session);
         // add the connection
@@ -84,7 +88,7 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     /** {@inheritDoc} */
     @Override
     public void sessionOpened(IoSession session) throws Exception {
-        log.debug("Session opened");
+        log.debug("Client session opened");
         super.sessionOpened(session);
         // get the handshake from the session
         RTMPHandshake handshake = (RTMPHandshake) session.getAttribute(RTMPConnection.RTMP_HANDSHAKE);
@@ -96,15 +100,25 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     /** {@inheritDoc} */
     @Override
     public void sessionClosed(IoSession session) throws Exception {
-        log.debug("Session closed");
+        log.debug("Client session closed");
+        //throw new Exception("Session closed");
         String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
         if (sessionId != null) {
             log.trace("Session id: {}", sessionId);
-            RTMPMinaConnection conn = (RTMPMinaConnection) getConnectionManager(session).getConnectionBySessionId(sessionId);
+            BaseRTMPClientHandler client = (BaseRTMPClientHandler) session.getAttribute(RTMPConnection.RTMP_HANDLER);
+            RTMPMinaConnection conn = null;
+            if (client != null) {
+                log.debug("Handler: {}", client);
+                conn = (RTMPMinaConnection) client.getConnection();
+                // fire-off closed event
+                client.connectionClosed(conn);
+            } else {
+                log.warn("Handler was null in session, may already be closed");
+                conn = (RTMPMinaConnection) getConnectionManager(session).getConnectionBySessionId(sessionId);
+            }
+            log.debug("Connection: {}", conn);
             if (conn != null) {
                 conn.sendPendingServiceCallsCloseError();
-                // fire-off closed event
-                handler.connectionClosed(conn);
                 // clear any session attributes we may have previously set
                 session.removeAttribute(RTMPConnection.RTMP_HANDLER);
                 session.removeAttribute(RTMPConnection.RTMP_HANDSHAKE);
@@ -121,14 +135,20 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     /** {@inheritDoc} */
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
-        log.debug("messageReceived");
+        //log.trace("messageReceived");
         if (message instanceof Packet && message != null) {
             String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
             log.trace("Session id: {}", sessionId);
-            RTMPMinaConnection conn = (RTMPMinaConnection) getConnectionManager(session).getConnectionBySessionId(sessionId);
-            Red5.setConnectionLocal(conn);
+            BaseRTMPClientHandler client = (BaseRTMPClientHandler) session.getAttribute(RTMPConnection.RTMP_HANDLER);
+            RTMPMinaConnection conn = null;
+            if (client != null) {
+                log.debug("Handler: {}", client);
+                conn = (RTMPMinaConnection) client.getConnection();
+            } else {
+                log.warn("Handler was null in session, may already be closed");
+                conn = (RTMPMinaConnection) getConnectionManager(session).getConnectionBySessionId(sessionId);
+            }
             conn.handleMessageReceived((Packet) message);
-            Red5.setConnectionLocal(null);
         } else {
             log.debug("Not packet type: {}", message);
         }
@@ -137,11 +157,21 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
     /** {@inheritDoc} */
     @Override
     public void messageSent(IoSession session, Object message) throws Exception {
-        log.debug("messageSent");
+        //log.trace("messageSent");
         if (message instanceof Packet) {
             String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
-            log.trace("Session id: {}", sessionId);
-            RTMPMinaConnection conn = (RTMPMinaConnection) getConnectionManager(session).getConnectionBySessionId(sessionId);
+            if (log.isTraceEnabled()) {
+                log.trace("Session id: {} attrs: {}", sessionId, session.getAttributeKeys());
+            }
+            BaseRTMPClientHandler client = (BaseRTMPClientHandler) session.getAttribute(RTMPConnection.RTMP_HANDLER);
+            RTMPMinaConnection conn = null;
+            if (client != null) {
+                log.debug("Handler: {}", client);
+                conn = (RTMPMinaConnection) client.getConnection();
+            } else {
+                log.warn("Handler was null in session, may already be closed");
+                conn = (RTMPMinaConnection) getConnectionManager(session).getConnectionBySessionId(sessionId);
+            }
             handler.messageSent(conn, (Packet) message);
         } else {
             log.trace("messageSent: {}", Hex.encodeHexString(((IoBuffer) message).array()));

@@ -41,6 +41,7 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.event.SWFResponse;
 import org.red5.server.net.rtmp.event.ServerBW;
 import org.red5.server.net.rtmp.event.SetBuffer;
@@ -375,7 +376,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             in.position(startPostion);
             return null;
         }
-
+        // get the last read header for this channel
         Header lastHeader = rtmp.getLastReadHeader(channelId);
         if (isTrace) {
             log.trace("{} lastHeader: {}", Header.HeaderType.values()[headerSize], lastHeader);
@@ -394,13 +395,21 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 return null;
             }
         }
-        //        if (isTrace) {
-        //            log.trace("headerLength: {}", headerLength);
-        //        }
-
         int timeBase = 0, timeDelta = 0;
         Header header = new Header();
         header.setChannelId(channelId);
+        if (lastHeader != null) {
+            // time base from last header
+            timeBase = lastHeader.getTimerBase();
+            // inherit the stream id from the last header
+            header.setStreamId(lastHeader.getStreamId());
+            // inherit the data type from the last header
+            header.setDataType(lastHeader.getDataType());
+            // inherit the size from the last header
+            header.setSize(lastHeader.getSize());
+            // inherit the extended flag from the last header
+            header.setExtended(lastHeader.isExtended());
+        }
         switch (headerSize) {
             case HEADER_NEW: // type 0
                 // an absolute time value
@@ -416,8 +425,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeBase = (int) (ext ^ (ext >>> 32));
+                    timeBase = (int) in.getUnsignedInt();
                     if (isTrace) {
                         log.trace("Extended time read: {}", timeBase);
                     }
@@ -427,13 +435,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setTimerDelta(timeDelta);
                 break;
             case HEADER_SAME_SOURCE: // type 1
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
                 // a delta time value
                 timeDelta = RTMPUtils.readUnsignedMediumInt(in);
                 header.setSize(RTMPUtils.readUnsignedMediumInt(in));
                 header.setDataType(in.get());
-                header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
                     headerLength += 4;
@@ -442,21 +447,15 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeDelta = (int) (ext ^ (ext >>> 32));
+                    timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
                 break;
             case HEADER_TIMER_CHANGE: // type 2
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
                 // a delta time value
                 timeDelta = RTMPUtils.readUnsignedMediumInt(in);
-                header.setSize(lastHeader.getSize());
-                header.setDataType(lastHeader.getDataType());
-                header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
                     headerLength += 4;
@@ -465,20 +464,32 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeDelta = (int) (ext ^ (ext >>> 32));
+                    timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
                 break;
-            case HEADER_CONTINUE: // type 3
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
-                timeDelta = lastHeader.getTimerDelta();
-                header.setSize(lastHeader.getSize());
-                header.setDataType(lastHeader.getDataType());
-                header.setStreamId(lastHeader.getStreamId());
+            case HEADER_CONTINUE: // TYPE_3_RELATIVE
+                if (lastHeader == null) {
+                    // For librtmp compatibility, be more lenient with Type 3 headers
+                    // Some librtmp implementations may send Type 3 headers without prior headers
+                    log.warn("Type 3 header received without prior header on channel {}. Creating minimal header for compatibility.", channelId);
+                    // Create a minimal header with defaults that librtmp would expect
+                    Header minimalHeader = new Header();
+                    minimalHeader.setChannelId(channelId);
+                    minimalHeader.setTimerBase(0);
+                    minimalHeader.setTimerDelta(0);
+                    minimalHeader.setSize(0);
+                    minimalHeader.setDataType((byte) 0);
+                    minimalHeader.setStreamId(0);
+                    minimalHeader.setExtended(false);
+                    lastHeader = minimalHeader;
+                }
+                // Log unusual Type 3 header usage but don't block it
+                if (in.position() == 0) {
+                    log.debug("Type 3 header used for new message on channel {} - unusual but allowed", channelId);
+                }
                 // read the extended timestamp if we have the indication that it exists
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID
                 // indicated the presence of an extended timestamp field
@@ -489,12 +500,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    int timeExt = (int) (ext ^ (ext >>> 32));
+                    timeBase = (int) in.getUnsignedInt();
                     if (isTrace) {
-                        log.trace("Extended time read: {} {}", ext, timeExt);
+                        log.trace("Extended time read: {}", timeBase);
                     }
-                    timeBase = timeExt;
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
@@ -641,6 +650,11 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     public ChunkSize decodeChunkSize(IoBuffer in) {
         int chunkSize = in.getInt();
         log.debug("Decoded chunk size: {}", chunkSize);
+        // Validate chunk size according to RTMP spec and librtmp compatibility
+        // librtmp uses default chunk size of 128, max of 65536
+        if (chunkSize < 1 || chunkSize > 65536) {
+            throw new ProtocolException("Invalid chunk size: " + chunkSize + ". Must be between 1 and 65536 for librtmp compatibility.");
+        }
         return new ChunkSize(chunkSize);
     }
 
@@ -841,16 +855,16 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             log.trace("Ping dump: {}", hexDump);
         }
         // control type
-        short type = in.getShort();
-        switch (type) {
-            case Ping.CLIENT_BUFFER:
+        PingType pingType = PingType.getType(in.getShort());
+        switch (pingType) {
+            case CLIENT_BUFFER:
                 ping = new SetBuffer(in.getInt(), in.getInt());
                 break;
-            case Ping.PING_SWF_VERIFY:
+            case PING_SWF_VERIFY:
                 // only contains the type (2 bytes)
-                ping = new Ping(type);
+                ping = new Ping(pingType);
                 break;
-            case Ping.PONG_SWF_VERIFY:
+            case PONG_SWF_VERIFY:
                 byte[] bytes = new byte[42];
                 in.get(bytes);
                 ping = new SWFResponse(bytes);
@@ -859,8 +873,11 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 //STREAM_BEGIN, STREAM_PLAYBUFFER_CLEAR, STREAM_DRY, RECORDED_STREAM
                 //PING_CLIENT, PONG_SERVER
                 //BUFFER_EMPTY, BUFFER_FULL
-                ping = new Ping(type, in.getInt());
+                ping = new Ping(pingType, in.getInt());
                 break;
+        }
+        if (isTrace) {
+            log.trace("Ping: {}", ping);
         }
         return ping;
     }
@@ -1001,7 +1018,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // need to debug this further
                 /*
                  * IoBuffer buf = IoBuffer.allocate(64); buf.setAutoExpand(true); Output out = null; if (encoding == Encoding.AMF3) { out = new org.red5.io.amf3.Output(buf); } else { out = new
-                 * Output(buf); } out.writeString(action); out.writeMap(params); buf.flip(); // instance a notify with action ret = new Notify(buf, action);
+                 * Output(buf); }
+                 * out.writeString(action);
+                 * out.writeMap(params);
+                 * buf.flip();
+                 * // instance a notify with action
+                 * ret = new Notify(buf, action);
                  */
                 // go back to the beginning
                 in.reset();

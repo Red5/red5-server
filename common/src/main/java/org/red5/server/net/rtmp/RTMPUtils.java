@@ -206,6 +206,7 @@ public class RTMPUtils implements Constants {
      *            Second time stamp
      * @return the distance between a and b, which will be negative if a is less than b.
      */
+    @Deprecated(since = "2.0.20", forRemoval = true) // Use RTMPProtocolEncoder.diffTimestamps instead
     public static long diffTimestamps(final int a, final int b) {
         // first convert each to unsigned integers
         final long unsignedA = a & 0xFFFFFFFFL;

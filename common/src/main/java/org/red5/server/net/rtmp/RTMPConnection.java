@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -68,6 +69,7 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.event.Ping;
+import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.event.ServerBW;
 import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.server.net.rtmp.message.Constants;
@@ -111,7 +113,10 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     public static final String RTMP_CONN_MANAGER = "rtmp.connection.manager";
 
     /** Constant <code>RTMP_HANDLER</code> */
-    public static final Object RTMP_HANDLER = "rtmp.handler";
+    public static final String RTMP_HANDLER = "rtmp.handler";
+
+    /** Constant <code>RTMP_CONNECTION="rtmp.connection"</code> */
+    //public static final String RTMP_CONNECTION = "rtmp.connection";
 
     /**
      * Marker byte for standard or non-encrypted RTMP data.
@@ -340,7 +345,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     /**
      * Thread pool for message handling.
      */
-    protected transient ThreadPoolTaskExecutor executor;
+    protected transient ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
     /**
      * Keep-alive worker flag
@@ -1615,7 +1620,10 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                             ReceivedMessageTask task = new ReceivedMessageTask(conn, p);
                             // run the task
                             CompletableFuture<Packet> future = CompletableFuture.supplyAsync(() -> task.get(), executor).exceptionally(throwable -> {
-                                throw new RuntimeException(throwable);
+                                log.warn("Error processing received message {} state: {}", sessionId, RTMP.states[getStateCode()], throwable);
+                                // if we have an exception, set it on the connection
+                                conn.setAttribute("exception", throwable);
+                                throw new CompletionException(throwable);
                             });
                             future.join();
                         }
@@ -1727,7 +1735,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
             lastPongReceivedOn.set(newPingTime);
         }
         Ping pingRequest = new Ping();
-        pingRequest.setEventType(Ping.PING_CLIENT);
+        pingRequest.setEventType(PingType.PING_CLIENT);
         lastPingSentOn.set(newPingTime);
         int now = (int) (newPingTime & 0xffffffffL);
         pingRequest.setValue2(now);
@@ -1829,21 +1837,13 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     }
 
     /**
-     * <p>Getter for the field <code>executor</code>.</p>
-     *
-     * @return a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor} object
-     */
-    public ThreadPoolTaskExecutor getExecutor() {
-        return executor;
-    }
-
-    /**
      * <p>Setter for the field <code>executor</code>.</p>
      *
      * @param executor a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor} object
      */
+    @Deprecated(forRemoval = true, since = "2.0.20")
     public void setExecutor(ThreadPoolTaskExecutor executor) {
-        this.executor = executor;
+        // XXX(paul) deprecating this in favor of a virtual thread executor
     }
 
     /**
@@ -2165,6 +2165,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                                     onInactive();
                                 } else {
                                     // send ping command to client to trigger sending of data
+                                    log.debug("Sending ping to client: session=[{}], lastPongReceived=[{} ms ago], lastPingSent=[{} ms ago], lastDataRx=[{} ms ago]", new Object[] { getSessionId(), (lastPingTime - lastPongTime), (now - lastPingTime), (now - lastBytesReadTime) });
                                     ping();
                                 }
                             }

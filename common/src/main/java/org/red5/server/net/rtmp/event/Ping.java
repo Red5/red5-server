@@ -20,75 +20,98 @@ public class Ping extends BaseEvent {
 
     private static final long serialVersionUID = -6478248060425544923L;
 
-    /**
-     * Stream begin / clear event
-     */
-    public static final short STREAM_BEGIN = 0;
+    public enum PingType {
+        STREAM_BEGIN, // Stream begin / clear event
+        STREAM_PLAYBUFFER_CLEAR, // Stream play buffer clear event
+        STREAM_DRY, // Stream dry event
+        CLIENT_BUFFER, // Client buffer event
+        RECORDED_STREAM, // Recorded stream event
+        UNKNOWN_5, // Unknown event
+        PING_CLIENT, // Ping client event
+        PONG_SERVER, // Pong server event
+        UNKNOWN_8, // Unknown event
+        PING_SWF_VERIFY, // Ping SWF verify event
+        PONG_SWF_VERIFY, // Pong SWF verify event
+        BUFFER_EMPTY, // Buffer empty event
+        BUFFER_FULL, // Buffer full event
+        UNDEFINED; // -1
 
-    /**
-     * Stream EOF, playback of requested stream is completed.
-     */
-    public static final short STREAM_PLAYBUFFER_CLEAR = 1;
+        /**
+         * <p>getType.</p>
+         * @return a {@link org.red5.server.net.rtmp.event.Ping.PingType} object
+         */
+        public static PingType getType(int type) {
+            switch (type) {
+                case 0:
+                    return STREAM_BEGIN;
+                case 1:
+                    return STREAM_PLAYBUFFER_CLEAR;
+                case 2:
+                    return STREAM_DRY;
+                case 3:
+                    return CLIENT_BUFFER;
+                case 4:
+                    return RECORDED_STREAM;
+                case 5:
+                    return UNKNOWN_5;
+                case 6:
+                    return PING_CLIENT;
+                case 7:
+                    return PONG_SERVER;
+                case 8:
+                    return UNKNOWN_8;
+                case 26:
+                    return PING_SWF_VERIFY;
+                case 27:
+                    return PONG_SWF_VERIFY;
+                case 31:
+                    return BUFFER_EMPTY;
+                case 32:
+                    return BUFFER_FULL;
+                default:
+                    return UNDEFINED;
+            }
+        }
 
-    /**
-     * Stream is empty
-     */
-    public static final short STREAM_DRY = 2;
-
-    /**
-     * Client buffer. Sent by client to indicate its buffer time in milliseconds.
-     */
-    public static final short CLIENT_BUFFER = 3;
-
-    /**
-     * Recorded stream. Sent by server to indicate a recorded stream.
-     */
-    public static final short RECORDED_STREAM = 4;
-
-    /**
-     * One more unknown event
-     */
-    public static final short UNKNOWN_5 = 5;
-
-    /**
-     * Client ping event. Sent by server to test if client is reachable.
-     */
-    public static final short PING_CLIENT = 6;
-
-    /**
-     * Server response event. A clients ping response.
-     */
-    public static final short PONG_SERVER = 7;
-
-    /**
-     * One more unknown event
-     */
-    public static final short UNKNOWN_8 = 8;
-
-    /**
-     * SWF verification ping 0x001a
-     */
-    public static final short PING_SWF_VERIFY = 26;
-
-    /**
-     * SWF verification pong 0x001b
-     */
-    public static final short PONG_SWF_VERIFY = 27;
-
-    /**
-     * Buffer empty.
-     */
-    public static final short BUFFER_EMPTY = 31;
-
-    /**
-     * Buffer full.
-     */
-    public static final short BUFFER_FULL = 32;
-
-    /**
-     * Event type is undefined
-     */
-    public static final int UNDEFINED = -1;
+        /**
+         * <p>getType.</p>
+         *
+         * @param type a {@link org.red5.server.net.rtmp.event.Ping.Type} object
+         * @return a short
+         */
+        public static short getType(PingType type) {
+            switch (type) {
+                case STREAM_BEGIN:
+                    return 0;
+                case STREAM_PLAYBUFFER_CLEAR:
+                    return 1;
+                case STREAM_DRY:
+                    return 2;
+                case CLIENT_BUFFER:
+                    return 3;
+                case RECORDED_STREAM:
+                    return 4;
+                case UNKNOWN_5:
+                    return 5;
+                case PING_CLIENT:
+                    return 6;
+                case PONG_SERVER:
+                    return 7;
+                case UNKNOWN_8:
+                    return 8;
+                case PING_SWF_VERIFY:
+                    return 26;
+                case PONG_SWF_VERIFY:
+                    return 27;
+                case BUFFER_EMPTY:
+                    return 31;
+                case BUFFER_FULL:
+                    return 32;
+                default:
+                    return -1;
+            }
+        }
+    }
 
     /**
      * The sub-type
@@ -100,9 +123,9 @@ public class Ping extends BaseEvent {
      */
     private Number value2;
 
-    private int value3 = UNDEFINED;
+    private int value3 = -1; // -1 is undefined, used for PING_CLIENT and PONG_SERVER
 
-    private int value4 = UNDEFINED;
+    private int value4 = -1; // -1 is undefined
 
     /**
      * Debug string
@@ -223,6 +246,64 @@ public class Ping extends BaseEvent {
         this.value4 = in.getValue4();
     }
 
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param pingType a {@link org.red5.server.net.rtmp.event.Ping.PingType} object
+     */
+    public Ping(PingType pingType) {
+        super(Type.SYSTEM);
+        this.eventType = PingType.getType(pingType);
+        this.value2 = 0;
+        this.value3 = -1; // -1 is undefined
+        this.value4 = -1; // -1 is undefined
+    }
+
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param pingType a {@link org.red5.server.net.rtmp.event.Ping.PingType} object
+     * @param streamId a {@link java.lang.Number} object
+     */
+    public Ping(PingType pingType, Number streamId) {
+        super(Type.SYSTEM);
+        this.eventType = PingType.getType(pingType);
+        this.value2 = streamId;
+        this.value3 = -1; // -1 is undefined
+        this.value4 = -1; // -1 is undefined
+    }
+
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param pingType a {@link org.red5.server.net.rtmp.event.Ping.PingType} object
+     * @param streamId a {@link java.lang.Number} object
+     * @param param3 an int
+     */
+    public Ping(PingType pingType, Number streamId, int param3) {
+        super(Type.SYSTEM);
+        this.eventType = PingType.getType(pingType);
+        this.value2 = streamId;
+        this.value3 = param3;
+        this.value4 = -1; // -1 is undefined
+    }
+
+    /**
+     * <p>Constructor for Ping.</p>
+     *
+     * @param pingType a {@link org.red5.server.net.rtmp.event.Ping.PingType} object
+     * @param streamId a {@link java.lang.Number} object
+     * @param param3 an int
+     * @param param4 an int
+     */
+    public Ping(PingType pingType, Number streamId, int param3, int param4) {
+        super(Type.SYSTEM);
+        this.eventType = PingType.getType(pingType);
+        this.value2 = streamId;
+        this.value3 = param3;
+        this.value4 = param4;
+    }
+
     /** {@inheritDoc} */
     @Override
     public byte getDataType() {
@@ -244,8 +325,8 @@ public class Ping extends BaseEvent {
      * @param eventType
      *            event type
      */
-    public void setEventType(short eventType) {
-        this.eventType = eventType;
+    public void setEventType(PingType eventType) {
+        this.eventType = PingType.getType(eventType);
     }
 
     /**
@@ -330,14 +411,14 @@ public class Ping extends BaseEvent {
     protected void doRelease() {
         eventType = 0;
         value2 = 0;
-        value3 = UNDEFINED;
-        value4 = UNDEFINED;
+        value3 = -1;
+        value4 = -1;
     }
 
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return String.format("Ping: %d, %f, %d, %d", eventType, value2.doubleValue(), value3, value4);
+        return String.format("Ping: %s, %f, %d, %d", PingType.getType(eventType), value2.doubleValue(), value3, value4);
     }
 
     /** {@inheritDoc} */
@@ -351,7 +432,8 @@ public class Ping extends BaseEvent {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         eventType = in.readShort();
-        switch (eventType) {
+        PingType pingType = PingType.getType(eventType);
+        switch (pingType) {
             case PING_CLIENT:
             case PONG_SERVER:
                 value2 = (Number) in.readInt();
@@ -368,7 +450,8 @@ public class Ping extends BaseEvent {
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeShort(eventType);
-        switch (eventType) {
+        PingType pingType = PingType.getType(eventType);
+        switch (pingType) {
             case PING_CLIENT:
             case PONG_SERVER:
                 out.writeInt(value2.intValue());

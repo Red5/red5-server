@@ -12,6 +12,7 @@ import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.red5.client.net.rtmp.BaseRTMPClientHandler;
 import org.red5.client.net.rtmp.RTMPClientConnManager;
 import org.red5.server.api.Red5;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -40,40 +41,45 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                 // get the connection from the session
                 String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
                 log.trace("Session id: {}", sessionId);
-                RTMPConnection conn = (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
-                Red5.setConnectionLocal(conn);
-                byte[] arr = new byte[in.remaining()];
-                in.get(arr);
-                // create a buffer and store it on the session
-                IoBuffer buf = (IoBuffer) session.getAttribute("buffer");
-                if (buf == null) {
-                    buf = IoBuffer.allocate(arr.length);
-                    buf.setAutoExpand(true);
-                    session.setAttribute("buffer", buf);
-                }
-                // copy incoming into buffer
-                buf.put(arr);
-                // flip so we can read
-                buf.flip();
-                final Semaphore lock = conn.getDecoderLock();
-                try {
-                    // acquire the decoder lock
-                    lock.acquire();
-                    // construct any objects from the decoded buffer
-                    List<?> objects = getDecoder().decodeBuffer(conn, buf);
-                    log.trace("Decoded: {}", objects);
-                    if (objects != null) {
-                        for (Object object : objects) {
-                            log.trace("Writing {} to decoder output: {}", object, out);
-                            out.write(object);
-                        }
+                BaseRTMPClientHandler client = (BaseRTMPClientHandler) session.getAttribute(RTMPConnection.RTMP_HANDLER);
+                RTMPConnection conn = client != null ? (RTMPConnection) client.getConnection() : (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
+                if (conn != null) {
+                    Red5.setConnectionLocal(conn);
+                    byte[] arr = new byte[in.remaining()];
+                    in.get(arr);
+                    // create a buffer and store it on the session
+                    IoBuffer buf = (IoBuffer) session.getAttribute("buffer");
+                    if (buf == null) {
+                        buf = IoBuffer.allocate(arr.length);
+                        buf.setAutoExpand(true);
+                        session.setAttribute("buffer", buf);
                     }
-                    log.trace("Input buffer position: {}", in.position());
-                } catch (Exception e) {
-                    log.error("Error during decode", e);
-                } finally {
-                    lock.release();
-                    Red5.setConnectionLocal(null);
+                    // copy incoming into buffer
+                    buf.put(arr);
+                    // flip so we can read
+                    buf.flip();
+                    final Semaphore lock = conn.getDecoderLock();
+                    try {
+                        // acquire the decoder lock
+                        lock.acquire();
+                        // construct any objects from the decoded buffer
+                        List<?> objects = getDecoder().decodeBuffer(conn, buf);
+                        log.trace("Decoded: {}", objects);
+                        if (objects != null) {
+                            for (Object object : objects) {
+                                log.trace("Writing {} to decoder output: {}", object, out);
+                                out.write(object);
+                            }
+                        }
+                        log.trace("Input buffer position: {}", in.position());
+                    } catch (Exception e) {
+                        log.error("Error during decode", e);
+                    } finally {
+                        lock.release();
+                        Red5.setConnectionLocal(null);
+                    }
+                } else {
+                    log.debug("Connection is no longer available for decoding, may have been closed already");
                 }
             }
         };
@@ -88,7 +94,8 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                 // get the connection from the session
                 String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);
                 log.trace("Session id: {}", sessionId);
-                RTMPConnection conn = (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
+                BaseRTMPClientHandler client = (BaseRTMPClientHandler) session.getAttribute(RTMPConnection.RTMP_HANDLER);
+                RTMPConnection conn = client != null ? (RTMPConnection) client.getConnection() : (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
                 if (conn != null) {
                     Red5.setConnectionLocal(conn);
                     final Semaphore lock = conn.getEncoderLock();

@@ -21,6 +21,14 @@ import org.red5.server.net.rtmp.message.Packet;
  */
 public class RTMP {
 
+    public static final int DEFAULT_CHUNK_SIZE = 128;
+
+    public static final int MIN_CHUNK_SIZE = 128;
+
+    public static final int MAX_CHUNK_SIZE = 65536;
+
+    public static final int HANDSHAKE_SIZE = 1536;
+
     /** Constant <code>states</code> */
     public static final String[] states = { "connect", "handshake", "connected", "error", "disconnecting", "disconnected" };
 
@@ -300,6 +308,12 @@ public class RTMP {
      *            Value to set for property 'readChunkSize'.
      */
     public void setReadChunkSize(int readChunkSize) {
+        // Allow common streaming client chunk sizes while maintaining security bounds
+        if (readChunkSize < 32 || readChunkSize > MAX_CHUNK_SIZE) {
+            if (readChunkSize < 1 || readChunkSize > 16777215) { // RTMP spec limits
+                throw new IllegalArgumentException("Invalid chunk size: " + readChunkSize + " (must be between 1 and 16777215)");
+            }
+        }
         this.readChunkSize = readChunkSize;
     }
 
@@ -319,6 +333,12 @@ public class RTMP {
      *            Write chunk size
      */
     public void setWriteChunkSize(int writeChunkSize) {
+        // Allow common streaming client chunk sizes while maintaining security bounds
+        if (writeChunkSize < 32 || writeChunkSize > MAX_CHUNK_SIZE) {
+            if (writeChunkSize < 1 || writeChunkSize > 16777215) { // RTMP spec limits
+                throw new IllegalArgumentException("Invalid chunk size: " + writeChunkSize + " (must be between 1 and 16777215)");
+            }
+        }
         this.writeChunkSize = writeChunkSize;
     }
 
