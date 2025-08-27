@@ -35,6 +35,16 @@ public interface Constants {
     public static final byte TYPE_CHUNK_SIZE = 0x01;
 
     /**
+     * Minimum allowed chunk size (1 byte)
+     */
+    public static final int MIN_CHUNK_SIZE = 1;
+
+    /**
+     * Maximum allowed chunk size (16MB per RTMP specification)
+     */
+    public static final int MAX_CHUNK_SIZE = MEDIUM_INT_MAX;
+
+    /**
      * Abort message
      */
     public static final byte TYPE_ABORT = 0x02;

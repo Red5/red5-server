@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.management.openmbean.CompositeData;
 
 import org.red5.server.api.scope.IScope;
+import org.red5.server.net.rtmp.message.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -282,7 +283,14 @@ public final class Red5 {
      * @param targetChunkSize the chunk size to use
      */
     public static void setTargetChunkSize(int targetChunkSize) {
-        Red5.targetChunkSize = targetChunkSize;
+        // Validate chunk size to prevent security vulnerabilities
+        if (targetChunkSize < Constants.MIN_CHUNK_SIZE || targetChunkSize > Constants.MAX_CHUNK_SIZE) {
+            log.warn("Invalid target chunk size: {}. Must be between {} and {}. Using default value of 128.", 
+                    targetChunkSize, Constants.MIN_CHUNK_SIZE, Constants.MAX_CHUNK_SIZE);
+            Red5.targetChunkSize = 128; // Use safe default
+        } else {
+            Red5.targetChunkSize = targetChunkSize;
+        }
     }
 
     /**
