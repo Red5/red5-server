@@ -69,6 +69,7 @@ import org.red5.server.stream.message.RTMPMessage;
 import org.red5.server.stream.message.ResetMessage;
 import org.red5.server.stream.message.StatusMessage;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A play engine for playing a IPlayItem.
@@ -79,10 +80,11 @@ import org.slf4j.Logger;
  * @author Dan Rossi
  * @author Tiago Daniel Jacobs (tiago@imdt.com.br)
  * @author Vladimir Hmelyoff (vlhm@splitmedialabs.com)
+ * @author Andy Shaules
  */
 public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnectionListener {
 
-    private static final Logger log = Red5LoggerFactory.getLogger(PlayEngine.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayEngine.class);
 
     private static boolean isDebug = log.isDebugEnabled();
 
@@ -393,6 +395,13 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                     playDecision = 0;
                 } else if (sourceType == IProviderService.INPUT_TYPE.LIVE_WAIT) {
                     playDecision = 2;
+                }
+                break;
+            case 0://Gstreamer rtmp2src compatibility.
+                if (sourceType == IProviderService.INPUT_TYPE.LIVE) {
+                    playDecision = 0;
+                } else if (sourceType == IProviderService.INPUT_TYPE.VOD) {
+                    playDecision = 1;
                 }
                 break;
             default:
