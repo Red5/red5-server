@@ -554,6 +554,14 @@
     <profiles>
         <profile>
             <id>release</id>
+            <modules>
+                <module>io</module>
+                <module>common</module>
+                <module>server</module>
+                <module>client</module>
+                <module>service</module>
+                <!-- exclude tests module -->
+            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -578,6 +586,7 @@
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
+-->
                     <plugin>
                         <artifactId>maven-gpg-plugin</artifactId>
                         <version>3.2.1</version>
@@ -591,7 +600,6 @@
                             </execution>
                         </executions>
                     </plugin>
--->
                 </plugins>
             </build>
             <distributionManagement>

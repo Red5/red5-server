@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Red5 :: Tests</name>
     <description>The Red5 tests</description>
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
     <build>
         <defaultGoal>test</defaultGoal>
         <plugins>
