@@ -157,7 +157,7 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
             // create a new header for the consumer if the message.body doesnt already have one
             final Header header = Optional.ofNullable(msg.getHeader()).orElse(new Header());
             // resets the header times
-            header.setTimer(eventTime);
+            header.setTimer(eventTime); // this is a new header, it does not inherit from another header
             // data buffer
             IoBuffer buf = null;
             switch (dataType) {
