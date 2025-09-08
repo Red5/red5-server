@@ -401,6 +401,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         if (lastHeader != null) {
             // time base from last header
             timeBase = lastHeader.getTimerBase();
+            // inherit the time delta from last header (critical for Type 3 headers)
+            timeDelta = lastHeader.getTimerDelta();
             // inherit the stream id from the last header
             header.setStreamId(lastHeader.getStreamId());
             // inherit the data type from the last header
