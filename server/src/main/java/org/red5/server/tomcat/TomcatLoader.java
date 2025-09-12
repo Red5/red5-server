@@ -69,7 +69,7 @@ import jakarta.servlet.ServletException;
 /**
  * Red5 loader for Tomcat.
  *
- * http://tomcat.apache.org/tomcat-8.5-doc/api/index.html
+ * https://tomcat.apache.org/tomcat-11.0-doc/api/index.html
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
