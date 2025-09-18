@@ -40,6 +40,8 @@ public class DefaultWebSocketEndpoint extends Endpoint {
     private final boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
 
     /**
+     * {@inheritDoc}
+     *
      * TODO: Currently, Tomcat uses an Endpoint instance once - however the java doc of endpoint says: "Each instance
      * of a websocket endpoint is guaranteed not to be called by more than one thread at a time per active connection."
      * This could mean that after calling onClose(), the instance could be reused for another connection so onOpen()
@@ -58,7 +60,8 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         // get ws scope from user props
         WebSocketScope scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
         if (isDebug) {
-            log.debug("onOpen - session: {} props: {} scope: {}", session.getId(), userProps, scope);
+            log.debug("onOpen - session: {} props: {} scope: {}", session.getId(), scope);
+            log.trace("onOpen - props: {} ", userProps);
         }
         // get ws connection from session user props
         WebSocketConnection conn = (WebSocketConnection) userProps.get(WSConstants.WS_CONNECTION);
@@ -70,6 +73,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         session.addMessageHandler(new WholePongHandler(conn));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onClose(Session session, CloseReason closeReason) {
         final String sessionId = session.getId();
@@ -79,7 +83,8 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         // get ws scope from user props
         WebSocketScope scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
         if (isDebug) {
-            log.debug("onClose - session: {} props: {} scope: {}", session.getId(), userProps, scope);
+            log.debug("onClose - session: {} scope: {}", session.getId(), scope);
+            log.trace("onClose - props: {} ", userProps);
         }
         WebSocketConnection conn = null;
         // getting the sessions user properties on a closed connection will throw an exception when it checks state
@@ -106,6 +111,7 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void onError(Session session, Throwable t) {
         log.debug("onError: {}", t.toString(), t);

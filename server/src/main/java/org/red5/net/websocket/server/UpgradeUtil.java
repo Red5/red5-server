@@ -32,6 +32,11 @@ import org.apache.tomcat.websocket.pojo.PojoEndpointServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>UpgradeUtil class.</p>
+ *
+ * @author mondain
+ */
 public class UpgradeUtil {
 
     private static final Logger log = LoggerFactory.getLogger(UpgradeUtil.class);
@@ -39,6 +44,8 @@ public class UpgradeUtil {
     private static final StringManager sm = StringManager.getManager(UpgradeUtil.class.getPackage().getName());
 
     private static final byte[] WS_ACCEPT = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11".getBytes(StandardCharsets.ISO_8859_1);
+
+    public static boolean wsAllowCompression = true;
 
     private UpgradeUtil() {
         // Utility class. Hide default constructor.
@@ -68,6 +75,17 @@ public class UpgradeUtil {
         return ((request instanceof HttpServletRequest) && (response instanceof HttpServletResponse) && Constants.UPGRADE_HEADER_VALUE.equalsIgnoreCase(((HttpServletRequest) request).getHeader(Constants.UPGRADE_HEADER_NAME)));
     }
 
+    /**
+     * <p>doUpgrade.</p>
+     *
+     * @param sc a {@link org.red5.net.websocket.server.DefaultWsServerContainer} object
+     * @param req a {@link jakarta.servlet.http.HttpServletRequest} object
+     * @param resp a {@link jakarta.servlet.http.HttpServletResponse} object
+     * @param sec a {@link jakarta.websocket.server.ServerEndpointConfig} object
+     * @param pathParams a {@link java.util.Map} object
+     * @throws jakarta.servlet.ServletException if any.
+     * @throws java.io.IOException if any.
+     */
     public static void doUpgrade(DefaultWsServerContainer sc, HttpServletRequest req, HttpServletResponse resp, ServerEndpointConfig sec, Map<String, String> pathParams) throws ServletException, IOException {
         log.debug("doUpgrade - sc: {} sec: {} params: {}", sc, sec, pathParams);
         // Validate the rest of the headers and reject the request if that validation fails
@@ -105,12 +123,12 @@ public class UpgradeUtil {
         }
         // Negotiation phase 1. By default this simply filters out the extensions that the server does not support but applications could
         // use a custom configurator to do more than this.
-        List<Extension> installedExtensions = null;
-        if (sec.getExtensions().size() == 0) {
-            installedExtensions = Constants.INSTALLED_EXTENSIONS;
-        } else {
-            installedExtensions = new ArrayList<>();
+        List<Extension> installedExtensions = new ArrayList<>();
+        if (sec.getExtensions().size() > 0) {
             installedExtensions.addAll(sec.getExtensions());
+        }
+        // Enable permessage-deflate negotiation.
+        if (wsAllowCompression) {
             installedExtensions.addAll(Constants.INSTALLED_EXTENSIONS);
         }
         List<Extension> negotiatedExtensionsPhase1 = sec.getConfigurator().getNegotiatedExtensions(installedExtensions, extensionsRequested);
@@ -185,7 +203,7 @@ public class UpgradeUtil {
         log.debug("About to upgrade http session: {} qs: {}", wsRequest.getHttpSession(), wsRequest.getQueryString());
         WsHttpUpgradeHandler wsHandler = req.upgrade(WsHttpUpgradeHandler.class);
         wsHandler.preInit(ep, perSessionServerEndpointConfig, sc, wsRequest, negotiatedExtensionsPhase2, subProtocol, transformation, pathParams, req.isSecure());
-        log.debug("preinit completed");
+        resp.setHeader("websocket.preinit", "true");
     }
 
     private static List<Transformation> createTransformations(List<Extension> negotiatedExtensions) {

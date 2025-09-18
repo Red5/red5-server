@@ -34,6 +34,8 @@ import jakarta.websocket.server.ServerEndpointConfig;
 
 /**
  * Servlet 3.1 HTTP upgrade handler for WebSocket connections.
+ *
+ * @author mondain
  */
 public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
@@ -84,15 +86,34 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
 
     private transient WebSocketScope scope;
 
+    private transient WebSocketConnection conn;
+
+    /**
+     * <p>Constructor for WsHttpUpgradeHandler.</p>
+     */
     public WsHttpUpgradeHandler() {
         applicationClassLoader = Thread.currentThread().getContextClassLoader();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setSocketWrapper(SocketWrapperBase<?> socketWrapper) {
         this.socketWrapper = socketWrapper;
     }
 
+    /**
+     * <p>preInit.</p>
+     *
+     * @param ep a {@link jakarta.websocket.Endpoint} object
+     * @param endpointConfig a {@link jakarta.websocket.EndpointConfig} object
+     * @param wsc a {@link org.red5.net.websocket.server.DefaultWsServerContainer} object
+     * @param handshakeRequest a {@link org.red5.net.websocket.server.WsHandshakeRequest} object
+     * @param negotiatedExtensionsPhase2 a {@link java.util.List} object
+     * @param subProtocol a {@link java.lang.String} object
+     * @param transformation a {@link org.apache.tomcat.websocket.Transformation} object
+     * @param pathParameters a {@link java.util.Map} object
+     * @param secure a boolean
+     */
     public void preInit(Endpoint ep, EndpointConfig endpointConfig, DefaultWsServerContainer wsc, WsHandshakeRequest handshakeRequest, List<Extension> negotiatedExtensionsPhase2, String subProtocol, Transformation transformation, Map<String, String> pathParameters, boolean secure) {
         this.ep = ep;
         this.endpointConfig = (ServerEndpointConfig) endpointConfig;
@@ -119,6 +140,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void init(WebConnection connection) {
         if (ep != null) {
@@ -149,7 +171,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                 // WsFrame adds the necessary final transformations. Copy the completed transformation chain to the remote end point.
                 wsRemoteEndpointServer.setTransformation(wsFrame.getTransformation());
                 // create a ws connection instance
-                WebSocketConnection conn = new WebSocketConnection(scope, wsSession);
+                conn = new WebSocketConnection(scope, wsSession);
                 // set ip and port
                 conn.setAttribute(WSConstants.WS_HEADER_REMOTE_IP, socketWrapper.getRemoteAddr());
                 conn.setAttribute(WSConstants.WS_HEADER_REMOTE_PORT, socketWrapper.getRemotePort());
@@ -178,6 +200,7 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public SocketState upgradeDispatch(SocketEvent status) {
         switch (status) {
@@ -222,16 +245,19 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void pause() {
         // NO-OP
     }
 
+    /** {@inheritDoc} */
     @Override
     public UpgradeInfo getUpgradeInfo() {
         return upgradeInfo;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() {
         if (connection != null) {
@@ -261,40 +287,38 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     }
 
     private void close(CloseReason cr) {
-        if (isDebug) {
-            log.debug("close for ws id: {} reason: {}", wsSession.getId(), cr);
-        }
-        /*
-         * Any call to this method is a result of a problem reading from the client. At this point that state of the
-         * connection is unknown. Attempt to send a close frame to the client and then close the socket immediately.
-         * There is no point in waiting for a close frame from the client because there is no guarantee that we can
-         * recover from whatever messed up state the client put the connection into.
-         */
-        wsSession.onClose(cr);
-        // null these so that we don't try to use them again
-        wsSession = null;
-        connection = null;
-        upgradeInfo = null;
-        // null the socket wrapper so that we don't try to use it again
-        if (socketWrapper != null) {
-            socketWrapper.close();
-            socketWrapper = null;
+        if (wsSession != null) {
+            if (wsSession.isClosed()) {
+                log.info("Session already closed: {}", wsSession.getId());
+            } else {
+                if (isDebug) {
+                    log.debug("close for ws id: {} reason: {}", wsSession.getId(), cr);
+                }
+                /*
+                 * Any call to this method is a result of a problem reading from the client. At this point that state of the
+                 * connection is unknown. Attempt to send a close frame to the client and then close the socket immediately.
+                 * There is no point in waiting for a close frame from the client because there is no guarantee that we can
+                 * recover from whatever messed up state the client put the connection into.
+                 */
+                wsSession.onClose(cr);
+            }
+        } else {
+            log.warn("Session is null in close");
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setSslSupport(SSLSupport sslSupport) {
         // NO-OP. WebSocket has no requirement to access the TLS information associated with the underlying connection.
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Check to see if the timeout has expired and process a timeout if that is the case. Note: The name of this method
      * originated with the Servlet 3.0 asynchronous processing but evolved over time to represent a timeout that is
      * triggered independently of the socket read/write timeouts.
-     *
-     * @param now
-     *            - The time (as returned by System.currentTimeMillis() to use as the current time to determine whether
-     * the timeout has expired. If negative, the timeout will always be treated as if it has expired.
      */
     @Override
     public void timeoutAsync(long now) {
@@ -303,16 +327,8 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             try {
                 final String wsSessionId = wsSession.getId();
                 // do lookup by session id, skips need for session user props
-                WebSocketConnection conn = scope.getConnectionBySessionId(wsSessionId);
-                // if we don't get it from the scope, try the session lookup
-                if (conn == null && wsSession.isOpen()) {
-                    // session methods may not be called if its not open
-                    conn = (WebSocketConnection) wsSession.getUserProperties().get(WSConstants.WS_CONNECTION);
-                }
-                // last check, if we don't have a connection, log a warning
-                if (conn == null) {
-                    log.warn("Connection for id: {} was not found in the scope or session: {}", wsSession.getId(), scope.getPath());
-                    return;
+                if (isDebug) {
+                    log.debug("timeoutAsync: {}ms on session id: {} at {}", now - lastTimeoutCheck, wsSessionId, scope.getPath());
                 }
                 // negative now means always treat as expired
                 if (now > 0) {
