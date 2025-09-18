@@ -269,11 +269,12 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
             }
             // checking the connection again? why?
             if (!conn.isConnected()) {
+                log.warn("Connection is not connected.");
                 // timeout while connecting client
                 return false;
             }
             // add the client and event listener
-            if (clients.add(client) && addEventListener(conn)) {
+            if (clients.contains(client) || (clients.add(client) && addEventListener(conn))) {
                 log.debug("Added client");
                 // increment conn stats
                 connectionStats.increment();
@@ -287,6 +288,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                     }
                 }
                 return true;
+            } else {
+                log.warn("Connection failed, client not added.");
             }
         } else {
             log.debug("Connection failed, scope is disabled");
