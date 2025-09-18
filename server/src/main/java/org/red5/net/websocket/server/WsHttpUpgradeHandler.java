@@ -301,10 +301,6 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                 * recover from whatever messed up state the client put the connection into.
                 */
                 wsSession.onClose(cr);
-                // null these so that we don't try to use them again
-                //wsSession = null;
-                //connection = null;
-                //upgradeInfo = null;
             }
         } else {
             log.warn("Session is null in close");
