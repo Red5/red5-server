@@ -60,7 +60,8 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         // get ws scope from user props
         WebSocketScope scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
         if (isDebug) {
-            log.debug("onOpen - session: {} props: {} scope: {}", session.getId(), userProps, scope);
+            log.debug("onOpen - session: {} props: {} scope: {}", session.getId(), scope);
+            log.trace("onOpen - props: {} ", userProps);
         }
         // get ws connection from session user props
         WebSocketConnection conn = (WebSocketConnection) userProps.get(WSConstants.WS_CONNECTION);
@@ -82,7 +83,8 @@ public class DefaultWebSocketEndpoint extends Endpoint {
         // get ws scope from user props
         WebSocketScope scope = (WebSocketScope) userProps.get(WSConstants.WS_SCOPE);
         if (isDebug) {
-            log.debug("onClose - session: {} props: {} scope: {}", session.getId(), userProps, scope);
+            log.debug("onClose - session: {} scope: {}", session.getId(), scope);
+            log.trace("onClose - props: {} ", userProps);
         }
         WebSocketConnection conn = null;
         // getting the sessions user properties on a closed connection will throw an exception when it checks state

@@ -124,7 +124,6 @@ public class UpgradeUtil {
         // Negotiation phase 1. By default this simply filters out the extensions that the server does not support but applications could
         // use a custom configurator to do more than this.
         List<Extension> installedExtensions = new ArrayList<>();
-
         if (sec.getExtensions().size() > 0) {
             installedExtensions.addAll(sec.getExtensions());
         }
@@ -204,7 +203,8 @@ public class UpgradeUtil {
         log.debug("About to upgrade http session: {} qs: {}", wsRequest.getHttpSession(), wsRequest.getQueryString());
         WsHttpUpgradeHandler wsHandler = req.upgrade(WsHttpUpgradeHandler.class);
         wsHandler.preInit(ep, perSessionServerEndpointConfig, sc, wsRequest, negotiatedExtensionsPhase2, subProtocol, transformation, pathParams, req.isSecure());
-        log.debug("preinit completed");
+        // set preinit header
+        resp.setHeader("websocket.preinit", "true");
     }
 
     private static List<Transformation> createTransformations(List<Extension> negotiatedExtensions) {
