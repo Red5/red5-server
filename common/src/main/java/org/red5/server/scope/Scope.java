@@ -270,7 +270,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
             if (clients.contains(client)) { // check this first so we don't double add in stats
                 log.debug("Client already added");
                 return true;
-            } else if (clients.add(client) && addEventListener(conn))) {
+            } else if (clients.add(client) && addEventListener(conn)) {
                 log.debug("Client added");
                 // increment conn stats
                 connectionStats.increment();
