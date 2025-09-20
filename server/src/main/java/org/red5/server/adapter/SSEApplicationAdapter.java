@@ -9,7 +9,6 @@ package org.red5.server.adapter;
 
 import java.util.List;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.api.scope.IScope;
@@ -17,6 +16,7 @@ import org.red5.server.net.sse.ISSEService;
 import org.red5.server.net.sse.SSEConnection;
 import org.red5.server.net.sse.SSEEvent;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class SSEApplicationAdapter extends MultiThreadedApplicationAdapter {
 
-    private static Logger log = Red5LoggerFactory.getLogger(SSEApplicationAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(SSEApplicationAdapter.class);
 
     @Autowired(required = false)
     private ISSEService sseService;

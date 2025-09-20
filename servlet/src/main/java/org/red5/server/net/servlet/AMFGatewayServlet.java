@@ -47,7 +47,7 @@ public class AMFGatewayServlet extends HttpServlet {
     /**
      * Logger
      */
-    protected Logger log = Red5LoggerFactory.getLogger(AMFGatewayServlet.class);
+    protected Logger log = LoggerFactory.getLogger(AMFGatewayServlet.class);
 
     /**
      * AMF MIME type

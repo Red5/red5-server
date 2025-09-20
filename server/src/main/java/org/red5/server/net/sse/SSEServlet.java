@@ -7,18 +7,22 @@
 
 package org.red5.server.net.sse;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IServer;
 import org.red5.server.api.scope.IGlobalScope;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.scope.WebScope;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
@@ -46,7 +50,7 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
 
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Red5LoggerFactory.getLogger(SSEServlet.class);
+    private static Logger log = LoggerFactory.getLogger(SSEServlet.class);
 
     private transient WebApplicationContext webAppCtx;
 
@@ -98,6 +102,13 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
     }
 
     @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Handle CORS preflight
+        handleCORS(req, resp);
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("SSE connection request from: {} {}", req.getRemoteAddr(), req.getRequestURI());
         // Validate that this is an SSE request
@@ -127,15 +138,75 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
         // Add to manager
         sseManager.addConnection(sseConnection);
         // Send initial connection confirmation
-        sseConnection.sendEvent("connection", "connected");
+        sseConnection.sendEvent("connection", "connected: " + connectionId);
         log.info("Established SSE connection: {} for scope: {}", connectionId, scope.getName());
     }
 
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Handle CORS preflight
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        log.debug("SSE event post request from: {} {}", req.getRemoteAddr(), req.getRequestURI());
+        // Handle CORS
         handleCORS(req, resp);
-        resp.setStatus(HttpServletResponse.SC_OK);
+        // Validate content type
+        String contentType = req.getContentType();
+        if (contentType == null || !contentType.toLowerCase().contains("application/json")) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Content-Type must be application/json");
+            return;
+        }
+        // Check if SSE manager is available
+        if (sseManager == null) {
+            log.warn("SSE manager not available for event posting");
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "SSE service not available");
+            return;
+        }
+        try {
+            // Read request body
+            StringBuilder requestBody = new StringBuilder();
+            try (BufferedReader reader = req.getReader()) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    requestBody.append(line);
+                }
+            }
+            String jsonBody = requestBody.toString();
+            if (jsonBody.isEmpty()) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request body is required");
+                return;
+            }
+            // Parse JSON manually (simple parsing for basic event structure)
+            SSEEventRequest eventRequest = parseEventRequest(jsonBody);
+            if (eventRequest == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JSON format or missing required fields");
+                return;
+            }
+            int successCount = 0;
+            // Handle different event targets
+            if (eventRequest.connectionId != null && !eventRequest.connectionId.isEmpty()) {
+                // Send to specific connection
+                boolean success = sseManager.sendEventToConnection(eventRequest.connectionId, eventRequest.event, eventRequest.data);
+                successCount = success ? 1 : 0;
+                log.debug("Sent event '{}' to connection '{}': {}", eventRequest.event, eventRequest.connectionId, success);
+            } else if (eventRequest.scope != null && !eventRequest.scope.isEmpty()) {
+                // Send to specific scope
+                IScope targetScope = resolveScope(eventRequest.scope);
+                if (targetScope != null) {
+                    successCount = sseManager.broadcastEventToScope(targetScope, eventRequest.event, eventRequest.data);
+                    log.debug("Broadcast event '{}' to scope '{}': {} connections", eventRequest.event, eventRequest.scope, successCount);
+                } else {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Scope not found: " + eventRequest.scope);
+                    return;
+                }
+            } else {
+                // Broadcast to all connections
+                successCount = sseManager.broadcastEvent(eventRequest.event, eventRequest.data);
+                log.debug("Broadcast event '{}' to all connections: {} recipients", eventRequest.event, successCount);
+            }
+            // Return success response
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } catch (Exception e) {
+            log.warn("Error processing SSE event post: {}", e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing event");
+        }
     }
 
     /**
@@ -149,8 +220,8 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             resp.setHeader("Access-Control-Allow-Origin", "*");
         }
         resp.setHeader("Access-Control-Allow-Credentials", "true");
-        resp.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-        resp.setHeader("Access-Control-Allow-Headers", "Accept, Cache-Control, Last-Event-ID");
+        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        resp.setHeader("Access-Control-Allow-Headers", "Accept, Cache-Control, Last-Event-ID, Content-Type");
         resp.setHeader("Access-Control-Max-Age", "3600");
     }
 
@@ -245,6 +316,78 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
      */
     public SSEManager getSseManager() {
         return sseManager;
+    }
+
+    /**
+     * Parses a JSON event request into an SSEEventRequest object.
+     * Simple JSON parser for basic event structure.
+     */
+    private SSEEventRequest parseEventRequest(String json) {
+        try {
+            // trim whitespace and validate basic JSON structure
+            json = json.trim();
+            if (json.startsWith("{") && json.endsWith("}")) {
+                JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+                if (jsonObject != null) {
+                    log.debug("Parsed JSON successfully: {}", jsonObject.toString());
+                    SSEEventRequest request = new SSEEventRequest();
+                    jsonObject.entrySet().forEach(entry -> {
+                        String key = entry.getKey();
+                        String value = entry.getValue().isJsonObject() ? entry.getValue().toString() : entry.getValue().getAsString();
+                        log.debug("JSON field: {} = {}", key, value);
+                        switch (key) {
+                            case "event":
+                                request.event = value;
+                                break;
+                            case "data":
+                                request.data = value;
+                                break;
+                            case "connectionId":
+                                request.connectionId = value;
+                                break;
+                            case "scope":
+                                request.scope = value;
+                                break;
+                        }
+                    });
+                    // Validate required fields
+                    if (request.event != null && request.data != null) {
+                        log.debug("Parsed event request: event='{}', data='{}'", request.event, request.data);
+                        return request;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error parsing event request JSON: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Resolves a scope by name.
+     */
+    private IScope resolveScope(String scopeName) {
+        if (server == null) {
+            return null;
+        }
+        IGlobalScope globalScope = server.getGlobal("default");
+        if (globalScope == null) {
+            return null;
+        }
+        return ScopeUtils.resolveScope(globalScope, scopeName);
+    }
+
+    /**
+     * Simple data class for SSE event requests.
+     */
+    private static class SSEEventRequest {
+        String event;
+
+        String data;
+
+        String connectionId; // Optional: target specific connection
+
+        String scope; // Optional: target specific scope
     }
 
 }

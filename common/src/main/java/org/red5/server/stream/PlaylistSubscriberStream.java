@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.IContext;
 import org.red5.server.api.Red5;
@@ -26,6 +25,7 @@ import org.red5.server.api.stream.IStreamAwareScopeHandler;
 import org.red5.server.api.stream.OperationNotSupportedException;
 import org.red5.server.api.stream.StreamState;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stream of playlist subscriber
@@ -34,7 +34,7 @@ import org.slf4j.Logger;
  */
 public class PlaylistSubscriberStream extends AbstractClientStream implements IPlaylistSubscriberStream, IPlaylistSubscriberStreamStatistics {
 
-    private static final Logger log = Red5LoggerFactory.getLogger(PlaylistSubscriberStream.class);
+    private static final Logger log = LoggerFactory.getLogger(PlaylistSubscriberStream.class);
 
     /**
      * Playlist controller

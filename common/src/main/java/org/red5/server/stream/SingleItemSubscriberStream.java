@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.IContext;
 import org.red5.server.api.Red5;
@@ -24,6 +23,7 @@ import org.red5.server.api.stream.IStreamAwareScopeHandler;
 import org.red5.server.api.stream.OperationNotSupportedException;
 import org.red5.server.api.stream.StreamState;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stream of a single play item for a subscriber
@@ -32,7 +32,7 @@ import org.slf4j.Logger;
  */
 public class SingleItemSubscriberStream extends AbstractClientStream implements ISingleItemSubscriberStream {
 
-    private static final Logger log = Red5LoggerFactory.getLogger(SingleItemSubscriberStream.class);
+    private static final Logger log = LoggerFactory.getLogger(SingleItemSubscriberStream.class);
 
     /**
      * Service used to provide notifications, keep client buffer filled, clean up, etc...

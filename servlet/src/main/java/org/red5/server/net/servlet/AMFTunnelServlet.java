@@ -37,7 +37,7 @@ public class AMFTunnelServlet extends HttpServlet {
 
     private static final long serialVersionUID = -35436145164322090L;
 
-    protected Logger log = Red5LoggerFactory.getLogger(AMFTunnelServlet.class);
+    protected Logger log = LoggerFactory.getLogger(AMFTunnelServlet.class);
 
     private static final String REQUEST_TYPE = "application/x-amf";
 

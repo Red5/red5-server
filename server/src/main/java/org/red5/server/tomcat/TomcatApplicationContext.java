@@ -7,16 +7,16 @@
 
 package org.red5.server.tomcat;
 
-import jakarta.servlet.ServletContext;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.core.StandardContext;
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IApplicationContext;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
+
+import jakarta.servlet.ServletContext;
 
 /**
  * Class that wraps a Tomcat webapp context.
@@ -28,7 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class TomcatApplicationContext implements IApplicationContext {
 
     /** Constant <code>log</code> */
-    protected static Logger log = Red5LoggerFactory.getLogger(TomcatApplicationContext.class);
+    protected static Logger log = LoggerFactory.getLogger(TomcatApplicationContext.class);
 
     /** Store a reference to the Tomcat webapp context. */
     private Context context;

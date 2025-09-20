@@ -21,11 +21,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scheduling.IScheduledJob;
 import org.red5.server.api.scheduling.ISchedulingService;
 import org.red5.server.jmx.mxbeans.JDKSchedulingServiceMXBean;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -39,7 +39,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 @ManagedResource(objectName = "org.red5.server:name=schedulingService,type=JDKSchedulingService")
 public class JDKSchedulingService implements ISchedulingService, JDKSchedulingServiceMXBean, InitializingBean, DisposableBean {
 
-    private static Logger log = Red5LoggerFactory.getLogger(JDKSchedulingService.class);
+    private static Logger log = LoggerFactory.getLogger(JDKSchedulingService.class);
 
     /**
      * Service scheduler

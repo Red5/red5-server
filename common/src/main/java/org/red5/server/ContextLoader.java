@@ -21,9 +21,9 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.jmx.mxbeans.ContextLoaderMXBean;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -49,7 +49,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 public class ContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ContextLoaderMXBean {
 
     /** Constant <code>log</code> */
-    protected static Logger log = Red5LoggerFactory.getLogger(ContextLoader.class);
+    protected static Logger log = LoggerFactory.getLogger(ContextLoader.class);
 
     /**
      * Spring Application context

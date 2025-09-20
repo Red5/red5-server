@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Set;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scope.IBroadcastScope;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.ScopeType;
@@ -32,6 +31,7 @@ import org.red5.server.scope.Scope;
 import org.red5.server.stream.provider.FileProvider;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>ProviderService class.</p>
@@ -40,7 +40,7 @@ import org.slf4j.Logger;
  */
 public class ProviderService implements IProviderService {
 
-    private static final Logger log = Red5LoggerFactory.getLogger(ProviderService.class);
+    private static final Logger log = LoggerFactory.getLogger(ProviderService.class);
 
     // whether or not to support FCS/FMS/AMS live-wait (default to off)
     private boolean liveWaitSupport;

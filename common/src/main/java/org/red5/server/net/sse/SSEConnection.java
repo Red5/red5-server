@@ -13,12 +13,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import jakarta.servlet.AsyncContext;
-import jakarta.servlet.http.HttpServletResponse;
-
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Represents a Server-Sent Events connection to a client.
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
  */
 public class SSEConnection {
 
-    private static Logger log = Red5LoggerFactory.getLogger(SSEConnection.class);
+    private static Logger log = LoggerFactory.getLogger(SSEConnection.class);
 
     private final String connectionId;
 

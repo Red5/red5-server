@@ -7,11 +7,11 @@
 
 package org.red5.server.scope;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.IScopeSecurityHandler;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Scope security handler providing positive results to any allow request.
@@ -20,7 +20,7 @@ import org.slf4j.Logger;
  */
 public class ScopeSecurityHandler implements IScopeSecurityHandler {
 
-    private Logger log = Red5LoggerFactory.getLogger(this.getClass());
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected boolean connectionAllowed = true;
 
