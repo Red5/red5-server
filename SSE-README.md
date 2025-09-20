@@ -10,8 +10,8 @@ The SSE implementation consists of several components that work together to prov
 - **SSEManager**: Handles connection lifecycle and broadcasting
 - **SSEServlet**: HTTP servlet that establishes SSE connections
 - **SSEService**: High-level API for application developers
-- **SSEApplicationAdapter**: Red5 application adapter with built-in SSE support
 - **SSEEvent**: Data structure for SSE events
+- **SSEApplicationAdapter**: Example Red5 application adapter with built-in SSE support
 
 ## Features
 
@@ -52,7 +52,7 @@ The SSE implementation consists of several components that work together to prov
 
 ### 1. Include SSE Configuration
 
-Add the SSE configuration to your Red5 Tomcat / JEE setup by including the SSE Spring configuration:
+Add the SSE beans to your Spring configuration, in `red5-common.xml` (they should already be present if you are using a recent version of Red5):
 
 ```xml
     <!-- Server-Sent Events Configuration -->
@@ -73,7 +73,20 @@ Add the SSE configuration to your Red5 Tomcat / JEE setup by including the SSE S
     </bean>
 ```
 
-You may expect to find these sections in the `jee-container.xml` file.
+Enable the SSE service in your Red5 Tomcat / JEE setup by setting `sse.enabled` to `true` in `red5.properties`:
+
+```properties
+sse.enabled=true
+```
+
+This will carryover to the Tomcat loader configuration:
+
+```xml
+    <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
+        <property name="secureEnabled" value="${secure.enabled}" />
+        <property name="sseEnabled" value="${sse.enabled}" />
+        <property name="websocketEnabled" value="${websocket.enabled}" />
+```
 
 ### 2. Configure Web Application
 
@@ -83,8 +96,12 @@ Update your `web.xml` to include the SSE servlet:
 <servlet>
     <servlet-name>sse</servlet-name>
     <servlet-class>org.red5.server.net.sse.SSEServlet</servlet-class>
-    <load-on-startup>3</load-on-startup>
+    <load-on-startup>-1</load-on-startup>
     <async-supported>true</async-supported>
+    <init-param>
+        <param-name>cors.enabled</param-name>
+        <param-value>true</param-value>
+    </init-param>
 </servlet>
 
 <servlet-mapping>
@@ -94,11 +111,29 @@ Update your `web.xml` to include the SSE servlet:
 </servlet-mapping>
 ```
 
+If an external CORS filter is used, you can disable CORS directly in the servlet by adding the following init parameters:
+
+```xml
+<init-param>
+    <param-name>cors.enabled</param-name>
+    <param-value>false</param-value>
+</init-param>
+```
+
+Ensure that the CORS filter allows these headers:
+
+- `Accept`
+- `Cache-Control`
+- `Last-Event-ID`
+
 ### 3. Configuration Properties
 
 Configure SSE behavior using properties in `red5.properties`:
 
 ```properties
+# Enable/disable SSE support (default: true)
+sse.enabled=true
+
 # Connection timeout in milliseconds (default: 5 minutes)
 sse.connection.timeout.ms=300000
 

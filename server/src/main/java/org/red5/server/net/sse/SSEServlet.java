@@ -10,6 +10,16 @@ package org.red5.server.net.sse;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.red5.logging.Red5LoggerFactory;
+import org.red5.server.api.IServer;
+import org.red5.server.api.scope.IGlobalScope;
+import org.red5.server.api.scope.IScope;
+import org.red5.server.scope.WebScope;
+import org.red5.server.util.ScopeUtils;
+import org.slf4j.Logger;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
@@ -18,14 +28,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.red5.logging.Red5LoggerFactory;
-import org.red5.server.api.IServer;
-import org.red5.server.api.scope.IGlobalScope;
-import org.red5.server.api.scope.IScope;
-import org.slf4j.Logger;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Servlet that handles Server-Sent Events (SSE) connections.
@@ -50,16 +52,18 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
 
     private transient IServer server;
 
+    private transient WebScope webScope;
+
+    private transient SSEService sseService;
+
     private transient SSEManager sseManager;
 
     @Override
     public void init() throws ServletException {
         super.init();
         log.debug("Initializing SSE servlet");
-
         ServletContext ctx = getServletContext();
         log.debug("Context path: {}", ctx.getContextPath());
-
         // Get the web application context
         try {
             webAppCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(ctx);
@@ -67,28 +71,23 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             log.debug("Required web application context not found, trying fallback");
             webAppCtx = (WebApplicationContext) ctx.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
         }
-
         if (webAppCtx != null) {
             // Get the Red5 server instance
             server = (IServer) webAppCtx.getBean("red5.server");
-
-            // Get or create SSE manager
-            if (webAppCtx.containsBean("sseManager")) {
-                sseManager = (SSEManager) webAppCtx.getBean("sseManager");
-            } else {
-                log.warn("SSE manager not found in context, creating default instance");
-                sseManager = new SSEManager();
-                try {
-                    sseManager.afterPropertiesSet();
-                } catch (Exception e) {
-                    log.error("Failed to initialize SSE manager", e);
-                    throw new ServletException("Failed to initialize SSE manager", e);
+            // get the application scope
+            webScope = (WebScope) webAppCtx.getBean("web.scope");
+            sseService = (SSEService) webScope.getServiceHandler(SSEService.BEAN_NAME);
+            if (sseService != null) {
+                sseManager = sseService.getSseManager();
+                if (sseManager == null) {
+                    log.warn("SSEManager not available from SSEService");
                 }
+            } else {
+                log.info("SSEService not available from WebScope");
             }
         } else {
             throw new ServletException("No web application context available");
         }
-
         log.info("SSE servlet initialized successfully");
     }
 
@@ -101,7 +100,6 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("SSE connection request from: {} {}", req.getRemoteAddr(), req.getRequestURI());
-
         // Validate that this is an SSE request
         String accept = req.getHeader("Accept");
         if (accept == null || !accept.contains("text/event-stream")) {
@@ -109,10 +107,8 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "This endpoint only supports Server-Sent Events");
             return;
         }
-
         // Handle CORS preflight if needed
         handleCORS(req, resp);
-
         // Get the scope for this connection
         IScope scope = getScope(req);
         if (scope == null) {
@@ -120,24 +116,18 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Scope not available");
             return;
         }
-
         // Generate unique connection ID
         String connectionId = generateConnectionId(req);
-
         // Start async processing
         AsyncContext asyncContext = req.startAsync();
         asyncContext.setTimeout(0); // No timeout, managed by SSEManager
         asyncContext.addListener(this);
-
         // Create SSE connection
         SSEConnection sseConnection = new SSEConnection(connectionId, asyncContext, resp, scope);
-
         // Add to manager
         sseManager.addConnection(sseConnection);
-
         // Send initial connection confirmation
         sseConnection.sendEvent("connection", "connected");
-
         log.info("Established SSE connection: {} for scope: {}", connectionId, scope.getName());
     }
 
@@ -168,48 +158,35 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
      * Gets the scope for the current request.
      */
     private IScope getScope(HttpServletRequest req) {
-        try {
-            String path = req.getContextPath();
-            if (path.startsWith("/")) {
-                path = path.substring(1);
-            }
-
-            // Additional path processing similar to AMFGatewayServlet
-            if (req.getPathInfo() != null) {
-                String pathInfo = req.getPathInfo();
-                if (pathInfo.startsWith("/")) {
-                    pathInfo = pathInfo.substring(1);
-                }
-                if (!pathInfo.isEmpty()) {
-                    path = path.isEmpty() ? pathInfo : path + "/" + pathInfo;
-                }
-            }
-
-            IGlobalScope global = server.lookupGlobal(req.getServerName(), path);
-            if (global == null) {
-                global = server.lookupGlobal(req.getLocalName(), path);
-                if (global == null) {
-                    global = server.lookupGlobal(req.getLocalAddr(), path);
-                }
-            }
-
-            if (global == null) {
-                log.warn("No global scope found for path: {}", path);
-                return null;
-            }
-
-            // For SSE, we typically want to use the global scope directly
-            // or resolve to a specific scope based on request parameters
-            String scopePath = req.getParameter("scope");
-            if (scopePath != null && !scopePath.isEmpty()) {
-                return global.getContext().resolveScope(global, scopePath);
-            }
-
-            return global;
-
-        } catch (Exception e) {
-            log.error("Error determining scope for SSE request", e);
+        if (webScope == null) {
+            log.warn("Web scope is not available");
             return null;
+        }
+        IGlobalScope globalScope = server.getGlobal("default");
+        if (globalScope == null) {
+            log.warn("Global scope is not available");
+            return null;
+        }
+        String path = req.getPathInfo();
+        if (path == null || path.equals("/")) {
+            // Default to root application
+            return ScopeUtils.resolveScope(globalScope, "/live");
+        } else {
+            // Extract application name from path
+            String[] parts = path.split("/");
+            if (parts.length > 1) {
+                String appName = parts[1];
+                IScope appScope = ScopeUtils.resolveScope(globalScope, appName);
+                if (appScope != null && ScopeUtils.isApp(appScope)) {
+                    return appScope;
+                } else {
+                    log.warn("Application scope '{}' not found, defaulting to 'live'", appName);
+                    return ScopeUtils.resolveScope(globalScope, "/live");
+                }
+            } else {
+                log.warn("Invalid path info '{}', defaulting to 'live'", path);
+                return ScopeUtils.resolveScope(globalScope, "/live");
+            }
         }
     }
 
@@ -256,7 +233,6 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             if (asyncContext != null) {
                 HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
                 String connectionId = (String) req.getAttribute("sse.connectionId");
-
                 if (connectionId != null && sseManager != null) {
                     SSEConnection connection = sseManager.removeConnection(connectionId);
                     if (connection != null) {
@@ -278,4 +254,5 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
     public SSEManager getSseManager() {
         return sseManager;
     }
+
 }

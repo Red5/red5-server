@@ -8,6 +8,7 @@
 package org.red5.server.net.sse;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -58,7 +59,6 @@ public class SSEConnection {
         this.response = response;
         this.scope = scope;
         this.lastActivity = System.currentTimeMillis();
-
         // Set up SSE headers
         response.setContentType("text/event-stream");
         response.setCharacterEncoding("UTF-8");
@@ -67,7 +67,6 @@ public class SSEConnection {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Headers", "Cache-Control");
-
         log.debug("Created SSE connection: {} for scope: {}", connectionId, scope.getName());
     }
 
@@ -102,53 +101,48 @@ public class SSEConnection {
      * @return true if the event was sent successfully
      */
     public boolean sendEvent(String id, String event, String data, Integer retry) {
-        if (!connected.get()) {
-            log.debug("Connection {} is not connected, cannot send event", connectionId);
-            return false;
-        }
-
-        try {
-            StringBuilder eventBuilder = new StringBuilder();
-
-            if (id != null) {
-                eventBuilder.append("id: ").append(id).append("\n");
-            } else {
-                // Auto-generate ID if not provided
-                eventBuilder.append("id: ").append(lastEventId.incrementAndGet()).append("\n");
-            }
-
-            if (event != null) {
-                eventBuilder.append("event: ").append(event).append("\n");
-            }
-
-            if (retry != null) {
-                eventBuilder.append("retry: ").append(retry).append("\n");
-            }
-
-            if (data != null) {
-                // Handle multi-line data
-                String[] lines = data.split("\n");
-                for (String line : lines) {
-                    eventBuilder.append("data: ").append(line).append("\n");
+        if (isConnected()) {
+            try {
+                StringBuilder eventBuilder = new StringBuilder();
+                if (id != null) {
+                    eventBuilder.append("id: ").append(id).append("\n");
+                } else {
+                    // Auto-generate ID if not provided
+                    eventBuilder.append("id: ").append(lastEventId.incrementAndGet()).append("\n");
                 }
+                if (event != null) {
+                    eventBuilder.append("event: ").append(event).append("\n");
+                }
+                if (retry != null) {
+                    eventBuilder.append("retry: ").append(retry).append("\n");
+                }
+                if (data != null) {
+                    // Handle multi-line data
+                    String[] lines = data.split("\n");
+                    for (String line : lines) {
+                        eventBuilder.append("data: ").append(line).append("\n");
+                    }
+                }
+                eventBuilder.append("\n"); // End of event
+                byte[] eventBytes = eventBuilder.toString().getBytes(StandardCharsets.UTF_8);
+                OutputStream outputStream = response.getOutputStream();
+                if (outputStream != null) {
+                    outputStream.write(eventBytes);
+                    outputStream.flush();
+                    lastActivity = System.currentTimeMillis();
+                    log.trace("Sent SSE event to connection {}: {}", connectionId, eventBuilder.toString().trim());
+                    return true;
+                } else {
+                    log.debug("Output stream is null for connection {}", connectionId);
+                }
+            } catch (IOException e) {
+                log.debug("Failed to send SSE event to connection {}: {}", connectionId, e.getMessage());
+                close();
             }
-
-            eventBuilder.append("\n"); // End of event
-
-            byte[] eventBytes = eventBuilder.toString().getBytes(StandardCharsets.UTF_8);
-            response.getOutputStream().write(eventBytes);
-            response.getOutputStream().flush();
-
-            lastActivity = System.currentTimeMillis();
-
-            log.trace("Sent SSE event to connection {}: {}", connectionId, eventBuilder.toString().trim());
-            return true;
-
-        } catch (IOException e) {
-            log.debug("Failed to send SSE event to connection {}: {}", connectionId, e.getMessage());
-            close();
-            return false;
+        } else {
+            log.debug("Connection {} is not connected, cannot send event", connectionId);
         }
+        return false;
     }
 
     /**
@@ -157,21 +151,24 @@ public class SSEConnection {
      * @return true if the keep-alive was sent successfully
      */
     public boolean sendKeepAlive() {
-        if (!connected.get()) {
-            return false;
+        if (isConnected()) {
+            try {
+                OutputStream outputStream = response.getOutputStream();
+                if (outputStream != null) {
+                    outputStream.write(": keep-alive\n\n".getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                    lastActivity = System.currentTimeMillis();
+                    log.trace("Sent keep-alive to connection {}", connectionId);
+                    return true;
+                } else {
+                    log.debug("Output stream is null for connection {}", connectionId);
+                }
+            } catch (IOException e) {
+                log.debug("Failed to send keep-alive to connection {}: {}", connectionId, e.getMessage());
+                close();
+            }
         }
-
-        try {
-            response.getOutputStream().write(": keep-alive\n\n".getBytes(StandardCharsets.UTF_8));
-            response.getOutputStream().flush();
-            lastActivity = System.currentTimeMillis();
-            log.trace("Sent keep-alive to connection {}", connectionId);
-            return true;
-        } catch (IOException e) {
-            log.debug("Failed to send keep-alive to connection {}: {}", connectionId, e.getMessage());
-            close();
-            return false;
-        }
+        return false;
     }
 
     /**
