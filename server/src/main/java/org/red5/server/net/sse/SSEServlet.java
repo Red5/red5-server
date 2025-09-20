@@ -167,7 +167,8 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             log.warn("Global scope is not available");
             return null;
         }
-        String path = req.getPathInfo();
+        String path = req.getContextPath();
+        log.debug("Request context path: {} path info: {}", path, req.getPathInfo());
         if (path == null || path.equals("/")) {
             // Default to root application
             return ScopeUtils.resolveScope(globalScope, "/live");
