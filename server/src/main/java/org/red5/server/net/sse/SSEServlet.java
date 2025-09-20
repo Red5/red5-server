@@ -8,8 +8,8 @@
 package org.red5.server.net.sse;
 
 import java.io.IOException;
-import java.util.UUID;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IServer;
 import org.red5.server.api.scope.IGlobalScope;
@@ -117,7 +117,7 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             return;
         }
         // Generate unique connection ID
-        String connectionId = generateConnectionId(req);
+        String connectionId = RandomStringUtils.insecure().nextAlphabetic(11); // random 11 char string
         // Start async processing
         AsyncContext asyncContext = req.startAsync();
         asyncContext.setTimeout(0); // No timeout, managed by SSEManager
@@ -188,15 +188,6 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
                 return ScopeUtils.resolveScope(globalScope, "/live");
             }
         }
-    }
-
-    /**
-     * Generates a unique connection ID.
-     */
-    private String generateConnectionId(HttpServletRequest req) {
-        // Include some client info for debugging but ensure uniqueness with UUID
-        String clientInfo = req.getRemoteAddr() + "-" + System.currentTimeMillis();
-        return clientInfo + "-" + UUID.randomUUID().toString();
     }
 
     // AsyncListener implementation
