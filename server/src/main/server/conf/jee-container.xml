@@ -18,6 +18,7 @@
     -->
     <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" lazy-init="true">
         <property name="secureEnabled" value="${secure.enabled}" />
+        <property name="sseEnabled" value="${sse.enabled}" />
         <property name="websocketEnabled" value="${websocket.enabled}" />
         <property name="webappFolder" value="${red5.root}/webapps" />
         <!-- Allows a wait period to allow plugins to start before starting Tomcat -->

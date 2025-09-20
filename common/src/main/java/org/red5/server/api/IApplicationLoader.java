@@ -37,4 +37,5 @@ public interface IApplicationLoader {
      * @return application context
      */
     public ApplicationContext getRootContext();
+
 }

@@ -10,6 +10,7 @@ package org.red5.server.net.sse;
 import java.util.Collection;
 
 import org.red5.server.api.scope.IScope;
+import org.red5.server.api.scope.IScopeService;
 
 /**
  * Interface for Server-Sent Events service operations.
@@ -17,7 +18,10 @@ import org.red5.server.api.scope.IScope;
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public interface ISSEService {
+public interface ISSEService extends IScopeService {
+
+    /** Constant <code>BEAN_NAME="sseService"</code> */
+    public static String BEAN_NAME = "sseService";
 
     /**
      * Broadcasts a message to all connected SSE clients.

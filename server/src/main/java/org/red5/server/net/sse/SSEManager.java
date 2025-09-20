@@ -13,9 +13,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class SSEManager implements InitializingBean, DisposableBean {
 
-    private static Logger log = Red5LoggerFactory.getLogger(SSEManager.class);
+    private static Logger log = LoggerFactory.getLogger(SSEManager.class);
 
     private final ConcurrentHashMap<String, SSEConnection> connections = new ConcurrentHashMap<>();
 
@@ -40,6 +40,10 @@ public class SSEManager implements InitializingBean, DisposableBean {
 
     private boolean keepAliveEnabled = true;
 
+    public SSEManager() {
+        log.debug("SSEManager instantiated");
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         log.info("Starting SSE Manager");
@@ -48,15 +52,12 @@ public class SSEManager implements InitializingBean, DisposableBean {
             t.setDaemon(true);
             return t;
         });
-
         // Schedule cleanup task
         executorService.scheduleWithFixedDelay(this::cleanupStaleConnections, 60, 60, TimeUnit.SECONDS);
-
         // Schedule keep-alive task if enabled
         if (keepAliveEnabled) {
             executorService.scheduleWithFixedDelay(this::sendKeepAlives, keepAliveIntervalMs, keepAliveIntervalMs, TimeUnit.MILLISECONDS);
         }
-
         log.info("SSE Manager started with {} connection timeout and {} keep-alive interval", connectionTimeoutMs, keepAliveIntervalMs);
     }
 
@@ -74,11 +75,9 @@ public class SSEManager implements InitializingBean, DisposableBean {
                 Thread.currentThread().interrupt();
             }
         }
-
         // Close all connections
         connections.values().forEach(SSEConnection::close);
         connections.clear();
-
         log.info("SSE Manager stopped");
     }
 
@@ -187,7 +186,6 @@ public class SSEManager implements InitializingBean, DisposableBean {
         if (scope == null) {
             return 0;
         }
-
         int successCount = 0;
         for (SSEConnection connection : connections.values()) {
             if (scope.equals(connection.getScope()) && connection.sendEvent(event, message)) {
@@ -257,7 +255,6 @@ public class SSEManager implements InitializingBean, DisposableBean {
     private void cleanupStaleConnections() {
         long now = System.currentTimeMillis();
         int removedCount = 0;
-
         for (SSEConnection connection : connections.values()) {
             if (!connection.isConnected() || (now - connection.getLastActivity()) > connectionTimeoutMs) {
                 removeConnection(connection.getConnectionId());
@@ -265,7 +262,6 @@ public class SSEManager implements InitializingBean, DisposableBean {
                 removedCount++;
             }
         }
-
         if (removedCount > 0) {
             log.debug("Cleaned up {} stale SSE connections", removedCount);
         }
@@ -339,4 +335,5 @@ public class SSEManager implements InitializingBean, DisposableBean {
     public boolean isKeepAliveEnabled() {
         return keepAliveEnabled;
     }
+
 }

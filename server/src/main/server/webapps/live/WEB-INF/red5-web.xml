@@ -22,4 +22,7 @@
 
 	<bean id="web.handler" class="org.red5.server.adapter.ApplicationAdapter" />
 
+	<!-- To enable SSE support, replace the above bean definition with the following one -->
+    <!-- <bean id="web.handler" class="org.red5.server.adapter.SSEApplicationAdapter" /> -->
+
 </beans>

@@ -249,7 +249,7 @@ public class ScopeUtils {
     }
 
     /**
-     * <p>getScopeService.</p>
+     * <p>getScopeService</p>
      *
      * @param scope a {@link org.red5.server.api.scope.IScope} object
      * @param intf a {@link java.lang.Class} object
@@ -276,7 +276,7 @@ public class ScopeUtils {
     }
 
     /**
-     * <p>getScopeService.</p>
+     * <p>getScopeService</p>
      *
      * @param scope a {@link org.red5.server.api.scope.IScope} object
      * @param intf a {@link java.lang.Class} object

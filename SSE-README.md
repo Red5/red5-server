@@ -52,16 +52,32 @@ The SSE implementation consists of several components that work together to prov
 
 ### 1. Include SSE Configuration
 
-Add the SSE configuration to your Red5 setup by importing the SSE Spring configuration:
+Add the SSE configuration to your Red5 Tomcat / JEE setup by including the SSE Spring configuration:
 
 ```xml
-<!-- In your red5-web.xml or similar configuration file -->
-<import resource="classpath:/red5-sse.xml"/>
+    <!-- Server-Sent Events Configuration -->
+    
+    <!-- SSE Manager - handles connection lifecycle and cleanup -->
+    <bean id="sseManager" class="org.red5.server.net.sse.SSEManager" init-method="afterPropertiesSet" destroy-method="destroy">
+        <!-- Connection timeout in milliseconds (default: 5 minutes) -->
+        <property name="connectionTimeoutMs" value="${sse.connection.timeout.ms:300000}"/>
+        <!-- Keep-alive interval in milliseconds (default: 30 seconds) -->
+        <property name="keepAliveIntervalMs" value="${sse.keepalive.interval.ms:30000}"/>
+        <!-- Enable/disable keep-alive messages (default: true) -->
+        <property name="keepAliveEnabled" value="${sse.keepalive.enabled:true}"/>
+    </bean>
+    
+    <!-- SSE Service - high-level API for applications -->
+    <bean id="sseService" class="org.red5.server.net.sse.SSEService">
+        <property name="sseManager" ref="sseManager"/>
+    </bean>
 ```
+
+You may expect to find these sections in the `jee-container.xml` file.
 
 ### 2. Configure Web Application
 
-Update your web.xml to include the SSE servlet:
+Update your `web.xml` to include the SSE servlet:
 
 ```xml
 <servlet>
@@ -322,12 +338,6 @@ This implementation follows:
 - `org.red5.server.net.sse.ISSEService`
 - `org.red5.server.net.sse.SSEService`
 - `org.red5.server.adapter.SSEApplicationAdapter`
-
-### Configuration
-
-- `server/src/main/server/conf/red5-sse.xml`
-- `server/src/main/server/webapps/root/WEB-INF/web-sse.xml`
-- `server/src/main/server/webapps/root/WEB-INF/red5-web-sse.xml`
 
 ### Test
 

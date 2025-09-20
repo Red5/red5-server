@@ -9,9 +9,9 @@ package org.red5.server.net.sse;
 
 import java.util.Collection;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -23,10 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class SSEService implements ISSEService {
 
-    private static Logger log = Red5LoggerFactory.getLogger(SSEService.class);
+    private static Logger log = LoggerFactory.getLogger(SSEService.class);
 
     @Autowired
     private SSEManager sseManager;
+
+    public SSEService() {
+        log.debug("SSEService instantiated");
+    }
 
     @Override
     public int broadcastMessage(String message) {
@@ -118,6 +122,7 @@ public class SSEService implements ISSEService {
      * @param sseManager the SSE manager to set
      */
     public void setSseManager(SSEManager sseManager) {
+        log.debug("Setting SSE manager: {}", sseManager);
         this.sseManager = sseManager;
     }
 
@@ -129,4 +134,5 @@ public class SSEService implements ISSEService {
     public SSEManager getSseManager() {
         return sseManager;
     }
+
 }

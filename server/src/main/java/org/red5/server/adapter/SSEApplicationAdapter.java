@@ -36,48 +36,40 @@ public class SSEApplicationAdapter extends MultiThreadedApplicationAdapter {
     @Override
     public boolean appStart(IScope app) {
         log.info("SSE-enabled application starting: {}", app.getName());
-
-        // Notify SSE clients about application start
-        if (sseService != null) {
-            sseService.broadcastEventToScope(app, "app.start", "Application " + app.getName() + " has started");
-        }
-
         return super.appStart(app);
     }
 
     @Override
     public void appStop(IScope app) {
         log.info("SSE-enabled application stopping: {}", app.getName());
-
-        // Notify SSE clients about application stop
         if (sseService != null) {
+            // Notify SSE clients about application stop
             sseService.broadcastEventToScope(app, "app.stop", "Application " + app.getName() + " is stopping");
         }
-
         super.appStop(app);
     }
 
     @Override
     public boolean appConnect(IConnection conn, Object[] params) {
         log.debug("Client connected to SSE-enabled app: {}", conn.getRemoteAddress());
-
-        // Notify SSE clients about new connection
+        // look up the SSE service if not already injected
+        if (sseService == null) {
+            sseService = (ISSEService) scope.getServiceHandler(ISSEService.BEAN_NAME);
+        }
         if (sseService != null) {
+            // Notify SSE clients about new connection
             sseService.broadcastEventToScope(conn.getScope(), "user.connect", "New user connected from " + conn.getRemoteAddress());
         }
-
         return super.appConnect(conn, params);
     }
 
     @Override
     public void appDisconnect(IConnection conn) {
         log.debug("Client disconnected from SSE-enabled app: {}", conn.getRemoteAddress());
-
-        // Notify SSE clients about disconnection
         if (sseService != null) {
+            // Notify SSE clients about disconnection
             sseService.broadcastEventToScope(conn.getScope(), "user.disconnect", "User disconnected: " + conn.getRemoteAddress());
         }
-
         super.appDisconnect(conn);
     }
 
@@ -213,4 +205,5 @@ public class SSEApplicationAdapter extends MultiThreadedApplicationAdapter {
     public void setSseService(ISSEService sseService) {
         this.sseService = sseService;
     }
+
 }

@@ -48,6 +48,7 @@ import org.red5.server.api.IApplicationContext;
 import org.red5.server.api.Red5;
 import org.red5.server.jmx.mxbeans.ContextLoaderMXBean;
 import org.red5.server.jmx.mxbeans.LoaderMXBean;
+import org.red5.server.net.sse.ISSEService;
 import org.red5.server.plugin.PluginRegistry;
 import org.red5.server.security.IRed5Realm;
 import org.red5.server.util.FileUtil;
@@ -176,6 +177,11 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     protected boolean websocketEnabled = true;
 
     /**
+     * SSE feature
+     */
+    protected boolean sseEnabled = true;
+
+    /**
      * HTTPS/WSS feature
      */
     protected boolean secureEnabled;
@@ -189,6 +195,11 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      * War deployer
      */
     private WarDeployer deployer;
+
+    /**
+     * SSE service.
+     */
+    private ISSEService sseService;
 
     {
         // allow setting to true if we're running in Red5 Pro
@@ -206,6 +217,8 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
     /** {@inheritDoc} */
     @Override
     public void afterPropertiesSet() throws Exception {
+        // set ourself as the instance
+        instance = this;
         // if we are not awaiting plugins, start immediately
         if (awaitPlugins) {
             log.info("Awaiting plugin loading");
@@ -326,6 +339,9 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         if (websocketEnabled) {
             checkWebsocketPlugin();
         }
+        if (sseEnabled) {
+            checkSSEService();
+        }
         // get a reference to the current threads classloader
         final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         // root location for servlet container
@@ -356,10 +372,8 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             // Use default webapps directory
             webappFolder = FileUtil.formatPath(serverRoot, "/webapps");
         }
-
         // To negotiate for web-socket compression or not.
         UpgradeUtil.wsAllowCompression = Boolean.valueOf(System.getProperty("ws.allow.compression", "true"));
-
         System.setProperty("red5.webapp.root", webappFolder);
         log.info("Application root: {}", webappFolder);
         // Root applications directory
@@ -594,6 +608,9 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
         log.debug("Tomcat load completed");
     }
 
+    /**
+     * Check for websocket plugin and load it if available.
+     */
     private void checkWebsocketPlugin() {
         // if websockets are enabled, ensure the websocket plugin is loaded
         if (PluginRegistry.getPlugin(WebSocketPlugin.NAME) == null) {
@@ -612,6 +629,21 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
             } catch (Exception e) {
                 log.warn("WebSocket plugin start, failed", e);
             }
+        }
+    }
+
+    /**
+     * Check for SSE service and load it if available.
+     */
+    private void checkSSEService() {
+        // get common context
+        ApplicationContext common = (ApplicationContext) applicationContext.getBean("red5.common");
+        // if SSE is enabled, ensure the SSE service is loaded
+        if (common.containsBean("sseService")) {
+            log.debug("SSE service was found");
+            sseService = common.getBean("sseService", ISSEService.class);
+        } else {
+            log.debug("SSE service was not found");
         }
     }
 
@@ -885,6 +917,32 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      */
     public void setWebsocketEnabled(boolean websocketEnabled) {
         this.websocketEnabled = websocketEnabled;
+    }
+
+    /**
+     * Returns enabled state of SSE support.
+     *
+     * @return true if enabled and false otherwise
+     */
+    public boolean isSseEnabled() {
+        return sseEnabled;
+    }
+
+    /**
+     * Set SSE feature enabled / disabled.
+     *
+     * @param sseEnabled a boolean
+     */
+    public void setSseEnabled(boolean sseEnabled) {
+        this.sseEnabled = sseEnabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ISSEService getSSEService() {
+        return sseService;
     }
 
     /**

@@ -27,7 +27,6 @@ import org.red5.codec.StreamCodecInfo;
 import org.red5.codec.VideoFrameType;
 import org.red5.io.amf.Output;
 import org.red5.io.utils.ObjectMap;
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.scheduling.IScheduledJob;
 import org.red5.server.api.scheduling.ISchedulingService;
 import org.red5.server.api.scope.IBroadcastScope;

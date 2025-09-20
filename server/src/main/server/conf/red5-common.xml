@@ -82,6 +82,23 @@
     <!-- Scheduling service -->
     <bean id="schedulingService" class="org.red5.server.scheduling.JDKSchedulingService"/>
 
+    <!-- Server-Sent Events Configuration -->
+    
+    <!-- SSE Manager - handles connection lifecycle and cleanup -->
+    <bean id="sseManager" class="org.red5.server.net.sse.SSEManager" init-method="afterPropertiesSet" destroy-method="destroy">
+        <!-- Connection timeout in milliseconds (default: 5 minutes) -->
+        <property name="connectionTimeoutMs" value="${sse.connection.timeout.ms:300000}"/>
+        <!-- Keep-alive interval in milliseconds (default: 30 seconds) -->
+        <property name="keepAliveIntervalMs" value="${sse.keepalive.interval.ms:30000}"/>
+        <!-- Enable/disable keep-alive messages (default: true) -->
+        <property name="keepAliveEnabled" value="${sse.keepalive.enabled:true}"/>
+    </bean>
+    
+    <!-- SSE Service - high-level API for applications -->
+    <bean id="sseService" class="org.red5.server.net.sse.SSEService">
+        <property name="sseManager" ref="sseManager"/>
+    </bean>
+
     <!-- Use injection to setup thread pool for remoting clients; requires remoting package from "servlet" module -->
     <!-- 
     <bean id="remotingClient" class="org.red5.server.net.remoting.RemotingClient">
