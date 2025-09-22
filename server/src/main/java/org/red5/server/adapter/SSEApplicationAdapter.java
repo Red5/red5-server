@@ -135,7 +135,7 @@ public class SSEApplicationAdapter extends MultiThreadedApplicationAdapter {
      */
     public List<SSEConnection> getSSEConnections() {
         if (sseService != null) {
-            return (List<SSEConnection>) sseService.getAllConnections();
+            return List.copyOf(sseService.getAllConnections());
         }
         log.warn("SSE service not available");
         return List.of();
