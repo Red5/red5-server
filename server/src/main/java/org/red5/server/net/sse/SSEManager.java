@@ -8,6 +8,8 @@
 package org.red5.server.net.sse;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -254,17 +256,19 @@ public class SSEManager implements InitializingBean, DisposableBean {
      */
     private void cleanupStaleConnections() {
         long now = System.currentTimeMillis();
-        int removedCount = 0;
+        List<String> removals = new ArrayList<>();
         for (SSEConnection connection : connections.values()) {
             if (!connection.isConnected() || (now - connection.getLastActivity()) > connectionTimeoutMs) {
-                removeConnection(connection.getConnectionId());
-                connection.close();
-                removedCount++;
+                removals.add(connection.getConnectionId());
             }
         }
-        if (removedCount > 0) {
-            log.debug("Cleaned up {} stale SSE connections", removedCount);
+        for (String connectionId : removals) {
+            SSEConnection connection = removeConnection(connectionId);
+            if (connection != null) {
+                connection.close();
+            }
         }
+        removals.clear();
     }
 
     /**
