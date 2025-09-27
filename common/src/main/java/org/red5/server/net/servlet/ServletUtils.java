@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * <p>ServletUtils class.</p>
@@ -27,7 +27,7 @@ import org.slf4j.Logger;
  */
 public class ServletUtils {
 
-    private static Logger log = Red5LoggerFactory.getLogger(ServletUtils.class);
+    private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
 
     /**
      * Default value is 2048.

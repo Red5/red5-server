@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.Constants;
 import org.apache.tomcat.websocket.WsSession;
@@ -128,10 +129,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
             log.debug("ws session: {}", wsSession);
         }
         // the websocket session id will be used for hash code comparison, its the only usable value currently
-        wsSessionId = session.getId();
-        if (isDebug) {
-            log.debug("wsSessionId: {}", wsSessionId);
-        }
+        //wsSessionId = session.getId();
+        wsSessionId = RandomStringUtils.insecure().nextAlphabetic(11); // random 11 char string
         hashCode = wsSessionId.hashCode();
         log.info("ws id: {} hashCode: {}", wsSessionId, hashCode);
         // get extensions

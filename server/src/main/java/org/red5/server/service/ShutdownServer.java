@@ -27,11 +27,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.ContextLoader;
 import org.red5.server.LoaderBase;
 import org.red5.server.plugin.PluginRegistry;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -46,7 +46,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class ShutdownServer implements ApplicationContextAware, InitializingBean, DisposableBean {
 
-    private Logger log = Red5LoggerFactory.getLogger(ShutdownServer.class);
+    private Logger log = LoggerFactory.getLogger(ShutdownServer.class);
 
     /**
      * Port to which the server listens for shutdown requests. Default is 9999.

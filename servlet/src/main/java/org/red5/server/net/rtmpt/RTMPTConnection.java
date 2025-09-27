@@ -31,7 +31,7 @@ import org.slf4j.Logger;
  */
 public class RTMPTConnection extends BaseRTMPTConnection {
 
-    private static final Logger log = Red5LoggerFactory.getLogger(RTMPTConnection.class);
+    private static final Logger log = LoggerFactory.getLogger(RTMPTConnection.class);
 
     /**
      * Start to increase the polling delay after this many empty results

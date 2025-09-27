@@ -17,6 +17,7 @@ import org.red5.server.api.IServer;
 import org.red5.server.api.scope.IGlobalScope;
 import org.red5.server.api.scope.ScopeType;
 import org.red5.server.jmx.mxbeans.WebScopeMXBean;
+import org.red5.server.net.sse.ISSEService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -28,13 +29,14 @@ import jakarta.servlet.ServletContext;
 
 /**
  * <p>
- * Web scope is special scope that is aware of servlet context and represents scope of a Red5 application within a servlet container (or application server) such as Tomcat, Jetty or JBoss.
- * </p>
- * <p>
- * Web scope is aware of virtual hosts configuration for Red5 application and is the first scope that instantiated after Red5 application gets started.
- * </p>
- * <p>
- * Then it loads virtual hosts configuration, adds mappings of paths to global scope that is injected thru Spring IoC context file and runs initialization process.
+ * Web scope is special scope that is aware of servlet context and represents scope of a Red5 application within a
+ * servlet container (or application server) such as Tomcat, Jetty or JBoss.
+ * <br/>
+ * Web scope is aware of virtual hosts configuration for Red5 application and is the first scope that instantiated
+ * after Red5 application gets started.
+ * <br/>
+ * Then it loads virtual hosts configuration, adds mappings of paths to global scope that is injected thru Spring IoC
+ * context file and runs initialization process.
  * </p>
  *
  * Red5 server implementation instance and ServletContext are injected as well.
@@ -208,6 +210,13 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
             log.debug("Webscope registering: {}", contextPath);
             getAppContext();
             appLoader = LoaderBase.getApplicationLoader();
+            ISSEService sseService = (ISSEService) LoaderBase.getInstance().getSSEService();
+            if (sseService != null) {
+                log.debug("SSE service found: {}", sseService);
+                registerServiceHandler(ISSEService.BEAN_NAME, sseService);
+            } else {
+                log.info("SSE service not found");
+            }
             // get the parent name
             String parentName = getParent().getName();
             // add host name mappings
@@ -238,6 +247,8 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
             uninit();
             // disconnect all clients before unregistering
             getClientConnections().forEach(IConnection::close);
+            // clear service
+            unregisterServiceHandler(ISSEService.BEAN_NAME);
             // remove host name mappings
             if (hostnames != null && hostnames.length > 0) {
                 for (String element : hostnames) {

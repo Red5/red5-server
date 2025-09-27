@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red5 Server-Sent Events Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .connecting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .log {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .event {
+            margin-bottom: 5px;
+            padding: 2px 5px;
+            border-left: 3px solid #007bff;
+        }
+        .event.connection {
+            border-left-color: #28a745;
+        }
+        .event.user {
+            border-left-color: #ffc107;
+        }
+        .event.app {
+            border-left-color: #dc3545;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 10px;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Red5 Server-Sent Events Test</h1>
+    
+    <div class="container">
+        <h2>Connection Status</h2>
+        <div id="status" class="status disconnected">Disconnected</div>
+        
+        <div class="controls">
+            <button id="connectBtn" onclick="connect()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div>
+            <strong>Event Stream URL:</strong> <code id="eventUrl"></code><br>
+            <strong>Connection ID:</strong> <span id="connectionId">-</span><br>
+            <strong>Events Received:</strong> <span id="eventCount">0</span><br>
+            <strong>Last Event:</strong> <span id="lastEventTime">-</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Event Log</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let eventCount = 0;
+        let connectionId = null;
+        
+        // Determine the SSE endpoint URL
+        const baseUrl = window.location.origin + window.location.pathname.replace('/sse-test.html', '');
+        const eventUrl = baseUrl + '/events';
+        document.getElementById('eventUrl').textContent = eventUrl;
+        
+        function updateStatus(status, message) {
+            const statusEl = document.getElementById('status');
+            statusEl.className = 'status ' + status;
+            statusEl.textContent = message;
+            
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            
+            if (status === 'connected') {
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+            } else {
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+            }
+        }
+        
+        function log(message, eventType = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const eventEl = document.createElement('div');
+            eventEl.className = 'event ' + eventType;
+            eventEl.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            logEl.appendChild(eventEl);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            eventCount = 0;
+            document.getElementById('eventCount').textContent = '0';
+        }
+        
+        function connect() {
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            updateStatus('connecting', 'Connecting...');
+            log('Connecting to ' + eventUrl);
+            
+            eventSource = new EventSource(eventUrl);
+            
+            eventSource.onopen = function(event) {
+                updateStatus('connected', 'Connected');
+                log('Connected to SSE server', 'connection');
+            };
+            
+            eventSource.onmessage = function(event) {
+                eventCount++;
+                document.getElementById('eventCount').textContent = eventCount;
+                document.getElementById('lastEventTime').textContent = new Date().toLocaleTimeString();
+                log('Message: ' + event.data);
+            };
+            
+            eventSource.onerror = function(event) {
+                updateStatus('disconnected', 'Connection error');
+                log('Connection error occurred', 'error');
+                
+                if (eventSource.readyState === EventSource.CLOSED) {
+                    log('Connection closed by server', 'connection');
+                }
+            };
+            
+            // Handle custom events
+            eventSource.addEventListener('connection', function(event) {
+                eventCount++;
+                document.getElementById('eventCount').textContent = eventCount;
+                log('Connection event: ' + event.data, 'connection');
+                
+                // Try to extract connection ID if present
+                if (event.data.includes('connected')) {
+                    // This is a simple approach - in practice you might send connection ID in a structured way
+                    connectionId = 'Connected';
+                    document.getElementById('connectionId').textContent = connectionId;
+                }
+            });
+            
+            eventSource.addEventListener('user.connect', function(event) {
+                eventCount++;
+                document.getElementById('eventCount').textContent = eventCount;
+                log('User connected: ' + event.data, 'user');
+            });
+            
+            eventSource.addEventListener('user.disconnect', function(event) {
+                eventCount++;
+                document.getElementById('eventCount').textContent = eventCount;
+                log('User disconnected: ' + event.data, 'user');
+            });
+            
+            eventSource.addEventListener('app.start', function(event) {
+                eventCount++;
+                document.getElementById('eventCount').textContent = eventCount;
+                log('App started: ' + event.data, 'app');
+            });
+            
+            eventSource.addEventListener('app.stop', function(event) {
+                eventCount++;
+                document.getElementById('eventCount').textContent = eventCount;
+                log('App stopped: ' + event.data, 'app');
+            });
+        }
+        
+        function disconnect() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            updateStatus('disconnected', 'Disconnected');
+            log('Disconnected from SSE server', 'connection');
+            document.getElementById('connectionId').textContent = '-';
+        }
+        
+        // Initialize the page
+        window.onload = function() {
+            log('SSE Test Page loaded. Click Connect to start receiving events.');
+        };
+        
+        // Clean up on page unload
+        window.onbeforeunload = function() {
+            if (eventSource) {
+                eventSource.close();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -19,8 +19,8 @@ import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.IntrospectionUtils;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
-import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Model object to contain a connector, socket address, and connection properties for a Tomcat connection.
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
  */
 public class TomcatConnector {
 
-    private static Logger log = Red5LoggerFactory.getLogger(TomcatConnector.class);
+    private static Logger log = LoggerFactory.getLogger(TomcatConnector.class);
 
     private Connector connector;
 

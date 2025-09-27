@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Example - Send and Receive Events</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .event-log { background: #f5f5f5; padding: 10px; height: 200px; overflow-y: auto; font-family: monospace; }
+        input, select, textarea, button { margin: 5px; padding: 8px; }
+        .form-group { margin: 10px 0; }
+        label { display: inline-block; width: 120px; }
+        button { background: #007cba; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .status { padding: 5px; margin: 5px 0; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Red5 Server-Sent Events Example</h1>
+
+    <!-- SSE Connection Section -->
+    <div class="section">
+        <h2>SSE Connection</h2>
+        <div class="form-group">
+            <label>Server URL:</label>
+            <input type="text" id="serverUrl" value="http://localhost:5080/live/sse" placeholder="http://localhost:5080/live/sse">
+            <button onclick="connectSSE()">Connect</button>
+            <button onclick="disconnectSSE()">Disconnect</button>
+        </div>
+        <div id="connectionStatus" class="status">Disconnected</div>
+        <div class="form-group">
+            <label>Connection ID:</label>
+            <span id="connectionId">Not connected</span>
+        </div>
+    </div>
+
+    <!-- Send Event Section -->
+    <div class="section">
+        <h2>Send Event via POST</h2>
+        <form onsubmit="sendEvent(event)">
+            <div class="form-group">
+                <label>Event Type:</label>
+                <input type="text" id="eventType" value="notification" placeholder="notification" required>
+            </div>
+            <div class="form-group">
+                <label>Event Data:</label>
+                <textarea id="eventData" placeholder="Hello from JavaScript!" rows="3" required>Hello from JavaScript!</textarea>
+            </div>
+            <div class="form-group">
+                <label>Target:</label>
+                <select id="targetType" onchange="updateTargetField()">
+                    <option value="all">All Connections</option>
+                    <option value="scope">Specific Scope</option>
+                    <option value="connection">Specific Connection</option>
+                </select>
+            </div>
+            <div class="form-group" id="targetValueGroup" style="display: none;">
+                <label>Target Value:</label>
+                <input type="text" id="targetValue" placeholder="live">
+            </div>
+            <button type="submit">Send Event</button>
+        </form>
+        <div id="sendStatus"></div>
+    </div>
+
+    <!-- Event Log Section -->
+    <div class="section">
+        <h2>Received Events</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="eventLog" class="event-log"></div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let currentConnectionId = null;
+
+        // Connect to SSE endpoint
+        function connectSSE() {
+            const url = document.getElementById('serverUrl').value;
+
+            if (eventSource) {
+                disconnectSSE();
+            }
+
+            try {
+                eventSource = new EventSource(url);
+
+                eventSource.onopen = function(event) {
+                    updateConnectionStatus('Connected', 'success');
+                    logEvent('SSE', 'Connection opened');
+                };
+
+                eventSource.onmessage = function(event) {
+                    logEvent('message', event.data);
+                };
+
+                eventSource.addEventListener('connection', function(event) {
+                    logEvent('connection', event.data);
+                    // Extract connection ID if provided in a specific format
+                    if (event.data === 'connected') {
+                        // Connection ID would need to be provided by server in the event data
+                        // For now, we'll use a placeholder
+                        currentConnectionId = 'auto-generated';
+                        document.getElementById('connectionId').textContent = currentConnectionId;
+                    }
+                });
+
+                eventSource.addEventListener('notification', function(event) {
+                    logEvent('notification', event.data);
+                });
+
+                eventSource.addEventListener('custom', function(event) {
+                    logEvent('custom', event.data);
+                });
+
+                eventSource.onerror = function(event) {
+                    logEvent('ERROR', 'Connection error or closed');
+                    updateConnectionStatus('Error/Disconnected', 'error');
+                };
+
+            } catch (error) {
+                updateConnectionStatus('Connection failed: ' + error.message, 'error');
+            }
+        }
+
+        // Disconnect from SSE
+        function disconnectSSE() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                currentConnectionId = null;
+                updateConnectionStatus('Disconnected', '');
+                document.getElementById('connectionId').textContent = 'Not connected';
+                logEvent('SSE', 'Connection closed');
+            }
+        }
+
+        // Send event via POST
+        async function sendEvent(event) {
+            event.preventDefault();
+
+            const serverUrl = document.getElementById('serverUrl').value;
+            const postUrl = serverUrl; // Same URL for POST
+            const eventType = document.getElementById('eventType').value;
+            const eventData = document.getElementById('eventData').value;
+            const targetType = document.getElementById('targetType').value;
+            const targetValue = document.getElementById('targetValue').value;
+
+            // Build request payload
+            const payload = {
+                event: eventType,
+                data: eventData
+            };
+
+            if (targetType === 'scope' && targetValue) {
+                payload.scope = targetValue;
+            } else if (targetType === 'connection' && targetValue) {
+                payload.connectionId = targetValue;
+            }
+
+            try {
+                const response = await fetch(postUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showSendStatus(`Event sent successfully to ${result.recipients} recipient(s)`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    showSendStatus(`Failed to send event: ${response.status} ${errorText}`, 'error');
+                }
+            } catch (error) {
+                showSendStatus(`Error sending event: ${error.message}`, 'error');
+            }
+        }
+
+        // Update target field visibility
+        function updateTargetField() {
+            const targetType = document.getElementById('targetType').value;
+            const targetGroup = document.getElementById('targetValueGroup');
+            const targetInput = document.getElementById('targetValue');
+
+            if (targetType === 'all') {
+                targetGroup.style.display = 'none';
+            } else {
+                targetGroup.style.display = 'block';
+                if (targetType === 'scope') {
+                    targetInput.placeholder = 'live';
+                } else if (targetType === 'connection') {
+                    targetInput.placeholder = currentConnectionId || 'connection-id';
+                }
+            }
+        }
+
+        // Update connection status display
+        function updateConnectionStatus(message, type) {
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+
+        // Show send status
+        function showSendStatus(message, type) {
+            const statusDiv = document.getElementById('sendStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+
+            // Clear after 5 seconds
+            setTimeout(() => {
+                statusDiv.textContent = '';
+                statusDiv.className = 'status';
+            }, 5000);
+        }
+
+        // Log received events
+        function logEvent(eventType, data) {
+            const log = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${eventType}: ${data}\n`;
+            log.textContent += logEntry;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Clear event log
+        function clearLog() {
+            document.getElementById('eventLog').textContent = '';
+        }
+
+        // Initialize target field visibility
+        updateTargetField();
+    </script>
+</body>
+</html>

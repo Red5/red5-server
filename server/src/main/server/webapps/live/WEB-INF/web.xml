@@ -8,6 +8,22 @@
         <param-name>webAppRootKey</param-name>
         <param-value>/live</param-value>
     </context-param>
+    <!-- Server-Sent Events Servlet -->
+    <servlet>
+        <servlet-name>sse</servlet-name>
+        <servlet-class>org.red5.server.net.sse.SSEServlet</servlet-class>
+        <load-on-startup>3</load-on-startup>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>cors.enabled</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>   
+    <servlet-mapping>
+        <servlet-name>sse</servlet-name>
+        <url-pattern>/events</url-pattern>
+        <url-pattern>/events/*</url-pattern>
+    </servlet-mapping>
     <!-- XXX(paul) unused feature 
     <servlet>
         <servlet-name>rtmpt</servlet-name>

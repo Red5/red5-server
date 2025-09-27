@@ -11,9 +11,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.plugin.IRed5Plugin;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Central registry for Red5 plug-ins.
@@ -22,7 +22,7 @@ import org.slf4j.Logger;
  */
 public class PluginRegistry {
 
-    private static Logger log = Red5LoggerFactory.getLogger(PluginRegistry.class, "plugins");
+    private static Logger log = LoggerFactory.getLogger(PluginRegistry.class);
 
     // keeps track of plug-ins, keyed by plug-in name
     private static volatile ConcurrentMap<String, IRed5Plugin> plugins = new ConcurrentHashMap<>(3, 0.9f, 1);

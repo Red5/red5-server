@@ -11,10 +11,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IApplicationContext;
 import org.red5.server.api.IApplicationLoader;
+import org.red5.server.net.sse.ISSEService;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -28,7 +29,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public abstract class LoaderBase implements ApplicationContextAware {
 
-    private static Logger log = Red5LoggerFactory.getLogger(LoaderBase.class);
+    private static Logger log = LoggerFactory.getLogger(LoaderBase.class);
 
     /**
      * We store the application context so we can access it later.
@@ -49,6 +50,20 @@ public abstract class LoaderBase implements ApplicationContextAware {
      * Folder containing the webapps.
      */
     protected String webappFolder = null;
+
+    /**
+     * Singleton instance.
+     */
+    protected static LoaderBase instance;
+
+    /**
+     * Getter for the singleton instance.
+     *
+     * @return LoaderBase instance
+     */
+    public static LoaderBase getInstance() {
+        return instance;
+    }
 
     /**
      * Getter for the application loader.
@@ -172,6 +187,15 @@ public abstract class LoaderBase implements ApplicationContextAware {
      */
     public void removeContext(String path) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns the SSE service if available.
+     *
+     * @return the SSE service
+     */
+    public ISSEService getSSEService() {
+        throw new UnsupportedOperationException("Unimplemented method 'getSSEService'");
     }
 
 }
