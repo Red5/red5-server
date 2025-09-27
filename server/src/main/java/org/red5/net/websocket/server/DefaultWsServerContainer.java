@@ -184,11 +184,19 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
      */
     @Override
     public void upgradeHttpToWebSocket(Object request, Object response, ServerEndpointConfig sec, Map<String, String> pathParams) throws IOException, DeploymentException {
-        log.debug("doUpgrade");
+        log.debug("upgradeHttpToWebSocket");
+        HttpServletResponse resp = (HttpServletResponse) response;
         try {
-            UpgradeUtil.doUpgrade(this, (HttpServletRequest) request, (HttpServletResponse) response, sec, pathParams);
+            UpgradeUtil.doUpgrade(this, (HttpServletRequest) request, resp, sec, pathParams);
         } catch (ServletException e) {
             throw new DeploymentException("Servlet exeception, upgrade failed", e);
+        }
+        // did the upgrade fail? check the header set by the upgrade process
+        if ("true".equals(resp.getHeader("websocket.preinit"))) {
+            // Upgrade successful
+            log.debug("Upgrade to WebSocket pre-init successful");
+        } else {
+            throw new DeploymentException("WebSocket upgrade failed");
         }
     }
 

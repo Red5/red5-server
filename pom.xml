@@ -103,8 +103,8 @@
         <logback.version>1.5.18</logback.version>
         <bc.version>1.79</bc.version>
         <mina.version>2.0.23</mina.version>
-        <spring.version>6.2.10</spring.version>
-        <tomcat.version>11.0.7</tomcat.version>
+        <spring.version>6.2.11</spring.version>
+        <tomcat.version>11.0.11</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>
         <ehcache.version>2.10.6</ehcache.version>
