@@ -237,22 +237,22 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
 
     /** {@inheritDoc} */
     public void initialize(IClient client) {
-        if (log.isDebugEnabled()) {
-            log.debug("initialize - client: {}", client);
-        }
+        //if (log.isDebugEnabled()) {
+        log.warn("initialize - client: {}", client);
+        //}
         if (this.client != null && this.client instanceof Client && !this.client.equals(client)) {
             // unregister old client
-            if (log.isTraceEnabled()) {
-                log.trace("Unregistering previous client: {}", this.client);
-            }
+            // if (log.isTraceEnabled()) {
+            log.warn("Unregistering previous client: {}", this.client);
+            //}
             ((Client) this.client).unregister(this, false);
         }
         this.client = client;
         if (this.client instanceof Client && !((Client) this.client).isRegistered(this)) {
             // register new client
-            if (log.isTraceEnabled()) {
-                log.trace("Registering client: {}", this.client);
-            }
+            // if (log.isTraceEnabled()) {
+            log.warn("Registering client: {}", this.client);
+            //}
             ((Client) this.client).register(this);
         }
     }

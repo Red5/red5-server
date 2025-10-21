@@ -275,7 +275,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
             }
             // add the client and event listener
             if (clients.contains(client) || (clients.add(client) && addEventListener(conn))) {
-                log.debug("Added client");
+                log.warn("Added client id {}", client.getId());
                 // increment conn stats
                 connectionStats.increment();
                 // get connected scope
@@ -346,14 +346,14 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      *            Connection object
      */
     public void disconnect(IConnection conn) {
-        log.debug("Disconnect: {}", conn);
+        log.warn("Disconnect: {}", conn);
         // call disconnect handlers in reverse order of connection. ie. roomDisconnect is called before appDisconnect.
         final IClient client = conn.getClient();
         // null client can happen if connection didn't fully connect to the scope or its been nulled out
         if (client != null) {
             // remove it if it exists
             if (clients.remove(client)) {
-                log.debug("Removed client");
+                log.warn("Removed client");
                 // get connected scope
                 IScope connScope = conn.getScope();
                 log.trace("Disconnection scope: {}", connScope);

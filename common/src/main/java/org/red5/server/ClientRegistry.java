@@ -85,10 +85,11 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
      */
     private void addClient(String id, IClient client) {
         // check to see if the id already exists first
+        log.warn("add client {}", id);
         if (!hasClient(id)) {
             clients.put(id, client);
         } else {
-            log.debug("Client id: {} already registered", id);
+            log.warn("Client id: {} already registered", id);
         }
     }
 

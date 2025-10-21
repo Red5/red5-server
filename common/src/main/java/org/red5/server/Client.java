@@ -90,6 +90,7 @@ public class Client extends AttributeStore implements IClient {
         } else {
             this.id = registry.nextId();
         }
+        log.warn("new iClient id:  {} ", id);
         this.creationTime = System.currentTimeMillis();
         // use a weak reference to prevent any hard-links to the registry
         this.registry = new WeakReference<ClientRegistry>(registry);
@@ -113,6 +114,7 @@ public class Client extends AttributeStore implements IClient {
         } else {
             this.id = registry.nextId();
         }
+        log.warn("new iClient id:  {} ", id);
         if (creationTime != null) {
             this.creationTime = creationTime;
         } else {
@@ -250,9 +252,9 @@ public class Client extends AttributeStore implements IClient {
     protected void register(IConnection conn) {
         if (log.isDebugEnabled()) {
             if (conn == null) {
-                log.debug("Register null connection, client id: {}", id);
+                log.warn("Register null connection, client id: {}", id);
             } else {
-                log.debug("Register connection ({}:{}) client id: {}", conn.getRemoteAddress(), conn.getRemotePort(), id);
+                log.warn("Register connection ({}:{}) client id: {}", conn.getRemoteAddress(), conn.getRemotePort(), id);
             }
         }
         if (conn != null) {
@@ -287,7 +289,7 @@ public class Client extends AttributeStore implements IClient {
      *            Whether to delete this client if it no longer has any connections
      */
     protected void unregister(IConnection conn, boolean deleteIfNoConns) {
-        log.debug("Unregister connection ({}:{}) client id: {}", conn.getRemoteAddress(), conn.getRemotePort(), id);
+        log.warn("Unregister connection ({}:{}) client id: {}", conn.getRemoteAddress(), conn.getRemotePort(), id);
         // remove connection from connected scopes list
         connections.remove(conn);
         // If client is not connected to any scope any longer then remove
