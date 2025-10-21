@@ -84,16 +84,7 @@ public class Client extends AttributeStore implements IClient {
      */
     @ConstructorProperties({ "id", "registry" })
     public Client(String id, ClientRegistry registry) {
-        super();
-        if (id != null) {
-            this.id = id;
-        } else {
-            this.id = registry.nextId();
-        }
-        log.warn("new iClient id:  {} ", id);
-        this.creationTime = System.currentTimeMillis();
-        // use a weak reference to prevent any hard-links to the registry
-        this.registry = new WeakReference<ClientRegistry>(registry);
+        this(id, System.currentTimeMillis(), registry);
     }
 
     /**
@@ -109,19 +100,25 @@ public class Client extends AttributeStore implements IClient {
     @ConstructorProperties({ "id", "creationTime", "registry" })
     public Client(String id, Long creationTime, ClientRegistry registry) {
         super();
+        // set the registry as a weak reference to avoid potential memory leaks
+        this.registry = new WeakReference<ClientRegistry>(registry);
+        // perform some id sanity checking, don't allow dupes in registry
         if (id != null) {
-            this.id = id;
+            if (registry.hasClient(id)) {
+                log.warn("Client id: {} already exists in registry, generating new id", id);
+                this.id = registry.nextId();
+            } else {
+                this.id = id;
+            }
         } else {
             this.id = registry.nextId();
         }
-        log.warn("new iClient id:  {} ", id);
+        log.warn("New Client id: {}", id);
         if (creationTime != null) {
-            this.creationTime = creationTime;
+            this.creationTime = creationTime.longValue();
         } else {
             this.creationTime = System.currentTimeMillis();
         }
-        // use a weak reference to prevent any hard-links to the registry
-        this.registry = new WeakReference<ClientRegistry>(registry);
     }
 
     /**

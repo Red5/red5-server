@@ -80,6 +80,7 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
             if (clientRegistry != null) {
                 IClient client = conn.getClient();
                 if (client == null) {
+                    // XXX(paul) this looks like a bug, the session id is not necessarily the client id
                     if (!clientRegistry.hasClient(id)) {
                         if (conn instanceof RTMPConnection) {
                             log.debug("Creating new client for: {}", conn.getClass().getName());
