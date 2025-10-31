@@ -80,8 +80,42 @@ Media handling in `io/src/main/java/org/red5/io/`:
 - **Maven 3.6+** for build management
 - **Spring Framework 6.x** for dependency injection and application context
 - **Apache MINA 2.x** for network I/O
+- **Caffeine 3.1.8** for high-performance caching
 - **Logback/SLF4J** for logging
 - **JUnit 4** for testing
+
+### Caching Implementation
+Red5 uses **Caffeine** for high-performance caching:
+
+#### AMF Serialization Caching (Automatic)
+The AMF/AMF3 serialization layer uses Caffeine internally for:
+- **String encoding cache**: Caches UTF-8 encoded strings (1000 entries, 20-min idle)
+- **Serialization cache**: Caches field serialization decisions (200 entries, 20-min idle)
+- **Field cache**: Caches reflection field lookups (200 entries, 20-min idle)
+- **Getter cache**: Caches getter method references (200 entries, 20-min idle)
+
+These caches are automatically initialized and require no configuration.
+
+#### Object Caching (Optional)
+File metadata and object caching via `ICacheStore` interface:
+- **`CaffeineCacheImpl`** - Recommended modern implementation using Caffeine
+  - Configurable in `conf/red5-common.xml`
+  - Supports expiration policies, max entries, statistics
+  - Example: See `EHCACHE_TO_CAFFEINE_MIGRATION.md`
+- **`NoCacheImpl`** - Default (no caching, useful for development)
+- **`CacheImpl`** - Simple HashMap-based cache with SoftReferences
+- **`EhCacheImpl`** - Deprecated (excluded from build, removed dependency)
+
+**Cache Configuration Example**:
+```xml
+<bean id="object.cache" class="org.red5.cache.impl.CaffeineCacheImpl"
+      init-method="init" destroy-method="destroy">
+    <property name="maxEntries" value="1000"/>
+    <property name="expireAfterAccessSeconds" value="1200"/>
+</bean>
+```
+
+See `EHCACHE_TO_CAFFEINE_MIGRATION.md` for migration details.
 
 ### Security Considerations
 Recent security enhancements to RTMP protocol handling:
