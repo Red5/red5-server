@@ -1186,7 +1186,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                 notify(cne.getMethod(), cne.getParams());
                 break;
             default:
-                log.warn("Unhandled event: {}", event);
+                log.debug("Unhandled event: {}", event);
         }
     }
 
