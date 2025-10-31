@@ -17,7 +17,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.beanutils.BeanMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.After;
 import org.junit.Before;
@@ -143,12 +142,13 @@ public class OutputCacheTest {
         bean.setName("GetterTest");
         bean.setValue(100);
 
-        BeanMap beanMap = new BeanMap(bean);
-
-        // Access getters through Output to trigger caching
-        out.writeObject(beanMap);
+        // Serialize bean multiple times to trigger getter caching
+        // Getter cache is populated when serializing regular beans, not BeanMaps directly
+        out.writeObject(bean);
         buf.clear();
-        out.writeObject(beanMap);
+        out.writeObject(bean);
+        buf.clear();
+        out.writeObject(bean);
 
         Cache<Class<?>, Map<String, Method>> getterCache = Output.getGetterCache();
         assertTrue("Getter cache should have entries", getterCache.estimatedSize() > 0);

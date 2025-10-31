@@ -133,9 +133,13 @@ public class CaffeineCacheImplTest {
             cache.put("key" + i, new CacheableImpl("value" + i));
         }
 
-        // Cache should have evicted some entries
+        // Trigger cache maintenance to perform async eviction
+        // Caffeine's eviction is asynchronous, cleanUp() performs pending maintenance
+        cache.cleanUp();
+
+        // Cache should have evicted entries down to maxEntries
         long size = CaffeineCacheImpl.getCacheSize();
-        assertTrue("Cache size should be <= max entries", size <= 5);
+        assertTrue("Cache size should be at or near max entries (got " + size + ", max 5)", size <= 5);
     }
 
     @Test

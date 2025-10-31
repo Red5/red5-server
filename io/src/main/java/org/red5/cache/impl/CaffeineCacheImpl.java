@@ -114,7 +114,9 @@ public class CaffeineCacheImpl implements ICacheStore, ApplicationContextAware {
         if (obj instanceof ICacheable) {
             cache.put(name, (ICacheable) obj);
         } else {
-            cache.put(name, new CacheableImpl(obj));
+            CacheableImpl cacheable = new CacheableImpl(obj);
+            cacheable.setName(name);
+            cache.put(name, cacheable);
         }
     }
 
@@ -278,6 +280,16 @@ public class CaffeineCacheImpl implements ICacheStore, ApplicationContextAware {
             return cache.stats();
         }
         return null;
+    }
+
+    /**
+     * Performs any pending maintenance operations needed by the cache.
+     * This triggers async eviction and cleanup. Useful for testing.
+     */
+    public void cleanUp() {
+        if (cache != null) {
+            cache.cleanUp();
+        }
     }
 
     /** {@inheritDoc} */
