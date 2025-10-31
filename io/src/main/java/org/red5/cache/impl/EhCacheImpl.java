@@ -32,10 +32,13 @@ import net.sf.ehcache.event.CacheManagerEventListener;
 /**
  * Provides an implementation of an object cache using EhCache.
  *
+ * @deprecated Use {@link CaffeineCacheImpl} instead. EhCache 2.x is end-of-life and this implementation
+ *             will be removed in a future release. Caffeine provides better performance and is actively maintained.
  * @see <a href="http://ehcache.sourceforge.net/">ehcache homepage</a>
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
+@Deprecated
 public class EhCacheImpl implements ICacheStore, ApplicationContextAware {
 
     /** Constant <code>log</code> */

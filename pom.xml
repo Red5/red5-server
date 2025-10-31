@@ -107,7 +107,7 @@
         <tomcat.version>11.0.11</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>
-        <ehcache.version>2.10.6</ehcache.version>
+        <caffeine.version>3.1.8</caffeine.version>
         <commons-beanutils.version>1.10.1</commons-beanutils.version>
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-collections.version>4.4</commons-collections.version>
@@ -472,15 +472,9 @@
                 <version>${bc.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.sf.ehcache</groupId>
-                <artifactId>ehcache</artifactId>
-                <version>${ehcache.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -534,8 +528,8 @@
             <artifactId>spring-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>

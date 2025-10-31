@@ -11,8 +11,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -31,16 +29,14 @@ import org.red5.io.object.BaseOutput;
 import org.red5.io.object.RecordSet;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.XMLUtils;
-import org.red5.resource.Red5Root;
-import org.red5.resource.RootResolutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheException;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>Output class.</p>
@@ -57,60 +53,46 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
 
     private static ReentrantLock lookupLock = new ReentrantLock();
 
-    private static Cache stringCache;
+    private static Cache<String, byte[]> stringCache;
 
-    private static Cache serializeCache;
+    private static Cache<Class<?>, Map<String, Boolean>> serializeCache;
 
-    private static Cache fieldCache;
+    private static Cache<Class<?>, Map<String, Field>> fieldCache;
 
-    private static Cache getterCache;
+    private static Cache<Class<?>, Map<String, Method>> getterCache;
 
-    private static CacheManager cacheManager;
+    private static volatile boolean cacheInitialized = false;
 
-    private static CacheManager getCacheManager() {
+    protected static void initializeCaches() {
+        if (!cacheInitialized) {
+            lookupLock.lock();
+            try {
+                if (!cacheInitialized) {
+                    log.debug("Initializing Caffeine caches for AMF serialization");
 
-        if (cacheManager == null) {
-            //Lock and load.
-            lookupLock.lock();//After acquiring the lock, ensure the condition directing this thread to the lock is still true.
-            try/*to*/ {
-                CREATE_CACHE_MANAGER: if (cacheManager == null) {
-                    String red5Root = null;
-                    try {
-                        red5Root = Red5Root.get();
-                    } catch (RootResolutionException e) {
-                        log.debug("", e);
-                    }
+                    // String cache - stores encoded UTF-8 byte arrays for strings
+                    // Configured for: max 1000 entries, 20 minute idle timeout
+                    stringCache = Caffeine.newBuilder().maximumSize(1000).expireAfterAccess(20, TimeUnit.MINUTES).recordStats().build();
 
-                    if (red5Root != null) {
-                        Path conf = Paths.get(red5Root, "conf", "ehcache.xml");
-                        if (conf.toFile().exists()) {
-                            try {
-                                cacheManager = new CacheManager(conf.toString());
-                                break CREATE_CACHE_MANAGER;
-                            } catch (CacheException e) {
-                                log.warn("", e);
-                            }
-                        }
-                    }
-                    cacheManager = constructDefault();
+                    // Serialize cache - stores serialization decisions for class fields
+                    // Configured for: max 200 entries, 20 minute idle timeout
+                    serializeCache = Caffeine.newBuilder().maximumSize(200).expireAfterAccess(20, TimeUnit.MINUTES).recordStats().build();
+
+                    // Field cache - stores reflection field lookups
+                    // Configured for: max 200 entries, 20 minute idle timeout
+                    fieldCache = Caffeine.newBuilder().maximumSize(200).expireAfterAccess(20, TimeUnit.MINUTES).recordStats().build();
+
+                    // Getter cache - stores getter method references
+                    // Configured for: max 200 entries, 20 minute idle timeout
+                    getterCache = Caffeine.newBuilder().maximumSize(200).expireAfterAccess(20, TimeUnit.MINUTES).recordStats().build();
+
+                    cacheInitialized = true;
+                    log.info("Caffeine caches initialized for AMF serialization");
                 }
             } finally {
                 lookupLock.unlock();
-                if (cacheManager == null) {
-                    log.info("Failed to create CacheManager.");
-                }
             }
         }
-        return cacheManager;
-    }
-
-    private static CacheManager constructDefault() {
-        CacheManager manager = CacheManager.getInstance();
-        manager.addCacheIfAbsent("org.red5.io.amf.Output.stringCache");
-        manager.addCacheIfAbsent("org.red5.io.amf.Output.getterCache");
-        manager.addCacheIfAbsent("org.red5.io.amf.Output.fieldCache");
-        manager.addCacheIfAbsent("org.red5.io.amf.Output.serializeCache");
-        return manager;
     }
 
     /**
@@ -377,23 +359,10 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      * @param getter a {@link java.lang.reflect.Method} object
      * @return a boolean
      */
-    @SuppressWarnings("unchecked")
     protected boolean serializeField(Class<?> objectClass, String keyName, Field field, Method getter) {
-        // to prevent, NullPointerExceptions, get the element first and check if it's null
-        Element element = getSerializeCache().get(objectClass);
-        Map<String, Boolean> serializeMap = (element == null ? null : (Map<String, Boolean>) element.getObjectValue());
-        if (serializeMap == null) {
-            serializeMap = new HashMap<>();
-            getSerializeCache().put(new Element(objectClass, serializeMap));
-        }
-        boolean serialize;
-        if (getSerializeCache().isKeyInCache(keyName)) {
-            serialize = serializeMap.get(keyName);
-        } else {
-            serialize = Serializer.serializeField(keyName, field, getter);
-            serializeMap.put(keyName, serialize);
-        }
-        return serialize;
+        initializeCaches();
+        Map<String, Boolean> serializeMap = getSerializeCache().get(objectClass, k -> new HashMap<>());
+        return serializeMap.computeIfAbsent(keyName, k -> Serializer.serializeField(keyName, field, getter));
     }
 
     /**
@@ -403,33 +372,22 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      * @param keyName a {@link java.lang.String} object
      * @return a {@link java.lang.reflect.Field} object
      */
-    @SuppressWarnings("unchecked")
     protected Field getField(Class<?> objectClass, String keyName) {
-        //again, to prevent null pointers, check if the element exists first.
-        Element element = getFieldCache().get(objectClass);
-        Map<String, Field> fieldMap = (element == null ? null : (Map<String, Field>) element.getObjectValue());
-        if (fieldMap == null) {
-            fieldMap = new HashMap<String, Field>();
-            getFieldCache().put(new Element(objectClass, fieldMap));
-        }
-        Field field = null;
-        if (fieldMap.containsKey(keyName)) {
-            field = fieldMap.get(keyName);
-        } else {
+        initializeCaches();
+        Map<String, Field> fieldMap = getFieldCache().get(objectClass, k -> new HashMap<>());
+        return fieldMap.computeIfAbsent(keyName, k -> {
             for (Class<?> clazz = objectClass; !clazz.equals(Object.class); clazz = clazz.getSuperclass()) {
                 Field[] fields = clazz.getDeclaredFields();
                 if (fields.length > 0) {
                     for (Field fld : fields) {
                         if (fld.getName().equals(keyName)) {
-                            field = fld;
-                            break;
+                            return fld;
                         }
                     }
                 }
             }
-            fieldMap.put(keyName, field);
-        }
-        return field;
+            return null;
+        });
     }
 
     /**
@@ -440,23 +398,10 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      * @param keyName a {@link java.lang.String} object
      * @return a {@link java.lang.reflect.Method} object
      */
-    @SuppressWarnings("unchecked")
     protected Method getGetter(Class<?> objectClass, BeanMap beanMap, String keyName) {
-        //check element to prevent null pointer
-        Element element = getGetterCache().get(objectClass);
-        Map<String, Method> getterMap = (element == null ? null : (Map<String, Method>) element.getObjectValue());
-        if (getterMap == null) {
-            getterMap = new HashMap<String, Method>();
-            getGetterCache().put(new Element(objectClass, getterMap));
-        }
-        Method getter;
-        if (getterMap.containsKey(keyName)) {
-            getter = getterMap.get(keyName);
-        } else {
-            getter = beanMap.getReadMethod(keyName);
-            getterMap.put(keyName, getter);
-        }
-        return getter;
+        initializeCaches();
+        Map<String, Method> getterMap = getGetterCache().get(objectClass, k -> new HashMap<>());
+        return getterMap.computeIfAbsent(keyName, k -> beanMap.getReadMethod(keyName));
     }
 
     /** {@inheritDoc} */
@@ -576,15 +521,13 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      * @return encoded string
      */
     protected static byte[] encodeString(String string) {
-        Element element = getStringCache().get(string);
-        byte[] encoded = (element == null ? null : (byte[]) element.getObjectValue());
-        if (encoded == null) {
-            ByteBuffer buf = AMF.CHARSET.encode(string);
-            encoded = new byte[buf.remaining()];
+        initializeCaches();
+        return getStringCache().get(string, k -> {
+            ByteBuffer buf = AMF.CHARSET.encode(k);
+            byte[] encoded = new byte[buf.remaining()];
             buf.get(encoded);
-            getStringCache().put(new Element(string, encoded));
-        }
-        return encoded;
+            return encoded;
+        });
     }
 
     /**
@@ -650,48 +593,40 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     /**
      * <p>Getter for the field <code>stringCache</code>.</p>
      *
-     * @return a {@link net.sf.ehcache.Cache} object
+     * @return a {@link com.github.benmanes.caffeine.cache.Cache} object
      */
-    protected static Cache getStringCache() {
-        if (stringCache == null) {
-            stringCache = getCacheManager().getCache("org.red5.io.amf.Output.stringCache");
-        }
+    protected static Cache<String, byte[]> getStringCache() {
+        initializeCaches();
         return stringCache;
     }
 
     /**
      * <p>Getter for the field <code>serializeCache</code>.</p>
      *
-     * @return a {@link net.sf.ehcache.Cache} object
+     * @return a {@link com.github.benmanes.caffeine.cache.Cache} object
      */
-    protected static Cache getSerializeCache() {
-        if (serializeCache == null) {
-            serializeCache = getCacheManager().getCache("org.red5.io.amf.Output.serializeCache");
-        }
+    protected static Cache<Class<?>, Map<String, Boolean>> getSerializeCache() {
+        initializeCaches();
         return serializeCache;
     }
 
     /**
      * <p>Getter for the field <code>fieldCache</code>.</p>
      *
-     * @return a {@link net.sf.ehcache.Cache} object
+     * @return a {@link com.github.benmanes.caffeine.cache.Cache} object
      */
-    protected static Cache getFieldCache() {
-        if (fieldCache == null) {
-            fieldCache = getCacheManager().getCache("org.red5.io.amf.Output.fieldCache");
-        }
+    protected static Cache<Class<?>, Map<String, Field>> getFieldCache() {
+        initializeCaches();
         return fieldCache;
     }
 
     /**
      * <p>Getter for the field <code>getterCache</code>.</p>
      *
-     * @return a {@link net.sf.ehcache.Cache} object
+     * @return a {@link com.github.benmanes.caffeine.cache.Cache} object
      */
-    protected static Cache getGetterCache() {
-        if (getterCache == null) {
-            getterCache = getCacheManager().getCache("org.red5.io.amf.Output.getterCache");
-        }
+    protected static Cache<Class<?>, Map<String, Method>> getGetterCache() {
+        initializeCaches();
         return getterCache;
     }
 
@@ -699,12 +634,30 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      * <p>destroyCache.</p>
      */
     public static void destroyCache() {
-        if (cacheManager != null) {
-            cacheManager.shutdown();
-            fieldCache = null;
-            getterCache = null;
-            serializeCache = null;
-            stringCache = null;
+        if (cacheInitialized) {
+            lookupLock.lock();
+            try {
+                if (stringCache != null) {
+                    stringCache.invalidateAll();
+                }
+                if (serializeCache != null) {
+                    serializeCache.invalidateAll();
+                }
+                if (fieldCache != null) {
+                    fieldCache.invalidateAll();
+                }
+                if (getterCache != null) {
+                    getterCache.invalidateAll();
+                }
+                fieldCache = null;
+                getterCache = null;
+                serializeCache = null;
+                stringCache = null;
+                cacheInitialized = false;
+                log.info("Caffeine caches destroyed for AMF serialization");
+            } finally {
+                lookupLock.unlock();
+            }
         }
     }
 }

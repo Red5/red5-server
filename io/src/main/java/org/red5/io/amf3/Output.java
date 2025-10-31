@@ -19,8 +19,6 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import net.sf.ehcache.Element;
-
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.annotations.Anonymous;
@@ -141,15 +139,13 @@ public class Output extends org.red5.io.amf.Output {
 
     /** {@inheritDoc} */
     protected static byte[] encodeString(String string) {
-        Element element = getStringCache().get(string);
-        byte[] encoded = (element == null ? null : (byte[]) element.getObjectValue());
-        if (encoded == null) {
-            ByteBuffer buf = AMF.CHARSET.encode(string);
-            encoded = new byte[buf.limit()];
+        initializeCaches();
+        return getStringCache().get(string, k -> {
+            ByteBuffer buf = AMF.CHARSET.encode(k);
+            byte[] encoded = new byte[buf.limit()];
             buf.get(encoded);
-            getStringCache().put(new Element(string, encoded));
-        }
-        return encoded;
+            return encoded;
+        });
     }
 
     /**
