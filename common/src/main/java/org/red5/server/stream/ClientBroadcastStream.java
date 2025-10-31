@@ -625,7 +625,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     public void onPipeConnectionEvent(PipeConnectionEvent event) {
         switch (event.getType()) {
             case PROVIDER_CONNECT_PUSH:
-                //log.debug("Provider connect");
+                log.warn("Provider connect - {}", event.toString());
                 if (event.getProvider() == this && event.getSource() != connMsgOut && (event.getParamMap() == null || !event.getParamMap().containsKey("record"))) {
                     livePipe = (IPipe) event.getSource();
                     //log.debug("Provider: {}", livePipe.getClass().getName());
@@ -635,7 +635,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                 }
                 break;
             case PROVIDER_DISCONNECT:
-                //log.debug("Provider disconnect");
+                log.warn("Provider disconnect - {}", event.toString());
                 //if (isDebug && livePipe != null) {
                 //log.debug("Provider: {}", livePipe.getClass().getName());
                 //}
@@ -644,7 +644,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                 }
                 break;
             case CONSUMER_CONNECT_PUSH:
-                //log.debug("Consumer connect");
+                log.warn("Consumer connect - {}", event.toString());
                 IPipe pipe = (IPipe) event.getSource();
                 //if (isDebug && pipe != null) {
                 //log.debug("Consumer: {}", pipe.getClass().getName());
@@ -655,7 +655,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                 subscriberStats.increment();
                 break;
             case CONSUMER_DISCONNECT:
-                //log.debug("Consumer disconnect: {}", event.getSource().getClass().getName());
+                log.warn("Consumer disconnect - {}", event.toString());
                 subscriberStats.decrement();
                 break;
             default:

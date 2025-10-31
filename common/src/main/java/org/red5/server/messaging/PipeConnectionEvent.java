@@ -166,6 +166,11 @@ public class PipeConnectionEvent extends EventObject {
         return taskList;
     }
 
+    @Override
+    public String toString() {
+        return "PipeConnectionEvent [source=" + source + ", provider=" + provider + ", consumer=" + consumer + ", type=" + type + ", paramMap=" + paramMap + "]";
+    }
+
     /**
      * Builds a PipeConnectionEvent with a source pipe and consumer.
      *
