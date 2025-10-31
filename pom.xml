@@ -24,7 +24,7 @@
     <name>Red5</name>
     <description>The Red5 server</description>
     <groupId>org.red5</groupId>
-    <version>2.0.23</version>
+    <version>2.0.24</version>
     <url>https://github.com/Red5/red5-server</url>
     <inceptionYear>2005</inceptionYear>
     <organization>
@@ -102,7 +102,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.18</logback.version>
         <bc.version>1.79</bc.version>
-        <mina.version>2.0.23</mina.version>
+        <mina.version>2.0.24</mina.version>
         <spring.version>6.2.11</spring.version>
         <tomcat.version>11.0.11</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
@@ -481,6 +481,13 @@
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <!-- Exclude hamcrest-core to avoid conflict with hamcrest 2.2 -->
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
