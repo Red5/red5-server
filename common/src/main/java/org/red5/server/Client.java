@@ -87,15 +87,7 @@ public class Client extends AttributeStore implements IClient {
      */
     @ConstructorProperties({ "id", "registry" })
     public Client(String id, ClientRegistry registry) {
-        super();
-        if (id != null) {
-            this.id = id;
-        } else {
-            this.id = registry.nextId();
-        }
-        this.creationTime = System.currentTimeMillis();
-        // use a weak reference to prevent any hard-links to the registry
-        this.registry = new WeakReference<ClientRegistry>(registry);
+        this(id, System.currentTimeMillis(), registry);
     }
 
     /**
@@ -111,18 +103,25 @@ public class Client extends AttributeStore implements IClient {
     @ConstructorProperties({ "id", "creationTime", "registry" })
     public Client(String id, Long creationTime, ClientRegistry registry) {
         super();
+        // set the registry as a weak reference to avoid potential memory leaks
+        this.registry = new WeakReference<ClientRegistry>(registry);
+        // perform some id sanity checking, don't allow dupes in registry
         if (id != null) {
-            this.id = id;
+            if (registry.hasClient(id)) {
+                log.warn("Client id: {} already exists in registry, generating new id", id);
+                this.id = registry.nextId();
+            } else {
+                this.id = id;
+            }
         } else {
             this.id = registry.nextId();
         }
+        log.warn("New Client id: {}", id);
         if (creationTime != null) {
-            this.creationTime = creationTime;
+            this.creationTime = creationTime.longValue();
         } else {
             this.creationTime = System.currentTimeMillis();
         }
-        // use a weak reference to prevent any hard-links to the registry
-        this.registry = new WeakReference<ClientRegistry>(registry);
     }
 
     /**
@@ -160,9 +159,11 @@ public class Client extends AttributeStore implements IClient {
     }
 
     /**
-     * {@inheritDoc}
-     *
      * Return client connections to given scope
+     *
+     * @param scope
+     *            Scope
+     * @return Set of connections for that scope
      */
     public Set<IConnection> getConnections(IScope scope) {
         if (scope == null) {
@@ -404,9 +405,11 @@ public class Client extends AttributeStore implements IClient {
     }
 
     /**
-     * {@inheritDoc}
-     *
      * Check clients equality by id
+     *
+     * @param obj
+     *            Object to check against
+     * @return true if clients ids are the same, false otherwise
      */
     @Override
     public boolean equals(Object obj) {
@@ -416,7 +419,10 @@ public class Client extends AttributeStore implements IClient {
         return false;
     }
 
-    /** {@inheritDoc} */
+    /**
+     *
+     * @return string representation of client
+     */
     @Override
     public String toString() {
         return "Client: " + id;
