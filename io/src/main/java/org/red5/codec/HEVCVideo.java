@@ -10,8 +10,6 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.io.IoConstants;
-import org.red5.util.ByteNibbler;
 
 /**
  * Red5 video codec for the HEVC (h265) video format. Stores DecoderConfigurationRecord and last keyframe.

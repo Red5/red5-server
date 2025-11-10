@@ -10,8 +10,6 @@ package org.red5.server.scope;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -152,6 +150,11 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     protected final AttributeStore attributes = new AttributeStore();
 
     /**
+     * Set of connections connected to this scope
+     */
+    protected final transient Set<IConnection> connections = new ConcurrentSkipListSet<>();
+
+    /**
      * Mbean object name.
      */
     protected ObjectName oName;
@@ -262,6 +265,11 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 // timeout while connecting client
                 return false;
             }
+            // XXX(paul) add connection to a set of connections for simple lookup later
+            if (!connections.add(conn)) {
+                log.warn("Connection: {} was already present in scope connections", conn);
+            }
+            // get client from connection
             final IClient client = conn.getClient();
             // we would not get this far if there is no handler
             if (hasHandler() && !getHandler().join(client, this)) {
@@ -347,6 +355,10 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      */
     public void disconnect(IConnection conn) {
         log.warn("Disconnect: {}", conn);
+        // XXX(paul) remove connection from the set of connections
+        if (!connections.remove(conn)) {
+            log.warn("Connection: {} was not found in scope connections", conn);
+        }
         // call disconnect handlers in reverse order of connection. ie. roomDisconnect is called before appDisconnect.
         final IClient client = conn.getClient();
         // null client can happen if connection didn't fully connect to the scope or its been nulled out
@@ -550,11 +562,20 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /** {@inheritDoc} */
-    @Deprecated
-    public Collection<Set<IConnection>> getConnections() {
-        Collection<Set<IConnection>> result = new ArrayList<Set<IConnection>>(3);
-        result.add(getClientConnections());
-        return result;
+    @Override
+    public Set<IConnection> getAllConnections() {
+        return Collections.unmodifiableSet(connections);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public IConnection lookupConnection(String sessionId) {
+        for (IConnection conn : connections) {
+            if (StringUtils.equals(conn.getSessionId(), sessionId)) {
+                return conn;
+            }
+        }
+        return null;
     }
 
     /** {@inheritDoc} */

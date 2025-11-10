@@ -27,14 +27,17 @@ import org.springframework.web.context.ServletContextAware;
 import jakarta.servlet.ServletContext;
 
 /**
+ * Application scope implementation.
+ *
  * <p>
- * Web scope is special scope that is aware of servlet context and represents scope of a Red5 application within a servlet container (or application server) such as Tomcat, Jetty or JBoss.
- * </p>
- * <p>
- * Web scope is aware of virtual hosts configuration for Red5 application and is the first scope that instantiated after Red5 application gets started.
- * </p>
- * <p>
- * Then it loads virtual hosts configuration, adds mappings of paths to global scope that is injected thru Spring IoC context file and runs initialization process.
+ * Web scope is special scope that is aware of servlet context and represents scope of a Red5 application within a
+ * servlet container (or application server) such as Tomcat, Jetty or JBoss.
+ * <br/>
+ * Web scope is aware of virtual hosts configuration for Red5 application and is the first scope that instantiated
+ * after Red5 application gets started.
+ * <br/>
+ * Then it loads virtual hosts configuration, adds mappings of paths to global scope that is injected thru Spring IoC
+ * context file and runs initialization process.
  * </p>
  *
  * Red5 server implementation instance and ServletContext are injected as well.
