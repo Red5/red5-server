@@ -32,7 +32,7 @@ import org.red5.server.so.SharedObjectScope;
 /**
  * Base abstract class for connections. Adds connection specific functionality like work with clients to AttributeStore.
  */
-public abstract class BaseConnection extends AttributeStore implements IConnection {
+public abstract class BaseConnection extends AttributeStore implements IConnection, Comparable<IConnection> {
 
     /**
      * Connection type
@@ -657,6 +657,11 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
             return false;
         }
         return sessionId.equals(((BaseConnection) obj).getSessionId());
+    }
+
+    /** {@inheritDoc} */
+    public int compareTo(IConnection c) {
+        return this.getSessionId().compareTo(c.getSessionId());
     }
 
 }

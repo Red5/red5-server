@@ -52,6 +52,7 @@ import org.red5.server.api.stream.IClientBroadcastStream;
 import org.red5.server.api.stream.IStreamCapableConnection;
 import org.red5.server.exception.ScopeException;
 import org.red5.server.jmx.mxbeans.ScopeMXBean;
+import org.red5.server.stream.ClientBroadcastStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -156,7 +157,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /**
      * Set of connections connected to this scope
      */
-    //protected final transient Set<IConnection> connections = new ConcurrentSkipListSet<>();
+    protected final transient Set<IConnection> connections = new ConcurrentSkipListSet<>();
 
     /**
      * Mbean object name.
@@ -195,47 +196,42 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         makeInternalWorker();
     }
 
+    // XXX: temporary internal worker to run code periodically
     private void makeInternalWorker() {
         if (doRun.compareAndSet(false, true)) {
-            //Temp code
-            Thread tr = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    while (doRun.get()) {
-                        try {
-                            Thread.sleep(10000);
-                        } catch (InterruptedException e) {
-                            break;
-                        }
-
-                        runMFCCodes();
-
+            Thread.ofVirtual().start(() -> {
+                while (doRun.get()) {
+                    try {
+                        Thread.sleep(10000);
+                        runInspectionCode();
+                    } catch (InterruptedException e) {
+                        break;
+                    } catch (Exception e) {
+                        log.error("Exception in internal worker", e);
                     }
-
                 }
-
             });
-            tr.start();
-
         }
     }
 
-    protected void runMFCCodes() {
-
+    protected void runInspectionCode() {
+        log.error("==========================Inspection start========================");
         IScope scope = (IScope) this;
-        //MultiThreadedApplicationAdapter adapter = (MultiThreadedApplicationAdapter) scope.getHandler();
         IScopeHandler adapter = (IScopeHandler) scope.getHandler();
-
-        String contextPath = scope.getContextPath();
+        log.error("Connections in scope: {}\n--------------------\n", connections);
+        // String contextPath = scope.getContextPath();
+        // internally calls scope.getClients(), so its equivalent to: getClients() here
         Set<IClient> clients = adapter.getClients();
+        // all clients connected to the current scope
         for (IClient client : clients) {
+            // all connections for the current client
             for (IConnection conn : client.getConnections()) {
+                // only interested in stream capable connections
                 if (conn instanceof IStreamCapableConnection) {
                     String wsId = conn.hasAttribute("ws-session-id") ? conn.getStringAttribute("ws-session-id") : "N/A";
-                    IStreamCapableConnection streamConn = (IStreamCapableConnection) conn;
+                    //IStreamCapableConnection streamConn = (IStreamCapableConnection) conn;
                     if (conn.getDuty().equals(IConnection.Duty.SUBSCRIBER)) {
-
+                        log.error("Subscriber connection - id: {} ws-id: {} client id: {}", conn.getSessionId(), wsId, conn.getClient().getId());
                     } else {
                         if (conn.hasAttribute("STREAM_NAME")) {
                             // if duty is not set, we can detect publisher by attribute
@@ -257,7 +253,20 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                                     }
                                 }
                             }
-                            log.error("Pub/Sub counts - pub: {} sub: {}", subSubscriberCount, pubSubscriberCount);
+                            log.error("Stream: {} counts - pub: {} sub: {}", pubStreamName, pubSubscriberCount, subSubscriberCount);
+                            IBroadcastScope bc = (IBroadcastScope) scope.getBasicScope(ScopeType.BROADCAST, pubStreamName);
+                            if (bc != null) {
+                                ClientBroadcastStream stream = (ClientBroadcastStream) bc.getClientBroadcastStream();
+                                if (stream != null) {
+                                    int subscriberCount = stream.getActiveSubscribers();
+                                    if (subscriberCount != pubSubscriberCount) {
+                                        log.error("Stream: {} subscriber count mismatch! expected: {} actual: {}", pubStreamName, pubSubscriberCount, subscriberCount);
+                                    } else {
+                                        log.debug("Stream: {} subscriber count matches: {}", pubStreamName, pubSubscriberCount);
+                                    }
+                                    log.error("Stream: {} actual subscriber count: {}", pubStreamName, subscriberCount);
+                                }
+                            }
                             /*
                             LoggingEventBuilder lb = log.atError();
                             lb.addArgument(subSubscriberCount);
@@ -268,6 +277,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                         }
 
                     }
+                } else {
+                    log.debug("Connection is not stream capable: {}", conn);
                 }
             }
         }
@@ -352,9 +363,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 return false;
             }
             // XXX(paul) add connection to a set of connections for simple lookup later
-            //if (!connections.add(conn)) {
-            //    log.warn("Connection: {} was already present in scope connections", conn);
-            //}
+            if (!connections.add(conn)) {
+                log.warn("Connection: {} was already present in scope connections", conn);
+            }
             // get client from connection
             final IClient client = conn.getClient();
             // we would not get this far if there is no handler
@@ -445,9 +456,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     public void disconnect(IConnection conn) {
         log.warn("Disconnect: {}", conn);
         // XXX(paul) remove connection from the set of connections
-        //if (!connections.remove(conn)) {
-        //    log.warn("Connection: {} was not found in scope connections", conn);
-        //}
+        if (!connections.remove(conn)) {
+            log.warn("Connection: {} was not found in scope connections", conn);
+        }
         // call disconnect handlers in reverse order of connection. ie. roomDisconnect is called before appDisconnect.
         final IClient client = conn.getClient();
         // null client can happen if connection didn't fully connect to the scope or its been nulled out
@@ -661,18 +672,17 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /** {@inheritDoc} */
     @Override
     public Set<IConnection> getAllConnections() {
-        //return Collections.unmodifiableSet(connections);
-        return Collections.unmodifiableSet(getClientConnections());
+        return Collections.unmodifiableSet(connections);
     }
 
     /** {@inheritDoc} */
     @Override
     public IConnection lookupConnection(String sessionId) {
-        // for (IConnection conn : connections) {
-        //     if (StringUtils.equals(conn.getSessionId(), sessionId)) {
-        //         return conn;
-        //     }
-        // }
+        for (IConnection conn : connections) {
+            if (StringUtils.equals(conn.getSessionId(), sessionId)) {
+                return conn;
+            }
+        }
         return null;
     }
 

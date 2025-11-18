@@ -100,6 +100,7 @@ public class Client extends AttributeStore implements IClient {
     @ConstructorProperties({ "id", "creationTime", "registry" })
     public Client(String id, Long creationTime, ClientRegistry registry) {
         super();
+        log.error("-----------------\nCreating new Client instance, id: {} creation time: {}\n------------------\n", id, creationTime);
         // set the registry as a weak reference to avoid potential memory leaks
         this.registry = new WeakReference<ClientRegistry>(registry);
         // perform some id sanity checking, don't allow dupes in registry
