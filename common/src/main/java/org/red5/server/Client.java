@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.management.openmbean.CompositeData;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
@@ -62,7 +63,12 @@ public class Client extends AttributeStore implements IClient {
     /**
      * Clients identifier
      */
-    protected final String id;
+    protected final String id = RandomStringUtils.secure().nextAlphanumeric(13).toUpperCase();
+
+    /**
+     * Clients identifier string
+     */
+    protected final String idString;
 
     /**
      * Whether or not the bandwidth has been checked.
@@ -77,43 +83,35 @@ public class Client extends AttributeStore implements IClient {
     /**
      * Creates client, sets creation time and registers it in ClientRegistry.
      *
-     * @param id
-     *            Client id
+     * @param idString
+     *            Client id string
      * @param registry
      *            ClientRegistry
      */
-    @ConstructorProperties({ "id", "registry" })
-    public Client(String id, ClientRegistry registry) {
-        this(id, System.currentTimeMillis(), registry);
+    @ConstructorProperties({ "idString", "registry" })
+    public Client(String idString, ClientRegistry registry) {
+        this(idString, System.currentTimeMillis(), registry);
     }
 
     /**
      * Creates client, sets creation time and registers it in ClientRegistry.
      *
-     * @param id
-     *            Client id
+     * @param idString
+     *            Client id string
      * @param creationTime
      *            Creation time
      * @param registry
      *            ClientRegistry
      */
-    @ConstructorProperties({ "id", "creationTime", "registry" })
-    public Client(String id, Long creationTime, ClientRegistry registry) {
+    @ConstructorProperties({ "idString", "creationTime", "registry" })
+    public Client(String idString, Long creationTime, ClientRegistry registry) {
         super();
-        log.error("-----------------\nCreating new Client instance, id: {} creation time: {}\n------------------\n", id, creationTime);
+        log.error("-----------------\nCreating new Client instance - id: {} idString: {} creation time: {}\n------------------\n", id, idString, creationTime);
+        // set id string, this would be what used to identify the client
+        this.idString = idString != null ? idString : this.id;
         // set the registry as a weak reference to avoid potential memory leaks
         this.registry = new WeakReference<ClientRegistry>(registry);
-        // perform some id sanity checking, don't allow dupes in registry
-        if (id != null) {
-            if (registry.hasClient(id)) {
-                log.warn("Client id: {} already exists in registry, generating new id", id);
-                this.id = registry.nextId();
-            } else {
-                this.id = id;
-            }
-        } else {
-            this.id = registry.nextId();
-        }
+        // id's are randomly generated at instantiation and ensure uniqueness
         log.warn("New Client id: {}", id);
         if (creationTime != null) {
             this.creationTime = creationTime.longValue();
@@ -194,6 +192,15 @@ public class Client extends AttributeStore implements IClient {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * Returns the client id string, not to be confused with the client id.
+     *
+     * @return client id string
+     */
+    public String getIdString() {
+        return idString;
     }
 
     /**
@@ -412,7 +419,7 @@ public class Client extends AttributeStore implements IClient {
      */
     @Override
     public String toString() {
-        return "Client: " + id;
+        return "Client: " + id + " (idString: " + idString + ") created: " + creationTime + " connections: " + connections.size();
     }
 
 }
