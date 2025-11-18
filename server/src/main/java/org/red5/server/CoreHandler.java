@@ -7,6 +7,9 @@
 
 package org.red5.server;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.red5.server.api.IClient;
 import org.red5.server.api.IClientRegistry;
 import org.red5.server.api.IConnection;
@@ -166,4 +169,7 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
         return false;
     }
 
+    public Set<IClient> getClients() {
+        return new HashSet<>();
+    }
 }

@@ -10,6 +10,8 @@ package org.red5.server.scope;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
@@ -46,6 +49,7 @@ import org.red5.server.api.statistics.IScopeStatistics;
 import org.red5.server.api.statistics.support.StatisticsCounter;
 import org.red5.server.api.stream.IBroadcastStream;
 import org.red5.server.api.stream.IClientBroadcastStream;
+import org.red5.server.api.stream.IStreamCapableConnection;
 import org.red5.server.exception.ScopeException;
 import org.red5.server.jmx.mxbeans.ScopeMXBean;
 import org.slf4j.Logger;
@@ -152,12 +156,14 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /**
      * Set of connections connected to this scope
      */
-    protected final transient Set<IConnection> connections = new ConcurrentSkipListSet<>();
+    //protected final transient Set<IConnection> connections = new ConcurrentSkipListSet<>();
 
     /**
      * Mbean object name.
      */
     protected ObjectName oName;
+
+    private AtomicBoolean doRun = new AtomicBoolean();
 
     {
         creationTime = System.currentTimeMillis();
@@ -171,6 +177,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         super(null, ScopeType.UNDEFINED, null, false);
         children = new ConcurrentScopeSet();
         clients = new CopyOnWriteArraySet<IClient>();
+        makeInternalWorker();
     }
 
     /**
@@ -185,6 +192,85 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         super(parent, type, name, persistent);
         children = new ConcurrentScopeSet();
         clients = new CopyOnWriteArraySet<IClient>();
+        makeInternalWorker();
+    }
+
+    private void makeInternalWorker() {
+        if (doRun.compareAndSet(false, true)) {
+            //Temp code
+            Thread tr = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    while (doRun.get()) {
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+
+                        runMFCCodes();
+
+                    }
+
+                }
+
+            });
+            tr.start();
+
+        }
+    }
+
+    protected void runMFCCodes() {
+
+        IScope scope = (IScope) this;
+        //MultiThreadedApplicationAdapter adapter = (MultiThreadedApplicationAdapter) scope.getHandler();
+        IScopeHandler adapter = (IScopeHandler) scope.getHandler();
+
+        String contextPath = scope.getContextPath();
+        Set<IClient> clients = adapter.getClients();
+        for (IClient client : clients) {
+            for (IConnection conn : client.getConnections()) {
+                if (conn instanceof IStreamCapableConnection) {
+                    String wsId = conn.hasAttribute("ws-session-id") ? conn.getStringAttribute("ws-session-id") : "N/A";
+                    IStreamCapableConnection streamConn = (IStreamCapableConnection) conn;
+                    if (conn.getDuty().equals(IConnection.Duty.SUBSCRIBER)) {
+
+                    } else {
+                        if (conn.hasAttribute("STREAM_NAME")) {
+                            // if duty is not set, we can detect publisher by attribute
+                            // get the stream name from the connection attribute
+                            String pubStreamName = conn.getStringAttribute("STREAM_NAME");
+                            // the stream name can be used to count subscribers, but this requires looking at each
+                            // connection that is a subscriber to see if they are subscribed to this stream
+                            // this is not efficient for large numbers of connections, but this is just a test page
+                            int pubSubscriberCount = 0;
+                            int subSubscriberCount = 0;
+                            for (IClient cclient : adapter.getClients()) {
+                                log.error("Client id: {}", cclient.getId());
+                                for (IConnection cconn : cclient.getConnections()) {
+                                    log.error("Connection: {}", cconn);
+                                    if (cconn instanceof IStreamCapableConnection && cconn.getDuty().equals(IConnection.Duty.SUBSCRIBER)) {
+                                        subSubscriberCount++;
+                                    } else {
+                                        pubSubscriberCount++;
+                                    }
+                                }
+                            }
+                            log.error("Pub/Sub counts - pub: {} sub: {}", subSubscriberCount, pubSubscriberCount);
+                            /*
+                            LoggingEventBuilder lb = log.atError();
+                            lb.addArgument(subSubscriberCount);
+                            lb.addArgument(pubSubscriberCount);
+                            lb.setMessage("HEY YOU GUYS. subs count: {} pub count: {}");
+                            lb.log();
+                            */
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -266,9 +352,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 return false;
             }
             // XXX(paul) add connection to a set of connections for simple lookup later
-            if (!connections.add(conn)) {
-                log.warn("Connection: {} was already present in scope connections", conn);
-            }
+            //if (!connections.add(conn)) {
+            //    log.warn("Connection: {} was already present in scope connections", conn);
+            //}
             // get client from connection
             final IClient client = conn.getClient();
             // we would not get this far if there is no handler
@@ -331,6 +417,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      */
     public void destroy() throws Exception {
         log.debug("Destroy scope");
+        if (doRun.compareAndSet(true, false)) {
+
+        }
         if (hasParent()) {
             parent.removeChildScope(this);
         }
@@ -356,9 +445,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     public void disconnect(IConnection conn) {
         log.warn("Disconnect: {}", conn);
         // XXX(paul) remove connection from the set of connections
-        if (!connections.remove(conn)) {
-            log.warn("Connection: {} was not found in scope connections", conn);
-        }
+        //if (!connections.remove(conn)) {
+        //    log.warn("Connection: {} was not found in scope connections", conn);
+        //}
         // call disconnect handlers in reverse order of connection. ie. roomDisconnect is called before appDisconnect.
         final IClient client = conn.getClient();
         // null client can happen if connection didn't fully connect to the scope or its been nulled out
@@ -563,18 +652,27 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
 
     /** {@inheritDoc} */
     @Override
+    public Collection<Set<IConnection>> getConnections() {
+        Collection<Set<IConnection>> result = new ArrayList<Set<IConnection>>(3);
+        result.add(getClientConnections());
+        return result;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public Set<IConnection> getAllConnections() {
-        return Collections.unmodifiableSet(connections);
+        //return Collections.unmodifiableSet(connections);
+        return Collections.unmodifiableSet(getClientConnections());
     }
 
     /** {@inheritDoc} */
     @Override
     public IConnection lookupConnection(String sessionId) {
-        for (IConnection conn : connections) {
-            if (StringUtils.equals(conn.getSessionId(), sessionId)) {
-                return conn;
-            }
-        }
+        // for (IConnection conn : connections) {
+        //     if (StringUtils.equals(conn.getSessionId(), sessionId)) {
+        //         return conn;
+        //     }
+        // }
         return null;
     }
 

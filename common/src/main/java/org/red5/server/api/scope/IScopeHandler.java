@@ -7,6 +7,8 @@
 
 package org.red5.server.api.scope;
 
+import java.util.Set;
+
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.event.IEventHandler;
@@ -114,5 +116,7 @@ public interface IScopeHandler extends IEventHandler {
      * @return true to allow, false to deny
      */
     boolean serviceCall(IConnection conn, IServiceCall call);
+
+    Set<IClient> getClients();
 
 }

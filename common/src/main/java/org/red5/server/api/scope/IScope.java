@@ -140,13 +140,14 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
      *
      * @return Iterator holding all connections
      */
-    @Deprecated
-    default Collection<Set<IConnection>> getConnections() {
-        // this only provides connections that belong to a client
-        Collection<Set<IConnection>> result = new ArrayList<Set<IConnection>>(3);
-        result.add(getClientConnections());
-        return result;
-    }
+    // @Deprecated
+    // default Collection<Set<IConnection>> getConnections() {
+    //     // this only provides connections that belong to a client
+    //     Collection<Set<IConnection>> result = new ArrayList<Set<IConnection>>(3);
+    //     result.add(getClientConnections());
+    //     return result;
+    // }
+    Collection<Set<IConnection>> getConnections();
 
     /**
      * Return a collection of all the connections connected to the scope.
