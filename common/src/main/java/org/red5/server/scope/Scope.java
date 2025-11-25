@@ -132,12 +132,12 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /**
      * Child scopes
      */
-    private final transient ConcurrentScopeSet children;
+    private final transient ConcurrentScopeSet children = new ConcurrentScopeSet();
 
     /**
      * Connected clients map
      */
-    private final transient CopyOnWriteArraySet<IClient> clients;
+    private final transient CopyOnWriteArraySet<IClient> clients = new CopyOnWriteArraySet<>();
 
     /**
      * Statistics about connections to the scope.
@@ -176,8 +176,6 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     @ConstructorProperties(value = { "" })
     public Scope() {
         super(null, ScopeType.UNDEFINED, null, false);
-        children = new ConcurrentScopeSet();
-        clients = new CopyOnWriteArraySet<IClient>();
         makeInternalWorker();
     }
 
@@ -191,26 +189,27 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      */
     public Scope(IScope parent, ScopeType type, String name, boolean persistent) {
         super(parent, type, name, persistent);
-        children = new ConcurrentScopeSet();
-        clients = new CopyOnWriteArraySet<IClient>();
         makeInternalWorker();
     }
 
     // XXX: temporary internal worker to run code periodically
     private void makeInternalWorker() {
-        if (doRun.compareAndSet(false, true)) {
-            Thread.ofVirtual().start(() -> {
-                while (doRun.get()) {
-                    try {
-                        Thread.sleep(10000);
-                        runInspectionCode();
-                    } catch (InterruptedException e) {
-                        break;
-                    } catch (Exception e) {
-                        log.error("Exception in internal worker", e);
+        if (log.isTraceEnabled()) {
+            log.trace("Making internal worker for scope: {}", this);
+            if (doRun.compareAndSet(false, true)) {
+                Thread.ofVirtual().start(() -> {
+                    while (doRun.get()) {
+                        try {
+                            Thread.sleep(10000);
+                            runInspectionCode();
+                        } catch (InterruptedException e) {
+                            break;
+                        } catch (Exception e) {
+                            log.error("Exception in internal worker", e);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -267,15 +266,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                                     log.error("Stream: {} actual subscriber count: {}", pubStreamName, subscriberCount);
                                 }
                             }
-                            /*
-                            LoggingEventBuilder lb = log.atError();
-                            lb.addArgument(subSubscriberCount);
-                            lb.addArgument(pubSubscriberCount);
-                            lb.setMessage("HEY YOU GUYS. subs count: {} pub count: {}");
-                            lb.log();
-                            */
                         }
-
                     }
                 } else {
                     log.debug("Connection is not stream capable: {}", conn);
