@@ -148,13 +148,7 @@ public class AttributeStore implements ICastingAttributeStore {
         if (defaultValue == null) {
             throw new NullPointerException("the default value may not be null");
         }
-        Object result = attributes.put(name, defaultValue);
-        // if no previous value result will be null
-        if (result == null) {
-            // use the default value
-            result = defaultValue;
-        }
-        return result;
+        return attributes.getOrDefault(name, defaultValue);
     }
 
     /**
