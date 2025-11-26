@@ -89,6 +89,9 @@ public class AV1Video extends AbstractVideo {
             if (enhanced) {
                 // get the packet type
                 packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
+                if (data.remaining() < 4) {
+                    return false;
+                }
                 // get the fourcc
                 int fourcc = data.getInt();
                 // reset back to the beginning after we got the fourcc
@@ -154,6 +157,9 @@ public class AV1Video extends AbstractVideo {
                         }
                         break;
                     case CodedFrames: // pass coded data
+                        if (data.remaining() < 3) {
+                            return false;
+                        }
                         int compTimeOffset = (data.get() << 16 | data.get() << 8 | data.get());
                         switch (frameType) {
                             case KEYFRAME: // keyframe
