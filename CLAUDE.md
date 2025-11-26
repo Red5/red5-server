@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Red5 Server is an open-source Flash media server written in Java that supports RTMP, RTMPT, RTMPS, and RTMPE protocols for streaming video/audio and real-time messaging. The project uses Maven as its build system with a multi-module structure.
+Red5 Server is an open-source media server written in Java that supports RTMP, RTMPT, RTMPS, RTMPE, and Server-Sent Events (SSE) protocols for streaming video/audio and real-time messaging. The project uses Maven as its build system with a multi-module structure. Current version is **2.0.23**.
 
 ## Build Commands
 
@@ -45,9 +45,10 @@ mvn -Dmilestone.version=1.0.7-M1 clean package -Pmilestone
 ## Project Architecture
 
 ### Module Structure
-- **`common/`** - Core RTMP protocol implementation, codecs, and shared utilities
+- **`common/`** - Core RTMP protocol implementation, codecs, SSE interfaces, and shared utilities
 - **`io/`** - I/O operations, file formats (FLV, MP4), AMF encoding/decoding
-- **`server/`** - Server application framework, scope management, Spring integration
+- **`server/`** - Server application framework, scope management, SSE implementation, Spring integration
+- **`servlet/`** - Servlet components including RTMPT support
 - **`client/`** - RTMP client implementation for outbound connections
 - **`service/`** - System service and daemon integration
 - **`tests/`** - Integration and unit tests
@@ -75,25 +76,38 @@ Media handling in `io/src/main/java/org/red5/io/`:
 - **`amf/`**, **`amf3/`** - Action Message Format serialization
 - **`object/`** - Object serialization framework
 
+#### Server-Sent Events (SSE)
+SSE implementation for real-time server-to-client communication:
+- **`common/.../net/sse/`** - Core interfaces (`ISSEService`, `SSEConnection`, `SSEEvent`)
+- **`server/.../net/sse/`** - Implementation (`SSEServlet`, `SSEManager`, `SSEService`)
+- **`server/.../adapter/SSEApplicationAdapter`** - Red5 application adapter with built-in SSE support
+- Features: W3C SSE compliance, connection management, keep-alive support, scope integration, CORS support
+
 ### Technology Stack
 - **Java 21** (minimum requirement)
 - **Maven 3.6+** for build management
-- **Spring Framework 6.x** for dependency injection and application context
-- **Apache MINA 2.x** for network I/O
-- **Logback/SLF4J** for logging
+- **Spring Framework 6.2.x** for dependency injection and application context
+- **Apache MINA 2.0.23** for network I/O
+- **Tomcat 11.0.x** (embedded) for servlet container
+- **Logback 1.5.x / SLF4J 2.0.x** for logging
+- **Ehcache 2.10.x** for caching
 - **JUnit 4** for testing
 
 ### Security Considerations
-Recent security enhancements to RTMP protocol handling:
-- Chunk size validation with bounds checking (128-65536 bytes)
-- Type 3 header validation to prevent stream confusion attacks
-- Extended timestamp rollover handling for 32-bit timestamp wraparound
+RTMP protocol security enhancements (see `SECURITY_FIXES_SUMMARY.md` for details):
+- **Chunk size validation** - Bounds checking (RTMP spec: 1-16777215, soft limits: 32-65536 bytes)
+- **Type 3 header validation** - Prevents stream confusion attacks with graceful handling
+- **Extended timestamp handling** - Correct 32-bit timestamp processing and rollover protection
+- **Client compatibility** - Maintains support for OBS Studio, FFmpeg, and other streaming clients
 
 ### Configuration
-- **`server/conf/`** - Server configuration files
+- **`server/src/main/server/conf/`** - Server configuration files
 - **`red5.properties`** - Main server properties
+- **`red5-common.xml`** - Common Spring beans including SSE configuration
+- **`red5-core.xml`** - Core server beans
 - **`logback.xml`** - Logging configuration
-- **Spring XML files** - Application context configuration
+- **`ehcache.xml`** - Cache configuration
+- **`jee-container.xml`** / **`no-jee-container.xml`** - Container-specific configuration
 
 ### Development Workflow
 1. Code formatting uses Eclipse formatter (`red5-eclipse-format.xml`)
@@ -107,5 +121,13 @@ Recent security enhancements to RTMP protocol handling:
 - **`IConnection`** - Client connection abstraction
 - **`IStream`** - Stream operations (publish/play)
 - **`ISharedObject`** - Shared object management
+- **`ISSEService`** - Server-Sent Events service interface
+
+### Related Documentation
+
+- **`SSE-README.md`** - Server-Sent Events implementation guide
+- **`SECURITY_FIXES_SUMMARY.md`** - RTMP security enhancements summary
+- **`RTMPS.md`** - RTMPS (secure RTMP) configuration guide
+- **`servlet/Readme.md`** - RTMPT servlet configuration
 
 This codebase follows traditional Java enterprise patterns with Spring framework integration, focusing on media streaming protocol implementation and real-time communication features.
