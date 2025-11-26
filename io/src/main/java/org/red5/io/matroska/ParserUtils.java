@@ -166,38 +166,17 @@ public class ParserUtils {
      *             - in case of IO error
      */
     public static VINT readVINT(InputStream inputStream) throws IOException {
-        byte[] vint;
         int fb = inputStream.read();
-        int read = 0;
         assert fb > 0;
 
-        int len = (fb >> 4);
-        long mask = MASK_BYTE_4;
-        if (len >= 0b1000) {
-            read = 0;
-            mask = MASK_BYTE_1;
-            vint = new byte[1];
-        } else if (len >= 0b0100) {
-            mask = MASK_BYTE_2;
-            vint = new byte[2];
-            read = inputStream.read(vint, 1, 1);
-            assert read == 1;
-        } else if (len >= 0b0010) {
-            mask = MASK_BYTE_3;
-            vint = new byte[3];
-            read = inputStream.read(vint, 1, 2);
-            assert read == 2;
-        } else if (len >= 0b0001) {
-            vint = new byte[4];
-            read = inputStream.read(vint, 1, 3);
-            assert read == 3;
-        } else {
-            mask = MASK_BYTE_8;
-            vint = new byte[8];
-            read = inputStream.read(vint, 1, 7);
-            assert read == 7;
-        }
+        int leadingZeros = Integer.numberOfLeadingZeros(fb & 0xFF) - 24;
+        int len = leadingZeros + 1;
+        byte[] vint = new byte[len];
         vint[0] = (byte) fb;
+        int read = inputStream.read(vint, 1, len - 1);
+        assert read == len - 1;
+
+        long mask = (1L << (len * 7)) - 1;
         long binaryV = 0;
         for (int i = 0; i < vint.length; ++i) {
             binaryV += (0x00FF & vint[i]);
