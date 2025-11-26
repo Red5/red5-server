@@ -67,6 +67,8 @@ public class WebmWriter implements Closeable, TagConsumer {
                     bytesWritten = file.length();
                 }
                 this.dataFile = new RandomAccessFile(file, "rws");
+                // move write cursor to end so data is appended, not overwritten
+                this.dataFile.seek(bytesWritten);
             } else {
                 // temporary data file for storage of stream data
                 File dat = new File(filePath + ".ser");
@@ -131,6 +133,8 @@ public class WebmWriter implements Closeable, TagConsumer {
             if (!append) {
                 dataFile.seek(0);
                 try (RandomAccessFile rf = new RandomAccessFile(file, "rw")) {
+                    // ensure previous contents are cleared before copying over new data
+                    rf.setLength(0);
                     rf.getChannel().transferFrom(dataFile.getChannel(), 0, dataFile.length());
                 }
             }
