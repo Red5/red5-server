@@ -111,6 +111,12 @@ public class ServiceInvoker implements IServiceInvoker {
         IConnection conn = Red5.getConnectionLocal();
         String methodName = call.getServiceMethodName();
         log.debug("Service: {} name: {} method: {}", service, call.getServiceName(), methodName);
+        if (methodName == null || methodName.isEmpty()) {
+            log.warn("Method name was null or empty for call: {}", call);
+            call.setStatus(Call.STATUS_METHOD_NOT_FOUND);
+            call.setException(new MethodNotFoundException(methodName));
+            return false;
+        }
         // pull off the prefixes since java doesnt allow this on a method name
         if (methodName.charAt(0) == '@') {
             log.debug("Method name contained an illegal prefix, it will be removed: {}", methodName);

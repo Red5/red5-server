@@ -53,13 +53,14 @@ public class ReflectionUtils {
         }
         // return value(s)
         Object[] methodResult = NULL_RETURN;
+        final int argsSize = (listArgs != null ? listArgs.size() : 0);
         // get all the name matched methods once, then filter out the ones that contain a $
-        final Set<Method> methods = Arrays.stream(service.getClass().getMethods()).filter(m -> (m.getName().equals(methodName) && !m.getName().contains("$"))).filter(m -> m.getParameterCount() == 1 || m.getParameterCount() == listArgs.size()).collect(Collectors.toUnmodifiableSet());
+        final Set<Method> methods = Arrays.stream(service.getClass().getMethods()).filter(m -> (m.getName().equals(methodName) && !m.getName().contains("$"))).filter(m -> m.getParameterCount() == 1 || m.getParameterCount() == argsSize).collect(Collectors.toUnmodifiableSet());
         if (!methods.isEmpty()) {
             if (isDebug) {
                 log.debug("Named method(s) {}: {} found in {}", methods.size(), methodName, service);
             }
-            Object[] args = listArgs.toArray();
+            Object[] args = (listArgs != null ? listArgs.toArray() : new Object[0]);
             // convert the args to their class types
             final Class<?>[] callParams = ConversionUtils.convertParams(args);
             // search for method with matching parameters

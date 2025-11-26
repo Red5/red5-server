@@ -304,7 +304,7 @@ public class Call implements IServiceCall, IExternalizable {
         serviceName = (String) in.readUTF();
         serviceMethodName = (String) in.readUTF();
         arguments = (Object[]) in.readObject();
-        if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled() && arguments != null) {
             for (int i = 0; i < arguments.length; i++) {
                 log.debug("ReadExt - Arg: {} type: {} => {}", i, (arguments[i] != null ? arguments[i].getClass().getName() : null), arguments[i]);
             }
@@ -319,9 +319,9 @@ public class Call implements IServiceCall, IExternalizable {
         writeTime = System.currentTimeMillis();
         // write-out properties
         out.writeByte(status);
-        out.writeUTF(serviceName);
-        out.writeUTF(serviceMethodName);
-        if (log.isDebugEnabled()) {
+        out.writeUTF(serviceName != null ? serviceName : "");
+        out.writeUTF(serviceMethodName != null ? serviceMethodName : "");
+        if (log.isDebugEnabled() && arguments != null) {
             for (int i = 0; i < arguments.length; i++) {
                 log.debug("WriteExt - Arg: {} type: {} => {}", i, (arguments[i] != null ? arguments[i].getClass().getName() : null), arguments[i]);
             }
