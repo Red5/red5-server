@@ -99,10 +99,10 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
                 if (bandwidthDetection && !client.isBandwidthChecked()) {
                     client.checkBandwidth();
                 }
+                registerJMX();
             } else {
                 log.warn("Client was null");
             }
-            registerJMX();
         } else {
             log.debug("Connect failed");
         }
