@@ -239,7 +239,7 @@ public class WebSocketPlugin extends Red5Plugin {
         // set a reference to the application scope so we can create room scopes
         String applicationScopeName = path.split("\\/")[1];
         log.debug("Looking for application scope: {}", applicationScopeName);
-        return managerMap.keySet().stream().filter(scope -> (ScopeUtils.isApp(scope) && scope.getName().equals(applicationScopeName))).findFirst().get();
+        return managerMap.keySet().stream().filter(scope -> (ScopeUtils.isApp(scope) && scope.getName().equals(applicationScopeName))).findFirst().orElse(null);
     }
 
     /**
