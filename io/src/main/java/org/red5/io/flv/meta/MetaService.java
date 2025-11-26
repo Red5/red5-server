@@ -68,6 +68,9 @@ public class MetaService implements IMetaService {
     public void write(IMetaData<?, ?> meta) throws IOException {
         // Get cue points, FLV reader and writer
         IMetaCue[] metaArr = meta.getMetaCue();
+        if (metaArr == null) {
+            metaArr = new IMetaCue[0];
+        }
         FLVReader reader = new FLVReader(file, false);
         FLVWriter writer = new FLVWriter(file, false);
         ITag tag = null;
