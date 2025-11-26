@@ -243,7 +243,11 @@ public class FileProvider implements IPassive, ISeekableProvider, IPullableProvi
      */
     private void uninit() {
         if (reader != null) {
-            reader.close();
+            try {
+                reader.close();
+            } catch (Exception e) {
+                log.warn("Exception closing reader: {}", e.getMessage());
+            }
             reader = null;
         }
     }

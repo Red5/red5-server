@@ -495,7 +495,11 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
                 queue.clear();
                 queue = null;
                 // close the writer
-                writer.close();
+                try {
+                    writer.close();
+                } catch (Exception e) {
+                    log.warn("Exception closing writer on uninit", e);
+                }
                 writer = null;
             }
             // clear path ref

@@ -1006,10 +1006,14 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
                     reader = streamFile.getReader();
                     duration = (double) reader.getDuration() / 1000;
                 } catch (IOException e) {
-                    log.error("Error read stream file {}. {}", file.getAbsolutePath(), e);
+                    log.warn("Error reading stream file {}. {}", file.getAbsolutePath(), e);
                 } finally {
                     if (reader != null) {
-                        reader.close();
+                        try {
+                            reader.close();
+                        } catch (Exception e) {
+                            log.warn("Error closing reader for file {}. {}", file.getAbsolutePath(), e);
+                        }
                     }
                 }
             } else {
