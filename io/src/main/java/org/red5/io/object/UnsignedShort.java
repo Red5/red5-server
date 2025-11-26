@@ -81,7 +81,7 @@ public final class UnsignedShort extends UnsignedNumber {
         if ((c.length - idx) < 2) {
             throw new IllegalArgumentException("An UnsignedShort number is composed of 2 bytes");
         }
-        number.value = ((c[0] << 8) | (c[1] & 0xFFFF));
+        number.value = ((c[idx] & 0xFF) << 8 | (c[idx + 1] & 0xFF));
         return number;
     }
 
@@ -160,11 +160,13 @@ public final class UnsignedShort extends UnsignedNumber {
     /** {@inheritDoc} */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof Number) {
+        if (other instanceof UnsignedNumber) {
             return Arrays.equals(getBytes(), ((UnsignedNumber) other).getBytes());
-        } else {
-            return false;
+        } else if (other instanceof Number) {
+            long otherValue = ((Number) other).longValue() & 0xFFFFL;
+            return (value & 0xFFFFL) == otherValue;
         }
+        return false;
     }
 
     /** {@inheritDoc} */
