@@ -238,7 +238,15 @@ public class ParserUtils {
      */
     public static void skip(long size, InputStream input) throws IOException {
         while (size > 0) {
-            size -= input.skip(size);
+            long skipped = input.skip(size);
+            if (skipped <= 0) {
+                // if skip is not making progress, consume one byte to avoid an infinite loop
+                if (input.read() == -1) {
+                    throw new IOException("Unexpected end of stream while skipping");
+                }
+                skipped = 1;
+            }
+            size -= skipped;
         }
     }
 }
