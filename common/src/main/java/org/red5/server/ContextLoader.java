@@ -206,7 +206,14 @@ public class ContextLoader implements ApplicationContextAware, InitializingBean,
     @SuppressWarnings("null")
     public void unloadContext(String name) {
         log.debug("Un-load context - name: {}", name);
+        if (contextMap == null) {
+            log.debug("Un-load - no contexts were loaded");
+            return;
+        }
         ApplicationContext context = contextMap.remove(name);
+        if (context == null) {
+            log.debug("Context {} was not loaded", name);
+        }
         log.debug("Context from map: {}", context);
         String[] bnames = BeanFactoryUtils.beanNamesIncludingAncestors(context);
         for (String bname : bnames) {
