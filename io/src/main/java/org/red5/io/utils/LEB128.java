@@ -38,20 +38,15 @@ public final class LEB128 {
      * @return unsigned integer in LEB128 format
      */
     public static int encode(int value) {
+        byte[] buffer = new byte[5];
+        int byteCount = encode(value, buffer, 0);
+        if (byteCount > 4) {
+            throw new IllegalArgumentException("LEB128 encoding requires " + byteCount + " bytes; use the byte[] encoder instead");
+        }
         int out = 0;
-        //int byteCount = 1;
-        do {
-            out |= (value & SEVEN_LSB_BITMASK);
-            value >>= 7;
-            if (value != 0) {
-                out |= MSB_BITMASK;
-                out <<= 8;
-            } else {
-                break;
-            }
-            //byteCount++;
-        } while (value != 0);
-        //log.trace("Encoded {} bytes", byteCount);
+        for (int i = 0; i < byteCount; i++) {
+            out = (out << 8) | (buffer[i] & 0xff);
+        }
         return out;
     }
 
