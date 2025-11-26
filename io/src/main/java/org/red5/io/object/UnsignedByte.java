@@ -79,7 +79,7 @@ public final class UnsignedByte extends UnsignedNumber {
         if ((c.length - idx) < 1)
             throw new IllegalArgumentException("An UnsignedByte number is composed of 1 byte");
 
-        number.value = (short) (c[0] & 0xFF);
+        number.value = (short) (c[idx] & 0xFF);
         return number;
     }
 
