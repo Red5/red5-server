@@ -274,11 +274,11 @@ public final class ArrayUtils {
             nested = Long.class;
         } else if (nested == float.class) {
             nested = Float.class;
-        } else if (nested == Double.class) {
+        } else if (nested == double.class) {
             nested = Double.class;
         } else if (nested == boolean.class) {
             nested = Boolean.class;
-        } else if (nested == Character.class) {
+        } else if (nested == char.class) {
             nested = Character.class;
         }
         return nested;
