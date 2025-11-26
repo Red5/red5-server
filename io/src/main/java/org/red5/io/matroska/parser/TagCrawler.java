@@ -110,6 +110,9 @@ public class TagCrawler {
     public void process(InputStream input) throws IOException, ConverterException {
         while (0 != input.available()) {
             Tag tag = ParserUtils.parseTag(input);
+            if (tag == null) {
+                throw new ConverterException("Unsupported matroska tag encountered");
+            }
             TagHandler handler = getHandler(tag);
             if (null == handler) {
                 skipHandler.handle(tag, input);
