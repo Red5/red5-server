@@ -659,7 +659,12 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                     int firstByte = body.array()[0] & 0xff;
                     if (((firstByte & ITag.MASK_SOUND_FORMAT) >> 4) == AudioCodec.AAC.getId()) {
                         // read second byte to see if its config data
-                        if (body.array()[1] != 0 && !audioConfigRead.get()) {
+                        if (body.array().length < 2) {
+                            log.debug("Skipping AAC since body size is too small for config");
+                            body.clear();
+                            body.free();
+                            tag = null;
+                        } else if (body.array()[1] != 0 && !audioConfigRead.get()) {
                             log.debug("Skipping AAC since config has not beean read yet");
                             body.clear();
                             body.free();
@@ -669,7 +674,12 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                         }
                     } else if ((firstByte & ITag.MASK_VIDEO_CODEC) == VideoCodec.AVC.getId()) {
                         // read second byte to see if its config data
-                        if (body.array()[1] != 0 && !videoConfigRead.get()) {
+                        if (body.array().length < 2) {
+                            log.debug("Skipping AVC since body size is too small for config");
+                            body.clear();
+                            body.free();
+                            tag = null;
+                        } else if (body.array()[1] != 0 && !videoConfigRead.get()) {
                             log.debug("Skipping AVC since config has not beean read yet");
                             body.clear();
                             body.free();
@@ -679,7 +689,12 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                         }
                     } else if ((firstByte & ITag.MASK_VIDEO_CODEC) == VideoCodec.HEVC.getId()) {
                         // read second byte to see if its config data
-                        if (body.array()[1] != 0 && !videoConfigRead.get()) {
+                        if (body.array().length < 2) {
+                            log.debug("Skipping HEVC since body size is too small for config");
+                            body.clear();
+                            body.free();
+                            tag = null;
+                        } else if (body.array()[1] != 0 && !videoConfigRead.get()) {
                             log.debug("Skipping HEVC since config has not beean read yet");
                             body.clear();
                             body.free();
@@ -712,7 +727,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     /** {@inheritDoc} */
     @Override
     public void close() {
-        log.debug("Reader close: {}", file.getName());
+        log.debug("Reader close: {}", file != null ? file.getName() : "buffer");
         try {
             lock.lock();
             if (in != null) {
@@ -722,12 +737,14 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
             if (channel != null) {
                 try {
                     channel.close();
-                    fis.close();
+                    if (fis != null) {
+                        fis.close();
+                    }
                 } catch (IOException e) {
                     log.error("FLVReader close", e);
                 }
             }
-            log.debug("Reader closed: {}", file.getName());
+            log.debug("Reader closed: {}", file != null ? file.getName() : "buffer");
         } finally {
             if (lock.isLocked()) {
                 lock.unlock();
