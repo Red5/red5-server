@@ -120,9 +120,9 @@ public class RecordSet {
             columns = (List<String>) serverInfo.get("columnNames");
             version = (Integer) serverInfo.get("version");
             id = serverInfo.get("id");
-            this.data = new ArrayList<List<Object>>(totalCount);
+            this.data = new ArrayList<List<Object>>(Collections.nCopies(totalCount, (List<Object>) null));
             for (int i = 0; i < initialData.size(); i++) {
-                this.data.add(i + cursor - 1, initialData.get(i));
+                this.data.set(i + cursor - 1, initialData.get(i));
             }
         } else {
             throw new RuntimeException("Map (serverinfo) was null");
@@ -239,7 +239,7 @@ public class RecordSet {
 
         // Store received items
         for (int i = 0; i < count; i++) {
-            this.data.add(start + i, data.get(i));
+            this.data.set(start + i, data.get(i));
         }
     }
 
