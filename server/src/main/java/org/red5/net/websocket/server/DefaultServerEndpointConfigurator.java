@@ -132,9 +132,12 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             path = path.substring(path.indexOf('/'));
         }
         log.debug("Stripped path: {}", path);
-        // trim off any non-path endings (like /?id=xxx)
-        int idx = -1;
-        if ((idx = path.lastIndexOf('/')) != -1) {
+        // trim off any non-path endings (like ?id=xxx or fragments)
+        int idx = path.indexOf('?');
+        if (idx == -1) {
+            idx = path.indexOf('#');
+        }
+        if (idx != -1) {
             path = path.substring(0, idx);
         }
         // get the manager
