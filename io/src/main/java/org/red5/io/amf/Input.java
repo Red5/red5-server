@@ -206,18 +206,27 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     @Override
     public String readString() {
         int limit = buf.limit();
+        int remaining = buf.remaining();
         int len = 0;
         switch (currentDataType) {
             case AMF.TYPE_LONG_STRING:
                 log.trace("Long string type");
                 len = buf.getInt();
-                if (len > limit) {
-                    len = limit;
+                if (len < 0) {
+                    log.warn("Negative long string length {}, clamping to 0", len);
+                    len = 0;
+                } else if (len > remaining) {
+                    log.warn("Long string length {} exceeds remaining {}, clamping", len, remaining);
+                    len = remaining;
                 }
                 break;
             case AMF.TYPE_STRING:
                 log.trace("Std string type");
                 len = buf.getUnsignedShort();
+                if (len > remaining) {
+                    log.warn("String length {} exceeds remaining {}, clamping", len, remaining);
+                    len = remaining;
+                }
                 break;
             default:
                 log.debug("Unknown AMF type: {}", currentDataType);
@@ -273,6 +282,16 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         log.debug("readArray - target: {}", target);
         Object result = null;
         int count = buf.getInt();
+        if (count < 0) {
+            log.warn("Negative array count {}, using 0 instead", count);
+            count = 0;
+        } else {
+            int remaining = buf.remaining();
+            if (count > remaining) {
+                log.warn("Array count {} exceeds remaining {}, clamping", count, remaining);
+                count = remaining;
+            }
+        }
         log.debug("Count: {}", count);
         // To conform to the Input API, we should convert the output into an Array if the Type asks us to.
         Class<?> collection = Collection.class;
@@ -522,8 +541,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
             buf.position(pos);
             return true;
         }
-        // an end-of-object marker can't occupy less than 3 bytes so return true
-        return true;
+        // not enough bytes to form another property
+        log.debug("Insufficient bytes ({}) for additional properties", buf.remaining());
+        return false;
     }
 
     /**
