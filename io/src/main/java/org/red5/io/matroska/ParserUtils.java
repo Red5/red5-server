@@ -150,7 +150,11 @@ public class ParserUtils {
         byte value[] = new byte[size];
         int i = value.length;
         while (i != 0) {
-            i -= inputStream.read(value, value.length - i, i);
+            int read = inputStream.read(value, value.length - i, i);
+            if (read < 0) {
+                throw new IOException("Unexpected end of stream while reading binary");
+            }
+            i -= read;
         }
 
         return value;
