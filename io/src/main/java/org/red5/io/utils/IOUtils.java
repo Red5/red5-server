@@ -235,6 +235,9 @@ public class IOUtils {
         // remove all the whitespace first
         s = s.replaceAll("\\s+", "");
         int len = s.length();
+        if ((len & 1) != 0) {
+            throw new IllegalArgumentException("Hex string must have an even number of characters");
+        }
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
