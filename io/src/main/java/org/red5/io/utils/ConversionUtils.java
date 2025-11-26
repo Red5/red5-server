@@ -210,7 +210,7 @@ public class ConversionUtils {
      * @return a {@link java.util.List} object
      */
     public static List<Object> convertMapToList(Map<?, ?> map) {
-        return List.of(map.values());
+        return new ArrayList<>(map.values());
     }
 
     /**
