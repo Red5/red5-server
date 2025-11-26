@@ -461,6 +461,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                                                     //videoTimeScale = scale * 2.0;
                                                     //log.debug("Video time scale: {}", videoTimeScale);
                                                 }
+                                                break;
                                             case "stss":
                                                 log.debug("Sync sample atom found");
                                                 SyncSamplesBox stss = (SyncSamplesBox) sbox; // stts
