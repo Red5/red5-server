@@ -367,7 +367,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
      * @return connection parameters
      */
     public Map<String, Object> getConnectParams() {
-        return Collections.unmodifiableMap(params);
+        return params == null ? Collections.emptyMap() : Collections.unmodifiableMap(params);
     }
 
     /** {@inheritDoc} */
