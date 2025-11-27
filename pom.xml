@@ -102,7 +102,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.18</logback.version>
         <bc.version>1.80</bc.version>
-        <mina.version>2.0.24</mina.version>
+        <mina.version>2.0.27</mina.version>
         <spring.version>6.2.11</spring.version>
         <tomcat.version>11.0.13</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
