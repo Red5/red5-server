@@ -34,7 +34,7 @@ import org.red5.server.so.SharedObjectScope;
  *
  * @author mondain
  */
-public abstract class BaseConnection extends AttributeStore implements IConnection {
+public abstract class BaseConnection extends AttributeStore implements IConnection, Comparable<IConnection> {
 
     /**
      * Connection type
@@ -74,7 +74,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     /**
      * Connection session identifier
      */
-    protected final String sessionId;
+    protected final String sessionId = RandomStringUtils.secure().nextAlphanumeric(13).toUpperCase();
 
     /**
      * Number of read messages
@@ -152,7 +152,6 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         } else {
             this.type = IConnection.Type.UNKNOWN;
         }
-        this.sessionId = RandomStringUtils.secure().nextAlphanumeric(13).toUpperCase();
         log.debug("Generated session id: {}", sessionId);
     }
 
@@ -174,6 +173,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
      * @param params
      *            Params passed from client
      */
+    @Deprecated(since = "2.0.24", forRemoval = true)
     @ConstructorProperties({ "type", "host", "remoteAddress", "remotePort", "path", "sessionId" })
     public BaseConnection(String type, String host, String remoteAddress, int remotePort, String path, String sessionId, Map<String, Object> params) {
         log.debug("New BaseConnection - type: {} host: {} remoteAddress: {} remotePort: {} path: {} sessionId: {}", new Object[] { type, host, remoteAddress, remotePort, path, sessionId });
@@ -190,9 +190,8 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
         this.remoteAddresses = Collections.unmodifiableList(this.remoteAddresses);
         this.remotePort = remotePort;
         this.path = path;
-        this.sessionId = sessionId;
+        log.warn("Ignoring passed in sessionId: {}, sessionId is generated at instantiation: {}", sessionId, this.sessionId);
         this.params = params;
-        log.debug("Generated session id: {}", sessionId);
     }
 
     /** {@inheritDoc} */
@@ -718,6 +717,11 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
             return false;
         }
         return sessionId.equals(((BaseConnection) obj).getSessionId());
+    }
+
+    /** {@inheritDoc} */
+    public int compareTo(IConnection c) {
+        return this.getSessionId().compareTo(c.getSessionId());
     }
 
 }

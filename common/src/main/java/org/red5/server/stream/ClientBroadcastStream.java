@@ -57,7 +57,6 @@ import org.red5.server.api.stream.IStreamListener;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.api.stream.StreamState;
 import org.red5.server.jmx.mxbeans.ClientBroadcastStreamMXBean;
-import org.red5.server.messaging.IConsumer;
 import org.red5.server.messaging.IFilter;
 import org.red5.server.messaging.IMessage;
 import org.red5.server.messaging.IMessageComponent;
@@ -659,9 +658,10 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                 if (event.getProvider() == this && event.getSource() != connMsgOut && (event.getParamMap() == null || !event.getParamMap().containsKey("record"))) {
                     livePipe = (IPipe) event.getSource();
                     //log.debug("Provider: {}", livePipe.getClass().getName());
-                    for (IConsumer consumer : livePipe.getConsumers()) {
-                        subscriberStats.increment();
-                    }
+                    // XXX(paul) disable stats incrementing here as it causes issues with subscriber counts
+                    //for (IConsumer consumer : livePipe.getConsumers()) {
+                    //    subscriberStats.increment();
+                    //}
                 }
                 break;
             case PROVIDER_DISCONNECT:

@@ -79,8 +79,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(Scope.class);
 
-    /** Constant <code>isDebug=log.isDebugEnabled()</code> */
-    /** Constant <code>isTrace=log.isTraceEnabled()</code> */
+    /** Constants <code>isDebug=log.isDebugEnabled()</code>, <code>isTrace=log.isTraceEnabled()</code> */
     protected static boolean isDebug = log.isDebugEnabled(), isTrace = log.isTraceEnabled();
 
     /**
@@ -131,12 +130,12 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /**
      * Child scopes
      */
-    private final transient ConcurrentScopeSet children;
+    private final transient ConcurrentScopeSet children = new ConcurrentScopeSet();
 
     /**
      * Connected clients map
      */
-    private final transient CopyOnWriteArraySet<IClient> clients;
+    private final transient CopyOnWriteArraySet<IClient> clients = new CopyOnWriteArraySet<>();
 
     /**
      * Statistics about connections to the scope.
@@ -147,6 +146,11 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * Statistics about sub-scopes.
      */
     protected final transient StatisticsCounter subscopeStats = new StatisticsCounter();
+
+    /**
+     * Set of connections connected to this scope
+     */
+    protected final transient Set<IConnection> connections = new ConcurrentSkipListSet<>();
 
     /**
      * Mbean object name.
@@ -163,8 +167,6 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     @ConstructorProperties(value = { "" })
     public Scope() {
         super(null, ScopeType.UNDEFINED, null, false);
-        children = new ConcurrentScopeSet();
-        clients = new CopyOnWriteArraySet<IClient>();
     }
 
     /**
@@ -177,8 +179,6 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      */
     public Scope(IScope parent, ScopeType type, String name, boolean persistent) {
         super(parent, type, name, persistent);
-        children = new ConcurrentScopeSet();
-        clients = new CopyOnWriteArraySet<IClient>();
     }
 
     /**
@@ -255,6 +255,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 // timeout while connecting client
                 return false;
             }
+            if (!connections.add(conn)) {
+                log.warn("Connection: {} was already present in scope connections", conn);
+            }
             final IClient client = conn.getClient();
             // we would not get this far if there is no handler
             if (hasHandler() && !getHandler().join(client, this)) {
@@ -267,11 +270,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 return false;
             }
             // add the client and event listener
-            if (clients.contains(client)) { // check this first so we don't double add in stats
-                log.debug("Client already added");
-                return true;
-            } else if (clients.add(client) && addEventListener(conn)) {
-                log.debug("Client added");
+            if (clients.contains(client) || (clients.add(client) && addEventListener(conn))) {
+                log.debug("Added client id {}", client.getId());
                 // increment conn stats
                 connectionStats.increment();
                 // get connected scope
@@ -331,6 +331,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
                 ((Scope) child).uninit();
             }
         });
+        connections.clear();
     }
 
     /**
@@ -377,6 +378,10 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         // disconnect from parent
         if (hasParent()) {
             parent.disconnect(conn);
+        }
+        // remove connection from the set of connections
+        if (!connections.remove(conn)) {
+            log.warn("Connection: {} was not found in scope connections", conn);
         }
         // decrement conn stats
         connectionStats.decrement();
@@ -514,16 +519,29 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return clients;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return a {@link java.util.Collection} object
-     */
-    @Deprecated
+    /** {@inheritDoc} */
+    @Override
     public Collection<Set<IConnection>> getConnections() {
         Collection<Set<IConnection>> result = new ArrayList<Set<IConnection>>(3);
         result.add(getClientConnections());
         return result;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<IConnection> getAllConnections() {
+        return Collections.unmodifiableSet(connections);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public IConnection lookupConnection(String sessionId) {
+        for (IConnection conn : connections) {
+            if (StringUtils.equals(conn.getSessionId(), sessionId)) {
+                return conn;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1185,7 +1203,6 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "Scope [name=" + getName() + ", path=" + getPath() + ", type=" + type + ", autoStart=" + autoStart + ", creationTime=" + creationTime + ", depth=" + getDepth() + ", enabled=" + enabled + ", running=" + running + "]";
@@ -1220,9 +1237,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return null;
     }
 
-    //for debugging
     /**
-     * <p>dump.</p>
+     * <p>dump for debugging</p>
      */
     public void dump() {
         if (isTrace) {

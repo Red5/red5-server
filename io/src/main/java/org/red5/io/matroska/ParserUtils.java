@@ -7,12 +7,6 @@
  */
 package org.red5.io.matroska;
 
-import static org.red5.io.matroska.VINT.MASK_BYTE_1;
-import static org.red5.io.matroska.VINT.MASK_BYTE_2;
-import static org.red5.io.matroska.VINT.MASK_BYTE_3;
-import static org.red5.io.matroska.VINT.MASK_BYTE_4;
-import static org.red5.io.matroska.VINT.MASK_BYTE_8;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

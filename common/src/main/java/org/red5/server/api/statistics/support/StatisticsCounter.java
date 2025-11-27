@@ -72,7 +72,6 @@ public class StatisticsCounter {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "StatisticsCounter [current=" + current + ", max=" + max + ", total=" + total + "]";

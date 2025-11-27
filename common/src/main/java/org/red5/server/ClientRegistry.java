@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -44,11 +43,6 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
     private ConcurrentMap<String, IClient> clients = new ConcurrentHashMap<String, IClient>(6, 0.9f, 2);
 
     /**
-     * Next client id
-     */
-    private AtomicInteger nextId = new AtomicInteger(0);
-
-    /**
      * The identifier for this client registry
      */
     private String name;
@@ -59,9 +53,8 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
     public ClientRegistry() {
     }
 
-    //allows for setting a "name" to be used with jmx for lookup
     /**
-     * <p>Constructor for ClientRegistry.</p>
+     * <p>Constructor for ClientRegistry; allows for setting a "name" to be used with jmx for lookup</p>
      *
      * @param name a {@link java.lang.String} object
      */
@@ -187,36 +180,10 @@ public class ClientRegistry implements IClientRegistry, ClientRegistryMXBean {
      */
     public IClient newClient(Object[] params) throws ClientNotFoundException, ClientRejectedException {
         // derive client id from the connection params or use next
-        String id = nextId();
-        IClient client = new Client(id, this);
-        addClient(id, client);
+        String idString = params != null && params.length > 0 && params[0] instanceof String ? (String) params[0] : null;
+        IClient client = new Client(idString, this);
+        addClient(client);
         return client;
-    }
-
-    /**
-     * Return next client id
-     *
-     * @return Next client id
-     */
-    public String nextId() {
-        String id = "-1";
-        do {
-            // when we reach max int, reset to zero
-            if (nextId.get() == Integer.MAX_VALUE) {
-                nextId.set(0);
-            }
-            id = String.format("%d", nextId.getAndIncrement());
-        } while (hasClient(id));
-        return id;
-    }
-
-    /**
-     * Return previous client id
-     *
-     * @return Previous client id
-     */
-    public String previousId() {
-        return String.format("%d", nextId.get());
     }
 
     /**

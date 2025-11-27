@@ -24,20 +24,6 @@ import org.red5.server.exception.ClientNotFoundException;
 public interface ClientRegistryMXBean {
 
     /**
-     * <p>nextId.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public String nextId();
-
-    /**
-     * <p>previousId.</p>
-     *
-     * @return a {@link java.lang.String} object
-     */
-    public String previousId();
-
-    /**
      * <p>hasClient.</p>
      *
      * @param id a {@link java.lang.String} object
