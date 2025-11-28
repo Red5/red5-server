@@ -26,7 +26,7 @@ public class M4AService extends BaseStreamableFileService implements IM4AService
     /**
      * File extensions handled by this service. If there are more than one, they are comma separated.
      */
-    private static String extension = ".f4a,.m4a,.aac";
+    private static String extension = ".f4a,.m4a,.mp4";
 
     private static String prefix = "f4a";
 
