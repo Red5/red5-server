@@ -43,7 +43,7 @@ public class LocalNetworkUtil {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        while (netInterfaces.hasMoreElements()) {
+        while (netInterfaces != null && netInterfaces.hasMoreElements()) {
             NetworkInterface ni = netInterfaces.nextElement();
             Enumeration<InetAddress> address = ni.getInetAddresses();
             while (address.hasMoreElements()) {
