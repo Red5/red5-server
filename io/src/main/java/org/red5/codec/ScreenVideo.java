@@ -153,7 +153,7 @@ public class ScreenVideo extends AbstractVideo {
             this.blockDataSize = blockSize;
             this.totalBlockDataSize = totalBlockSize;
             this.blockData = new byte[blockSize * this.blockCount];
-            this.blockSize = new int[blockSize * this.blockCount];
+            this.blockSize = new int[this.blockCount];
             // Reset the sizes to zero
             for (int idx = 0; idx < this.blockCount; idx++) {
                 this.blockSize[idx] = 0;
@@ -176,6 +176,10 @@ public class ScreenVideo extends AbstractVideo {
 
         int countBlocks = this.blockCount;
         while (data.remaining() > 0 && countBlocks > 0) {
+            if (data.remaining() < 2) {
+                data.rewind();
+                return false;
+            }
             short size = data.getShort();
             countBlocks--;
             if (size == 0) {
@@ -183,6 +187,10 @@ public class ScreenVideo extends AbstractVideo {
                 idx += 1;
                 pos += this.blockDataSize;
                 continue;
+            }
+            if (size < 0 || size > this.blockDataSize || data.remaining() < size) {
+                data.rewind();
+                return false;
             }
 
             // Store new block data
