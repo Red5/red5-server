@@ -228,11 +228,20 @@ public class MP3Stream extends PushbackInputStream {
      */
     private static void skipStream(InputStream in, long count) throws IOException {
         long size = count;
-        long skipped = 0;
-        while (size > 0 && skipped >= 0) {
-            skipped = in.skip(size);
-            if (skipped != -1) {
+        while (size > 0) {
+            long skipped = in.skip(size);
+            if (skipped > 0) {
                 size -= skipped;
+                continue;
+            }
+            if (skipped == 0) {
+                int b = in.read();
+                if (b == -1) {
+                    break;
+                }
+                size--;
+            } else {
+                break;
             }
         }
     }
