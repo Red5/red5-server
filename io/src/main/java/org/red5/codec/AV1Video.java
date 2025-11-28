@@ -95,6 +95,10 @@ public class AV1Video extends AbstractVideo {
                 // get the fourcc
                 int fourcc = data.getInt();
                 // reset back to the beginning after we got the fourcc
+                if (fourcc != codec.getFourcc()) {
+                    data.reset();
+                    return false;
+                }
                 data.reset();
                 if (isDebug) {
                     log.debug("{} - frame type: {} packet type: {}", VideoCodec.valueOfByFourCc(fourcc), frameType, packetType);
