@@ -30,20 +30,30 @@ public final class UrlQueryStringMap<K, V> extends HashMap<K, V> {
      */
     public static UrlQueryStringMap<String, String> parse(String queryString) {
         UrlQueryStringMap<String, String> map = new UrlQueryStringMap<String, String>();
-        //
+        if (queryString == null || queryString.isEmpty()) {
+            return map;
+        }
         String tmp = queryString;
-        //check if we start with '?' or not
-        if (queryString.charAt(0) != '?') {
-            tmp = queryString.split("\\?")[1];
-        } else if (queryString.charAt(0) == '?') {
+        int qmIndex = queryString.indexOf('?');
+        if (qmIndex == 0) {
             tmp = queryString.substring(1);
+        } else if (qmIndex > 0) {
+            tmp = queryString.substring(qmIndex + 1);
         }
         //now break up into key/value blocks
+        if (tmp.isEmpty()) {
+            return map;
+        }
         String[] kvs = tmp.split("&");
         //take each key/value block and break into its key value parts
         for (String kv : kvs) {
-            String[] split = kv.split("=");
-            map.put(split[0], split[1]);
+            if (kv.isEmpty()) {
+                continue;
+            }
+            String[] split = kv.split("=", 2);
+            String key = split[0];
+            String value = (split.length > 1) ? split[1] : "";
+            map.put(key, value);
         }
         return map;
     }
