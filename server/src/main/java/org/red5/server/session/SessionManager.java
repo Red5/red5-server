@@ -182,6 +182,10 @@ public class SessionManager {
         }
 
         public void execute(ISchedulingService service) {
+            if (SessionManager.maxLifetime == null) {
+                log.debug("Reaper not running because max session lifetime was not configured");
+                return;
+            }
             log.debug("Reaper running...");
             if (sessions != null) {
                 if (!sessions.isEmpty()) {
