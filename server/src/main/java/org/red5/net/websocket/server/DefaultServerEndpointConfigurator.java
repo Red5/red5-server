@@ -101,6 +101,10 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         log.debug("checkOrigin: {}", originHeaderValue);
         // if CORS is enabled
         if (crossOriginPolicy) {
+            if (originHeaderValue == null) {
+                log.info("Origin header is missing and cross-origin policy is enabled");
+                return false;
+            }
             log.debug("allowedOrigins: {}", Arrays.toString(allowedOrigins));
             // allow "*" == any / all or origin suffix matches
             Optional<String> opt = Stream.of(allowedOrigins).filter(origin -> "*".equals(origin) || origin.endsWith(originHeaderValue)).findFirst();

@@ -100,13 +100,11 @@ public class WsWriteTimeout implements BackgroundProcess {
         public int compare(WsRemoteEndpointImplServer o1, WsRemoteEndpointImplServer o2) {
             long t1 = o1.getTimeoutExpiry();
             long t2 = o2.getTimeoutExpiry();
-            if (t1 < t2) {
-                return -1;
-            } else if (t1 == t2) {
-                return 0;
-            } else {
-                return 1;
+            if (t1 == t2) {
+                // fall back to identity hash to keep ordering stable and unique when timeouts match
+                return Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
             }
+            return Long.compare(t1, t2);
         }
 
     }
