@@ -66,13 +66,18 @@ public class EngineLauncher implements Daemon {
      */
     public static void windowsService(String args[]) {
         String cmd = "start";
-        if (args.length > 0) {
+        if (args != null && args.length > 0) {
             cmd = args[0];
         }
         if ("start".equals(cmd)) {
             engineLauncherInstance.windowsStart();
         } else {
-            commandLineArgs = args;
+            // drop the leading control arg so stop receives only port / token
+            if (args != null && args.length > 1) {
+                commandLineArgs = Arrays.copyOfRange(args, 1, args.length);
+            } else {
+                commandLineArgs = new String[0];
+            }
             engineLauncherInstance.windowsStop();
         }
     }
@@ -157,7 +162,10 @@ public class EngineLauncher implements Daemon {
     public void terminate() {
         if (stopped.compareAndSet(false, true)) {
             System.out.printf("Stopping Red5 with args: %s%n", Arrays.toString(commandLineArgs));
-            if (commandLineArgs == null || commandLineArgs.length < 2) {
+            if (commandLineArgs == null) {
+                commandLineArgs = new String[0];
+            }
+            if (commandLineArgs.length < 2) {
                 // there should be 40+ characters worth of args (port + token)
                 // use the default port of 9999
                 String port = "9999";
