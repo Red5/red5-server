@@ -49,7 +49,9 @@ public class ExtendedAudio extends AbstractAudio {
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
         if (data != null && data.limit() > 0) {
+            data.mark();
             result = ((data.get() & IoConstants.MASK_SOUND_FORMAT) >> 4) == codec.getId();
+            data.reset();
         }
         return result;
     }
@@ -100,10 +102,18 @@ public class ExtendedAudio extends AbstractAudio {
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
                         trackCodec = getTrackCodec(data);
+                        if (trackCodec == null) {
+                            data.reset();
+                            return false;
+                        }
                     }
                 } else {
                     // The tracks are encoded with the same codec identified by the FOURCC
                     trackCodec = getTrackCodec(data);
+                    if (trackCodec == null) {
+                        data.reset();
+                        return false;
+                    }
                 }
             }
             // read all the data
@@ -114,6 +124,10 @@ public class ExtendedAudio extends AbstractAudio {
                     if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with their own codec identified by the FOURCC
                         trackCodec = getTrackCodec(data);
+                        if (trackCodec == null) {
+                            data.reset();
+                            return false;
+                        }
                     }
                     // track ordering
                     // For identifying the highest priority (a.k.a., default track) or highest quality track, it is RECOMMENDED
@@ -136,6 +150,10 @@ public class ExtendedAudio extends AbstractAudio {
                     }
                 } else {
                     trackCodec = getTrackCodec(data);
+                    if (trackCodec == null) {
+                        data.reset();
+                        return false;
+                    }
                 }
                 switch (packetType) {
                     case CodedFrames: // pass coded data
@@ -194,9 +212,14 @@ public class ExtendedAudio extends AbstractAudio {
     protected IAudioStreamCodec getTrackCodec(IoBuffer data) {
         Integer fourcc = data.getInt();
         log.debug("Fourcc: {} pos: {}", fourcc, data.position());
+        AudioCodec audioCodec = AudioCodec.valueOfByFourCc(fourcc);
+        if (audioCodec == null) {
+            log.warn("Unknown audio fourcc: {}", fourcc);
+            return null;
+        }
         if (!tracks.containsKey(fourcc)) {
             // create a new codec instance
-            trackCodec = AudioCodec.valueOfByFourCc(fourcc).newInstance();
+            trackCodec = audioCodec.newInstance();
             tracks.put(fourcc, trackCodec);
         } else {
             trackCodec = tracks.get(fourcc);
