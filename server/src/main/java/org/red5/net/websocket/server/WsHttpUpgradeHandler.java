@@ -324,6 +324,11 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     public void timeoutAsync(long now) {
         log.trace("timeoutAsync: {} on session: {}", now, wsSession);
         if (wsSession != null) {
+            // check if session is already closed to avoid IllegalStateException
+            if (wsSession.isClosed()) {
+                log.debug("timeoutAsync: session already closed");
+                return;
+            }
             try {
                 final String wsSessionId = wsSession.getId();
                 // do lookup by session id, skips need for session user props
@@ -335,6 +340,11 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                     long checkDelta = now - lastTimeoutCheck;
                     long readBytes = conn.getReadBytes(), writtenBytes = conn.getWrittenBytes();
                     log.info("timeoutAsync: {}ms on session id: {} read: {} written: {}", checkDelta, wsSessionId, readBytes, writtenBytes);
+                    // double-check session state before accessing properties (race condition guard)
+                    if (wsSession.isClosed()) {
+                        log.debug("timeoutAsync: session closed during processing");
+                        return;
+                    }
                     Map<String, Object> props = wsSession.getUserProperties();
                     log.debug("Session properties: {}", props);
                     long maxIdleTimeout = wsSession.getMaxIdleTimeout();
@@ -371,6 +381,9 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                     log.warn("timeoutAsync: negative time on session id: {}", wsSessionId);
                     conn.close(CloseCodes.GOING_AWAY, "Timeout expired");
                 }
+            } catch (IllegalStateException ise) {
+                // session was closed between our check and property access - this is expected in race conditions
+                log.debug("timeoutAsync: session closed during timeout check - {}", ise.getMessage());
             } catch (Throwable t) {
                 log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
             }
