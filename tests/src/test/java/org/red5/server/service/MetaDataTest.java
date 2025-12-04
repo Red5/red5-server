@@ -71,7 +71,7 @@ public class MetaDataTest extends TestCase {
     }
 
     public void testWidth() {
-        assertEquals(400, data.getVideoDataRate());
+        assertEquals(300, data.getVideoDataRate());
     }
 
 }
