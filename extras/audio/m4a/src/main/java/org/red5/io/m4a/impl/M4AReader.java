@@ -125,7 +125,7 @@ public class M4AReader implements IoConstants, ITagReader {
     private long audioSampleDuration = 1024;
 
     //keep track of current sample
-    private int currentFrame = 1;
+    private int currentFrame = 0;
 
     private int prevFrameSize = 0;
 
@@ -153,11 +153,10 @@ public class M4AReader implements IoConstants, ITagReader {
     @SuppressWarnings("null")
     public M4AReader(File f) throws IOException {
         if (null == f) {
-            log.warn("Reader was passed a null file");
-            log.debug("{}", ToStringBuilder.reflectionToString(this));
+            throw new IllegalArgumentException("M4AReader requires a non-null file");
         }
-        String fileName = f.getName();
-        if (fileName.endsWith("m4a") || fileName.endsWith("mp4")) {
+        String fileName = f.getName().toLowerCase();
+        if (fileName.endsWith("m4a") || fileName.endsWith("mp4") || fileName.endsWith("f4a")) {
             // create a datasource / channel
             dataSource = Files.newByteChannel(Paths.get(f.toURI()));
             // instance an iso file from mp4parser
@@ -537,7 +536,7 @@ public class M4AReader implements IoConstants, ITagReader {
      */
     @Override
     public boolean hasMoreTags() {
-        return currentFrame < frames.size();
+        return !firstTags.isEmpty() || currentFrame < frames.size();
     }
 
     /**
@@ -783,7 +782,7 @@ public class M4AReader implements IoConstants, ITagReader {
      * @return frame index
      */
     private int getFrame(long pos) {
-        int sample = 1;
+        int sample = 0;
         int len = frames.size();
         MP4Frame frame = null;
         for (int f = 0; f < len; f++) {
