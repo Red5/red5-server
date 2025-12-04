@@ -55,8 +55,9 @@ public class InetAddressEditor extends PropertyEditorSupport {
 
                 byte[] addressBytes = new byte[addressParts.length * 2];
                 for (int i = 0; i < addressParts.length; i++) {
-                    addressBytes[i * 2] = Byte.parseByte(addressParts[i].substring(0, 2));
-                    addressBytes[i * 2 + 1] = Byte.parseByte(addressParts[i].substring(2, 4));
+                    // parse each two-character segment as hexadecimal and store as unsigned bytes
+                    addressBytes[i * 2] = (byte) Integer.parseInt(addressParts[i].substring(0, 2), 16);
+                    addressBytes[i * 2 + 1] = (byte) Integer.parseInt(addressParts[i].substring(2, 4), 16);
                 }
 
                 address = InetAddress.getByAddress(addressBytes);
