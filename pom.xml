@@ -101,7 +101,7 @@
         <red5-service.version>${project.version}</red5-service.version>
         <slf4j.version>2.0.17</slf4j.version>
         <logback.version>1.5.18</logback.version>
-        <bc.version>1.80</bc.version>
+        <bc.version>1.83</bc.version>
         <mina.version>2.0.27</mina.version>
         <spring.version>6.2.11</spring.version>
         <tomcat.version>11.0.14</tomcat.version>
