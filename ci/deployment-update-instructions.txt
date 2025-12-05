@@ -1,0 +1,35 @@
+Deployement of Red5 opensource update -
+
+From the existing deployment, delete the existing red5 opensource jars:
+
+	/usr/local/red5pro
+	   red5-server.jar
+	   red5-service.jar
+
+	/usr/local/red5pro/lib
+	   red5-client-2.0.16.43.jar
+	   red5-io-2.0.16.43.jar
+	   red5-server-common-2.0.16.43.jar
+
+Extract the red5-server-2.0.16.44.zip contents and copy:
+
+	from red5-server
+	   red5-server.jar
+	   red5-service.jar
+
+	into /usr/local/red5pro
+
+	from red5-server/lib
+	   red5-client-2.0.16.44.jar
+	   red5-io-2.0.16.44.jar
+	   red5-server-common-2.0.16.44.jar
+
+	into /usr/local/red5pro/lib
+
+Lastly copy 
+
+	red5-client-2.0.16.44.jar
+
+	into /usr/local/red5pro/lib
+
+Restart red5pro

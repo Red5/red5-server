@@ -225,6 +225,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                             updateWriteBytes(lengthToWrite);
                         }
                     }
+                } catch (IllegalStateException e) {
+                    // Session closed between check and send - expected race condition during disconnect
+                    log.debug("Send text failed, session closed: {}", wsSessionId);
                 } catch (Exception e) {
                     log.warn("Send text exception", e);
                 }
@@ -271,6 +274,9 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
                         updateWriteBytes(buf.length);
                     }
                 }
+            } catch (IllegalStateException e) {
+                // Session closed between check and send - expected race condition during disconnect
+                log.debug("Send binary failed, session closed: {}", wsSessionId);
             } catch (Exception e) {
                 log.warn("Send bytes exception", e);
             }
