@@ -134,9 +134,9 @@ public class ScreenVideo2 extends AbstractVideo {
         width = widthInfo & 0xfff;
         height = heightInfo & 0xfff;
         // calculate size of blocks
-        blockWidth = (widthInfo & 0xf000 >> 12) + 1;
+        blockWidth = ((widthInfo & 0xf000) >> 12) + 1;
         blockWidth <<= 4;
-        blockHeight = (heightInfo & 0xf000 >> 12) + 1;
+        blockHeight = ((heightInfo & 0xf000) >> 12) + 1;
         blockHeight <<= 4;
         int xblocks = width / blockWidth;
         if ((width % blockWidth) != 0) {
@@ -156,7 +156,7 @@ public class ScreenVideo2 extends AbstractVideo {
             blockDataSize = compressedSize;
             totalBlockDataSize = totalBlockSize;
             blockData = new byte[compressedSize * blockCount];
-            blockSize = new int[compressedSize * blockCount];
+            blockSize = new int[blockCount];
             // Reset the sizes to zero
             for (int idx = 0; idx < blockCount; idx++) {
                 blockSize[idx] = 0;
@@ -176,9 +176,17 @@ public class ScreenVideo2 extends AbstractVideo {
         int pos = 0;
         byte[] tmpData = new byte[blockDataSize];
         // reserved (6) has iframeimage (1) has palleteinfo (1)
+        if (!data.hasRemaining()) {
+            data.rewind();
+            return false;
+        }
         specInfo1 = data.get();
         int countBlocks = blockCount;
         while (data.remaining() > 0 && countBlocks > 0) {
+            if (data.remaining() < 2) {
+                data.rewind();
+                return false;
+            }
             short size = data.getShort();
             countBlocks--;
             if (size == 0) {
@@ -186,15 +194,19 @@ public class ScreenVideo2 extends AbstractVideo {
                 idx += 1;
                 pos += blockDataSize;
                 continue;
-            } else {
-                // imageformat
-                specInfo2 = data.get();
-                size--;
             }
+            int sizeVal = size & 0xffff;
+            if (sizeVal < 1 || sizeVal > blockDataSize || data.remaining() < sizeVal) {
+                data.rewind();
+                return false;
+            }
+            // imageformat
+            specInfo2 = data.get();
+            sizeVal--;
             // Store new block data
-            blockSize[idx] = size;
-            data.get(tmpData, 0, size);
-            System.arraycopy(tmpData, 0, blockData, pos, size);
+            blockSize[idx] = sizeVal;
+            data.get(tmpData, 0, sizeVal);
+            System.arraycopy(tmpData, 0, blockData, pos, sizeVal);
             idx += 1;
             pos += blockDataSize;
         }
