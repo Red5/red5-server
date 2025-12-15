@@ -30,24 +30,21 @@ public class CertificateGrabber {
     private static Logger log = LoggerFactory.getLogger(CertificateGrabber.class);
 
     /**
-     * Retrieves the server certificate from the specified host and port.
+     * Retrieves the full certificate chain from the specified host and port.
+     * This includes the server certificate and all intermediate CA certificates,
+     * which are required for proper TLS validation.
      *
-     * @param host
-     * @param port
-     * @throws Exception
+     * @param host the hostname to connect to
+     * @param port the port to connect to
+     * @throws Exception if an error occurs while retrieving certificates
      */
     public static void retrieveCertificate(String host, int port) throws Exception {
-        // Create a trust manager that captures certificates
-        final X509Certificate[] serverCert = new X509Certificate[1];
+        // Create a trust manager that accepts all certificates (for retrieval only)
         TrustManager[] trustManagers = new TrustManager[] { new X509TrustManager() {
             public void checkClientTrusted(X509Certificate[] chain, String authType) {
             }
 
             public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                // Capture the server certificate
-                if (chain != null && chain.length > 0) {
-                    serverCert[0] = chain[0];
-                }
             }
 
             public X509Certificate[] getAcceptedIssuers() {
@@ -61,23 +58,52 @@ public class CertificateGrabber {
         SSLSocketFactory factory = sslContext.getSocketFactory();
         try (SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) {
             socket.startHandshake();
-            // Get the certificate chain
+            // Get the full certificate chain
             SSLSession session = socket.getSession();
             Certificate[] certs = session.getPeerCertificates();
-            // Save the certificate
+            // Save the full certificate chain
             if (certs != null && certs.length > 0) {
-                X509Certificate cert = (X509Certificate) certs[0];
                 // check for path to store the certificate
                 String truststorePath = System.getProperty("javax.net.ssl.trustStore");
                 if (truststorePath == null || truststorePath.isEmpty()) {
                     throw new IllegalStateException("Truststore path is not set. Please set 'javax.net.ssl.trustStore' system property.");
                 }
                 String pemPath = truststorePath.substring(0, truststorePath.lastIndexOf('/'));
-                log.info("CertificateGrabber - pemPath: {}", pemPath);
-                saveCertificate(cert, String.format("%s/%s.pem", pemPath, host));
-                log.debug("Certificate subject: {} issuer: {}\n serial number: {}\n valid from: {} to: {}", cert.getSubjectX500Principal(), cert.getIssuerX500Principal(), cert.getSerialNumber(), cert.getNotBefore(), cert.getNotAfter());
+                log.info("CertificateGrabber - pemPath: {}, chain length: {}", pemPath, certs.length);
+                // Save all certificates in the chain to a single PEM file
+                saveCertificateChain(certs, String.format("%s/%s.pem", pemPath, host));
+                // Log info about each certificate in the chain
+                for (int i = 0; i < certs.length; i++) {
+                    X509Certificate cert = (X509Certificate) certs[i];
+                    log.debug("Certificate[{}] subject: {} issuer: {} serial: {} valid: {} to {}", i, cert.getSubjectX500Principal(), cert.getIssuerX500Principal(), cert.getSerialNumber(), cert.getNotBefore(), cert.getNotAfter());
+                }
             }
         }
+    }
+
+    /**
+     * Saves the full certificate chain to a file in PEM format.
+     * All certificates are written to a single file, which can then be
+     * imported into a truststore.
+     *
+     * @param certs the certificate chain to save
+     * @param fileName name of the file to save the certificates to
+     * @throws Exception if an error occurs while saving the certificates
+     */
+    private static void saveCertificateChain(Certificate[] certs, String fileName) throws Exception {
+        // Save all certificates as PEM format in a single file
+        try (FileWriter fw = new FileWriter(fileName); PrintWriter pw = new PrintWriter(fw)) {
+            for (int i = 0; i < certs.length; i++) {
+                X509Certificate cert = (X509Certificate) certs[i];
+                pw.println("-----BEGIN CERTIFICATE-----");
+                pw.println(Base64.encodeBase64String(cert.getEncoded()));
+                pw.println("-----END CERTIFICATE-----");
+                if (i < certs.length - 1) {
+                    pw.println(); // blank line between certificates
+                }
+            }
+        }
+        log.info("Certificate chain ({} certs) saved to: {}", certs.length, fileName);
     }
 
     /**
@@ -87,6 +113,7 @@ public class CertificateGrabber {
      * @param fileName name of the file to save the certificate to
      * @throws Exception if an error occurs while saving the certificate
      */
+    @SuppressWarnings("unused")
     private static void saveCertificate(X509Certificate cert, String fileName) throws Exception {
         // Save as PEM format
         try (FileWriter fw = new FileWriter(fileName); PrintWriter pw = new PrintWriter(fw)) {

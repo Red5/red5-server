@@ -170,8 +170,24 @@ public class RTMPSClient extends RTMPClient {
             keyStoreType = keyStoreType == null ? "PKCS12" : truststorePath.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
             log.debug("RTMPSClient - keystoreType: {}, truststorePath: {}", keyStoreType, truststorePath);
         }
-        // strip the end of the truststore path to use it for saving the pem file
-        String pemPath = truststorePath.substring(0, truststorePath.lastIndexOf('/'));
+        // ensure the truststore parent directory exists
+        java.nio.file.Path truststoreFile = Paths.get(truststorePath);
+        java.nio.file.Path parentDir = truststoreFile.getParent();
+        String pemPath;
+        if (parentDir != null) {
+            try {
+                if (!Files.exists(parentDir)) {
+                    Files.createDirectories(parentDir);
+                    log.info("Created truststore directory: {}", parentDir);
+                }
+            } catch (IOException e) {
+                log.warn("Failed to create truststore directory: {}", parentDir, e);
+            }
+            pemPath = parentDir.toString();
+        } else {
+            // truststore is in current directory
+            pemPath = ".";
+        }
         log.info("RTMPSClient - pemPath: {}", pemPath);
         // ensure the truststore has a certificate for the server we are connecting to
         try {
