@@ -122,6 +122,12 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      */
     private AtomicInteger streamStartTS = new AtomicInteger(-1);
 
+    /**
+     * For late subscribers, stores the publisher's current timestamp when playLive() is called.
+     * Used to generate relative timestamps for the subscriber.
+     */
+    private int publisherTimestampOffset = 0;
+
     private AtomicReference<IPlayItem> currentItem = new AtomicReference<>();
 
     private RTMPMessage pendingMessage;
@@ -156,6 +162,12 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      * State machine for video frame dropping in live streams
      */
     private IFrameDropper videoFrameDropper = new VideoFrameDropper();
+
+    /**
+     * Flag indicating we're waiting for the first keyframe from the publisher.
+     * This allows us to switch to SEND_ALL mode once a keyframe is available.
+     */
+    private volatile boolean waitingForKeyframe = false;
 
     private int timestampOffset = 0;
 
@@ -422,10 +434,14 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 if (msgInReference.compareAndSet(null, in)) {
                     // drop all frames up to the next keyframe
                     videoFrameDropper.reset(IFrameDropper.SEND_KEYFRAMES_CHECK);
+                    waitingForKeyframe = true;
+                    log.debug("playItem: set waitingForKeyframe=true, SEND_KEYFRAMES_CHECK mode");
                     if (in instanceof IBroadcastScope) {
                         IBroadcastStream stream = (IBroadcastStream) ((IBroadcastScope) in).getClientBroadcastStream();
+                        log.debug("playItem: stream={}, codecInfo={}", stream, stream != null ? stream.getCodecInfo() : "N/A");
                         if (stream != null && stream.getCodecInfo() != null) {
                             IVideoStreamCodec videoCodec = stream.getCodecInfo().getVideoCodec();
+                            log.debug("playItem: videoCodec={}, hasKeyframe={}, numInterframes={}", videoCodec, videoCodec != null ? videoCodec.getKeyframe() != null : "N/A", videoCodec != null ? videoCodec.getNumInterframes() : "N/A");
                             if (videoCodec != null) {
                                 if (withReset) {
                                     sendReset();
@@ -434,8 +450,10 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                                 }
                                 sendNotifications = false;
                                 if (videoCodec.getNumInterframes() > 0 || videoCodec.getKeyframe() != null) {
+                                    log.debug("playItem: Keyframe available, switching to SEND_ALL mode");
                                     bufferedInterframeIdx = 0;
                                     videoFrameDropper.reset(IFrameDropper.SEND_ALL);
+                                    waitingForKeyframe = false;
                                 }
                             }
                         }
@@ -545,6 +563,10 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     private final void playLive() throws IOException {
         // change state
         subscriberStream.setState(StreamState.PLAYING);
+        // Mark this as a late subscriber by setting streamStartTS to 0
+        // This will be detected in sendMessage() to generate proper relative timestamps
+        streamStartTS.set(0);
+        log.debug("playLive: Initialized streamStartTS to 0");
         IMessageInput in = msgInReference.get();
         IMessageOutput out = msgOutReference.get();
         if (in != null && out != null) {
@@ -564,12 +586,12 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                     log.debug("No metadata available");
                 }
                 IStreamCodecInfo codecInfo = stream.getCodecInfo();
-                log.debug("Codec info: {}", codecInfo);
+                log.debug("Codec info: {} stream: {}", codecInfo, stream);
                 if (codecInfo instanceof StreamCodecInfo) {
                     StreamCodecInfo info = (StreamCodecInfo) codecInfo;
                     // handle video codec with configuration
                     IVideoStreamCodec videoCodec = info.getVideoCodec();
-                    log.debug("Video codec: {}", videoCodec);
+                    log.debug("Video codec: {} hasKeyframe: {}", videoCodec, videoCodec != null ? videoCodec.getKeyframe() != null : "N/A");
                     if (videoCodec != null) {
                         // check for decoder configuration to send
                         IoBuffer config = videoCodec.getDecoderConfiguration();
@@ -578,14 +600,27 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                             VideoData conf = new VideoData(config, true);
                             log.debug("Pushing video decoder configuration");
                             sendMessage(RTMPMessage.build(conf, ts));
+                        } else {
+                            log.warn("No decoder configuration available for {}", videoCodec.getName());
                         }
                         // check for keyframes to send
                         FrameData[] keyFrames = videoCodec.getKeyframes();
-                        for (FrameData keyframe : keyFrames) {
-                            log.debug("Keyframe is available");
-                            VideoData video = new VideoData(keyframe.getFrame(), true);
-                            log.debug("Pushing keyframe");
-                            sendMessage(RTMPMessage.build(video, ts));
+                        log.debug("Keyframes count: {}", keyFrames != null ? keyFrames.length : "null");
+                        if (keyFrames != null) {
+                            for (FrameData keyframe : keyFrames) {
+                                log.debug("Keyframe is available");
+                                VideoData video = new VideoData(keyframe.getFrame(), true);
+                                log.debug("Pushing keyframe");
+                                // Use timestamp 1 for keyframe to distinguish from decoder config at 0
+                                sendMessage(RTMPMessage.build(video, 1));
+                            }
+                        }
+                        // If no keyframes were sent but we have one in the codec, send it
+                        if ((keyFrames == null || keyFrames.length == 0) && videoCodec.getKeyframe() != null) {
+                            log.warn("No keyframes array but getKeyframe() is available, sending it");
+                            VideoData video = new VideoData(videoCodec.getKeyframe(), true);
+                            // Use timestamp 1 for keyframe to distinguish from decoder config at 0
+                            sendMessage(RTMPMessage.build(video, 1));
                         }
                     } else {
                         log.debug("No video decoder configuration available");
@@ -1039,11 +1074,12 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         // get the incoming event time
         int eventTime = eventIn.getTimestamp();
         // get the incoming event source type and set on the outgoing event
-        event.setSourceType(eventIn.getSourceType());
+        byte incomingSourceType = eventIn.getSourceType();
+        event.setSourceType(incomingSourceType);
         // instance the outgoing message
         RTMPMessage messageOut = RTMPMessage.build(event, eventTime);
-        if (isTrace) {
-            log.trace("Source type - in: {} out: {}", eventIn.getSourceType(), messageOut.getBody().getSourceType());
+        if (isTrace || incomingSourceType != Constants.SOURCE_TYPE_LIVE) {
+            log.warn("Source type issue - in: {} out: {} event type: {}", new Object[] { incomingSourceType, messageOut.getBody().getSourceType(), eventIn.getClass().getSimpleName() });
             long delta = System.currentTimeMillis() - playbackStart;
             log.trace("sendMessage: streamStartTS {}, length {}, streamOffset {}, timestamp {} last timestamp {} delta {} buffered {}", new Object[] { streamStartTS.get(), currentItem.get().getLength(), streamOffset, eventTime, lastMessageTs, delta, lastMessageTs - delta });
         }
@@ -1066,19 +1102,53 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             }
         } else {
             // don't reset streamStartTS to 0 for live streams
-            if (eventTime > 0 && streamStartTS.compareAndSet(-1, eventTime)) {
-                log.debug("sendMessage: set streamStartTS");
+            // streamStartTS may be 0 (initialized by playLive) or -1 (not yet initialized)
+            if (eventTime > 0) {
+                int currentStartTs = streamStartTS.get();
+                // Only set streamStartTS if it's -1 (not initialized by playLive)
+                // If playLive already set it to 0, keep it at 0 to prevent timestamp adjustment
+                // for late subscribers (decoder config at 0, keyframe at 1, live frames at their original timestamps)
+                if (currentStartTs == -1 && streamStartTS.compareAndSet(-1, eventTime)) {
+                    log.debug("sendMessage: set streamStartTS from -1 to {}", eventTime);
+                }
             }
             // relative timestamp adjustment for live streams
             int startTs = streamStartTS.get();
-            if (startTs > 0) {
-                // subtract the offset time of when the stream started playing for the client
-                eventTime -= startTs;
+            // For late subscribers (streamStartTS was set to 0 by playLive):
+            // - Capture the first live video frame's timestamp (not the keyframe at ts=1)
+            // - Use that as the offset for all subsequent frames including the first
+            if (startTs == 0 && eventTime > 1) {
+                // This is a late subscriber - capture the publisher's base timestamp
+                // and adjust this frame and all subsequent frames
+                if (streamStartTS.compareAndSet(0, eventTime)) {
+                    log.debug("sendMessage: Late subscriber, setting streamStartTS from 0 to {} (first live frame at ts={})", eventTime, eventTime);
+                    // Store the publisher's base timestamp for late subscriber detection
+                    publisherTimestampOffset = eventTime;
+                    // Set the first live frame to timestamp 2 (after decoder config at 0 and keyframe at 1)
+                    messageOut.getBody().setTimestamp(2);
+                } else {
+                    // Another thread already set it
+                    startTs = streamStartTS.get();
+                    // For late subscribers, use formula: new_ts = original_ts - publisher_base + 2
+                    eventTime = eventTime - startTs + 2;
+                    messageOut.getBody().setTimestamp(eventTime);
+                    log.debug("sendMessage: Late subscriber adjusted timestamp to {}", eventTime);
+                }
+            } else if (startTs > 1) {
+                // Check if this is a late subscriber by seeing if publisherTimestampOffset was set
+                if (publisherTimestampOffset > 0) {
+                    // Late subscriber: adjust using publisherTimestampOffset
+                    eventTime = eventTime - publisherTimestampOffset + 2;
+                } else {
+                    // Early subscriber: normal adjustment
+                    eventTime -= startTs;
+                }
                 messageOut.getBody().setTimestamp(eventTime);
                 if (isTrace) {
                     log.trace("sendMessage (updated): streamStartTS={}, length={}, streamOffset={}, timestamp={}", new Object[] { startTs, currentItem.get().getLength(), streamOffset, eventTime });
                 }
             }
+            // For startTs <= 1 (decoder config at 0, keyframe at 1), no adjustment
         }
         doPushMessage(messageOut);
     }
@@ -1464,6 +1534,13 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 return;
             }
         }
+        // Debug logging to trace source type
+        if (message instanceof RTMPMessage rtmpMsg && rtmpMsg.getBody() != null) {
+            byte srcType = rtmpMsg.getBody().getSourceType();
+            if (srcType != Constants.SOURCE_TYPE_LIVE && rtmpMsg.getBody() instanceof VideoData) {
+                log.warn("pushMessage: VideoData has source type {} (expected LIVE=1), class: {}", new Object[] { srcType, rtmpMsg.getBody().getClass().getName() });
+            }
+        }
         String sessionId = subscriberStream.getConnection().getSessionId();
         if (message instanceof RTMPMessage) {
             IMessageInput msgIn = msgInReference.get();
@@ -1486,6 +1563,22 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                         IBroadcastStream stream = (IBroadcastStream) ((IBroadcastScope) msgIn).getClientBroadcastStream();
                         if (stream != null && stream.getCodecInfo() != null) {
                             IVideoStreamCodec videoCodec = stream.getCodecInfo().getVideoCodec();
+                            // Check if we were waiting for a keyframe and one is now available
+                            // IMPORTANT: Only switch modes when the CURRENT frame is a keyframe,
+                            // not just when one exists in the codec, to prevent sending interframes
+                            // before the keyframe has been transmitted
+                            if (videoCodec != null && waitingForKeyframe) {
+                                VideoData videoData = (VideoData) body;
+                                if (videoData.isKeyFrame()) {
+                                    log.debug("Keyframe frame received, switching from SEND_KEYFRAMES_CHECK to SEND_INTERFRAMES mode");
+                                    // Use SEND_INTERFRAMES to let the frame dropper state machine
+                                    // naturally progress to SEND_ALL when conditions are right
+                                    videoFrameDropper.reset(IFrameDropper.SEND_INTERFRAMES);
+                                    waitingForKeyframe = false;
+                                } else {
+                                    log.trace("Still waiting for keyframe, current frame is {}", videoData.getFrameType());
+                                }
+                            }
                             // dont try to drop frames if video codec is null
                             if (videoCodec != null && videoCodec.canDropFrames()) {
                                 if (!receiveVideo) {

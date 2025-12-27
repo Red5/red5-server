@@ -17,7 +17,6 @@ import org.red5.codec.VideoFrameType;
 import org.red5.io.object.Output;
 import org.red5.io.object.Serializer;
 import org.red5.server.api.IConnection.Encoding;
-import org.red5.server.api.Red5;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IServiceCall;
 import org.red5.server.exception.ClientDetailsException;
@@ -90,6 +89,11 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
     private boolean dropEncoded;
 
     /**
+     * RTMP connection associated with this encoder.
+     */
+    private volatile RTMPConnection conn;
+
+    /**
      * Encodes object with given protocol state to byte buffer
      *
      * @param message
@@ -124,6 +128,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      * @return Encoded data
      */
     public IoBuffer encodePacket(Packet packet) {
+        RTMP rtmp = conn.getState();
         IoBuffer out = null;
         Header header = packet.getHeader();
         int channelId = header.getChannelId();
@@ -131,14 +136,13 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         IRTMPEvent message = packet.getMessage();
         if (message instanceof ChunkSize) {
             ChunkSize chunkSizeMsg = (ChunkSize) message;
-            ((RTMPConnection) Red5.getConnectionLocal()).getState().setWriteChunkSize(chunkSizeMsg.getSize());
+            rtmp.setWriteChunkSize(chunkSizeMsg.getSize());
         }
         // normally the message is expected not to be dropped
         if (!dropMessage(channelId, message)) {
             //log.trace("Header time: {} message timestamp: {}", header.getTimer(), message.getTimestamp());
             IoBuffer data = encodeMessage(header, message);
             if (data != null) {
-                RTMP rtmp = ((RTMPConnection) Red5.getConnectionLocal()).getState();
                 // set last write packet
                 rtmp.setLastWritePacket(channelId, packet);
                 // ensure we're at the beginning
@@ -219,14 +223,14 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
             log.trace("Not dropping due to vod");
             return false;
         }
-        RTMPConnection conn = (RTMPConnection) Red5.getConnectionLocal();
+        RTMP rtmp = conn.getState();
         if (message instanceof Ping) {
             final Ping pingMessage = (Ping) message;
             if (PingType.STREAM_PLAYBUFFER_CLEAR.equals(PingType.getType(pingMessage.getEventType()))) {
                 // client buffer cleared, make sure to reset timestamps for this stream
                 final int channel = conn.getChannelIdForStreamId(pingMessage.getValue2());
                 log.trace("Ping stream id: {} channel id: {}", pingMessage.getValue2(), channel);
-                conn.getState().clearLastTimestampMapping(channel, channel + 1, channel + 2);
+                rtmp.clearLastTimestampMapping(channel, channel + 1, channel + 2);
             }
             // never drop pings
             return false;
@@ -245,7 +249,6 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 String sourceType = (isLiveStream ? "LIVE" : "VOD");
                 log.debug("Connection: {} connType={}", conn.getSessionId(), sourceType);
             }
-            RTMP rtmp = conn.getState();
             long timestamp = (message.getTimestamp() & 0xFFFFFFFFL);
             LiveTimestampMapping mapping = rtmp.getLastTimestampMapping(channelId);
             long now = System.currentTimeMillis();
@@ -347,7 +350,6 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      * @return Header type to use
      */
     private byte getHeaderType(final Header header, final Header lastHeader) {
-        //int lastFullTs = ((RTMPConnection) Red5.getConnectionLocal()).getState().getLastFullTimestampWritten(header.getChannelId());
         if (lastHeader == null || header.getStreamId() != lastHeader.getStreamId() || header.getTimer() < lastHeader.getTimer()) {
             // new header mark if header for another stream
             return HEADER_NEW;
@@ -440,7 +442,6 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                     buf.putInt(timeBase);
                     header.setExtended(true);
                 }
-                RTMPConnection conn = (RTMPConnection) Red5.getConnectionLocal();
                 if (conn != null) {
                     conn.getState().setLastFullTimestampWritten(header.getChannelId(), timeBase);
                 }
@@ -525,7 +526,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                                 //audio and video channels
                                 int[] channels = new int[] { 5, 6 };
                                 //if its a seek notification, reset the "mapping" for audio (5) and video (6)
-                                RTMP rtmp = ((RTMPConnection) Red5.getConnectionLocal()).getState();
+                                RTMP rtmp = conn.getState();
                                 for (int channelId : channels) {
                                     LiveTimestampMapping mapping = rtmp.getLastTimestampMapping(channelId);
                                     if (mapping != null) {
@@ -652,7 +653,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      *            output buffer
      */
     private void doEncodeSharedObject(ISharedObjectMessage so, IoBuffer out) {
-        final Encoding encoding = Red5.getConnectionLocal().getEncoding();
+        final Encoding encoding = conn.getEncoding();
         final Output output = new org.red5.io.amf.Output(out);
         final Output amf3output = new org.red5.io.amf3.Output(out);
         output.putString(so.getName());
@@ -818,7 +819,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         Output output = new org.red5.io.amf.Output(out);
         // response to initial connect is always AMF0
         if (!"connect".equals(call.getServiceMethodName())) {
-            if (Red5.getConnectionLocal().getEncoding() == Encoding.AMF3) {
+            if (conn.getEncoding() == Encoding.AMF3) {
                 output = new org.red5.io.amf3.Output(out);
             }
         }
@@ -1097,6 +1098,10 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      */
     public long getBaseTolerance() {
         return baseTolerance;
+    }
+
+    public void setConnection(RTMPConnection conn) {
+        this.conn = conn;
     }
 
 }

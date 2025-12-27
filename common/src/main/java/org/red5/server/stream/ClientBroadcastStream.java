@@ -277,8 +277,12 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                     }
                     int eventTime = rtmpEvent.getTimestamp();
                     // verify and / or set source type
+                    byte originalSourceType = rtmpEvent.getSourceType();
                     if (rtmpEvent.getSourceType() != Constants.SOURCE_TYPE_LIVE) {
                         rtmpEvent.setSourceType(Constants.SOURCE_TYPE_LIVE);
+                        if (isDebug) {
+                            log.debug("Set source type from {} to LIVE for {}", originalSourceType, rtmpEvent.getClass().getSimpleName());
+                        }
                     }
                     // get the buffer only once per call
                     IoBuffer buf = null;

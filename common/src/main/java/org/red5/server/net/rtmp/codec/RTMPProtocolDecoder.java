@@ -25,7 +25,6 @@ import org.red5.io.object.Deserializer;
 import org.red5.io.object.Input;
 import org.red5.io.object.StreamAction;
 import org.red5.server.api.IConnection.Encoding;
-import org.red5.server.api.Red5;
 import org.red5.server.net.protocol.ProtocolException;
 import org.red5.server.net.protocol.RTMPDecodeState;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -913,16 +912,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         }
         // our result is a notify
         Notify ret = null;
-        // check the encoding, if its AMF3 check to see if first byte is set to AMF0
-        Encoding encoding = ((RTMPConnection) Red5.getConnectionLocal()).getEncoding();
-        log.trace("Encoding: {}", encoding);
         // set mark
         in.mark();
         // create input using AMF0 to start with
         Input input = new org.red5.io.amf.Input(in);
-        if (encoding == Encoding.AMF3) {
-            log.trace("Client indicates its using AMF3");
-        }
         // get the first datatype
         byte dataType = input.readDataType();
         log.debug("Data type: {}", dataType);
