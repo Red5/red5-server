@@ -57,15 +57,10 @@ public final class LEB128 {
      * @return a int
      */
     public static int encode(byte[] value) {
-        int out = 0;
-        for (int i = 0; i < value.length; i++) {
-            out |= (value[i] & SEVEN_LSB_BITMASK);
-            if (i < value.length - 1) {
-                out |= MSB_BITMASK;
-                out <<= 8;
-            }
-        }
-        return out;
+        // Decode the LEB128 byte array and return the integer value
+        // This is essentially a decode operation returning just the value
+        LEB128Result result = decode(value);
+        return result.value;
     }
 
     /**
@@ -118,20 +113,29 @@ public final class LEB128 {
      * @return LEB128Result
      */
     public static LEB128Result decode(byte[] value) {
-        log.debug("Decode encoded bytes: {}", HexDump.byteArrayToHexString(value));
-        LEB128Result result = new LEB128Result(0, 1);
-        int v = hexBytesToUnsignedInt(value);
-        log.debug("Decode: {}", v);
-        do {
-            result.value |= (v & SEVEN_LSB_BITMASK);
-            v >>>= 8;
-            if ((v & MSB_BITMASK) == 0) {
+        if (log.isDebugEnabled()) {
+            log.debug("Decode encoded bytes: {}", HexDump.byteArrayToHexString(value));
+        }
+        LEB128Result result = new LEB128Result(0, 0);
+        int shift = 0;
+        for (byte b : value) {
+            // Extract 7 bits of data and shift into position (little-endian)
+            result.value |= ((b & SEVEN_LSB_BITMASK) << shift);
+            result.bytesRead++;
+            // If MSB is 0, this is the last byte
+            if ((b & MSB_BITMASK) == 0) {
                 break;
             }
-            result.value <<= 7;
-            result.bytesRead++;
-        } while (v != 0);
-        log.debug("Decoded leb: {}", result);
+            shift += 7;
+            // Safety check: don't overflow int (max 5 bytes for 32-bit)
+            if (shift >= 35) {
+                log.warn("LEB128 value too large or malformed");
+                break;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Decoded leb: {}", result);
+        }
         return result;
     }
 
