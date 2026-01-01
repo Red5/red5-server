@@ -829,7 +829,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         Output output = new org.red5.io.amf.Output(out);
         // response to initial connect is always AMF0
         if (!"connect".equals(call.getServiceMethodName())) {
-            if (conn.getEncoding() == Encoding.AMF3) {
+            if (conn != null && conn.getEncoding() == Encoding.AMF3) {
                 output = new org.red5.io.amf3.Output(out);
             }
         }
