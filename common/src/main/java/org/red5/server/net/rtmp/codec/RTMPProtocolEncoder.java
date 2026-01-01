@@ -229,6 +229,10 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
             log.trace("Not dropping due to vod");
             return false;
         }
+        if (conn == null) {
+            log.trace("Not dropping due to missing connection");
+            return false;
+        }
         RTMP rtmp = conn.getState();
         if (message instanceof Ping) {
             final Ping pingMessage = (Ping) message;
