@@ -128,6 +128,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      * @return Encoded data
      */
     public IoBuffer encodePacket(Packet packet) {
+        if (conn == null) {
+            if (log.isWarnEnabled()) {
+                log.warn("encodePacket called with null connection; packet will not be encoded");
+            }
+            return null;
+        }
         RTMP rtmp = conn.getState();
         IoBuffer out = null;
         Header header = packet.getHeader();
