@@ -113,6 +113,14 @@ public final class LEB128 {
      * @return LEB128Result
      */
     public static LEB128Result decode(byte[] value) {
+        // Validate input to avoid NullPointerException and clearly handle edge cases
+        if (value == null || value.length == 0) {
+            if (log.isWarnEnabled()) {
+                log.warn("decode(byte[]): null or empty input provided");
+            }
+            // Return default result indicating no data was read
+            return new LEB128Result(0, 0);
+        }
         if (log.isDebugEnabled()) {
             log.debug("Decode encoded bytes: {}", HexDump.byteArrayToHexString(value));
         }
