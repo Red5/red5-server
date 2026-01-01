@@ -308,11 +308,9 @@ public class RTMP {
      *            Value to set for property 'readChunkSize'.
      */
     public void setReadChunkSize(int readChunkSize) {
-        // Allow common streaming client chunk sizes while maintaining security bounds
-        if (readChunkSize < 32 || readChunkSize > MAX_CHUNK_SIZE) {
-            if (readChunkSize < 1 || readChunkSize > 16777215) { // RTMP spec limits
-                throw new IllegalArgumentException("Invalid chunk size: " + readChunkSize + " (must be between 1 and 16777215)");
-            }
+        // RTMP spec allows 1-16777215; libav/FFmpeg may use values larger than typical librtmp max of 65536
+        if (readChunkSize < 1 || readChunkSize > 16777215) {
+            throw new IllegalArgumentException("Invalid chunk size: " + readChunkSize + " (must be between 1 and 16777215 per RTMP spec)");
         }
         this.readChunkSize = readChunkSize;
     }
@@ -333,11 +331,9 @@ public class RTMP {
      *            Write chunk size
      */
     public void setWriteChunkSize(int writeChunkSize) {
-        // Allow common streaming client chunk sizes while maintaining security bounds
-        if (writeChunkSize < 32 || writeChunkSize > MAX_CHUNK_SIZE) {
-            if (writeChunkSize < 1 || writeChunkSize > 16777215) { // RTMP spec limits
-                throw new IllegalArgumentException("Invalid chunk size: " + writeChunkSize + " (must be between 1 and 16777215)");
-            }
+        // RTMP spec allows 1-16777215; libav/FFmpeg may use values larger than typical librtmp max of 65536
+        if (writeChunkSize < 1 || writeChunkSize > 16777215) {
+            throw new IllegalArgumentException("Invalid chunk size: " + writeChunkSize + " (must be between 1 and 16777215 per RTMP spec)");
         }
         this.writeChunkSize = writeChunkSize;
     }
@@ -413,6 +409,46 @@ public class RTMP {
         for (int channelId : channelIds) {
             getChannelInfo(channelId).setLiveTimestamp(null);
         }
+    }
+
+    /**
+     * Get the timestamp offset for discontinuity compensation on a channel.
+     *
+     * @param channelId channel id
+     * @return timestamp offset in milliseconds
+     */
+    public long getTimestampOffset(int channelId) {
+        return getChannelInfo(channelId).getTimestampOffset();
+    }
+
+    /**
+     * Set the timestamp offset for discontinuity compensation on a channel.
+     *
+     * @param channelId channel id
+     * @param offset timestamp offset in milliseconds
+     */
+    public void setTimestampOffset(int channelId, long offset) {
+        getChannelInfo(channelId).setTimestampOffset(offset);
+    }
+
+    /**
+     * Get the last raw timestamp (before offset applied) for a channel.
+     *
+     * @param channelId channel id
+     * @return last raw timestamp
+     */
+    public int getLastRawTimestamp(int channelId) {
+        return getChannelInfo(channelId).getLastRawTimestamp();
+    }
+
+    /**
+     * Set the last raw timestamp (before offset applied) for a channel.
+     *
+     * @param channelId channel id
+     * @param timestamp last raw timestamp
+     */
+    public void setLastRawTimestamp(int channelId, int timestamp) {
+        getChannelInfo(channelId).setLastRawTimestamp(timestamp);
     }
 
     /*
@@ -495,6 +531,12 @@ public class RTMP {
 
         // used for live streams
         private LiveTimestampMapping liveTimestamp;
+
+        // timestamp offset for discontinuity compensation (accumulated across restarts)
+        private long timestampOffset;
+
+        // last raw timestamp seen (before offset applied) for discontinuity detection
+        private int lastRawTimestamp;
 
         /**
          * @return the readHeader
@@ -600,6 +642,36 @@ public class RTMP {
          */
         public void setLiveTimestamp(LiveTimestampMapping liveTimestamp) {
             this.liveTimestamp = liveTimestamp;
+        }
+
+        /**
+         * @return the timestampOffset for discontinuity compensation
+         */
+        public long getTimestampOffset() {
+            return timestampOffset;
+        }
+
+        /**
+         * @param timestampOffset
+         *            the timestampOffset to set
+         */
+        public void setTimestampOffset(long timestampOffset) {
+            this.timestampOffset = timestampOffset;
+        }
+
+        /**
+         * @return the lastRawTimestamp before offset applied
+         */
+        public int getLastRawTimestamp() {
+            return lastRawTimestamp;
+        }
+
+        /**
+         * @param lastRawTimestamp
+         *            the lastRawTimestamp to set
+         */
+        public void setLastRawTimestamp(int lastRawTimestamp) {
+            this.lastRawTimestamp = lastRawTimestamp;
         }
     }
 

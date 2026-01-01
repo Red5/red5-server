@@ -320,7 +320,10 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             }
                             break;
                         case TYPE_VIDEO_DATA: // VideoData
-                            //log.trace("Video: {}", eventTime);
+                            if (isDebug) {
+                                VideoData vd = (VideoData) rtmpEvent;
+                                log.debug("Video received: ts={} frameType={} size={}", eventTime, vd.getFrameType(), buf != null ? buf.limit() : 0);
+                            }
                             IVideoStreamCodec videoStreamCodec = null;
                             if (checkVideoCodec) {
                                 videoStreamCodec = VideoCodecFactory.getVideoCodec(buf);
@@ -373,6 +376,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                         try {
                             // create new RTMP message, initialize it and push through pipe
                             RTMPMessage msg = RTMPMessage.build(rtmpEvent, eventTime);
+                            if (isDebug && rtmpEvent instanceof VideoData) {
+                                log.debug("Pushing video to livePipe: ts={} subscribers={}", eventTime, subscriberStats.getCurrent());
+                            }
                             livePipe.pushMessage(msg);
                         } catch (IOException err) {
                             stop();

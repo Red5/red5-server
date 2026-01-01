@@ -173,7 +173,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                     log.trace("Channel id: {} chunkSize: {}", channelId, chunkSize);
                 }
                 // attempt to properly guess the size of the buffer we'll need
-                int bufSize = dataLen + 18 + (numChunks * 2);
+                // Account for: data + first header (max 18) + continuation headers (1 byte each)
+                // + extended timestamps (4 bytes per chunk if timestamp >= MEDIUM_INT_MAX)
+                // Use unsigned comparison to handle timestamps >= 2^31 correctly
+                boolean hasExtendedTimestamp = Integer.compareUnsigned(header.getTimerBase(), MEDIUM_INT_MAX) >= 0 || (lastHeader != null && lastHeader.isExtended());
+                int extendedSize = hasExtendedTimestamp ? (numChunks * 4) : 0;
+                int bufSize = dataLen + 18 + (numChunks * 2) + extendedSize;
                 //log.trace("Allocated buffer size: {}", bufSize);
                 out = IoBuffer.allocate(bufSize, false);
                 out.setAutoExpand(true);
@@ -448,9 +453,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 RTMPUtils.writeReverseInt(buf, header.getStreamId().intValue());
                 header.setTimerDelta(timeDelta);
                 // write the extended timestamp if we are indicated to do so
-                if (timeBase >= MEDIUM_INT_MAX) {
+                // Use unsigned comparison to handle timestamps >= 2^31 correctly
+                if (Integer.compareUnsigned(timeBase, MEDIUM_INT_MAX) >= 0) {
                     buf.putInt(timeBase);
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 if (conn != null) {
                     conn.getState().setLastFullTimestampWritten(header.getChannelId(), timeBase);
@@ -466,9 +474,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 RTMPUtils.writeMediumInt(buf, headerSize);
                 buf.put(header.getDataType());
                 // write the extended timestamp if we are indicated to do so
-                if (timeDelta >= MEDIUM_INT_MAX) {
+                // Use unsigned comparison to handle deltas >= 2^31 correctly
+                if (Integer.compareUnsigned(timeDelta, MEDIUM_INT_MAX) >= 0) {
                     buf.putInt(timeDelta);
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 // time base is from last header minus delta
                 timeBase = header.getTimerBase() - timeDelta;
@@ -481,20 +492,37 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 // write the time delta 24-bit 3 bytes
                 RTMPUtils.writeMediumInt(buf, Math.min(timeDelta, MEDIUM_INT_MAX));
                 // write the extended timestamp if we are indicated to do so
-                if (timeDelta >= MEDIUM_INT_MAX) {
+                // Use unsigned comparison to handle deltas >= 2^31 correctly
+                if (Integer.compareUnsigned(timeDelta, MEDIUM_INT_MAX) >= 0) {
                     buf.putInt(timeDelta);
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 // time base is from last header minus delta
                 timeBase = header.getTimerBase() - timeDelta;
                 header.setTimerBase(timeBase);
                 break;
             case HEADER_CONTINUE: // type 3 - 0 bytes
-                // time base from the most recent header
-                timeBase = header.getTimerBase() - timeDelta;
-                // write the extended timestamp if we are indicated to do so
+                // Write the extended timestamp if indicated by the previous header.
+                // FFmpeg/libav compatibility: use the same extended timestamp value as the original header.
+                // For Type 0 originated messages: the extended value was the absolute timestamp
+                // For Type 1/2 originated messages: the extended value was the delta
                 if (lastHeader.isExtended()) {
-                    buf.putInt(timeBase);
+                    int extendedTimestamp;
+                    // Determine the correct extended timestamp value based on what triggered the extended flag
+                    // Use unsigned comparison to handle values >= 2^31 correctly
+                    if (Integer.compareUnsigned(lastHeader.getTimerDelta(), MEDIUM_INT_MAX) >= 0) {
+                        // Type 1/2 case: extended was triggered by delta >= MEDIUM_INT_MAX
+                        extendedTimestamp = lastHeader.getTimerDelta();
+                    } else {
+                        // Type 0 case: extended was triggered by absolute timestamp >= MEDIUM_INT_MAX
+                        extendedTimestamp = lastHeader.getTimer();
+                    }
+                    buf.putInt(extendedTimestamp);
+                    header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 break;
             default:
