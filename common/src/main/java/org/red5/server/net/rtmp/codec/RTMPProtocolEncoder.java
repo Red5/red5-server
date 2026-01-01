@@ -659,7 +659,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      *            output buffer
      */
     private void doEncodeSharedObject(ISharedObjectMessage so, IoBuffer out) {
-        final Encoding encoding = conn.getEncoding();
+        final Encoding encoding = (conn != null) ? conn.getEncoding() : Encoding.AMF0;
         final Output output = new org.red5.io.amf.Output(out);
         final Output amf3output = new org.red5.io.amf3.Output(out);
         output.putString(so.getName());
