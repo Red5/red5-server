@@ -15,7 +15,6 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import org.apache.mina.filter.codec.ProtocolEncoderAdapter;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.slf4j.Logger;
@@ -46,17 +45,10 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
             IConnectionManager<RTMPConnection> connManager = (IConnectionManager<RTMPConnection>) ((WeakReference<?>) session.getAttribute(RTMPConnection.RTMP_CONN_MANAGER)).get();
             RTMPConnection conn = (RTMPConnection) connManager.getConnectionBySessionId(sessionId);
             if (conn != null) {
-                // look for and compare the connection local; set it from the session
-                RTMPConnection localConn = (RTMPConnection) Red5.getConnectionLocal();
-                if (!conn.equals(localConn)) {
-                    if (localConn != null) {
-                        log.debug("Connection local ({}) didn't match io session ({})", localConn.getSessionId(), sessionId);
-                    }
-                    // replace conn with the one from the session id lookup
-                    Red5.setConnectionLocal(conn);
-                }
                 Boolean interrupted = false;
                 try {
+                    // set the connection for the encoder
+                    encoder.setConnection(conn);
                     // get the buffer
                     final IoBuffer buf = message instanceof IoBuffer ? (IoBuffer) message : encoder.encode(message);
                     if (buf != null) {
@@ -81,10 +73,8 @@ public class RTMPMinaProtocolEncoder extends ProtocolEncoderAdapter {
                     if (interrupted) {
                         log.info("Released lock after interruption. session {}", conn.getSessionId());
                     }
-                }
-                // set connection local back to previous value
-                if (localConn != null) {
-                    Red5.setConnectionLocal(localConn);
+                    // clear the connection from the encoder
+                    encoder.setConnection(null);
                 }
             } else {
                 log.debug("Connection is no longer available for encoding, may have been closed already");

@@ -25,7 +25,6 @@ import org.red5.io.object.Deserializer;
 import org.red5.io.object.Input;
 import org.red5.io.object.StreamAction;
 import org.red5.server.api.IConnection.Encoding;
-import org.red5.server.api.Red5;
 import org.red5.server.net.protocol.ProtocolException;
 import org.red5.server.net.protocol.RTMPDecodeState;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -273,6 +272,18 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             packet = new Packet(header.clone());
             // store the packet based on its channel id
             rtmp.setLastReadPacket(channelId, packet);
+        } else {
+            // Validate packet size consistency (FFmpeg/libav compatibility)
+            // If we're continuing an existing packet, the size must match
+            int existingSize = packet.getHeader().getSize();
+            int newSize = header.getSize();
+            if (newSize != existingSize && newSize > 0) {
+                log.warn("RTMP packet size mismatch on channel {}: existing={}, new={}. Resetting packet.", channelId, existingSize, newSize);
+                // Clear the corrupted packet and start fresh
+                rtmp.setLastReadPacket(channelId, null);
+                packet = new Packet(header.clone());
+                rtmp.setLastReadPacket(channelId, packet);
+            }
         }
         // get the packet data
         IoBuffer buf = packet.getData();
@@ -451,6 +462,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     }
                     timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
+                } else {
+                    // Reset extended flag when timestamp is below threshold (libav compatibility)
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -468,6 +482,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     }
                     timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
+                } else {
+                    // Reset extended flag when timestamp is below threshold (libav compatibility)
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -492,10 +509,23 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 if (in.position() == 0) {
                     log.debug("Type 3 header used for new message on channel {} - unusual but allowed", channelId);
                 }
-                // read the extended timestamp if we have the indication that it exists
+                // Read the extended timestamp if we have the indication that it exists.
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID
-                // indicated the presence of an extended timestamp field
-                if (lastHeader.isExtended()) {
+                // indicated the presence of an extended timestamp field.
+                // FFmpeg/libav compatibility: check both the flag AND the inherited timestamp value.
+                // The extended timestamp is present when the 24-bit timestamp field was 0xFFFFFF (MEDIUM_INT_MAX).
+                // For Type 0, this is the absolute timestamp; for Type 1/2, this is the delta.
+                boolean hasExtendedTimestamp = lastHeader.isExtended();
+                if (!hasExtendedTimestamp) {
+                    // Double-check using the inherited values (libav compatibility)
+                    // If the previous header's timestamp field would have been >= MEDIUM_INT_MAX on the wire
+                    int lastTimerDelta = lastHeader.getTimerDelta();
+                    int lastTimerBase = lastHeader.getTimerBase();
+                    // For Type 1/2 predecessors, check delta; for Type 0, check base
+                    // Use unsigned comparison to handle timestamps >= 2^31 correctly
+                    hasExtendedTimestamp = (Integer.compareUnsigned(lastTimerDelta, MEDIUM_INT_MAX) >= 0) || (lastTimerDelta == 0 && Integer.compareUnsigned(lastTimerBase, MEDIUM_INT_MAX) >= 0);
+                }
+                if (hasExtendedTimestamp) {
                     headerLength += 4;
                     if (in.remaining() < 4) {
                         state.bufferDecoding(headerLength - in.remaining());
@@ -507,6 +537,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         log.trace("Extended time read: {}", timeBase);
                     }
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -515,6 +547,51 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 throw new ProtocolException(String.format("Unexpected header: %s", headerSize));
         }
         log.trace("Decoded chunk {} {}", Header.HeaderType.values()[headerSize], header);
+        // Apply timestamp discontinuity compensation
+        // This handles source restarts where timestamps reset to 0
+        int rawTimer = header.getTimer();
+        long currentOffset = rtmp.getTimestampOffset(channelId);
+        int lastRawTimestamp = rtmp.getLastRawTimestamp(channelId);
+        // Detect timestamp discontinuity on Type 0 headers (absolute timestamps)
+        if (headerSize == HEADER_NEW && lastRawTimestamp > 0) {
+            // Use unsigned arithmetic to detect large backward jumps
+            long unsignedLast = Integer.toUnsignedLong(lastRawTimestamp);
+            long unsignedCurrent = Integer.toUnsignedLong(rawTimer);
+            // A backward jump > 1 second is likely a discontinuity (source restart)
+            // We use 1 second threshold to catch resets while allowing normal jitter
+            if (unsignedLast > unsignedCurrent && (unsignedLast - unsignedCurrent) > 1000L) {
+                // Calculate the new offset: accumulate previous offset + last timestamp + small gap
+                // The +1 ensures strict monotonicity
+                long newOffset = currentOffset + unsignedLast + 1;
+                // Cap the offset to prevent integer overflow in downstream int arithmetic
+                // PlayEngine and other components use int for timestamp math; values near
+                // Integer.MAX_VALUE cause overflow when small values are added
+                // Max safe offset is ~1 billion (0x40000000) to leave headroom
+                final long MAX_SAFE_OFFSET = 0x40000000L; // ~12 days in ms
+                if (newOffset > MAX_SAFE_OFFSET) {
+                    log.info("Timestamp discontinuity on channel {}: capping large offset {} to {} to prevent overflow", channelId, newOffset, MAX_SAFE_OFFSET);
+                    newOffset = MAX_SAFE_OFFSET;
+                } else {
+                    log.warn("Timestamp discontinuity on channel {}: raw {} -> {}, adjusting offset from {} to {} (accumulated: {}ms)", channelId, unsignedLast, unsignedCurrent, currentOffset, newOffset, newOffset);
+                }
+                rtmp.setTimestampOffset(channelId, newOffset);
+                currentOffset = newOffset;
+            }
+        }
+        // Store raw timestamp for next discontinuity detection
+        rtmp.setLastRawTimestamp(channelId, rawTimer);
+        // Apply offset if we have one
+        if (currentOffset > 0) {
+            long adjustedTimer = Integer.toUnsignedLong(rawTimer) + currentOffset;
+            // Clamp to 32-bit range (will wrap, but that's expected for very long streams)
+            int adjustedTimerInt = (int) (adjustedTimer & 0xFFFFFFFFL);
+            if (log.isTraceEnabled()) {
+                log.trace("Channel {} timestamp adjusted: raw={} + offset={} = {}", channelId, rawTimer, currentOffset, adjustedTimerInt);
+            }
+            // Update the header with adjusted timestamp
+            header.setTimerBase(adjustedTimerInt);
+            header.setTimerDelta(0);
+        }
         return header;
     }
 
@@ -652,10 +729,16 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     public ChunkSize decodeChunkSize(IoBuffer in) {
         int chunkSize = in.getInt();
         log.debug("Decoded chunk size: {}", chunkSize);
-        // Validate chunk size according to RTMP spec and librtmp compatibility
-        // librtmp uses default chunk size of 128, max of 65536
-        if (chunkSize < 1 || chunkSize > 65536) {
-            throw new ProtocolException("Invalid chunk size: " + chunkSize + ". Must be between 1 and 65536 for librtmp compatibility.");
+        // Validate chunk size according to RTMP spec (1-16777215)
+        // librtmp typically uses 128 default, 65536 max, but libav/FFmpeg may use larger values
+        if (chunkSize < 1 || chunkSize > MEDIUM_INT_MAX) {
+            throw new ProtocolException("Invalid chunk size: " + chunkSize + ". Must be between 1 and " + MEDIUM_INT_MAX + " per RTMP spec.");
+        }
+        // Warn about unusual chunk sizes that may indicate compatibility issues
+        if (chunkSize < 32) {
+            log.warn("Unusually small chunk size: {}. This may cause performance issues.", chunkSize);
+        } else if (chunkSize > 65536) {
+            log.info("Large chunk size: {} (exceeds typical librtmp max of 65536, but within RTMP spec)", chunkSize);
         }
         return new ChunkSize(chunkSize);
     }
@@ -913,16 +996,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         }
         // our result is a notify
         Notify ret = null;
-        // check the encoding, if its AMF3 check to see if first byte is set to AMF0
-        Encoding encoding = ((RTMPConnection) Red5.getConnectionLocal()).getEncoding();
-        log.trace("Encoding: {}", encoding);
         // set mark
         in.mark();
         // create input using AMF0 to start with
         Input input = new org.red5.io.amf.Input(in);
-        if (encoding == Encoding.AMF3) {
-            log.trace("Client indicates its using AMF3");
-        }
         // get the first datatype
         byte dataType = input.readDataType();
         log.debug("Data type: {}", dataType);
