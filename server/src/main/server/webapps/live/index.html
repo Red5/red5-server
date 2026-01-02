@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>Red5 Live Streaming Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.2/flv.min.js"></script>
+</head>
+<body>
+    <h1>Red5 Live Streaming Test</h1>
+    <video id="videoElement" width="640" height="360" controls></video>
+    <script>
+        if (flvjs.isSupported()) {
+            var videoElement = document.getElementById('videoElement');
+            var flvPlayer = flvjs.createPlayer({
+                type: 'flv',
+                isLive: false,
+                url: 'http://localhost:5080/live/streams/red5.flv'
+            }, {
+                enableStashBuffer: false,  // Lower latency
+                stashInitialSize: 128      // Smaller buffer
+            });
+            flvPlayer.attachMediaElement(videoElement);
+            flvPlayer.load();
+            flvPlayer.play();
+        } else {
+            console.error('FLV.js is not supported in this browser.');
+        }
+    </script>
+</body>
+</html>
