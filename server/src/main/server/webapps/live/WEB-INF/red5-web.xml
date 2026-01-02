@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:lang="http://www.springframework.org/schema/lang"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd                            
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:lang="http://www.springframework.org/schema/lang" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd                            
     http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
-	
+
 	<bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-	    <property name="location" value="/WEB-INF/red5-web.properties" />
+		<property name="location" value="/WEB-INF/red5-web.properties" />
 	</bean>
-	
+
 	<bean id="web.context" class="org.red5.server.Context" autowire="byType" />
-	
+
 	<bean id="web.scope" class="org.red5.server.scope.WebScope">
 		<property name="server" ref="red5.server" />
 		<property name="parent" ref="global.scope" />
@@ -20,9 +19,23 @@
 		<property name="virtualHosts" value="${webapp.virtualHosts}" />
 	</bean>
 
-	<bean id="web.handler" class="org.red5.server.adapter.ApplicationAdapter" />
+	<bean id="web.handler" class="org.red5.server.adapter.MultiThreadedApplicationAdapter" />
 
 	<!-- To enable SSE support, replace the above bean definition with the following one -->
-    <!-- <bean id="web.handler" class="org.red5.server.adapter.SSEApplicationAdapter" /> -->
+	<!-- <bean id="web.handler" class="org.red5.server.adapter.SSEApplicationAdapter" /> -->
 
+	<!-- 
+	<bean id="wsFlvListener" class="org.red5.net.websocket.flv.WebSocketFLVDataListener" depends-on="httpflv.service">
+		<property name="httpFlvService" ref="httpflv.service"/>
+	</bean>
+
+	<bean id="webSocketScope" class="org.red5.net.websocket.WebSocketScope" depends-on="web.handler,wsFlvListener">
+		<property name="scope" ref="web.scope"/>
+		<property name="listeners">
+			<list>
+				<ref bean="wsFlvListener"/>
+			</list>
+		</property>
+	</bean>
+    -->
 </beans>

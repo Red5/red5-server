@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+<web-app version="3.0"
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
          http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     <display-name>live</display-name>
     <context-param>
@@ -9,6 +9,7 @@
         <param-value>/live</param-value>
     </context-param>
     <!-- Server-Sent Events Servlet -->
+    <!-- To enable SSE support, ensure that the web.handler bean in red5-web.xml is set to SSEApplicationAdapter
     <servlet>
         <servlet-name>sse</servlet-name>
         <servlet-class>org.red5.server.net.sse.SSEServlet</servlet-class>
@@ -18,11 +19,22 @@
             <param-name>cors.enabled</param-name>
             <param-value>true</param-value>
         </init-param>
-    </servlet>   
+    </servlet>
     <servlet-mapping>
         <servlet-name>sse</servlet-name>
         <url-pattern>/events</url-pattern>
         <url-pattern>/events/*</url-pattern>
+    </servlet-mapping>
+    -->
+    <!-- HTTP-FLV Servlet -->
+    <servlet>
+        <servlet-name>HTTPFLVServlet</servlet-name>
+        <servlet-class>org.red5.server.net.httpflv.HTTPFLVServlet</servlet-class>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HTTPFLVServlet</servlet-name>
+        <url-pattern>*.flv</url-pattern>
     </servlet-mapping>
     <!-- XXX(paul) unused feature 
     <servlet>

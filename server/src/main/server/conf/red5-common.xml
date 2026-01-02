@@ -99,6 +99,35 @@
         <property name="sseManager" ref="sseManager"/>
     </bean>
 
+    <!-- HTTP-FLV Configuration for flv.js playback support -->
+
+    <!-- HTTP-FLV Service - handles stream configuration, GOP cache, and connection management -->
+    <bean id="httpflv.service" class="org.red5.server.net.httpflv.HTTPFLVService">
+        <!-- Enable/disable HTTP-FLV streaming (default: true) -->
+        <property name="enabled" value="${httpflv.enabled:true}"/>
+        <!-- Enable GOP caching for instant playback start (default: true) -->
+        <property name="gopCacheEnabled" value="${httpflv.gop.cache.enabled:true}"/>
+        <!-- Maximum GOP frames to cache per stream (default: 300) -->
+        <property name="maxGopFrames" value="${httpflv.gop.max.frames:300}"/>
+        <!-- Maximum connections per stream, 0 = unlimited (default: 0) -->
+        <property name="maxConnectionsPerStream" value="${httpflv.max.connections.per.stream:0}"/>
+    </bean>
+
+    <!-- HTTP-FLV Manager - handles connection lifecycle, keep-alive, and timeouts -->
+    <bean id="httpflv.manager" class="org.red5.server.net.httpflv.HTTPFLVManager"
+          init-method="afterPropertiesSet" destroy-method="destroy">
+        <!-- Reference to HTTP-FLV service for coordination -->
+        <property name="httpFlvService" ref="httpflv.service"/>
+        <!-- Connection timeout in milliseconds (default: 30 seconds) -->
+        <property name="connectionTimeout" value="${httpflv.connection.timeout:30000}"/>
+        <!-- Keep-alive check interval in milliseconds (default: 15 seconds) -->
+        <property name="keepAliveInterval" value="${httpflv.keepalive.interval:15000}"/>
+        <!-- Timeout check interval in milliseconds (default: 5 seconds) -->
+        <property name="timeoutCheckInterval" value="${httpflv.timeout.check.interval:5000}"/>
+        <!-- Enable/disable keep-alive checks (default: true) -->
+        <property name="keepAliveEnabled" value="${httpflv.keepalive.enabled:true}"/>
+    </bean>
+
     <!-- Use injection to setup thread pool for remoting clients; requires remoting package from "servlet" module -->
     <!-- 
     <bean id="remotingClient" class="org.red5.server.net.remoting.RemotingClient">
