@@ -144,6 +144,11 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         if (idx != -1) {
             path = path.substring(0, idx);
         }
+        // normalize path by removing trailing slashes (e.g., "/live/" -> "/live")
+        while (path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        log.debug("Normalized path: {}", path);
         // get the manager
         WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
         WebSocketScopeManager manager = plugin.getManager(path);
@@ -156,8 +161,12 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             if (scope == null) {
                 // split up the path into usable scope names
                 String[] paths = path.split("\\/");
-                // parent scope
-                IScope appScope = Optional.ofNullable(applicationScope).orElse(plugin.getApplicationScope(path));
+                // parent scope - prefer manager's app scope over separate lookup
+                IScope appScope = Optional.ofNullable(applicationScope).orElse(manager.getApplication());
+                if (appScope == null) {
+                    // fallback to plugin lookup
+                    appScope = plugin.getApplicationScope(path);
+                }
                 IScope parentScope = appScope;
                 // room scope
                 IScope roomScope = null;
@@ -177,23 +186,37 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                         parentScope = roomScope;
                     }
                 }
-                // create and add the websocket scope for the new room scope
-                manager.makeScope(roomScope);
-                // get the new ws scope
-                scope = manager.getScope(path);
-                // copy the listeners from the app websocket scope
-                Set<IWebSocketDataListener> listeners = ((WebSocketScope) appScope.getAttribute(WSConstants.WS_SCOPE)).getListeners();
-                for (IWebSocketDataListener listener : listeners) {
-                    log.debug("Adding listener: {}", listener);
-                    scope.addListener(listener);
+                // create and add the websocket scope for the room or app scope
+                IScope scopeToUse = roomScope != null ? roomScope : appScope;
+                if (scopeToUse != null) {
+                    manager.makeScope(scopeToUse);
+                    // get the new ws scope
+                    scope = manager.getScope(path);
+                    // copy the listeners from the app websocket scope if available
+                    if (appScope != null && appScope.hasAttribute(WSConstants.WS_SCOPE)) {
+                        WebSocketScope appWsScope = (WebSocketScope) appScope.getAttribute(WSConstants.WS_SCOPE);
+                        if (appWsScope != null && scope != null) {
+                            Set<IWebSocketDataListener> listeners = appWsScope.getListeners();
+                            for (IWebSocketDataListener listener : listeners) {
+                                log.debug("Adding listener: {}", listener);
+                                scope.addListener(listener);
+                            }
+                        }
+                    }
+                } else {
+                    log.warn("Cannot create websocket scope - no valid scope available for path: {}", path);
                 }
             }
-            // add the websocket scope to the user props
-            sec.getUserProperties().put(WSConstants.WS_SCOPE, scope);
-            // run through any modifiers
-            handshakeModifiers.forEach(modifier -> {
-                modifier.modifyHandshake(request, response);
-            });
+            // add the websocket scope to the user props if available
+            if (scope != null) {
+                sec.getUserProperties().put(WSConstants.WS_SCOPE, scope);
+                // run through any modifiers
+                handshakeModifiers.forEach(modifier -> {
+                    modifier.modifyHandshake(request, response);
+                });
+            } else {
+                log.warn("WebSocket scope is null for path: {} - handshake may fail", path);
+            }
         } else {
             log.warn("No websocket manager found for path: {} requested uri: {}", path, request.getRequestURI().toString());
         }
