@@ -333,6 +333,10 @@ public class WebSocketScopeManager {
      */
     public void makeScope(IScope scope) {
         log.debug("makeScope: {}", scope);
+        if (scope == null) {
+            log.warn("Cannot create WebSocket scope for null IScope");
+            return;
+        }
         String path = scope.getContextPath();
         if (!scopes.containsKey(path)) {
             // add the name to the collection (no '/' prefix)
@@ -358,6 +362,10 @@ public class WebSocketScopeManager {
      */
     public WebSocketScope getScope(String path) {
         log.debug("getScope: {}", path);
+        // normalize path by removing trailing slashes (e.g., "/live/" -> "/live")
+        while (path != null && path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
         WebSocketScope scope = scopes.get(path);
         // if we dont find a scope, go for default
         if (scope == null) {
@@ -451,6 +459,15 @@ public class WebSocketScopeManager {
         this.appScope = appScope;
         // add the name to the collection (no '/' prefix)
         return activeRooms.add(appScope.getName());
+    }
+
+    /**
+     * Returns the application scope for this manager.
+     *
+     * @return the application scope or null if not set
+     */
+    public IScope getApplication() {
+        return appScope;
     }
 
     /**
