@@ -98,6 +98,8 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                 RTMPConnection conn = client != null ? (RTMPConnection) client.getConnection() : (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
                 if (conn != null) {
                     Red5.setConnectionLocal(conn);
+                    // set the connection on the encoder (required for encodePacket)
+                    getEncoder().setConnection(conn);
                     final Semaphore lock = conn.getEncoderLock();
                     try {
                         // acquire the encoder lock
@@ -116,6 +118,7 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                         log.error("Exception during encode", ex);
                     } finally {
                         lock.release();
+                        getEncoder().setConnection(null);
                         Red5.setConnectionLocal(null);
                     }
                 } else {
