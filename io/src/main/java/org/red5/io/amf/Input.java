@@ -90,49 +90,51 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     public byte readDataType() {
         // prevent the handling of an empty Object
         if (buf.hasRemaining()) {
-            do {
-                // get the data type
-                currentDataType = buf.get();
-                log.trace("Data type {}: {}", currentDataType, DataTypes.toStringValue(currentDataType));
-                switch (currentDataType) {
-                    case AMF.TYPE_NULL:
-                    case AMF.TYPE_UNDEFINED:
-                        return DataTypes.CORE_NULL;
-                    case AMF.TYPE_NUMBER:
-                        return DataTypes.CORE_NUMBER;
-                    case AMF.TYPE_BOOLEAN:
-                        return DataTypes.CORE_BOOLEAN;
-                    case AMF.TYPE_STRING:
-                    case AMF.TYPE_LONG_STRING:
-                        return DataTypes.CORE_STRING;
-                    case AMF.TYPE_CLASS_OBJECT:
-                    case AMF.TYPE_OBJECT:
-                        return DataTypes.CORE_OBJECT;
-                    case AMF.TYPE_MIXED_ARRAY:
-                        return DataTypes.CORE_MAP;
-                    case AMF.TYPE_ARRAY:
-                        return DataTypes.CORE_ARRAY;
-                    case AMF.TYPE_DATE:
-                        return DataTypes.CORE_DATE;
-                    case AMF.TYPE_XML:
-                        return DataTypes.CORE_XML;
-                    case AMF.TYPE_REFERENCE:
-                        return DataTypes.OPT_REFERENCE;
-                    case AMF.TYPE_UNSUPPORTED:
-                    case AMF.TYPE_MOVIECLIP:
-                    case AMF.TYPE_RECORDSET:
-                        // These types are not handled by core datatypes
-                        // So add the amf mask to them, this way the deserializer
-                        // will call back to readCustom, we can then handle or
-                        // return null
-                        return (byte) (currentDataType + DataTypes.CUSTOM_AMF_MASK);
-                    case AMF.TYPE_AMF3_OBJECT:
-                        log.debug("Switch to AMF3");
-                        return DataTypes.CORE_SWITCH;
-                }
-            } while (hasMoreProperties());
-            log.trace("No more data types available");
-            return DataTypes.CORE_END_OBJECT;
+            // get the data type
+            currentDataType = buf.get();
+            log.trace("Data type {}: {}", currentDataType, DataTypes.toStringValue(currentDataType));
+            switch (currentDataType) {
+                case AMF.TYPE_NULL:
+                case AMF.TYPE_UNDEFINED:
+                    return DataTypes.CORE_NULL;
+                case AMF.TYPE_NUMBER:
+                    return DataTypes.CORE_NUMBER;
+                case AMF.TYPE_BOOLEAN:
+                    return DataTypes.CORE_BOOLEAN;
+                case AMF.TYPE_STRING:
+                case AMF.TYPE_LONG_STRING:
+                    return DataTypes.CORE_STRING;
+                case AMF.TYPE_CLASS_OBJECT:
+                case AMF.TYPE_OBJECT:
+                    return DataTypes.CORE_OBJECT;
+                case AMF.TYPE_MIXED_ARRAY:
+                    return DataTypes.CORE_MAP;
+                case AMF.TYPE_ARRAY:
+                    return DataTypes.CORE_ARRAY;
+                case AMF.TYPE_DATE:
+                    return DataTypes.CORE_DATE;
+                case AMF.TYPE_XML:
+                    return DataTypes.CORE_XML;
+                case AMF.TYPE_REFERENCE:
+                    return DataTypes.OPT_REFERENCE;
+                case AMF.TYPE_UNSUPPORTED:
+                case AMF.TYPE_MOVIECLIP:
+                case AMF.TYPE_RECORDSET:
+                    // These types are not handled by core datatypes
+                    // So add the amf mask to them, this way the deserializer
+                    // will call back to readCustom, we can then handle or
+                    // return null
+                    return (byte) (currentDataType + DataTypes.CUSTOM_AMF_MASK);
+                case AMF.TYPE_AMF3_OBJECT:
+                    log.debug("Switch to AMF3");
+                    return DataTypes.CORE_SWITCH;
+                case AMF.TYPE_END_OF_OBJECT:
+                    // End of object marker encountered
+                    return DataTypes.CORE_END_OBJECT;
+                default:
+                    // Unknown AMF type - this indicates malformed or corrupted data
+                    log.warn("Unknown AMF0 type marker: 0x{} ({})", String.format("%02X", currentDataType), currentDataType & 0xFF);
+            }
         }
         // empty object, may as well be null
         return DataTypes.CORE_NULL;
