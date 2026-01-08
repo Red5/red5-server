@@ -394,16 +394,27 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         }
         // got a non-new header for a channel which has no last-read header
         if (headerSize != HEADER_NEW && lastHeader == null) {
-            String detail = String.format("Last header null: %s, channelId %s", Header.HeaderType.values()[headerSize], channelId);
-            log.debug("{}", detail);
+            String detail = String.format("Last header null: %s, channelId %s, format=%d, position=%d", Header.HeaderType.values()[headerSize], channelId, chh.getFormat(), startPostion);
+            log.warn("{}", detail);
             // if the op prefers to exit or kill the connection, we should allow based on configuration param
             if (closeOnHeaderError) {
                 // this will trigger an error status, which in turn will disconnect the "offending" flash player
                 // preventing a memory leak and bringing the whole server to its knees
                 throw new ProtocolException(detail);
             } else {
-                // we need to skip the current channel data and continue until a new header is sent
-                return null;
+                // This indicates chunk stream desynchronization - likely an extended timestamp mismatch
+                // Log surrounding bytes for debugging
+                if (log.isDebugEnabled()) {
+                    int pos = Math.max(0, startPostion - 8);
+                    int end = Math.min(in.limit(), startPostion + 16);
+                    byte[] context = new byte[end - pos];
+                    in.position(pos);
+                    in.get(context);
+                    log.debug("Buffer context around error position {}: {}", startPostion, org.apache.commons.codec.binary.Hex.encodeHexString(context));
+                }
+                // Reset position and throw to close the connection - continuing with misaligned data is dangerous
+                in.position(startPostion);
+                throw new ProtocolException(detail + " - chunk stream desynchronized");
             }
         }
         int timeBase = 0, timeDelta = 0;
@@ -422,6 +433,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             header.setSize(lastHeader.getSize());
             // inherit the extended flag from the last header
             header.setExtended(lastHeader.isExtended());
+            // Log inheritance for debugging chunk assembly issues (only for non-Type 0 headers that inherit dataType)
+            if (log.isDebugEnabled() && headerSize != HEADER_NEW) {
+                log.debug("Header inheritance on channel {}: type={}, inherited dataType={} (0x{}), size={} from lastHeader", channelId, Header.HeaderType.values()[headerSize], lastHeader.getDataType(), String.format("%02X", lastHeader.getDataType()), lastHeader.getSize());
+            }
         }
         switch (headerSize) {
             case HEADER_NEW: // type 0
@@ -443,6 +458,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         log.trace("Extended time read: {}", timeBase);
                     }
                     header.setExtended(true);
+                } else {
+                    // Reset extended flag when timestamp is below threshold
+                    // This is critical when a channel transitions from extended to non-extended timestamps
+                    // Without this, inherited extended=true from lastHeader causes Type 3 chunks to
+                    // incorrectly read 4 extra bytes, desynchronizing the chunk stream
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -512,19 +533,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // Read the extended timestamp if we have the indication that it exists.
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID
                 // indicated the presence of an extended timestamp field.
-                // FFmpeg/libav compatibility: check both the flag AND the inherited timestamp value.
-                // The extended timestamp is present when the 24-bit timestamp field was 0xFFFFFF (MEDIUM_INT_MAX).
-                // For Type 0, this is the absolute timestamp; for Type 1/2, this is the delta.
+                // The extended flag is properly tracked through Type 0/1/2 header decoding based on the wire timestamp values.
+                // Note: We intentionally do NOT check the decoded timestamp values (timerBase/timerDelta) here because
+                // those values may include discontinuity offsets that don't reflect what was on the wire.
                 boolean hasExtendedTimestamp = lastHeader.isExtended();
-                if (!hasExtendedTimestamp) {
-                    // Double-check using the inherited values (libav compatibility)
-                    // If the previous header's timestamp field would have been >= MEDIUM_INT_MAX on the wire
-                    int lastTimerDelta = lastHeader.getTimerDelta();
-                    int lastTimerBase = lastHeader.getTimerBase();
-                    // For Type 1/2 predecessors, check delta; for Type 0, check base
-                    // Use unsigned comparison to handle timestamps >= 2^31 correctly
-                    hasExtendedTimestamp = (Integer.compareUnsigned(lastTimerDelta, MEDIUM_INT_MAX) >= 0) || (lastTimerDelta == 0 && Integer.compareUnsigned(lastTimerBase, MEDIUM_INT_MAX) >= 0);
-                }
                 if (hasExtendedTimestamp) {
                     headerLength += 4;
                     if (in.remaining() < 4) {
@@ -631,6 +643,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 message = decodeFlexMessage(in);
                 break;
             case TYPE_INVOKE:
+                if (log.isDebugEnabled()) {
+                    // Log header and first bytes for debugging chunk assembly issues
+                    in.mark();
+                    byte[] preview = new byte[Math.min(16, in.remaining())];
+                    in.get(preview);
+                    in.reset();
+                    log.debug("Decoding TYPE_INVOKE - channel: {}, streamId: {}, size: {}, timer: {}, firstBytes: {}", header.getChannelId(), header.getStreamId(), header.getSize(), header.getTimer(), Hex.encodeHexString(preview));
+                }
                 message = decodeAction(conn.getEncoding(), in, header);
                 break;
             case TYPE_FLEX_STREAM_SEND:
@@ -649,6 +669,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 if (header.getStreamId().doubleValue() != 0.0d) {
                     message = decodeStreamData(in);
                 } else {
+                    if (log.isDebugEnabled()) {
+                        // Log header and first bytes for debugging chunk assembly issues
+                        in.mark();
+                        byte[] preview = new byte[Math.min(16, in.remaining())];
+                        in.get(preview);
+                        in.reset();
+                        log.debug("Decoding TYPE_NOTIFY as action - channel: {}, streamId: {}, size: {}, timer: {}, firstBytes: {}", header.getChannelId(), header.getStreamId(), header.getSize(), header.getTimer(), Hex.encodeHexString(preview));
+                    }
                     message = decodeAction(conn.getEncoding(), in, header);
                 }
                 break;
@@ -891,7 +919,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // get the action
         String action = Deserializer.deserialize(input, String.class);
         if (action == null) {
-            throw new RuntimeException("Action was null");
+            // Log context for debugging - first byte indicates AMF type
+            log.warn("Failed to decode action string - first byte was 0x{}, header: {}", String.format("%02X", tmp), header);
+            throw new RuntimeException("Action was null - expected AMF string but first byte was 0x" + String.format("%02X", tmp));
         }
         if (isTrace) {
             log.trace("Action: {}", action);

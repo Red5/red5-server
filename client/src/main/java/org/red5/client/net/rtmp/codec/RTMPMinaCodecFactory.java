@@ -54,9 +54,9 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                         buf.setAutoExpand(true);
                         session.setAttribute("buffer", buf);
                     }
-                    // copy incoming into buffer
+                    // copy incoming into buffer - buffer should be in write mode (position at end of any leftover data)
                     buf.put(arr);
-                    // flip so we can read
+                    // flip so we can read from the beginning
                     buf.flip();
                     final Semaphore lock = conn.getDecoderLock();
                     try {
@@ -75,6 +75,8 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                     } catch (Exception e) {
                         log.error("Error during decode", e);
                     } finally {
+                        // NOTE: compact() is already called in RTMPProtocolDecoder.decodeBuffer()
+                        // Do NOT compact again here - double compact corrupts buffer position
                         lock.release();
                         Red5.setConnectionLocal(null);
                     }

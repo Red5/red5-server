@@ -80,6 +80,8 @@ public class RTMPMinaProtocolDecoder extends ProtocolDecoderAdapter {
                 } catch (Exception e) {
                     log.error("Error during decode", e);
                 }
+                // NOTE: compact() is already called in RTMPProtocolDecoder.decodeBuffer()
+                // Do NOT compact again here - double compact corrupts buffer position
                 if (log.isTraceEnabled()) {
                     //log.trace("Buffer after: {}", Hex.encodeHexString(Arrays.copyOfRange(buf.array(), buf.position(), buf.limit())));
                     log.trace("Buffers info after: position {}, limit {}, remaining {}", new Object[] { buf.position(), buf.limit(), buf.remaining() });

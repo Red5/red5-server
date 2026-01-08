@@ -519,6 +519,9 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                         // Type 0 case: extended was triggered by absolute timestamp >= MEDIUM_INT_MAX
                         extendedTimestamp = lastHeader.getTimer();
                     }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Type 3 writing extended timestamp on channel {}: value={}, delta={}, base={}", header.getChannelId(), extendedTimestamp, lastHeader.getTimerDelta(), lastHeader.getTimerBase());
+                    }
                     buf.putInt(extendedTimestamp);
                     header.setExtended(true);
                 } else {
