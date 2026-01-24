@@ -24,6 +24,17 @@
         <url-pattern>/events</url-pattern>
         <url-pattern>/events/*</url-pattern>
     </servlet-mapping>
+    <!-- MediaBunny fMP4 stream servlet -->
+    <servlet>
+        <servlet-name>mediabunny</servlet-name>
+        <servlet-class>org.red5.server.net.mediabunny.MediaBunnyServlet</servlet-class>
+        <load-on-startup>4</load-on-startup>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>mediabunny</servlet-name>
+        <url-pattern>/mediabunny</url-pattern>
+    </servlet-mapping>
     <!-- XXX(paul) unused feature 
     <servlet>
         <servlet-name>rtmpt</servlet-name>
