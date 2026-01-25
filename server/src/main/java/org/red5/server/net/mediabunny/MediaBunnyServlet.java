@@ -43,6 +43,7 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
+    @SuppressWarnings("null")
     @Override
     public void init() throws ServletException {
         super.init();

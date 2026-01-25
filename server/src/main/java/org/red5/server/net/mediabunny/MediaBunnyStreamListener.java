@@ -1,6 +1,7 @@
 package org.red5.server.net.mediabunny;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -275,9 +276,13 @@ public class MediaBunnyStreamListener implements IStreamListener {
             return;
         }
         Fmp4FragmentBuilder.FragmentConfig config = new Fmp4FragmentBuilder.FragmentConfig().setSequenceNumber(sequence).setTrackId(trackId).setBaseDecodeTime(buffer.fragmentStartDecodeTime).setGroupId(groupId).setMediaType(mediaType).setMediaData(buffer.media.toByteArray()).setSamples(new ArrayList<>(buffer.samples));
-
-        byte[] fragment = fragmentBuilder.buildFragment(config).serialize();
-        registry.onFragment(streamKey, fragment);
+        byte[] fragment;
+        try {
+            fragment = fragmentBuilder.buildFragment(config).serialize();
+            registry.onFragment(streamKey, fragment);
+        } catch (IOException e) {
+            log.warn("Failed to build fragment for stream: {}", streamKey, e);
+        }
         buffer.reset();
     }
 
