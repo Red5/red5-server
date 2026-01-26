@@ -89,10 +89,10 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             } else {
                 log.info("SSEService not available from WebScope");
             }
+            log.info("SSE servlet initialized successfully");
         } else {
-            throw new ServletException("No web application context available");
+            log.warn("No web application context available");
         }
-        log.info("SSE servlet initialized successfully");
     }
 
     @Override
@@ -223,6 +223,33 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
         resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         resp.setHeader("Access-Control-Allow-Headers", "Accept, Cache-Control, Last-Event-ID, Content-Type");
         resp.setHeader("Access-Control-Max-Age", "3600");
+        // Ensure web application context is available
+        if (webAppCtx == null) {
+            ServletContext ctx = getServletContext();
+            try {
+                webAppCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(ctx);
+            } catch (IllegalStateException e) {
+                webAppCtx = (WebApplicationContext) ctx.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+            }
+            if (webAppCtx != null) {
+                // Get the Red5 server instance
+                server = (IServer) webAppCtx.getBean("red5.server");
+                // get the application scope
+                webScope = (WebScope) webAppCtx.getBean("web.scope");
+                sseService = (SSEService) webScope.getServiceHandler(SSEService.BEAN_NAME);
+                if (sseService != null) {
+                    sseManager = sseService.getSseManager();
+                    if (sseManager == null) {
+                        log.warn("SSEManager not available from SSEService");
+                    }
+                } else {
+                    log.info("SSEService not available from WebScope");
+                }
+                log.info("SSE servlet initialized successfully");
+            } else {
+                log.warn("No web application context available");
+            }
+        }
     }
 
     /**

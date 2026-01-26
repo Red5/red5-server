@@ -505,6 +505,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
                         Thread.currentThread().setContextClassLoader(webClassLoader);
                         // create a thread to speed-up application loading
                         Future<?> appStartTask = executor.submit(new Runnable() {
+                            @SuppressWarnings("null")
                             public void run() {
                                 //set thread context classloader to web classloader
                                 Thread.currentThread().setContextClassLoader(webClassLoader);

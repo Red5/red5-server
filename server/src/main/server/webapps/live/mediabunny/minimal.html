@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mediabunny Live (Minimal)</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        font-family: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+        margin: 24px;
+        color: #111;
+        background: #f6f2ee;
+      }
+      h1 {
+        margin: 0 0 16px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      label {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+      input {
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #b8b1aa;
+        background: #fff;
+      }
+      button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #111;
+        background: #111;
+        color: #fff;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: transparent;
+        color: #111;
+      }
+      #status {
+        margin-top: 8px;
+        font-size: 13px;
+        opacity: 0.8;
+      }
+      #error {
+        margin-top: 8px;
+        color: #b00020;
+        font-size: 13px;
+      }
+      #player {
+        margin-top: 16px;
+        background: #000;
+        border-radius: 10px;
+        overflow: hidden;
+        max-width: 960px;
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mediabunny Live (Minimal)</h1>
+
+    <div class="row">
+      <label for="stream">Stream</label>
+      <input id="stream" type="text" value="mystream" />
+      <button id="start">Start</button>
+      <button id="stop" class="secondary" disabled>Stop</button>
+    </div>
+
+    <div id="status">Idle</div>
+    <div id="error"></div>
+
+    <div id="player">
+      <canvas id="canvas" width="1280" height="720"></canvas>
+    </div>
+
+    <script type="module" src="./minimal.js"></script>
+  </body>
+</html>
