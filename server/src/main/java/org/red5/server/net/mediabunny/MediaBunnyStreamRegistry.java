@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.red5.server.api.scope.IBroadcastScope;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.stream.IClientBroadcastStream;
+import org.red5.codec.IStreamCodecInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,15 +25,24 @@ public class MediaBunnyStreamRegistry {
 
     private final Map<String, StreamState> streams = new ConcurrentHashMap<>();
 
+    private final Map<String, byte[]> pendingInitSegments = new ConcurrentHashMap<>();
+
     public static MediaBunnyStreamRegistry getInstance() {
         return INSTANCE;
     }
 
     public StreamSubscription subscribe(IScope scope, String streamName) {
+        log.debug("Subscribing to stream: {}", streamName);
         String key = buildKey(scope, streamName);
+        log.debug("Subscriber key: {}", key);
         StreamState state = streams.computeIfAbsent(key, id -> createState(scope, streamName));
         if (state == null) {
             throw new IllegalStateException("Stream not found: " + streamName);
+        }
+        byte[] pendingInit = pendingInitSegments.remove(key);
+        if (pendingInit != null && state.initSegment == null) {
+            state.initSegment = pendingInit;
+            log.debug("Applied pending init segment for stream {}", key);
         }
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
         state.subscribers.add(queue);
@@ -44,6 +54,7 @@ public class MediaBunnyStreamRegistry {
     }
 
     public void unsubscribe(String key, BlockingQueue<byte[]> queue) {
+        log.debug("Unsubscribing from stream: {}", key);
         StreamState state = streams.get(key);
         if (state == null) {
             return;
@@ -58,6 +69,8 @@ public class MediaBunnyStreamRegistry {
     void onInitSegment(String key, byte[] initSegment) {
         StreamState state = streams.get(key);
         if (state == null) {
+            pendingInitSegments.put(key, initSegment);
+            log.debug("Stored pending init segment for stream {}", key);
             return;
         }
         state.initSegment = initSegment;
@@ -71,6 +84,9 @@ public class MediaBunnyStreamRegistry {
         if (state == null) {
             return;
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching fragment for {} to {} subscribers ({} bytes)", key, state.subscribers.size(), fragment.length);
+        }
         for (BlockingQueue<byte[]> queue : state.subscribers) {
             queue.offer(fragment);
         }
@@ -78,19 +94,28 @@ public class MediaBunnyStreamRegistry {
 
     private StreamState createState(IScope scope, String streamName) {
         if (scope == null) {
+            log.debug("Scope is null");
             return null;
         }
         IBroadcastScope broadcastScope = scope.getBroadcastScope(streamName);
         if (broadcastScope == null) {
+            log.debug("Broadcast scope is null for stream: {}", streamName);
             return null;
         }
         IClientBroadcastStream cbs = broadcastScope.getClientBroadcastStream();
         if (cbs == null) {
+            log.debug("Client broadcast stream is null for stream: {}", streamName);
             return null;
         }
         MediaBunnyStreamListener listener = new MediaBunnyStreamListener(buildKey(scope, streamName), this);
         cbs.addStreamListener(listener);
         log.info("Attached MediaBunny listener to stream: {}", streamName);
+        IStreamCodecInfo codecInfo = cbs.getCodecInfo();
+        if (codecInfo != null) {
+            listener.seedFromCodecInfo(codecInfo);
+        } else {
+            log.debug("No codec info available for stream {}", streamName);
+        }
         return new StreamState(cbs, listener);
     }
 

@@ -43,6 +43,8 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
+    private static final int INIT_PREFIX_BYTES = 32;
+
     @SuppressWarnings("null")
     @Override
     public void init() throws ServletException {
@@ -56,10 +58,10 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
         if (webAppCtx != null) {
             server = (IServer) webAppCtx.getBean("red5.server");
             webScope = (WebScope) webAppCtx.getBean("web.scope");
+            log.info("MediaBunny servlet initialized");
         } else {
-            throw new ServletException("No web application context available");
+            log.warn("No web application context available");
         }
-        log.info("MediaBunny servlet initialized");
     }
 
     @Override
@@ -76,8 +78,9 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handleCORS(req, resp);
         String streamName = req.getParameter("stream");
+        log.debug("Mediabunny get request: {}", streamName);
+        handleCORS(req, resp);
         if (streamName == null || streamName.isBlank()) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing stream parameter");
             return;
@@ -87,7 +90,6 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Scope not available");
             return;
         }
-
         MediaBunnyStreamRegistry.StreamSubscription subscription;
         try {
             subscription = MediaBunnyStreamRegistry.getInstance().subscribe(scope, streamName);
@@ -95,7 +97,6 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Stream not found: " + streamName);
             return;
         }
-
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType("video/mp4");
         resp.setHeader("Cache-Control", "no-cache");
@@ -109,10 +110,23 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
     }
 
     private void streamQueue(AsyncContext asyncContext, MediaBunnyStreamRegistry.StreamSubscription subscription) {
+        boolean loggedFirstChunk = false;
+        boolean loggedSecondChunk = false;
+        int chunkCount = 0;
         try (OutputStream out = asyncContext.getResponse().getOutputStream()) {
             BlockingQueue<byte[]> queue = subscription.getQueue();
             while (true) {
                 byte[] chunk = queue.take();
+                chunkCount++;
+                if (!loggedFirstChunk) {
+                    loggedFirstChunk = true;
+                    log.info("MediaBunny first chunk ({} bytes) prefix={}", chunk.length, hexPrefix(chunk, INIT_PREFIX_BYTES));
+                } else if (!loggedSecondChunk) {
+                    loggedSecondChunk = true;
+                    log.info("MediaBunny second chunk ({} bytes) prefix={}", chunk.length, hexPrefix(chunk, INIT_PREFIX_BYTES));
+                } else if (chunkCount % 50 == 0 && log.isDebugEnabled()) {
+                    log.debug("MediaBunny chunk {} ({} bytes)", chunkCount, chunk.length);
+                }
                 out.write(chunk);
                 out.flush();
             }
@@ -120,7 +134,11 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
             log.debug("MediaBunny stream ended: {}", e.getMessage());
         } finally {
             subscription.close();
-            asyncContext.complete();
+            try {
+                asyncContext.complete();
+            } catch (IllegalStateException e) {
+                log.debug("AsyncContext already completed or in error state", e);
+            }
         }
     }
 
@@ -135,6 +153,22 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
         resp.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
         resp.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type");
         resp.setHeader("Access-Control-Max-Age", "3600");
+        // Ensure web application context is available
+        if (webAppCtx == null) {
+            ServletContext ctx = getServletContext();
+            try {
+                webAppCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(ctx);
+            } catch (IllegalStateException e) {
+                webAppCtx = (WebApplicationContext) ctx.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+            }
+            if (webAppCtx != null) {
+                server = (IServer) webAppCtx.getBean("red5.server");
+                webScope = (WebScope) webAppCtx.getBean("web.scope");
+                log.info("MediaBunny servlet initialized");
+            } else {
+                log.warn("No web application context available");
+            }
+        }
     }
 
     private IScope getScope(HttpServletRequest req) {
@@ -178,5 +212,20 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
     @Override
     public void onStartAsync(AsyncEvent event) throws IOException {
         // no-op
+    }
+
+    private static String hexPrefix(byte[] data, int maxBytes) {
+        if (data == null || data.length == 0) {
+            return "<empty>";
+        }
+        int limit = Math.min(data.length, maxBytes);
+        StringBuilder sb = new StringBuilder(limit * 2 + 6);
+        for (int i = 0; i < limit; i++) {
+            sb.append(String.format("%02x", data[i]));
+        }
+        if (data.length > limit) {
+            sb.append("...");
+        }
+        return sb.toString();
     }
 }

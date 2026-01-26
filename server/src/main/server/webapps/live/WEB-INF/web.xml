@@ -9,6 +9,7 @@
         <param-value>/live</param-value>
     </context-param>
     <!-- Server-Sent Events Servlet -->
+    <!--
     <servlet>
         <servlet-name>sse</servlet-name>
         <servlet-class>org.red5.server.net.sse.SSEServlet</servlet-class>
@@ -24,6 +25,7 @@
         <url-pattern>/events</url-pattern>
         <url-pattern>/events/*</url-pattern>
     </servlet-mapping>
+    -->
     <!-- MediaBunny fMP4 stream servlet -->
     <servlet>
         <servlet-name>mediabunny</servlet-name>
@@ -33,7 +35,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>mediabunny</servlet-name>
-        <url-pattern>/mediabunny</url-pattern>
+        <url-pattern>/mb</url-pattern>
     </servlet-mapping>
     <!-- XXX(paul) unused feature 
     <servlet>

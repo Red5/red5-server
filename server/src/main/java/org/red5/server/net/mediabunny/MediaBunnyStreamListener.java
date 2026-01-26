@@ -15,6 +15,9 @@ import org.red5.codec.VideoFrameType;
 import org.red5.server.api.stream.IBroadcastStream;
 import org.red5.server.api.stream.IStreamListener;
 import org.red5.server.api.stream.IStreamPacket;
+import org.red5.codec.IAudioStreamCodec;
+import org.red5.codec.IStreamCodecInfo;
+import org.red5.codec.IVideoStreamCodec;
 import org.red5.server.net.rtmp.event.AudioData;
 import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.codec.AudioPacketType;
@@ -39,9 +42,13 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private static final long DEFAULT_AUDIO_DURATION = 1024;
 
-    private static final long VIDEO_FRAGMENT_TARGET = 90000;
+    private static final int AAC_FRAME_SAMPLES = 1024;
 
-    private static final long AUDIO_FRAGMENT_TARGET = 48000;
+    private static final long VIDEO_FRAGMENT_TARGET = 9000;
+
+    private static final long AUDIO_FRAGMENT_TARGET = 4800;
+
+    private static final int AUDIO_JITTER_FRAMES = 6;
 
     private final String streamKey;
 
@@ -71,6 +78,12 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private boolean videoSeen;
 
+    private boolean expectedAudio;
+
+    private boolean expectedVideo;
+
+    private boolean videoKeyframeSeen;
+
     private long lastVideoTimestamp = -1;
 
     private long lastAudioTimestamp = -1;
@@ -87,13 +100,55 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private final TrackBuffer audioBuffer = new TrackBuffer();
 
+    private boolean audioFragmentSent;
+
     MediaBunnyStreamListener(String streamKey, MediaBunnyStreamRegistry registry) {
+        log.debug("Creating MediaBunnyStreamListener for stream: {}", streamKey);
         this.streamKey = streamKey;
         this.registry = registry;
     }
 
+    public void setExpectedTracks(boolean expectVideo, boolean expectAudio) {
+        this.expectedVideo = expectVideo;
+        this.expectedAudio = expectAudio;
+        log.info("Expected tracks for stream {} video={} audio={}", streamKey, expectVideo, expectAudio);
+    }
+
+    public void seedFromCodecInfo(IStreamCodecInfo codecInfo) {
+        if (codecInfo == null) {
+            log.debug("No codec info available to seed for stream {}", streamKey);
+            return;
+        }
+        setExpectedTracks(codecInfo.hasVideo(), codecInfo.hasAudio());
+        IVideoStreamCodec videoCodec = codecInfo.getVideoCodec();
+        if (videoCodec != null) {
+            IoBuffer config = videoCodec.getDecoderConfiguration();
+            if (config != null && config.remaining() > 0) {
+                log.info("Seeding video codec config for stream {} codec={}", streamKey, videoCodec.getName());
+                handleVideo(new VideoData(config.asReadOnlyBuffer()));
+            } else {
+                log.debug("Video codec config not available for stream {} codec={}", streamKey, videoCodec.getName());
+            }
+        } else {
+            log.debug("No video codec present in codec info for stream {}", streamKey);
+        }
+        IAudioStreamCodec audioCodec = codecInfo.getAudioCodec();
+        if (audioCodec != null) {
+            IoBuffer config = audioCodec.getDecoderConfiguration();
+            if (config != null && config.remaining() > 0) {
+                log.info("Seeding audio codec config for stream {} codec={}", streamKey, audioCodec.getName());
+                handleAudio(new AudioData(config.asReadOnlyBuffer()));
+            } else {
+                log.debug("Audio codec config not available for stream {} codec={}", streamKey, audioCodec.getName());
+            }
+        } else {
+            log.debug("No audio codec present in codec info for stream {}", streamKey);
+        }
+    }
+
     @Override
     public void packetReceived(IBroadcastStream stream, IStreamPacket packet) {
+        log.debug("Packet received for stream {}: {}", streamKey, packet.getClass().getSimpleName());
         if (packet instanceof VideoData) {
             handleVideo((VideoData) packet);
         } else if (packet instanceof AudioData) {
@@ -103,6 +158,9 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private void handleVideo(VideoData video) {
         if (video.getCodecId() != VideoCodec.AVC.getId()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring non-AVC video packet for stream {} codecId={}", streamKey, video.getCodecId());
+            }
             return;
         }
         videoSeen = true;
@@ -112,7 +170,9 @@ public class MediaBunnyStreamListener implements IStreamListener {
         }
         VideoPacketType packetType = video.getVideoPacketType();
         if (packetType == VideoPacketType.SequenceStart) {
+            log.info("Received AVC sequence start for stream {} codecId={} payloadBytes={}", streamKey, video.getCodecId(), payload.length);
             avcConfig = Arrays.copyOfRange(payload, 5, payload.length);
+            log.info("AVC config prefix for stream {}: {}", streamKey, hexPrefix(avcConfig, 32));
             avcCBox = buildBox("avcC", avcConfig);
             int[] dimensions = parseAvcDimensions(avcConfig);
             if (dimensions != null) {
@@ -135,6 +195,10 @@ public class MediaBunnyStreamListener implements IStreamListener {
                 return;
             }
         }
+        if (!videoKeyframeSeen && video.getFrameType() != VideoFrameType.KEYFRAME) {
+            // Drop pre-keyframe samples to satisfy decoder expectations
+            return;
+        }
         long timestamp = video.getTimestamp();
         long duration = computeDuration(timestamp, lastVideoTimestamp, DEFAULT_VIDEO_DURATION, VIDEO_TIMESCALE);
         lastVideoTimestamp = timestamp;
@@ -143,10 +207,23 @@ public class MediaBunnyStreamListener implements IStreamListener {
         byte[] sampleData = Arrays.copyOfRange(payload, 5, payload.length);
         SampleFlags flags = video.getFrameType() == VideoFrameType.KEYFRAME ? SampleFlags.createSyncSampleFlags() : SampleFlags.createNonSyncSampleFlags();
 
-        if (video.getFrameType() == VideoFrameType.KEYFRAME && !videoBuffer.samples.isEmpty()) {
-            flushVideoBuffer();
+        if (video.getFrameType() == VideoFrameType.KEYFRAME) {
+            if (!videoKeyframeSeen) {
+                // Reset timing on first keyframe to align fragment with decoder expectations
+                videoKeyframeSeen = true;
+                videoDecodeTime = 0;
+                videoBuffer.reset();
+                videoSequence = 0;
+                // Align audio start with video start
+                audioDecodeTime = 0;
+                audioBuffer.reset();
+                audioFragmentSent = false;
+            } else if (!videoBuffer.samples.isEmpty()) {
+                flushVideoBuffer();
+            }
+        } else if (!videoKeyframeSeen) {
+            return;
         }
-
         addSample(videoBuffer, sampleData, duration, flags, compositionOffset, videoDecodeTime);
         videoDecodeTime += duration;
 
@@ -157,6 +234,9 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private void handleAudio(AudioData audio) {
         if (audio.getCodecId() != AudioCodec.AAC.getId()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring non-AAC audio packet for stream {} codecId={}", streamKey, audio.getCodecId());
+            }
             return;
         }
         audioSeen = true;
@@ -165,13 +245,22 @@ public class MediaBunnyStreamListener implements IStreamListener {
             return;
         }
         AudioPacketType packetType = audio.getPacketType();
+        if (log.isDebugEnabled()) {
+            log.debug("Audio packet type for stream {}: {}", streamKey, packetType);
+        }
         if (packetType == AudioPacketType.SequenceStart) {
+            log.info("Received AAC sequence start for stream {} codecId={} payloadBytes={}", streamKey, audio.getCodecId(), payload.length);
             ascConfig = Arrays.copyOfRange(payload, 2, payload.length);
+            log.info("AAC config prefix for stream {}: {}", streamKey, hexPrefix(ascConfig, 16));
             AudioSpecificConfig asc = parseAudioSpecificConfig(ascConfig);
             audioSampleRate = asc.sampleRate;
             audioChannels = asc.channelConfig;
             esdsBox = buildEsdsBox(ascConfig);
             trySendInitSegment();
+            return;
+        }
+        if (expectedVideo && !videoKeyframeSeen) {
+            // Hold audio samples until we have a video keyframe to align against
             return;
         }
         if (packetType != AudioPacketType.CodedFrames) {
@@ -185,7 +274,7 @@ public class MediaBunnyStreamListener implements IStreamListener {
         }
         long timestamp = audio.getTimestamp();
         long timescale = audioSampleRate > 0 ? audioSampleRate : 48000;
-        long duration = computeDuration(timestamp, lastAudioTimestamp, DEFAULT_AUDIO_DURATION, timescale);
+        long duration = computeAacDuration(timestamp, lastAudioTimestamp, timescale);
         lastAudioTimestamp = timestamp;
         byte[] sampleData = Arrays.copyOfRange(payload, 2, payload.length);
         SampleFlags flags = SampleFlags.createSyncSampleFlags();
@@ -193,9 +282,25 @@ public class MediaBunnyStreamListener implements IStreamListener {
         addSample(audioBuffer, sampleData, duration, flags, null, audioDecodeTime);
         audioDecodeTime += duration;
 
-        long target = audioSampleRate > 0 ? audioSampleRate : AUDIO_FRAGMENT_TARGET;
+        long target = AUDIO_FRAGMENT_TARGET;
+        if (audioSampleRate > 0) {
+            target = Math.min(AAC_FRAME_SAMPLES * 5L, AUDIO_FRAGMENT_TARGET);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Audio buffer for stream {} samples={} bufferedDuration={} target={}", streamKey, audioBuffer.samples.size(), audioBuffer.bufferedDuration, target);
+        }
+        if (!audioFragmentSent) {
+            if (audioBuffer.samples.size() >= AUDIO_JITTER_FRAMES) {
+                flushAudioBuffer();
+                audioFragmentSent = true;
+                return;
+            } else {
+                return;
+            }
+        }
         if (audioBuffer.bufferedDuration >= target) {
             flushAudioBuffer();
+            audioFragmentSent = true;
         }
     }
 
@@ -205,6 +310,12 @@ public class MediaBunnyStreamListener implements IStreamListener {
         }
         boolean videoReady = avcCBox != null && width > 0 && height > 0;
         boolean audioReady = esdsBox != null && audioSampleRate > 0 && audioChannels > 0;
+        if (expectedVideo && !videoReady) {
+            return;
+        }
+        if (expectedAudio && !audioReady) {
+            return;
+        }
         if (videoSeen && !videoReady) {
             return;
         }
@@ -214,6 +325,7 @@ public class MediaBunnyStreamListener implements IStreamListener {
         if (!videoReady && !audioReady) {
             return;
         }
+        log.info("Building init segment for stream {} videoReady={} audioReady={} width={} height={} audioSampleRate={} audioChannels={}", streamKey, videoReady, audioReady, width, height, audioSampleRate, audioChannels);
         Fmp4InitSegmentBuilder builder = new Fmp4InitSegmentBuilder();
         if (videoReady) {
             builder.addVideoTrack(new Fmp4InitSegmentBuilder.VideoTrackConfig(1, VIDEO_TIMESCALE, "avc1", avcCBox, width, height));
@@ -223,6 +335,12 @@ public class MediaBunnyStreamListener implements IStreamListener {
         }
         try {
             byte[] initSegment = builder.build();
+            patchBrandBox(initSegment, "ftyp", "iso6");
+            initSegment = ensureMvex(initSegment, new int[] { 1, 2 });
+            if (log.isInfoEnabled()) {
+                log.info("Init segment contains mvex={} trex={}", containsAscii(initSegment, "mvex"), containsAscii(initSegment, "trex"));
+            }
+            log.info("Init segment built for stream {} ({} bytes) prefix={}", streamKey, initSegment.length, hexPrefix(initSegment, 24));
             initSegmentSent = true;
             registry.onInitSegment(streamKey, initSegment);
         } catch (Exception e) {
@@ -248,6 +366,17 @@ public class MediaBunnyStreamListener implements IStreamListener {
             return duration > 0 ? duration : defaultDuration;
         }
         return defaultDuration;
+    }
+
+    private static long computeAacDuration(long timestamp, long lastTimestamp, long timescale) {
+        if (lastTimestamp >= 0 && timestamp > lastTimestamp) {
+            long deltaMs = timestamp - lastTimestamp;
+            double samplesExact = (deltaMs * (double) timescale) / 1000.0;
+            long frames = Math.max(1, Math.round(samplesExact / AAC_FRAME_SAMPLES));
+            long duration = frames * AAC_FRAME_SAMPLES;
+            return Math.min(duration, AAC_FRAME_SAMPLES * 6L);
+        }
+        return AAC_FRAME_SAMPLES;
     }
 
     private static long toTimescale(long ms, long timescale) {
@@ -279,6 +408,11 @@ public class MediaBunnyStreamListener implements IStreamListener {
         byte[] fragment;
         try {
             fragment = fragmentBuilder.buildFragment(config).serialize();
+            patchBrandBox(fragment, "styp", "iso6");
+            fragment = stripLeadingBox(fragment, "styp");
+            if (log.isDebugEnabled()) {
+                log.debug("Built {} fragment for stream {} ({} bytes)", mediaType, streamKey, fragment.length);
+            }
             registry.onFragment(streamKey, fragment);
         } catch (IOException e) {
             log.warn("Failed to build fragment for stream: {}", streamKey, e);
@@ -315,6 +449,21 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
         byte[] fullBox = concat(new byte[] { 0, 0, 0, 0 }, esDescriptor);
         return buildBox("esds", fullBox);
+    }
+
+    private static String hexPrefix(byte[] data, int maxBytes) {
+        if (data == null || data.length == 0) {
+            return "<empty>";
+        }
+        int limit = Math.min(data.length, maxBytes);
+        StringBuilder sb = new StringBuilder(limit * 2 + 6);
+        for (int i = 0; i < limit; i++) {
+            sb.append(String.format("%02x", data[i]));
+        }
+        if (data.length > limit) {
+            sb.append("...");
+        }
+        return sb.toString();
     }
 
     private static byte[] buildDecoderConfig(byte[] decSpecific) {
@@ -362,6 +511,166 @@ public class MediaBunnyStreamListener implements IStreamListener {
         return out;
     }
 
+    private static void patchBrandBox(byte[] data, String boxType, String replacementBrand) {
+        if (data == null || data.length < 16) {
+            return;
+        }
+        if (boxType.length() != 4 || replacementBrand.length() != 4) {
+            return;
+        }
+        if (!matchesBoxType(data, boxType)) {
+            return;
+        }
+        // Replace major_brand at offset 8..11
+        for (int i = 0; i < 4; i++) {
+            data[8 + i] = (byte) replacementBrand.charAt(i);
+        }
+    }
+
+    private static boolean containsAscii(byte[] data, String needle) {
+        if (data == null || needle == null || needle.isEmpty()) {
+            return false;
+        }
+        byte[] target = needle.getBytes(StandardCharsets.US_ASCII);
+        outer: for (int i = 0; i <= data.length - target.length; i++) {
+            for (int j = 0; j < target.length; j++) {
+                if (data[i + j] != target[j]) {
+                    continue outer;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static byte[] ensureMvex(byte[] data, int[] trackIds) {
+        if (data == null || data.length < 16 || trackIds == null || trackIds.length == 0) {
+            return data;
+        }
+        if (containsAscii(data, "mvex")) {
+            return data;
+        }
+        int moovOffset = findBoxOffset(data, "moov");
+        if (moovOffset < 0) {
+            return data;
+        }
+        int moovSize = readU32(data, moovOffset);
+        if (moovSize < 8 || moovOffset + moovSize > data.length) {
+            return data;
+        }
+        byte[] mvex = buildMvex(trackIds);
+        int newMoovSize = moovSize + mvex.length;
+        byte[] out = new byte[data.length + mvex.length];
+        System.arraycopy(data, 0, out, 0, moovOffset);
+        System.arraycopy(data, moovOffset, out, moovOffset, moovSize);
+        int insertPos = moovOffset + moovSize;
+        System.arraycopy(mvex, 0, out, insertPos, mvex.length);
+        System.arraycopy(data, insertPos, out, insertPos + mvex.length, data.length - insertPos);
+        writeU32(out, moovOffset, newMoovSize);
+        return out;
+    }
+
+    private static int findBoxOffset(byte[] data, String boxType) {
+        if (data == null || data.length < 8 || boxType == null || boxType.length() != 4) {
+            return -1;
+        }
+        int offset = 0;
+        while (offset + 8 <= data.length) {
+            int size = readU32(data, offset);
+            if (size < 8 || offset + size > data.length) {
+                return -1;
+            }
+            if (matchesBoxTypeAt(data, offset, boxType)) {
+                return offset;
+            }
+            offset += size;
+        }
+        return -1;
+    }
+
+    private static boolean matchesBoxTypeAt(byte[] data, int offset, String boxType) {
+        for (int i = 0; i < 4; i++) {
+            if (data[offset + 4 + i] != (byte) boxType.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static int readU32(byte[] data, int offset) {
+        return ((data[offset] & 0xff) << 24) | ((data[offset + 1] & 0xff) << 16) | ((data[offset + 2] & 0xff) << 8) | (data[offset + 3] & 0xff);
+    }
+
+    private static void writeU32(byte[] data, int offset, int value) {
+        data[offset] = (byte) ((value >> 24) & 0xff);
+        data[offset + 1] = (byte) ((value >> 16) & 0xff);
+        data[offset + 2] = (byte) ((value >> 8) & 0xff);
+        data[offset + 3] = (byte) (value & 0xff);
+    }
+
+    private static byte[] buildMvex(int[] trackIds) {
+        byte[] trexAll = new byte[0];
+        for (int trackId : trackIds) {
+            byte[] trex = buildTrex(trackId);
+            trexAll = concat(trexAll, trex);
+        }
+        return buildBox("mvex", trexAll);
+    }
+
+    private static byte[] buildTrex(int trackId) {
+        byte[] payload = new byte[4 + 4 + 4 + 4 + 4 + 4];
+        int pos = 0;
+        // version + flags
+        payload[pos++] = 0;
+        payload[pos++] = 0;
+        payload[pos++] = 0;
+        payload[pos++] = 0;
+        // trackId
+        writeU32(payload, pos, trackId);
+        pos += 4;
+        // default_sample_description_index
+        writeU32(payload, pos, 1);
+        pos += 4;
+        // default_sample_duration
+        writeU32(payload, pos, 0);
+        pos += 4;
+        // default_sample_size
+        writeU32(payload, pos, 0);
+        pos += 4;
+        // default_sample_flags
+        writeU32(payload, pos, 0);
+        return buildBox("trex", payload);
+    }
+
+    private static byte[] stripLeadingBox(byte[] data, String boxType) {
+        if (data == null || data.length < 8) {
+            return data;
+        }
+        if (boxType.length() != 4) {
+            return data;
+        }
+        if (!matchesBoxType(data, boxType)) {
+            return data;
+        }
+        int size = ((data[0] & 0xff) << 24) | ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
+        if (size <= 8 || size > data.length) {
+            return data;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Stripping leading {} box ({} bytes)", boxType, size);
+        }
+        return Arrays.copyOfRange(data, size, data.length);
+    }
+
+    private static boolean matchesBoxType(byte[] data, String boxType) {
+        for (int i = 0; i < 4; i++) {
+            if (data[4 + i] != (byte) boxType.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static int[] parseAvcDimensions(byte[] avcConfig) {
         if (avcConfig == null || avcConfig.length < 7) {
             return null;
@@ -389,7 +698,15 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private static int[] parseSps(byte[] sps) {
         byte[] cleaned = removeEmulationPrevention(sps);
-        BitReader reader = new BitReader(cleaned);
+        int offset = 0;
+        if (cleaned.length > 0 && (cleaned[0] & 0x1f) == 7) {
+            // Skip NAL header byte if present
+            offset = 1;
+        }
+        if (cleaned.length - offset <= 0) {
+            return null;
+        }
+        BitReader reader = new BitReader(Arrays.copyOfRange(cleaned, offset, cleaned.length));
         int profileIdc = reader.readBits(8);
         reader.readBits(8); // constraint flags + reserved
         reader.readBits(8); // level idc
