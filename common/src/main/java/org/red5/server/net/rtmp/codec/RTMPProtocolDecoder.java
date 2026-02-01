@@ -404,7 +404,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             log.trace("{} lastHeader: {}", Header.HeaderType.values()[headerSize], lastHeader);
         }
         // got a non-new header for a channel which has no last-read header
-        if (headerSize != HEADER_NEW && lastHeader == null) {
+        // Type 3 (HEADER_CONTINUE) is excluded here because it has its own fallback handling
+        // in the switch statement below for librtmp compatibility (creates a minimal header)
+        if (headerSize != HEADER_NEW && headerSize != HEADER_CONTINUE && lastHeader == null) {
             String detail = String.format("Last header null: %s, channelId %s, format=%d, position=%d", Header.HeaderType.values()[headerSize], channelId, chh.getFormat(), startPostion);
             log.warn("{}", detail);
             // if the op prefers to exit or kill the connection, we should allow based on configuration param

@@ -113,7 +113,7 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
     @Override
     public void close() {
         if (closing.compareAndSet(false, true)) {
-            super.close();
+            super.closeInternal();
             log.debug("IO Session closing: {}", (ioSession != null ? ioSession.isClosing() : null));
             if (ioSession != null && !ioSession.isClosing()) {
                 // set a ref to ourself so that the handler can be notified when close future is done

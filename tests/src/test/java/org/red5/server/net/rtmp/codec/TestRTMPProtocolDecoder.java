@@ -271,6 +271,8 @@ public class TestRTMPProtocolDecoder implements IRTMPHandler {
             }
         };
         conn.getState().setState(RTMP.STATE_CONNECTED);
+        // message payload is 387 bytes; set chunk size large enough to avoid needing Type 3 continuation headers
+        conn.getState().setReadChunkSize(512);
         conn.setHandler(this);
 
         Red5.setConnectionLocal(conn);

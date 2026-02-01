@@ -1108,62 +1108,71 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     @Override
     public void close() {
         if (closing.compareAndSet(false, true)) {
-            if (isDebug) {
-                log.debug("close: {}", sessionId);
-            }
-            stopWaitForHandshake();
-            stopRoundTripMeasurement();
-            // update our state
-            if (state != null) {
-                final byte s = getStateCode();
-                switch (s) {
-                    case RTMP.STATE_DISCONNECTED:
-                        if (isDebug) {
-                            log.debug("Already disconnected");
-                        }
-                        return;
-                    default:
-                        if (isDebug) {
-                            log.debug("State: {}", RTMP.states[s]);
-                        }
-                        setStateCode(RTMP.STATE_DISCONNECTING);
-                }
-            }
-            Red5.setConnectionLocal(this);
-            IStreamService streamService = (IStreamService) ScopeUtils.getScopeService(scope, IStreamService.class, StreamService.class);
-            if (streamService != null) {
-                //in the end of call streamService.deleteStream we do streams.remove
-                for (Iterator<IClientStream> it = streams.values().iterator(); it.hasNext();) {
-                    IClientStream stream = it.next();
-                    if (isDebug) {
-                        log.debug("Closing stream: {}", stream.getStreamId());
-                    }
-                    streamService.deleteStream(this, stream.getStreamId());
-                }
-            } else {
-                if (isDebug) {
-                    log.debug("Stream service was not found for scope: {}", (scope != null ? scope.getName() : "null or non-existant"));
-                }
-            }
-            // close the base connection - disconnect scopes and unregister client
-            super.close();
-            // kill all the collections etc
-            channels.clear();
-            streams.clear();
-            pendingCalls.clear();
-            deferredResults.clear();
-            pendingVideos.clear();
-            streamBuffers.clear();
-            if (isTrace) {
-                // dump memory stats
-                log.trace("Memory at close - free: {}K total: {}K", Runtime.getRuntime().freeMemory() / 1024, Runtime.getRuntime().totalMemory() / 1024);
-            }
-            // reset / stop decoder state
-            if (decoderState != null) {
-                decoderState.stopDecoding();
-            }
+            closeInternal();
         } else if (isDebug) {
             log.debug("Already closing.");
+        }
+    }
+
+    /**
+     * Performs the actual close operations. Separated from {@link #close()} so that subclasses
+     * which need their own CAS guard on {@code closing} can still invoke the parent close logic
+     * via {@code super.closeInternal()} without the CAS rejecting the call.
+     */
+    protected void closeInternal() {
+        if (isDebug) {
+            log.debug("close: {}", sessionId);
+        }
+        stopWaitForHandshake();
+        stopRoundTripMeasurement();
+        // update our state
+        if (state != null) {
+            final byte s = getStateCode();
+            switch (s) {
+                case RTMP.STATE_DISCONNECTED:
+                    if (isDebug) {
+                        log.debug("Already disconnected");
+                    }
+                    return;
+                default:
+                    if (isDebug) {
+                        log.debug("State: {}", RTMP.states[s]);
+                    }
+                    setStateCode(RTMP.STATE_DISCONNECTING);
+            }
+        }
+        Red5.setConnectionLocal(this);
+        IStreamService streamService = (IStreamService) ScopeUtils.getScopeService(scope, IStreamService.class, StreamService.class);
+        if (streamService != null) {
+            //in the end of call streamService.deleteStream we do streams.remove
+            for (Iterator<IClientStream> it = streams.values().iterator(); it.hasNext();) {
+                IClientStream stream = it.next();
+                if (isDebug) {
+                    log.debug("Closing stream: {}", stream.getStreamId());
+                }
+                streamService.deleteStream(this, stream.getStreamId());
+            }
+        } else {
+            if (isDebug) {
+                log.debug("Stream service was not found for scope: {}", (scope != null ? scope.getName() : "null or non-existant"));
+            }
+        }
+        // close the base connection - disconnect scopes and unregister client
+        super.close();
+        // kill all the collections etc
+        channels.clear();
+        streams.clear();
+        pendingCalls.clear();
+        deferredResults.clear();
+        pendingVideos.clear();
+        streamBuffers.clear();
+        if (isTrace) {
+            // dump memory stats
+            log.trace("Memory at close - free: {}K total: {}K", Runtime.getRuntime().freeMemory() / 1024, Runtime.getRuntime().totalMemory() / 1024);
+        }
+        // reset / stop decoder state
+        if (decoderState != null) {
+            decoderState.stopDecoding();
         }
     }
 
