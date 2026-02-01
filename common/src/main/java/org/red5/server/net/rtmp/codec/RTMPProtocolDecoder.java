@@ -136,7 +136,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     final int positionBeforeDecode = buffer.position();
                     final Object decodedObject = decode(conn, state, buffer);
                     if (buffer.position() == positionBeforeDecode && decodedObject == null) {
-                        log.warn("Decode made no progress; breaking to avoid infinite loop (pos={}, remaining={}, state={})", positionBeforeDecode, remaining, state);
+                        if (!state.canContinueDecoding()) {
+                            // state is BUFFER or DESTROYED; need more data or connection is done
+                            log.trace("Decode needs more data; waiting for additional bytes (pos={}, remaining={}, state={})", positionBeforeDecode, remaining, state);
+                        } else {
+                            log.warn("Decode made no progress; breaking to avoid infinite loop (pos={}, remaining={}, state={})", positionBeforeDecode, remaining, state);
+                        }
                         break;
                     }
                     if (state.hasDecodedObject()) {
