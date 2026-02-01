@@ -31,6 +31,12 @@ mvn test
 # Run tests for specific module
 mvn -pl common test
 mvn -pl server test
+
+# Run integration tests against a manually started Red5 server
+mvn test -Pintegration
+
+# Run integration tests with Docker (starts/stops mondain/red5 container automatically)
+mvn -pl tests verify -Pdocker-integration -DskipTests=false
 ```
 
 ### Assembly & Packaging
