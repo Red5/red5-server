@@ -274,14 +274,15 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     protected volatile int maxInactivity = 60000;
 
     /**
-     * Data read interval
+     * Data read interval - send BytesRead acknowledgement every 128KB
+     * Reduced from 1MB to improve compatibility with some encoders
      */
-    protected long bytesReadInterval = 1024 * 1024;
+    protected long bytesReadInterval = 128 * 1024;
 
     /**
      * Number of bytes to read next.
      */
-    protected long nextBytesRead = 1024 * 1024;
+    protected long nextBytesRead = 128 * 1024;
 
     /**
      * Number of bytes the client reported to have received.
@@ -1186,7 +1187,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                 notify(cne.getMethod(), cne.getParams());
                 break;
             default:
-                log.warn("Unhandled event: {}", event);
+                log.debug("Unhandled event: {}", event);
         }
     }
 
@@ -1278,12 +1279,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      * Update number of bytes to read next value.
      */
     protected void updateBytesRead() {
-        //if (isTrace) {
-        //    log.trace("updateBytesRead");
-        //}
         long bytesRead = getReadBytes();
         if (bytesRead >= nextBytesRead) {
             BytesRead sbr = new BytesRead((int) (bytesRead % Integer.MAX_VALUE));
+            if (isDebug) {
+                log.debug("Sending BytesRead acknowledgement: {} bytes", bytesRead);
+            }
             getChannel(2).write(sbr);
             nextBytesRead += bytesReadInterval;
         }

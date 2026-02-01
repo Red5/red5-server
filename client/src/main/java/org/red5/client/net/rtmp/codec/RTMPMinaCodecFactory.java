@@ -54,9 +54,9 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                         buf.setAutoExpand(true);
                         session.setAttribute("buffer", buf);
                     }
-                    // copy incoming into buffer
+                    // copy incoming into buffer - buffer should be in write mode (position at end of any leftover data)
                     buf.put(arr);
-                    // flip so we can read
+                    // flip so we can read from the beginning
                     buf.flip();
                     final Semaphore lock = conn.getDecoderLock();
                     try {
@@ -75,6 +75,8 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                     } catch (Exception e) {
                         log.error("Error during decode", e);
                     } finally {
+                        // NOTE: compact() is already called in RTMPProtocolDecoder.decodeBuffer()
+                        // Do NOT compact again here - double compact corrupts buffer position
                         lock.release();
                         Red5.setConnectionLocal(null);
                     }
@@ -98,6 +100,8 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                 RTMPConnection conn = client != null ? (RTMPConnection) client.getConnection() : (RTMPConnection) RTMPClientConnManager.getInstance().getConnectionBySessionId(sessionId);
                 if (conn != null) {
                     Red5.setConnectionLocal(conn);
+                    // set the connection on the encoder (required for encodePacket)
+                    getEncoder().setConnection(conn);
                     final Semaphore lock = conn.getEncoderLock();
                     try {
                         // acquire the encoder lock
@@ -116,6 +120,7 @@ public class RTMPMinaCodecFactory implements ProtocolCodecFactory {
                         log.error("Exception during encode", ex);
                     } finally {
                         lock.release();
+                        getEncoder().setConnection(null);
                         Red5.setConnectionLocal(null);
                     }
                 } else {

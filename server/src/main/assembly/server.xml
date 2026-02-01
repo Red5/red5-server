@@ -151,6 +151,10 @@
         </fileSet>
         <!-- Live -->
         <fileSet>
+            <directory>${project.basedir}/src/main/server/webapps/live</directory>
+            <outputDirectory>webapps/live</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${project.basedir}/src/main/server/webapps/live/WEB-INF</directory>
             <outputDirectory>webapps/live/WEB-INF</outputDirectory>
             <includes>

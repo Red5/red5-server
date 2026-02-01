@@ -168,6 +168,9 @@ public class HEVCVideo extends AbstractVideo implements IEnhancedRTMPVideoCodec 
                 }
                 break;
             case CodedFrames: // pass coded data
+                if (data.remaining() < 3) {
+                    return;
+                }
                 int compTimeOffset = (data.get() << 16 | data.get() << 8 | data.get());
                 switch (frameType) {
                     case KEYFRAME: // keyframe

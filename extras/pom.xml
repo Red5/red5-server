@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>red5-extras</artifactId>
     <name>Red5 :: Extras</name>
-    <description>The Red5 Extas</description>
+    <description>The Red5 Extras</description>
     <packaging>jar</packaging>
     <properties>
         <maven.test.skip>true</maven.test.skip>

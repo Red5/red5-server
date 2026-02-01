@@ -50,6 +50,10 @@ public class AACAudio extends AbstractAudio {
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
         if (data != null && data.limit() > 0) {
+            // Need at least two bytes for flags + header before reading further
+            if (data.remaining() < 2) {
+                return false;
+            }
             byte flgs = data.get();
             byte hdr = data.get();
             int codecId = (flgs & IoConstants.MASK_SOUND_FORMAT) >> 4;
@@ -58,14 +62,24 @@ public class AACAudio extends AbstractAudio {
             // attempt configuration parsing if we've identified the codec and have in-band data
             if (result) {
                 if (hdr == 0) {
+                    // decoder configuration requires at least 4 bytes (per usage below)
+                    if (data.remaining() < 2) {
+                        return false;
+                    }
                     // rewind the buffer without causing an error with mark and reset
                     data.position(0);
                     blockDataAACDCR = new byte[data.remaining()]; // expect > 2 bytes
                     // example: AF 00 11 90
                     data.get(blockDataAACDCR);
                     // the sound "header" data is ignored for AAC and the bitstream is parsed instead
+                    if (blockDataAACDCR.length < 4) {
+                        return false;
+                    }
                     int objectType = (blockDataAACDCR[2] >> 3) & 0x1f; // five bits
                     int freqIndex = ((blockDataAACDCR[2] & 0x7) << 1) | ((blockDataAACDCR[3] >> 7) & 0x1);
+                    if (freqIndex >= AAC_SAMPLERATES.length) {
+                        return false;
+                    }
                     channels = (blockDataAACDCR[3] & 0x78) >> 3;
                     sampleRate = AAC_SAMPLERATES[freqIndex];
                     log.info("aac config sample rate {} type {} channels {}", sampleRate, objectType, channels);

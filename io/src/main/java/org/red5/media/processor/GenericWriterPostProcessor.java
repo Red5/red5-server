@@ -32,15 +32,19 @@ public class GenericWriterPostProcessor implements IPostProcessor {
     public void init(Object... objs) {
         log.info("init: {}", Arrays.toString(objs));
         // we expect a file path to which a writer wrote to
-        file = new File(objs[0].toString());
+        if (objs != null && objs.length > 0 && objs[0] != null) {
+            file = new File(objs[0].toString());
+        } else {
+            log.warn("Init called without a valid file reference");
+            file = null;
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public void run() {
         if (file != null) {
-            try {
-                FLVReader reader = new FLVReader(file);
+            try (FLVReader reader = new FLVReader(file)) {
                 ITag tag = null;
                 int audio = 0, video = 0, meta = 0;
                 while (reader.hasMoreTags()) {
@@ -59,7 +63,6 @@ public class GenericWriterPostProcessor implements IPostProcessor {
                         }
                     }
                 }
-                reader.close();
                 log.info("Data type counts - audio: {} video: {} metadata: {}", audio, video, meta);
             } catch (Exception e) {
                 log.error("Exception reading: {}", file.getName(), e);

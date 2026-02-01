@@ -122,6 +122,20 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      */
     private AtomicInteger streamStartTS = new AtomicInteger(-1);
 
+    /**
+     * For late subscribers, stores the publisher's current timestamp when playLive() is called.
+     * Used to generate relative timestamps for the subscriber.
+     */
+    private int publisherTimestampOffset = 0;
+
+    /**
+     * For late subscribers, track audio and video base timestamps separately to ensure
+     * both streams start at ts=2 for proper A/V sync.
+     */
+    private volatile int audioBaseTs = -1;
+
+    private volatile int videoBaseTs = -1;
+
     private AtomicReference<IPlayItem> currentItem = new AtomicReference<>();
 
     private RTMPMessage pendingMessage;
@@ -156,6 +170,12 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
      * State machine for video frame dropping in live streams
      */
     private IFrameDropper videoFrameDropper = new VideoFrameDropper();
+
+    /**
+     * Flag indicating we're waiting for the first keyframe from the publisher.
+     * This allows us to switch to SEND_ALL mode once a keyframe is available.
+     */
+    private volatile boolean waitingForKeyframe = false;
 
     private int timestampOffset = 0;
 
@@ -422,10 +442,14 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 if (msgInReference.compareAndSet(null, in)) {
                     // drop all frames up to the next keyframe
                     videoFrameDropper.reset(IFrameDropper.SEND_KEYFRAMES_CHECK);
+                    waitingForKeyframe = true;
+                    log.debug("playItem: set waitingForKeyframe=true, SEND_KEYFRAMES_CHECK mode");
                     if (in instanceof IBroadcastScope) {
                         IBroadcastStream stream = (IBroadcastStream) ((IBroadcastScope) in).getClientBroadcastStream();
+                        log.debug("playItem: stream={}, codecInfo={}", stream, stream != null ? stream.getCodecInfo() : "N/A");
                         if (stream != null && stream.getCodecInfo() != null) {
                             IVideoStreamCodec videoCodec = stream.getCodecInfo().getVideoCodec();
+                            log.debug("playItem: videoCodec={}, hasKeyframe={}, numInterframes={}", videoCodec, videoCodec != null ? videoCodec.getKeyframe() != null : "N/A", videoCodec != null ? videoCodec.getNumInterframes() : "N/A");
                             if (videoCodec != null) {
                                 if (withReset) {
                                     sendReset();
@@ -434,8 +458,10 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                                 }
                                 sendNotifications = false;
                                 if (videoCodec.getNumInterframes() > 0 || videoCodec.getKeyframe() != null) {
+                                    log.debug("playItem: Keyframe available, switching to SEND_ALL mode");
                                     bufferedInterframeIdx = 0;
                                     videoFrameDropper.reset(IFrameDropper.SEND_ALL);
+                                    waitingForKeyframe = false;
                                 }
                             }
                         }
@@ -545,6 +571,14 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
     private final void playLive() throws IOException {
         // change state
         subscriberStream.setState(StreamState.PLAYING);
+        // Mark this as a late subscriber by setting streamStartTS to 0
+        // This will be detected in sendMessage() to generate proper relative timestamps
+        streamStartTS.set(0);
+        // Reset A/V base timestamps for late subscriber tracking
+        audioBaseTs = -1;
+        videoBaseTs = -1;
+        publisherTimestampOffset = 0;
+        log.debug("playLive: Initialized streamStartTS to 0, reset A/V base timestamps");
         IMessageInput in = msgInReference.get();
         IMessageOutput out = msgOutReference.get();
         if (in != null && out != null) {
@@ -564,37 +598,30 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                     log.debug("No metadata available");
                 }
                 IStreamCodecInfo codecInfo = stream.getCodecInfo();
-                log.debug("Codec info: {}", codecInfo);
+                log.debug("Codec info: {} stream: {}", codecInfo, stream);
                 if (codecInfo instanceof StreamCodecInfo) {
                     StreamCodecInfo info = (StreamCodecInfo) codecInfo;
-                    // handle video codec with configuration
                     IVideoStreamCodec videoCodec = info.getVideoCodec();
-                    log.debug("Video codec: {}", videoCodec);
+                    IAudioStreamCodec audioCodec = info.getAudioCodec();
+                    log.debug("Video codec: {} hasKeyframe: {}", videoCodec, videoCodec != null ? videoCodec.getKeyframe() != null : "N/A");
+                    log.debug("Audio codec: {}", audioCodec);
+                    // Send decoder configurations first (both at ts=0) to maintain DTS order
+                    // 1. Video decoder configuration
                     if (videoCodec != null) {
-                        // check for decoder configuration to send
                         IoBuffer config = videoCodec.getDecoderConfiguration();
                         if (config != null) {
                             log.debug("Decoder configuration is available for {}", videoCodec.getName());
                             VideoData conf = new VideoData(config, true);
                             log.debug("Pushing video decoder configuration");
                             sendMessage(RTMPMessage.build(conf, ts));
-                        }
-                        // check for keyframes to send
-                        FrameData[] keyFrames = videoCodec.getKeyframes();
-                        for (FrameData keyframe : keyFrames) {
-                            log.debug("Keyframe is available");
-                            VideoData video = new VideoData(keyframe.getFrame(), true);
-                            log.debug("Pushing keyframe");
-                            sendMessage(RTMPMessage.build(video, ts));
+                        } else {
+                            log.warn("No decoder configuration available for {}", videoCodec.getName());
                         }
                     } else {
                         log.debug("No video decoder configuration available");
                     }
-                    // handle audio codec with configuration
-                    IAudioStreamCodec audioCodec = info.getAudioCodec();
-                    log.debug("Audio codec: {}", audioCodec);
+                    // 2. Audio decoder configuration (must come before keyframe to maintain DTS order)
                     if (audioCodec != null) {
-                        // check for decoder configuration to send
                         IoBuffer config = audioCodec.getDecoderConfiguration();
                         if (config != null) {
                             log.debug("Decoder configuration is available for {}", audioCodec.getName());
@@ -604,6 +631,27 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                         }
                     } else {
                         log.debug("No audio decoder configuration available");
+                    }
+                    // 3. Video keyframe (at ts=1, after all ts=0 configs)
+                    if (videoCodec != null) {
+                        FrameData[] keyFrames = videoCodec.getKeyframes();
+                        log.debug("Keyframes count: {}", keyFrames != null ? keyFrames.length : "null");
+                        if (keyFrames != null) {
+                            for (FrameData keyframe : keyFrames) {
+                                log.debug("Keyframe is available");
+                                VideoData video = new VideoData(keyframe.getFrame(), true);
+                                log.debug("Pushing keyframe");
+                                // Use timestamp 1 for keyframe to distinguish from decoder config at 0
+                                sendMessage(RTMPMessage.build(video, 1));
+                            }
+                        }
+                        // If no keyframes were sent but we have one in the codec, send it
+                        if ((keyFrames == null || keyFrames.length == 0) && videoCodec.getKeyframe() != null) {
+                            log.warn("No keyframes array but getKeyframe() is available, sending it");
+                            VideoData video = new VideoData(videoCodec.getKeyframe(), true);
+                            // Use timestamp 1 for keyframe to distinguish from decoder config at 0
+                            sendMessage(RTMPMessage.build(video, 1));
+                        }
                     }
                 }
             }
@@ -1039,11 +1087,12 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         // get the incoming event time
         int eventTime = eventIn.getTimestamp();
         // get the incoming event source type and set on the outgoing event
-        event.setSourceType(eventIn.getSourceType());
+        byte incomingSourceType = eventIn.getSourceType();
+        event.setSourceType(incomingSourceType);
         // instance the outgoing message
         RTMPMessage messageOut = RTMPMessage.build(event, eventTime);
-        if (isTrace) {
-            log.trace("Source type - in: {} out: {}", eventIn.getSourceType(), messageOut.getBody().getSourceType());
+        if (isTrace || incomingSourceType != Constants.SOURCE_TYPE_LIVE) {
+            log.warn("Source type issue - in: {} out: {} event type: {}", new Object[] { incomingSourceType, messageOut.getBody().getSourceType(), eventIn.getClass().getSimpleName() });
             long delta = System.currentTimeMillis() - playbackStart;
             log.trace("sendMessage: streamStartTS {}, length {}, streamOffset {}, timestamp {} last timestamp {} delta {} buffered {}", new Object[] { streamStartTS.get(), currentItem.get().getLength(), streamOffset, eventTime, lastMessageTs, delta, lastMessageTs - delta });
         }
@@ -1066,19 +1115,101 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             }
         } else {
             // don't reset streamStartTS to 0 for live streams
-            if (eventTime > 0 && streamStartTS.compareAndSet(-1, eventTime)) {
-                log.debug("sendMessage: set streamStartTS");
+            // streamStartTS may be 0 (initialized by playLive) or -1 (not yet initialized)
+            if (eventTime > 0) {
+                int currentStartTs = streamStartTS.get();
+                // Only set streamStartTS if it's -1 (not initialized by playLive)
+                // If playLive already set it to 0, keep it at 0 to prevent timestamp adjustment
+                // for late subscribers (decoder config at 0, keyframe at 1, live frames at their original timestamps)
+                if (currentStartTs == -1 && streamStartTS.compareAndSet(-1, eventTime)) {
+                    log.debug("sendMessage: set streamStartTS from -1 to {}", eventTime);
+                }
             }
             // relative timestamp adjustment for live streams
             int startTs = streamStartTS.get();
-            if (startTs > 0) {
-                // subtract the offset time of when the stream started playing for the client
-                eventTime -= startTs;
+            // For late subscribers (streamStartTS was set to 0 by playLive):
+            // Track audio and video base timestamps separately so both start at ts=2
+            if (startTs == 0 && eventTime > 1) {
+                // This is a late subscriber receiving first live frames
+                boolean isVideo = eventIn instanceof VideoData;
+                boolean isAudio = eventIn instanceof AudioData;
+
+                if (isVideo && videoBaseTs == -1) {
+                    // First video frame for late subscriber - capture base and output ts=2
+                    videoBaseTs = eventTime;
+                    log.debug("sendMessage: Late subscriber first VIDEO, setting videoBaseTs={}", eventTime);
+                    messageOut.getBody().setTimestamp(2);
+                    // Also update streamStartTS for general tracking
+                    streamStartTS.compareAndSet(0, eventTime);
+                    publisherTimestampOffset = eventTime;
+                } else if (isAudio && audioBaseTs == -1) {
+                    // First audio frame for late subscriber - capture base and output ts=2
+                    audioBaseTs = eventTime;
+                    log.debug("sendMessage: Late subscriber first AUDIO, setting audioBaseTs={}", eventTime);
+                    messageOut.getBody().setTimestamp(2);
+                    // Update streamStartTS if not already set
+                    if (streamStartTS.compareAndSet(0, eventTime)) {
+                        publisherTimestampOffset = eventTime;
+                    }
+                } else if (isVideo && videoBaseTs > 0) {
+                    // Subsequent video frames - adjust using video base
+                    eventTime = eventTime - videoBaseTs + 2;
+                    messageOut.getBody().setTimestamp(eventTime);
+                } else if (isAudio && audioBaseTs > 0) {
+                    // Subsequent audio frames - adjust using audio base
+                    eventTime = eventTime - audioBaseTs + 2;
+                    messageOut.getBody().setTimestamp(eventTime);
+                }
+            } else if (startTs > 1) {
+                // Late subscriber with streamStartTS already captured
+                boolean isVideo = eventIn instanceof VideoData;
+                boolean isAudio = eventIn instanceof AudioData;
+
+                if (isVideo) {
+                    if (videoBaseTs == -1) {
+                        // First video frame after streamStartTS was set by audio
+                        videoBaseTs = eventTime;
+                        log.debug("sendMessage: Late subscriber first VIDEO (after audio), setting videoBaseTs={}", eventTime);
+                        eventTime = 2;
+                    } else if (videoBaseTs > 0) {
+                        eventTime = eventTime - videoBaseTs + 2;
+                    } else if (publisherTimestampOffset > 0) {
+                        eventTime = eventTime - publisherTimestampOffset + 2;
+                    } else {
+                        eventTime -= startTs;
+                    }
+                } else if (isAudio) {
+                    if (audioBaseTs == -1) {
+                        // First audio frame after streamStartTS was set by video
+                        audioBaseTs = eventTime;
+                        log.debug("sendMessage: Late subscriber first AUDIO (after video), setting audioBaseTs={}", eventTime);
+                        eventTime = 2;
+                    } else if (audioBaseTs > 0) {
+                        eventTime = eventTime - audioBaseTs + 2;
+                    } else if (publisherTimestampOffset > 0) {
+                        eventTime = eventTime - publisherTimestampOffset + 2;
+                    } else {
+                        eventTime -= startTs;
+                    }
+                } else {
+                    // Other data types (metadata, etc.)
+                    if (publisherTimestampOffset > 0) {
+                        eventTime = eventTime - publisherTimestampOffset + 2;
+                    } else {
+                        eventTime -= startTs;
+                    }
+                }
                 messageOut.getBody().setTimestamp(eventTime);
                 if (isTrace) {
                     log.trace("sendMessage (updated): streamStartTS={}, length={}, streamOffset={}, timestamp={}", new Object[] { startTs, currentItem.get().getLength(), streamOffset, eventTime });
                 }
             }
+            // For startTs <= 1 (decoder config at 0, keyframe at 1), no adjustment
+        }
+        // Log final adjusted timestamps for A/V sync debugging
+        if (log.isDebugEnabled()) {
+            String type = eventIn instanceof VideoData ? "VIDEO" : (eventIn instanceof AudioData ? "AUDIO" : "OTHER");
+            log.debug("sendMessage final: type={} originalTs={} adjustedTs={} streamStartTS={}", type, eventIn.getTimestamp(), messageOut.getBody().getTimestamp(), streamStartTS.get());
         }
         doPushMessage(messageOut);
     }
@@ -1464,6 +1595,13 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 return;
             }
         }
+        // Debug logging to trace source type
+        if (message instanceof RTMPMessage rtmpMsg && rtmpMsg.getBody() != null) {
+            byte srcType = rtmpMsg.getBody().getSourceType();
+            if (srcType != Constants.SOURCE_TYPE_LIVE && rtmpMsg.getBody() instanceof VideoData) {
+                log.warn("pushMessage: VideoData has source type {} (expected LIVE=1), class: {}", new Object[] { srcType, rtmpMsg.getBody().getClass().getName() });
+            }
+        }
         String sessionId = subscriberStream.getConnection().getSessionId();
         if (message instanceof RTMPMessage) {
             IMessageInput msgIn = msgInReference.get();
@@ -1480,12 +1618,32 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                     return;
                 }
                 if (body instanceof VideoData && body.getSourceType() == Constants.SOURCE_TYPE_LIVE) {
+                    if (log.isDebugEnabled()) {
+                        VideoData vd = (VideoData) body;
+                        log.debug("PlayEngine received video: ts={} frameType={} size={}", body.getTimestamp(), vd.getFrameType(), vd.getData() != null ? vd.getData().limit() : 0);
+                    }
                     // We only want to drop packets from a live stream. VOD streams we let it buffer.
                     // We don't want a user watching a movie to see a choppy video due to low bandwidth.
                     if (msgIn instanceof IBroadcastScope) {
                         IBroadcastStream stream = (IBroadcastStream) ((IBroadcastScope) msgIn).getClientBroadcastStream();
                         if (stream != null && stream.getCodecInfo() != null) {
                             IVideoStreamCodec videoCodec = stream.getCodecInfo().getVideoCodec();
+                            // Check if we were waiting for a keyframe and one is now available
+                            // IMPORTANT: Only switch modes when the CURRENT frame is a keyframe,
+                            // not just when one exists in the codec, to prevent sending interframes
+                            // before the keyframe has been transmitted
+                            if (videoCodec != null && waitingForKeyframe) {
+                                VideoData videoData = (VideoData) body;
+                                if (videoData.isKeyFrame()) {
+                                    log.debug("Keyframe frame received, switching from SEND_KEYFRAMES_CHECK to SEND_INTERFRAMES mode");
+                                    // Use SEND_INTERFRAMES to let the frame dropper state machine
+                                    // naturally progress to SEND_ALL when conditions are right
+                                    videoFrameDropper.reset(IFrameDropper.SEND_INTERFRAMES);
+                                    waitingForKeyframe = false;
+                                } else {
+                                    log.trace("Still waiting for keyframe, current frame is {}", videoData.getFrameType());
+                                }
+                            }
                             // dont try to drop frames if video codec is null
                             if (videoCodec != null && videoCodec.canDropFrames()) {
                                 if (!receiveVideo) {
@@ -1514,6 +1672,11 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                                         log.info("Frame dropper says to drop packet. sessionId={} stream={} dropped={}", sessionId, subscribedStreamName, droppedPacketsCount);
                                     }
                                     return;
+                                }
+                                // Log that video will be sent
+                                if (log.isDebugEnabled()) {
+                                    VideoData vd = (VideoData) body;
+                                    log.debug("Video passing to subscriber: ts={} frameType={} waitingForKeyframe={}", body.getTimestamp(), vd.getFrameType(), waitingForKeyframe);
                                 }
                                 // increment the number of times we had pending video frames sequentially
                                 if (pendingVideos > 1) {
@@ -1553,6 +1716,9 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                         }
                     }
                 } else if (body instanceof AudioData) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("PlayEngine received audio: ts={}", body.getTimestamp());
+                    }
                     if (!receiveAudio && sendBlankAudio) {
                         // send blank audio packet to reset player
                         sendBlankAudio = false;

@@ -239,7 +239,7 @@ public class WebSocketPlugin extends Red5Plugin {
         // set a reference to the application scope so we can create room scopes
         String applicationScopeName = path.split("\\/")[1];
         log.debug("Looking for application scope: {}", applicationScopeName);
-        return managerMap.keySet().stream().filter(scope -> (ScopeUtils.isApp(scope) && scope.getName().equals(applicationScopeName))).findFirst().get();
+        return managerMap.keySet().stream().filter(scope -> (ScopeUtils.isApp(scope) && scope.getName().equals(applicationScopeName))).findFirst().orElse(null);
     }
 
     /**
@@ -312,10 +312,13 @@ public class WebSocketPlugin extends Red5Plugin {
         log.info("WebSocketPlugin application: {}", application);
         // get the app scope
         final IScope appScope = application.getScope();
-        // put if not already there
-        managerMap.putIfAbsent(appScope, new WebSocketScopeManager());
-        // add the app scope to the manager
-        managerMap.get(appScope).setApplication(appScope);
+        // atomically create and initialize manager to prevent race condition
+        // where getManager() could return a manager before setApplication() is called
+        managerMap.computeIfAbsent(appScope, scope -> {
+            WebSocketScopeManager manager = new WebSocketScopeManager();
+            manager.setApplication(scope);
+            return manager;
+        });
         super.setApplication(application);
     }
 

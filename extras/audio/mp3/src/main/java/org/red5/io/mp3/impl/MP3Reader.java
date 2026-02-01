@@ -213,7 +213,17 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
      * Check if the file can be played back with Flash. Supported sample rates are 44KHz, 22KHz, 11KHz and 5.5KHz
      */
     private void checkValidHeader() {
-        int sampleRate = Integer.valueOf(metaData.getSampleRate());
+        if (metaData == null || metaData.getSampleRate() == null) {
+            log.warn("Sample rate metadata missing; skipping validation");
+            return;
+        }
+        int sampleRate = 0;
+        try {
+            sampleRate = Integer.parseInt(metaData.getSampleRate());
+        } catch (NumberFormatException nfe) {
+            log.warn("Invalid sample rate metadata: {}", metaData.getSampleRate());
+            return;
+        }
         switch (sampleRate) {
             case 48000:
             case 44100:
@@ -439,7 +449,7 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
             // seek at EOF
             currentTime = duration;
         }
-        if (posTimeMap.containsKey(pos)) {
+        if (posTimeMap != null && posTimeMap.containsKey(pos)) {
             try {
                 fileChannel.position(pos);
                 currentTime = posTimeMap.get(pos);
@@ -516,7 +526,12 @@ public class MP3Reader implements ITagReader, IKeyFrameDataAnalyzer {
             channel.position(0);
             log.trace("Finished with frame count: {}", frameCount);
             duration = (long) time;
-            dataRate = (int) (rate / frameCount);
+            if (frameCount > 0) {
+                dataRate = (int) (rate / frameCount);
+            } else {
+                dataRate = 0;
+                log.warn("No frames were read from {}; data rate set to 0", file.getName());
+            }
             posTimeMap = new HashMap<>();
             frameMeta = new KeyFrameMeta();
             frameMeta.duration = duration;

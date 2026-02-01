@@ -79,7 +79,7 @@ public final class UnsignedInt extends UnsignedNumber {
         if ((c.length - idx) < 4) {
             throw new IllegalArgumentException("An UnsignedInt number is composed of 4 bytes");
         }
-        number.value = (c[0] << 24 | c[1] << 16 | c[2] << 8 | c[3]);
+        number.value = ((c[idx] & 0xFFL) << 24 | (c[idx + 1] & 0xFFL) << 16 | (c[idx + 2] & 0xFFL) << 8 | (c[idx + 3] & 0xFFL));
         return number;
     }
 

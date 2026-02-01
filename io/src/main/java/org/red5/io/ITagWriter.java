@@ -17,12 +17,12 @@ import org.red5.media.processor.IPostProcessor;
  *
  * @author mondain
  */
-public interface ITagWriter {
+public interface ITagWriter extends AutoCloseable {
 
     /**
      * Closes a Writer
      */
-    public void close();
+    public void close() throws Exception;
 
     /**
      * Return the bytes written

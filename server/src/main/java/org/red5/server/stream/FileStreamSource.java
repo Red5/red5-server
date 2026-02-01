@@ -56,7 +56,11 @@ public class FileStreamSource implements ISeekableStreamSource, Constants {
      * Closes tag reader
      */
     public void close() {
-        reader.close();
+        try {
+            reader.close();
+        } catch (Exception e) {
+            log.warn("Error closing reader. {}", e);
+        }
     }
 
     /**

@@ -881,6 +881,9 @@ public class TlsUtils {
      */
     public static int readUint16(InputStream input) throws IOException {
         int i1 = input.read();
+        if (i1 < 0) {
+            throw new EOFException();
+        }
         int i2 = input.read();
         if (i2 < 0) {
             throw new EOFException();
@@ -910,7 +913,13 @@ public class TlsUtils {
      */
     public static int readUint24(InputStream input) throws IOException {
         int i1 = input.read();
+        if (i1 < 0) {
+            throw new EOFException();
+        }
         int i2 = input.read();
+        if (i2 < 0) {
+            throw new EOFException();
+        }
         int i3 = input.read();
         if (i3 < 0) {
             throw new EOFException();
@@ -941,8 +950,17 @@ public class TlsUtils {
      */
     public static long readUint32(InputStream input) throws IOException {
         int i1 = input.read();
+        if (i1 < 0) {
+            throw new EOFException();
+        }
         int i2 = input.read();
+        if (i2 < 0) {
+            throw new EOFException();
+        }
         int i3 = input.read();
+        if (i3 < 0) {
+            throw new EOFException();
+        }
         int i4 = input.read();
         if (i4 < 0) {
             throw new EOFException();

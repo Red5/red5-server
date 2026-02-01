@@ -57,7 +57,6 @@ import org.red5.server.api.stream.IStreamListener;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.api.stream.StreamState;
 import org.red5.server.jmx.mxbeans.ClientBroadcastStreamMXBean;
-import org.red5.server.messaging.IConsumer;
 import org.red5.server.messaging.IFilter;
 import org.red5.server.messaging.IMessage;
 import org.red5.server.messaging.IMessageComponent;
@@ -278,8 +277,12 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                     }
                     int eventTime = rtmpEvent.getTimestamp();
                     // verify and / or set source type
+                    byte originalSourceType = rtmpEvent.getSourceType();
                     if (rtmpEvent.getSourceType() != Constants.SOURCE_TYPE_LIVE) {
                         rtmpEvent.setSourceType(Constants.SOURCE_TYPE_LIVE);
+                        if (isDebug) {
+                            log.debug("Set source type from {} to LIVE for {}", originalSourceType, rtmpEvent.getClass().getSimpleName());
+                        }
                     }
                     // get the buffer only once per call
                     IoBuffer buf = null;
@@ -317,7 +320,10 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                             }
                             break;
                         case TYPE_VIDEO_DATA: // VideoData
-                            //log.trace("Video: {}", eventTime);
+                            if (isDebug) {
+                                VideoData vd = (VideoData) rtmpEvent;
+                                log.debug("Video received: ts={} frameType={} size={}", eventTime, vd.getFrameType(), buf != null ? buf.limit() : 0);
+                            }
                             IVideoStreamCodec videoStreamCodec = null;
                             if (checkVideoCodec) {
                                 videoStreamCodec = VideoCodecFactory.getVideoCodec(buf);
@@ -370,6 +376,9 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                         try {
                             // create new RTMP message, initialize it and push through pipe
                             RTMPMessage msg = RTMPMessage.build(rtmpEvent, eventTime);
+                            if (isDebug && rtmpEvent instanceof VideoData) {
+                                log.debug("Pushing video to livePipe: ts={} subscribers={}", eventTime, subscriberStats.getCurrent());
+                            }
                             livePipe.pushMessage(msg);
                         } catch (IOException err) {
                             stop();
@@ -659,9 +668,10 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                 if (event.getProvider() == this && event.getSource() != connMsgOut && (event.getParamMap() == null || !event.getParamMap().containsKey("record"))) {
                     livePipe = (IPipe) event.getSource();
                     //log.debug("Provider: {}", livePipe.getClass().getName());
-                    for (IConsumer consumer : livePipe.getConsumers()) {
-                        subscriberStats.increment();
-                    }
+                    // XXX(paul) disable stats incrementing here as it causes issues with subscriber counts
+                    //for (IConsumer consumer : livePipe.getConsumers()) {
+                    //    subscriberStats.increment();
+                    //}
                 }
                 break;
             case PROVIDER_DISCONNECT:

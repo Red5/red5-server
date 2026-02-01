@@ -281,11 +281,12 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
     @Override
     public boolean setAttributes(Map<String, Object> values) {
         int successes = 0;
-        if (values != null) {
-            for (Map.Entry<String, Object> entry : values.entrySet()) {
-                if (setAttribute(entry.getKey(), entry.getValue())) {
-                    successes++;
-                }
+        if (values == null) {
+            return false;
+        }
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            if (setAttribute(entry.getKey(), entry.getValue())) {
+                successes++;
             }
         }
         // expect every value to have been added

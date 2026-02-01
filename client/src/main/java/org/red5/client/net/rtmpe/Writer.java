@@ -136,7 +136,11 @@ public class Writer implements IClientListener {
     public void stopListening() {
         log.debug("stopListening, client is finished providing data");
         if (writer != null) {
-            writer.close();
+            try {
+                writer.close();
+            } catch (Exception e) {
+                log.warn("Exception closing the writer", e);
+            }
             log.debug("Bytes written: {}", writer.getBytesWritten());
             writer = null;
         }

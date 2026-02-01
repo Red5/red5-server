@@ -25,7 +25,6 @@ import org.red5.io.object.Deserializer;
 import org.red5.io.object.Input;
 import org.red5.io.object.StreamAction;
 import org.red5.server.api.IConnection.Encoding;
-import org.red5.server.api.Red5;
 import org.red5.server.net.protocol.ProtocolException;
 import org.red5.server.net.protocol.RTMPDecodeState;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -273,6 +272,18 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             packet = new Packet(header.clone());
             // store the packet based on its channel id
             rtmp.setLastReadPacket(channelId, packet);
+        } else {
+            // Validate packet size consistency (FFmpeg/libav compatibility)
+            // If we're continuing an existing packet, the size must match
+            int existingSize = packet.getHeader().getSize();
+            int newSize = header.getSize();
+            if (newSize != existingSize && newSize > 0) {
+                log.warn("RTMP packet size mismatch on channel {}: existing={}, new={}. Resetting packet.", channelId, existingSize, newSize);
+                // Clear the corrupted packet and start fresh
+                rtmp.setLastReadPacket(channelId, null);
+                packet = new Packet(header.clone());
+                rtmp.setLastReadPacket(channelId, packet);
+            }
         }
         // get the packet data
         IoBuffer buf = packet.getData();
@@ -383,16 +394,27 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         }
         // got a non-new header for a channel which has no last-read header
         if (headerSize != HEADER_NEW && lastHeader == null) {
-            String detail = String.format("Last header null: %s, channelId %s", Header.HeaderType.values()[headerSize], channelId);
-            log.debug("{}", detail);
+            String detail = String.format("Last header null: %s, channelId %s, format=%d, position=%d", Header.HeaderType.values()[headerSize], channelId, chh.getFormat(), startPostion);
+            log.warn("{}", detail);
             // if the op prefers to exit or kill the connection, we should allow based on configuration param
             if (closeOnHeaderError) {
                 // this will trigger an error status, which in turn will disconnect the "offending" flash player
                 // preventing a memory leak and bringing the whole server to its knees
                 throw new ProtocolException(detail);
             } else {
-                // we need to skip the current channel data and continue until a new header is sent
-                return null;
+                // This indicates chunk stream desynchronization - likely an extended timestamp mismatch
+                // Log surrounding bytes for debugging
+                if (log.isDebugEnabled()) {
+                    int pos = Math.max(0, startPostion - 8);
+                    int end = Math.min(in.limit(), startPostion + 16);
+                    byte[] context = new byte[end - pos];
+                    in.position(pos);
+                    in.get(context);
+                    log.debug("Buffer context around error position {}: {}", startPostion, org.apache.commons.codec.binary.Hex.encodeHexString(context));
+                }
+                // Reset position and throw to close the connection - continuing with misaligned data is dangerous
+                in.position(startPostion);
+                throw new ProtocolException(detail + " - chunk stream desynchronized");
             }
         }
         int timeBase = 0, timeDelta = 0;
@@ -411,6 +433,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             header.setSize(lastHeader.getSize());
             // inherit the extended flag from the last header
             header.setExtended(lastHeader.isExtended());
+            // Log inheritance for debugging chunk assembly issues (only for non-Type 0 headers that inherit dataType)
+            if (log.isDebugEnabled() && headerSize != HEADER_NEW) {
+                log.debug("Header inheritance on channel {}: type={}, inherited dataType={} (0x{}), size={} from lastHeader", channelId, Header.HeaderType.values()[headerSize], lastHeader.getDataType(), String.format("%02X", lastHeader.getDataType()), lastHeader.getSize());
+            }
         }
         switch (headerSize) {
             case HEADER_NEW: // type 0
@@ -432,6 +458,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         log.trace("Extended time read: {}", timeBase);
                     }
                     header.setExtended(true);
+                } else {
+                    // Reset extended flag when timestamp is below threshold
+                    // This is critical when a channel transitions from extended to non-extended timestamps
+                    // Without this, inherited extended=true from lastHeader causes Type 3 chunks to
+                    // incorrectly read 4 extra bytes, desynchronizing the chunk stream
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -451,6 +483,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     }
                     timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
+                } else {
+                    // Reset extended flag when timestamp is below threshold (libav compatibility)
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -468,6 +503,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     }
                     timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
+                } else {
+                    // Reset extended flag when timestamp is below threshold (libav compatibility)
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -492,10 +530,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 if (in.position() == 0) {
                     log.debug("Type 3 header used for new message on channel {} - unusual but allowed", channelId);
                 }
-                // read the extended timestamp if we have the indication that it exists
+                // Read the extended timestamp if we have the indication that it exists.
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID
-                // indicated the presence of an extended timestamp field
-                if (lastHeader.isExtended()) {
+                // indicated the presence of an extended timestamp field.
+                // The extended flag is properly tracked through Type 0/1/2 header decoding based on the wire timestamp values.
+                // Note: We intentionally do NOT check the decoded timestamp values (timerBase/timerDelta) here because
+                // those values may include discontinuity offsets that don't reflect what was on the wire.
+                boolean hasExtendedTimestamp = lastHeader.isExtended();
+                if (hasExtendedTimestamp) {
                     headerLength += 4;
                     if (in.remaining() < 4) {
                         state.bufferDecoding(headerLength - in.remaining());
@@ -507,6 +549,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         log.trace("Extended time read: {}", timeBase);
                     }
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
@@ -515,6 +559,51 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 throw new ProtocolException(String.format("Unexpected header: %s", headerSize));
         }
         log.trace("Decoded chunk {} {}", Header.HeaderType.values()[headerSize], header);
+        // Apply timestamp discontinuity compensation
+        // This handles source restarts where timestamps reset to 0
+        int rawTimer = header.getTimer();
+        long currentOffset = rtmp.getTimestampOffset(channelId);
+        int lastRawTimestamp = rtmp.getLastRawTimestamp(channelId);
+        // Detect timestamp discontinuity on Type 0 headers (absolute timestamps)
+        if (headerSize == HEADER_NEW && lastRawTimestamp > 0) {
+            // Use unsigned arithmetic to detect large backward jumps
+            long unsignedLast = Integer.toUnsignedLong(lastRawTimestamp);
+            long unsignedCurrent = Integer.toUnsignedLong(rawTimer);
+            // A backward jump > 1 second is likely a discontinuity (source restart)
+            // We use 1 second threshold to catch resets while allowing normal jitter
+            if (unsignedLast > unsignedCurrent && (unsignedLast - unsignedCurrent) > 1000L) {
+                // Calculate the new offset: accumulate previous offset + last timestamp + small gap
+                // The +1 ensures strict monotonicity
+                long newOffset = currentOffset + unsignedLast + 1;
+                // Cap the offset to prevent integer overflow in downstream int arithmetic
+                // PlayEngine and other components use int for timestamp math; values near
+                // Integer.MAX_VALUE cause overflow when small values are added
+                // Max safe offset is ~1 billion (0x40000000) to leave headroom
+                final long MAX_SAFE_OFFSET = 0x40000000L; // ~12 days in ms
+                if (newOffset > MAX_SAFE_OFFSET) {
+                    log.info("Timestamp discontinuity on channel {}: capping large offset {} to {} to prevent overflow", channelId, newOffset, MAX_SAFE_OFFSET);
+                    newOffset = MAX_SAFE_OFFSET;
+                } else {
+                    log.warn("Timestamp discontinuity on channel {}: raw {} -> {}, adjusting offset from {} to {} (accumulated: {}ms)", channelId, unsignedLast, unsignedCurrent, currentOffset, newOffset, newOffset);
+                }
+                rtmp.setTimestampOffset(channelId, newOffset);
+                currentOffset = newOffset;
+            }
+        }
+        // Store raw timestamp for next discontinuity detection
+        rtmp.setLastRawTimestamp(channelId, rawTimer);
+        // Apply offset if we have one
+        if (currentOffset > 0) {
+            long adjustedTimer = Integer.toUnsignedLong(rawTimer) + currentOffset;
+            // Clamp to 32-bit range (will wrap, but that's expected for very long streams)
+            int adjustedTimerInt = (int) (adjustedTimer & 0xFFFFFFFFL);
+            if (log.isTraceEnabled()) {
+                log.trace("Channel {} timestamp adjusted: raw={} + offset={} = {}", channelId, rawTimer, currentOffset, adjustedTimerInt);
+            }
+            // Update the header with adjusted timestamp
+            header.setTimerBase(adjustedTimerInt);
+            header.setTimerDelta(0);
+        }
         return header;
     }
 
@@ -554,6 +643,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 message = decodeFlexMessage(in);
                 break;
             case TYPE_INVOKE:
+                if (log.isDebugEnabled()) {
+                    // Log header and first bytes for debugging chunk assembly issues
+                    in.mark();
+                    byte[] preview = new byte[Math.min(16, in.remaining())];
+                    in.get(preview);
+                    in.reset();
+                    log.debug("Decoding TYPE_INVOKE - channel: {}, streamId: {}, size: {}, timer: {}, firstBytes: {}", header.getChannelId(), header.getStreamId(), header.getSize(), header.getTimer(), Hex.encodeHexString(preview));
+                }
                 message = decodeAction(conn.getEncoding(), in, header);
                 break;
             case TYPE_FLEX_STREAM_SEND:
@@ -572,6 +669,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 if (header.getStreamId().doubleValue() != 0.0d) {
                     message = decodeStreamData(in);
                 } else {
+                    if (log.isDebugEnabled()) {
+                        // Log header and first bytes for debugging chunk assembly issues
+                        in.mark();
+                        byte[] preview = new byte[Math.min(16, in.remaining())];
+                        in.get(preview);
+                        in.reset();
+                        log.debug("Decoding TYPE_NOTIFY as action - channel: {}, streamId: {}, size: {}, timer: {}, firstBytes: {}", header.getChannelId(), header.getStreamId(), header.getSize(), header.getTimer(), Hex.encodeHexString(preview));
+                    }
                     message = decodeAction(conn.getEncoding(), in, header);
                 }
                 break;
@@ -652,10 +757,16 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     public ChunkSize decodeChunkSize(IoBuffer in) {
         int chunkSize = in.getInt();
         log.debug("Decoded chunk size: {}", chunkSize);
-        // Validate chunk size according to RTMP spec and librtmp compatibility
-        // librtmp uses default chunk size of 128, max of 65536
-        if (chunkSize < 1 || chunkSize > 65536) {
-            throw new ProtocolException("Invalid chunk size: " + chunkSize + ". Must be between 1 and 65536 for librtmp compatibility.");
+        // Validate chunk size according to RTMP spec (1-16777215)
+        // librtmp typically uses 128 default, 65536 max, but libav/FFmpeg may use larger values
+        if (chunkSize < 1 || chunkSize > MEDIUM_INT_MAX) {
+            throw new ProtocolException("Invalid chunk size: " + chunkSize + ". Must be between 1 and " + MEDIUM_INT_MAX + " per RTMP spec.");
+        }
+        // Warn about unusual chunk sizes that may indicate compatibility issues
+        if (chunkSize < 32) {
+            log.warn("Unusually small chunk size: {}. This may cause performance issues.", chunkSize);
+        } else if (chunkSize > 65536) {
+            log.info("Large chunk size: {} (exceeds typical librtmp max of 65536, but within RTMP spec)", chunkSize);
         }
         return new ChunkSize(chunkSize);
     }
@@ -808,7 +919,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // get the action
         String action = Deserializer.deserialize(input, String.class);
         if (action == null) {
-            throw new RuntimeException("Action was null");
+            // Log context for debugging - first byte indicates AMF type
+            log.warn("Failed to decode action string - first byte was 0x{}, header: {}", String.format("%02X", tmp), header);
+            throw new RuntimeException("Action was null - expected AMF string but first byte was 0x" + String.format("%02X", tmp));
         }
         if (isTrace) {
             log.trace("Action: {}", action);
@@ -913,16 +1026,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         }
         // our result is a notify
         Notify ret = null;
-        // check the encoding, if its AMF3 check to see if first byte is set to AMF0
-        Encoding encoding = ((RTMPConnection) Red5.getConnectionLocal()).getEncoding();
-        log.trace("Encoding: {}", encoding);
         // set mark
         in.mark();
         // create input using AMF0 to start with
         Input input = new org.red5.io.amf.Input(in);
-        if (encoding == Encoding.AMF3) {
-            log.trace("Client indicates its using AMF3");
-        }
         // get the first datatype
         byte dataType = input.readDataType();
         log.debug("Data type: {}", dataType);

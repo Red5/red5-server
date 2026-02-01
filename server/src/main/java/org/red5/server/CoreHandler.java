@@ -7,6 +7,9 @@
 
 package org.red5.server;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.red5.server.api.IClient;
 import org.red5.server.api.IClientRegistry;
 import org.red5.server.api.IConnection;
@@ -17,7 +20,6 @@ import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.IScopeHandler;
 import org.red5.server.api.service.IServiceCall;
 import org.red5.server.jmx.mxbeans.CoreHandlerMXBean;
-import org.red5.server.net.rtmp.RTMPConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,8 +72,6 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
         // Use client registry from scope the client connected to
         IScope connectionScope = conn.getScope();
         log.debug("Connection scope: {}", (connectionScope == null ? "is null" : "not null"));
-        // when the scope is null bad things seem to happen, if a null scope is OK then
-        // this block will need to be removed - Paul
         if (connectionScope != null) {
             // Get client registry for connection scope
             IClientRegistry clientRegistry = connectionScope.getContext().getClientRegistry();
@@ -79,26 +79,23 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
             if (clientRegistry != null) {
                 IClient client = conn.getClient();
                 if (client == null) {
-                    if (!clientRegistry.hasClient(id)) {
-                        if (conn instanceof RTMPConnection) {
-                            log.debug("Creating new client for: {}", conn.getClass().getName());
-                            // this is a new connection, create a new client to hold it
-                            client = clientRegistry.newClient(params);
-                            // set the client on the connection
-                            conn.setClient(client);
-                        } else {
-                            log.warn("Connection is not of type RTMPConnection, cannot create new client");
-                        }
-                    } else {
-                        client = clientRegistry.lookupClient(id);
+                    try {
+                        log.debug("Creating new client for: {}", conn.getClass().getName());
+                        // this is a new connection, create a new client to hold it
+                        client = clientRegistry.newClient(params);
+                        // set the client on the connection
                         conn.setClient(client);
+                        // assign connection to client
+                        conn.initialize(client);
+                        log.info("New client created: {} for connection: {}", client.getId(), conn);
+                    } catch (Exception e) {
+                        log.warn("Client creation failed: {}", e.getMessage());
                     }
                 } else {
-                    // set the client on the connection
-                    conn.setClient(client);
+                    log.debug("Existing client: {} found for connection: {}", client.getId(), conn);
+                    // assign connection to client
+                    conn.initialize(client);
                 }
-                // assign connection to client
-                conn.initialize(client);
                 // we could checked for banned clients here
                 connect = true;
             } else {
@@ -158,6 +155,10 @@ public class CoreHandler implements IScopeHandler, CoreHandlerMXBean {
     /** {@inheritDoc} */
     public boolean handleEvent(IEvent event) {
         return false;
+    }
+
+    public Set<IClient> getClients() {
+        return Collections.emptySet();
     }
 
 }

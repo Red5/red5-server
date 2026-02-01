@@ -68,6 +68,7 @@ public class VideoFrameDropper implements IFrameDropper {
         if (packet instanceof VideoData) {
             VideoData video = (VideoData) packet;
             VideoFrameType type = video.getFrameType();
+            int prevState = state;
             switch (state) {
                 case SEND_ALL:
                     // All packets will be sent
@@ -100,8 +101,35 @@ public class VideoFrameDropper implements IFrameDropper {
                     break;
                 default:
             }
+            // Log state transitions and drop decisions
+            if (log.isDebugEnabled()) {
+                if (prevState != state) {
+                    log.debug("VideoFrameDropper state change: {} -> {} (frameType={}, pending={})", getStateName(prevState), getStateName(state), type, pending);
+                }
+                if (!result) {
+                    log.debug("VideoFrameDropper dropping frame: state={} frameType={} pending={}", getStateName(state), type, pending);
+                }
+            }
         }
         return result;
+    }
+
+    /**
+     * Get a human-readable name for the state.
+     */
+    private String getStateName(int s) {
+        switch (s) {
+            case SEND_ALL:
+                return "SEND_ALL";
+            case SEND_INTERFRAMES:
+                return "SEND_INTERFRAMES";
+            case SEND_KEYFRAMES:
+                return "SEND_KEYFRAMES";
+            case SEND_KEYFRAMES_CHECK:
+                return "SEND_KEYFRAMES_CHECK";
+            default:
+                return "UNKNOWN(" + s + ")";
+        }
     }
 
     /** {@inheritDoc} */

@@ -57,6 +57,9 @@ public class OpusAudio extends AbstractAudio {
     public boolean canHandleData(IoBuffer data) {
         boolean result = false;
         if (data != null && data.limit() > 0) {
+            if (data.remaining() < 2) {
+                return false;
+            }
             byte flgs = data.get();
             byte hdr = data.get();
             result = (((flgs & IoConstants.MASK_SOUND_FORMAT) >> 4) == AudioCodec.OPUS.getId());
@@ -64,8 +67,14 @@ public class OpusAudio extends AbstractAudio {
                 // we have an opus header
                 log.debug("Received opus header");
                 // set the sample rate and channels
+                if (data.remaining() < 2) {
+                    return false;
+                }
                 index = data.get();
                 channels = data.get();
+                if (index < 0 || index >= OPUS_SAMPLERATES.length) {
+                    return false;
+                }
                 sampleRate = OPUS_SAMPLERATES[index];
                 log.info("opus sample rate {} channels {}", sampleRate, channels);
             }

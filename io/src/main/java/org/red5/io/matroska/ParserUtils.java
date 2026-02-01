@@ -7,12 +7,6 @@
  */
 package org.red5.io.matroska;
 
-import static org.red5.io.matroska.VINT.MASK_BYTE_1;
-import static org.red5.io.matroska.VINT.MASK_BYTE_2;
-import static org.red5.io.matroska.VINT.MASK_BYTE_3;
-import static org.red5.io.matroska.VINT.MASK_BYTE_4;
-import static org.red5.io.matroska.VINT.MASK_BYTE_8;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -150,7 +144,11 @@ public class ParserUtils {
         byte value[] = new byte[size];
         int i = value.length;
         while (i != 0) {
-            i -= inputStream.read(value, value.length - i, i);
+            int read = inputStream.read(value, value.length - i, i);
+            if (read < 0) {
+                throw new IOException("Unexpected end of stream while reading binary");
+            }
+            i -= read;
         }
 
         return value;
@@ -166,38 +164,17 @@ public class ParserUtils {
      *             - in case of IO error
      */
     public static VINT readVINT(InputStream inputStream) throws IOException {
-        byte[] vint;
         int fb = inputStream.read();
-        int read = 0;
         assert fb > 0;
 
-        int len = (fb >> 4);
-        long mask = MASK_BYTE_4;
-        if (len >= 0b1000) {
-            read = 0;
-            mask = MASK_BYTE_1;
-            vint = new byte[1];
-        } else if (len >= 0b0100) {
-            mask = MASK_BYTE_2;
-            vint = new byte[2];
-            read = inputStream.read(vint, 1, 1);
-            assert read == 1;
-        } else if (len >= 0b0010) {
-            mask = MASK_BYTE_3;
-            vint = new byte[3];
-            read = inputStream.read(vint, 1, 2);
-            assert read == 2;
-        } else if (len >= 0b0001) {
-            vint = new byte[4];
-            read = inputStream.read(vint, 1, 3);
-            assert read == 3;
-        } else {
-            mask = MASK_BYTE_8;
-            vint = new byte[8];
-            read = inputStream.read(vint, 1, 7);
-            assert read == 7;
-        }
+        int leadingZeros = Integer.numberOfLeadingZeros(fb & 0xFF) - 24;
+        int len = leadingZeros + 1;
+        byte[] vint = new byte[len];
         vint[0] = (byte) fb;
+        int read = inputStream.read(vint, 1, len - 1);
+        assert read == len - 1;
+
+        long mask = (1L << (len * 7)) - 1;
         long binaryV = 0;
         for (int i = 0; i < vint.length; ++i) {
             binaryV += (0x00FF & vint[i]);
@@ -259,7 +236,15 @@ public class ParserUtils {
      */
     public static void skip(long size, InputStream input) throws IOException {
         while (size > 0) {
-            size -= input.skip(size);
+            long skipped = input.skip(size);
+            if (skipped <= 0) {
+                // if skip is not making progress, consume one byte to avoid an infinite loop
+                if (input.read() == -1) {
+                    throw new IOException("Unexpected end of stream while skipping");
+                }
+                skipped = 1;
+            }
+            size -= skipped;
         }
     }
 }

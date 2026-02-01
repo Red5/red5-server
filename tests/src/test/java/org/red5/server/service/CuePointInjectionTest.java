@@ -134,7 +134,11 @@ public class CuePointInjectionTest extends TestCase {
             // Advance to the next CuePoint
             ts.remove(ts.first());
         }
-        writer.close();
+        try {
+            writer.close();
+        } catch (Exception e) {
+            throw new IOException("Exception closing the writer", e);
+        }
     }
 
     /**

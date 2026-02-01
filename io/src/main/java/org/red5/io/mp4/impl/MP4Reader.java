@@ -461,6 +461,7 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                                                     //videoTimeScale = scale * 2.0;
                                                     //log.debug("Video time scale: {}", videoTimeScale);
                                                 }
+                                                break;
                                             case "stss":
                                                 log.debug("Sync sample atom found");
                                                 SyncSamplesBox stss = (SyncSamplesBox) sbox; // stts
@@ -1016,8 +1017,10 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         }
         // ensure there are frames before proceeding
         if (!frames.isEmpty()) {
+            boolean acquired = false;
             try {
                 lock.acquire();
+                acquired = true;
                 //log.debug("Read tag");
                 //empty-out the pre-streaming tags first
                 if (!firstTags.isEmpty()) {
@@ -1094,8 +1097,12 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                 }
             } catch (InterruptedException e) {
                 log.warn("Exception acquiring lock", e);
+                Thread.currentThread().interrupt();
+                return null;
             } finally {
-                lock.release();
+                if (acquired) {
+                    lock.release();
+                }
             }
         } else {
             log.warn("No frames are available for the requested item");

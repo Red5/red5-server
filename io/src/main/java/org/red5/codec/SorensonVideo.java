@@ -7,6 +7,8 @@
 
 package org.red5.codec;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
 
@@ -78,6 +80,9 @@ public class SorensonVideo extends AbstractVideo {
             data.mark();
             // get frame type
             VideoFrameType frame = VideoFrameType.valueOf((first & IoConstants.MASK_VIDEO_FRAMETYPE) >> 4);
+            if (interframes == null) {
+                interframes = new CopyOnWriteArrayList<>();
+            }
             if (VideoFrameType.KEYFRAME != frame) {
                 // Not a keyframe
                 try {

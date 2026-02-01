@@ -70,6 +70,9 @@ public class AVCVideo extends AbstractVideo {
                 packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
                 if (frameType.getValue() < 5 && packetType.getPacketType() < 5) {
                     // get the fourcc
+                    if (data.remaining() < 4) {
+                        return false;
+                    }
                     fourcc = data.getInt();
                     result = (codec.getFourcc() == fourcc);
                     if (!result) {
@@ -140,6 +143,9 @@ public class AVCVideo extends AbstractVideo {
                         }
                         break;
                     case CodedFrames: // pass coded data
+                        if (data.remaining() < 3) {
+                            return false;
+                        }
                         int compTimeOffset = (data.get() << 16 | data.get() << 8 | data.get());
                         data.reset();
                         switch (frameType) {

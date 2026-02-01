@@ -267,7 +267,7 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
      * @return true if one exists and false otherwise
      */
     public boolean hasListener(Class<?> clazz) {
-        return listeners.stream().filter(listener -> listener.getClass().isInstance(clazz)).findFirst().isPresent();
+        return listeners.stream().anyMatch(listener -> clazz.isInstance(listener));
     }
 
     /**

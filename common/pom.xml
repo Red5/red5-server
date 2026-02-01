@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.red5</groupId>
         <artifactId>red5-parent</artifactId>
-        <version>2.0.24</version>
+        <version>2.0.30</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>red5-server-common</artifactId>

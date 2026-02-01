@@ -17,7 +17,6 @@ import org.red5.codec.VideoFrameType;
 import org.red5.io.object.Output;
 import org.red5.io.object.Serializer;
 import org.red5.server.api.IConnection.Encoding;
-import org.red5.server.api.Red5;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IServiceCall;
 import org.red5.server.exception.ClientDetailsException;
@@ -90,6 +89,11 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
     private boolean dropEncoded;
 
     /**
+     * RTMP connection associated with this encoder.
+     */
+    private volatile RTMPConnection conn;
+
+    /**
      * Encodes object with given protocol state to byte buffer
      *
      * @param message
@@ -124,6 +128,13 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      * @return Encoded data
      */
     public IoBuffer encodePacket(Packet packet) {
+        if (conn == null) {
+            if (log.isWarnEnabled()) {
+                log.warn("encodePacket called with null connection; packet will not be encoded");
+            }
+            return null;
+        }
+        RTMP rtmp = conn.getState();
         IoBuffer out = null;
         Header header = packet.getHeader();
         int channelId = header.getChannelId();
@@ -131,14 +142,13 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         IRTMPEvent message = packet.getMessage();
         if (message instanceof ChunkSize) {
             ChunkSize chunkSizeMsg = (ChunkSize) message;
-            ((RTMPConnection) Red5.getConnectionLocal()).getState().setWriteChunkSize(chunkSizeMsg.getSize());
+            rtmp.setWriteChunkSize(chunkSizeMsg.getSize());
         }
         // normally the message is expected not to be dropped
         if (!dropMessage(channelId, message)) {
             //log.trace("Header time: {} message timestamp: {}", header.getTimer(), message.getTimestamp());
             IoBuffer data = encodeMessage(header, message);
             if (data != null) {
-                RTMP rtmp = ((RTMPConnection) Red5.getConnectionLocal()).getState();
                 // set last write packet
                 rtmp.setLastWritePacket(channelId, packet);
                 // ensure we're at the beginning
@@ -163,7 +173,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                     log.trace("Channel id: {} chunkSize: {}", channelId, chunkSize);
                 }
                 // attempt to properly guess the size of the buffer we'll need
-                int bufSize = dataLen + 18 + (numChunks * 2);
+                // Account for: data + first header (max 18) + continuation headers (1 byte each)
+                // + extended timestamps (4 bytes per chunk if timestamp >= MEDIUM_INT_MAX)
+                // Use unsigned comparison to handle timestamps >= 2^31 correctly
+                boolean hasExtendedTimestamp = Integer.compareUnsigned(header.getTimerBase(), MEDIUM_INT_MAX) >= 0 || (lastHeader != null && lastHeader.isExtended());
+                int extendedSize = hasExtendedTimestamp ? (numChunks * 4) : 0;
+                int bufSize = dataLen + 18 + (numChunks * 2) + extendedSize;
                 //log.trace("Allocated buffer size: {}", bufSize);
                 out = IoBuffer.allocate(bufSize, false);
                 out.setAutoExpand(true);
@@ -219,14 +234,18 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
             log.trace("Not dropping due to vod");
             return false;
         }
-        RTMPConnection conn = (RTMPConnection) Red5.getConnectionLocal();
+        if (conn == null) {
+            log.trace("Not dropping due to missing connection");
+            return false;
+        }
+        RTMP rtmp = conn.getState();
         if (message instanceof Ping) {
             final Ping pingMessage = (Ping) message;
             if (PingType.STREAM_PLAYBUFFER_CLEAR.equals(PingType.getType(pingMessage.getEventType()))) {
                 // client buffer cleared, make sure to reset timestamps for this stream
                 final int channel = conn.getChannelIdForStreamId(pingMessage.getValue2());
                 log.trace("Ping stream id: {} channel id: {}", pingMessage.getValue2(), channel);
-                conn.getState().clearLastTimestampMapping(channel, channel + 1, channel + 2);
+                rtmp.clearLastTimestampMapping(channel, channel + 1, channel + 2);
             }
             // never drop pings
             return false;
@@ -245,7 +264,6 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 String sourceType = (isLiveStream ? "LIVE" : "VOD");
                 log.debug("Connection: {} connType={}", conn.getSessionId(), sourceType);
             }
-            RTMP rtmp = conn.getState();
             long timestamp = (message.getTimestamp() & 0xFFFFFFFFL);
             LiveTimestampMapping mapping = rtmp.getLastTimestampMapping(channelId);
             long now = System.currentTimeMillis();
@@ -347,7 +365,6 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      * @return Header type to use
      */
     private byte getHeaderType(final Header header, final Header lastHeader) {
-        //int lastFullTs = ((RTMPConnection) Red5.getConnectionLocal()).getState().getLastFullTimestampWritten(header.getChannelId());
         if (lastHeader == null || header.getStreamId() != lastHeader.getStreamId() || header.getTimer() < lastHeader.getTimer()) {
             // new header mark if header for another stream
             return HEADER_NEW;
@@ -436,11 +453,13 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 RTMPUtils.writeReverseInt(buf, header.getStreamId().intValue());
                 header.setTimerDelta(timeDelta);
                 // write the extended timestamp if we are indicated to do so
-                if (timeBase >= MEDIUM_INT_MAX) {
+                // Use unsigned comparison to handle timestamps >= 2^31 correctly
+                if (Integer.compareUnsigned(timeBase, MEDIUM_INT_MAX) >= 0) {
                     buf.putInt(timeBase);
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
-                RTMPConnection conn = (RTMPConnection) Red5.getConnectionLocal();
                 if (conn != null) {
                     conn.getState().setLastFullTimestampWritten(header.getChannelId(), timeBase);
                 }
@@ -455,9 +474,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 RTMPUtils.writeMediumInt(buf, headerSize);
                 buf.put(header.getDataType());
                 // write the extended timestamp if we are indicated to do so
-                if (timeDelta >= MEDIUM_INT_MAX) {
+                // Use unsigned comparison to handle deltas >= 2^31 correctly
+                if (Integer.compareUnsigned(timeDelta, MEDIUM_INT_MAX) >= 0) {
                     buf.putInt(timeDelta);
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 // time base is from last header minus delta
                 timeBase = header.getTimerBase() - timeDelta;
@@ -470,20 +492,40 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 // write the time delta 24-bit 3 bytes
                 RTMPUtils.writeMediumInt(buf, Math.min(timeDelta, MEDIUM_INT_MAX));
                 // write the extended timestamp if we are indicated to do so
-                if (timeDelta >= MEDIUM_INT_MAX) {
+                // Use unsigned comparison to handle deltas >= 2^31 correctly
+                if (Integer.compareUnsigned(timeDelta, MEDIUM_INT_MAX) >= 0) {
                     buf.putInt(timeDelta);
                     header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 // time base is from last header minus delta
                 timeBase = header.getTimerBase() - timeDelta;
                 header.setTimerBase(timeBase);
                 break;
             case HEADER_CONTINUE: // type 3 - 0 bytes
-                // time base from the most recent header
-                timeBase = header.getTimerBase() - timeDelta;
-                // write the extended timestamp if we are indicated to do so
+                // Write the extended timestamp if indicated by the previous header.
+                // FFmpeg/libav compatibility: use the same extended timestamp value as the original header.
+                // For Type 0 originated messages: the extended value was the absolute timestamp
+                // For Type 1/2 originated messages: the extended value was the delta
                 if (lastHeader.isExtended()) {
-                    buf.putInt(timeBase);
+                    int extendedTimestamp;
+                    // Determine the correct extended timestamp value based on what triggered the extended flag
+                    // Use unsigned comparison to handle values >= 2^31 correctly
+                    if (Integer.compareUnsigned(lastHeader.getTimerDelta(), MEDIUM_INT_MAX) >= 0) {
+                        // Type 1/2 case: extended was triggered by delta >= MEDIUM_INT_MAX
+                        extendedTimestamp = lastHeader.getTimerDelta();
+                    } else {
+                        // Type 0 case: extended was triggered by absolute timestamp >= MEDIUM_INT_MAX
+                        extendedTimestamp = lastHeader.getTimer();
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Type 3 writing extended timestamp on channel {}: value={}, delta={}, base={}", header.getChannelId(), extendedTimestamp, lastHeader.getTimerDelta(), lastHeader.getTimerBase());
+                    }
+                    buf.putInt(extendedTimestamp);
+                    header.setExtended(true);
+                } else {
+                    header.setExtended(false);
                 }
                 break;
             default:
@@ -525,7 +567,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                                 //audio and video channels
                                 int[] channels = new int[] { 5, 6 };
                                 //if its a seek notification, reset the "mapping" for audio (5) and video (6)
-                                RTMP rtmp = ((RTMPConnection) Red5.getConnectionLocal()).getState();
+                                RTMP rtmp = conn.getState();
                                 for (int channelId : channels) {
                                     LiveTimestampMapping mapping = rtmp.getLastTimestampMapping(channelId);
                                     if (mapping != null) {
@@ -652,7 +694,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      *            output buffer
      */
     private void doEncodeSharedObject(ISharedObjectMessage so, IoBuffer out) {
-        final Encoding encoding = Red5.getConnectionLocal().getEncoding();
+        final Encoding encoding = (conn != null) ? conn.getEncoding() : Encoding.AMF0;
         final Output output = new org.red5.io.amf.Output(out);
         final Output amf3output = new org.red5.io.amf3.Output(out);
         output.putString(so.getName());
@@ -818,7 +860,7 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         Output output = new org.red5.io.amf.Output(out);
         // response to initial connect is always AMF0
         if (!"connect".equals(call.getServiceMethodName())) {
-            if (Red5.getConnectionLocal().getEncoding() == Encoding.AMF3) {
+            if (conn != null && conn.getEncoding() == Encoding.AMF3) {
                 output = new org.red5.io.amf3.Output(out);
             }
         }
@@ -1097,6 +1139,10 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
      */
     public long getBaseTolerance() {
         return baseTolerance;
+    }
+
+    public void setConnection(RTMPConnection conn) {
+        this.conn = conn;
     }
 
 }

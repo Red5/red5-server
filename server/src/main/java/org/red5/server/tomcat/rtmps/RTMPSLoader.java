@@ -96,7 +96,7 @@ public class RTMPSLoader extends RTMPTLoader {
         host.addChild(ctx);
         // add servlet wrapper
         StandardWrapper wrapper = new StandardWrapper();
-        wrapper.setServletName("RTMPTServlet");
+        wrapper.setServletName("RTMPSServlet");
         wrapper.setServletClass("org.red5.server.net.rtmps.RTMPSLoader");
         ctx.addChild(wrapper);
 

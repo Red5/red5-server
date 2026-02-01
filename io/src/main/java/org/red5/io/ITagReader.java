@@ -12,12 +12,12 @@ package org.red5.io;
  *
  * @author mondain
  */
-public interface ITagReader {
+public interface ITagReader extends AutoCloseable {
 
     /**
      * Closes the reader and free any allocated memory.
      */
-    void close();
+    void close() throws Exception;
 
     /**
      * Decode the header of the stream;

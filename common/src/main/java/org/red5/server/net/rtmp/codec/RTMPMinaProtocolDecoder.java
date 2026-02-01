@@ -15,7 +15,6 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import org.apache.mina.filter.codec.ProtocolDecoderAdapter;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
-import org.red5.server.api.Red5;
 import org.red5.server.net.IConnectionManager;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.slf4j.Logger;
@@ -44,15 +43,7 @@ public class RTMPMinaProtocolDecoder extends ProtocolDecoderAdapter {
             @SuppressWarnings("unchecked")
             IConnectionManager<RTMPConnection> connManager = (IConnectionManager<RTMPConnection>) ((WeakReference<?>) session.getAttribute(RTMPConnection.RTMP_CONN_MANAGER)).get();
             RTMPConnection conn = (RTMPConnection) connManager.getConnectionBySessionId(sessionId);
-            RTMPConnection connLocal = (RTMPConnection) Red5.getConnectionLocal();
-            if (connLocal == null || !conn.getSessionId().equals(connLocal.getSessionId())) {
-                if (log.isDebugEnabled() && connLocal != null) {
-                    log.debug("Connection local didn't match session");
-                }
-            }
             if (conn != null) {
-                // set the connection to local if its referred to by this session
-                Red5.setConnectionLocal(conn);
                 // copy data range from incoming
                 if (log.isTraceEnabled()) {
                     log.trace("Incomming: position {}, limit {}, remaining {}", new Object[] { in.position(), in.limit(), in.remaining() });
@@ -88,10 +79,9 @@ public class RTMPMinaProtocolDecoder extends ProtocolDecoderAdapter {
                     }
                 } catch (Exception e) {
                     log.error("Error during decode", e);
-                } finally {
-                    // clear local
-                    Red5.setConnectionLocal(null);
                 }
+                // NOTE: compact() is already called in RTMPProtocolDecoder.decodeBuffer()
+                // Do NOT compact again here - double compact corrupts buffer position
                 if (log.isTraceEnabled()) {
                     //log.trace("Buffer after: {}", Hex.encodeHexString(Arrays.copyOfRange(buf.array(), buf.position(), buf.limit())));
                     log.trace("Buffers info after: position {}, limit {}, remaining {}", new Object[] { buf.position(), buf.limit(), buf.remaining() });

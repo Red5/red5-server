@@ -44,6 +44,7 @@ public class MP4ReaderTest extends TestCase {
             log.debug("Tag: {}", tag);
         }
 
+        reader.close();
         log.info("----------------------------------------------------------------------------------");
     }
 

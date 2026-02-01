@@ -98,7 +98,6 @@ public class StatefulScopeWrappingAdapter extends AbstractScopeAdapter {
      *
      * @return collection of a set of connections
      */
-    @SuppressWarnings("deprecation")
     public Collection<Set<IConnection>> getConnections() {
         return scope.getConnections();
     }

@@ -29,6 +29,7 @@ public class FLVReaderTest {
             //log.debug("Meta: {}", meta);
             if (!reader.hasMoreTags()) {
                 log.warn("No tags found");
+                reader.close();
                 return;
             }
             ITag tag = null;

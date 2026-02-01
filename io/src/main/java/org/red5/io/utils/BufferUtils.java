@@ -65,13 +65,7 @@ public class BufferUtils {
     public static int readMediumInt(IoBuffer in) {
         byte[] bytes = new byte[3];
         in.get(bytes);
-        int val = 0;
-        val += bytes[0] * 256 * 256;
-        val += bytes[1] * 256;
-        val += bytes[2];
-        if (val < 0) {
-            val += 256;
-        }
+        int val = (bytes[0] << 16) | ((bytes[1] & 0xff) << 8) | (bytes[2] & 0xff);
         return val;
     }
 

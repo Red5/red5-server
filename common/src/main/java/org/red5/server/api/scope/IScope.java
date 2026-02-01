@@ -143,11 +143,26 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
     /**
      * Get a connection iterator. You can call remove, and the connection will be closed.
      *
-     * @deprecated Use {@link org.red5.server.api.scope.IScope#getClientConnections()} instead
      * @return Iterator holding all connections
      */
-    @Deprecated
-    public Collection<Set<IConnection>> getConnections();
+    Collection<Set<IConnection>> getConnections();
+
+    /**
+     * Return a collection of all the connections connected to the scope.
+     *
+     * @return Set of connections
+     */
+    Set<IConnection> getAllConnections();
+
+    /**
+     * Return connection by session id.
+     * @param sessionId
+     *            Session id
+     * @return Connection or null if not found
+     */
+    default IConnection lookupConnection(String sessionId) {
+        return getAllConnections().stream().filter(conn -> conn.getSessionId().equals(sessionId)).findFirst().orElse(null);
+    }
 
     /**
      * Get all current connections. You can call remove, and the connection will be closed.
@@ -164,7 +179,7 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
      * @return Set of connection objects (read-only)
      */
     @Deprecated
-    public Set<IConnection> lookupConnections(IClient client);
+    Set<IConnection> lookupConnections(IClient client);
 
     /**
      * Lookup connection for a given client.
