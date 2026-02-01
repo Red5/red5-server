@@ -3,6 +3,7 @@ target/
 .project
 .classpath
 .DS_Store
+.claude/
 
 *.zip
 *.tar.gz
@@ -19,3 +20,12 @@ ci/Red5-release-steps.md
 *.crt
 *.pem
 tests/conf/rtmps_truststore.p12
+
+*.md
+!README.md
+!RTMPS.md
+!CONTRIBUTING.md
+!FUNDING.md
+!SSE-README.md
+!SECURITY_FIXES_SUMMARY.md
+!docs/CACHE_USAGE_EXAMPLES.md
