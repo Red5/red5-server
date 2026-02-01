@@ -155,6 +155,14 @@ public class MediaBunnyStreamListener implements IStreamListener {
         }
     }
 
+    @Override
+    public void onClosed() {
+        log.info("Closing MediaBunnyStreamListener for stream {}", streamKey);
+        flushVideoBuffer();
+        flushAudioBuffer();
+        registry.onStreamClosed(streamKey);
+    }
+
     private void handleVideo(VideoData video) {
         if (video.getCodecId() != VideoCodec.AVC.getId()) {
             if (log.isDebugEnabled()) {
@@ -220,6 +228,7 @@ public class MediaBunnyStreamListener implements IStreamListener {
             } else if (!videoBuffer.samples.isEmpty()) {
                 flushVideoBuffer();
             }
+            videoBuffer.startsWithKeyframe = true;
         } else if (!videoKeyframeSeen) {
             return;
         }
@@ -403,6 +412,7 @@ public class MediaBunnyStreamListener implements IStreamListener {
         if (buffer.samples.isEmpty()) {
             return;
         }
+        boolean keyframe = buffer.startsWithKeyframe;
         Fmp4FragmentBuilder.FragmentConfig config = new Fmp4FragmentBuilder.FragmentConfig().setSequenceNumber(sequence).setTrackId(trackId).setBaseDecodeTime(buffer.fragmentStartDecodeTime).setGroupId(groupId).setMediaType(mediaType).setMediaData(buffer.media.toByteArray()).setSamples(new ArrayList<>(buffer.samples));
         byte[] fragment;
         try {
@@ -410,9 +420,13 @@ public class MediaBunnyStreamListener implements IStreamListener {
             patchBrandBox(fragment, "styp", "iso6");
             fragment = stripLeadingBox(fragment, "styp");
             if (log.isDebugEnabled()) {
-                log.debug("Built {} fragment for stream {} ({} bytes)", mediaType, streamKey, fragment.length);
+                log.debug("Built {} fragment for stream {} ({} bytes, keyframe={})", mediaType, streamKey, fragment.length, keyframe);
             }
-            registry.onFragment(streamKey, fragment);
+            if (keyframe && mediaType == CmafFragment.MediaType.VIDEO) {
+                registry.onKeyframeFragment(streamKey, fragment);
+            } else {
+                registry.onFragment(streamKey, fragment);
+            }
         } catch (IOException e) {
             log.warn("Failed to build fragment for stream: {}", streamKey, e);
         }
@@ -888,11 +902,14 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
         private long fragmentStartDecodeTime;
 
+        private boolean startsWithKeyframe;
+
         private void reset() {
             media.reset();
             samples.clear();
             bufferedDuration = 0;
             fragmentStartDecodeTime = 0;
+            startsWithKeyframe = false;
         }
     }
 }

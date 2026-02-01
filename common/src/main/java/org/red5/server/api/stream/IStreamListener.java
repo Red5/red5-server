@@ -23,6 +23,13 @@ public interface IStreamListener {
      * @param packet
      *            the packet received
      */
-    public void packetReceived(IBroadcastStream stream, IStreamPacket packet);
+    void packetReceived(IBroadcastStream stream, IStreamPacket packet);
+
+    /**
+     * Stream is closed, notify the listener and release all resources.
+     */
+    default void onClosed() {
+        // default implementation does nothing
+    }
 
 }

@@ -117,6 +117,10 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
             BlockingQueue<byte[]> queue = subscription.getQueue();
             while (true) {
                 byte[] chunk = queue.take();
+                if (chunk.length == 0) {
+                    log.debug("MediaBunny received end-of-stream signal");
+                    break;
+                }
                 chunkCount++;
                 if (!loggedFirstChunk) {
                     loggedFirstChunk = true;

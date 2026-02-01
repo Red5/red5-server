@@ -35,7 +35,18 @@ public class MediaBunnyStreamRegistry {
         log.debug("Subscribing to stream: {}", streamName);
         String key = buildKey(scope, streamName);
         log.debug("Subscriber key: {}", key);
-        StreamState state = streams.computeIfAbsent(key, id -> createState(scope, streamName));
+        StreamState state = streams.compute(key, (k, existing) -> {
+            IBroadcastScope bs = scope.getBroadcastScope(streamName);
+            IClientBroadcastStream currentStream = (bs != null) ? bs.getClientBroadcastStream() : null;
+            if (existing != null) {
+                if (currentStream != null && currentStream == existing.stream) {
+                    return existing; // same stream, reuse
+                }
+                log.info("Stream changed for {}, detaching old listener", k);
+                existing.detach();
+            }
+            return createState(scope, streamName);
+        });
         if (state == null) {
             throw new IllegalStateException("Stream not found: " + streamName);
         }
@@ -49,6 +60,10 @@ public class MediaBunnyStreamRegistry {
         byte[] initSegment = state.initSegment;
         if (initSegment != null) {
             queue.offer(initSegment);
+        }
+        byte[] keyframe = state.keyframeFragment;
+        if (keyframe != null) {
+            queue.offer(keyframe);
         }
         return new StreamSubscription(key, queue, this);
     }
@@ -66,6 +81,18 @@ public class MediaBunnyStreamRegistry {
         }
     }
 
+    void onStreamClosed(String key) {
+        StreamState state = streams.remove(key);
+        if (state != null) {
+            log.info("Stream closed for {}, removed state and notifying {} subscribers", key, state.subscribers.size());
+            // poison-pill empty array to unblock waiting subscribers
+            for (BlockingQueue<byte[]> queue : state.subscribers) {
+                queue.offer(new byte[0]);
+            }
+        }
+        pendingInitSegments.remove(key);
+    }
+
     void onInitSegment(String key, byte[] initSegment) {
         StreamState state = streams.get(key);
         if (state == null) {
@@ -76,6 +103,20 @@ public class MediaBunnyStreamRegistry {
         state.initSegment = initSegment;
         for (BlockingQueue<byte[]> queue : state.subscribers) {
             queue.offer(initSegment);
+        }
+    }
+
+    void onKeyframeFragment(String key, byte[] fragment) {
+        StreamState state = streams.get(key);
+        if (state == null) {
+            return;
+        }
+        state.keyframeFragment = fragment;
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching keyframe fragment for {} to {} subscribers ({} bytes)", key, state.subscribers.size(), fragment.length);
+        }
+        for (BlockingQueue<byte[]> queue : state.subscribers) {
+            queue.offer(fragment);
         }
     }
 
@@ -131,6 +172,8 @@ public class MediaBunnyStreamRegistry {
         private final List<BlockingQueue<byte[]>> subscribers = new CopyOnWriteArrayList<>();
 
         private volatile byte[] initSegment;
+
+        private volatile byte[] keyframeFragment;
 
         StreamState(IClientBroadcastStream stream, MediaBunnyStreamListener listener) {
             this.stream = stream;
