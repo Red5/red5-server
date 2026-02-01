@@ -119,7 +119,13 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     log.warn("Session decode overlap: {} != {}", conn.getSessionId(), state.getSessionId());
                 }
                 int remaining;
+                int iterations = 0;
+                final int maxIterations = buffer.remaining() + 1;
                 while ((remaining = buffer.remaining()) > 0) {
+                    if (++iterations > maxIterations) {
+                        log.warn("Decode loop exceeded expected iterations; breaking to avoid potential hang (iterations={}, maxIterations={}, remaining={})", iterations, maxIterations, remaining);
+                        break;
+                    }
                     if (state.canStartDecoding(remaining)) {
                         //log.trace("Can start decoding");
                         state.startDecoding();
@@ -127,7 +133,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         log.trace("Cannot start decoding");
                         break;
                     }
+                    final int positionBeforeDecode = buffer.position();
                     final Object decodedObject = decode(conn, state, buffer);
+                    if (buffer.position() == positionBeforeDecode && decodedObject == null) {
+                        log.warn("Decode made no progress; breaking to avoid infinite loop (pos={}, remaining={}, state={})", positionBeforeDecode, remaining, state);
+                        break;
+                    }
                     if (state.hasDecodedObject()) {
                         //log.trace("Has decoded object");
                         if (decodedObject != null) {

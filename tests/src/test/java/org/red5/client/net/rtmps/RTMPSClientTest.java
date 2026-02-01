@@ -9,7 +9,10 @@ import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.service.IPendingServiceCall;
 import org.red5.server.api.service.IPendingServiceCallback;
 import org.red5.server.net.rtmp.event.Ping.PingType;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
+@Category(IntegrationTest.class)
 public class RTMPSClientTest {
 
     // https://github.com/Red5/red5-client/pull/31

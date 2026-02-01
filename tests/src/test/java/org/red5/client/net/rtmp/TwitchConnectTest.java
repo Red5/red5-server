@@ -3,12 +3,15 @@ package org.red5.client.net.rtmp;
 import org.junit.After;
 import org.junit.Before;
 import org.red5.io.utils.ObjectMap;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
 /**
  * Tests for connecting to Twitch servers.
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
+@Category(IntegrationTest.class)
 public class TwitchConnectTest extends PublisherTest {
 
     @Before

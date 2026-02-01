@@ -7,6 +7,7 @@
  */
 package org.red5.io.matroska.dtd;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Map;
@@ -72,7 +73,11 @@ public class TagFactory {
             }
         } else {
             log.info("Unsupported matroska tag: {} {}", id, id.getBinary());
-            //throw new ConverterException("not supported matroska tag: " + id.getBinary());
+            try {
+                tag = new BinaryTag("UnknownTag-" + Long.toHexString(id.getBinary()), id, size, null);
+            } catch (IOException e) {
+                log.error("Unexpected exception while creating unknown tag", e);
+            }
         }
         return tag;
     }

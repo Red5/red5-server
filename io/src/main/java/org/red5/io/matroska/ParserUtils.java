@@ -165,14 +165,27 @@ public class ParserUtils {
      */
     public static VINT readVINT(InputStream inputStream) throws IOException {
         int fb = inputStream.read();
-        assert fb > 0;
+        if (fb < 0) {
+            throw new IOException("Unexpected end of stream while reading VINT");
+        }
+        if (fb == 0) {
+            throw new IOException("Invalid VINT marker byte: 0x00");
+        }
 
         int leadingZeros = Integer.numberOfLeadingZeros(fb & 0xFF) - 24;
         int len = leadingZeros + 1;
         byte[] vint = new byte[len];
         vint[0] = (byte) fb;
-        int read = inputStream.read(vint, 1, len - 1);
-        assert read == len - 1;
+        int offset = 1;
+        int remaining = len - 1;
+        while (remaining > 0) {
+            int read = inputStream.read(vint, offset, remaining);
+            if (read < 0) {
+                throw new IOException("Unexpected end of stream while reading VINT");
+            }
+            offset += read;
+            remaining -= read;
+        }
 
         long mask = (1L << (len * 7)) - 1;
         long binaryV = 0;
@@ -182,7 +195,7 @@ public class ParserUtils {
                 binaryV <<= BIT_IN_BYTE;
             }
         }
-        return new VINT(binaryV, (byte) (read + 1), mask & binaryV);
+        return new VINT(binaryV, (byte) len, mask & binaryV);
     }
 
     /**

@@ -210,12 +210,17 @@ public class WebScope extends Scope implements ServletContextAware, WebScopeMXBe
             log.debug("Webscope registering: {}", contextPath);
             getAppContext();
             appLoader = LoaderBase.getApplicationLoader();
-            ISSEService sseService = (ISSEService) LoaderBase.getInstance().getSSEService();
-            if (sseService != null) {
-                log.debug("SSE service found: {}", sseService);
-                registerServiceHandler(ISSEService.BEAN_NAME, sseService);
+            LoaderBase loader = LoaderBase.getInstance();
+            if (loader != null) {
+                ISSEService sseService = (ISSEService) loader.getSSEService();
+                if (sseService != null) {
+                    log.debug("SSE service found: {}", sseService);
+                    registerServiceHandler(ISSEService.BEAN_NAME, sseService);
+                } else {
+                    log.info("SSE service not found");
+                }
             } else {
-                log.info("SSE service not found");
+                log.debug("LoaderBase instance not available; skipping SSE registration");
             }
             // get the parent name
             String parentName = getParent().getName();

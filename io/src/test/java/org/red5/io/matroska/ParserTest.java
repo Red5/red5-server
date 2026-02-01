@@ -46,8 +46,8 @@ public class ParserTest {
     // size = 4, value = "arch" -> negative scenario
     static final byte[] ebmlDocTypeTagBytesArch = { 0x42, (byte) 0x82, (byte) 0x84, 0x61, 0x72, 0x63, 0x68 };
 
-    // size = 1, value = 0x37
-    static final byte[] trackEntryTagBytes = { (byte) 0xae, (byte) 0xEB };
+    // size = 0
+    static final byte[] trackEntryTagBytes = { (byte) 0xae, (byte) 0x80 };
 
     /**
      * tests if EBML tag parsed as expected

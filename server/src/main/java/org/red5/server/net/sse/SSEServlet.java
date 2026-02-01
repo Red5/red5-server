@@ -212,6 +212,7 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
     /**
      * Handles CORS headers for cross-origin requests.
      */
+    @SuppressWarnings("null")
     private void handleCORS(HttpServletRequest req, HttpServletResponse resp) {
         String origin = req.getHeader("Origin");
         if (origin != null) {

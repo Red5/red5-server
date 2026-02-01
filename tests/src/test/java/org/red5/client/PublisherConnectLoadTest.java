@@ -35,12 +35,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.core.util.ExecutorServiceUtil;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
 /**
  * Load tests for rapidly adding publishers via RTMP.
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
+@Category(IntegrationTest.class)
 public class PublisherConnectLoadTest {
 
     private static Logger log = LoggerFactory.getLogger(PublisherConnectLoadTest.class);

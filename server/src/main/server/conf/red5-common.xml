@@ -109,10 +109,11 @@
     <!--
     Now we can load the cache engine, only one may be enabled at a time. If no-caching is required select the
     NoCacheImpl. Alternative implementations include CaffeineCacheImpl (recommended) and CacheImpl (simple HashMap-based).
-    Note: EhCacheImpl is deprecated and will be removed in a future release.
+    Note: EhCacheImpl was deprecated and removed.
 
     Examples:
     <bean id="object.cache" class="org.red5.cache.impl.NoCacheImpl"/>
+
     <bean id="object.cache" class="org.red5.cache.impl.CaffeineCacheImpl" init-method="init" destroy-method="destroy">
         <property name="maxEntries" value="1000"/>
         <property name="expireAfterAccessSeconds" value="1200"/>

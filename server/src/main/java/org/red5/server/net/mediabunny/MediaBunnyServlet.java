@@ -142,6 +142,7 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
         }
     }
 
+    @SuppressWarnings("null")
     private void handleCORS(HttpServletRequest req, HttpServletResponse resp) {
         String origin = req.getHeader("Origin");
         if (origin != null) {

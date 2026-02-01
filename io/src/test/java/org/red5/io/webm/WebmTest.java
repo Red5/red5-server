@@ -8,13 +8,13 @@
 package org.red5.io.webm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.red5.io.matroska.ConverterException;
@@ -85,7 +85,7 @@ public class WebmTest {
     @Test
     public void testReaderWriter() throws IOException, ConverterException {
         File webmF = new File(webmTestFilePath);
-        assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
+        Assume.assumeTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
         File out = File.createTempFile("webmwriter", ".webm");
         try (WebmWriter w = new WebmWriter(out, false); WebmReader r = new WebmReader(webmF, w);) {
             r.process();
@@ -97,10 +97,8 @@ public class WebmTest {
     @Test
     public void testReader() throws IOException, ConverterException {
         // https://www.matroska.org/technical/tagging.html
-        //File webmF = new File("/media/mondain/terrorbyte/Videos/bbb-fullhd.webm");
-        File webmF = new File("/media/mondain/terrorbyte/Videos/BladeRunner2049.webm");
-        assertTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
-        File out = File.createTempFile("webmwriter", ".webm");
+        File webmF = new File(webmTestFilePath);
+        Assume.assumeTrue("Invalid webM file is specified", webmF.exists() && webmF.isFile());
         try (WebmReader r = new WebmReader(webmF, new TagConsumer() {
             @Override
             public void consume(Tag tag) {
@@ -109,8 +107,6 @@ public class WebmTest {
         });) {
             r.process();
         }
-        log.debug("Temporary file was created: " + out.getAbsolutePath());
-        assertEquals("", webmF.length(), out.length());
     }
 
 }

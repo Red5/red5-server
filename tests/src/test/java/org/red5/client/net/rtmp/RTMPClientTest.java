@@ -10,7 +10,10 @@ import org.red5.server.api.service.IPendingServiceCallback;
 import org.red5.server.net.rtmp.event.Notify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
+@Category(IntegrationTest.class)
 public class RTMPClientTest {
 
     private Logger log = LoggerFactory.getLogger(RTMPClientTest.class);

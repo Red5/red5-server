@@ -1,7 +1,6 @@
 package org.red5.server.net.rtmp.codec;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.mina.core.buffer.IoBuffer;

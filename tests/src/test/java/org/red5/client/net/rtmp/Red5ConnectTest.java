@@ -2,12 +2,15 @@ package org.red5.client.net.rtmp;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
 /**
  * Tests for connecting to red5 servers.
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
+@Category(IntegrationTest.class)
 public class Red5ConnectTest extends PublisherTest {
 
     // XXX(paul) verified working on 2025-07-27

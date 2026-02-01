@@ -76,11 +76,13 @@ public class RTMPUtils implements Constants {
         final byte a = in.get();
         final byte b = in.get();
         final byte c = in.get();
-        // Fix unsigned values
         int val = 0;
         val += (a & 0xff) << 16;
         val += (b & 0xff) << 8;
         val += (c & 0xff);
+        if ((val & 0x00800000) != 0) {
+            val |= 0xFF000000;
+        }
         return val;
     }
 

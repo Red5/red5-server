@@ -16,7 +16,10 @@ import org.red5.server.net.rtmp.event.Ping;
 import org.red5.server.net.rtmp.event.Ping.PingType;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.status.StatusCodes;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
+@Category(IntegrationTest.class)
 public class RTMPTSClientTest extends RTMPTSClient {
 
     private static boolean finished = false;

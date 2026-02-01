@@ -92,15 +92,9 @@ public class RTMPHandshakeTest {
         OutboundHandshake out = new OutboundHandshake();
         // set the handshake type
         out.setHandshakeType(RTMPConnection.RTMP_NON_ENCRYPTED);
-        // called initially with null input which triggers creation of C1
-        //IoBuffer C1 = hs.doHandshake(null);
-        //log.debug("C1: {}", C1);
-        //log.debug("C0C1 bytes: {}", new String(clientC0C1.array()));
-
-        // create C0+C1
-        IoBuffer C1 = ((OutboundHandshake) out).generateClientRequest1();
-        log.debug("C1: {}", C1);
-        //log.debug("C0C1 bytes: {}", new String(clientC0C1.array()));
+        // Use the canned client handshake data (simple handshake).
+        out.setFp9Handshake(false);
+        out.setClientHandshakeBytes(Arrays.copyOfRange(clientC0C1.array(), 1, clientC0C1.array().length));
 
         // strip 03 byte
         serverS0S1S2part1.get();
@@ -116,13 +110,19 @@ public class RTMPHandshakeTest {
         //log.debug("Server bytes1: {}", new String(serverS0S1S2part1.array()));
         //log.debug("Server bytes2: {}", new String(serverS0S1S2part2.array()));
 
+        // reset buffers for reuse
+        serverS0S1S2part1.rewind();
+        serverS0S1S2part2.rewind();
+
         // put parts 1 and 2 together
         IoBuffer S0S1S2 = IoBuffer.allocate(3073);
         S0S1S2.put(serverS0S1S2part1);
         S0S1S2.put(serverS0S1S2part2);
         S0S1S2.flip();
         // strip the 03 byte
-        S0S1S2.get();
+        if (S0S1S2.hasRemaining()) {
+            S0S1S2.get();
+        }
         // send in the combined server handshake, this creates C2
         C2 = out.decodeServerResponse1(S0S1S2);
         log.debug("C2 (third): {}", C2);

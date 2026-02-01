@@ -29,6 +29,7 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.CompositeData;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.red5.server.Server;
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
@@ -537,7 +538,7 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     @Override
     public IConnection lookupConnection(String sessionId) {
         for (IConnection conn : connections) {
-            if (StringUtils.equals(conn.getSessionId(), sessionId)) {
+            if (Strings.CS.equals(conn.getSessionId(), sessionId)) {
                 return conn;
             }
         }

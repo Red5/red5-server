@@ -30,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.core.util.ExecutorServiceUtil;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
 /**
  * Base class for publisher tests.

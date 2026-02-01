@@ -19,7 +19,10 @@ import org.junit.Test;
 import org.red5.server.api.so.IClientSharedObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
+@Category(IntegrationTest.class)
 public class RemoteSOTest {
 
     private static Logger log = LoggerFactory.getLogger(RemoteSOTest.class);

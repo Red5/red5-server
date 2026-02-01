@@ -1,11 +1,12 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This is a multi-module Maven build. Key modules live at the repo root:
-- `common`, `io`, `server`, `service`, `servlet`, `client`: core Java modules (each has `src/main/java`).
+This is a multi-module Maven build. Key modules in the root build live at the repo root:
+- `common`, `io`, `server`, `service`, `client`: core Java modules (each has `src/main/java`).
 - `tests`: shared test module (`src/test/java`).
 - `extras`, `apidocs`, `ci`: supporting assets and build tooling.
 - Root docs like `README.md`, `RTMPS.md`, and `SSE-README.md` capture protocol-specific notes.
+Note: `servlet` exists as a standalone module but is not wired into the root build.
 
 ## Build, Test, and Development Commands
 Use JDK 21 with Maven (no toolchains).

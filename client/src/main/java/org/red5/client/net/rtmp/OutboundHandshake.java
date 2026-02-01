@@ -483,6 +483,18 @@ public class OutboundHandshake extends RTMPHandshake {
     }
 
     /**
+     * Sets the client handshake bytes for tests that use canned handshakes.
+     *
+     * @param c1 client handshake bytes (C1)
+     */
+    void setClientHandshakeBytes(byte[] c1) {
+        if (c1 == null || c1.length != Constants.HANDSHAKE_SIZE) {
+            throw new IllegalArgumentException("C1 must be " + Constants.HANDSHAKE_SIZE + " bytes");
+        }
+        this.c1 = c1;
+    }
+
+    /**
      * <p>Setter for the field <code>forceVerification</code>.</p>
      *
      * @param forceVerification a boolean

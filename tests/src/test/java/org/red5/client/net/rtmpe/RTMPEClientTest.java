@@ -10,7 +10,10 @@ import org.red5.client.net.rtmp.ClientExceptionHandler;
 import org.red5.client.net.rtmpe.RTMPEClient.ClientCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
+@Category(IntegrationTest.class)
 public class RTMPEClientTest {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPEClientTest.class);

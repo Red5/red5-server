@@ -2,6 +2,8 @@ package org.red5.client.net.rtmp;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
 /**
  * Tests for connecting to YouTube servers.
@@ -11,6 +13,7 @@ import org.junit.Before;
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
+@Category(IntegrationTest.class)
 public class YouTubeConnectTest extends PublisherTest {
 
     // XXX(paul) verified working on 2025-07-27

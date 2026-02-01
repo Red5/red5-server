@@ -74,21 +74,21 @@
   </head>
   <body>
     <h1>Mediabunny Live (Minimal)</h1>
-
+    <span>Publish an RTMP stream to the Red5 Server using <a href="https://obsproject.com/" target="_blank">OBS</a> or any other RTMP encoder. Enter the stream name below and click Start to begin viewing.</span>
+    <br /><br />
     <div class="row">
       <label for="stream">Stream</label>
       <input id="stream" type="text" value="mystream" />
       <button id="start">Start</button>
       <button id="stop" class="secondary" disabled>Stop</button>
     </div>
-
     <div id="status">Idle</div>
     <div id="error"></div>
-
     <div id="player">
       <canvas id="canvas" width="1280" height="720"></canvas>
     </div>
-
     <script type="module" src="./minimal.js"></script>
+    <br />
+    <span>Special thanks to <a href="https://www.red5.net" target="_blank">Red5</a> and <a href="https://mediabunny.dev" target="_blank">Mediabunny</a></span>
   </body>
 </html>

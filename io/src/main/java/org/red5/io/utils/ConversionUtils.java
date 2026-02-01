@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,6 +144,15 @@ public class ConversionUtils {
                     return ((List<?>) source).stream().collect(Collectors.toCollection(HashSet::new));
                 }
                 return Arrays.stream((Object[]) source).collect(Collectors.toCollection(HashSet::new));
+            }
+        }
+        if (source instanceof Collection<?>) {
+            if (Set.class.isAssignableFrom(target)) {
+                log.trace("Source: {} to target set: {}", source, target);
+                return ((Collection<?>) source).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+            } else if (List.class.isAssignableFrom(target)) {
+                log.trace("Source: {} to target list: {}", source, target);
+                return ((Collection<?>) source).stream().collect(Collectors.toCollection(ArrayList::new));
             }
         }
         if (Map.class.isAssignableFrom(sourceClass)) {

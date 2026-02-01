@@ -314,8 +314,20 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>3.6.0</version>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>org.red5.test.IntegrationTest</excludedGroups>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
     <reporting>
         <plugins>
@@ -559,6 +571,20 @@
         </dependency>
     </dependencies>
     <profiles>
+        <profile>
+            <id>integration</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>org.red5.test.IntegrationTest</groups>
+                            <excludedGroups></excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>release</id>
             <modules>

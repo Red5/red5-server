@@ -28,6 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runners.MethodSorters;
 import org.red5.server.api.IAttributeStore;
 import org.red5.server.api.scope.IScope;
@@ -36,6 +37,7 @@ import org.red5.server.api.so.ISharedObjectBase;
 import org.red5.server.api.so.ISharedObjectListener;
 import org.red5.server.scope.WebScope;
 import org.red5.server.util.ScopeUtils;
+import org.red5.test.IntegrationTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
@@ -53,6 +55,7 @@ import com.google.gson.Gson;
 @SuppressWarnings("null")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(locations = { "SharedObjectTest.xml" })
+@Category(IntegrationTest.class)
 public class SharedObjectTest extends AbstractJUnit4SpringContextTests {
 
     protected static Logger log = LoggerFactory.getLogger(SharedObjectTest.class);

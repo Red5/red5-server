@@ -71,68 +71,67 @@ public class MetaService implements IMetaService {
         if (metaArr == null) {
             metaArr = new IMetaCue[0];
         }
-        FLVReader reader = new FLVReader(file, false);
-        FLVWriter writer = new FLVWriter(file, false);
-        ITag tag = null;
-        // Read first tag
-        if (reader.hasMoreTags()) {
-            tag = reader.readTag();
-            if (tag.getDataType() == IoConstants.TYPE_METADATA) {
-                if (!reader.hasMoreTags()) {
-                    throw new IOException("File we're writing is metadata only?");
-                }
-            }
-        }
-        if (tag == null) {
-            throw new IOException("Tag was null");
-        }
-        meta.setDuration(((double) reader.getDuration() / 1000));
-        meta.setVideoCodecId(reader.getVideoCodecId());
-        meta.setAudioCodecId(reader.getAudioCodecId());
-
-        ITag injectedTag = injectMetaData(meta, tag);
-        injectedTag.setPreviousTagSize(0);
-        tag.setPreviousTagSize(injectedTag.getBodySize());
-
-        // TODO look into why this fails in the unit test
-        try {
-            writer.writeTag(injectedTag);
-            writer.writeTag(tag);
-        } catch (Exception e) {
-            log.warn("Metadata insert failed", e);
-            return;
-        }
-
-        int cuePointTimeStamp = 0;
-        int counter = 0;
-
-        if (metaArr != null) {
-            Arrays.sort(metaArr);
-            cuePointTimeStamp = getTimeInMilliseconds(metaArr[0]);
-        }
-        while (reader.hasMoreTags()) {
-            tag = reader.readTag();
-            // if there are cuePoints in the array
-            if (counter < metaArr.length) {
-                // If the tag has a greater timestamp than the
-                // cuePointTimeStamp, then inject the tag
-                while (tag.getTimestamp() > cuePointTimeStamp) {
-                    injectedTag = injectMetaCue(metaArr[counter], tag);
-                    writer.writeTag(injectedTag);
-                    tag.setPreviousTagSize(injectedTag.getBodySize());
-                    // Advance to the next CuePoint
-                    counter++;
-                    if (counter > (metaArr.length - 1)) {
-                        break;
+        try (FLVReader reader = new FLVReader(file, false); FLVWriter writer = new FLVWriter(file, false)) {
+            ITag tag = null;
+            // Read first tag
+            if (reader.hasMoreTags()) {
+                tag = reader.readTag();
+                if (tag.getDataType() == IoConstants.TYPE_METADATA) {
+                    if (!reader.hasMoreTags()) {
+                        throw new IOException("File we're writing is metadata only?");
                     }
-                    cuePointTimeStamp = getTimeInMilliseconds(metaArr[counter]);
                 }
             }
-            if (tag.getDataType() != IoConstants.TYPE_METADATA) {
+            if (tag == null) {
+                throw new IOException("Tag was null");
+            }
+            meta.setDuration(((double) reader.getDuration() / 1000));
+            meta.setVideoCodecId(reader.getVideoCodecId());
+            meta.setAudioCodecId(reader.getAudioCodecId());
+
+            ITag injectedTag = injectMetaData(meta, tag);
+            injectedTag.setPreviousTagSize(0);
+            tag.setPreviousTagSize(injectedTag.getBodySize());
+
+            // TODO look into why this fails in the unit test
+            try {
+                writer.writeTag(injectedTag);
                 writer.writeTag(tag);
+            } catch (Exception e) {
+                log.warn("Metadata insert failed", e);
+                return;
+            }
+
+            int cuePointTimeStamp = 0;
+            int counter = 0;
+
+            if (metaArr != null) {
+                Arrays.sort(metaArr);
+                cuePointTimeStamp = getTimeInMilliseconds(metaArr[0]);
+            }
+            while (reader.hasMoreTags()) {
+                tag = reader.readTag();
+                // if there are cuePoints in the array
+                if (counter < metaArr.length) {
+                    // If the tag has a greater timestamp than the
+                    // cuePointTimeStamp, then inject the tag
+                    while (tag.getTimestamp() > cuePointTimeStamp) {
+                        injectedTag = injectMetaCue(metaArr[counter], tag);
+                        writer.writeTag(injectedTag);
+                        tag.setPreviousTagSize(injectedTag.getBodySize());
+                        // Advance to the next CuePoint
+                        counter++;
+                        if (counter > (metaArr.length - 1)) {
+                            break;
+                        }
+                        cuePointTimeStamp = getTimeInMilliseconds(metaArr[counter]);
+                    }
+                }
+                if (tag.getDataType() != IoConstants.TYPE_METADATA) {
+                    writer.writeTag(tag);
+                }
             }
         }
-        writer.close();
     }
 
     /**

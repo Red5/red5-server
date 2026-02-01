@@ -46,12 +46,15 @@ import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
+import org.junit.experimental.categories.Category;
+import org.red5.test.IntegrationTest;
 
 /**
  * Tests for websocket operations.
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
+@Category(IntegrationTest.class)
 public class WebSocketServerTest {
 
     protected static Logger log = LoggerFactory.getLogger(WebSocketServerTest.class);

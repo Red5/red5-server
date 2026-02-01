@@ -616,6 +616,7 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     /**
      * Starts measurement.
      */
+    @SuppressWarnings("null")
     private void startRoundTripMeasurement() {
         if (scheduler != null) {
             if (!pingInterval.isZero()) {

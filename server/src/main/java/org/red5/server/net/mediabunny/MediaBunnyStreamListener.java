@@ -40,6 +40,7 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private static final long DEFAULT_VIDEO_DURATION = 3000;
 
+    @SuppressWarnings("unused")
     private static final long DEFAULT_AUDIO_DURATION = 1024;
 
     private static final int AAC_FRAME_SAMPLES = 1024;

@@ -95,14 +95,6 @@ public class Serializer {
             } else if (obj instanceof Object[]) {
                 log.trace("write object array: {}", obj);
                 out.writeArray((Object[]) obj);
-            } else if (obj instanceof Collection) {
-                log.trace("write collection");
-                out.writeArray((Collection<Object>) obj);
-            } else if (obj instanceof List<?>) {
-                log.trace("write list");
-                writeList(out, (List<?>) obj);
-            } else if (obj instanceof Document) {
-                writeDocument(out, (Document) obj);
             } else if (obj instanceof Vector) {
                 log.trace("write vector");
                 // scan the vector to determine the generic type
@@ -138,6 +130,14 @@ public class Serializer {
                     ((org.red5.io.amf3.Output) out).enforceAMF3();
                     out.writeVectorNumber((Vector<Double>) obj);
                 }
+            } else if (obj instanceof List<?>) {
+                log.trace("write list");
+                writeList(out, (List<?>) obj);
+            } else if (obj instanceof Collection) {
+                log.trace("write collection");
+                out.writeArray((Collection<Object>) obj);
+            } else if (obj instanceof Document) {
+                writeDocument(out, (Document) obj);
             } else if (obj instanceof Iterator) {
                 writeIterator(out, (Iterator<Object>) obj);
             } else if (writeObjectType(out, obj)) {
