@@ -140,6 +140,10 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.red5</groupId>
+            <artifactId>red5-moq-pkgr</artifactId>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
