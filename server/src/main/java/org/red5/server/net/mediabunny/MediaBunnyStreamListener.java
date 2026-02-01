@@ -89,9 +89,7 @@ public class MediaBunnyStreamListener implements IStreamListener {
 
     private long lastAudioTimestamp = -1;
 
-    private long videoSequence = 0;
-
-    private long audioSequence = 0;
+    private long fragmentSequence = 0;
 
     private long videoDecodeTime = 0;
 
@@ -214,7 +212,7 @@ public class MediaBunnyStreamListener implements IStreamListener {
                 videoKeyframeSeen = true;
                 videoDecodeTime = 0;
                 videoBuffer.reset();
-                videoSequence = 0;
+                fragmentSequence = 0;
                 // Align audio start with video start
                 audioDecodeTime = 0;
                 audioBuffer.reset();
@@ -394,11 +392,11 @@ public class MediaBunnyStreamListener implements IStreamListener {
     }
 
     private void flushVideoBuffer() {
-        flushBuffer(videoBuffer, ++videoSequence, 1, 1, CmafFragment.MediaType.VIDEO);
+        flushBuffer(videoBuffer, ++fragmentSequence, 1, 1, CmafFragment.MediaType.VIDEO);
     }
 
     private void flushAudioBuffer() {
-        flushBuffer(audioBuffer, ++audioSequence, 2, 2, CmafFragment.MediaType.AUDIO);
+        flushBuffer(audioBuffer, ++fragmentSequence, 2, 2, CmafFragment.MediaType.AUDIO);
     }
 
     private void flushBuffer(TrackBuffer buffer, long sequence, long trackId, long groupId, CmafFragment.MediaType mediaType) {
