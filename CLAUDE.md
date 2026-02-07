@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Context
+
+This project uses Java (primary), Rust (JNI/native layer), and Maven for builds. Key projects: Red5 server, MoQ relay (draft-14 spec), RTMP codec, media pipeline. When working on MoQ, always reference the relevant draft spec version. When working across Java/Rust JNI boundaries, test both sides.
+
 ## Project Overview
 
 Red5 Server is an open-source media server written in Java that supports RTMP, RTMPT, RTMPS, RTMPE, and Server-Sent Events (SSE) protocols for streaming video/audio and real-time messaging. The project uses Maven as its build system with a multi-module structure. Current version is **2.0.23**.
@@ -47,6 +51,10 @@ mvn -Dmaven.test.skip=true clean package -P assemble
 # Create milestone build
 mvn -Dmilestone.version=1.0.7-M1 clean package -Pmilestone
 ```
+
+## Build & Test
+
+Always compile and test from the project root using `mvn clean test` or the appropriate top-level build command — never compile from within a reactor submodule directory where errors may not surface.
 
 ## Project Architecture
 
@@ -161,6 +169,18 @@ RTMP protocol security enhancements (see `SECURITY_FIXES_SUMMARY.md` for details
 - **`IStream`** - Stream operations (publish/play)
 - **`ISharedObject`** - Shared object management
 - **`ISSEService`** - Server-Sent Events service interface
+
+## Debugging Guidelines
+
+When debugging, do NOT assume data corruption or external causes first. Always investigate the controlled codebase (encoder/decoder symmetry, race conditions, logic bugs) before considering corruption, RTMPE, or external factors. Ask clarifying questions rather than pursuing speculative fixes.
+
+When fixing bugs, always address the root cause — not symptoms. Do not add null guards, skip-byte workarounds, or band-aid fixes without first understanding WHY the invalid state occurs. If unsure, ask the user before applying a speculative fix.
+
+When the user shares log files or diagnostic output, read ALL of it carefully before concluding. Do not stop analysis at the first plausible issue — there may be secondary problems (e.g., capsule issues, datagram forwarding regressions) visible further in the logs.
+
+## Git Conventions
+
+Never amend a commit that has already been pushed to a remote branch. Create a new commit instead.
 
 ### Related Documentation
 
