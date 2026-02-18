@@ -69,10 +69,10 @@ To build a milestone tarball:
 mvn -Dmilestone.version=1.0.7-M1 clean package -Pmilestone
 ```
 
-# Older Releases
+## Older Releases
 Visit this page to review release notes from all previous versions [Releases·Red5/red5-server](https://github.com/Red5/red5-server/releases)
 
-### Supporters
+## Supporters
 
 [![YourKit](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/java/profiler/)
 
