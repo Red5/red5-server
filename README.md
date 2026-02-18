@@ -13,8 +13,6 @@ Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.o
  * [Red5](https://ci-builds.apache.org/job/OpenMeetings/job/Red5-server/)
  * [Windows Installer](https://ci-builds.apache.org/job/OpenMeetings/job/red5-installer/)
 
-__Note on Bootstrap__ The bootstrap and shutdown classes have been moved to the [red5-service](https://github.com/Red5/red5-service) project; the dependency has been added to this projects pom.
-
 ## Developer Community Support
 
 If you have questions regarding the development, there are a couple of places you get help help from fellow developers:[Join Red5 Slack community](https://red5pro.slack.com/)
@@ -22,9 +20,9 @@ Ask your question on [Red5 official subreddit](https://www.reddit.com/r/red5/) o
 
 ## Maven
 
-Releases are available at [Sonatype - Releases](https://oss.sonatype.org/content/repositories/releases/org/red5/)
+Releases are available at [Sonatype - Releases](https://mvnrepository.com/search?q=red5)
 
-Snapshots are available at [Sonatype - Snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/red5/)
+Snapshots are available at [Sonatype - Snapshots](https://mvnrepository.com/search?q=red5)
 
 Include the red5-parent in your __pom.xml__  in the __dependencyManagement__ section
 
@@ -71,33 +69,8 @@ To build a milestone tarball:
 mvn -Dmilestone.version=1.0.7-M1 clean package -Pmilestone
 ```
 
-# Eclipse
-
-1. Create the eclipse project files, execute this within red5-server directory.
-```sh
-mvn eclipse:eclipse
-```
-2. Import the project into Eclipse.
-3. Access the right-click menu and select "Configure" and then "Convert to Maven Project".
-4. Now the project will build automatically, if you have the maven plugin installed.
-
-[Screencast](http://screencast.com/t/2sgjMevf9)
-  
-Features supported via plugin (These are mostly deprecated):
- * [WebSocket (ws and wss)](https://github.com/Red5/red5-websocket)
- * [RTSP (From Axis-type cameras)](https://github.com/Red5/red5-rtsp-restreamer)
- * [HLS](https://github.com/Red5/red5-hls-plugin)
- 
 # Older Releases
 Visit this page to review release notes from all previous versions [Releases·Red5/red5-server](https://github.com/Red5/red5-server/releases)
-
-### Donations
-Donate to the cause using
-<table>
-  <tr><td>BTC</td><td>19AUgJuVzC8jg16bSLJDcM6Nfouh9JvwKA</td></tr>
-  <tr><td>ETH</td><td>0x5115e085937ba5B4AEc0FF5C3cAbF6eE523B7D97</td></tr>
-</table>
-<i>Donations are used for beer and snacks</i>
 
 ### Supporters
 
