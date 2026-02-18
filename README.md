@@ -5,15 +5,8 @@
 [![Maven Central](https://img.shields.io/maven-central/v/org.red5/red5-server.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.red5%22)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-Red5 is an Open Source Flash Server written in Java that supports:
 
-* Streaming Video (FLV, F4V, MP4, 3GP)
-* Streaming Audio (MP3, F4A, M4A, AAC)
-* Recording Client Streams (FLV and AVC+AAC in FLV container)
-* Shared Objects
-* Live Stream Publishing
-* Remoting
-* Protocols: RTMP, RTMPT, RTMPS, and RTMPE in the description with “Red5 open source media server is one of the [free live streaming solutions](https://www.red5.net/open-source-live-streaming/) provided by Red5. It is written in Java and is designed to be flexible with a simple plugin architecture that allows for customization of virtually any video-on-demand (VOD) and live streaming scenario. Read more about its key features and capabilities [here](https://www.red5.net/red5-media-server/) Installed over 1,000,000 times worldwide, Red5 open source media server has powered applications for organizations like Amazon, the US Department of Defense, Akamai, Harvard University, and many others. Red5 open source media server is server core for [Red5pro](https://www.red5.net/red5-pro/low-latency-streaming-software/) and [Red5Cloud](https://www.red5.net/red5-cloud-low-latency-live-streaming-platform/).Red5 open source media server is ideal for developers, hobbyists, and students who want to experiment with live video streaming technology, build a media server and learn how it works. 
+* Red5 open source media server is one of the [free live streaming solutions](https://www.red5.net/open-source-live-streaming/) provided by Red5. It is written in Java and is designed to be flexible with a simple plugin architecture that allows for customization of virtually any video-on-demand (VOD) and live streaming scenario. Read more about its key features and capabilities [here](https://www.red5.net/red5-media-server/) Installed over 1,000,000 times worldwide, Red5 open source media server has powered applications for organizations like Amazon, the US Department of Defense, Akamai, Harvard University, and many others. Red5 open source media server is server core for [Red5pro](https://www.red5.net/red5-pro/low-latency-streaming-software/) and [Red5Cloud](https://www.red5.net/red5-cloud-low-latency-live-streaming-platform/).Red5 open source media server is ideal for developers, hobbyists, and students who want to experiment with live video streaming technology, build a media server and learn how it works. 
 
 Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.org/)):
 
@@ -115,5 +108,4 @@ for monitoring and profiling Java and .NET applications.
 
 [![Red5pro](https://www.red5pro.com/wp-content/uploads/2019/08/Red5Pro_logo_white_red.svg)](https://red5pro.com/)
 
-Live video streaming solved.
-Broadcast video to millions in under 500 milliseconds.
+Red5 is a trusted [live streaming solution provider](https://www.red5.net/products/) for developers, startups and enterprises, delivering video, audio, and data with under 250 ms of latency.
