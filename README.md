@@ -1,4 +1,4 @@
-# red5-server - Red5 server core
+# Red5 open source media server
 
 ===========
 
@@ -13,11 +13,7 @@ Red5 is an Open Source Flash Server written in Java that supports:
 * Shared Objects
 * Live Stream Publishing
 * Remoting
-* Protocols: RTMP, RTMPT, RTMPS, and RTMPE
-
-The Red5 users list may be found here: [red5interest](https://groups.google.com/forum/#!forum/red5interest)
-
-Subreddit: [r/red5](http://www.reddit.com/r/red5)
+* Protocols: RTMP, RTMPT, RTMPS, and RTMPE in the description with “Red5 open source media server is one of the [free live streaming solutions](https://www.red5.net/open-source-live-streaming/) provided by Red5. It is written in Java and is designed to be flexible with a simple plugin architecture that allows for customization of virtually any video-on-demand (VOD) and live streaming scenario. Read more about its key features and capabilities [here](https://www.red5.net/red5-media-server/) Installed over 1,000,000 times worldwide, Red5 open source media server has powered applications for organizations like Amazon, the US Department of Defense, Akamai, Harvard University, and many others. Red5 open source media server is server core for [Red5pro](https://www.red5.net/red5-pro/low-latency-streaming-software/) and [Red5Cloud](https://www.red5.net/red5-cloud-low-latency-live-streaming-platform/).Red5 open source media server is ideal for developers, hobbyists, and students who want to experiment with live video streaming technology, build a media server and learn how it works. 
 
 Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.org/)):
 
@@ -26,9 +22,10 @@ Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.o
 
 __Note on Bootstrap__ The bootstrap and shutdown classes have been moved to the [red5-service](https://github.com/Red5/red5-service) project; the dependency has been added to this projects pom.
 
-## StackOverflow
+## Developer Community Support
 
-If you want answers from a broader audience, [Stack Overflow](http://stackoverflow.com/tags/red5/info) may be your best bet.
+If you have questions regarding the development, there are a couple of places you get help help from fellow developers:[Join Red5 Slack community](https://red5pro.slack.com/)
+Ask your question on [Red5 official subreddit](https://www.reddit.com/r/red5/) or [Stack](https://stackoverflow.com/questions/tagged/red5?sort=newest)
 
 ## Maven
 
@@ -99,27 +96,7 @@ Features supported via plugin (These are mostly deprecated):
  * [HLS](https://github.com/Red5/red5-hls-plugin)
  
 # Older Releases
-The artifacts for the following releases are no longer available; if your project requires them, you'll have to build them from source. The listings are here only for historical purposes.
-
- * [Red5 1.2.25 Release](https://github.com/Red5/red5-server/releases/tag/v1.2.25-RELEASE) (28 June 2022)
- * [Red5 1.2.2 Release](https://github.com/Red5/red5-server/releases/tag/v1.2.2-RELEASE) (5 September 2019)
- * [Red5 1.1.1 Release](https://github.com/Red5/red5-server/releases/tag/v1.1.1-RELEASE) (29 May 2019)
- * [Red5 1.1.0 Release](https://github.com/Red5/red5-server/releases/tag/v1.1.0-RELEASE) (22 April 2019)
- * [Red5 1.0.10 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.10-RELEASE) (9 February 2019)
- * [Red5 1.0.9 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.9-RELEASE) (11 June 2017)
- * [Red5 1.0.8 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.8-RELEASE) (23 December 2016)
- * [Red5 1.0.7 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.7-RELEASE) (12 May 2016)
- * [Red5 1.0.6 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.6-RELEASE) (8 September 2015)
- * [Red5 1.0.5 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.5-RELEASE) (7 February 2015)
- * [Red5 1.0.4 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.4-RELEASE) (26 December 2014)
- * [Red5 1.0.3 Release](https://github.com/Red5/red5-server/releases/tag/v1.0.3-RELEASE) (5 August 2014)
- * Red5 1.0.2 Release (9 April 2014)
- * Red5 1.0.2 Snapshot (18 April 2013)
- * Red5 1.0.1 Final (14 January 2013)
- * Red5 1.0 Final (03 December 2012)
- * Red5 0.9.1 Final (21 February 2010)
- * Red5 0.9.0 Final (27 January 2010)
- * Red5 0.8.0 Final
+Visit this page to review release notes from all previous versions [Releases·Red5/red5-server](https://github.com/Red5/red5-server/releases)
 
 ### Donations
 Donate to the cause using
