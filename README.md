@@ -79,6 +79,6 @@ Visit this page to review release notes from all previous versions [Releases·Re
 YourKit supports open source projects with innovative and intelligent tools
 for monitoring and profiling Java and .NET applications.
 
-[![Red5pro](https://www.red5pro.com/wp-content/uploads/2019/08/Red5Pro_logo_white_red.svg)](https://red5pro.com/)
+[![Red5](Red5-logo.png)](https://red5pro.com/)
 
 Red5 is a trusted [live streaming solution provider](https://www.red5.net/products/) for developers, startups and enterprises, delivering video, audio, and data with under 250 ms of latency.
