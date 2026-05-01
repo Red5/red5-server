@@ -1199,6 +1199,16 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                         eventTime -= startTs;
                     }
                 }
+                // Clamp negative adjusted timestamps. Buffered events (decoder configs, keyframes)
+                // captured before the live anchor land here with eventTime < 0; place them at ts=1
+                // so they precede the first live frame at ts=2 without being interpreted as a
+                // far-future unsigned-32 value (e.g. -97 on the wire = 0xFFFFFF9F = ~49.7 days).
+                if (eventTime < 0) {
+                    if (isTrace) {
+                        log.trace("sendMessage: clamping negative adjusted timestamp {} to 1 (buffered prelude before live anchor)", eventTime);
+                    }
+                    eventTime = 1;
+                }
                 messageOut.getBody().setTimestamp(eventTime);
                 if (isTrace) {
                     log.trace("sendMessage (updated): streamStartTS={}, length={}, streamOffset={}, timestamp={}", new Object[] { startTs, currentItem.get().getLength(), streamOffset, eventTime });
