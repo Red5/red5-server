@@ -585,15 +585,18 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             // get the stream so that we can grab any metadata and decoder configs
             IBroadcastStream stream = (IBroadcastStream) ((IBroadcastScope) in).getClientBroadcastStream();
             // prevent an NPE when a play list is created and then immediately flushed
+            // Prelude (metadata, decoder configs) goes out at ts=0 and the cached keyframe at
+            // ts=1 so the late-subscriber rebasing in sendMessage() does not anchor
+            // audioBaseTs/videoBaseTs to the publisher's stale cached metadata timestamp. The
+            // first live A/V frame then establishes the per-PID base and the subscriber's first
+            // real frame lands near ts=2 instead of (publisher_now - cached_metadata_ts).
             int ts = 0;
             if (stream != null) {
                 Notify metaData = stream.getMetaData();
                 //check for metadata to send
                 if (metaData != null) {
-                    ts = metaData.getTimestamp();
                     log.debug("Metadata is available");
-                    RTMPMessage metaMsg = RTMPMessage.build(metaData, metaData.getTimestamp());
-                    sendMessage(metaMsg);
+                    sendMessage(RTMPMessage.build(metaData, ts));
                 } else {
                     log.debug("No metadata available");
                 }
