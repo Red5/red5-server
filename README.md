@@ -81,13 +81,13 @@ Prerequisites:
 
 Run against the published image (`mondain/red5:latest`):
 ```sh
-mvn -pl tests -Pdocker-integration -DskipTests=false verify
+mvn -pl tests -Pdocker-integration -Dred5.it.image=mondain/red5:latest -Dred5.it.autoPull=on -DskipTests=false verify
 ```
 
 Run against your current checkout (build + dockerize local version first):
 ```sh
 bash tests/src/test/resources/scripts/build_local_red5_docker_image.sh red5-local:dev
-mvn -pl tests -Pdocker-integration -Dred5.it.image=red5-local:dev -DskipTests=false verify
+mvn -pl tests -Pdocker-integration -Dred5.it.image=red5-local:dev -Dred5.it.autoPull=off -DskipTests=false verify
 ```
 
 Artifacts are written to:

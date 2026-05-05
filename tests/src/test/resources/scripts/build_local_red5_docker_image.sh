@@ -30,4 +30,4 @@ docker build -t "${IMAGE_TAG}" "${BUILD_DIR}"
 
 echo "Done. Image available as ${IMAGE_TAG}"
 echo "Run integration test with:"
-echo "  mvn -pl tests -Pdocker-integration -Dred5.it.image=${IMAGE_TAG} verify"
+echo "  mvn -pl tests -Pdocker-integration -Dred5.it.image=${IMAGE_TAG} -Dred5.it.autoPull=off verify"

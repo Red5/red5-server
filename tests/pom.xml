@@ -13,6 +13,7 @@
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <red5.it.image>mondain/red5:latest</red5.it.image>
+        <red5.it.autoPull>off</red5.it.autoPull>
     </properties>
     <build>
         <defaultGoal>test</defaultGoal>
@@ -113,6 +114,7 @@
                         <artifactId>docker-maven-plugin</artifactId>
                         <version>0.45.1</version>
                         <configuration>
+                            <autoPull>${red5.it.autoPull}</autoPull>
                             <images>
                                 <image>
                                     <name>${red5.it.image}</name>
