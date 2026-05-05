@@ -14,11 +14,11 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.beanutils.BeanMap;
@@ -361,7 +361,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      */
     protected boolean serializeField(Class<?> objectClass, String keyName, Field field, Method getter) {
         initializeCaches();
-        Map<String, Boolean> serializeMap = getSerializeCache().get(objectClass, k -> new HashMap<>());
+        Map<String, Boolean> serializeMap = getSerializeCache().get(objectClass, k -> new ConcurrentHashMap<>());
         return serializeMap.computeIfAbsent(keyName, k -> Serializer.serializeField(keyName, field, getter));
     }
 
@@ -374,7 +374,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      */
     protected Field getField(Class<?> objectClass, String keyName) {
         initializeCaches();
-        Map<String, Field> fieldMap = getFieldCache().get(objectClass, k -> new HashMap<>());
+        Map<String, Field> fieldMap = getFieldCache().get(objectClass, k -> new ConcurrentHashMap<>());
         return fieldMap.computeIfAbsent(keyName, k -> {
             for (Class<?> clazz = objectClass; !clazz.equals(Object.class); clazz = clazz.getSuperclass()) {
                 Field[] fields = clazz.getDeclaredFields();
@@ -400,7 +400,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
      */
     protected Method getGetter(Class<?> objectClass, BeanMap beanMap, String keyName) {
         initializeCaches();
-        Map<String, Method> getterMap = getGetterCache().get(objectClass, k -> new HashMap<>());
+        Map<String, Method> getterMap = getGetterCache().get(objectClass, k -> new ConcurrentHashMap<>());
         return getterMap.computeIfAbsent(keyName, k -> beanMap.getReadMethod(keyName));
     }
 

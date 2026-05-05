@@ -27,6 +27,38 @@ require_bin docker
 require_bin ffmpeg
 require_bin ffprobe
 
+find_red5_container() {
+    docker ps --filter ancestor="${RED5_IMAGE_NAME:-}" --filter publish="${RTMP_PORT}" --format '{{.ID}}' | head -n 1
+}
+
+find_red5_container_fallback() {
+    docker ps --filter publish="${RTMP_PORT}" --format '{{.ID}}' | head -n 1
+}
+
+collect_container_logs() {
+    local cid="${1:-}"
+    if [[ -z "${cid}" ]]; then
+        cid="$(find_red5_container_fallback)"
+    fi
+    if [[ -n "${cid}" ]]; then
+        docker logs "${cid}" >"${OUT_DIR}/red5-container.log" 2>&1 || true
+        echo "${cid}" >"${OUT_DIR}/red5-container.id"
+    fi
+}
+
+fail_with_diagnostics() {
+    local message="$1"
+    collect_container_logs "${CONTAINER_ID:-}"
+    if [[ -f "${OUT_DIR}/red5-container.log" ]]; then
+        rg -n -i "ConcurrentModificationException|RTMPProtocolEncoder - Error encoding|InboundHandshake|NetConnection\\.Connect\\.Rejected|StreamNotFound|Exception" \
+            "${OUT_DIR}/red5-container.log" >"${OUT_DIR}/failure-findings.log" || true
+        echo "---- red5 failure findings ----"
+        sed -n '1,120p' "${OUT_DIR}/failure-findings.log" || true
+    fi
+    echo "${message}"
+    exit 1
+}
+
 wait_for_rtmp_port() {
     local retries=30
     local i
@@ -72,14 +104,20 @@ launch_publisher() {
 
 for i in $(seq 1 "${PUBLISHERS}"); do
     launch_publisher "${i}"
+    sleep 1
 done
 
 sleep 8
 
 for pid in "${PIDS[@]}"; do
     if ! kill -0 "${pid}" >/dev/null 2>&1; then
-        echo "At least one publisher exited early"
-        exit 1
+        fail_with_diagnostics "At least one publisher exited early"
+    fi
+done
+
+for i in $(seq 1 "${PUBLISHERS}"); do
+    if ! rg -q "Output #0, flv, to 'rtmp://.*stream${i}'" "${OUT_DIR}/publisher-stream${i}.log"; then
+        fail_with_diagnostics "Publisher stream${i} failed to establish RTMP output"
     fi
 done
 
@@ -109,18 +147,15 @@ sleep "${PUBLISH_DURATION}"
 
 for pid in "${PIDS[@]}"; do
     if ! kill -0 "${pid}" >/dev/null 2>&1; then
-        echo "At least one publisher terminated before duration ${PUBLISH_DURATION}s"
-        exit 1
+        fail_with_diagnostics "At least one publisher terminated before duration ${PUBLISH_DURATION}s"
     fi
 done
 
-container_id="$(docker ps --filter ancestor=mondain/red5:latest --filter publish=${RTMP_PORT} --format '{{.ID}}' | head -n 1 || true)"
-if [[ -z "${container_id}" ]]; then
-    echo "Could not identify running Red5 container"
-    exit 1
+CONTAINER_ID="$(find_red5_container_fallback)"
+if [[ -z "${CONTAINER_ID}" ]]; then
+    fail_with_diagnostics "Could not identify running Red5 container"
 fi
-
-docker logs "${container_id}" >"${OUT_DIR}/red5-container.log" 2>&1 || true
+collect_container_logs "${CONTAINER_ID}"
 
 if rg -n -i "handshake.*(fail|error|exception)|exception.*handshake|rtmp.*handshake.*failed" "${OUT_DIR}/red5-container.log" \
     >"${OUT_DIR}/handshake-findings.log"; then
