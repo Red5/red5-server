@@ -12,6 +12,7 @@
     <description>The Red5 tests</description>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <red5.it.image>mondain/red5:latest</red5.it.image>
     </properties>
     <build>
         <defaultGoal>test</defaultGoal>
@@ -114,7 +115,7 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>mondain/red5:latest</name>
+                                    <name>${red5.it.image}</name>
                                     <alias>red5-server</alias>
                                     <run>
                                         <ports>

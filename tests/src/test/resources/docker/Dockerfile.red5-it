@@ -1,0 +1,10 @@
+FROM eclipse-temurin:21-jre
+
+ENV RED5_HOME=/opt/red5
+WORKDIR /opt/red5
+
+COPY red5/ /opt/red5/
+
+EXPOSE 1935 5080 5443 8081 843 8443
+
+ENTRYPOINT ["./red5.sh"]

@@ -64,6 +64,44 @@ To package everything up in an assembly (tarball/zip):
 ```sh
 mvn -Dmaven.test.skip=true clean package -P assemble
 ```
+
+## Docker RTMP Integration Test
+
+This repo includes an integration test that:
+- starts a Red5 server container
+- launches 5 concurrent RTMP publishers via `ffmpeg`
+- validates subscriptions with `ffprobe`
+- collects logs and checks for handshake / rejection issues
+
+Prerequisites:
+- `docker`
+- `ffmpeg`
+- `ffprobe`
+- Java 21 and Maven
+
+Run against the published image (`mondain/red5:latest`):
+```sh
+mvn -pl tests -Pdocker-integration -DskipTests=false verify
+```
+
+Run against your current checkout (build + dockerize local version first):
+```sh
+bash tests/src/test/resources/scripts/build_local_red5_docker_image.sh red5-local:dev
+mvn -pl tests -Pdocker-integration -Dred5.it.image=red5-local:dev -DskipTests=false verify
+```
+
+Artifacts are written to:
+```text
+tests/target/rtmp-docker-it/<timestamp>/
+```
+
+Key outputs:
+- `red5-container.log`: server logs from the container
+- `publisher-stream*.log`: per-publisher `ffmpeg` logs
+- `ffprobe-stream*.json`: per-stream probe validation
+- `handshake-findings.log`: handshake-related findings
+- `connection-rejections.log`: connection rejection findings
+
 To build a milestone tarball:
 ```sh
 mvn -Dmilestone.version=1.0.7-M1 clean package -Pmilestone
