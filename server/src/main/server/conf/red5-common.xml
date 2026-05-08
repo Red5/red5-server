@@ -123,9 +123,11 @@
     <bean id="object.cache" class="org.red5.cache.impl.NoCacheImpl"/>
 
     <!-- Cache to use for keyframe metadata -->
+    <!--
     <bean id="keyframe.cache" class="org.red5.io.CachingFileKeyFrameMetaCache">
         <property name="maxCacheEntry" value="${keyframe.cache.entry.max}" />
     </bean>
+    -->
 
     <!--
         Represents FLV files
@@ -143,9 +145,11 @@
 
     <!-- Use injection to set the keyframe cache for FLV files -->
     <bean id="flvreader.impl" class="org.red5.io.flv.impl.FLVReader">
+    <!--
         <property name="keyFrameCache">
             <ref bean="keyframe.cache"/>
         </property>
+    -->
     </bean>
 
     <!-- Use injection to set the keyframe cache for MP4 files -->

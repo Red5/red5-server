@@ -116,6 +116,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
     private boolean useLoadBuf;
 
     /** Cache for keyframe informations. */
+    @Deprecated(since = "2.0.35", forRemoval = true)
     private static IKeyFrameMetaCache keyframeCache;
 
     /** The header of this FLV file. */
@@ -213,7 +214,7 @@ public class FLVReader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      * @param keyframeCache a {@link org.red5.io.IKeyFrameMetaCache} object
      */
     public void setKeyFrameCache(IKeyFrameMetaCache keyframeCache) {
-        FLVReader.keyframeCache = keyframeCache;
+        //FLVReader.keyframeCache = keyframeCache;
     }
 
     /**
