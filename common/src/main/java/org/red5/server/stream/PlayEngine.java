@@ -249,6 +249,8 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
 
     private boolean configsDone;
 
+    private String sourceStreamName;
+
     /**
      * Constructs a new PlayEngine.
      */
@@ -448,6 +450,8 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                         IBroadcastStream stream = (IBroadcastStream) ((IBroadcastScope) in).getClientBroadcastStream();
                         log.debug("playItem: stream={}, codecInfo={}", stream, stream != null ? stream.getCodecInfo() : "N/A");
                         if (stream != null && stream.getCodecInfo() != null) {
+                            // get the published name for logging purposes
+                            sourceStreamName = stream.getPublishedName();
                             IVideoStreamCodec videoCodec = stream.getCodecInfo().getVideoCodec();
                             log.debug("playItem: videoCodec={}, hasKeyframe={}, numInterframes={}", videoCodec, videoCodec != null ? videoCodec.getKeyframe() != null : "N/A", videoCodec != null ? videoCodec.getNumInterframes() : "N/A");
                             if (videoCodec != null) {
@@ -479,6 +483,8 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
                 // get source input with create
                 in = providerService.getLiveProviderInput(thisScope, itemName, true);
                 if (msgInReference.compareAndSet(null, in)) {
+                    // use item name as stream name
+                    sourceStreamName = itemName;
                     if (type == -1 && itemLength >= 0) {
                         if (isDebug) {
                             log.debug("Creating wait job for {}", itemLength);
@@ -1046,6 +1052,17 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         IMessageOutput out = msgOutReference.get();
         if (out != null) {
             try {
+                if (message instanceof RTMPMessage) {
+                    IRTMPEvent body = ((RTMPMessage) message).getBody();
+                    int dataLen = -1;
+                    if (body instanceof IStreamData) {
+                        IoBuffer sd = ((IStreamData<?>) body).getData();
+                        if (sd != null) {
+                            dataLen = sd.limit();
+                        }
+                    }
+                    log.info("Transmitting RTMP message for {} to subscriber: type={} dataType=0x{} ts={} sourceType={} length={}", sourceStreamName, body.getClass().getSimpleName(), Integer.toHexString(body.getDataType() & 0xff), body.getTimestamp(), body.getSourceType(), dataLen);
+                }
                 out.pushMessage(message);
                 if (message instanceof RTMPMessage) {
                     IRTMPEvent body = ((RTMPMessage) message).getBody();
