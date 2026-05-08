@@ -104,7 +104,7 @@
         <logback.version>1.5.18</logback.version>
         <bc.version>1.84</bc.version>
         <mina.version>2.0.27</mina.version>
-        <spring.version>6.2.17</spring.version>
+        <spring.version>6.2.18</spring.version>
         <tomcat.version>11.0.15</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>
