@@ -1052,16 +1052,18 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         IMessageOutput out = msgOutReference.get();
         if (out != null) {
             try {
-                if (message instanceof RTMPMessage) {
-                    IRTMPEvent body = ((RTMPMessage) message).getBody();
-                    int dataLen = -1;
-                    if (body instanceof IStreamData) {
-                        IoBuffer sd = ((IStreamData<?>) body).getData();
-                        if (sd != null) {
-                            dataLen = sd.limit();
+                if (isDebug) {
+                    if (message instanceof RTMPMessage) {
+                        IRTMPEvent body = ((RTMPMessage) message).getBody();
+                        int dataLen = -1;
+                        if (body instanceof IStreamData) {
+                            IoBuffer sd = ((IStreamData<?>) body).getData();
+                            if (sd != null) {
+                                dataLen = sd.limit();
+                            }
                         }
+                        log.debug("Transmitting RTMP message for {} to subscriber: type={} dataType=0x{} ts={} length={}", sourceStreamName, body.getClass().getSimpleName(), Integer.toHexString(body.getDataType() & 0xff), body.getTimestamp(), dataLen);
                     }
-                    log.info("Transmitting RTMP message for {} to subscriber: type={} dataType=0x{} ts={} sourceType={} length={}", sourceStreamName, body.getClass().getSimpleName(), Integer.toHexString(body.getDataType() & 0xff), body.getTimestamp(), body.getSourceType(), dataLen);
                 }
                 out.pushMessage(message);
                 if (message instanceof RTMPMessage) {
