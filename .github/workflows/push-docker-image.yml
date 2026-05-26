@@ -1,0 +1,16 @@
+name: Push Docker Image
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  push-docker-image:
+    uses: Red5/docker/.github/workflows/push-docker-image.yml@4ec701169e70c9abef5abaacb7a4090a5f351fba
+    with:
+      version: ${{ github.event.release.tag_name }}
+    secrets:
+      dockerhub-password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-repository: ${{ secrets.DOCKERHUB_REPOSITORY }}
