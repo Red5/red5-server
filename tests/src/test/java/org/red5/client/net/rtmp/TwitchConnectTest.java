@@ -34,8 +34,8 @@ public class TwitchConnectTest extends PublisherTest {
             System.setProperty("javax.net.debug", "ssl,handshake,verbose,data,keymanager,trustmanager,record,plaintext");
         }
         // Twitch ingest server details
-        //host = "ingest.global-contribute.live-video.net";
-        host = "lax.contribute.live-video.net"; // Los Angeles region
+        host = "ingest.global-contribute.live-video.net"; // Global ingest server (Twitch will route to the nearest one)
+        //host = "lax.contribute.live-video.net"; // Los Angeles region
         port = 1935;
         app = "app"; // Standard RTMP application name for Twitch
         streamKey = "live_107484810_QSnKJKfaSjFigTqRQ1o0Y38ggnope"; // Stream key for publish command
@@ -45,23 +45,21 @@ public class TwitchConnectTest extends PublisherTest {
         // Twitch workflow: connect -> releaseStream (optional) -> createStream -> publish
         setStartWithReleaseStream(true); // Try releaseStream first (ignore if it fails)
         setUseFCCommands(true);
-        // Set up connection parameters for Twitch
+        // Set up connection parameters for Twitch.
+        //
+        // IMPORTANT: Twitch ingest does *strict* pattern-matching on the connect command object.
+        // If it sees Flash/FMS-style capability properties (objectEncoding, fpad, audioCodecs,
+        // videoCodecs, videoFunction, capabilities, swfUrl, pageUrl) it treats the peer as a
+        // legacy Flash player rather than an encoder and TCP-closes the socket immediately
+        // after sending Connect.Success - which manifests as releaseStream/FCPublish/createStream
+        // never reaching the server. A wire capture of FFmpeg's libavformat publishing to Twitch
+        // shows it sends only these four properties; copying that minimal shape is what Twitch
+        // accepts as a publisher.
         ObjectMap<String, Object> params = new ObjectMap<>();
         params.put("app", app);
         params.put("type", "nonprivate");
-        params.put("flashVer", "FMLE/3.0 (compatible; FMSc/1.0)"); // OBS-like user agent
+        params.put("flashVer", "FMLE/3.0 (compatible; FMSc/1.0)"); // FFmpeg uses a Lavf suffix here
         params.put("tcUrl", "rtmp://" + host + ":" + port + "/" + app);
-        params.put("objectEncoding", Integer.valueOf(0)); // AMF0 encoding
-        params.put("fpad", Boolean.FALSE);
-        params.put("audioCodecs", Integer.valueOf(3575)); // Standard OBS audio codecs
-        params.put("videoCodecs", Integer.valueOf(252)); // Standard OBS video codecs
-        params.put("videoFunction", Integer.valueOf(1));
-        params.put("capabilities", Integer.valueOf(15));
-        // Add swfUrl which some servers expect
-        params.put("swfUrl", params.get("tcUrl") + "/swf/Red5Publisher.swf");
-        params.put("pageUrl", "");
-        params.put("streamKey", streamKey); // Use the Twitch stream key for publishing
-        // Set the connection parameters in the test instance
         setConnectionParams(params);
     }
 
