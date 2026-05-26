@@ -334,14 +334,23 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         PingType pingType = PingType.getType(ping.getEventType());
         switch (pingType) {
             case PING_CLIENT:
-            case STREAM_BEGIN:
-            case RECORDED_STREAM:
-            case STREAM_PLAYBUFFER_CLEAR:
-                // the server wants to measure the RTT
+                // PingRequest (event 6) from server requires us to send back PongResponse (event 7)
                 Ping pong = new Ping();
                 pong.setEventType(PingType.PONG_SERVER);
                 pong.setValue2((int) (System.currentTimeMillis() & 0xffffffff));
                 conn.ping(pong);
+                break;
+            case STREAM_BEGIN:
+            case RECORDED_STREAM:
+            case STREAM_PLAYBUFFER_CLEAR:
+                // server-to-client notifications (User Control events 0, 4, 1) - informational only.
+                // Echoing a PongResponse here is a protocol violation: strict ingests (e.g. Twitch)
+                // treat the unexpected response as misbehavior and TCP-close the socket. The original
+                // case fall-through that did so is what caused Twitch publish attempts to die right
+                // after Connect.Success.
+                if (log.isDebugEnabled()) {
+                    log.debug("Server notification ping: {}", pingType);
+                }
                 break;
             case STREAM_DRY:
                 log.debug("Stream indicates there is no data available");
@@ -866,6 +875,13 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
                     channel.write(reply);
                 } else if ("onBWDone".equals(methodName)) {
                     onBWDone(call.getArguments().length > 0 ? call.getArguments()[0] : null);
+                } else if (command.getTransactionId() == 0) {
+                    // Server-initiated notifications (transactionId == 0) such as onFCPublish,
+                    // onFCSubscribe, onFCUnpublish, etc. are one-way. Replying with an _error
+                    // because we have no handler for them caused Twitch (and other strict
+                    // ingests) to TCP-close the connection right after createStream, before our
+                    // publish() invoke could go out.
+                    log.debug("Suppressed reply to server notification {} (txn=0)", methodName);
                 } else {
                     Invoke reply = new Invoke();
                     reply.setCall(call);

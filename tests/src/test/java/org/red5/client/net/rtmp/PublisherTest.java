@@ -214,16 +214,22 @@ abstract class PublisherTest {
                     case "connect":
                         if (call.getStatus() == Call.STATUS_SUCCESS_RESULT) {
                             log.info("Successfully connected to the server");
-                            // release the stream before publishing
+                            // OBS / FMLE / Twitch ordering: send releaseStream + FCPublish + createStream
+                            // back-to-back from the connect callback and only AWAIT createStream's _result.
+                            // Twitch does not reply to releaseStream or FCPublish individually (only
+                            // onFCPublish notify alongside the createStream result), so chaining each on
+                            // the previous _result stalls forever and Twitch closes after a ~4s idle.
                             Thread.ofVirtual().start(() -> {
                                 if (startWithReleaseStream) {
-                                    log.info("Releasing stream: {}", streamKey);
+                                    log.info("Releasing stream: {} (fire-and-forget)", streamKey);
                                     client.invoke("releaseStream", new Object[] { streamKey }, self);
-                                } else {
-                                    // Skip releaseStream step
-                                    log.info("Skipping releaseStream for stream: {}", streamKey);
-                                    client.createStream(self);
                                 }
+                                if (useFCCommands) {
+                                    log.info("Calling FCPublish for stream: {} (fire-and-forget)", streamKey);
+                                    client.invoke("FCPublish", new Object[] { streamKey }, self);
+                                }
+                                log.info("Calling createStream for stream: {}", streamKey);
+                                client.createStream(self);
                             });
                         } else {
                             log.error("Connection failed - Status: {} Exception: {}", call.getStatus(), call.getException());
@@ -231,28 +237,12 @@ abstract class PublisherTest {
                         }
                         break;
                     case "releaseStream":
-                        // Some servers (like Twitch) may return error status for releaseStream but we should continue anyway
-                        if (call.getStatus() == Call.STATUS_SUCCESS_RESULT) {
-                            log.info("Stream released successfully: {}", streamKey);
-                        } else {
-                            log.warn("Stream release returned status {} but continuing anyway: {}", call.getStatus(), streamKey);
-                        }
-                        // OBS / FMLE ordering: send FCPublish fire-and-forget (Twitch and most
-                        // ingests never reply to it) and proceed straight to createStream.
-                        // Chaining createStream on an FCPublish _result will hang on those servers.
-                        Thread.ofVirtual().start(() -> {
-                            if (useFCCommands) {
-                                log.info("Calling FCPublish for stream: {} (fire-and-forget)", streamKey);
-                                // route the (usually absent) reply to self so it just logs via the FCPublish case
-                                client.invoke("FCPublish", new Object[] { streamKey }, self);
-                            }
-                            log.info("Calling createStream for stream: {}", streamKey);
-                            client.createStream(self);
-                        });
+                        // Most ingests never send a _result for this; if a server does, just log it -
+                        // createStream has already been dispatched by the connect branch above.
+                        log.info("releaseStream _result received for stream: {} status: {} (ignored, createStream already dispatched)", streamKey, call.getStatus());
                         break;
                     case "FCPublish":
-                        // Most ingests never send this; if a server does, just log it - createStream
-                        // has already been dispatched by the releaseStream branch above.
+                        // Most ingests never send this; if a server does, just log it.
                         log.info("FCPublish _result received for stream: {} status: {} (ignored, createStream already dispatched)", streamKey, call.getStatus());
                         break;
                     case "createStream":
