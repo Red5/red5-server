@@ -696,7 +696,13 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 if (isTrace) {
                     log.trace("Decoding notify on stream id: {}", header.getStreamId());
                 }
-                if (header.getStreamId().doubleValue() != 0.0d) {
+                // Per RTMP spec, TYPE_NOTIFY (0x12) carries stream data (onMetaData, onCuePoint,
+                // @setDataFrame, onFI, ...). Some encoders (older FFmpeg, librtmp-based publishers,
+                // mobile encoders) send `@setDataFrame onMetaData` with streamId=0 before/during
+                // stream creation. Routing those to decodeAction trips a ClassCastException because
+                // the AMF token after the action string is a String, not the Number transactionId
+                // that an invoke payload would have. See issue #440.
+                if (header.getStreamId().doubleValue() != 0.0d || looksLikeStreamData(in)) {
                     message = decodeStreamData(in);
                 } else {
                     if (log.isDebugEnabled()) {
@@ -985,6 +991,50 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     private int readTransactionId(Input input) {
         Number transactionId = Deserializer.<Number> deserialize(input, Number.class);
         return transactionId == null ? 0 : transactionId.intValue();
+    }
+
+    /**
+     * Peeks the first AMF0 token of a TYPE_NOTIFY payload to determine whether it carries
+     * stream data (e.g. {@code @setDataFrame}, {@code onMetaData}, {@code onCuePoint},
+     * {@code onFI}) rather than an invoke-style action. Buffer position is restored.
+     *
+     * Used to recover from publishers that send data-frame notifies on streamId 0 (issue #440).
+     *
+     * @param in buffer positioned at the start of the AMF payload
+     * @return true if the payload looks like stream data and should go through decodeStreamData
+     */
+    private boolean looksLikeStreamData(IoBuffer in) {
+        if (in.remaining() < 4) {
+            return false;
+        }
+        in.mark();
+        try {
+            byte type = in.get();
+            int len;
+            if (type == AMF.TYPE_STRING) {
+                len = in.getUnsignedShort();
+            } else if (type == AMF.TYPE_LONG_STRING) {
+                long ulen = in.getUnsignedInt();
+                len = ulen > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) ulen;
+            } else {
+                return false;
+            }
+            if (len <= 0 || len > in.remaining()) {
+                return false;
+            }
+            // '@' marks data-frame messages (@setDataFrame); 'on' prefixes the common
+            // metadata notifies (onMetaData, onCuePoint, onFI, onTextData, ...)
+            byte b0 = in.get();
+            if (b0 == '@') {
+                return true;
+            }
+            if (b0 == 'o' && in.remaining() > 0 && in.get() == 'n') {
+                return true;
+            }
+            return false;
+        } finally {
+            in.reset();
+        }
     }
 
     /**

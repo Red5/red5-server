@@ -21,6 +21,7 @@ import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
 import org.red5.server.net.rtmp.RTMPUtils;
 import org.red5.server.net.rtmp.event.Invoke;
+import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.message.ChunkHeader;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.message.Packet;
@@ -320,6 +321,54 @@ public class TestRTMPProtocolDecoder implements IRTMPHandler {
         //log.debug("Decoded: {}", event.toString());
 
         Red5.setConnectionLocal(null);
+    }
+
+    /**
+     * Regression test for issue #440: ClassCastException (String → Number) when
+     * decoding {@code @setDataFrame onMetaData} TYPE_NOTIFY (0x12) packets that
+     * arrive with messageStreamId == 0 (e.g. older FFmpeg builds and some
+     * librtmp/mobile encoders).
+     *
+     * Before the fix the decoder routed streamId-0 notifies to {@code decodeAction},
+     * which tried to read a Number transactionId after the AMF action string and
+     * threw {@code ClassCastException} on the {@code "onMetaData"} string, killing
+     * the connection. After the fix the payload is recognised as stream data and
+     * decoded into a {@link Notify} with action {@code onMetaData}.
+     *
+     * <pre>
+     * Packet (12 byte header + 56 byte AMF0 payload):
+     *   04                       basic header, fmt=0, csid=4
+     *   00 00 00                 timestamp
+     *   00 00 38                 length (56)
+     *   12                       type notify (0x12)
+     *   00 00 00 00              message stream id = 0 (the bug trigger)
+     *   02 00 0D "@setDataFrame" AMF0 string
+     *   02 00 0A "onMetaData"    AMF0 string
+     *   08 00 00 00 01           AMF0 ECMA array, 1 entry
+     *     00 08 "duration"         key
+     *     00 0000000000000000      AMF0 number 0.0
+     *   00 00 09                 end-of-object marker
+     * </pre>
+     */
+    @Test
+    public void testDecodeSetDataFrameOnStreamIdZero_issue440() {
+        log.debug("\ntestDecodeSetDataFrameOnStreamIdZero_issue440");
+        RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
+        RTMPConnection conn = new RTMPMinaConnection();
+        conn.getState().setState(RTMP.STATE_CONNECTED);
+        conn.setHandler(this);
+        try {
+            IoBuffer buf = IoBuffer.wrap(IOUtils.hexStringToByteArray("04000000000038120000000002000d40736574446174614672616d6502000a6f6e4d65746144617461080000000100086475726174696f6e000000000000000000000009"));
+            List<Object> objs = dec.decodeBuffer(conn, buf);
+            assertNotNull("Objects should not be null", objs);
+            assertFalse("Objects should not be empty (decoder swallowed the packet)", objs.isEmpty());
+            Object msg = ((Packet) objs.get(0)).getMessage();
+            assertNotNull("Decoded message should not be null", msg);
+            assertEquals("@setDataFrame on streamId 0 must decode to a Notify, not an Invoke", Notify.class, msg.getClass());
+            assertEquals("Notify action should be the inner onMetaData/onCuePoint/onFI name", "onMetaData", ((Notify) msg).getAction());
+        } finally {
+            conn.close();
+        }
     }
 
     @Override
