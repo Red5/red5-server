@@ -14,7 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.IConnection;
@@ -104,6 +106,10 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
      * Task to start on connection close
      */
     private Runnable connectionClosedHandler;
+
+    // one-shot guard so the user's connectionClosedHandler dispatches at most once across
+    // duplicate sessionClosed events (remote FIN racing our own conn.close())
+    private final AtomicBoolean closeHandlerDispatched = new AtomicBoolean(false);
 
     /**
      * Task to start on connection errors
@@ -753,13 +759,23 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         byte previousState = conn.getStateCode();
         log.info("connectionClosed - session: {} previousState: 0x{} peer: {}", conn.getSessionId(), String.format("%02X", previousState), conn.getRemoteAddress());
         super.connectionClosed(conn);
-        if (previousState != RTMP.STATE_DISCONNECTED) {
-            if (connectionClosedHandler != null) {
-                executor.submit(connectionClosedHandler);
+        // Mina can fire sessionClosed more than once for a single transport teardown (e.g. the
+        // remote FIN plus our own conn.close() racing). Only dispatch the user-supplied close
+        // handler once, gated on a one-shot CAS, and only when the executor is still alive.
+        if (connectionClosedHandler != null && closeHandlerDispatched.compareAndSet(false, true)) {
+            if (!executor.isShutdown()) {
+                try {
+                    executor.submit(connectionClosedHandler);
+                } catch (RejectedExecutionException ree) {
+                    // executor was shut down between the isShutdown() check and submit() - benign
+                    log.debug("Close handler not dispatched; executor terminated concurrently");
+                }
+            } else {
+                log.debug("Close handler not dispatched; executor already terminated");
             }
         }
         // shutdown the executor when we're disconnected
-        if (conn.getStateCode() == RTMP.STATE_DISCONNECTED) {
+        if (conn.getStateCode() == RTMP.STATE_DISCONNECTED && !executor.isShutdown()) {
             log.debug("Shutting down executor");
             executor.shutdown();
         }
