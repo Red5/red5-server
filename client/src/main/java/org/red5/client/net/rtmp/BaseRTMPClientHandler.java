@@ -747,17 +747,19 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
     /** {@inheritDoc} */
     @Override
     public void connectionClosed(RTMPConnection conn) {
-        log.debug("connectionClosed");
+        // capture state BEFORE super.connectionClosed mutates it to DISCONNECTED; otherwise the
+        // post-super check below would always be false and the user-supplied close handler would
+        // silently never run (it would also hide the close from logs in tests that rely on it).
+        byte previousState = conn.getStateCode();
+        log.info("connectionClosed - session: {} previousState: 0x{} peer: {}", conn.getSessionId(), String.format("%02X", previousState), conn.getRemoteAddress());
         super.connectionClosed(conn);
-        byte stateCode = conn.getStateCode();
-        // submit close handler only if we're not yet disconnected
-        if (stateCode != RTMP.STATE_DISCONNECTED) {
+        if (previousState != RTMP.STATE_DISCONNECTED) {
             if (connectionClosedHandler != null) {
                 executor.submit(connectionClosedHandler);
             }
         }
         // shutdown the executor when we're disconnected
-        if (stateCode == RTMP.STATE_DISCONNECTED) {
+        if (conn.getStateCode() == RTMP.STATE_DISCONNECTED) {
             log.debug("Shutting down executor");
             executor.shutdown();
         }

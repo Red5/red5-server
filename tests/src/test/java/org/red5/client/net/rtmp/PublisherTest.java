@@ -237,22 +237,23 @@ abstract class PublisherTest {
                         } else {
                             log.warn("Stream release returned status {} but continuing anyway: {}", call.getStatus(), streamKey);
                         }
+                        // OBS / FMLE ordering: send FCPublish fire-and-forget (Twitch and most
+                        // ingests never reply to it) and proceed straight to createStream.
+                        // Chaining createStream on an FCPublish _result will hang on those servers.
                         Thread.ofVirtual().start(() -> {
                             if (useFCCommands) {
-                                log.info("Calling FCPublish for stream: {}", streamKey);
+                                log.info("Calling FCPublish for stream: {} (fire-and-forget)", streamKey);
+                                // route the (usually absent) reply to self so it just logs via the FCPublish case
                                 client.invoke("FCPublish", new Object[] { streamKey }, self);
-                            } else {
-                                log.info("Calling createStream for stream: {}", streamKey);
-                                client.createStream(self);
                             }
+                            log.info("Calling createStream for stream: {}", streamKey);
+                            client.createStream(self);
                         });
                         break;
                     case "FCPublish":
-                        log.info("FCPublish called for stream: {}", streamKey);
-                        // now we can create the stream
-                        Thread.ofVirtual().start(() -> {
-                            client.createStream(self);
-                        });
+                        // Most ingests never send this; if a server does, just log it - createStream
+                        // has already been dispatched by the releaseStream branch above.
+                        log.info("FCPublish _result received for stream: {} status: {} (ignored, createStream already dispatched)", streamKey, call.getStatus());
                         break;
                     case "createStream":
                         Object result = call.getResult();
