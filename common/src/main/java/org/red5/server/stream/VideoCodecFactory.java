@@ -8,9 +8,10 @@
 package org.red5.server.stream;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.codec.AbstractVideo;
 import org.red5.codec.IVideoStreamCodec;
 import org.red5.codec.VideoCodec;
+import org.red5.codec.VideoFrameType;
+import org.red5.codec.VideoPacketType;
 import org.red5.io.IoConstants;
 import org.red5.util.ByteNibbler;
 import org.slf4j.Logger;
@@ -53,9 +54,7 @@ public class VideoCodecFactory {
             boolean enhanced = ByteNibbler.isBitSet(c, 7);
             if (enhanced) {
                 log.debug("Enhanced codec handling; pos: {}", data.position());
-                AbstractVideo absv = new AbstractVideo();
-                absv.addData(data, 0);
-                codec = absv.getTrackCodec(0);
+                codec = getEnhancedVideoCodec(data);
             } else {
                 int codecId = (c & IoConstants.MASK_VIDEO_CODEC);
                 codec = VideoCodec.valueOfById(codecId);
@@ -82,6 +81,31 @@ public class VideoCodecFactory {
             log.error("Error creating codec instance", ex);
         }
         return result;
+    }
+
+    private static VideoCodec getEnhancedVideoCodec(IoBuffer data) {
+        VideoCodec codec = null;
+        data.mark();
+        try {
+            byte flags = data.get();
+            VideoFrameType frameType = VideoFrameType.valueOf((flags & IoConstants.MASK_VIDEO_FRAMETYPE) >> 4);
+            VideoPacketType packetType = VideoPacketType.valueOf(flags & IoConstants.MASK_VIDEO_CODEC);
+            if (frameType == VideoFrameType.COMMAND_FRAME && packetType != VideoPacketType.Metadata) {
+                return null;
+            }
+            if (packetType == VideoPacketType.Multitrack) {
+                if (!data.hasRemaining()) {
+                    return null;
+                }
+                data.skip(1);
+            }
+            if (data.remaining() >= Integer.BYTES) {
+                codec = VideoCodec.valueOfByFourCc(data.getInt());
+            }
+        } finally {
+            data.reset();
+        }
+        return codec;
     }
 
 }
