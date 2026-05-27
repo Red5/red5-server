@@ -79,7 +79,10 @@ public class ConnectionConsumer implements IPushableConsumer, IPipeConnectionLis
     /**
      * Chunk size. Packets are sent chunk-by-chunk.
      */
-    private int chunkSize = 1024; //TODO: Not sure of the best value here
+    // Outbound RTMP chunk size sent to subscribing clients. 4096 is the de-facto standard used by
+    // FFmpeg, OBS and nginx-rtmp; raising it from 1024 cuts the per-message chunk count (and therefore
+    // chunk-header writes and encoder work) ~4x for typical video frames with no compatibility impact.
+    private int chunkSize = 4096;
 
     /**
      * Whether or not the chunk size has been sent. This seems to be required for h264.
