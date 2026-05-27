@@ -185,11 +185,14 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 do {
                     // encode the header
                     encodeHeader(header, lastHeader, out);
-                    // write a chunk
-                    byte[] buf = new byte[Math.min(chunkSize, data.remaining())];
-                    data.get(buf);
-                    //log.trace("Buffer: {}", Hex.encodeHexString(buf));
-                    out.put(buf);
+                    // write a chunk directly from the source buffer. The previous code allocated a
+                    // temporary byte[] per chunk and copied through it; this loop runs once per chunk
+                    // for every outbound message, so under load it was a dominant allocation source.
+                    int chunkLen = Math.min(chunkSize, data.remaining());
+                    int dataLimit = data.limit();
+                    data.limit(data.position() + chunkLen);
+                    out.put(data);
+                    data.limit(dataLimit);
                     // move header over to last header
                     lastHeader = header.clone();
                 } while (data.hasRemaining());

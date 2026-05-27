@@ -120,9 +120,18 @@ public class RTMP {
      * @return channel info
      */
     private ChannelInfo getChannelInfo(int channelId) {
-        ChannelInfo info = channels.putIfAbsent(channelId, new ChannelInfo());
+        // get-first so the common (channel already present) path allocates nothing. This method is
+        // called several times per packet; the previous putIfAbsent(channelId, new ChannelInfo())
+        // allocated a ChannelInfo on every call and discarded it on a hit (~12% of all allocations).
+        // A computeIfAbsent lambda is avoided too: ChannelInfo is a non-static inner class, so its
+        // construction captures the enclosing instance, which would allocate a capturing lambda per call.
+        ChannelInfo info = channels.get(channelId);
         if (info == null) {
-            info = channels.get(channelId);
+            info = new ChannelInfo();
+            ChannelInfo existing = channels.putIfAbsent(channelId, info);
+            if (existing != null) {
+                info = existing;
+            }
         }
         return info;
     }

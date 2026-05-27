@@ -1629,14 +1629,13 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                             receivedQueueSizeUpdater.decrementAndGet(this);
                             // create a task to handle the packet
                             ReceivedMessageTask task = new ReceivedMessageTask(conn, p);
-                            // run the task
-                            CompletableFuture<Packet> future = CompletableFuture.supplyAsync(() -> task.get(), executor).exceptionally(throwable -> {
-                                log.warn("Error processing received message {} state: {}", sessionId, RTMP.states[getStateCode()], throwable);
-                                // if we have an exception, set it on the connection
-                                conn.setAttribute("exception", throwable);
-                                throw new CompletionException(throwable);
-                            });
-                            future.join();
+                            // process the packet inline on this per-connection receiver thread. Previously this was
+                            // dispatched to a per-connection virtual-thread executor and immediately join()-ed, which
+                            // added a virtual-thread spawn + CompletableFuture allocation + two context switches per
+                            // packet for no concurrency benefit (the join serialized processing anyway). Ordering is
+                            // preserved because this loop is single-threaded. ReceivedMessageTask.get() records any
+                            // handler exception via the connection "exception" attribute, matching prior behavior.
+                            task.get();
                         }
                     } while (state.getState() < RTMP.STATE_ERROR); // keep processing unless we pass the error state
                 } catch (InterruptedException e) {

@@ -328,15 +328,18 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             in.position(position);
             return null;
         }
-        // get the chunk from our input
-        byte[] chunk = Arrays.copyOfRange(in.array(), in.position(), in.position() + length);
+        // transfer the chunk directly from the input buffer into the packet buffer. The previous
+        // Arrays.copyOfRange allocated a byte[] for every chunk of every inbound packet, which was the
+        // dominant byte[] allocation on the decode path under load. buf.put(in) advances in's position
+        // by length, so the old explicit in.skip(length) is no longer needed.
+        int inLimit = in.limit();
+        in.limit(in.position() + length);
         if (isTrace) {
-            log.trace("Read chunkSize: {}, length: {}, chunk: {}", readChunkSize, length, Hex.encodeHexString(chunk));
+            log.trace("Read chunkSize: {}, length: {}, chunk: {}", readChunkSize, length, Hex.encodeHexString(Arrays.copyOfRange(in.array(), in.position(), in.position() + length)));
         }
-        // move the position
-        in.skip(length);
         // put the chunk into the packet
-        buf.put(chunk);
+        buf.put(in);
+        in.limit(inLimit);
         if (buf.hasRemaining()) {
             if (isTrace) {
                 log.trace("Packet is incomplete ({},{})", buf.remaining(), buf.limit());
