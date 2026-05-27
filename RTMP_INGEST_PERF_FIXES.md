@@ -124,26 +124,37 @@ best value" TODO). Raised to 4096 (the de-facto standard used by FFmpeg, OBS and
 cutting the per-message chunk count ~4x for typical video frames - fewer chunk headers, fewer
 copies, less encoder work - with no client compatibility impact.
 
+### 6. Per-chunk `Arrays.copyOfRange` in the decoder
+
+`common/.../net/rtmp/codec/RTMPProtocolDecoder.java`
+
+Chunk reassembly allocated `byte[] chunk = Arrays.copyOfRange(in.array(), ...)` for every chunk
+of every inbound packet, purely to transfer bytes from the input buffer into the packet buffer.
+Replaced with a direct buffer-to-buffer transfer (limit the source `IoBuffer` to the chunk and
+`buf.put(in)`), which also advances the input position so the prior explicit `skip` is removed.
+The per-chunk allocation is now only performed when TRACE logging is enabled.
+
 ## Combined verification
 
-Re-profiled under the identical 80-stream load with all five fixes applied:
+Re-profiled under the identical 80-stream load with all six fixes applied (allocation profiles
+are 15s windows; CPU samples are rate-normalized for comparison):
 
 | Metric                         | Baseline | Final  | Change |
 |--------------------------------|----------|--------|--------|
-| Allocation (profiler samples)  | 14308    | 8791   | -39%   |
-| CPU (profiler samples)         | 1580     | 1392   | -12%   |
+| Allocation (profiler samples)  | 14308    | 8236   | -42%   |
+| CPU (rate-normalized)          | 52.7/s   | 46.6/s | -12%   |
 | `RTMP$ChannelInfo` allocation  | 12.2%    | 0%     | gone   |
-| RTMP decode path CPU           | 12.2%    | ~3%    | gone   |
+| RTMP decode path CPU           | 12.2%    | ~4%    | gone   |
+| `Arrays.copyOfRange` (decode)  | present  | 0%     | gone   |
 | ZGC CPU                        | 2.6%     | 1.7%   | less GC|
 
-The ~39% allocation reduction is the main memory win and lowers GC frequency; CPU drops ~12%,
-with the remainder being inherent socket I/O. 80 ffmpeg subscribers consumed the re-chunked
-streams cleanly throughout, confirming encoder correctness.
+The ~42% allocation reduction is the main memory win and lowers GC frequency; CPU drops ~12%,
+with the remainder being inherent socket I/O. The decoder change is an allocation reduction
+(its `copyOfRange` was only ~1-2% CPU). Remaining `byte[]` allocation is dominated by the
+necessary per-packet message buffers and MINA I/O buffers. RTMPChunkingTest, OriginEdgeChunkTest
+and RTMPExtendedTimestampTest pass, and 80 ffmpeg subscribers consumed the streams cleanly.
 
 ## Remaining scaling levers (not addressed)
 
-- Socket read/write syscalls still dominate (~38% combined) and are largely inherent to
+- Socket read/write syscalls still dominate (~36-45% combined) and are largely inherent to
   per-frame low-latency relaying; coalescing writes would trade latency for fewer syscalls.
-- The inbound decoder still copies each chunk via `Arrays.copyOfRange` (`RTMPProtocolDecoder`),
-  which is the bulk of the remaining `byte[]` allocation; it could write directly into the
-  packet buffer.
