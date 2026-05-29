@@ -140,6 +140,11 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+        <!-- runtime dependency of the bundled chat demo webapp (net.minidev.json); see parent dependencyManagement -->
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.red5</groupId>
             <artifactId>red5-moq-pkgr</artifactId>

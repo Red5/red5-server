@@ -119,6 +119,7 @@
         <cglib.version>3.2.7</cglib.version>
         <xerces.version>2.12.1</xerces.version>
         <gson.version>2.13.2</gson.version>
+        <json-smart.version>2.5.2</json-smart.version>
     </properties>
     <modules>
         <module>io</module>
@@ -386,12 +387,15 @@
                 <groupId>org.red5</groupId>
                 <artifactId>red5-io</artifactId>
                 <version>${red5-io.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>*</groupId>
-                    </exclusion>
-                </exclusions>
+                <!--
+                    No wildcard exclusion here. A previous *:* exclusion stripped ALL of red5-io's
+                    transitive dependencies; most are shared with red5-server-common (and are version
+                    managed below, so they dedup harmlessly), but two are unique to red5-io and are
+                    required at runtime: org.jcodec:jcodec (MP4Reader / HVC1Box) and commons-io. The
+                    wildcard silently dropped both from the assembled lib/, so the server failed to
+                    boot with NoClassDefFoundError: org/jcodec/common/io/SeekableByteChannel once
+                    MP4Reader began touching jcodec classes.
+                -->
             </dependency>
             <dependency>
                 <groupId>org.red5</groupId>
@@ -517,6 +521,18 @@
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
+            </dependency>
+            <!--
+                Required at runtime by the bundled chat demo webapp (org.red5.demos.chat.*, compiled
+                against net.minidev.json). It was previously pulled via an undefined ${json-smart.version}
+                property and silently dropped, leaving the chat webapp failing to deploy with
+                NoClassDefFoundError: net/minidev/json/parser/ParseException. Managed here and bundled
+                into lib/ via the server module so webapps see it on the shared classpath.
+            -->
+            <dependency>
+                <groupId>net.minidev</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${json-smart.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
