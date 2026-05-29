@@ -1606,6 +1606,10 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      * @param packet
      *            incoming message packet
      */
+    // S6906: the received-packet loop runs on a virtual thread so idle connections hold no platform
+    // thread; the only synchronized code reachable from the handler path is off the per-frame hot path
+    // and never blocks on IO, so carrier pinning is negligible and is eliminated entirely by JEP 491 on JDK 24+.
+    @SuppressWarnings("java:S6906")
     public void handleMessageReceived(Packet packet) {
         //if (isTrace) {
         //    log.trace("handleMessageReceived - {}", sessionId);
