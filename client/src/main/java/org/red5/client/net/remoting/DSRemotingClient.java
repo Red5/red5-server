@@ -215,9 +215,11 @@ public class DSRemotingClient extends RemotingClient {
      *            Result data to decode
      * @return Object deserialized from byte buffer data
      */
-    @SuppressWarnings("null")
     private Object decodeResult(IoBuffer data) {
-        log.debug("decodeResult - data limit: {}", (data != null ? data.limit() : 0));
+        if (data == null) {
+            throw new RuntimeException("No result data to decode");
+        }
+        log.debug("decodeResult - data limit: {}", data.limit());
         processHeaders(data);
 
         Input input = new Input(data);

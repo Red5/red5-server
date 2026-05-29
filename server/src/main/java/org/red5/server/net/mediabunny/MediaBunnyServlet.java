@@ -134,6 +134,10 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
                 out.write(chunk);
                 out.flush();
             }
+        } catch (InterruptedException e) {
+            // restore the interrupt status and end the stream
+            Thread.currentThread().interrupt();
+            log.debug("MediaBunny stream interrupted: {}", e.getMessage());
         } catch (Exception e) {
             log.debug("MediaBunny stream ended: {}", e.getMessage());
         } finally {

@@ -277,12 +277,12 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      * Data read interval - send BytesRead acknowledgement every 128KB
      * Reduced from 1MB to improve compatibility with some encoders
      */
-    protected long bytesReadInterval = 128 * 1024;
+    protected long bytesReadInterval = 128 * 1024L;
 
     /**
      * Number of bytes to read next.
      */
-    protected long nextBytesRead = 128 * 1024;
+    protected long nextBytesRead = 128 * 1024L;
 
     /**
      * Number of bytes the client reported to have received.

@@ -59,13 +59,22 @@ public class MediaBunnyStreamRegistry {
         state.subscribers.add(queue);
         byte[] initSegment = state.initSegment;
         if (initSegment != null) {
-            queue.offer(initSegment);
+            enqueue(queue, initSegment);
         }
         byte[] keyframe = state.keyframeFragment;
         if (keyframe != null) {
-            queue.offer(keyframe);
+            enqueue(queue, keyframe);
         }
         return new StreamSubscription(key, queue, this);
+    }
+
+    /**
+     * Offers data to a subscriber queue, logging when the (unbounded) queue unexpectedly rejects it.
+     */
+    private static void enqueue(BlockingQueue<byte[]> queue, byte[] data) {
+        if (!queue.offer(data)) {
+            log.warn("Subscriber queue rejected a {} byte fragment", data.length);
+        }
     }
 
     public void unsubscribe(String key, BlockingQueue<byte[]> queue) {
@@ -87,7 +96,7 @@ public class MediaBunnyStreamRegistry {
             log.info("Stream closed for {}, removed state and notifying {} subscribers", key, state.subscribers.size());
             // poison-pill empty array to unblock waiting subscribers
             for (BlockingQueue<byte[]> queue : state.subscribers) {
-                queue.offer(new byte[0]);
+                enqueue(queue, new byte[0]);
             }
         }
         pendingInitSegments.remove(key);
@@ -102,7 +111,7 @@ public class MediaBunnyStreamRegistry {
         }
         state.initSegment = initSegment;
         for (BlockingQueue<byte[]> queue : state.subscribers) {
-            queue.offer(initSegment);
+            enqueue(queue, initSegment);
         }
     }
 
@@ -116,7 +125,7 @@ public class MediaBunnyStreamRegistry {
             log.debug("Dispatching keyframe fragment for {} to {} subscribers ({} bytes)", key, state.subscribers.size(), fragment.length);
         }
         for (BlockingQueue<byte[]> queue : state.subscribers) {
-            queue.offer(fragment);
+            enqueue(queue, fragment);
         }
     }
 
@@ -129,7 +138,7 @@ public class MediaBunnyStreamRegistry {
             log.debug("Dispatching fragment for {} to {} subscribers ({} bytes)", key, state.subscribers.size(), fragment.length);
         }
         for (BlockingQueue<byte[]> queue : state.subscribers) {
-            queue.offer(fragment);
+            enqueue(queue, fragment);
         }
     }
 
