@@ -379,9 +379,16 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
     protected ScheduledFuture<?> keepAliveTask;
 
     /**
-     * Executor for received RTMP messages.
+     * Executor for received RTMP messages. Uses a virtual-thread-per-task executor: exactly one
+     * long-lived loop task is submitted per connection (guarded by {@link #receivedPacketFuture}),
+     * so the previous {@code newSingleThreadExecutor()} pinned one platform thread per connection
+     * for the life of the connection and was never shut down (a soft platform-thread leak relying
+     * on GC finalization). The loop blocks in {@code receivedPacketQueue.poll(timeout)}, which is
+     * virtual-thread-aware, so an idle connection unmounts from its carrier and holds no platform
+     * thread; the virtual thread terminates when the loop exits on close. Per-connection ordering
+     * is preserved because there is still a single serial loop per connection.
      */
-    protected transient ExecutorService receivedPacketExecutor = Executors.newSingleThreadExecutor();
+    protected transient ExecutorService receivedPacketExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     /**
      * Future which takes packets from the queue and passes them to the handler.
