@@ -46,9 +46,19 @@ echo "Running on " $OS
 
 # JAVA options
 # ZGC collector https://wiki.openjdk.java.net/display/zgc
-# You can set JVM additional options here if you want
-if [ -z "$JVM_OPTS" ]; then 
-    JVM_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms256m -Xmx1g -XX:InitialCodeCacheSize=8m -XX:MaxGCPauseMillis=500 -XX:ReservedCodeCacheSize=32m"
+# You can set JVM additional options here if you want.
+#
+# Container/CPU-limited note: thread pools (RTMP io threads, scheduler, GC workers, virtual-thread
+# carriers) are sized from Runtime.availableProcessors(). The JVM only derives a reduced core count
+# from a hard CPU *limit* (cgroup quota / cpuset); CPU *requests*/shares alone leave it reading the
+# host core count and oversizing every pool. On a CPU-capped deployment either set a hard limit or
+# pin the count explicitly, e.g. add: -XX:ActiveProcessorCount=2
+#
+# ZGC targets many-core/large-heap workloads; on a small (e.g. 2-core) container G1 (-XX:+UseG1GC)
+# often jitters less. -XX:MaxGCPauseMillis is honored by G1 but ignored by ZGC, so it was removed
+# here (it was a no-op under the ZGC default below).
+if [ -z "$JVM_OPTS" ]; then
+    JVM_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xms256m -Xmx1g -XX:InitialCodeCacheSize=8m -XX:ReservedCodeCacheSize=32m"
 fi
 # Set up security options
 SECURITY_OPTS="-Djava.security.debug=failure"
@@ -71,4 +81,4 @@ export RED5_CLASSPATH="${RED5_HOME}/red5-service.jar${P}${RED5_HOME}/conf${P}${C
 
 # start Red5
 echo "Starting Red5"
-exec "$JAVA" -Dred5.root="${RED5_HOME}" $JAVA_OPTS -cp "${RED5_CLASSPATH}" -noverify "$RED5_MAINCLASS" $RED5_OPTS
+exec "$JAVA" -Dred5.root="${RED5_HOME}" $JAVA_OPTS -cp "${RED5_CLASSPATH}" "$RED5_MAINCLASS" $RED5_OPTS
