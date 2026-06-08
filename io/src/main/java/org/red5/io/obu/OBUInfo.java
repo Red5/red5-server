@@ -98,7 +98,11 @@ public class OBUInfo {
     public static OBUInfo build(byte[] data, int offset, int length) {
         OBUType obuType = OBUType.fromValue((data[0] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
         ByteBuffer buffer = ByteBuffer.wrap(data, offset, length);
-        return new OBUInfo(obuType, buffer);
+        OBUInfo info = new OBUInfo(obuType, buffer);
+        // the wrapped buffer holds the whole OBU element; record its length so callers
+        // (e.g. the AV1 depacketizer's AVCC-style size prefix) receive a correct size
+        info.size = length;
+        return info;
     }
 
     /** {@inheritDoc} */
