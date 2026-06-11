@@ -130,8 +130,14 @@ public class OBUParser {
             pos++; // move past the OBU extension header
         }
         if (obuHasSizeField) {
-            byte[] lengthBytes = new byte[buf[pos] == 127 ? 2 : 1];
-            System.arraycopy(buf, pos, lengthBytes, 0, lengthBytes.length);
+            // LEB128 size is variable length: keep reading while the high (continuation) bit is set
+            int maxIdx = Math.min(bufSize, buf.length);
+            int lenBytes = 1;
+            while (pos + lenBytes - 1 < maxIdx && (buf[pos + lenBytes - 1] & 0x80) != 0) {
+                lenBytes++;
+            }
+            byte[] lengthBytes = new byte[lenBytes];
+            System.arraycopy(buf, pos, lengthBytes, 0, lenBytes);
             LEB128Result result = LEB128.decode(lengthBytes);
             pos += result.bytesRead;
             info.size = result.value;

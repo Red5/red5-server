@@ -154,9 +154,13 @@ public class AV1Packetizer {
             // W is the obu count expected in the packet
             logger.debug("OBU element #{} of {} array index: {}", obuIndex, obuCount, currentIndex);
             if (obuCount == 0 || obuIndex < obuCount) {
-                // read the length of the OBU fragment and if its 127 expect to read 2 bytes
-                byte[] fragmentLen = new byte[payload[currentIndex] == 127 ? 2 : 1];
-                System.arraycopy(payload, currentIndex, fragmentLen, 0, fragmentLen.length);
+                // read the leb128 length of the OBU fragment; keep reading while the high (continuation) bit is set
+                int lenBytes = 1;
+                while (currentIndex + lenBytes - 1 < payload.length && (payload[currentIndex + lenBytes - 1] & 0x80) != 0) {
+                    lenBytes++;
+                }
+                byte[] fragmentLen = new byte[lenBytes];
+                System.arraycopy(payload, currentIndex, fragmentLen, 0, lenBytes);
                 LEB128Result result = LEB128.decode(fragmentLen);
                 obuFragmentLength = result.value;
                 //logger.trace("Index: {} new index: {}", currentIndex, (currentIndex + result[1]));
