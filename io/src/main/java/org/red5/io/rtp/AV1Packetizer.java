@@ -187,8 +187,7 @@ public class AV1Packetizer {
                 if (obuType == null) {
                     // not a continuation (per the Z bit) yet the header is unrecognized; skip its bytes to stay
                     // aligned rather than mis-append the data or NPE in the valid-OBU check below
-                    logger.warn("Unrecognized OBU header 0x{} at index {}; skipping {} bytes",
-                            Integer.toHexString(payload[currentIndex] & 0xFF), currentIndex, obuFragmentLength);
+                    logger.warn("Unrecognized OBU header 0x{} at index {}; skipping {} bytes", Integer.toHexString(payload[currentIndex] & 0xFF), currentIndex, obuFragmentLength);
                 } else {
                     if (isTrace) {
                         boolean obuExtensionFlag = OBUParser.obuHasExtension(payload[currentIndex]);

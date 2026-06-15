@@ -31,3 +31,4 @@ tests/conf/rtmps_truststore.p12
 !SECURITY_FIXES_SUMMARY.md
 !docs/CACHE_USAGE_EXAMPLES.md
 .codex
+graphify-out/*
