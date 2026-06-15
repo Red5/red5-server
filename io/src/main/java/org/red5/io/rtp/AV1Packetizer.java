@@ -292,7 +292,7 @@ public class AV1Packetizer {
                     int currentFragmentSize = Math.min(maxFragmentSize, payloadDataRemaining);
                     int leb128Value = LEB128.encode(currentFragmentSize);
                     byte[] out;
-                    if (currentFragmentSize >= 127) { // leb takes at least 2 bytes
+                    if (currentFragmentSize > 127) { // leb takes 2 bytes only above 127 (0-127 fit in one byte)
                         int outLen = aggregationHeaderLength + 2 + currentFragmentSize;
                         out = new byte[outLen];
                         out[1] = (byte) (leb128Value >> 8);
