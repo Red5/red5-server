@@ -166,36 +166,50 @@ public class AV1Packetizer {
                 //logger.trace("Index: {} new index: {}", currentIndex, (currentIndex + result[1]));
                 currentIndex += result.bytesRead;
             }
-            obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
-            if (obuType == null && !OBUElements.isEmpty()) {
+            // The Z bit (firstPacketInFrame == startsWithFragment) signals that the FIRST OBU element of this
+            // payload is a continuation of the last OBU element of the previous packet: its leading bytes are
+            // raw OBU payload data, NOT an OBU header, so they must be appended to the prior element rather
+            // than parsed as a new OBU. The previous implementation inferred this from
+            // OBUType.fromValue(...) == null, which silently mis-framed (and dropped) continuation fragments
+            // whose first data byte happened to encode a valid OBU type.
+            if (obuIndex == 1 && firstPacketInFrame && !OBUElements.isEmpty()) {
                 byte[] lastFragment = OBUElements.removeLast();
-                // read the type for the last fragment
-                obuType = OBUType.fromValue((lastFragment[0] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
-                logger.warn("Unknown OBU type, appending data of the last packet fragment: {}", obuType);
                 byte[] newLastFragment = new byte[lastFragment.length + obuFragmentLength];
                 System.arraycopy(lastFragment, 0, newLastFragment, 0, lastFragment.length);
                 System.arraycopy(payload, currentIndex, newLastFragment, lastFragment.length, obuFragmentLength);
                 OBUElements.add(newLastFragment);
+                if (isDebug) {
+                    OBUType continued = OBUType.fromValue((newLastFragment[0] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
+                    logger.debug("Appended {}-byte continuation fragment to OBU type: {}", obuFragmentLength, continued);
+                }
             } else {
-                if (isTrace) {
-                    boolean obuExtensionFlag = OBUParser.obuHasExtension(payload[currentIndex]);
-                    boolean obuHasSizeField = OBUParser.obuHasSize(payload[currentIndex]);
-                    logger.trace("OBU type: {} extension? {} size field? {}, length: {}", obuType, obuExtensionFlag, obuHasSizeField, obuFragmentLength);
-                }
-                //if (payload.length < (currentIndex + obuElementLength)) {
-                //    throw new Exception("Short packet");
-                //}
-                byte[] obuFragment = new byte[obuFragmentLength];
-                System.arraycopy(payload, currentIndex, obuFragment, 0, obuFragmentLength);
-                // if we have a sequence header, store it
-                if (obuType == OBUType.SEQUENCE_HEADER) {
-                    sequenceHeader = Arrays.clone(obuFragment);
-                }
-                // we don't store temporal delimiter, tile list, or padding
-                if (OBUParser.isValidObu(obuType)) {
-                    OBUElements.add(obuFragment);
+                obuType = OBUType.fromValue((payload[currentIndex] & OBU_FRAME_TYPE_MASK) >>> OBU_FRAME_TYPE_BITSHIFT);
+                if (obuType == null) {
+                    // not a continuation (per the Z bit) yet the header is unrecognized; skip its bytes to stay
+                    // aligned rather than mis-append the data or NPE in the valid-OBU check below
+                    logger.warn("Unrecognized OBU header 0x{} at index {}; skipping {} bytes",
+                            Integer.toHexString(payload[currentIndex] & 0xFF), currentIndex, obuFragmentLength);
                 } else {
-                    logger.debug("Skip OBU type for RTP: {}", obuType);
+                    if (isTrace) {
+                        boolean obuExtensionFlag = OBUParser.obuHasExtension(payload[currentIndex]);
+                        boolean obuHasSizeField = OBUParser.obuHasSize(payload[currentIndex]);
+                        logger.trace("OBU type: {} extension? {} size field? {}, length: {}", obuType, obuExtensionFlag, obuHasSizeField, obuFragmentLength);
+                    }
+                    //if (payload.length < (currentIndex + obuElementLength)) {
+                    //    throw new Exception("Short packet");
+                    //}
+                    byte[] obuFragment = new byte[obuFragmentLength];
+                    System.arraycopy(payload, currentIndex, obuFragment, 0, obuFragmentLength);
+                    // if we have a sequence header, store it
+                    if (obuType == OBUType.SEQUENCE_HEADER) {
+                        sequenceHeader = Arrays.clone(obuFragment);
+                    }
+                    // we don't store temporal delimiter, tile list, or padding
+                    if (OBUParser.isValidObu(obuType)) {
+                        OBUElements.add(obuFragment);
+                    } else {
+                        logger.debug("Skip OBU type for RTP: {}", obuType);
+                    }
                 }
             }
             currentIndex += obuFragmentLength;
