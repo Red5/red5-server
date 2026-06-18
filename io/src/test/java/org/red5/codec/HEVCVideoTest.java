@@ -106,6 +106,124 @@ public class HEVCVideoTest {
         log.info("testCanHandleDataEnhanced end\n");
     }
 
+    /**
+     * Verify that HEVC is in the compositionTime set (unlike AV1 which is not).
+     */
+    @Test
+    public void testHEVCInCompositionTimeSet() {
+        assertTrue("HEVC must be in compositionTime set", VideoCodec.getCompositionTime().contains(VideoCodec.HEVC));
+    }
+
+    /**
+     * Enhanced CodedFrames keyframe reads SI24 composition time offset before NALU data.
+     * Flag byte: 1_001_0001 = 0x91 (enhanced + keyframe + CodedFrames)
+     */
+    @Test
+    public void testEnhancedCodedFramesKeyframe() {
+        log.info("testEnhancedCodedFramesKeyframe");
+        IoBuffer data = IoBuffer.allocate(32);
+        data.put((byte) 0x91); // enhanced + keyframe + CodedFrames
+        data.put((byte) 'h');
+        data.put((byte) 'v');
+        data.put((byte) 'c');
+        data.put((byte) '1');
+        // SI24 composition time offset = 80ms
+        data.put((byte) 0x00);
+        data.put((byte) 0x00);
+        data.put((byte) 0x50);
+        // fake NALU data
+        data.put(RandomStringUtils.randomAlphanumeric(8).getBytes());
+        data.flip();
+
+        HEVCVideo video = new HEVCVideo();
+        assertTrue(video.canHandleData(data));
+        assertTrue(video.addData(data, 1000));
+        assertTrue("Keyframe must be stored", video.getKeyframes().length > 0);
+    }
+
+    /**
+     * Enhanced CodedFrames interframe with composition time offset should be buffered
+     * when bufferInterframes is enabled. This was a bug: the CodedFrames case fell through
+     * to default and interframes were silently dropped.
+     */
+    @Test
+    public void testEnhancedCodedFramesInterframe() {
+        log.info("testEnhancedCodedFramesInterframe");
+        HEVCVideo video = new HEVCVideo();
+        video.setBufferInterframes(true);
+
+        // First send a keyframe via CodedFramesX to initialize
+        IoBuffer keyframe = IoBuffer.allocate(32);
+        keyframe.put((byte) 0x93); // enhanced + keyframe + CodedFramesX
+        keyframe.put((byte) 'h');
+        keyframe.put((byte) 'v');
+        keyframe.put((byte) 'c');
+        keyframe.put((byte) '1');
+        keyframe.put(RandomStringUtils.randomAlphanumeric(8).getBytes());
+        keyframe.flip();
+        assertTrue(video.addData(keyframe, 1000));
+
+        // Now send an interframe via CodedFrames (with SI24 comp time offset)
+        // Enhanced + interframe(2) + CodedFrames(1) = 1_010_0001 = 0xA1
+        IoBuffer interframe = IoBuffer.allocate(32);
+        interframe.put((byte) 0xA1);
+        interframe.put((byte) 'h');
+        interframe.put((byte) 'v');
+        interframe.put((byte) 'c');
+        interframe.put((byte) '1');
+        // SI24 composition time offset = 33ms
+        interframe.put((byte) 0x00);
+        interframe.put((byte) 0x00);
+        interframe.put((byte) 0x21);
+        // fake NALU data
+        interframe.put(RandomStringUtils.randomAlphanumeric(8).getBytes());
+        interframe.flip();
+
+        assertTrue(video.addData(interframe, 1033));
+        assertTrue("Interframe must be buffered", video.getNumInterframes() > 0);
+    }
+
+    /**
+     * Enhanced CodedFramesX keyframe (no comp time offset on wire).
+     */
+    @Test
+    public void testEnhancedCodedFramesXKeyframe() {
+        log.info("testEnhancedCodedFramesXKeyframe");
+        IoBuffer data = IoBuffer.allocate(32);
+        data.put((byte) 0x93); // enhanced + keyframe + CodedFramesX
+        data.put((byte) 'h');
+        data.put((byte) 'v');
+        data.put((byte) 'c');
+        data.put((byte) '1');
+        data.put(RandomStringUtils.randomAlphanumeric(8).getBytes());
+        data.flip();
+
+        HEVCVideo video = new HEVCVideo();
+        assertTrue(video.addData(data, 2000));
+        assertTrue("Keyframe must be stored", video.getKeyframes().length > 0);
+    }
+
+    /**
+     * Enhanced SequenceStart stores HEVCDecoderConfigurationRecord.
+     */
+    @Test
+    public void testEnhancedSequenceStart() {
+        log.info("testEnhancedSequenceStart");
+        IoBuffer data = IoBuffer.allocate(32);
+        data.put((byte) 0x90); // enhanced + keyframe + SequenceStart
+        data.put((byte) 'h');
+        data.put((byte) 'v');
+        data.put((byte) 'c');
+        data.put((byte) '1');
+        // fake HEVCDecoderConfigurationRecord
+        data.put(RandomStringUtils.randomAlphanumeric(12).getBytes());
+        data.flip();
+
+        HEVCVideo video = new HEVCVideo();
+        assertTrue(video.addData(data, 0));
+        assertNotNull("Decoder config must be stored after SequenceStart", video.getDecoderConfiguration());
+    }
+
     @Test
     public void testRealisticFlow() {
         log.info("testRealisticFlow");
