@@ -111,6 +111,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     log.warn("Session decode overlap: {} != {}", conn.getSessionId(), state.getSessionId());
                 }
                 int remaining;
+                int consecutiveUnknownTypes = 0;
                 while ((remaining = buffer.remaining()) > 0) {
                     if (state.canStartDecoding(remaining)) {
                         //log.trace("Can start decoding");
@@ -124,6 +125,17 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         //log.trace("Has decoded object");
                         if (decodedObject != null) {
                             result.add(decodedObject);
+                            // detect chunk stream desynchronization via repeated unknown data types
+                            if (decodedObject instanceof Packet) {
+                                byte dataType = ((Packet) decodedObject).getHeader().getDataType();
+                                if (dataType < TYPE_CHUNK_SIZE || dataType > TYPE_AGGREGATE) {
+                                    if (++consecutiveUnknownTypes >= 3) {
+                                        throw new ProtocolException("Chunk stream desynchronization detected: " + consecutiveUnknownTypes + " consecutive unknown data types (last: 0x" + String.format("%02X", dataType) + ")");
+                                    }
+                                } else {
+                                    consecutiveUnknownTypes = 0;
+                                }
+                            }
                         }
                     } else if (state.canContinueDecoding()) {
                         //log.trace("Can continue decoding");
@@ -367,15 +379,17 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             in.position(startPostion);
             return null;
         }
-
+        // get the last read header for this channel
         Header lastHeader = rtmp.getLastReadHeader(channelId);
         if (isTrace) {
             log.trace("{} lastHeader: {}", Header.HeaderType.values()[headerSize], lastHeader);
         }
         // got a non-new header for a channel which has no last-read header
-        if (headerSize != HEADER_NEW && lastHeader == null) {
-            String detail = String.format("Last header null: %s, channelId %s", Header.HeaderType.values()[headerSize], channelId);
-            log.debug("{}", detail);
+        // Type 3 (HEADER_CONTINUE) is excluded here because it has its own fallback handling
+        // in the switch statement below for librtmp compatibility (creates a minimal header)
+        if (headerSize != HEADER_NEW && headerSize != HEADER_CONTINUE && lastHeader == null) {
+            String detail = String.format("Last header null: %s, channelId %s, format=%d, position=%d", Header.HeaderType.values()[headerSize], channelId, chh.getFormat(), startPostion);
+            log.warn("{}", detail);
             // if the op prefers to exit or kill the connection, we should allow based on configuration param
             if (closeOnHeaderError) {
                 // this will trigger an error status, which in turn will disconnect the "offending" flash player
@@ -386,13 +400,23 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 return null;
             }
         }
-        //        if (isTrace) {
-        //            log.trace("headerLength: {}", headerLength);
-        //        }
-
         int timeBase = 0, timeDelta = 0;
         Header header = new Header();
         header.setChannelId(channelId);
+        if (lastHeader != null) {
+            // time base from last header
+            timeBase = lastHeader.getTimerBase();
+            // inherit the time delta from last header (critical for Type 3 headers)
+            timeDelta = lastHeader.getTimerDelta();
+            // inherit the stream id from the last header
+            header.setStreamId(lastHeader.getStreamId());
+            // inherit the data type from the last header
+            header.setDataType(lastHeader.getDataType());
+            // inherit the size from the last header
+            header.setSize(lastHeader.getSize());
+            // inherit the extended flag from the last header
+            header.setExtended(lastHeader.isExtended());
+        }
         switch (headerSize) {
             case HEADER_NEW: // type 0
                 // an absolute time value
@@ -408,8 +432,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeBase = (int) (ext ^ (ext >>> 32));
+                    timeBase = (int) in.getUnsignedInt();
                     if (isTrace) {
                         log.trace("Extended time read: {}", timeBase);
                     }
@@ -419,13 +442,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 header.setTimerDelta(timeDelta);
                 break;
             case HEADER_SAME_SOURCE: // type 1
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
                 // a delta time value
                 timeDelta = RTMPUtils.readUnsignedMediumInt(in);
                 header.setSize(RTMPUtils.readUnsignedMediumInt(in));
                 header.setDataType(in.get());
-                header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
                     headerLength += 4;
@@ -434,21 +454,15 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeDelta = (int) (ext ^ (ext >>> 32));
+                    timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
                 break;
             case HEADER_TIMER_CHANGE: // type 2
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
                 // a delta time value
                 timeDelta = RTMPUtils.readUnsignedMediumInt(in);
-                header.setSize(lastHeader.getSize());
-                header.setDataType(lastHeader.getDataType());
-                header.setStreamId(lastHeader.getStreamId());
                 // read the extended timestamp if we have the indication that it exists
                 if (timeDelta >= MEDIUM_INT_MAX) {
                     headerLength += 4;
@@ -457,20 +471,30 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    timeDelta = (int) (ext ^ (ext >>> 32));
+                    timeDelta = (int) in.getUnsignedInt();
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
                 header.setTimerDelta(timeDelta);
                 break;
-            case HEADER_CONTINUE: // type 3
-                // time base from last header
-                timeBase = lastHeader.getTimerBase();
-                timeDelta = lastHeader.getTimerDelta();
-                header.setSize(lastHeader.getSize());
-                header.setDataType(lastHeader.getDataType());
-                header.setStreamId(lastHeader.getStreamId());
+            case HEADER_CONTINUE: // TYPE_3_RELATIVE
+                if (lastHeader == null) {
+                    log.warn("Type 3 header received without previous header on channel {} - creating minimal header", channelId);
+                    // Create a minimal header to maintain compatibility
+                    Header minimalHeader = new Header();
+                    minimalHeader.setChannelId(channelId);
+                    minimalHeader.setTimerBase(0);
+                    minimalHeader.setTimerDelta(0);
+                    minimalHeader.setSize(0);
+                    minimalHeader.setDataType((byte) 0);
+                    minimalHeader.setStreamId(0);
+                    rtmp.setLastReadHeader(channelId, minimalHeader);
+                    lastHeader = minimalHeader;
+                }
+                // Log unusual Type 3 header usage but don't block it
+                if (in.position() == 0) {
+                    log.debug("Type 3 header used for new message on channel {} - unusual but allowed", channelId);
+                }
                 // read the extended timestamp if we have the indication that it exists
                 // This field is present in Type 3 chunks when the most recent Type 0, 1, or 2 chunk for the same chunk stream ID
                 // indicated the presence of an extended timestamp field
@@ -481,12 +505,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                         in.position(startPostion);
                         return null;
                     }
-                    long ext = in.getUnsignedInt();
-                    int timeExt = (int) (ext ^ (ext >>> 32));
+                    timeBase = (int) in.getUnsignedInt();
                     if (isTrace) {
-                        log.trace("Extended time read: {} {}", ext, timeExt);
+                        log.trace("Extended time read: {}", timeBase);
                     }
-                    timeBase = timeExt;
                     header.setExtended(true);
                 }
                 header.setTimerBase(timeBase);
@@ -550,7 +572,13 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 if (isTrace) {
                     log.trace("Decoding notify on stream id: {}", header.getStreamId());
                 }
-                if (header.getStreamId().doubleValue() != 0.0d) {
+                // Per RTMP spec, TYPE_NOTIFY (0x12) carries stream data (onMetaData, onCuePoint,
+                // @setDataFrame, onFI, ...). Some encoders (older FFmpeg, librtmp-based publishers,
+                // mobile encoders) send `@setDataFrame onMetaData` with streamId=0 before/during
+                // stream creation. Routing those to decodeAction trips a ClassCastException because
+                // the AMF token after the action string is a String, not the Number transactionId
+                // that an invoke payload would have. See issue #440.
+                if (header.getStreamId().doubleValue() != 0.0d || looksLikeStreamData(in)) {
                     message = decodeStreamData(in);
                 } else {
                     message = decodeAction(conn.getEncoding(), in, header);
@@ -812,6 +840,50 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     private int readTransactionId(Input input) {
         Number transactionId = Deserializer.<Number> deserialize(input, Number.class);
         return transactionId == null ? 0 : transactionId.intValue();
+    }
+
+    /**
+     * Peeks the first AMF0 token of a TYPE_NOTIFY payload to determine whether it carries
+     * stream data (e.g. {@code @setDataFrame}, {@code onMetaData}, {@code onCuePoint},
+     * {@code onFI}) rather than an invoke-style action. Buffer position is restored.
+     *
+     * Used to recover from publishers that send data-frame notifies on streamId 0 (issue #440).
+     *
+     * @param in buffer positioned at the start of the AMF payload
+     * @return true if the payload looks like stream data and should go through decodeStreamData
+     */
+    private boolean looksLikeStreamData(IoBuffer in) {
+        if (in.remaining() < 4) {
+            return false;
+        }
+        in.mark();
+        try {
+            byte type = in.get();
+            int len;
+            if (type == AMF.TYPE_STRING) {
+                len = in.getUnsignedShort();
+            } else if (type == AMF.TYPE_LONG_STRING) {
+                long ulen = in.getUnsignedInt();
+                len = ulen > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) ulen;
+            } else {
+                return false;
+            }
+            if (len <= 0 || len > in.remaining()) {
+                return false;
+            }
+            // '@' marks data-frame messages (@setDataFrame); 'on' prefixes the common
+            // metadata notifies (onMetaData, onCuePoint, onFI, onTextData, ...)
+            byte b0 = in.get();
+            if (b0 == '@') {
+                return true;
+            }
+            if (b0 == 'o' && in.remaining() > 0 && in.get() == 'n') {
+                return true;
+            }
+            return false;
+        } finally {
+            in.reset();
+        }
     }
 
     /**

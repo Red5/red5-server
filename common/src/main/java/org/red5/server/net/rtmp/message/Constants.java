@@ -132,7 +132,7 @@ public interface Constants {
     /**
      * There's more to encode
      */
-    public static final byte HEADER_CONTINUE = 0x03;
+    public static final byte HEADER_CONTINUE = 0x03; // TYPE_3_RELATIVE
 
     /**
      * Size of initial handshake between client and server
