@@ -48,6 +48,7 @@ import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusObject;
 import org.red5.server.net.rtmp.status.StatusObjectService;
 import org.red5.server.service.Call;
+import org.red5.server.service.PendingCall;
 import org.red5.server.so.ISharedObjectEvent;
 import org.red5.server.so.SharedObjectEvent;
 import org.red5.server.so.SharedObjectMessage;
@@ -347,7 +348,7 @@ public class RTMPHandler extends BaseRTMPHandler {
                                             result.setAdditional("fourCcList", new Object[] { "*" });
                                             result.setAdditional("audioFourCcInfoMap", Collections.singletonMap("*", 4));
                                             result.setAdditional("videoFourCcInfoMap", Collections.singletonMap("*", 4));
-                                            result.setAdditional("CapsEx", (CapsExMask.Reconnect.getMask() | CapsExMask.Multitrack.getMask()));
+                                            result.setAdditional("CapsEx", (CapsExMask.Reconnect.getMask() | CapsExMask.Multitrack.getMask() | CapsExMask.ModEx.getMask() | CapsExMask.TimestampNanoOffset.getMask()));
                                             pc.setResult(result);
                                         }
                                         // Measure initial round-trip time after connecting
@@ -624,6 +625,29 @@ public class RTMPHandler extends BaseRTMPHandler {
 
     protected void onBWDone() {
         log.debug("onBWDone");
+    }
+
+    /**
+     * Sends a reconnect request to the client, requesting it to connect to a different server.
+     * Per E-RTMP v2 spec, the server sends onStatus with code NetConnection.Connect.ReconnectRequest.
+     * The old connection should continue processing until the client disconnects.
+     *
+     * @param conn the connection to send the reconnect request to
+     * @param tcUrl the target server URL to reconnect to, or null to use the current tcUrl
+     * @param description optional human-readable description, or null
+     */
+    public static void sendReconnectRequest(RTMPConnection conn, String tcUrl, String description) {
+        StatusObject status = new StatusObject(NC_CONNECT_RECONNECT_REQUEST, "status", description != null ? description : "Server is requesting reconnection");
+        if (tcUrl != null) {
+            status.setAdditional("tcUrl", tcUrl);
+        }
+        Channel channel = conn.getChannel(3);
+        if (channel != null) {
+            Invoke invoke = new Invoke();
+            invoke.setCall(new PendingCall("onStatus", new Object[] { status }));
+            invoke.setTransactionId(0);
+            channel.write(invoke);
+        }
     }
 
 }

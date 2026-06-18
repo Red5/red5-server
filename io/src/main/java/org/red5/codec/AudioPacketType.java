@@ -28,7 +28,9 @@ public enum AudioPacketType {
     // introduce this enum to ensure we can signal the end of the audio sequence for any audio track.
     SequenceEnd((byte) 0x02), MultichannelConfig((byte) 0x04),
     // Turns on multitrack mode
-    Multitrack((byte) 0x05);
+    Multitrack((byte) 0x05),
+    // Modifier/extension signal. Wraps modifier data around another packet type.
+    ModEx((byte) 0x07);
 
     private final byte packetType;
 

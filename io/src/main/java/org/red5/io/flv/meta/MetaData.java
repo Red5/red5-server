@@ -204,4 +204,30 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     public String toString() {
         return "MetaData{" + "cuePoints=" + (cuePoints == null ? null : this.get("cuePoints")) + '}';
     }
+
+    /** {@inheritDoc} */
+    @Override
+    @SuppressWarnings("unchecked")
+    public java.util.Map<Integer, java.util.Map<String, Object>> getVideoTrackIdInfoMap() {
+        return (java.util.Map<Integer, java.util.Map<String, Object>>) get("videoTrackIdInfoMap");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setVideoTrackIdInfoMap(java.util.Map<Integer, java.util.Map<String, Object>> map) {
+        put("videoTrackIdInfoMap", map);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @SuppressWarnings("unchecked")
+    public java.util.Map<Integer, java.util.Map<String, Object>> getAudioTrackIdInfoMap() {
+        return (java.util.Map<Integer, java.util.Map<String, Object>>) get("audioTrackIdInfoMap");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setAudioTrackIdInfoMap(java.util.Map<Integer, java.util.Map<String, Object>> map) {
+        put("audioTrackIdInfoMap", map);
+    }
 }

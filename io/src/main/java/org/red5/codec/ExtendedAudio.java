@@ -88,6 +88,28 @@ public class ExtendedAudio extends AbstractAudio {
             if (codecId == codec.getId()) {
                 // The UB[4] bits are interpreted as AudioPacketType instead of sound rate, size and type
                 packetType = AudioPacketType.valueOf((byte) nibbler.nibble(4));
+                // ModEx unwrap loop: peel off modifier layers until a non-ModEx packet type is reached
+                while (packetType == AudioPacketType.ModEx) {
+                    // Determine the size of the ModEx data (UI8 + 1, range 1-256)
+                    int modExDataSize = (data.get() & 0xff) + 1;
+                    // If maximum 8-bit size (256), use 16-bit value instead
+                    if (modExDataSize == 256) {
+                        modExDataSize = ((data.get() & 0xff) << 8 | (data.get() & 0xff)) + 1;
+                    }
+                    // Read the ModEx data
+                    byte[] modExData = new byte[modExDataSize];
+                    data.get(modExData);
+                    // Next byte: upper nibble = ModExType, lower nibble = updated PacketType
+                    ByteNibbler modExNibbler = new ByteNibbler(data.get());
+                    AudioPacketModExType modExType = AudioPacketModExType.valueOf(modExNibbler.nibble(4));
+                    packetType = AudioPacketType.valueOf(modExNibbler.nibble(4));
+                    if (modExType == AudioPacketModExType.TimestampOffsetNano && modExData.length >= 3) {
+                        int nanoOffset = (modExData[0] & 0xff) << 16 | (modExData[1] & 0xff) << 8 | (modExData[2] & 0xff);
+                        if (log.isTraceEnabled()) {
+                            log.trace("Audio ModEx TimestampOffsetNano: {} ns", nanoOffset);
+                        }
+                    }
+                }
                 if (packetType == AudioPacketType.Multitrack) {
                     // set the multitrack flag
                     multitrack = true;

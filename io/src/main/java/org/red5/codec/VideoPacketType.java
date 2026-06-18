@@ -16,7 +16,10 @@ public enum VideoPacketType {
     // mutually exclusive.
     MPEG2TSSequenceStart((byte) 0x05),
     // Turns on multitrack mode
-    Multitrack((byte) 0x06);
+    Multitrack((byte) 0x06),
+    // Modifier/extension signal. Wraps modifier data around another packet type.
+    // The unwrap loop peels off ModEx layers until a non-ModEx packet type is reached.
+    ModEx((byte) 0x07);
 
     private final byte packetType;
 

@@ -9,7 +9,7 @@ import java.util.EnumSet;
  */
 public enum CapsExMask {
 
-    Reconnect((byte) 0x01), Multitrack((byte) 0x02);
+    Reconnect((byte) 0x01), Multitrack((byte) 0x02), ModEx((byte) 0x04), TimestampNanoOffset((byte) 0x08);
 
     private final byte mask;
 

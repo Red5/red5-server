@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.red5.codec.VideoFunctionFlag;
 import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.event.IEvent;
@@ -214,7 +215,7 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         params.put("fpad", Boolean.FALSE);
         params.put("flashVer", "FMLE/3.0 (compatible; Red5Client)"); // old value WIN 11,2,202,235
         params.put("audioCodecs", Integer.valueOf(0x0FFF)); // old value 3575 = 0x0E0F
-        params.put("videoFunction", Integer.valueOf(1));
+        params.put("videoFunction", Integer.valueOf(VideoFunctionFlag.SUPPORT_VID_CLIENT_SEEK | VideoFunctionFlag.SUPPORT_VID_CLIENT_HDR | VideoFunctionFlag.SUPPORT_VID_CLIENT_VIDEO_PACKET_TYPE_METADATA));
         params.put("pageUrl", null);
         params.put("path", application);
         params.put("capabilities", Integer.valueOf(15));

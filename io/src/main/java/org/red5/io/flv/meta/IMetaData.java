@@ -144,4 +144,34 @@ public interface IMetaData<K, V> extends IMeta {
      * @return Cue points
      */
     public IMetaCue[] getMetaCue();
+
+    /**
+     * Returns the video track info map for multitrack enhanced RTMP.
+     * Keys are trackId numbers (1+), values are per-track metadata maps.
+     *
+     * @return Video track info map or null if not multitrack
+     */
+    public java.util.Map<Integer, java.util.Map<String, Object>> getVideoTrackIdInfoMap();
+
+    /**
+     * Sets the video track info map for multitrack enhanced RTMP.
+     *
+     * @param map Video track info map
+     */
+    public void setVideoTrackIdInfoMap(java.util.Map<Integer, java.util.Map<String, Object>> map);
+
+    /**
+     * Returns the audio track info map for multitrack enhanced RTMP.
+     * Keys are trackId numbers (1+), values are per-track metadata maps.
+     *
+     * @return Audio track info map or null if not multitrack
+     */
+    public java.util.Map<Integer, java.util.Map<String, Object>> getAudioTrackIdInfoMap();
+
+    /**
+     * Sets the audio track info map for multitrack enhanced RTMP.
+     *
+     * @param map Audio track info map
+     */
+    public void setAudioTrackIdInfoMap(java.util.Map<Integer, java.util.Map<String, Object>> map);
 }

@@ -1,11 +1,16 @@
 package org.red5.codec;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.red5.io.amf.Input;
+import org.red5.io.object.Deserializer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IoConstants;
@@ -216,6 +221,29 @@ public class AbstractVideo implements IVideoStreamCodec {
                         data.rewind();
                         return false;
                     }
+                    // ModEx unwrap loop: peel off modifier layers until a non-ModEx packet type is reached
+                    while (packetType == VideoPacketType.ModEx) {
+                        // Determine the size of the ModEx data (UI8 + 1, range 1-256)
+                        int modExDataSize = (data.get() & 0xff) + 1;
+                        // If maximum 8-bit size (256), use 16-bit value instead
+                        if (modExDataSize == 256) {
+                            modExDataSize = ((data.get() & 0xff) << 8 | (data.get() & 0xff)) + 1;
+                        }
+                        // Read the ModEx data
+                        byte[] modExData = new byte[modExDataSize];
+                        data.get(modExData);
+                        // Next byte: upper nibble = ModExType, lower nibble = updated PacketType
+                        ByteNibbler modExNibbler = new ByteNibbler(data.get());
+                        VideoPacketModExType modExType = VideoPacketModExType.valueOf(modExNibbler.nibble(4));
+                        packetType = VideoPacketType.valueOf(modExNibbler.nibble(4));
+                        if (modExType == VideoPacketModExType.TimestampOffsetNano && modExData.length >= 3) {
+                            // UI24 nanosecond offset within the current millisecond
+                            int nanoOffset = (modExData[0] & 0xff) << 16 | (modExData[1] & 0xff) << 8 | (modExData[2] & 0xff);
+                            if (isTrace) {
+                                log.trace("ModEx TimestampOffsetNano: {} ns", nanoOffset);
+                            }
+                        }
+                    }
                 }
                 if (isTrace)
                     log.trace("Multitrack: {} multitrackType: {} packetType: {}", multitrack, multitrackType, packetType);
@@ -252,13 +280,24 @@ public class AbstractVideo implements IVideoStreamCodec {
                             trackCodec.setTrackId(trackId);
                         }
                     } else if (packetType == VideoPacketType.Metadata) {
-                        // The body does not contain video data; instead, it consists of AMF-encoded metadata. The
-                        // metadata is represented by a series of [name, value] pairs. Currently, the only defined
-                        // [name, value] pair is ["colorInfo", Object]. See the Metadata Frame section for more
-                        // details on this object.
-                        // For a deeper understanding of the encoding, please refer to the descriptions of SCRIPTDATA
-                        // and SCRIPTDATAVALUE in the [FLV] file specification.
-                        //TODO read map or array
+                        // The body contains AMF-encoded metadata as [name, value] pairs.
+                        // Currently defined: ["colorInfo", Object] for HDR information.
+                        if (data.hasRemaining()) {
+                            try {
+                                Input amfInput = new Input(data);
+                                Map<String, Object> metadata = new LinkedHashMap<>();
+                                while (data.hasRemaining()) {
+                                    String name = Deserializer.deserialize(amfInput, String.class);
+                                    Object value = Deserializer.deserialize(amfInput, Object.class);
+                                    metadata.put(name, value);
+                                }
+                                if (this instanceof IEnhancedRTMPVideoCodec) {
+                                    ((IEnhancedRTMPVideoCodec) this).onVideoMetadata(metadata);
+                                }
+                            } catch (Exception e) {
+                                log.warn("Failed to parse video metadata", e);
+                            }
+                        }
                         break;
                     }
                     // check for multiple tracks
@@ -281,8 +320,8 @@ public class AbstractVideo implements IVideoStreamCodec {
                         enhancedCodec.onVideoCommand(command, data, timestamp);
                     } else {
                         switch (packetType) {
-                            case Metadata://TODO
-                                enhancedCodec.onVideoMetadata(null);
+                            case Metadata:
+                                // Metadata was already parsed and dispatched in the loop above
                                 break;
                             case Multitrack:
                                 enhancedCodec.onMultiTrackParsed(getMultitrackType(), data, timestamp);
