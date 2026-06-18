@@ -172,7 +172,7 @@ public enum VideoCodec {
     /**
      * Codecs supplying composition time offset.
      */
-    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC, AV1);
+    private final static EnumSet<VideoCodec> compositionTime = EnumSet.of(AVC, HEVC);
 
     private final static Map<Byte, VideoCodec> map = new HashMap<>();
 

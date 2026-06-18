@@ -10,26 +10,29 @@ package org.red5.codec;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.red5.io.IoConstants;
-import org.red5.util.ByteNibbler;
 
 /**
- * Red5 video codec for the AV1 video format. Portions of this AV1 code are based on the work of the Pion project.
+ * Red5 video codec for the AV1 video format. Stores AV1CodecConfigurationRecord and last keyframe.
+ * <p>
+ * Per the E-RTMP v2 spec, AV1 uses OBUs (Open Bitstream Units) not NALUs. AV1 does NOT use
+ * compositionTimeOffset (SI24) in CodedFrames -- the body goes straight to OBU data. Consequently,
+ * CodedFramesX is not a distinct packet type for AV1 (both CodedFrames and CodedFramesX carry raw
+ * OBU data without any composition time offset).
+ * </p>
+ * <p>
+ * AV1 is the only codec that supports MPEG2TSSequenceStart, carrying an AV1VideoDescriptor.
+ * </p>
  *
  * @author The Red5 Project
  * @author Paul Gregoire (mondain@gmail.com)
  */
-public class AV1Video extends AbstractVideo {
+public class AV1Video extends AbstractVideo implements IEnhancedRTMPVideoCodec {
 
-    /* AV1
+    /*
+       AV1CodecConfigurationRecord per AOM av1-isobmff spec:
        https://aomediacodec.github.io/av1-isobmff/v1.3.0.html#av1codecconfigurationbox-definition
 
-       class AV1CodecConfigurationBox extends Box('av1C')
-        {
-        AV1CodecConfigurationRecord av1Config;
-        }
-
-        aligned(8) class AV1CodecConfigurationRecord {
+       aligned(8) class AV1CodecConfigurationRecord {
             unsigned int(1) marker = 1;
             unsigned int(7) version = 1;
             unsigned int(3) seq_profile;
@@ -42,18 +45,21 @@ public class AV1Video extends AbstractVideo {
             unsigned int(1) chroma_subsampling_y;
             unsigned int(2) chroma_sample_position;
             unsigned int(3) reserved = 0;
-
             unsigned int(1) initial_presentation_delay_present;
             if (initial_presentation_delay_present) {
                 unsigned int(4) initial_presentation_delay_minus_one;
             } else {
                 unsigned int(4) reserved = 0;
             }
-
             unsigned int(8) configOBUs[];
         }
     */
     private FrameData decoderConfiguration;
+
+    /**
+     * MPEG-2 TS sequence start descriptor (AV1VideoDescriptor), if received.
+     */
+    private FrameData mpeg2tsDescriptor;
 
     {
         codec = VideoCodec.AV1;
@@ -66,125 +72,98 @@ public class AV1Video extends AbstractVideo {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("incomplete-switch")
     @Override
-    public boolean addData(IoBuffer data, int timestamp) {
-        log.trace("{} addData timestamp: {} remaining: {} pos: {}", codec.name(), timestamp, data.remaining(), data.position());
-        boolean result = false;
-        // go back to the beginning, this only works in non-multitrack scenarios
-        if (data.position() > 0) {
-            data.rewind();
-        }
-        // no data, no operation
-        if (data.hasRemaining()) {
-            // mark the position before we get the flags
-            data.mark();
-            // get the first byte for v1 codec type or enhanced codec bit
-            byte flg = data.get();
-            // determine if we've got an enhanced codec
-            enhanced = ByteNibbler.isBitSet(flg, 7);
-            // for frame type we need get 3 bits
-            int ft = ((flg & 0b01110000) >> 4);
-            frameType = VideoFrameType.valueOf(ft);
-            if (enhanced) {
-                // get the packet type
-                packetType = VideoPacketType.valueOf(flg & IoConstants.MASK_VIDEO_CODEC);
-                if (data.remaining() < 4) {
-                    return false;
-                }
-                // get the fourcc
-                int fourcc = data.getInt();
-                // reset back to the beginning after we got the fourcc
-                if (fourcc != codec.getFourcc()) {
-                    data.reset();
-                    return false;
-                }
-                data.reset();
-                if (isDebug) {
-                    log.debug("{} - frame type: {} packet type: {}", VideoCodec.valueOfByFourCc(fourcc), frameType, packetType);
-                }
-                switch (packetType) {
-                    case SequenceStart:
-                        if (frameType == VideoFrameType.KEYFRAME) {
-                            if (isDebug) {
-                                log.debug("Decoder configuration");
-                            }
-                            // Store AV1 DecoderConfigurationRecord data, if one exists
-                            if (decoderConfiguration == null) {
-                                decoderConfiguration = new FrameData(data);
-                            } else {
-                                decoderConfiguration.setData(data);
-                            }
-                            // new sequence, clear keyframe and interframe collections
-                            softReset();
-                        }
-                        break;
-                    case CodedFramesX: // pass coded data without comp time offset
-                        switch (frameType) {
-                            case KEYFRAME: // keyframe
-                                if (isDebug) {
-                                    log.debug("Keyframe - keyframeTimestamp: {}", keyframeTimestamp);
-                                }
-                                // get the time stamp and compare with the current value
-                                if (timestamp != keyframeTimestamp) {
-                                    //log.trace("New keyframe");
-                                    // new keyframe
-                                    keyframeTimestamp = timestamp;
-                                    // if its a new keyframe, clear keyframe and interframe collections
-                                    softReset();
-                                }
-                                // store keyframe
-                                keyframes.add(new FrameData(data));
-                                break;
-                            case INTERFRAME:
-                                if (bufferInterframes) {
-                                    if (isDebug) {
-                                        log.debug("Interframe - timestamp: {}", timestamp);
-                                    }
-                                    if (interframes == null) {
-                                        interframes = new CopyOnWriteArrayList<>();
-                                    }
-                                    try {
-                                        int lastInterframe = numInterframes.getAndIncrement();
-                                        //log.trace("Buffering interframe #{}", lastInterframe);
-                                        if (lastInterframe < interframes.size()) {
-                                            interframes.get(lastInterframe).setData(data);
-                                        } else {
-                                            interframes.add(new FrameData(data));
-                                        }
-                                    } catch (Throwable e) {
-                                        log.warn("Failed to buffer interframe", e);
-                                    }
-                                    //log.trace("Interframes: {}", interframes.size());
-                                }
-                                break;
-                        }
-                        break;
-                    case CodedFrames: // pass coded data
-                        if (data.remaining() < 3) {
-                            return false;
-                        }
-                        int compTimeOffset = (data.get() << 16 | data.get() << 8 | data.get());
-                        switch (frameType) {
-                            case KEYFRAME: // keyframe
-                                if (isDebug) {
-                                    log.debug("Keyframe - keyframeTimestamp: {} compTimeOffset: {}", keyframeTimestamp, compTimeOffset);
-                                }
-                                keyframes.add(new FrameData(data, compTimeOffset));
-                                break;
-                        }
-                        break;
-                }
-            } else {
-                // no non-enhanced codec suspport yet
-            }
-            //log.trace("Keyframes: {}", keyframes.size());
-            // we handled the data
-            result = true;
-        }
-        // reset the position
-        data.rewind();
-        return result;
+    public void reset() {
+        softReset();
     }
 
+    /** {@inheritDoc} */
+    public void handleNonEnhanced(VideoFrameType type, IoBuffer data, int timestamp) {
+        // AV1 has no legacy (non-enhanced) RTMP codec ID; non-enhanced is not supported
+        if (isDebug) {
+            log.debug("AV1 non-enhanced not supported");
+        }
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
+    public void handleFrame(VideoPacketType packetType, VideoFrameType frameType, IoBuffer data, int timestamp) {
+        switch (packetType) {
+            case SequenceStart:
+                if (frameType == VideoFrameType.KEYFRAME) {
+                    if (isDebug) {
+                        log.debug("Decoder configuration");
+                    }
+                    // Store AV1CodecConfigurationRecord data
+                    if (decoderConfiguration == null) {
+                        decoderConfiguration = new FrameData(data);
+                    } else {
+                        decoderConfiguration.setData(data);
+                    }
+                    // new sequence, clear keyframe and interframe collections
+                    softReset();
+                }
+                break;
+            case MPEG2TSSequenceStart:
+                // AV1 is the only codec that supports MPEG-2 TS sequence start
+                if (isDebug) {
+                    log.debug("MPEG-2 TS sequence start (AV1VideoDescriptor)");
+                }
+                if (mpeg2tsDescriptor == null) {
+                    mpeg2tsDescriptor = new FrameData(data);
+                } else {
+                    mpeg2tsDescriptor.setData(data);
+                }
+                softReset();
+                break;
+            case CodedFrames:
+            case CodedFramesX:
+                // Per E-RTMP v2 spec: AV1 does NOT use compositionTimeOffset (SI24).
+                // Both CodedFrames and CodedFramesX carry raw OBU data directly.
+                // (CodedFramesX is technically not defined for AV1 in the spec, but
+                // we handle it identically to CodedFrames for robustness.)
+                switch (frameType) {
+                    case KEYFRAME:
+                        if (isDebug) {
+                            log.debug("Keyframe - keyframeTimestamp: {}", keyframeTimestamp);
+                        }
+                        if (timestamp != keyframeTimestamp) {
+                            keyframeTimestamp = timestamp;
+                            softReset();
+                        }
+                        keyframes.add(new FrameData(data));
+                        break;
+                    case INTERFRAME:
+                        if (bufferInterframes) {
+                            if (isDebug) {
+                                log.debug("Interframe - timestamp: {}", timestamp);
+                            }
+                            if (interframes == null) {
+                                interframes = new CopyOnWriteArrayList<>();
+                            }
+                            try {
+                                int lastInterframe = numInterframes.getAndIncrement();
+                                if (lastInterframe < interframes.size()) {
+                                    interframes.get(lastInterframe).setData(data);
+                                } else {
+                                    interframes.add(new FrameData(data));
+                                }
+                            } catch (Throwable e) {
+                                log.warn("Failed to buffer interframe", e);
+                            }
+                        }
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        data.rewind();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public IoBuffer getDecoderConfiguration() {
+        return decoderConfiguration != null ? decoderConfiguration.getFrame() : null;
+    }
 }
