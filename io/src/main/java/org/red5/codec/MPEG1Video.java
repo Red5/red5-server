@@ -25,7 +25,7 @@ public class MPEG1Video extends AbstractVideo {
     private static boolean isDebug = log.isDebugEnabled();
 
     /** Video decoder configuration data */
-    private FrameData decoderConfiguration;
+    private FrameData decoderConfiguration = new FrameData();
 
     {
         codec = VideoCodec.MPEG1;
@@ -60,7 +60,7 @@ public class MPEG1Video extends AbstractVideo {
             // get frame type
             byte frameType = data.get();
             byte avcType = data.get();
-            if ((frameType & 0x0f) == VideoCodec.AVC.getId()) {
+            if ((frameType & 0x0f) == codec.getId()) {
                 // check for keyframe
                 if ((frameType & 0xf0) == FLV_FRAME_KEY) {
                     if (isDebug) {

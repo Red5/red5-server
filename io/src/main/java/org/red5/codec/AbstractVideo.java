@@ -205,9 +205,17 @@ public class AbstractVideo implements IVideoStreamCodec {
                     if (multitrackType != AvMultitrackType.ManyTracksManyCodecs) {
                         // The tracks are encoded with the same codec identified by the FOURCC
                         trackCodec = getTrackCodec(data);
+                        if (trackCodec == null) {
+                            data.rewind();
+                            return false;
+                        }
                     }
                 } else {
                     trackCodec = getTrackCodec(data);
+                    if (trackCodec == null) {
+                        data.rewind();
+                        return false;
+                    }
                 }
                 if (isTrace)
                     log.trace("Multitrack: {} multitrackType: {} packetType: {}", multitrack, multitrackType, packetType);
@@ -219,6 +227,10 @@ public class AbstractVideo implements IVideoStreamCodec {
                         if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
                             // The tracks are encoded with their own codec identified by the FOURCC
                             trackCodec = getTrackCodec(data);
+                            if (trackCodec == null) {
+                                data.rewind();
+                                return false;
+                            }
                         }
                         // track ordering
                         // For identifying the highest priority (a.k.a., default track) or highest quality track, it is RECOMMENDED
@@ -236,7 +248,7 @@ public class AbstractVideo implements IVideoStreamCodec {
                             trackSize = (data.get() & 0xff) << 16 | (data.get() & 0xff) << 8 | data.get() & 0xff;
                         }
                         // we're multitrack and multicodec so update track id
-                        if (multitrackType == AvMultitrackType.ManyTracksManyCodecs) {
+                        if (multitrackType == AvMultitrackType.ManyTracksManyCodecs && trackCodec != null) {
                             trackCodec.setTrackId(trackId);
                         }
                     } else if (packetType == VideoPacketType.Metadata) {
@@ -261,7 +273,7 @@ public class AbstractVideo implements IVideoStreamCodec {
                 if (command != null && trackCodec == null) {
                     result = true;
                 } else {
-                    result = multitrack ? true : codec == trackCodec.getCodec();
+                    result = multitrack ? true : (trackCodec != null && codec == trackCodec.getCodec());
                 }
                 if (result && this instanceof IEnhancedRTMPVideoCodec) {
                     IEnhancedRTMPVideoCodec enhancedCodec = IEnhancedRTMPVideoCodec.class.cast(this);
@@ -311,13 +323,22 @@ public class AbstractVideo implements IVideoStreamCodec {
      * @return Video codec
      */
     protected IVideoStreamCodec getTrackCodec(IoBuffer data) {
+        if (data.remaining() < 4) {
+            log.warn("Insufficient data for video fourcc: {}", data.remaining());
+            return null;
+        }
         Integer fourcc = data.getInt();
         if (isTrace) {
             log.trace("Fourcc: {} pos: {}", fourcc, data.position());
         }
         if (!tracks.containsKey(fourcc)) {
+            VideoCodec trakCodec = VideoCodec.valueOfByFourCc(fourcc);
+            if (trakCodec == null) {
+                log.warn("Unknown video fourcc: {}", fourcc);
+                return null;
+            }
             // create a new codec instance
-            trackCodec = VideoCodec.valueOfByFourCc(fourcc).newInstance();
+            trackCodec = trakCodec.newInstance();
             tracks.put(fourcc, trackCodec);
         } else {
             trackCodec = tracks.get(fourcc);

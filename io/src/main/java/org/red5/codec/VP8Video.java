@@ -218,20 +218,38 @@ public class VP8Video extends AbstractVideo {
      * @return The size in bytes of the payload descriptor at offset in input, or -1 if the input is not valid
      */
     public static int getDesciptorSize(byte[] input, int offset, int length) {
+        if (input == null || offset < 0 || offset >= length || length > input.length) {
+            return -1;
+        }
         if ((input[offset] & X_BIT) == 0) {
             return 1;
         }
+        if (offset + 1 >= length) {
+            return -1;
+        }
         int size = 2;
         if ((input[offset + 1] & I_BIT) != 0) {
+            if (offset + 2 >= length) {
+                return -1;
+            }
             size++;
             if ((input[offset + 2] & M_BIT) != 0) {
+                if (offset + 3 >= length) {
+                    return -1;
+                }
                 size++;
             }
         }
         if ((input[offset + 1] & L_BIT) != 0) {
+            if (offset + size >= length) {
+                return -1;
+            }
             size++;
         }
         if ((input[offset + 1] & (T_BIT | K_BIT)) != 0) {
+            if (offset + size >= length) {
+                return -1;
+            }
             size++;
         }
         return size;
