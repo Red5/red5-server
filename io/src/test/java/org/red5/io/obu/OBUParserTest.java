@@ -71,7 +71,9 @@ public class OBUParserTest {
             System.out.println("Packetized buffer 2 - " + av1Packetizer + " OBUs: " + obuCount);
             List<byte[]> obuElements = av1Packetizer.getOBUElements();
             //System.out.println("Depacketized OBUs: " + obuElements.size());
-            assertTrue(obuElements.size() == 3);
+            // The second RTP packet starts with a continuation fragment; it should append to the
+            // previous frame OBU instead of becoming a separate OBU element.
+            assertEquals(2, obuElements.size());
             List<OBUInfo> obuInfos = new LinkedList<>();
             for (byte[] obu : obuElements) {
                 // parse the OBU
