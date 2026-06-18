@@ -26,33 +26,49 @@ public class LEB128Test {
 
     @Test
     public void testEncodeAndDecode() throws LEB128Exception {
-        int[][] testData = { { 0, 0 }, { 127, 0x7f }, { 11, 0x0b, 0x0b08 }, { 150, 0x9601 }, { 254, 0xfe01 }, { 400, 0x9003 }, { 1200, 0xb009 }, { 999999, 0xBF843D }, { 1176, 0x9809 }, { 1162, 0x8a09 } };
-        // add max value at some point { Integer.MAX_VALUE, 0xffffff07 }
+        // Test data format: { input_value, expected_leb128_encoded_int }
+        // LEB128 format: little-endian base 128, MSB=1 means more bytes follow
+        int[][] testData = { { 0, 0x00 }, // 0 -> 0x00
+                { 11, 0x0b }, // 11 -> 0x0b (fits in 7 bits, MSB=0)
+                { 127, 0x7f }, // 127 -> 0x7f (fits in 7 bits, MSB=0)
+                { 150, 0x9601 }, // 150 -> 0x96 0x01 (little-endian: 0x96 = 22, 0x01 = 1, (22 << 0) | (1 << 7) = 150)
+                { 254, 0xfe01 }, // 254 -> 0xfe 0x01
+                { 255, 0xff01 }, // 255 -> 0xff 0x01
+                { 256, 0x8002 }, // 256 -> 0x80 0x02
+                { 400, 0x9003 }, // 400 -> 0x90 0x03
+                { 1200, 0xb009 }, // 1200 -> 0xb0 0x09
+                { 16383, 0xff7f }, // 16383 -> 0xff 0x7f (max 2-byte value)
+                { 16384, 0x808001 }, // 16384 -> 0x80 0x80 0x01 (needs 3 bytes)
+                { 1176, 0x9809 }, // 1176 -> 0x98 0x09
+                { 1162, 0x8a09 }, // 1162 -> 0x8a 0x09
+                { 999999, 0xBF843D } // 999999 -> 0xbf 0x84 0x3d
+        };
         for (int i = 0; i < testData.length; i++) {
-            int encoded = LEB128.encode(testData[i][0]);
-            System.out.println("Value: " + testData[i][0] + " encoded: " + Integer.toHexString(encoded));
-            if (encoded != testData[i][1]) {
-                if (testData[i][2] == 0) {
-                    fail("Encode failed: " + encoded + " expected " + testData[i][1]);
-                } else {
-                    fail("Encode failed: " + encoded + " expected " + testData[i][1] + " or " + testData[i][2]);
-                }
+            int inputValue = testData[i][0];
+            int expectedEncoded = testData[i][1];
+
+            // Test encoding
+            int encoded = LEB128.encode(inputValue);
+            System.out.println("Value: " + inputValue + " encoded: 0x" + Integer.toHexString(encoded));
+
+            if (encoded != expectedEncoded) {
+                fail("Encode failed for value " + inputValue + ": got 0x" + Integer.toHexString(encoded) + " expected 0x" + Integer.toHexString(expectedEncoded));
             } else {
-                System.out.printf("Encode success: %d decoded: %d%n", encoded, testData[i][0]);
+                System.out.printf("Encode success: value=%d encoded=0x%x%n", inputValue, encoded);
             }
-            LEB128.LEB128Result decoded = LEB128.decode(encoded);
-            if (decoded.value != testData[i][0]) {
-                fail("Decode failed: " + decoded.value + " expected " + testData[i][0]);
+
+            // Test round-trip decoding
+            byte[] encodedBytes = new byte[5];
+            int byteCount = LEB128.encode(inputValue, encodedBytes, 0);
+            byte[] actualBytes = new byte[byteCount];
+            System.arraycopy(encodedBytes, 0, actualBytes, 0, byteCount);
+
+            LEB128.LEB128Result decoded = LEB128.decode(actualBytes);
+            if (decoded.value != inputValue) {
+                fail("Decode round-trip failed: got " + decoded.value + " expected " + inputValue);
             } else {
-                System.out.printf("Decode success: %d encoded: %d%n", decoded.value, testData[i][1]);
+                System.out.printf("Decode round-trip success: value=%d bytes=%d%n", decoded.value, decoded.bytesRead);
             }
         }
-        //int bytesEncoded = encode(2824, test, 0);
-        //int bytesEncoded = encode(0, test, 0);
-        //System.out.println("Bytes encoded: " + bytesEncoded + " value: " + HexDump.byteArrayToHexString(test) + " decoded: " + decode(test, 0)[0]);
-        //byte[] fragmentLen = new byte[] { 0x01, (byte) 0x88, 0x16, 0, 0 }; // 2824 index 1
-        //byte[] fragmentLen = new byte[] { 0x07, 0x07, (byte) 0xfe, 1, (byte) 0x8f, 0 }; // 254 index 2
-        //LEB128Result result = decode(fragmentLen, 2);
-        //System.out.println("Decoded: " + result);
     }
 }

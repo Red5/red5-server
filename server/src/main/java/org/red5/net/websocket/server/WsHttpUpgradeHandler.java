@@ -324,9 +324,15 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
     public void timeoutAsync(long now) {
         log.trace("timeoutAsync: {} on session: {}", now, wsSession);
         if (wsSession != null) {
-            // check if session is already closed to avoid IllegalStateException
+            // If the underlying WsSession was closed by Tomcat, any further accessor (e.g.
+            // getUserProperties, getMaxIdleTimeout) throws IllegalStateException. The Tomcat
+            // scheduler keeps invoking timeoutAsync once per second, so without this guard the
+            // server log fills up forever with the same stack. See issue #436.
             if (wsSession.isClosed()) {
-                log.debug("timeoutAsync: session already closed");
+                if (isDebug) {
+                    log.debug("timeoutAsync: dropping closed ws session ref");
+                }
+                wsSession = null;
                 return;
             }
             try {
@@ -382,8 +388,11 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                     conn.close(CloseCodes.GOING_AWAY, "Timeout expired");
                 }
             } catch (IllegalStateException ise) {
-                // session was closed between our check and property access - this is expected in race conditions
-                log.debug("timeoutAsync: session closed during timeout check - {}", ise.getMessage());
+                // covers the race where the session closes after the isClosed() guard above
+                if (isDebug) {
+                    log.debug("timeoutAsync: session closed mid-check, releasing ref", ise);
+                }
+                wsSession = null;
             } catch (Throwable t) {
                 log.warn(sm.getString("wsHttpUpgradeHandler.timeoutAsyncFailed"), t);
             }

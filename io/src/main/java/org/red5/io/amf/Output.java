@@ -15,11 +15,11 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -339,17 +339,10 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         Element element = getSerializeCache().get(objectClass);
         Map<String, Boolean> serializeMap = (element == null ? null : (Map<String, Boolean>) element.getObjectValue());
         if (serializeMap == null) {
-            serializeMap = new HashMap<>();
+            serializeMap = new ConcurrentHashMap<>();
             getSerializeCache().put(new Element(objectClass, serializeMap));
         }
-        boolean serialize;
-        if (getSerializeCache().isKeyInCache(keyName)) {
-            serialize = serializeMap.get(keyName);
-        } else {
-            serialize = Serializer.serializeField(keyName, field, getter);
-            serializeMap.put(keyName, serialize);
-        }
-        return serialize;
+        return serializeMap.computeIfAbsent(keyName, k -> Serializer.serializeField(keyName, field, getter));
     }
 
     @SuppressWarnings("unchecked")
@@ -358,27 +351,22 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         Element element = getFieldCache().get(objectClass);
         Map<String, Field> fieldMap = (element == null ? null : (Map<String, Field>) element.getObjectValue());
         if (fieldMap == null) {
-            fieldMap = new HashMap<String, Field>();
+            fieldMap = new ConcurrentHashMap<>();
             getFieldCache().put(new Element(objectClass, fieldMap));
         }
-        Field field = null;
-        if (fieldMap.containsKey(keyName)) {
-            field = fieldMap.get(keyName);
-        } else {
+        return fieldMap.computeIfAbsent(keyName, k -> {
             for (Class<?> clazz = objectClass; !clazz.equals(Object.class); clazz = clazz.getSuperclass()) {
                 Field[] fields = clazz.getDeclaredFields();
                 if (fields.length > 0) {
                     for (Field fld : fields) {
                         if (fld.getName().equals(keyName)) {
-                            field = fld;
-                            break;
+                            return fld;
                         }
                     }
                 }
             }
-            fieldMap.put(keyName, field);
-        }
-        return field;
+            return null;
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -387,17 +375,10 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         Element element = getGetterCache().get(objectClass);
         Map<String, Method> getterMap = (element == null ? null : (Map<String, Method>) element.getObjectValue());
         if (getterMap == null) {
-            getterMap = new HashMap<String, Method>();
+            getterMap = new ConcurrentHashMap<>();
             getGetterCache().put(new Element(objectClass, getterMap));
         }
-        Method getter;
-        if (getterMap.containsKey(keyName)) {
-            getter = getterMap.get(keyName);
-        } else {
-            getter = beanMap.getReadMethod(keyName);
-            getterMap.put(keyName, getter);
-        }
-        return getter;
+        return getterMap.computeIfAbsent(keyName, k -> beanMap.getReadMethod(keyName));
     }
 
     /** {@inheritDoc} */

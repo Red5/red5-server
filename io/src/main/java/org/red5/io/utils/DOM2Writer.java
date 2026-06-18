@@ -79,7 +79,7 @@ public class DOM2Writer {
                         out.print(' ');
                         out.print(attr.getNodeName());
                         out.print("=\"");
-                        out.print(attr.getValue());
+                        out.print(escape(attr.getValue(), true));
                         out.print('\"');
                     }
                 }
@@ -111,7 +111,7 @@ public class DOM2Writer {
                 out.print("]]>");
                 break;
             case Node.TEXT_NODE:
-                out.print(node.getNodeValue());
+                out.print(escape(node.getNodeValue(), false));
                 break;
             default:
                 if (logger.isDebugEnabled()) {
@@ -124,5 +124,34 @@ public class DOM2Writer {
             out.print('>');
             hasChildren = false;
         }
+    }
+
+    private static String escape(String value, boolean attribute) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            switch (c) {
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '"':
+                    if (attribute) {
+                        sb.append("&quot;");
+                        break;
+                    }
+                default:
+                    sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 }
