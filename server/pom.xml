@@ -145,6 +145,11 @@
             <version>${gson.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- runtime dependency of the bundled chat demo webapp (net.minidev.json); see parent dependencyManagement -->
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
