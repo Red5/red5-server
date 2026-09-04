@@ -31,7 +31,7 @@ if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
 )
 echo Using Daemon:           "%EXECUTABLE%"
 set SERVICE_NAME=Red5
-set "CLASSPATH=%RED5_HOME%\commons-daemon-1.0.15.jar;%RED5_HOME%\red5-service.jar;%RED5_HOME%\conf"
+set "CLASSPATH=%RED5_HOME%\commons-daemon-1.6.1.jar;%RED5_HOME%\red5-service.jar;%RED5_HOME%\conf"
 set "WORKING_PATH=%RED5_HOME%\"
 
 rem Make sure prerequisite environment variables are set
