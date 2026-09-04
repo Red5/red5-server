@@ -77,18 +77,26 @@ public class SctpServerChanneOverUDP extends SctpServerChannel implements IServe
         DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
         SctpPacket packet = null;
         while (true) {
+            // a short datagram shrinks the packet length; restore full capacity before every receive
+            receivePacket.setLength(buffer.length);
             serverSocket.receive(receivePacket);
             try {
                 packet = new SctpPacket(buffer, 0, receivePacket.getLength());
-            } catch (SctpException e) {
-                logger.log(Level.WARNING, e.getMessage());
+            } catch (SctpException | RuntimeException e) {
+                // malformed datagrams must never terminate the accept loop
+                logger.log(Level.WARNING, "Dropping malformed datagram: " + e.getMessage());
                 continue;
             }
 
             logger.log(Level.INFO, "receive new packet");
 
             InetSocketAddress address = new InetSocketAddress(receivePacket.getAddress(), receivePacket.getPort());
-            packet.apply(address, this);
+            try {
+                packet.apply(address, this);
+            } catch (SctpException | RuntimeException e) {
+                logger.log(Level.WARNING, "Dropping packet that failed to apply: " + e.getMessage());
+                continue;
+            }
 
             Association association = pendingAssociations.get(address);
             if (association != null && association.getState() == State.ESTABLISHED) {

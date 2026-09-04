@@ -7,6 +7,8 @@
  */
 package org.red5.io.sctp.packet.chunks;
 
+import org.red5.io.sctp.SctpException;
+
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -84,10 +86,16 @@ public class StateCookie {
      * @param offset a int
      * @param length a int
      */
-    public StateCookie(byte[] data, int offset, int length) {
+    public StateCookie(byte[] data, int offset, int length) throws SctpException {
+        if (data == null || offset < 0 || length < 4 || offset > data.length - length) {
+            throw new SctpException("invalid state cookie bounds: offset " + offset + " length " + length);
+        }
         ByteBuffer byteBuffer = ByteBuffer.wrap(data, offset, 4);
         int macLength = byteBuffer.getInt();
-
+        // the cookie must hold the mac plus the fixed header; check before allocating or copying anything
+        if (macLength < 0 || macLength > length - 4 - HEADER_STATE_COOKIE_SIZE) {
+            throw new SctpException("invalid state cookie mac length " + macLength + " for cookie length " + length);
+        }
         mac = new byte[macLength];
         System.arraycopy(data, offset + 4, mac, 0, macLength);
 
