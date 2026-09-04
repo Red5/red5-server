@@ -172,6 +172,35 @@ public class RamPersistence implements IPersistenceStore {
     }
 
     /** {@inheritDoc} */
+    /**
+     * Checks a persistable object name or id against the identifier grammar used for file persistence. Names may
+     * contain '/' separated segments but no empty, '.' or '..' segments, no backslashes, no control characters and no
+     * leading separator or drive letter.
+     *
+     * @param name object name or id
+     * @return true if the name is safe to map onto the filesystem
+     */
+    public static boolean isValidObjectName(String name) {
+        if (name == null || name.isEmpty() || name.length() > 255) {
+            return false;
+        }
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (c < 0x20 || c == 0x7f || c == '\\') {
+                return false;
+            }
+        }
+        if (name.charAt(0) == '/' || name.matches("^[A-Za-z]:.*")) {
+            return false;
+        }
+        for (String segment : name.split("/", -1)) {
+            if (segment.isEmpty() || ".".equals(segment) || "..".equals(segment)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean remove(String name) {
         if (!objects.containsKey(name)) {
             return false;

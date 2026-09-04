@@ -455,6 +455,10 @@ public class FilePersistence extends RamPersistence {
     @Override
     public IPersistable load(String name) {
         log.debug("load - name: {}", name);
+        if (!isValidObjectName(name)) {
+            log.warn("Refusing to load object with invalid name: {}", name);
+            return null;
+        }
         IPersistable result = super.load(name);
         if (result != null) {
             // Object has already been loaded
@@ -484,6 +488,10 @@ public class FilePersistence extends RamPersistence {
     @SuppressWarnings("null")
     protected boolean saveObject(IPersistable object) {
         log.debug("saveObject - object: {}", object);
+        if (!isValidObjectName(object.getName()) || (object.getPath() != null && !object.getPath().isEmpty() && !isValidObjectName(object.getPath()))) {
+            log.warn("Refusing to persist object with invalid name or path: {} / {}", object.getName(), object.getPath());
+            return false;
+        }
         boolean result = true;
         String path = getObjectFilepath(object, true);
         log.trace("Path: {}", path);
@@ -539,6 +547,10 @@ public class FilePersistence extends RamPersistence {
                 log.debug("New file name: {}", filename);
             }
             File file = new File(dir, filename);
+            if (!isWithinPersistenceRoot(file)) {
+                log.warn("Refusing to persist object {} outside the persistence root: {}", object.getName(), file);
+                return false;
+            }
             //Resource resFile = resources.getResource(filename);
             //log.debug("Resource (file) check #1 - file name: {} exists: {}", resPath.getFilename(), exists);
             IoBuffer buf = null;
@@ -585,6 +597,37 @@ public class FilePersistence extends RamPersistence {
     }
 
     /**
+     * Returns the directory every persisted file must live beneath.
+     *
+     * @return persistence root directory
+     * @throws IOException if the root cannot be resolved
+     */
+    private File getPersistenceRoot() throws IOException {
+        Resource res = resources.getResource(path);
+        if (res.exists()) {
+            return res.getFile();
+        }
+        return new File(rootDir, path);
+    }
+
+    /**
+     * Checks that a file resolves beneath the persistence root, after normalizing any traversal components.
+     *
+     * @param file candidate file
+     * @return true if the file is contained in the persistence root
+     */
+    private boolean isWithinPersistenceRoot(File file) {
+        try {
+            String root = getPersistenceRoot().getCanonicalPath();
+            String candidate = file.getCanonicalPath();
+            return candidate.startsWith(root + File.separator);
+        } catch (IOException e) {
+            log.warn("Unable to resolve persistence root", e);
+            return false;
+        }
+    }
+
+    /**
      * Remove empty dirs
      *
      * @param base
@@ -623,13 +666,22 @@ public class FilePersistence extends RamPersistence {
     /** {@inheritDoc} */
     @Override
     public boolean remove(String name) {
+        if (!isValidObjectName(name)) {
+            log.warn("Refusing to remove object with invalid name: {}", name);
+            return false;
+        }
         super.remove(name);
         boolean result = true;
         String filename = path + '/' + name + extension;
         Resource resFile = resources.getResource(filename);
         if (resFile.exists()) {
             try {
-                result = resFile.getFile().delete();
+                File target = resFile.getFile();
+                if (!isWithinPersistenceRoot(target)) {
+                    log.warn("Refusing to remove file outside the persistence root: {}", target);
+                    return false;
+                }
+                result = target.delete();
                 if (result) {
                     checkRemoveEmptyDirectories(filename);
                 }

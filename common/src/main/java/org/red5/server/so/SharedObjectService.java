@@ -127,6 +127,10 @@ public class SharedObjectService implements ISharedObjectService {
 
     /** {@inheritDoc} */
     public boolean createSharedObject(IScope scope, String name, boolean persistent) {
+        if (!RamPersistence.isValidObjectName(name)) {
+            log.warn("Refusing to create shared object with invalid name: {}", name);
+            return false;
+        }
         boolean added = hasSharedObject(scope, name);
         if (!added) {
             log.debug("Attempting to add shared object: {} to {}", name, scope.getName());

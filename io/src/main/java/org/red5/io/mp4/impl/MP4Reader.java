@@ -1115,6 +1115,27 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
      * Performs frame analysis and generates metadata for use in seeking. All the frames are analyzed and sorted together based on time and
      * offset.
      */
+    /**
+     * Checks that a sample described by the sample tables actually lies inside the media file. Guards against crafted
+     * size tables requesting allocations larger than the file or overflowing offset arithmetic (issue #476).
+     *
+     * @param offset sample offset in the file
+     * @param size declared sample size
+     * @return true if the sample is fully contained in the file
+     */
+    private boolean isSampleWithinFile(long offset, long size) {
+        if (offset < 0 || size < 0 || size > Integer.MAX_VALUE - 8) {
+            return false;
+        }
+        long end = offset + size;
+        if (end < offset) {
+            // overflow
+            return false;
+        }
+        long total = getTotalBytes();
+        return total <= 0 || end <= total;
+    }
+
     public void analyzeFrames() {
         log.debug("Analyzing frames - video samples/chunks: {}", videoSamplesToChunks);
         // Maps positions, samples, timestamps to one another
@@ -1166,8 +1187,14 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                         } else {
                             log.debug("No sync samples available");
                         }
-                        // size of the sample
-                        int size = (int) videoSamples[sample - 1];
+                        // size of the sample, validated against the file before it is narrowed to int
+                        long sampleSize = videoSamples[sample - 1];
+                        if (!isSampleWithinFile(pos, sampleSize)) {
+                            log.warn("Video sample {} at {} with size {} exceeds file bounds; stopping frame analysis", sample, pos, sampleSize);
+                            sampleCount = 0;
+                            continue;
+                        }
+                        int size = (int) sampleSize;
                         // create a frame
                         MP4Frame frame = new MP4Frame();
                         frame.setKeyFrame(keyframe);
@@ -1227,8 +1254,8 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                         int size = 0;
                         // if we have no samples, skip size check as its probably not aac
                         if (audioSamples.length > 0) {
-                            // update sample size
-                            size = (int) audioSamples[sample - 1];
+                            // update sample size (validated below before use)
+                            size = (int) Math.min(audioSamples[sample - 1], Integer.MAX_VALUE);
                             // skip empty AAC data which is 6 bytes long
                             log.trace("Audio sample - size: {} pos: {}", size, pos);
                             if (size == 6) {
@@ -1261,8 +1288,14 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
                                 }
                             }
                         }
-                        // set audio sample size
-                        size = (int) (size != 0 ? size : audioSampleSize);
+                        // set audio sample size, validated against the file before it is narrowed to int
+                        long sampleSize = size != 0 ? size : audioSampleSize;
+                        if (!isSampleWithinFile(pos, sampleSize)) {
+                            log.warn("Audio sample {} at {} with size {} exceeds file bounds; stopping frame analysis", sample, pos, sampleSize);
+                            sampleCount = 0;
+                            continue;
+                        }
+                        size = (int) sampleSize;
                         // create a frame
                         MP4Frame frame = new MP4Frame();
                         frame.setOffset(pos);

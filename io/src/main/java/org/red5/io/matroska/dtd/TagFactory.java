@@ -8,6 +8,7 @@
 package org.red5.io.matroska.dtd;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Map;
@@ -62,22 +63,28 @@ public class TagFactory {
      * @return a {@link org.red5.io.matroska.dtd.Tag} object
      * @throws org.red5.io.matroska.ConverterException if any.
      */
-    public static Tag createTag(VINT id, VINT size, InputStream inputStream) throws ConverterException {
+    public static Tag createTag(VINT id, VINT size, InputStream inputStream) throws ConverterException, IOException {
         Tag tag = null;
         NameTag nt = tagsById.get(id.getBinary());
         if (nt != null) {
             try {
                 tag = (Tag) nt.clazz.getConstructor(String.class, VINT.class, VINT.class, InputStream.class).newInstance(nt.name, id, size, inputStream);
-            } catch (Exception e) {
-                log.error("Unexpected exception while creating tag", e);
+            } catch (InvocationTargetException e) {
+                // surface I/O and bounds failures from the tag constructor to the caller instead of swallowing them
+                Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    throw (IOException) cause;
+                }
+                if (cause instanceof ConverterException) {
+                    throw (ConverterException) cause;
+                }
+                throw new IOException("Unable to create tag " + nt.name, cause);
+            } catch (ReflectiveOperationException | RuntimeException e) {
+                throw new IOException("Unable to create tag " + nt.name, e);
             }
         } else {
             log.info("Unsupported matroska tag: {} {}", id, id.getBinary());
-            try {
-                tag = new BinaryTag("UnknownTag-" + Long.toHexString(id.getBinary()), id, size, null);
-            } catch (IOException e) {
-                log.error("Unexpected exception while creating unknown tag", e);
-            }
+            tag = new BinaryTag("UnknownTag-" + Long.toHexString(id.getBinary()), id, size, null);
         }
         return tag;
     }

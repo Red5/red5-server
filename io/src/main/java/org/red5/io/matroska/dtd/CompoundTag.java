@@ -71,7 +71,7 @@ public class CompoundTag extends Tag {
     /** {@inheritDoc} */
     @Override
     public void parse(InputStream inputStream) throws IOException, ConverterException {
-        for (Tag tag : ParserUtils.parseMasterElement(inputStream, (int) getSize())) {
+        for (Tag tag : ParserUtils.parseMasterElement(inputStream, ParserUtils.checkElementSize(getSize()))) {
             subElements.put(tag.getName(), tag);
         }
     }

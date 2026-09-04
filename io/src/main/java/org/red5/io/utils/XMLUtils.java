@@ -13,7 +13,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
@@ -51,10 +53,32 @@ public class XMLUtils {
      * @throws java.io.IOException
      *             I/O exception
      */
+    /**
+     * Creates a DocumentBuilderFactory hardened against DTD / entity expansion attacks. DOCTYPE declarations are
+     * disallowed outright, external general and parameter entities are disabled, external DTD/schema access is blocked
+     * and secure processing is enabled. Fails closed if a required feature is unsupported by the underlying parser.
+     *
+     * @return hardened factory
+     * @throws ParserConfigurationException if a required security feature cannot be applied
+     */
+    public static DocumentBuilderFactory newSecureDocumentBuilderFactory() throws ParserConfigurationException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
+        return dbf;
+    }
+
     public static Document stringToDoc(String str) throws IOException {
         if (StringUtils.isNotEmpty(str)) {
             try (Reader reader = new StringReader(str)) {
-                DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                DocumentBuilder db = newSecureDocumentBuilderFactory().newDocumentBuilder();
                 EntityResolver noop = (publicId, systemId) -> new InputSource(new StringReader(""));
                 db.setEntityResolver(noop);
                 Document doc = db.parse(new InputSource(reader));

@@ -191,13 +191,11 @@ public abstract class RTMPHandshake implements IHandshake {
      *            shared secret byte sequence
      */
     protected void initRC4Encryption(byte[] sharedSecret) {
-        log.debug("Shared secret: {}", Hex.encodeHexString(sharedSecret));
-        // create output cipher
+        // create output cipher (the shared secret and derived RC4 keys are deliberately never logged)
         log.debug("Outgoing public key [{}]: {}", outgoingPublicKey.length, Hex.encodeHexString(outgoingPublicKey));
         byte[] rc4keyOut = new byte[32];
         // digest is 32 bytes, but our key is 16
         calculateHMAC_SHA256(outgoingPublicKey, 0, outgoingPublicKey.length, sharedSecret, KEY_LENGTH, rc4keyOut, 0);
-        log.debug("RC4 Out Key: {}", Hex.encodeHexString(Arrays.copyOfRange(rc4keyOut, 0, 16)));
         try {
             cipherOut = Cipher.getInstance("RC4");
             cipherOut.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(rc4keyOut, 0, 16, "RC4"));
@@ -209,7 +207,6 @@ public abstract class RTMPHandshake implements IHandshake {
         // digest is 32 bytes, but our key is 16
         byte[] rc4keyIn = new byte[32];
         calculateHMAC_SHA256(incomingPublicKey, 0, incomingPublicKey.length, sharedSecret, KEY_LENGTH, rc4keyIn, 0);
-        log.debug("RC4 In Key: {}", Hex.encodeHexString(Arrays.copyOfRange(rc4keyIn, 0, 16)));
         try {
             cipherIn = Cipher.getInstance("RC4");
             cipherIn.init(Cipher.DECRYPT_MODE, new SecretKeySpec(rc4keyIn, 0, 16, "RC4"));
@@ -295,7 +292,6 @@ public abstract class RTMPHandshake implements IHandshake {
             log.error("Exception getting the shared secret", e);
         }
         byte[] sharedSecret = agreement.generateSecret();
-        log.debug("Shared secret [{}]: {}", sharedSecret.length, Hex.encodeHexString(sharedSecret));
         return sharedSecret;
     }
 
@@ -392,7 +388,6 @@ public abstract class RTMPHandshake implements IHandshake {
         if (log.isTraceEnabled()) {
             log.trace("calculateHMAC_SHA256 - messageOffset: {} messageLen: {}", messageOffset, messageLen);
             log.trace("calculateHMAC_SHA256 - message: {}", Hex.encodeHexString(Arrays.copyOfRange(message, messageOffset, messageOffset + messageLen)));
-            log.trace("calculateHMAC_SHA256 - keyLen: {} key: {}", keyLen, Hex.encodeHexString(Arrays.copyOf(key, keyLen)));
             //log.trace("calculateHMAC_SHA256 - digestOffset: {} digest: {}", digestOffset, Hex.encodeHexString(Arrays.copyOfRange(digest, digestOffset, digestOffset + DIGEST_LENGTH)));
         }
         byte[] calcDigest;

@@ -25,14 +25,22 @@ public class ChunkFactory {
      * @throws org.red5.io.sctp.SctpException if any.
      */
     public static Chunk createChunk(final byte[] data, int offset, int length) throws SctpException {
-        assert length > 0;
-        switch (ChunkType.values()[data[offset]]) {
+        if (data == null || length <= 0 || offset < 0 || offset >= data.length) {
+            throw new SctpException("invalid chunk bounds: offset " + offset + " length " + length);
+        }
+        // the wire byte is unsigned; map it explicitly rather than indexing the enum with a signed value
+        int typeId = data[offset] & 0xff;
+        ChunkType[] types = ChunkType.values();
+        if (typeId >= types.length) {
+            throw new SctpException("not supported chunk type " + typeId);
+        }
+        switch (types[typeId]) {
             case INIT:
                 return new Init(data, offset, length);
             case INIT_ACK:
                 return new InitAck(data, offset, length);
             default:
-                throw new SctpException("not supported chunk type " + data);
+                throw new SctpException("not supported chunk type " + types[typeId]);
         }
     }
 }
