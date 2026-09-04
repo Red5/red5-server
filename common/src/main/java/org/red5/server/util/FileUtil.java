@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.io.OutputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -218,6 +219,59 @@ public class FileUtil {
      * @param destinationDir
      *            The destination directory, ie: webapps
      */
+    /** Maximum number of entries extracted from a single archive. */
+    public static final long MAX_ZIP_ENTRIES = Long.getLong("red5.unzip.maxEntries", 100_000L);
+
+    /** Maximum number of expanded bytes extracted from a single archive. */
+    public static final long MAX_ZIP_EXPANDED_BYTES = Long.getLong("red5.unzip.maxExpandedBytes", 4L * 1024 * 1024 * 1024);
+
+    /**
+     * Resolves a zip entry name beneath a fixed extraction root. Returns null when the entry is absolute, drive
+     * qualified, uses backslash separators, contains parent references, or otherwise normalizes outside the root.
+     *
+     * @param root real path of the extraction root
+     * @param entryName entry name from the archive
+     * @return the contained target path, or null if the entry must be rejected
+     */
+    public static Path resolveZipEntry(Path root, String entryName) {
+        if (entryName == null || entryName.isEmpty() || entryName.indexOf('\\') != -1 || entryName.indexOf('\0') != -1) {
+            return null;
+        }
+        if (entryName.startsWith("/") || entryName.matches("^[A-Za-z]:.*")) {
+            return null;
+        }
+        for (String segment : entryName.split("/")) {
+            if ("..".equals(segment)) {
+                return null;
+            }
+        }
+        Path target = root.resolve(entryName).normalize();
+        if (!target.startsWith(root)) {
+            return null;
+        }
+        return target;
+    }
+
+    /**
+     * Copies at most <code>limit</code> bytes from the input to the output.
+     *
+     * @param in source
+     * @param out destination
+     * @param limit maximum number of bytes to copy
+     * @return number of bytes copied
+     * @throws IOException on I/O error
+     */
+    private static long copy(InputStream in, OutputStream out, long limit) throws IOException {
+        byte[] buf = new byte[8192];
+        long total = 0;
+        int read;
+        while (total < limit && (read = in.read(buf, 0, (int) Math.min(buf.length, limit - total))) != -1) {
+            out.write(buf, 0, read);
+            total += read;
+        }
+        return total;
+    }
+
     public static void unzip(String compressedFileName, String destinationDir) {
         //strip everything except the applications name
         String dirName = null;
@@ -242,39 +296,42 @@ public class FileUtil {
         log.debug("Making directory: {}", tmpDir.mkdirs());
         ZipFile zf = null;
         try {
+            final Path root = tmpDir.toPath().toRealPath();
             zf = new ZipFile(compressedFileName);
             Enumeration<?> e = zf.entries();
+            long entryCount = 0;
+            long expandedBytes = 0;
             while (e.hasMoreElements()) {
                 ZipEntry ze = (ZipEntry) e.nextElement();
                 log.debug("Unzipping {}", ze.getName());
-                if (ze.isDirectory()) {
-                    log.debug("is a directory");
-                    File dir = new File(tmpDir + "/" + ze.getName());
-                    Boolean tmp = dir.mkdir();
-                    log.debug("{}", tmp);
+                if (++entryCount > MAX_ZIP_ENTRIES) {
+                    log.error("Archive {} exceeds the maximum entry count {}; aborting extraction", compressedFileName, MAX_ZIP_ENTRIES);
+                    break;
+                }
+                // resolve the entry against the destination root and refuse anything that would escape it (zip slip)
+                Path target = resolveZipEntry(root, ze.getName());
+                if (target == null) {
+                    log.error("Rejecting archive entry {} in {}: escapes the destination directory", ze.getName(), compressedFileName);
                     continue;
                 }
-
-                // checks to see if a zipEntry contains a path
-                // i.e. ze.getName() == "META-INF/MANIFEST.MF"
-                // if this case is true, then we create the path first
-                if (ze.getName().lastIndexOf("/") != -1) {
-                    String zipName = ze.getName();
-                    String zipDirStructure = zipName.substring(0, zipName.lastIndexOf("/"));
-                    File completeDirectory = new File(tmpDir + "/" + zipDirStructure);
-                    if (!completeDirectory.exists()) {
-                        if (!completeDirectory.mkdirs()) {
-                            log.error("could not create complete directory structure");
-                        }
-                    }
+                if (ze.isDirectory()) {
+                    log.debug("is a directory");
+                    Files.createDirectories(target);
+                    continue;
                 }
-
+                // ensure the parent directory structure exists, i.e. ze.getName() == "META-INF/MANIFEST.MF"
+                Path parentDir = target.getParent();
+                if (parentDir != null && !Files.isDirectory(parentDir)) {
+                    Files.createDirectories(parentDir);
+                }
                 // creates the file
-                FileOutputStream fout = new FileOutputStream(tmpDir + "/" + ze.getName());
-                InputStream in = zf.getInputStream(ze);
-                copy(in, fout);
-                in.close();
-                fout.close();
+                try (InputStream in = zf.getInputStream(ze); FileOutputStream fout = new FileOutputStream(target.toFile())) {
+                    expandedBytes += copy(in, fout, MAX_ZIP_EXPANDED_BYTES - expandedBytes);
+                }
+                if (expandedBytes >= MAX_ZIP_EXPANDED_BYTES) {
+                    log.error("Archive {} exceeds the maximum expanded size {}; aborting extraction", compressedFileName, MAX_ZIP_EXPANDED_BYTES);
+                    break;
+                }
             }
             e = null;
         } catch (IOException e) {
