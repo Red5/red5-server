@@ -83,6 +83,9 @@ public class ClientList<E> extends AbstractList<E> {
                 break;
             }
         }
+        if (removed) {
+            removeReleased();
+        }
         return removed;
     }
 
