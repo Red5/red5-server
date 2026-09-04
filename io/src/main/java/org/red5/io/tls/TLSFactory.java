@@ -138,8 +138,6 @@ public class TLSFactory {
      */
     public static SSLContext getTLSContext(String storeType, char[] passphrase) throws Exception {
         log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
-        log.debug("Keystore - file: {} password: {}", keystorePath, passphrase);
-        log.debug("Truststore - file: {} password: {}", truststorePath, passphrase);
         KeyStore ks = KeyStore.getInstance(storeType);
         KeyStore ts = KeyStore.getInstance(storeType);
         try (FileInputStream fis = new FileInputStream(keystorePath)) {
@@ -157,7 +155,7 @@ public class TLSFactory {
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         try {
             PrivateKey privateKey = (PrivateKey) ks.getKey("privatekey", passphrase);
-            log.debug("Private key: {}", privateKey);
+            log.debug("Private key present: {} algorithm: {}", privateKey != null, privateKey != null ? privateKey.getAlgorithm() : null);
             kmf.init(ks, passphrase);
         } catch (UnrecoverableKeyException e) {
             log.error("Failed to initialize KeyManagerFactory with keystore: {}", keystorePath, e);
@@ -183,8 +181,6 @@ public class TLSFactory {
      */
     public static SSLContext getTLSContext(String storeType, String keystorePassword, String keystorePath, String truststorePassword, String truststorePath) throws Exception {
         log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
-        log.debug("Keystore - file: {} password: {}", keystorePath, keystorePassword);
-        log.debug("Truststore - file: {} password: {}", truststorePath, truststorePassword);
         KeyStore ks = KeyStore.getInstance(storeType);
         KeyStore ts = KeyStore.getInstance(storeType);
         char[] keyStrorePassphrase = keystorePassword.toCharArray();
@@ -217,8 +213,6 @@ public class TLSFactory {
      */
     public static SSLContext getTLSContext(String storeType, char[] keyStrorePassphrase, InputStream keystoreInput, char[] trustStorePassphrase, InputStream truststoreInput) throws Exception {
         log.info("Creating SSL context with keystore and truststore input streams, using {}", storeType);
-        log.debug("Keystore - passphrase: {}", keyStrorePassphrase);
-        log.debug("Truststore - passphrase: {}", trustStorePassphrase);
         KeyStore ks = KeyStore.getInstance(storeType);
         KeyStore ts = KeyStore.getInstance(storeType);
         ks.load(keystoreInput, keyStrorePassphrase);
