@@ -41,6 +41,7 @@
     <!-- RTMP Handler -->
     <bean id="rtmpHandler" class="org.red5.server.net.rtmp.RTMPHandler">
         <property name="server" ref="red5.server" />
+        <property name="minReadChunkSize" value="${rtmp.min_chunk_size}" />
         <property name="statusObjectService" ref="statusObjectService" />
         <!-- Enable this to allow unvalidated connections -->
         <property name="unvalidatedConnectionAllowed" value="true" />
