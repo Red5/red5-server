@@ -93,6 +93,11 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      */
     protected int keepDelay = 0;
 
+    // Guarded by this scope's monitor, shared with room cleanup and admission.
+    protected boolean reaped;
+
+    protected long lastActivityTime = System.currentTimeMillis();
+
     /**
      * List of security handlers
      */
@@ -274,7 +279,10 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      *
      * Add event listener to list of notified objects
      */
-    public boolean addEventListener(IEventListener listener) {
+    public synchronized boolean addEventListener(IEventListener listener) {
+        if (reaped) {
+            return false;
+        }
         log.debug("addEventListener - scope: {} {}", getName(), listener);
         return listeners.add(listener);
     }
@@ -284,12 +292,15 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      *
      * Remove event listener from list of listeners
      */
-    public boolean removeEventListener(IEventListener listener) {
+    public synchronized boolean removeEventListener(IEventListener listener) {
         log.debug("removeEventListener - scope: {} {}", getName(), listener);
         if (log.isTraceEnabled()) {
             log.trace("Listeners - check #1: {}", listeners);
         }
         boolean removed = listeners.remove(listener);
+        if (removed) {
+            lastActivityTime = System.currentTimeMillis();
+        }
         if (!keepOnDisconnect) {
             if (removed && keepAliveJobName == null) {
                 if (ScopeUtils.isRoom(this) && listeners.isEmpty()) {
@@ -427,7 +438,9 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
         }
 
         public void execute(ISchedulingService service) {
-            if (listeners.isEmpty()) {
+            if (scope instanceof Scope room) {
+                room.removeIfIdle(System.currentTimeMillis(), 0);
+            } else if (listeners.isEmpty()) {
                 // delete empty rooms
                 log.trace("Removing {} from {}", scope.getName(), parent.getName());
                 parent.removeChildScope(scope);

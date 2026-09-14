@@ -93,6 +93,8 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      */
     private long creationTime;
 
+    private int pendingConnections;
+
     /**
      * Scope nesting depth, unset by default
      */
@@ -187,7 +189,10 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      *
      * Add child scope to this scope
      */
-    public boolean addChildScope(IBasicScope scope) {
+    public synchronized boolean addChildScope(IBasicScope scope) {
+        if (reaped) {
+            return false;
+        }
         log.debug("Add child: {}", scope);
         boolean added = false;
         if (scope.isValid()) {
@@ -241,6 +246,23 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * @return true on success, false otherwise
      */
     public boolean connect(IConnection conn, Object[] params) {
+        synchronized (this) {
+            if (reaped || !enabled) {
+                return false;
+            }
+            pendingConnections++;
+        }
+        try {
+            return connectInternal(conn, params);
+        } finally {
+            synchronized (this) {
+                pendingConnections--;
+                lastActivityTime = System.currentTimeMillis();
+            }
+        }
+    }
+
+    private boolean connectInternal(IConnection conn, Object[] params) {
         log.debug("Connect - scope: {} connection: {}", this, conn);
         if (enabled) {
             if (hasParent() && !parent.connect(conn, params)) {
@@ -765,11 +787,13 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return null;
     }
 
-    /**
-     * Return child scope names iterator
-     *
-     * @return Child scope names iterator
-     */
+    /** Returns a detached, read-only snapshot of child scope objects. */
+    @Override
+    public Collection<IBasicScope> getBasicScopes() {
+        return Collections.unmodifiableList(new ArrayList<>(children));
+    }
+
+    /** Returns the set of child scope names. */
     public Set<String> getScopeNames() {
         log.debug("Children: {}", children);
         return children.getNames();
@@ -1180,8 +1204,23 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Stops scope
+     * Detaches an empty room after its idle/retention period. Admission is closed
+     * atomically with the eligibility check; lifecycle callbacks run outside that lock.
      */
+    public boolean removeIfIdle(long now, long minimumIdleMillis) {
+        synchronized (this) {
+            if (type != ScopeType.ROOM || parent == null || reaped || keepOnDisconnect || pendingConnections != 0 || !listeners.isEmpty() || !connections.isEmpty() || !children.isEmpty() || now - lastActivityTime < Math.max(minimumIdleMillis, keepDelay * 1000L)) {
+                return false;
+            }
+            // References obtained before removal cannot attach a connection or child.
+            reaped = true;
+        }
+        parent.removeChildScope(this);
+        enabled = false;
+        return true;
+    }
+
+    /** Stops the scope's lifecycle without detaching it from its parent. */
     public void stop() {
         log.debug("stop: {}", name);
         if (enabled && running && handler != null) {

@@ -92,6 +92,21 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
     public Set<String> getScopeNames();
 
     /**
+     * Returns a detached, read-only snapshot of child scope objects. Scope overrides
+     * this compatibility default with a single pass over its child collection.
+     */
+    default Collection<IBasicScope> getBasicScopes() {
+        java.util.List<IBasicScope> result = new java.util.ArrayList<>();
+        for (String name : getScopeNames()) {
+            IBasicScope child = getBasicScope(ScopeType.UNDEFINED, name);
+            if (child != null) {
+                result.add(child);
+            }
+        }
+        return java.util.Collections.unmodifiableList(result);
+    }
+
+    /**
      * <p>getBasicScopeNames.</p>
      *
      * @param type a {@link org.red5.server.api.scope.ScopeType} object
