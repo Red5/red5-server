@@ -89,7 +89,10 @@ public class ScopeResolver implements IScopeResolver {
                 }
                 // if scope does not exist and we are not in the root, create a child scope
                 if (!scope.hasChildScope(child) && !scope.equals(root)) {
-                    scope.createChildScope(child);
+                    if (scope.createChildScope(child) && scope.getScope(child) instanceof Scope room) {
+                        // remove the room if the request exits before any connection joins it
+                        room.scheduleIdleCheck(Scope.NEW_ROOM_IDLE_GRACE_MILLIS);
+                    }
                 }
                 // get child scope
                 scope = scope.getScope(child);

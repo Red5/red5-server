@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.lang.reflect.Proxy;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,6 +20,7 @@ import org.red5.server.api.scheduling.IScheduledJob;
 import org.red5.server.api.scheduling.ISchedulingService;
 import org.red5.server.api.scope.IBasicScope;
 import org.red5.server.api.scope.IScope;
+import org.red5.server.api.scope.IScopeHandler;
 import org.red5.server.api.scope.ScopeType;
 
 public class ScopeCleanupTest {
@@ -165,6 +168,166 @@ public class ScopeCleanupTest {
         assertTrue(room.removeEventListener(second));
         job.get().execute(scheduler);
         assertNull(app.getScope("room"));
+    }
+
+    /** Records scheduled jobs so tests can run them on demand. */
+    private static class Jobs {
+        final List<IScheduledJob> scheduled = new CopyOnWriteArrayList<>();
+
+        final List<Long> delays = new CopyOnWriteArrayList<>();
+
+        final ISchedulingService scheduler = (ISchedulingService) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { ISchedulingService.class }, (proxy, method, args) -> {
+            switch (method.getName()) {
+                case "addScheduledOnceJob":
+                    delays.add(((Number) args[0]).longValue());
+                    scheduled.add((IScheduledJob) args[1]);
+                    return "job" + scheduled.size();
+                case "removeScheduledJob":
+                    return null;
+                default:
+                    throw new AssertionError(method.getName());
+            }
+        });
+
+        final IContext context = (IContext) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { IContext.class }, (proxy, method, args) -> scheduler);
+
+        void runLast() throws Exception {
+            scheduled.get(scheduled.size() - 1).execute(scheduler);
+        }
+    }
+
+    @Test
+    public void rejectedConnectToNewRoomIsRemovedAfterGrace() throws Exception {
+        Jobs jobs = new Jobs();
+        App app = new App() {
+            public IContext getContext() {
+                return jobs.context;
+            }
+
+            public boolean connect(IConnection conn, Object[] params) {
+                return false;
+            }
+        };
+        Scope room = room(app, "rejected");
+        room.scheduleIdleCheck(Scope.NEW_ROOM_IDLE_GRACE_MILLIS);
+        assertEquals(Long.valueOf(Scope.NEW_ROOM_IDLE_GRACE_MILLIS), jobs.delays.get(0));
+        assertFalse(room.connect(null));
+        // still inside the grace period, so the check is rescheduled rather than dropped
+        jobs.runLast();
+        assertSame(room, app.getScope("rejected"));
+        assertEquals(2, jobs.scheduled.size());
+        room.lastActivityTime -= Scope.NEW_ROOM_IDLE_GRACE_MILLIS;
+        jobs.runLast();
+        assertNull(app.getScope("rejected"));
+    }
+
+    @Test
+    public void sharedObjectChildDoesNotPinRoom() throws Exception {
+        Jobs jobs = new Jobs();
+        App app = new App() {
+            public IContext getContext() {
+                return jobs.context;
+            }
+        };
+        Scope room = room(app, "room");
+        assertTrue(room.addChildScope(new BasicScope(room, ScopeType.SHARED_OBJECT, "so", false) {
+        }));
+        IEventListener listener = event -> {
+        };
+        assertTrue(room.addEventListener(listener));
+        assertTrue(room.removeEventListener(listener));
+        jobs.runLast();
+        assertNull(app.getScope("room"));
+    }
+
+    @Test
+    public void nestedRoomsAreRemovedChildFirst() throws Exception {
+        Jobs jobs = new Jobs();
+        App app = new App() {
+            public IContext getContext() {
+                return jobs.context;
+            }
+        };
+        Scope parent = room(app, "parent");
+        Scope child = new Scope(parent, ScopeType.ROOM, "child", false);
+        assertTrue(parent.addChildScope(child));
+        IEventListener conn = event -> {
+        };
+        assertTrue(parent.addEventListener(conn));
+        assertTrue(child.addEventListener(conn));
+        assertTrue(child.removeEventListener(conn));
+        IScheduledJob childJob = jobs.scheduled.get(jobs.scheduled.size() - 1);
+        assertTrue(parent.removeEventListener(conn));
+        // parent check runs first and is deferred while the child room is attached
+        jobs.runLast();
+        assertSame(parent, app.getScope("parent"));
+        int scheduled = jobs.scheduled.size();
+        childJob.execute(jobs.scheduler);
+        assertNull(parent.getScope("child"));
+        assertEquals(scheduled + 1, jobs.scheduled.size());
+        jobs.runLast();
+        assertNull(app.getScope("parent"));
+    }
+
+    @Test
+    public void idleCheckDuringConnectResumesWhenConnectFails() throws Exception {
+        Jobs jobs = new Jobs();
+        CountDownLatch entered = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        App app = new App() {
+            public IContext getContext() {
+                return jobs.context;
+            }
+
+            public boolean connect(IConnection conn, Object[] params) {
+                entered.countDown();
+                try {
+                    return release.await(5, TimeUnit.SECONDS) && false;
+                } catch (InterruptedException e) {
+                    throw new AssertionError(e);
+                }
+            }
+        };
+        Scope room = room(app, "room");
+        IEventListener listener = event -> {
+        };
+        assertTrue(room.addEventListener(listener));
+        assertTrue(room.removeEventListener(listener));
+        Thread connect = new Thread(() -> room.connect(null));
+        connect.start();
+        try {
+            assertTrue(entered.await(5, TimeUnit.SECONDS));
+            jobs.runLast();
+            assertSame(room, app.getScope("room"));
+            assertEquals(1, jobs.scheduled.size());
+        } finally {
+            release.countDown();
+            connect.join(5000);
+        }
+        assertEquals(2, jobs.scheduled.size());
+        jobs.runLast();
+        assertNull(app.getScope("room"));
+    }
+
+    @Test
+    public void childScopeCallbacksRunOutsideMonitor() {
+        AtomicReference<Boolean> listenerAdded = new AtomicReference<>();
+        App app = new App();
+        Scope room = room(app, "room");
+        IEventListener listener = event -> {
+        };
+        app.setHandler((IScopeHandler) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { IScopeHandler.class }, (proxy, method, args) -> {
+            if (method.getName().equals("addChildScope") && "child".equals(((IBasicScope) args[0]).getName())) {
+                Thread other = new Thread(() -> room.addEventListener(listener));
+                other.start();
+                other.join(2000);
+                listenerAdded.set(!other.isAlive());
+            }
+            return method.getReturnType() == boolean.class ? Boolean.TRUE : null;
+        }));
+        assertTrue(room.addChildScope(new Scope(room, ScopeType.ROOM, "child", false)));
+        assertEquals(Boolean.TRUE, listenerAdded.get());
+        assertTrue(room.hasEventListeners());
     }
 
     @Test
