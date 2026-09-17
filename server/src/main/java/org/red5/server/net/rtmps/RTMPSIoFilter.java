@@ -34,12 +34,27 @@ public class RTMPSIoFilter extends RTMPEIoFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RTMPSIoFilter.class);
 
+    /** Session attribute set once data has been discarded because TLS closed. */
+    private static final String TLS_CLOSED = "rtmps.tlsClosed";
+
     /** {@inheritDoc} */
     @Override
     public void messageReceived(NextFilter nextFilter, IoSession session, Object obj) throws Exception {
         log.trace("messageReceived nextFilter: {} session: {} message: {}", nextFilter, session, obj);
-        if (obj instanceof SslFilterMessage || !session.isSecured()) {
-            log.trace("Either ssl message or un-secured session: {}", session.isSecured());
+        if (obj instanceof SslFilterMessage) {
+            log.trace("SSL message: {}", obj);
+            nextFilter.messageReceived(session, obj);
+        } else if (obj == session.getAttribute(RTMPSInboundMarkFilter.UNDECRYPTED_INBOUND)) {
+            // MINA 2.0.x forwards the received buffer itself, undecrypted, once TLS has closed
+            if (!session.containsAttribute(TLS_CLOSED)) {
+                session.setAttribute(TLS_CLOSED, Boolean.TRUE);
+                IoBuffer buf = (IoBuffer) obj;
+                log.warn("Discarding undecrypted data received after TLS closed, closing session: {} id: {} remaining: {} head: {}", session.getId(), session.getAttribute(RTMPConnection.RTMP_SESSION_ID), buf.remaining(), buf.getHexDump(32));
+            }
+            session.closeNow();
+        } else if (!session.isSecured()) {
+            // decrypted data on a session MINA reports as unsecured: after a renegotiation, or delivered after TLS closure
+            log.trace("Un-secured session: {}", session.isSecured());
             nextFilter.messageReceived(session, obj);
         } else {
             String sessionId = (String) session.getAttribute(RTMPConnection.RTMP_SESSION_ID);

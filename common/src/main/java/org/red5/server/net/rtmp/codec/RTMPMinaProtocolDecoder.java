@@ -88,6 +88,8 @@ public class RTMPMinaProtocolDecoder extends ProtocolDecoderAdapter {
                 }
             } else {
                 log.debug("Closing and skipping decode for unregistered connection: {}", sessionId);
+                // consume the input, otherwise ProtocolCodecFilter calls decode again while bytes remain and the I/O thread never returns
+                in.position(in.limit());
                 session.closeNow();
                 log.debug("Session closing: {} reading: {} writing: {}", session.isClosing(), session.isReadSuspended(), session.isWriteSuspended());
             }

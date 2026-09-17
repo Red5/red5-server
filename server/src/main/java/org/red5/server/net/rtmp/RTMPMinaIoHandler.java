@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.SocketException;
 
+import javax.net.ssl.SSLException;
+
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.future.CloseFuture;
@@ -236,8 +238,9 @@ public class RTMPMinaIoHandler extends IoHandlerAdapter {
         if (isDebug) {
             log.warn("Exception caught on session: {} id: {}", session.getId(), sessionId, cause);
         }
-        if (cause instanceof IOException) {
-            // Mina states that the connection will be automatically closed when an IOException is caught
+        if (cause instanceof IOException && !(cause instanceof SSLException)) {
+            // Mina states that the connection will be automatically closed when an IOException is caught; that does not hold for an
+            // SSLException thrown by the SslFilter on an established session, so those are force-closed below
             log.debug("IOException caught on {}", sessionId);
         } else {
             log.debug("Non-IOException caught on {}", sessionId);

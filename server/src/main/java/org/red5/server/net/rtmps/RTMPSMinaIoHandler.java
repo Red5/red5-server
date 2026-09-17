@@ -151,6 +151,8 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
         IoFilterChain chain = session.getFilterChain();
         // add ssl first
         chain.addFirst("sslFilter", sslFilter);
+        // mark undecrypted input so the rtmps filter can reject it if the ssl filter forwards it after TLS closure
+        chain.addBefore("sslFilter", "rtmpsInboundMark", new RTMPSInboundMarkFilter());
         // use notification messages
         session.setAttribute(SslFilter.USE_NOTIFICATION, Boolean.TRUE);
         log.debug("isSslStarted: {}", sslFilter.isSslStarted(session));
