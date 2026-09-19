@@ -1,0 +1,39 @@
+FROM eclipse-temurin:21-jre
+
+ENV RED5_HOME=/opt/red5
+WORKDIR /opt/red5
+
+COPY red5/ /opt/red5/
+
+# Enable the RTMPS transport (uncomment the block that follows the RTMPS marker in red5-core.xml)
+# and point it at a self-signed PKCS12 keystore/truststore generated at image build time.
+RUN set -eu; \
+    awk 'BEGIN{state=0} \
+         state==0 && /<!-- RTMPS -->/ {print; state=1; next} \
+         state==1 && /^<!--$/ {state=2; next} \
+         state==2 && /^-->$/ {state=3; next} \
+         {print}' conf/red5-core.xml > conf/red5-core.xml.new; \
+    mv conf/red5-core.xml.new conf/red5-core.xml; \
+    grep -q 'id="rtmpsTransport"' conf/red5-core.xml; \
+    sed -i \
+        -e 's#^rtmps.keystorepass=.*#rtmps.keystorepass=password123#' \
+        -e 's#^rtmps.keystorefile=.*#rtmps.keystorefile=conf/rtmps_keystore.p12#' \
+        -e 's#^rtmps.truststorepass=.*#rtmps.truststorepass=password123#' \
+        -e 's#^rtmps.truststorefile=.*#rtmps.truststorefile=conf/rtmps_truststore.p12#' \
+        conf/red5.properties; \
+    grep -q '^rtmps.keystorefile=conf/rtmps_keystore.p12' conf/red5.properties; \
+    keytool -genkeypair -alias red5 -keyalg RSA -keysize 2048 -validity 3650 \
+        -dname "CN=red5, OU=e2e, O=Red5, C=US" \
+        -ext "SAN=dns:red5,dns:localhost,ip:127.0.0.1" \
+        -storetype PKCS12 -keystore conf/rtmps_keystore.p12 \
+        -storepass password123 -keypass password123; \
+    keytool -exportcert -alias red5 -keystore conf/rtmps_keystore.p12 -storepass password123 \
+        -rfc -file /tmp/red5.crt; \
+    keytool -importcert -noprompt -alias red5 -file /tmp/red5.crt \
+        -storetype PKCS12 -keystore conf/rtmps_truststore.p12 -storepass password123; \
+    rm -f /tmp/red5.crt; \
+    chmod +x red5.sh
+
+EXPOSE 1935 5080 8443
+
+ENTRYPOINT ["./red5.sh"]

@@ -1,0 +1,44 @@
+# RTMPS end-to-end test: Red5 built from the current checkout with RTMPS enabled,
+# an ffmpeg publisher over rtmps, and a prober that subscribes over rtmps.
+# Driven by tests/src/test/resources/scripts/rtmps_compose_e2e_test.sh.
+services:
+  red5:
+    build:
+      context: .
+      dockerfile: Dockerfile.red5
+    environment:
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    healthcheck:
+      test: ["CMD", "bash", "-c", ":</dev/tcp/127.0.0.1/8443 && :</dev/tcp/127.0.0.1/1935"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+      start_period: 15s
+
+  publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile.ffmpeg
+    depends_on:
+      red5:
+        condition: service_healthy
+    environment:
+      RTMPS_URL: "rtmps://red5:8443/live/rtmpstest"
+      PUBLISH_DURATION: "${PUBLISH_DURATION:-30}"
+    command: ["/scripts/publish.sh"]
+
+  prober:
+    build:
+      context: .
+      dockerfile: Dockerfile.ffmpeg
+    depends_on:
+      red5:
+        condition: service_healthy
+      publisher:
+        condition: service_started
+    environment:
+      RTMPS_URL: "rtmps://red5:8443/live/rtmpstest"
+      RTMPS_HOST: "red5"
+      RTMPS_PORT: "8443"
+      MIN_FRAMES: "${MIN_FRAMES:-30}"
+    command: ["/scripts/probe.sh"]

@@ -271,3 +271,17 @@ Using ffplay to test playback, issue the following, but make sure to update the 
 
 * To enable SSL debugging, add the following system property to the JVM: `-Djavax.net.debug=SSL`
 * To enable more detailed SSL debugging, add the following system property to the JVM: `-Djavax.net.debug=SSL,handshake,verbose,trustmanager,keymanager,record,plaintext`
+
+## End-to-end test
+
+An RTMPS end-to-end test lives in `tests/src/test/resources/docker/rtmps-e2e` and is driven by `tests/src/test/resources/scripts/rtmps_compose_e2e_test.sh`. It builds a Red5 image from the current checkout with the RTMPS transport enabled and a self-signed PKCS12 keystore, publishes a synthetic H.264/AAC stream over `rtmps://` with ffmpeg, then subscribes over `rtmps://` and asserts on the TLS certificate, the probed codecs, and the number of decoded frames.
+
+```bash
+# directly (requires docker compose v2; uses server/target/red5-server-*.tar.gz or assembles one)
+tests/src/test/resources/scripts/rtmps_compose_e2e_test.sh
+
+# via Maven
+mvn -pl tests -Prtmps-e2e verify
+```
+
+Set `PUBLISH_DURATION`, `MIN_FRAMES`, `RED5_TARBALL`, or `KEEP_UP=1` to adjust the run. Logs are written under `tests/target/rtmps-e2e/`.

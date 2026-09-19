@@ -245,4 +245,28 @@ public class ServerRTMPHandshakeTest {
         Assert.assertEquals(0, failures.get());
     }
 
+    @Test
+    public void testRC4EncryptDecryptRoundTrip() throws Exception {
+        // dummy shared secret
+        byte[] sharedSecret = new byte[16];
+        for (int i = 0; i < sharedSecret.length; i++) {
+            sharedSecret[i] = (byte) i;
+        }
+        // dummy public key used for both directions
+        byte[] publicKey = new byte[128];
+        for (int i = 0; i < publicKey.length; i++) {
+            publicKey[i] = (byte) i;
+        }
+        RTMPHandshake handshake = new InboundHandshake();
+        handshake.outgoingPublicKey = publicKey;
+        handshake.incomingPublicKey = publicKey;
+        handshake.initRC4Encryption(sharedSecret);
+        // with identical keys on both sides, cipherOut then cipherIn must round-trip
+        byte[] message = "Hello, World!".getBytes();
+        byte[] encrypted = handshake.cipherOut.doFinal(message);
+        Assert.assertFalse(Arrays.equals(message, encrypted));
+        byte[] decrypted = handshake.cipherIn.doFinal(encrypted);
+        Assert.assertArrayEquals(message, decrypted);
+    }
+
 }

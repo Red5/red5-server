@@ -1,0 +1,6 @@
+FROM alpine:3.20
+
+RUN apk add --no-cache ffmpeg openssl bash
+
+COPY publish.sh probe.sh /scripts/
+RUN chmod +x /scripts/publish.sh /scripts/probe.sh
