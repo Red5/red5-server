@@ -25,8 +25,18 @@ public interface IProviderService extends IScopeService {
     /** Constant <code>BEAN_NAME="providerService"</code> */
     public final static String BEAN_NAME = "providerService";
 
+    /**
+     * The kind of input source that was found for a requested stream name.
+     */
     enum INPUT_TYPE {
-        NOT_FOUND, LIVE, LIVE_WAIT, VOD;
+        /** No matching live or VOD source could be found. */
+        NOT_FOUND,
+        /** A live broadcast source is currently available. */
+        LIVE,
+        /** No live source is available yet, but legacy live-wait support means one may still arrive. */
+        LIVE_WAIT,
+        /** A video-on-demand (recorded) file source was found. */
+        VOD;
     };
 
     /**

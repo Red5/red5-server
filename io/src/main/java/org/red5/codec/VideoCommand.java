@@ -7,7 +7,10 @@ package org.red5.codec;
  */
 public enum VideoCommand {
 
-    START_SEEK((byte) 0), END_SEEK((byte) 0x01);
+    /** Marks the start of a client-side seeking video frame sequence. */
+    START_SEEK((byte) 0),
+    /** Marks the end of a client-side seeking video frame sequence. */
+    END_SEEK((byte) 0x01);
 
     private final byte value;
 

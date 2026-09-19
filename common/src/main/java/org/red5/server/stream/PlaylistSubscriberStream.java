@@ -950,6 +950,13 @@ public class PlaylistSubscriberStream extends AbstractClientStream implements IP
 
         final IConnection conn;
 
+        /**
+         * Creates a notifier that will invoke the stream aware scope handler on behalf of the given connection.
+         *
+         * @param stream the playlist subscriber stream this notifier is attached to
+         * @param handler the scope handler to notify
+         * @param conn the connection associated with the notification
+         */
         public Notifier(IPlaylistSubscriberStream stream, IStreamAwareScopeHandler handler, IConnection conn) {
             log.trace("Notifier - stream: {} handler: {}", stream, handler);
             this.conn = conn;

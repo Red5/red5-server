@@ -279,6 +279,14 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
         //Required for play engine
         private IProviderService providerService;
 
+        /**
+         * Creates a builder with the required collaborators for a {@link PlayEngine}.
+         *
+         * @param subscriberStream the subscriber stream the engine will serve
+         * @param schedulingService the scheduling service used for buffer checks and live wait jobs
+         * @param consumerService the consumer service used to obtain a stream consumer
+         * @param providerService the provider service used to look up VOD/live providers
+         */
         public Builder(ISubscriberStream subscriberStream, ISchedulingService schedulingService, IConsumerService consumerService, IProviderService providerService) {
             this.subscriberStream = subscriberStream;
             this.schedulingService = schedulingService;
@@ -286,6 +294,11 @@ public final class PlayEngine implements IFilter, IPushableConsumer, IPipeConnec
             this.providerService = providerService;
         }
 
+        /**
+         * Builds a new {@link PlayEngine} configured from this builder.
+         *
+         * @return the constructed play engine
+         */
         public PlayEngine build() {
             return new PlayEngine(this);
         }

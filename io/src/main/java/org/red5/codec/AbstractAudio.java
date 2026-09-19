@@ -22,34 +22,51 @@ public class AbstractAudio implements IAudioStreamCodec {
     /** Constant <code>isDebug=log.isDebugEnabled()</code> */
     protected static boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
+    /** The audio codec handled by this instance. */
     protected AudioCodec codec;
 
     // whether or not to employ enhanced codec handling
+    /** Whether or not to employ enhanced (E-RTMP) codec handling for this instance. */
     protected boolean enhanced;
 
+    /** The multitrack arrangement type when enhanced multitrack audio is in use. */
     protected AvMultitrackType multitrackType;
 
+    /** The enhanced RTMP audio packet type of the most recently handled packet. */
     protected AudioPacketType packetType;
 
     // defaulting to 48khz, 16bit, stereo
-    protected int sampleRate = 48000, sampleSizeInBits = 16, channels = 2;
+    /** Audio sample rate, in Hz; defaults to 48000. */
+    protected int sampleRate = 48000;
+
+    /** Bit depth of each audio sample, in bits; defaults to 16. */
+    protected int sampleSizeInBits = 16;
+
+    /** Number of audio channels; defaults to 2 (stereo). */
+    protected int channels = 2;
 
     // defaulting to unsigned simply to support 8 bit audio / older codecs
+    /** Whether the sample data is signed; defaults to {@code true}. */
     protected boolean signed = true;
 
     // track id
+    /** Identifier of the track this codec instance is associated with. */
     protected int trackId;
 
     // audio channel order
+    /** Layout scheme used for the audio channels; defaults to {@link AudioChannelOrder#Unspecified}. */
     protected AudioChannelOrder audioChannelOrder = AudioChannelOrder.Unspecified;
 
     // each entry specifies the speaker layout
+    /** Speaker layout for each channel when a custom audio channel order is in use. */
     protected AudioChannel[] audioChannelMap;
 
     // indicates which channels are present in the multi-channel stream
+    /** Bit flags indicating which channels are present in the multi-channel stream. */
     protected int audioChannelFlags;
 
     // audio codec specific attributes
+    /** Arbitrary codec-specific attributes keyed by name. */
     protected transient ConcurrentMap<String, String> attributes = new ConcurrentHashMap<>();
 
     /** {@inheritDoc} */

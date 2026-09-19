@@ -34,7 +34,6 @@ public class QueuedMediaData {
         this.tag = ImmutableTag.build(dataType, timestamp);
     }
 
-    @SuppressWarnings("rawtypes")
     /**
      * <p>Constructor for QueuedMediaData.</p>
      *
@@ -42,6 +41,7 @@ public class QueuedMediaData {
      * @param dataType a byte
      * @param streamData a {@link org.red5.server.stream.IStreamData} object
      */
+    @SuppressWarnings("rawtypes")
     public QueuedMediaData(int timestamp, byte dataType, IStreamData streamData) {
         this.tag = ImmutableTag.build(dataType, timestamp, streamData.getData());
         if (streamData instanceof VideoData) {

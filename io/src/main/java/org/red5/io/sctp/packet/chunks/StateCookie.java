@@ -85,6 +85,7 @@ public class StateCookie {
      * @param data an array of {@link byte} objects
      * @param offset a int
      * @param length a int
+     * @throws org.red5.io.sctp.SctpException if the offset and length do not fit the data or the MAC length is invalid
      */
     public StateCookie(byte[] data, int offset, int length) throws SctpException {
         if (data == null || offset < 0 || length < 4 || offset > data.length - length) {

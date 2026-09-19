@@ -19,19 +19,19 @@ public class Session implements ISession {
 
     private static final long serialVersionUID = 2893666721L;
 
-    //time at which this session instance was created
+    /** Time, in milliseconds since the epoch, at which this session instance was created. */
     protected long created;
 
-    //whether or not this session is in an active state
+    /** Whether or not this session is in an active state. */
     protected boolean active;
 
-    //unique identifier for this session
+    /** Unique identifier for this session. */
     protected String sessionId;
 
-    //location where resources may be stored for this instance
+    /** Location on disk where resources may be stored for this session instance. */
     protected String destinationDirectory;
 
-    //flash client identifier
+    /** Flash client identifier associated with this session. */
     protected String clientId;
 
     {

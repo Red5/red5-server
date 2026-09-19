@@ -20,8 +20,14 @@ import org.red5.net.websocket.WebSocketConnection;
  */
 public class WSMessage {
 
+    /**
+     * The kind of payload carried by a WebSocket message.
+     */
     public enum MessageType {
-        BINARY, TEXT;
+        /** The message payload is binary data. */
+        BINARY,
+        /** The message payload is UTF-8 text. */
+        TEXT;
     }
 
     // message type
@@ -83,7 +89,7 @@ public class WSMessage {
      * Returns the payload data as a UTF8 string.
      *
      * @return string
-     * @throws java.io.UnsupportedEncodingException
+     * @throws java.io.UnsupportedEncodingException if the UTF8 encoding is not supported by the JVM
      */
     public String getMessageAsString() throws UnsupportedEncodingException {
         return new String(payload.array(), "UTF8").trim();

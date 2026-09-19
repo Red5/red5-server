@@ -46,6 +46,9 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
      */
     protected ScheduledExecutorService scheduler;
 
+    /**
+     * Number of threads used by the scheduler's thread pool, defaults to twice the available processor count.
+     */
     protected int threadCount = Runtime.getRuntime().availableProcessors() * 2;
 
     /**
@@ -53,6 +56,9 @@ public class JDKSchedulingService implements ISchedulingService, JDKSchedulingSe
      */
     protected ConcurrentMap<String, ScheduledFuture<?>> keyMap = new ConcurrentHashMap<>();
 
+    /**
+     * Counter used to generate unique job detail / job names.
+     */
     protected AtomicInteger jobDetailCounter = new AtomicInteger();
 
     private boolean interruptOnRemove = true;

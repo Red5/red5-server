@@ -14,15 +14,19 @@ import java.util.Arrays;
 public class OBUInfo {
 
     // OBU type
+    /** The type of this Open Bitstream Unit, per the AV1 bitstream specification. */
     public OBUType obuType;
 
     // general OBU info
+    /** Size in bytes of the OBU payload ({@code size}), and the temporal ({@code temporal_id}) and spatial ({@code spatial_id}) layer identifiers from the OBU extension header. */
     public int size, temporalId, spatialId;
 
     // OBU header info
+    /** Up to 7 raw header bytes preceding the OBU payload (obu_header plus optional obu_extension_header and leb128 size). */
     public byte[] prefix = new byte[7];
 
     // OBU data
+    /** Buffer wrapping the OBU payload bytes. */
     public ByteBuffer data;
 
     /**

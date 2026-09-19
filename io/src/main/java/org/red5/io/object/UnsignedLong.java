@@ -20,6 +20,7 @@ public final class UnsignedLong extends UnsignedNumber {
 
     private static final long serialVersionUID = 1L;
 
+    /** The 8 bytes making up this unsigned 64 bit value, stored most significant byte first. */
     private byte[] value = new byte[8];
 
     /**

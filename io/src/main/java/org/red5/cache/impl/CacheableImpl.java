@@ -25,10 +25,13 @@ public class CacheableImpl implements ICacheable {
     /** Constant <code>log</code> */
     protected static Logger log = LoggerFactory.getLogger(CacheableImpl.class);
 
+    /** The raw serialized bytes held by this cache entry. */
     private byte[] bytes;
 
+    /** The name under which this entry is stored in the cache. */
     private String name;
 
+    /** Whether this entry currently holds valid cached data. */
     private boolean cached;
 
     /**

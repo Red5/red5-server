@@ -17,12 +17,16 @@ import java.util.Map;
  */
 public class AbstractMessage implements IMessage {
 
+    /** Unique identifier of this message. */
     protected String messageID;
 
+    /** Identifier correlating this message with another, such as a reply to a request. */
     protected String correlationID;
 
+    /** Type descriptor for this message. */
     protected String messageType;
 
+    /** Additional headers not covered by the dedicated getters/setters. */
     protected Map<?, ?> extraHeaders;
 
     /**

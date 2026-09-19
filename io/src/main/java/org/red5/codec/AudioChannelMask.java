@@ -8,12 +8,57 @@ package org.red5.codec;
  */
 public enum AudioChannelMask {
 
-    FrontLeft(0x000001), FrontRight(0x000002), FrontCenter(0x000004), LowFrequency1(0x000008), BackLeft(0x000010), BackRight(0x000020), FrontLeftCenter(0x000040), FrontRightCenter(0x000080), BackCenter(0x000100), SideLeft(0x000200), SideRight(0x000400), TopCenter(0x000800), TopFrontLeft(0x001000), TopFrontCenter(0x002000), TopFrontRight(0x004000), TopBackLeft(0x008000), TopBackCenter(0x010000), TopBackRight(
-            0x020000),
+    /** Front left speaker channel. */
+    FrontLeft(0x000001),
+    /** Front right speaker channel. */
+    FrontRight(0x000002),
+    /** Front center speaker channel. */
+    FrontCenter(0x000004),
+    /** Low frequency effects channel 1 (subwoofer). */
+    LowFrequency1(0x000008),
+    /** Back left speaker channel. */
+    BackLeft(0x000010),
+    /** Back right speaker channel. */
+    BackRight(0x000020),
+    /** Front left-of-center speaker channel. */
+    FrontLeftCenter(0x000040),
+    /** Front right-of-center speaker channel. */
+    FrontRightCenter(0x000080),
+    /** Back center speaker channel. */
+    BackCenter(0x000100),
+    /** Side left speaker channel. */
+    SideLeft(0x000200),
+    /** Side right speaker channel. */
+    SideRight(0x000400),
+    /** Top center speaker channel. */
+    TopCenter(0x000800),
+    /** Top front left speaker channel. */
+    TopFrontLeft(0x001000),
+    /** Top front center speaker channel. */
+    TopFrontCenter(0x002000),
+    /** Top front right speaker channel. */
+    TopFrontRight(0x004000),
+    /** Top back left speaker channel. */
+    TopBackLeft(0x008000),
+    /** Top back center speaker channel. */
+    TopBackCenter(0x010000),
+    /** Top back right speaker channel. */
+    TopBackRight(0x020000),
 
     // Completes 22.2 multichannel audio), as standardized in SMPTE ST2036-2-2008
     // see - <https://en.wikipedia.org/wiki/22.2_surround_sound>
-    LowFrequency2(0x040000), TopSideLeft(0x080000), TopSideRight(0x100000), BottomFrontCenter(0x200000), BottomFrontLeft(0x400000), BottomFrontRight(0x800000);
+    /** Low frequency effects channel 2 (second subwoofer), part of 22.2 surround sound. */
+    LowFrequency2(0x040000),
+    /** Top side left speaker channel, part of 22.2 surround sound. */
+    TopSideLeft(0x080000),
+    /** Top side right speaker channel, part of 22.2 surround sound. */
+    TopSideRight(0x100000),
+    /** Bottom front center speaker channel, part of 22.2 surround sound. */
+    BottomFrontCenter(0x200000),
+    /** Bottom front left speaker channel, part of 22.2 surround sound. */
+    BottomFrontLeft(0x400000),
+    /** Bottom front right speaker channel, part of 22.2 surround sound. */
+    BottomFrontRight(0x800000);
 
     private int mask;
 

@@ -64,10 +64,13 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
      */
     private ObjectName oName;
 
+    /** Default outbound bandwidth advertised to clients from the server, in bytes per second. */
     protected int defaultServerBandwidth = 10000000;
 
+    /** Default outbound bandwidth advertised to the server from the client, in bytes per second. */
     protected int defaultClientBandwidth = 10000000;
 
+    /** Whether the connection attempts to auto-detect the client's available bandwidth. */
     protected boolean bandwidthDetection = true;
 
     /**

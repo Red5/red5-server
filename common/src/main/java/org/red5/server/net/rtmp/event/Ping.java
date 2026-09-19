@@ -20,25 +20,44 @@ public class Ping extends BaseEvent {
 
     private static final long serialVersionUID = -6478248060425544923L;
 
+    /**
+     * The sub-type of a {@link org.red5.server.net.rtmp.event.Ping} user control event.
+     */
     public enum PingType {
-        STREAM_BEGIN, // Stream begin / clear event
-        STREAM_PLAYBUFFER_CLEAR, // Stream play buffer clear event
-        STREAM_DRY, // Stream dry event
-        CLIENT_BUFFER, // Client buffer event
-        RECORDED_STREAM, // Recorded stream event
-        UNKNOWN_5, // Unknown event
-        PING_CLIENT, // Ping client event
-        PONG_SERVER, // Pong server event
-        UNKNOWN_8, // Unknown event
-        PING_SWF_VERIFY, // Ping SWF verify event
-        PONG_SWF_VERIFY, // Pong SWF verify event
-        BUFFER_EMPTY, // Buffer empty event
-        BUFFER_FULL, // Buffer full event
-        UNDEFINED; // -1
+        /** Stream begin / clear event. */
+        STREAM_BEGIN,
+        /** Stream play buffer clear event. */
+        STREAM_PLAYBUFFER_CLEAR,
+        /** Stream dry event. */
+        STREAM_DRY,
+        /** Client buffer event. */
+        CLIENT_BUFFER,
+        /** Recorded stream event. */
+        RECORDED_STREAM,
+        /** Unknown event (raw type 5). */
+        UNKNOWN_5,
+        /** Ping client event. */
+        PING_CLIENT,
+        /** Pong server event. */
+        PONG_SERVER,
+        /** Unknown event (raw type 8). */
+        UNKNOWN_8,
+        /** Ping SWF verify event. */
+        PING_SWF_VERIFY,
+        /** Pong SWF verify event. */
+        PONG_SWF_VERIFY,
+        /** Buffer empty event. */
+        BUFFER_EMPTY,
+        /** Buffer full event. */
+        BUFFER_FULL,
+        /** Undefined / unrecognized event type (raw value -1). */
+        UNDEFINED;
 
         /**
-         * <p>getType.</p>
-         * @return a {@link org.red5.server.net.rtmp.event.Ping.PingType} object
+         * Looks up the {@link org.red5.server.net.rtmp.event.Ping.PingType} matching a raw wire type value.
+         *
+         * @param type the raw ping event type value read from or written to the RTMP stream
+         * @return the matching {@link org.red5.server.net.rtmp.event.Ping.PingType} object, or {@code UNDEFINED} if unrecognized
          */
         public static PingType getType(int type) {
             switch (type) {

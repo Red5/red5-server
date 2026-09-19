@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericWriterPostProcessor implements IPostProcessor {
 
+    /** Logger for this class. */
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private File file;

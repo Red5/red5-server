@@ -63,10 +63,10 @@ public final class WarDeployer implements ApplicationContextAware {
         log.info("War deployer service created");
     }
 
-    @Deprecated(since = "2.0.9", forRemoval = true)
     /**
      * <p>Constructor for WarDeployer.</p>
      */
+    @Deprecated(since = "2.0.9", forRemoval = true)
     public WarDeployer() {
         log.warn("Use via constructor or as a Spring bean is deprecated");
         webappsDirectory = new File("webapps");

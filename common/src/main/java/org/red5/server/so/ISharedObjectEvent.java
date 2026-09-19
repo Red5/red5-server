@@ -14,8 +14,36 @@ package org.red5.server.so;
  */
 public interface ISharedObjectEvent {
 
+    /**
+     * The kind of shared object update or notification an event represents.
+     */
     enum Type {
-        SERVER_CONNECT, SERVER_DISCONNECT, SERVER_SET_ATTRIBUTE, SERVER_DELETE_ATTRIBUTE, SERVER_SEND_MESSAGE, CLIENT_CLEAR_DATA, CLIENT_DELETE_ATTRIBUTE, CLIENT_DELETE_DATA, CLIENT_INITIAL_DATA, CLIENT_STATUS, CLIENT_UPDATE_DATA, CLIENT_UPDATE_ATTRIBUTE, CLIENT_SEND_MESSAGE
+        /** A client connected to the shared object, server-side notification. */
+        SERVER_CONNECT,
+        /** A client disconnected from the shared object, server-side notification. */
+        SERVER_DISCONNECT,
+        /** An attribute was set on the shared object, server-side notification. */
+        SERVER_SET_ATTRIBUTE,
+        /** An attribute was deleted from the shared object, server-side notification. */
+        SERVER_DELETE_ATTRIBUTE,
+        /** A message/method call was sent to the shared object, server-side notification. */
+        SERVER_SEND_MESSAGE,
+        /** Request to clear all data/attributes of the shared object. */
+        CLIENT_CLEAR_DATA,
+        /** Request to delete a single attribute from the shared object. */
+        CLIENT_DELETE_ATTRIBUTE,
+        /** Notification that data was deleted from the shared object. */
+        CLIENT_DELETE_DATA,
+        /** Initial data sent to a client upon connecting to the shared object. */
+        CLIENT_INITIAL_DATA,
+        /** A status event/message reported to the client. */
+        CLIENT_STATUS,
+        /** Notification that data was updated on the shared object. */
+        CLIENT_UPDATE_DATA,
+        /** Request to update (set) a single attribute on the shared object. */
+        CLIENT_UPDATE_ATTRIBUTE,
+        /** A message/method call sent by a client to the shared object handlers. */
+        CLIENT_SEND_MESSAGE
     };
 
     /**

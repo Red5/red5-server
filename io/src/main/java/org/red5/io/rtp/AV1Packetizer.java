@@ -82,6 +82,7 @@ public class AV1Packetizer {
          set to 0 otherwise.
       N: MUST be set to 1 if the packet is the first packet of a coded video sequence, and MUST be set to 0 otherwise.
     */
+    /** MUST be set to 1 if the first OBU element is an OBU fragment continuing from the previous packet, and 0 otherwise. */
     public boolean Z, Y, N;
 
     /*
@@ -94,6 +95,11 @@ public class AV1Packetizer {
               length of aggregation header
               length of previous OBU elements including length fields
     */
+    /**
+     * Two bit field describing the number of OBU elements in the packet. Set to 0 or to the number of OBU elements
+     * contained in the packet; if 0, each OBU element is preceded by a length field, otherwise (1, 2 or 3) the last
+     * OBU element is not preceded by a length field and its length is derived from the RTP payload length.
+     */
     public byte W;
 
     // Collection of OBU Elements; each OBU Element may be a full OBU, or just a fragment of one.

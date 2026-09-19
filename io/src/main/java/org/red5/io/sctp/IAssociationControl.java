@@ -18,8 +18,18 @@ import org.red5.io.sctp.packet.SctpPacket;
  */
 public interface IAssociationControl {
 
+    /**
+     * SCTP association state, per RFC 4960.
+     */
     public static enum State {
-        CLOSED, COOKIE_WAIT, COOKIE_ECHOED, ESTABLISHED
+        /** The association is closed / does not exist. */
+        CLOSED,
+        /** An INIT has been sent and the association is waiting for the INIT ACK cookie. */
+        COOKIE_WAIT,
+        /** The cookie has been echoed back and the association is awaiting COOKIE ACK. */
+        COOKIE_ECHOED,
+        /** The association handshake is complete and the association is established. */
+        ESTABLISHED
     }
 
     /** Constant <code>VALID_COOKIE_TIME=60</code> */

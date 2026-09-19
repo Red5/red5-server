@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseEvent implements Constants, IRTMPEvent, Externalizable {
 
+    /** Logger for this instance, bound to the runtime class. */
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     // XXX we need a better way to inject allocation debugging

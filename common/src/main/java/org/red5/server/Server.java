@@ -71,11 +71,14 @@ public class Server implements IServer, ApplicationContextAware, InitializingBea
      */
     protected static final String EMPTY = "";
 
+    /** Listeners notified whenever a scope is added to or removed from this server. */
     public Set<IScopeListener> scopeListeners = new CopyOnWriteArraySet<IScopeListener>();
 
+    /** Listeners notified whenever a connection is added to or removed from this server. */
     public Set<IConnectionListener> connectionListeners = new CopyOnWriteArraySet<IConnectionListener>();
 
     // delay between posting a notification and informing any listeners
+    /** Delay in milliseconds between posting a scope/connection notification and informing the registered listeners. */
     public long notificationDelay = 5L;
 
     /**

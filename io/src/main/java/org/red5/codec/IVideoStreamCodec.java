@@ -133,13 +133,31 @@ public interface IVideoStreamCodec {
 
         private int compTimeOffset;
 
+        /**
+         * Constructs an empty frame data holder with no backing bytes.
+         */
         public FrameData() {
         }
 
+        /**
+         * Constructs a frame data holder, copying the given buffer's remaining bytes.
+         *
+         * @param data
+         *            the frame's source data
+         */
         public FrameData(IoBuffer data) {
             setData(data);
         }
 
+        /**
+         * Constructs a frame data holder, copying the given buffer's remaining bytes and recording its
+         * composition time offset.
+         *
+         * @param data
+         *            the frame's source data
+         * @param compTimeOffset
+         *            the composition time offset for the frame
+         */
         public FrameData(IoBuffer data, int compTimeOffset) {
             setData(data);
             this.compTimeOffset = compTimeOffset;
@@ -160,14 +178,29 @@ public interface IVideoStreamCodec {
             data.get(frame);
         }
 
+        /**
+         * Returns the frame's data as a read-only buffer.
+         *
+         * @return a read-only {@link org.apache.mina.core.buffer.IoBuffer} wrapping the frame bytes, or null if no data was set
+         */
         public IoBuffer getFrame() {
             return frame == null ? null : IoBuffer.wrap(frame).asReadOnlyBuffer();
         }
 
+        /**
+         * Returns the frame's raw backing bytes.
+         *
+         * @return the frame data bytes, or null if no data was set
+         */
         public byte[] getFrameBytes() {
             return frame;
         }
 
+        /**
+         * Returns the composition time offset for the frame.
+         *
+         * @return the composition time offset
+         */
         public int getCompTimeOffset() {
             return compTimeOffset;
         }

@@ -58,6 +58,7 @@ public class WebSocketScopeManager {
     private CopyOnWriteArraySet<String> activeRooms = new CopyOnWriteArraySet<>();
 
     // whether or not to copy listeners from parent to child on create
+    /** Whether scope listeners are copied from a parent WebSocket scope to a newly created child scope. */
     protected boolean copyListeners = true;
 
     // value for the websocket ping period/interval

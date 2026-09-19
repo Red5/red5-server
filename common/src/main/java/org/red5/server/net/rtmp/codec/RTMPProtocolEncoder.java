@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RTMPProtocolEncoder implements Constants, IEventEncoder {
 
+    /** Logger for this encoder instance. */
     protected Logger log = LoggerFactory.getLogger(RTMPProtocolEncoder.class);
 
     /**
@@ -1144,6 +1145,11 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         return baseTolerance;
     }
 
+    /**
+     * Sets the RTMP connection associated with this encoder.
+     *
+     * @param conn the RTMP connection to associate with this encoder
+     */
     public void setConnection(RTMPConnection conn) {
         this.conn = conn;
     }

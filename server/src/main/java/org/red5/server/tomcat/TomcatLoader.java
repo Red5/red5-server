@@ -258,7 +258,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      * @param docBase
      *            Document base
      * @return Catalina context (that is, web application)
-     * @throws jakarta.servlet.ServletException
+     * @throws jakarta.servlet.ServletException if the context cannot be created or started
      * @param path a {@link java.lang.String} object
      */
     public Context addContext(String path, String docBase) throws ServletException {
@@ -275,7 +275,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      * @param host
      *            Host to add context to
      * @return Catalina context (that is, web application)
-     * @throws jakarta.servlet.ServletException
+     * @throws jakarta.servlet.ServletException if the context cannot be created or started
      */
     public Context addContext(String contextPath, String docBase, Host host) throws ServletException {
         log.debug("Add context - path: {} docbase: {}", contextPath, docBase);
@@ -811,7 +811,7 @@ public class TomcatLoader extends LoaderBase implements InitializingBean, Dispos
      *
      * @param contexts
      *            Map of contexts
-     * @throws jakarta.servlet.ServletException
+     * @throws jakarta.servlet.ServletException if any of the contexts cannot be created or started
      */
     public void setContexts(Map<String, String> contexts) throws ServletException {
         log.debug("setContexts: {}", contexts.size());

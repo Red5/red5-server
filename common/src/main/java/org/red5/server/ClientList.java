@@ -26,19 +26,19 @@ public class ClientList<E> extends AbstractList<E> {
 
     private CopyOnWriteArrayList<WeakReference<E>> items = new CopyOnWriteArrayList<WeakReference<E>>();
 
-    @ConstructorProperties(value = { "" })
     /**
      * <p>Constructor for ClientList.</p>
      */
+    @ConstructorProperties(value = { "" })
     public ClientList() {
     }
 
-    @ConstructorProperties({ "c" })
     /**
      * <p>Constructor for ClientList.</p>
      *
      * @param c a {@link java.util.Collection} object
      */
+    @ConstructorProperties({ "c" })
     public ClientList(Collection<E> c) {
         addAll(0, c);
     }

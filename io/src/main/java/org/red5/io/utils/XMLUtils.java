@@ -75,6 +75,16 @@ public class XMLUtils {
         return dbf;
     }
 
+    /**
+     * Parses the given XML string into a DOM {@link org.w3c.dom.Document} using a hardened, external-entity-resistant
+     * parser configuration.
+     *
+     * @param str
+     *            XML content to parse; must not be empty
+     * @return the parsed {@link org.w3c.dom.Document}
+     * @throws java.io.IOException
+     *             if {@code str} is empty, or if the string could not be parsed as XML
+     */
     public static Document stringToDoc(String str) throws IOException {
         if (StringUtils.isNotEmpty(str)) {
             try (Reader reader = new StringReader(str)) {

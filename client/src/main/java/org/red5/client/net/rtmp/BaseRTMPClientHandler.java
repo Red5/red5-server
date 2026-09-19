@@ -732,6 +732,16 @@ public abstract class BaseRTMPClientHandler extends BaseRTMPHandler implements I
         conn.ping(new Ping(PingType.getType(pingType), streamId, param));
     }
 
+    /**
+     * Sends a ping.
+     *
+     * @param pingType
+     *            the type of ping
+     * @param streamId
+     *            streams id
+     * @param param
+     *            ping parameter
+     */
     public void ping(PingType pingType, Number streamId, int param) {
         conn.ping(new Ping(pingType, streamId, param));
     }

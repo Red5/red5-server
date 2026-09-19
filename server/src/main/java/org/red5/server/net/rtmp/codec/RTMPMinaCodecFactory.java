@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class RTMPMinaCodecFactory implements ProtocolCodecFactory, ApplicationContextAware, InitializingBean {
 
+    /** Spring application context, used to look up the shared decoder/encoder beans. */
     protected ApplicationContext appCtx;
 
     /**

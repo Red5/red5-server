@@ -172,7 +172,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
     }
 
     /**
-     * {@inheritDoc}
+     * Adds all of the given events to this message.
      *
      * @param events a {@link java.util.List} object
      */
@@ -181,7 +181,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
     }
 
     /**
-     * {@inheritDoc}
+     * Adds all of the given events to this message.
      *
      * @param events a {@link java.util.Queue} object
      */
@@ -190,7 +190,7 @@ public class SharedObjectMessage extends BaseEvent implements ISharedObjectMessa
     }
 
     /**
-     * {@inheritDoc}
+     * Adds all of the given events to this message.
      *
      * @param events a {@link java.util.Set} object
      */

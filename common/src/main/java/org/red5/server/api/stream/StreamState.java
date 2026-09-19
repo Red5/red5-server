@@ -14,6 +14,29 @@ package org.red5.server.api.stream;
  */
 public enum StreamState {
 
-    INIT, UNINIT, OPEN, CLOSED, STARTED, STOPPED, PUBLISHING, PLAYING, PAUSED, RESUMED, END, SEEK;
+    /** The stream has been created but not yet initialized. */
+    INIT,
+    /** The stream has been un-initialized / torn down. */
+    UNINIT,
+    /** The stream is open and ready for use. */
+    OPEN,
+    /** The stream has been closed. */
+    CLOSED,
+    /** The stream has been started. */
+    STARTED,
+    /** The stream has been stopped. */
+    STOPPED,
+    /** The stream is currently being published (broadcast). */
+    PUBLISHING,
+    /** The stream is currently being played back. */
+    PLAYING,
+    /** The stream playback or publish has been paused. */
+    PAUSED,
+    /** The stream playback or publish has been resumed after a pause. */
+    RESUMED,
+    /** The stream has reached its end. */
+    END,
+    /** A seek operation is in progress on the stream. */
+    SEEK;
 
 }

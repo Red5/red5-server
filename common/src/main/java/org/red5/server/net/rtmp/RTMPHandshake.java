@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RTMPHandshake implements IHandshake {
 
+    /** Logger for this instance, bound to the runtime class. */
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     /** Constant <code>HANDSHAKE_TYPES</code> */
@@ -126,38 +127,51 @@ public abstract class RTMPHandshake implements IHandshake {
     /** Constant <code>random</code> */
     protected static final Random random = new Random();
 
+    /** Diffie-Hellman key agreement used to derive the shared secret for RC4 key material. */
     protected KeyAgreement keyAgreement;
 
+    /** RC4 cipher used to encrypt outgoing data once the handshake completes. */
     protected Cipher cipherOut;
 
+    /** RC4 cipher used to decrypt incoming data once the handshake completes. */
     protected Cipher cipherIn;
 
     // handles encrypt and / or decrypt using Xtea
+    /** Handles encrypt and/or decrypt using XTEA, for RTMPE type 0x08. */
     protected XTEAEngine xtea;
 
     // handles encrypt and / or decrypt using Blowfish
+    /** Handles encrypt and/or decrypt using Blowfish, for RTMPE type 0x09. */
     protected BlowfishEngine blowfish;
 
+    /** The handshake type byte, identifying plain vs. encrypted variants (see {@link #HANDSHAKE_TYPES}). */
     protected byte handshakeType;
 
+    /** The generated or received handshake byte sequence exchanged with the peer. */
     protected byte[] handshakeBytes;
 
     // servers public key
+    /** The server's Diffie-Hellman public key bytes. */
     protected byte[] incomingPublicKey;
 
     // clients public key
+    /** The client's Diffie-Hellman public key bytes. */
     protected byte[] outgoingPublicKey;
 
     // uncompressed swf size
+    /** Size in bytes of the uncompressed SWF used for SWF verification. */
     protected int swfSize;
 
     // swf verification bytes
+    /** The computed SWF verification pong payload bytes. */
     protected byte[] swfVerificationBytes;
 
     // handshake algorithm / validation scheme
+    /** Handshake algorithm / validation scheme identifier (0 or 1). */
     protected int algorithm = 1;
 
     // start as an fp of at least version 9.0.115.0
+    /** Whether to use the Flash Player 9+ versioned handshake scheme. */
     protected boolean fp9Handshake = System.getProperty("use.fp9.handshake", "true").equals("true");
 
     static {
@@ -714,6 +728,11 @@ public abstract class RTMPHandshake implements IHandshake {
         return swfVerificationBytes;
     }
 
+    /**
+     * Returns whether the Flash Player 9+ versioned handshake is in use.
+     *
+     * @return true if the fp9 handshake scheme is enabled, false otherwise
+     */
     public boolean isFp9Handshake() {
         return fp9Handshake;
     }

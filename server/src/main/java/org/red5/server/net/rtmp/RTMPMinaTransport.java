@@ -54,12 +54,16 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
     // utilized when enableDefaultAcceptor is false
     private ThreadPoolExecutor executor;
 
+    /** MINA socket acceptor that binds the configured addresses and dispatches accepted connections to {@link #ioHandler}. */
     protected SocketAcceptor acceptor;
 
+    /** Set of {@code host:port} address strings this transport listens on. */
     protected Set<String> addresses = new HashSet<String>();
 
+    /** Handler invoked by MINA for I/O events on accepted RTMP connections. */
     protected IoHandlerAdapter ioHandler;
 
+    /** Number of I/O processor threads used by the socket acceptor. */
     protected int ioThreads = Runtime.getRuntime().availableProcessors() * 2;
 
     /**
@@ -67,22 +71,31 @@ public class RTMPMinaTransport implements RTMPMinaTransportMXBean {
      */
     protected ObjectName serviceManagerObjectName;
 
+    /** Statistics collected by the MINA I/O service, exposed for monitoring. */
     protected IoServiceStatistics stats;
 
+    /** Whether the MINA logging filter is added to the acceptor's filter chain. */
     protected boolean enableMinaLogFilter;
 
+    /** Whether the MINA statistics monitor thread is enabled. */
     protected boolean enableMinaMonitor;
 
+    /** Interval in milliseconds at which the MINA statistics monitor polls the acceptor. */
     protected int minaPollInterval = 1000;
 
+    /** Whether TCP_NODELAY is enabled on accepted sockets, disabling Nagle's algorithm. */
     protected boolean tcpNoDelay = true;
 
+    /** Whether MINA allocates buffers on the Java heap rather than off-heap direct buffers. */
     protected boolean useHeapBuffers = true;
 
+    /** Size in bytes of the socket send buffer. */
     protected int sendBufferSize = 65536;
 
+    /** Size in bytes of the socket receive buffer. */
     protected int receiveBufferSize = 65536;
 
+    /** Maximum size in bytes of the buffer used when reading from a socket. */
     protected int maxReadBufferSize = 65536;
 
     // maximum idle time 1m

@@ -19,8 +19,10 @@ public class DataMessage extends AsyncMessage {
 
     private static final long serialVersionUID = -4650851055941106677L;
 
+    /** Identity of the item this data message applies to. */
     public Object identity;
 
+    /** Operation to perform, one of the constants defined by the Flex data messaging protocol. */
     public int operation;
 
     /** {@inheritDoc} */

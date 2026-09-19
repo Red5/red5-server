@@ -9,7 +9,14 @@ import java.util.EnumSet;
  */
 public enum CapsExMask {
 
-    Reconnect((byte) 0x01), Multitrack((byte) 0x02), ModEx((byte) 0x04), TimestampNanoOffset((byte) 0x08);
+    /** Indicates the client or server supports automatic reconnection. */
+    Reconnect((byte) 0x01),
+    /** Indicates support for carrying multiple tracks in a single message. */
+    Multitrack((byte) 0x02),
+    /** Indicates support for the ModEx (modifier/extension) packet wrapping mechanism. */
+    ModEx((byte) 0x04),
+    /** Indicates support for nanosecond-precision timestamp offsets. */
+    TimestampNanoOffset((byte) 0x08);
 
     private final byte mask;
 

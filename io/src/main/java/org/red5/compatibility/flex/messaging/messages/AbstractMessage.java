@@ -30,22 +30,31 @@ public class AbstractMessage implements Message, Serializable {
 
     private static final long serialVersionUID = -834697863344344313L;
 
+    /** Time (milliseconds since epoch) at which this message was created. */
     public long timestamp;
 
+    /** Name/value header pairs associated with this message. */
     public Map<String, Object> headers = new ObjectMap<>();
 
+    /** Payload carried by this message. */
     public Object body;
 
+    /** Unique identifier of this message, as a string UUID. */
     public String messageId;
 
+    /** Unique identifier of this message, in its compact binary (UUID byte array) form. */
     protected byte[] messageIdBytes;
 
+    /** Number of milliseconds this message is valid for, or {@code 0} if it never expires. */
     public long timeToLive;
 
+    /** Identifier of the client that sent, or should receive, this message, as a string UUID. */
     public String clientId;
 
+    /** Identifier of the client, in its compact binary (UUID byte array) form. */
     protected byte[] clientIdBytes;
 
+    /** Destination this message is addressed to. */
     public String destination;
 
     /**

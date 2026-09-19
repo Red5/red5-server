@@ -31,24 +31,72 @@ public interface IConnection extends ICoreObject, ICastingAttributeStore {
      * Encoding type.
      */
     static enum Encoding {
-        AMF0, AMF3, WEBSOCKET, SOCKETIO, RTP, SRTP, BLOB, RAW, RTSP, SRT, MPEGTS, DATACHANNEL, WEBRTC, HTTP
+        /** Legacy AMF0 encoding. */
+        AMF0,
+        /** AMF3 encoding. */
+        AMF3,
+        /** WebSocket transport encoding. */
+        WEBSOCKET,
+        /** Socket.IO transport encoding. */
+        SOCKETIO,
+        /** RTP transport encoding. */
+        RTP,
+        /** Secure RTP (SRTP) transport encoding. */
+        SRTP,
+        /** Raw binary blob encoding. */
+        BLOB,
+        /** Raw, unencoded data. */
+        RAW,
+        /** RTSP transport encoding. */
+        RTSP,
+        /** Secure Reliable Transport (SRT) encoding. */
+        SRT,
+        /** MPEG transport stream encoding. */
+        MPEGTS,
+        /** WebRTC data channel encoding. */
+        DATACHANNEL,
+        /** WebRTC media encoding. */
+        WEBRTC,
+        /** Plain HTTP encoding. */
+        HTTP
     };
 
     /**
      * Duty type.
      */
     static enum Duty {
-        UNDEFINED, PUBLISHER, SUBSCRIBER, PROXY, REMOTING, SENDRECV, SENDONLY, RECVONLY, HEARTBEAT
+        /** No duty has been assigned yet. */
+        UNDEFINED,
+        /** Connection publishes media or data. */
+        PUBLISHER,
+        /** Connection subscribes to (consumes) media or data. */
+        SUBSCRIBER,
+        /** Connection acts as a proxy between other connections. */
+        PROXY,
+        /** Connection is used for remoting calls. */
+        REMOTING,
+        /** Connection both sends and receives. */
+        SENDRECV,
+        /** Connection only sends. */
+        SENDONLY,
+        /** Connection only receives. */
+        RECVONLY,
+        /** Connection is used solely for heartbeat/keep-alive purposes. */
+        HEARTBEAT
     };
 
     /**
      * Connection type.
      */
     static enum Type {
-        PERSISTENT, // Persistent connection type, eg RTMP
-        POLLING, // Polling connection type, eg RTMPT
-        TRANSIENT, // Transient connection type, eg Remoting, HTTP, etc
-        UNKNOWN // all others not matching known types
+        /** Persistent connection type, eg RTMP. */
+        PERSISTENT,
+        /** Polling connection type, eg RTMPT. */
+        POLLING,
+        /** Transient connection type, eg Remoting, HTTP, etc. */
+        TRANSIENT,
+        /** All others not matching known types. */
+        UNKNOWN
     };
 
     /**

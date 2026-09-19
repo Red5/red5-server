@@ -1136,6 +1136,11 @@ public class MP4Reader implements IoConstants, ITagReader, IKeyFrameDataAnalyzer
         return total <= 0 || end <= total;
     }
 
+    /**
+     * Analyzes the video samples-to-chunks and composition time data to build the sample-to-position and
+     * time-to-position maps used for seeking, and to record key frame seek points. Does nothing for audio-only
+     * files, since it relies on {@code videoSamplesToChunks} having been populated.
+     */
     public void analyzeFrames() {
         log.debug("Analyzing frames - video samples/chunks: {}", videoSamplesToChunks);
         // Maps positions, samples, timestamps to one another

@@ -94,6 +94,8 @@ public interface IScope extends IBasicScope, ResourcePatternResolver, IServiceHa
     /**
      * Returns a detached, read-only snapshot of child scope objects. Scope overrides
      * this compatibility default with a single pass over its child collection.
+     *
+     * @return read-only snapshot of the child scopes
      */
     default Collection<IBasicScope> getBasicScopes() {
         java.util.List<IBasicScope> result = new java.util.ArrayList<>();

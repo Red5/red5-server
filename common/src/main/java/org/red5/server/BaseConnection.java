@@ -298,7 +298,7 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the duty this connection performs.
      *
      * @param duty a Duty object
      */

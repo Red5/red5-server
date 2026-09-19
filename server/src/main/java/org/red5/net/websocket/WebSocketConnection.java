@@ -192,8 +192,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      *
      * @param data
      *            string / text data
-     * @throws java.io.UnsupportedEncodingException
-     * @throws java.io.IOException
+     * @throws java.io.UnsupportedEncodingException if the data is null
+     * @throws java.io.IOException if the session is closed or the write fails
      */
     public void send(String data) throws UnsupportedEncodingException, IOException {
         if (isDebug) {
@@ -244,7 +244,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      * Sends binary data to the client.
      *
      * @param buf an array of {@link byte} objects
-     * @throws java.io.IOException
+     * @throws java.io.IOException if the session is closed or the write fails
      */
     public void send(byte[] buf) throws IOException {
         if (isDebug) {
@@ -287,8 +287,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      * Sends a ping to the client.
      *
      * @param buf an array of {@link byte} objects
-     * @throws java.io.IOException
-     * @throws java.lang.IllegalArgumentException
+     * @throws java.io.IOException if the session is closed or the write fails
+     * @throws java.lang.IllegalArgumentException if the payload exceeds the size allowed for a control frame
      */
     public void sendPing(byte[] buf) throws IllegalArgumentException, IOException {
         if (isTrace) {
@@ -310,8 +310,8 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
      * Sends a pong back to the client; normally in response to a ping.
      *
      * @param buf an array of {@link byte} objects
-     * @throws java.io.IOException
-     * @throws java.lang.IllegalArgumentException
+     * @throws java.io.IOException if the session is closed or the write fails
+     * @throws java.lang.IllegalArgumentException if the payload exceeds the size allowed for a control frame
      */
     public void sendPong(byte[] buf) throws IllegalArgumentException, IOException {
         if (isTrace) {

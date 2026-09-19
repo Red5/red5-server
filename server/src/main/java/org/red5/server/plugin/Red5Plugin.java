@@ -19,8 +19,10 @@ import org.springframework.context.ApplicationContext;
  */
 public abstract class Red5Plugin implements IRed5Plugin {
 
+    /** Spring application context in which this plug-in is running. */
     protected ApplicationContext context;
 
+    /** Red5 server instance that this plug-in is registered with. */
     protected Server server;
 
     /**

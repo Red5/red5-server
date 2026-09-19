@@ -21,10 +21,21 @@ public enum VideoPacketModExType {
         this.value = value;
     }
 
+    /**
+     * Returns the raw byte value of this modifier/extension type.
+     *
+     * @return the type's underlying byte value
+     */
     public byte getValue() {
         return value;
     }
 
+    /**
+     * Looks up the modifier/extension type matching the given raw value.
+     *
+     * @param value the raw byte value to match, as an int
+     * @return the matching {@link VideoPacketModExType}, or {@code null} if none matches
+     */
     public static VideoPacketModExType valueOf(int value) {
         for (VideoPacketModExType type : values()) {
             if (type.getValue() == value) {

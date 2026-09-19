@@ -215,7 +215,7 @@ public interface StatusCodes {
     public static final String NS_UNPAUSE_NOTIFY = "NetStream.Unpause.Notify";
 
     /**
-     *
+     * Playback of a data-only stream has started; the subscriber will receive data messages such as onMetaData.
      */
     public static final String NS_DATA_START = "NetStream.Data.Start";
 

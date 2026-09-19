@@ -177,6 +177,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
      */
     protected transient WeakReference<IRecordingListener> recordingListener;
 
+    /** Timestamp, in milliseconds, of the most recently received packet; {@code -1} if none has been received yet. */
     protected volatile long latestTimeStamp = -1;
 
     /**

@@ -14,6 +14,19 @@ package org.red5.proxy;
  */
 public enum StreamState {
 
-    UNINITIALIZED, STOPPED, CONNECTING, STREAM_CREATING, PUBLISHING, PUBLISHED, UNPUBLISHED;
+    /** The stream has not yet been set up. */
+    UNINITIALIZED,
+    /** The stream is stopped and not currently active. */
+    STOPPED,
+    /** The underlying connection to the server is being established. */
+    CONNECTING,
+    /** A stream is being created on the connection. */
+    STREAM_CREATING,
+    /** A publish request has been sent and is in progress. */
+    PUBLISHING,
+    /** The stream has been successfully published. */
+    PUBLISHED,
+    /** The stream has been unpublished. */
+    UNPUBLISHED;
 
 }

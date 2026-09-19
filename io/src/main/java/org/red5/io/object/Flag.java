@@ -13,5 +13,10 @@ package org.red5.io.object;
  * @author mondain
  */
 public enum Flag {
-    Enabled, Disabled, Default
+    /** The feature or option is explicitly enabled. */
+    Enabled,
+    /** The feature or option is explicitly disabled. */
+    Disabled,
+    /** No explicit preference; the implementation's default behavior is used. */
+    Default
 }

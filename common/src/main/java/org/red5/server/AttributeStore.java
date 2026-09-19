@@ -31,10 +31,13 @@ import org.slf4j.LoggerFactory;
  */
 public class AttributeStore implements ICastingAttributeStore {
 
+    /** Logger for this instance, bound to the runtime class. */
     protected Logger log = LoggerFactory.getLogger(getClass());
 
+    /** Cached result of {@code log.isTraceEnabled()}, checked before trace-level logging. */
     protected boolean isTrace = log.isTraceEnabled();
 
+    /** Cached result of {@code log.isDebugEnabled()}, checked before debug-level logging. */
     protected boolean isDebug = log.isDebugEnabled();
 
     /**

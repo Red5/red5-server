@@ -29,14 +29,19 @@ public class StatusObject implements IExternalizable {
     /** Constant <code>WARNING="warning"</code> */
     public static final String ERROR = "error", STATUS = "status", WARNING = "warning";
 
+    /** Status code identifying the specific status event (e.g. {@code NetStream.Play.Start}). */
     protected String code;
 
+    /** Severity level of the status, one of {@link #ERROR}, {@link #STATUS}, or {@link #WARNING}. */
     protected String level;
 
+    /** Human readable description of the status. */
     protected String description = "";
 
+    /** Application-specific object attached to this status. */
     protected Object application;
 
+    /** Additional name/value pairs beyond the standard code/level/description/application properties. */
     protected Map<String, Object> additional;
 
     /**

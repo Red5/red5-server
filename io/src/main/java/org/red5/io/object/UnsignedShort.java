@@ -17,6 +17,7 @@ import java.util.Arrays;
 public final class UnsignedShort extends UnsignedNumber {
     static final long serialVersionUID = 1L;
 
+    /** The unsigned 16-bit value, stored internally as an int in the range 0-65535. */
     private int value;
 
     /**

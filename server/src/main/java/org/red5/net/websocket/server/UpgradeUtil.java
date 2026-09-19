@@ -45,6 +45,7 @@ public class UpgradeUtil {
 
     private static final byte[] WS_ACCEPT = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11".getBytes(StandardCharsets.ISO_8859_1);
 
+    /** Whether per-message WebSocket compression extensions should be negotiated during the upgrade handshake. */
     public static boolean wsAllowCompression = true;
 
     private UpgradeUtil() {

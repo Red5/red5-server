@@ -7,7 +7,16 @@ package org.red5.io.obu;
  */
 public enum OBPMetadataType {
 
-    HDR_CLL(1), HDR_MDCV(2), SCALABILITY(3), ITUT_T35(4), TIMECODE(5);
+    /** Content Light Level metadata (HDR CLL: MaxCLL / MaxFALL). */
+    HDR_CLL(1),
+    /** Mastering Display Color Volume metadata (HDR MDCV). */
+    HDR_MDCV(2),
+    /** Scalability structure metadata describing spatial/temporal layers. */
+    SCALABILITY(3),
+    /** ITU-T T.35 registered user data metadata. */
+    ITUT_T35(4),
+    /** Timecode metadata (SMPTE-style time-of-day/frame count). */
+    TIMECODE(5);
 
     private final int value;
 

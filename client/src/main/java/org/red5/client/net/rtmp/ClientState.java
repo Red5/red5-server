@@ -14,6 +14,23 @@ package org.red5.client.net.rtmp;
  */
 public enum ClientState {
 
-    UNINIT, CONNECTING, CONNECTED, STREAM_CREATING, PUBLISHING, UNPUBLISHED, PLAYING, STOPPED, DISCONNECTED;
+    /** Client has not yet been initialized. */
+    UNINIT,
+    /** Client is in the process of establishing a connection to the server. */
+    CONNECTING,
+    /** Client has successfully connected to the server. */
+    CONNECTED,
+    /** Client is in the process of creating a stream. */
+    STREAM_CREATING,
+    /** Client is actively publishing a stream. */
+    PUBLISHING,
+    /** Client has stopped publishing a stream. */
+    UNPUBLISHED,
+    /** Client is actively playing a stream. */
+    PLAYING,
+    /** Client has stopped playback. */
+    STOPPED,
+    /** Client has disconnected from the server. */
+    DISCONNECTED;
 
 }

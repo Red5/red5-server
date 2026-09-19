@@ -14,20 +14,35 @@ package org.red5.io.sctp.packet.chunks;
  */
 public enum ChunkType {
 
+    /** Payload Data chunk. */
     DATA(0), // Payload Data
+    /** Initiation chunk. */
     INIT(1), // Initiation
+    /** Initiation Acknowledgement chunk. */
     INIT_ACK(2), // Initiation Acknowledgement
+    /** Selective Acknowledgement chunk. */
     SACK(3), // Selective Acknowledgement
+    /** Heartbeat Request chunk. */
     HEARTBEAT(4), // Heartbeat Request
+    /** Heartbeat Acknowledgement chunk. */
     HEARTBEAT_ACK(5), // Heartbeat Acknowledgement
+    /** Abort chunk. */
     ABORT(6), // Abort
+    /** Shutdown chunk. */
     SHUTDOWN(7), // Shutdown
+    /** Shutdown Acknowledgement chunk. */
     SHUTDOWN_ACK(8), // Shutdown Acknowledgement
+    /** Operation Error chunk. */
     ERROR(9), // Operation Error
+    /** State Cookie chunk. */
     COOKIE_ECHO(10), // State Cookie
+    /** Cookie Acknowledgement chunk. */
     COOKIE_ACK(11), // Cookie Acknowledgement
+    /** Reserved for Explicit Congestion Notification Echo. */
     ECNE(12), // Reserved for Explicit Congestion Notification Echo
+    /** Reserved for Congestion Window Reduced. */
     CWR(13), // Reserved for Congestion Window Reduced
+    /** Shutdown Complete chunk. */
     SHUTDOWN_COMPLETE(14);
 
     private int value;

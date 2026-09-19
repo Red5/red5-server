@@ -32,6 +32,7 @@ public class CommandMessage extends AsyncMessage {
     /** Constant <code>OPERATION_FLAG=1</code> */
     protected static byte OPERATION_FLAG = 1;
 
+    /** Type of the message that this command message refers to. */
     public String messageRefType;
 
     /** Command id to execute. */

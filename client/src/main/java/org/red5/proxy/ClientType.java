@@ -14,6 +14,13 @@ package org.red5.proxy;
  */
 public enum ClientType {
 
-    RTMP, RTMPS, RTMPT, RTMPE;
+    /** Plain, unencrypted RTMP over TCP. */
+    RTMP,
+    /** RTMP tunneled over a TLS/SSL connection. */
+    RTMPS,
+    /** RTMP tunneled over HTTP(S), used to traverse proxies/firewalls. */
+    RTMPT,
+    /** RTMP with the native (encrypted) handshake/session obfuscation. */
+    RTMPE;
 
 }

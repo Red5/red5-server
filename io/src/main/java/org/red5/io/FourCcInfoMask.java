@@ -9,8 +9,11 @@ import java.util.EnumSet;
  */
 public enum FourCcInfoMask {
 
+    /** The codec can decode. */
     CanDecode((byte) 0x01), // Can decode
+    /** The codec can encode. */
     CanEncode((byte) 0x02), // Can encode
+    /** The codec can forward any codec without transcoding. */
     CanForward((byte) 0x04); // Can forward any codec
 
     private final byte mask;

@@ -14,6 +14,15 @@ package org.red5.net.websocket.model;
  */
 public enum WebSocketEvent {
 
-    SCOPE_CREATED, SCOPE_ADDED, SCOPE_REMOVED, CONNECTION_ADDED, CONNECTION_REMOVED;
+    /** A new WebSocket scope was created. */
+    SCOPE_CREATED,
+    /** A WebSocket scope was added to its parent/manager. */
+    SCOPE_ADDED,
+    /** A WebSocket scope was removed from its parent/manager. */
+    SCOPE_REMOVED,
+    /** A WebSocket connection was added to a scope. */
+    CONNECTION_ADDED,
+    /** A WebSocket connection was removed from a scope. */
+    CONNECTION_REMOVED;
 
 }

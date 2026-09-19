@@ -96,6 +96,9 @@ public class Input extends org.red5.io.amf.Input {
 
         private static Logger log = LoggerFactory.getLogger(PendingObject.class);
 
+        /**
+         * <p>Constructor for PendingObject.</p>
+         */
         public PendingObject() {
             if (log.isDebugEnabled()) {
                 log.debug("PendingObject");
@@ -121,6 +124,16 @@ public class Input extends org.red5.io.amf.Input {
 
         private List<PendingProperty> properties;
 
+        /**
+         * Queues a property that could not be resolved yet because it references an object still being deserialized.
+         *
+         * @param obj
+         *            the object whose property is pending
+         * @param klass
+         *            the class declaring the pending field/property
+         * @param name
+         *            the name of the pending field/property
+         */
         public void addPendingProperty(Object obj, Class<?> klass, String name) {
             if (properties == null) {
                 properties = new ArrayList<PendingProperty>();
@@ -128,6 +141,13 @@ public class Input extends org.red5.io.amf.Input {
             properties.add(new PendingProperty(obj, klass, name));
         }
 
+        /**
+         * Resolves all pending properties queued via {@link #addPendingProperty(Object, Class, String)} by assigning the given
+         * result to each of them, then clears the pending list.
+         *
+         * @param result
+         *            the resolved object to assign to each pending property
+         */
         public void resolveProperties(Object result) {
             if (properties != null) {
                 for (PendingProperty prop : properties) {

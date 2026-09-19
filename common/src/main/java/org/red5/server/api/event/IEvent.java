@@ -52,8 +52,32 @@ public interface IEvent {
      */
     public IEventListener getSource();
 
+    /**
+     * Enumeration of the event categories an {@link IEvent} may belong to.
+     */
     enum Type {
-        SYSTEM, STATUS, SERVICE_CALL, SHARED_OBJECT, STREAM_ACTION, STREAM_CONTROL, STREAM_DATA, CLIENT, CLIENT_INVOKE, CLIENT_NOTIFY, SERVER
+        /** System-level event, not tied to a particular client or scope. */
+        SYSTEM,
+        /** Status notification event. */
+        STATUS,
+        /** Invocation of a remote service call. */
+        SERVICE_CALL,
+        /** Shared object related event. */
+        SHARED_OBJECT,
+        /** Stream action event (e.g. publish/play control). */
+        STREAM_ACTION,
+        /** Stream control event. */
+        STREAM_CONTROL,
+        /** Stream data event carrying audio/video/data payload. */
+        STREAM_DATA,
+        /** Event originating from or targeting a client. */
+        CLIENT,
+        /** Client invoke (remote method call) event. */
+        CLIENT_INVOKE,
+        /** Client notify event. */
+        CLIENT_NOTIFY,
+        /** Event originating from or targeting the server. */
+        SERVER
     }
 
 }

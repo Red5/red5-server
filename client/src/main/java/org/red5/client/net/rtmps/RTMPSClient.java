@@ -107,7 +107,7 @@ public class RTMPSClient extends RTMPClient {
      * @param password keystore password
      * @param keystorePath path to keystore file
      * @param truststorePath path to truststore file
-     * @throws java.io.IOException
+     * @throws java.io.IOException if the keystore or truststore cannot be read
      */
     public RTMPSClient(String keyStoreType, String password, String keystorePath, String truststorePath) throws IOException {
         this(keyStoreType, password, keystorePath, password, truststorePath);
@@ -122,7 +122,7 @@ public class RTMPSClient extends RTMPClient {
      * @param keystorePath path to keystore file
      * @param truststorePassword truststore password
      * @param truststorePath path to truststore file
-     * @throws java.io.IOException
+     * @throws java.io.IOException if the keystore or truststore cannot be read
      */
     public RTMPSClient(String keyStoreType, String keystorePassword, String keystorePath, String truststorePassword, String truststorePath) throws IOException {
         // set the password for both keystore and truststore since only one is supplied

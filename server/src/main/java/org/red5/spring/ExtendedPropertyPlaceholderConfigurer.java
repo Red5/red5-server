@@ -130,6 +130,7 @@ public class ExtendedPropertyPlaceholderConfigurer extends PropertyPlaceholderCo
         return prop;
     }
 
+    /** Compares resources by their filename, ordering a null resource or filename after any non-null one. */
     public static class ResourceFilenameComparator implements Comparator<Resource>, Serializable {
 
         private static final long serialVersionUID = -6365943736917478749L;

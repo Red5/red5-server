@@ -27,10 +27,25 @@ public class MediaBunnyStreamRegistry {
 
     private final Map<String, byte[]> pendingInitSegments = new ConcurrentHashMap<>();
 
+    /**
+     * Returns the process-wide singleton instance of this registry.
+     *
+     * @return the shared {@link MediaBunnyStreamRegistry} instance
+     */
     public static MediaBunnyStreamRegistry getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * Subscribes to the named broadcast stream in the given scope, attaching a listener to it if one is not already
+     * attached, and returns a subscription whose queue receives the stream's init segment, latest keyframe fragment
+     * (if any) and subsequent fragments.
+     *
+     * @param scope the scope containing the broadcast stream
+     * @param streamName the name of the stream to subscribe to
+     * @return a new subscription for the stream
+     * @throws IllegalStateException if the named stream cannot be found in the scope
+     */
     public StreamSubscription subscribe(IScope scope, String streamName) {
         log.debug("Subscribing to stream: {}", streamName);
         String key = buildKey(scope, streamName);
@@ -77,6 +92,13 @@ public class MediaBunnyStreamRegistry {
         }
     }
 
+    /**
+     * Removes a subscriber's queue from the stream's subscriber list, detaching and removing the stream's state
+     * entirely once its last subscriber has been removed.
+     *
+     * @param key the stream key, as built by {@link #buildKey(IScope, String)}
+     * @param queue the subscriber queue to remove
+     */
     public void unsubscribe(String key, BlockingQueue<byte[]> queue) {
         log.debug("Unsubscribing from stream: {}", key);
         StreamState state = streams.get(key);
@@ -198,6 +220,7 @@ public class MediaBunnyStreamRegistry {
         }
     }
 
+    /** A handle to an active subscription to a MediaBunny stream, exposing the fragment queue and a way to unsubscribe. */
     public static class StreamSubscription {
         private final String key;
 
@@ -211,10 +234,19 @@ public class MediaBunnyStreamRegistry {
             this.registry = registry;
         }
 
+        /**
+         * Returns the queue that receives this subscription's init segment, keyframe and fragment byte arrays.
+         *
+         * @return the subscriber's fragment queue
+         */
         public BlockingQueue<byte[]> getQueue() {
             return queue;
         }
 
+        /**
+         * Unsubscribes this subscription's queue from the registry, releasing the stream's listener once no
+         * subscribers remain.
+         */
         public void close() {
             registry.unsubscribe(key, queue);
         }

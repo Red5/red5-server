@@ -13,5 +13,10 @@ package org.red5.io;
  * @author mondain
  */
 public enum BufferType {
-    AUTO, DIRECT, HEAP
+    /** Buffer type is chosen automatically. */
+    AUTO,
+    /** Buffer is allocated as a direct (off-heap) buffer. */
+    DIRECT,
+    /** Buffer is allocated as a heap buffer. */
+    HEAP
 }

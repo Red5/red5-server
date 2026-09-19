@@ -22,8 +22,10 @@ public class ScopeSecurityHandler implements IScopeSecurityHandler {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
+    /** Whether connections are permitted; {@code true} allows all connections. */
     protected boolean connectionAllowed = true;
 
+    /** Whether scope access is permitted; {@code true} allows access to all scopes. */
     protected boolean scopeAllowed = true;
 
     /** {@inheritDoc} */

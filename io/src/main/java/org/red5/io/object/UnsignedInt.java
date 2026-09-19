@@ -15,6 +15,7 @@ package org.red5.io.object;
 public final class UnsignedInt extends UnsignedNumber {
     static final long serialVersionUID = 1L;
 
+    /** The 32-bit unsigned value, stored widened in a {@code long} and masked to the low 32 bits. */
     private long value;
 
     /**

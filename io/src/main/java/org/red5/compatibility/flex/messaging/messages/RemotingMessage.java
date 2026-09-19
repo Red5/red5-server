@@ -25,6 +25,7 @@ public class RemotingMessage extends RPCMessage {
     /** Value of the <code>source</code> attribute of mx:RemoteObject that sent the message. */
     public String source;
 
+    /** Arguments passed to the remote {@link #operation}. */
     private Object[] parameters;
 
     /**

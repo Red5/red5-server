@@ -51,6 +51,7 @@ import org.w3c.dom.Document;
 @SuppressWarnings("serial")
 public class Input extends BaseInput implements org.red5.io.object.Input {
 
+    /** Logger for this class instance. */
     protected Logger log = LoggerFactory.getLogger(this.getClass());
 
     /** Constant <code>classAliases</code> */
@@ -62,8 +63,10 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         }
     };
 
+    /** Buffer being read from to decode AMF data. */
     protected IoBuffer buf;
 
+    /** Data type of the value most recently read by {@link #readDataType()}. */
     protected byte currentDataType;
 
     /**

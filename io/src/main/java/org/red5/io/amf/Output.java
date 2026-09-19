@@ -63,6 +63,10 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
 
     private static volatile boolean cacheInitialized = false;
 
+    /**
+     * Lazily initializes the Caffeine caches used for AMF serialization (string, serialize, field and getter caches),
+     * in a thread-safe manner using double-checked locking.
+     */
     protected static void initializeCaches() {
         if (!cacheInitialized) {
             lookupLock.lock();

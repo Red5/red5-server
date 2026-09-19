@@ -20,12 +20,16 @@ public class SequencedMessage extends AsyncMessage {
 
     private static final long serialVersionUID = 5607350918278510061L;
 
+    /** Identifier of the sequence this message is part of. */
     public long sequenceId;
 
+    /** Proxies used to fetch further pages of the sequence, if any. */
     public Object sequenceProxies;
 
+    /** Total number of items in the sequence. */
     public long sequenceSize;
 
+    /** Name of the originating data message. */
     public String dataMessage;
 
     /** {@inheritDoc} */

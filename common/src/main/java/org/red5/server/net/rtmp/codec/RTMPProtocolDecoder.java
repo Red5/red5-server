@@ -76,7 +76,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     /** Constant <code>isDebug=log.isDebugEnabled()</code> */
     protected static final boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
-    // close when header errors occur
+    /** Whether the connection should be closed when a chunk header error occurs. */
     protected boolean closeOnHeaderError;
 
     // maximum size for an RTMP packet in Mb

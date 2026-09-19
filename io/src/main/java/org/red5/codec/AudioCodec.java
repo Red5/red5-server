@@ -21,6 +21,7 @@ import org.red5.io.utils.IOUtils;
  */
 public enum AudioCodec {
 
+    /** Raw uncompressed PCM audio. */
     PCM((byte) 0) {
 
         @Override
@@ -29,6 +30,7 @@ public enum AudioCodec {
         }
 
     }, // pcm raw
+    /** ADPCM audio, mapped to the g722 mime type. */
     ADPCM((byte) 0x01) {
 
         @Override
@@ -37,6 +39,7 @@ public enum AudioCodec {
         }
 
     }, // adpcm
+    /** MPEG-1/2 Audio Layer III (MP3). */
     MP3((byte) 0x02) {
 
         @Override
@@ -50,7 +53,9 @@ public enum AudioCodec {
         }
 
     }, // MP3 / .mp3 / mp3
+    /** Raw uncompressed PCM audio, little-endian byte order. */
     PCM_LE((byte) 0x03), // pcm le
+    /** Nellymoser audio sampled at 16 kHz. */
     NELLY_MOSER_16K((byte) 0x04) {
 
         @Override
@@ -59,6 +64,7 @@ public enum AudioCodec {
         }
 
     },
+    /** Nellymoser audio sampled at 8 kHz. */
     NELLY_MOSER_8K((byte) 0x05) {
 
         @Override
@@ -67,6 +73,7 @@ public enum AudioCodec {
         }
 
     },
+    /** Legacy Nellymoser audio codec variant. */
     NELLY_MOSER((byte) 0x06) {
 
         @Override
@@ -75,6 +82,7 @@ public enum AudioCodec {
         }
 
     }, // nelly moser legacy
+    /** Raw PCM audio using A-law companding. */
     PCM_ALAW((byte) 0x07) {
 
         @Override
@@ -83,6 +91,7 @@ public enum AudioCodec {
         }
 
     }, // pcm alaw
+    /** Raw PCM audio using mu-law companding. */
     PCM_MULAW((byte) 0x08) {
 
         @Override
@@ -91,6 +100,7 @@ public enum AudioCodec {
         }
 
     }, // pcm mulaw
+    /** Extended header codec id (0x09) used to signal FourCC-based (Enhanced RTMP) audio codec selection. */
     ExHeader((byte) 0x09) {
 
         @Override
@@ -109,6 +119,7 @@ public enum AudioCodec {
         }
 
     }, // used to signal FOURCC mode
+    /** Advanced Audio Coding (AAC), mime type {@code mp4a}. */
     AAC((byte) 0x0a) {
 
         @Override
@@ -122,6 +133,7 @@ public enum AudioCodec {
         }
 
     }, // AAC / mp4a / advanced audio codec
+    /** Speex audio codec. */
     SPEEX((byte) 0x0b) {
 
         @Override
@@ -135,6 +147,7 @@ public enum AudioCodec {
         }
 
     }, // Speex / "spx " / speex
+    /** MPEG-1/2 Audio Layer II (MP2). */
     MP2((byte) 0x0c) {
 
         @Override
@@ -143,6 +156,7 @@ public enum AudioCodec {
         }
 
     }, // MP2 / mp2a / mpeg2 audio
+    /** Opus audio codec. */
     OPUS((byte) 0x0d) {
 
         @Override
@@ -156,6 +170,7 @@ public enum AudioCodec {
         }
 
     }, // Opus / opus
+    /** MP3 audio sampled at 8 kHz. */
     MP3_8K((byte) 0x0e) {
 
         @Override
@@ -170,6 +185,7 @@ public enum AudioCodec {
 
     }, // mp3 8khz
     //DEVICE_SPECIFIC((byte) 0x0f), // device specific (reserved)
+    /** Uncompressed 16-bit linear PCM audio (L16). */
     L16((byte) 0x0f) {
 
         @Override
@@ -184,6 +200,7 @@ public enum AudioCodec {
 
     }, // L16 audio / XXX(paul) update logic that used 0x09 previously for L16
     // RTMP-E specific that weren't already added previously
+    /** AC-3 (Dolby Digital) audio. */
     AC3((byte) 0x10) {
 
         @Override
@@ -197,6 +214,7 @@ public enum AudioCodec {
         }
 
     }, // AC3 / ac-3 / ac3
+    /** Enhanced AC-3 (Dolby Digital Plus) audio. */
     EAC3((byte) 0x11) {
 
         @Override
@@ -210,6 +228,7 @@ public enum AudioCodec {
         }
 
     }, // EAC3 / ec-3 / eac3
+    /** Free Lossless Audio Codec (FLAC). */
     FLAC((byte) 0x12) {
 
         @Override

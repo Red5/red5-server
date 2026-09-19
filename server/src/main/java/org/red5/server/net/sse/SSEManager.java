@@ -42,6 +42,9 @@ public class SSEManager implements InitializingBean, DisposableBean {
 
     private boolean keepAliveEnabled = true;
 
+    /**
+     * Constructs the SSE manager.
+     */
     public SSEManager() {
         log.debug("SSEManager instantiated");
     }

@@ -19,6 +19,18 @@ public class P12StoreManager {
 
     private static Logger log = LoggerFactory.getLogger(P12StoreManager.class);
 
+    /**
+     * Loads a PKCS#12 truststore from disk, creating it if it does not yet exist, then imports the certificate(s) found at
+     * {@code certPath} (a single certificate or a PEM chain) and persists the resulting truststore back to disk.
+     *
+     * @param truststorePath
+     *            path to the PKCS#12 truststore file to load or create
+     * @param truststorePassword
+     *            password protecting the truststore
+     * @param certPath
+     *            path to a PEM file containing one or more X.509 certificates to import
+     * @return the loaded/updated {@link java.security.KeyStore}, or {@code null} if an error occurred while managing it
+     */
     @SuppressWarnings("unchecked")
     public static KeyStore buildTrustStore(String truststorePath, char[] truststorePassword, String certPath) {
         KeyStore trustStore = null;

@@ -1246,6 +1246,10 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     /**
      * Detaches an empty room after its idle/retention period. Admission is closed
      * atomically with the eligibility check; lifecycle callbacks run outside that lock.
+     *
+     * @param now current time in milliseconds
+     * @param minimumIdleMillis how long the room must have been empty before it may be removed
+     * @return true if the room was detached from its parent, false if it is not removable or not yet idle long enough
      */
     public boolean removeIfIdle(long now, long minimumIdleMillis) {
         synchronized (this) {

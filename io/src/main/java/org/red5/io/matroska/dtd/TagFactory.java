@@ -62,6 +62,7 @@ public class TagFactory {
      * @param inputStream a {@link java.io.InputStream} object
      * @return a {@link org.red5.io.matroska.dtd.Tag} object
      * @throws org.red5.io.matroska.ConverterException if any.
+     * @throws java.io.IOException if the tag cannot be instantiated or its data cannot be read from the stream
      */
     public static Tag createTag(VINT id, VINT size, InputStream inputStream) throws ConverterException, IOException {
         Tag tag = null;

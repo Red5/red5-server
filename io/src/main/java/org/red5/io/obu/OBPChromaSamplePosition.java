@@ -6,7 +6,12 @@ package org.red5.io.obu;
  * @author mondain
  */
 public enum OBPChromaSamplePosition {
-    CSP_UNKNOWN(0), CSP_VERTICAL(1), CSP_COLOCATED(2);
+    /** Chroma sample position is unknown or unspecified. */
+    CSP_UNKNOWN(0),
+    /** Chroma samples are co-sited vertically with the luma samples. */
+    CSP_VERTICAL(1),
+    /** Chroma samples are co-located with the corresponding luma samples. */
+    CSP_COLOCATED(2);
 
     private final int value;
 

@@ -18,8 +18,42 @@ import java.util.Map;
  */
 public enum StreamAction {
 
-    CONNECT("connect"), DISCONNECT("disconnect"), CREATE_STREAM("createStream"), DELETE_STREAM("deleteStream"), CLOSE_STREAM("closeStream"), INIT_STREAM("initStream"), RELEASE_STREAM("releaseStream"), PUBLISH("publish"), PAUSE("pause"), PAUSE_RAW("pauseRaw"), SEEK("seek"), PLAY("play"), PLAY2("play2"), STOP("stop"), RECEIVE_VIDEO("receiveVideo"), RECEIVE_AUDIO("receiveAudio"), GET_STREAM_LENGTH(
-            "getStreamLength"), CUSTOM("");
+    /** Requests a new client connection to the application. */
+    CONNECT("connect"),
+    /** Requests that the connection be closed. */
+    DISCONNECT("disconnect"),
+    /** Requests creation of a new stream on the connection. */
+    CREATE_STREAM("createStream"),
+    /** Requests deletion of an existing stream. */
+    DELETE_STREAM("deleteStream"),
+    /** Requests that a stream be closed. */
+    CLOSE_STREAM("closeStream"),
+    /** Requests initialization of a stream prior to use. */
+    INIT_STREAM("initStream"),
+    /** Requests that a previously reserved stream be released. */
+    RELEASE_STREAM("releaseStream"),
+    /** Requests that the client begin publishing a stream. */
+    PUBLISH("publish"),
+    /** Requests that stream playback be paused or resumed. */
+    PAUSE("pause"),
+    /** Requests a raw (non-buffered) pause/resume of stream playback. */
+    PAUSE_RAW("pauseRaw"),
+    /** Requests a seek to a specific position within a stream. */
+    SEEK("seek"),
+    /** Requests playback of a stream. */
+    PLAY("play"),
+    /** Requests playback of a stream using the extended play2 semantics (transitions, multiple items). */
+    PLAY2("play2"),
+    /** Requests that stream playback be stopped. */
+    STOP("stop"),
+    /** Requests enabling or disabling receipt of video data on the stream. */
+    RECEIVE_VIDEO("receiveVideo"),
+    /** Requests enabling or disabling receipt of audio data on the stream. */
+    RECEIVE_AUDIO("receiveAudio"),
+    /** Requests the length of a recorded stream. */
+    GET_STREAM_LENGTH("getStreamLength"),
+    /** Represents an action not covered by the other predefined constants. */
+    CUSTOM("");
 
     // presize to fit all enums in
     /** Constant <code>map</code> */

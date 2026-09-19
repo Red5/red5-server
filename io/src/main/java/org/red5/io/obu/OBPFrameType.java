@@ -7,7 +7,14 @@ package org.red5.io.obu;
  */
 public enum OBPFrameType {
 
-    KEYFRAME(0), INTERFRAME(1), INTRA_ONLY_FRAME(2), SWITCH_FRAME(3);
+    /** AV1 {@code frame_type} value 0: KEY_FRAME, a frame that can be decoded without reference to any other frame. */
+    KEYFRAME(0),
+    /** AV1 {@code frame_type} value 1: INTER_FRAME, a frame predicted using one or more reference frames. */
+    INTERFRAME(1),
+    /** AV1 {@code frame_type} value 2: INTRA_ONLY_FRAME, a non-key frame coded entirely with intra prediction. */
+    INTRA_ONLY_FRAME(2),
+    /** AV1 {@code frame_type} value 3: SWITCH_FRAME, a frame enabling switching between coded streams. */
+    SWITCH_FRAME(3);
 
     private final int value;
 

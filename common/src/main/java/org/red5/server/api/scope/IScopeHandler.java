@@ -116,6 +116,11 @@ public interface IScopeHandler extends IEventHandler {
      */
     boolean serviceCall(IConnection conn, IServiceCall call);
 
+    /**
+     * Returns the clients currently connected to the scope.
+     *
+     * @return set of connected clients
+     */
     Set<IClient> getClients();
 
 }

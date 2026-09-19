@@ -137,7 +137,12 @@ public class Output extends org.red5.io.amf.Output {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Encodes a string as UTF-8 bytes, serving repeated strings from the shared string cache.
+     *
+     * @param string the string to encode
+     * @return the UTF-8 encoded bytes
+     */
     protected static byte[] encodeString(String string) {
         initializeCaches();
         return getStringCache().get(string, k -> {

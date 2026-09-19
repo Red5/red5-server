@@ -21,12 +21,16 @@ import org.red5.server.net.rtmp.message.Packet;
  */
 public class RTMP {
 
+    /** Default RTMP chunk size in bytes used until a Set Chunk Size message changes it. */
     public static final int DEFAULT_CHUNK_SIZE = 128;
 
+    /** Minimum allowed RTMP chunk size in bytes, per the RTMP specification. */
     public static final int MIN_CHUNK_SIZE = 128;
 
+    /** Maximum allowed RTMP chunk size in bytes, per the RTMP specification. */
     public static final int MAX_CHUNK_SIZE = 65536;
 
+    /** Size in bytes of each RTMP handshake block (C1/S1, C2/S2). */
     public static final int HANDSHAKE_SIZE = 1536;
 
     /** Constant <code>states</code> */

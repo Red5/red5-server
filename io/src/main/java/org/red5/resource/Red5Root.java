@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Red5Root {
 
+    /** Logger for this class. */
     protected static Logger log = LoggerFactory.getLogger(Red5Root.class);
 
     private static final String PropertyRed5Root = "red5.root";

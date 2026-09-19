@@ -329,13 +329,13 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      */
     protected RTMP state = new RTMP();
 
-    // protection for the decoder when using multiple threads per connection
+    /** Protection for the decoder when using multiple threads per connection. */
     protected transient Semaphore decoderLock = new Semaphore(1, true);
 
-    // protection for the encoder when using multiple threads per connection
+    /** Protection for the encoder when using multiple threads per connection. */
     protected transient Semaphore encoderLock = new Semaphore(1, true);
 
-    // keeps track of the decode state
+    /** Keeps track of the decode state for this connection. */
     protected transient RTMPDecodeState decoderState;
 
     /**

@@ -32,14 +32,18 @@ public class Stax2DomBuilder {
      */
     protected boolean mCfgIgnoreWs = false;
 
+    /** Whether the builder should be namespace-aware when creating DOM elements and attributes. */
     protected boolean mNsAware = true;
 
     // // Trivial caching...
 
+    /** Prefix of the most recently qualified name computed by {@link #getQualified}, used to short-circuit repeat lookups. */
     protected String mLastPrefix = null;
 
+    /** Local name of the most recently qualified name computed by {@link #getQualified}, used to short-circuit repeat lookups. */
     protected String mLastLocalName = null;
 
+    /** Most recently computed qualified name (prefix:localName), cached for reuse when the same prefix/local name repeat. */
     protected String mLastQName = null;
 
     /**

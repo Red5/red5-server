@@ -41,6 +41,7 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
 
     private transient WebScope webScope;
 
+    /** Thread pool used to run per-connection streaming tasks off the servlet container's request threads. */
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     private static final int INIT_PREFIX_BYTES = 32;

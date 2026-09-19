@@ -52,16 +52,22 @@ public class RTMPTClientConnector extends Thread {
      */
     protected static final int SEND_TARGET_SIZE = 32768;
 
+    /** HTTP client used to issue the RTMPT polling requests (open/send/idle/close). */
     protected HttpClient httpClient;
 
+    /** Host and port of the remote RTMPT server that requests are sent to. */
     protected HttpHost targetHost;
 
+    /** The RTMPT client whose connection this connector drives. */
     protected RTMPTClient client;
 
+    /** Session identifier assigned by the server in response to the initial open request. */
     protected String sessionId;
 
+    /** Running count of requests sent on this session, used to build the request URL. */
     protected long messageCount = 1;
 
+    /** Flag indicating the polling loop in {@link #run()} should stop and the connection be closed. */
     protected volatile boolean stopRequested = false;
 
     {

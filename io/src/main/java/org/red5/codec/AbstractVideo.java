@@ -25,29 +25,39 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractVideo implements IVideoStreamCodec {
 
+    /** Logger for this instance, bound to the runtime class. */
     protected Logger log = LoggerFactory.getLogger(getClass());
 
+    /** Cached results of {@code log.isTraceEnabled()} and {@code log.isDebugEnabled()}, checked before logging at those levels. */
     protected boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     // tracks for multitrack video, if size = 1, theres only one track
+    /** Per-track codec instances for multitrack video; a size of 1 means there is only one track. */
     protected ConcurrentMap<Integer, IVideoStreamCodec> tracks = new ConcurrentSkipListMap<>();
 
     // multitrack flag
+    /** Whether this stream carries more than one video track. */
     protected boolean multitrack;
 
     // track codec - this is temporary when used for multitrack video
+    /** Temporary holder for the codec of the track currently being handled during multitrack video processing. */
     protected IVideoStreamCodec trackCodec;
 
     // codec enum
+    /** The video codec in use for this instance. */
     protected VideoCodec codec;
 
     // whether or not to employ enhanced codec handling
+    /** Whether to employ Enhanced RTMP codec handling. */
     protected boolean enhanced;
 
+    /** The multitrack arrangement (one track, many tracks, or many tracks with many codecs) in use. */
     protected AvMultitrackType multitrackType;
 
+    /** The video frame type (key frame, interframe, etc.) of the frame currently being processed. */
     protected VideoFrameType frameType;
 
+    /** The Enhanced RTMP video packet type of the packet currently being processed. */
     protected VideoPacketType packetType;
 
     /** Current timestamp for the stored keyframe */
@@ -74,12 +84,15 @@ public class AbstractVideo implements IVideoStreamCodec {
     protected boolean bufferInterframes;
 
     // track id
+    /** Identifier of the track currently being handled. */
     protected int trackId = 0;
 
     // track length in bytes
+    /** Length in bytes of the track data currently being handled. */
     protected int trackSize = 0;
 
     // video codec specific attributes
+    /** Codec-specific attributes, keyed by name. */
     protected transient ConcurrentMap<String, String> attributes = new ConcurrentHashMap<>();
 
     /** {@inheritDoc} */

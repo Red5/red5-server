@@ -8,7 +8,12 @@ package org.red5.codec;
 public enum AvMultitrackType {
 
     // Used by audio and video pipeline
-    OneTrack((byte) 0), ManyTracks((byte) 0x01), ManyTracksManyCodecs((byte) 0x02);
+    /** A single track is present. */
+    OneTrack((byte) 0),
+    /** Multiple tracks are present, all using the same codec. */
+    ManyTracks((byte) 0x01),
+    /** Multiple tracks are present, potentially using different codecs. */
+    ManyTracksManyCodecs((byte) 0x02);
 
     private final byte multitrackType;
 

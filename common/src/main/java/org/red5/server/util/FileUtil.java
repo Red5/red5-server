@@ -272,6 +272,15 @@ public class FileUtil {
         return total;
     }
 
+    /**
+     * Extracts the contents of a compressed (zip/war) file into the given destination directory, guarding against zip
+     * slip and excessive entry counts.
+     *
+     * @param compressedFileName
+     *            path to the compressed file to extract
+     * @param destinationDir
+     *            directory into which the archive contents will be extracted
+     */
     public static void unzip(String compressedFileName, String destinationDir) {
         //strip everything except the applications name
         String dirName = null;

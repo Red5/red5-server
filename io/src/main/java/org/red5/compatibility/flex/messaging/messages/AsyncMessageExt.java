@@ -19,6 +19,7 @@ public class AsyncMessageExt extends AsyncMessage implements IExternalizable {
 
     private static final long serialVersionUID = -5371460213241777011L;
 
+    /** The wrapped async message being externalized. */
     private AsyncMessage message;
 
     /**

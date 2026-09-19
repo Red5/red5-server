@@ -182,22 +182,35 @@ public class ColorInfo implements IExternalizable {
         return "ColorInfo [colorConfig=" + colorConfig + ", hdrCll=" + hdrCll + ", hdrMdcv=" + hdrMdcv + "]";
     }
 
+    /**
+     * Color configuration describing bit depth and the color primaries, transfer characteristics and matrix
+     * coefficients used to interpret the pixel data.
+     */
     public class ColorConfig implements Serializable {
 
-        // number of bits used to record the color channels for each pixel
+        /** Number of bits used to record the color channels for each pixel. SHOULD be 8, 10 or 12. */
         Number bitDepth = 8; // SHOULD be 8, 10 or 12
 
         // colorPrimaries, transferCharacteristics and matrixCoefficients are defined in ISO/IEC 23091-4/ITU-T H.273.
         // The values are an index into respective tables which are described in "Colour primaries", "Transfer
         // characteristics" and "Matrix coefficients" sections. It is RECOMMENDED to provide these values.
 
-        // indicates the chromaticity coordinates of the source color primaries
+        /**
+         * Indicates the chromaticity coordinates of the source color primaries. An enumerated index, per
+         * ISO/IEC 23091-4/ITU-T H.273, in the range [0-255].
+         */
         Number colorPrimaries; // enumeration [0-255]
 
-        // opto-electronic transfer characteristic function (ex. PQ, HLG)
+        /**
+         * Opto-electronic transfer characteristic function (ex. PQ, HLG). An enumerated index, per
+         * ISO/IEC 23091-4/ITU-T H.273, in the range [0-255].
+         */
         Number transferCharacteristics; // enumeration [0-255]
 
-        // matrix coefficients used in deriving luma and chroma signals
+        /**
+         * Matrix coefficients used in deriving luma and chroma signals. An enumerated index, per
+         * ISO/IEC 23091-4/ITU-T H.273, in the range [0-255].
+         */
         Number matrixCoefficients; // enumeration [0-255]
 
         @Override
@@ -207,12 +220,15 @@ public class ColorInfo implements IExternalizable {
 
     }
 
+    /**
+     * Content Light Level (HDR CLL) values describing the peak and average light levels of the mastered content.
+     */
     public class HdrCll implements Serializable {
 
-        // maximum value of the frame average light level (in 1 cd/m2) of the entire playback sequence
+        /** Maximum value of the frame average light level, in 1 cd/m2, of the entire playback sequence. Range [0.0001-10000]. */
         Number maxFall; // [0.0001-10000]
 
-        // maximum light level of any single pixel (in 1 cd/m2) of the entire playback sequence
+        /** Maximum light level of any single pixel, in 1 cd/m2, of the entire playback sequence. Range [0.0001-10000]. */
         Number maxCLL; // [0.0001-10000]
 
         @Override
@@ -222,13 +238,39 @@ public class ColorInfo implements IExternalizable {
 
     }
 
+    /**
+     * Mastering Display Color Volume (HDR MDCV) values describing the color primaries, white point and
+     * luminance range of the display used to master the content.
+     */
     public class HdrMdcv implements Serializable {
 
         // Mastering display color volume (mdcv) xy Chromaticity Coordinates within CIE 1931 color space.
 
         // Values SHALL be specified with four decimal places. The x coordinate SHALL be in the range [0.0001, 0.7400].
         // The y coordinate SHALL be in the range [0.0001, 0.8400].
-        Number redX, redY, greenX, greenY, blueX, blueY, whitePointX, whitePointY;
+        /** Red primary x chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.7400]. */
+        Number redX;
+
+        /** Red primary y chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.8400]. */
+        Number redY;
+
+        /** Green primary x chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.7400]. */
+        Number greenX;
+
+        /** Green primary y chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.8400]. */
+        Number greenY;
+
+        /** Blue primary x chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.7400]. */
+        Number blueX;
+
+        /** Blue primary y chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.8400]. */
+        Number blueY;
+
+        /** White point x chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.7400]. */
+        Number whitePointX;
+
+        /** White point y chromaticity coordinate within the CIE 1931 color space. Range [0.0001, 0.8400]. */
+        Number whitePointY;
 
         // max/min display luminance of the mastering display (in 1 cd/m2 ie. nits)
         // note: ST 2086:2018 - SMPTE Standard specifies minimum display mastering luminance in multiples of 0.0001
@@ -239,7 +281,9 @@ public class ColorInfo implements IExternalizable {
         // to increase resolution on the lower end of the minLuminance property. The ranges (in nits) mentioned
         // below suffice the theoretical limit for Mastering Reference Displays and adhere to the SMPTE ST 2084
         // standard (a.k.a., PQ) which is capable of representing full gamut of luminance level.
-        Number maxLuminance, // [5-10000]
+        /** Maximum display luminance of the mastering display, in 1 cd/m2 (nits). Range [5-10000]. */
+        Number maxLuminance,
+                /** Minimum display luminance of the mastering display, in 1 cd/m2 (nits). Range [0.0001-5]. */
                 minLuminance; // [0.0001-5]
 
         @Override

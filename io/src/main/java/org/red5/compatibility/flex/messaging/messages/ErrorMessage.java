@@ -17,14 +17,19 @@ public class ErrorMessage extends AsyncMessage {
 
     private static final long serialVersionUID = -9069412644250075809L;
 
+    /** Fault code identifying the error that occurred. */
     public String faultCode;
 
+    /** Additional detail describing the fault. */
     public String faultDetail;
 
+    /** Human-readable description of the fault. */
     public String faultString;
 
+    /** Nested cause of this error, if one is available. */
     public Object rootCause;
 
+    /** Additional application-specific data associated with the error. */
     public Object extendedData;
 
 }

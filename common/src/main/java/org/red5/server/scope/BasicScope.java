@@ -99,9 +99,10 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      */
     protected int keepDelay = 0;
 
-    // Guarded by this scope's monitor, shared with room cleanup and admission.
+    /** Whether this scope has been reaped (cleaned up). Guarded by this scope's monitor, shared with room cleanup and admission. */
     protected boolean reaped;
 
+    /** Timestamp (milliseconds since epoch) of the last activity observed on this scope. */
     protected long lastActivityTime = System.currentTimeMillis();
 
     /**

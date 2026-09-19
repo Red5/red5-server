@@ -21,6 +21,7 @@ import org.red5.io.utils.IOUtils;
  */
 public enum VideoCodec {
 
+    /** JPEG still-image video codec. */
     JPEG((byte) 0x01) {
 
         @Override
@@ -29,6 +30,7 @@ public enum VideoCodec {
         }
 
     }, // jpeg
+    /** Sorenson Spark / H.263 video codec. */
     H263((byte) 0x02) {
 
         @Override
@@ -42,6 +44,7 @@ public enum VideoCodec {
         }
 
     }, // h263
+    /** Macromedia/Adobe Screen Video (FSV1) codec. */
     SCREEN_VIDEO((byte) 0x03) {
 
         @Override
@@ -55,6 +58,7 @@ public enum VideoCodec {
         }
 
     }, // FSV1 / screen video
+    /** On2 VP6 video codec. */
     VP6((byte) 0x04) {
 
         @Override
@@ -63,6 +67,7 @@ public enum VideoCodec {
         }
 
     }, // VP6 / vp6f / vp6
+    /** On2 VP6 video codec with alpha channel support. */
     VP6a((byte) 0x05) {
 
         @Override
@@ -71,6 +76,7 @@ public enum VideoCodec {
         }
 
     }, // VP6A / vp6 alpha
+    /** Macromedia/Adobe Screen Video 2 (FSV2) codec. */
     SCREEN_VIDEO2((byte) 0x06) {
 
         @Override
@@ -84,6 +90,7 @@ public enum VideoCodec {
         }
 
     }, // FSV2 / screen video 2
+    /** AVC / H.264 video codec (fourcc avc1). */
     AVC((byte) 0x07) {
 
         @Override
@@ -97,6 +104,7 @@ public enum VideoCodec {
         }
 
     }, // AVC / avc1 / h264
+    /** VP8 video codec (fourcc vp08). */
     VP8((byte) 0x08) {
 
         @Override
@@ -110,6 +118,7 @@ public enum VideoCodec {
         }
 
     }, // VP8 / vp08 / vp8
+    /** VP9 video codec (fourcc vp09). */
     VP9((byte) 0x09) {
 
         @Override
@@ -123,7 +132,9 @@ public enum VideoCodec {
         }
 
     }, // VP9 / vp09
+    /** Reserved codec id, currently unused/available for future assignment. */
     AVAILABLE((byte) 0x0a), // available
+    /** MPEG-1 video codec. */
     MPEG1((byte) 0x0b) {
 
         @Override
@@ -137,6 +148,7 @@ public enum VideoCodec {
         }
 
     }, // MPEG / mpeg / mpeg1 video
+    /** HEVC / H.265 video codec (fourcc hvc1). */
     HEVC((byte) 0x0c) {
 
         @Override
@@ -150,6 +162,7 @@ public enum VideoCodec {
         }
 
     }, // HEVC / hvc1 / h265
+    /** AV1 video codec (fourcc av01). */
     AV1((byte) 0x0d) {
 
         @Override
@@ -163,6 +176,7 @@ public enum VideoCodec {
         }
 
     }, // AV1 / av01
+    /** VVC / H.266 video codec (fourcc vvc1). */
     VVC((byte) 0x0e) {
 
         @Override

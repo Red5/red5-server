@@ -107,12 +107,27 @@ public class MediaBunnyStreamListener implements IStreamListener {
         this.registry = registry;
     }
 
+    /**
+     * Sets which tracks are expected to be present in the stream, used to decide when the output is complete.
+     *
+     * @param expectVideo
+     *            whether a video track is expected
+     * @param expectAudio
+     *            whether an audio track is expected
+     */
     public void setExpectedTracks(boolean expectVideo, boolean expectAudio) {
         this.expectedVideo = expectVideo;
         this.expectedAudio = expectAudio;
         log.info("Expected tracks for stream {} video={} audio={}", streamKey, expectVideo, expectAudio);
     }
 
+    /**
+     * Seeds the expected tracks and pushes any available decoder configuration data from an existing stream's codec info, so
+     * late-joining consumers of this listener receive the required configuration before media data.
+     *
+     * @param codecInfo
+     *            the stream's codec information to seed from, or {@code null} if none is available
+     */
     public void seedFromCodecInfo(IStreamCodecInfo codecInfo) {
         if (codecInfo == null) {
             log.debug("No codec info available to seed for stream {}", streamKey);

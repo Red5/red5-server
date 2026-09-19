@@ -48,10 +48,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, StatusCodes {
 
-    // initialize the Logger upon class load, keeping it at the class level
+    /** Logger for this handler instance, initialized upon class load and kept at the class level. */
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    // convenience flags to prevent unnecessary calls to is*Enabled() calls which require logger lookup
+    /** Convenience flag caching whether trace level logging is enabled, to avoid repeated {@code isTraceEnabled()} lookups. */
     protected boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
 
     /** {@inheritDoc} */

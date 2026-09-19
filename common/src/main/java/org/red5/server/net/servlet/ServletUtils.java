@@ -90,8 +90,11 @@ public class ServletUtils {
         }
     }
 
+    /** Maximum request body accepted by the servlet helpers, configurable via the red5.servlet.maxRequestBody property. */
+    public static final long MAX_REQUEST_BODY_SIZE = Long.getLong("red5.servlet.maxRequestBody", 4L * 1024 * 1024);
+
     /**
-     * Copies information from the http request to the output stream using the specified content length.
+     * Copies information from the http request to the output stream, enforcing {@link #MAX_REQUEST_BODY_SIZE} as the content length limit.
      *
      * @param req
      *            Request
@@ -100,9 +103,6 @@ public class ServletUtils {
      * @throws java.io.IOException
      *             on error
      */
-    /** Maximum request body accepted by the servlet helpers, configurable via the red5.servlet.maxRequestBody property. */
-    public static final long MAX_REQUEST_BODY_SIZE = Long.getLong("red5.servlet.maxRequestBody", 4L * 1024 * 1024);
-
     public static void copy(HttpServletRequest req, OutputStream output) throws IOException {
         copy(req, output, MAX_REQUEST_BODY_SIZE);
     }

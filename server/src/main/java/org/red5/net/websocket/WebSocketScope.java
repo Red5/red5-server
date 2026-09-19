@@ -37,13 +37,17 @@ public class WebSocketScope implements InitializingBean, DisposableBean {
 
     private WebSocketScopeManager manager;
 
+    /** WebSocket connections currently associated with this scope. */
     protected ConcurrentSkipListSet<WebSocketConnection> conns = new ConcurrentSkipListSet<>();
 
     // this has very few entries, possibly only one, COWAS is fine here and won't incur Comparable requirements
+    /** Data listeners registered to receive events for this scope. */
     protected CopyOnWriteArraySet<IWebSocketDataListener> listeners = new CopyOnWriteArraySet<>();
 
+    /** The Red5 scope backing this WebSocket scope. */
     protected IScope scope;
 
+    /** The context path associated with this WebSocket scope. */
     protected String path = "default";
 
     /**

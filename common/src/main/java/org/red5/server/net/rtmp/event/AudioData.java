@@ -31,6 +31,7 @@ public class AudioData extends BaseEvent implements IStreamData<AudioData>, IStr
 
     private static final long serialVersionUID = -4102940670913999407L;
 
+    /** Raw encoded audio payload for this frame. */
     protected IoBuffer data;
 
     /**

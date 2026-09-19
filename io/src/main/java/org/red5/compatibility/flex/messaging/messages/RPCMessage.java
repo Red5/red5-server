@@ -10,8 +10,10 @@ import org.red5.io.amf3.IDataOutput;
 public abstract class RPCMessage extends AbstractMessage {
     private static final long serialVersionUID = -1203255926746881424L;
 
+    /** Username used to authenticate the remote destination, when set. */
     private String remoteUsername;
 
+    /** Password used to authenticate the remote destination, when set. */
     private String remotePassword;
 
     /**

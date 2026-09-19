@@ -19,6 +19,7 @@ public class AcknowledgeMessageExt extends AcknowledgeMessage implements IExtern
 
     private static final long serialVersionUID = -8764729006642310394L;
 
+    /** The wrapped acknowledge message that supplies the actual externalization. */
     private AcknowledgeMessage message;
 
     /**

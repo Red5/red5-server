@@ -15,6 +15,7 @@ package org.red5.io.object;
 public final class UnsignedByte extends UnsignedNumber {
     static final long serialVersionUID = 1L;
 
+    /** The unsigned 8-bit value, stored in the low byte, range 0-255. */
     private short value;
 
     /**

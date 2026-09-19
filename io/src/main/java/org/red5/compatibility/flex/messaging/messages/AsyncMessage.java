@@ -34,6 +34,7 @@ public class AsyncMessage extends AbstractMessage {
     /** Id of message this message belongs to. */
     public String correlationId;
 
+    /** Raw byte representation of the correlation id, used when the id was provided as a byte array instead of a string. */
     protected byte[] correlationIdBytes;
 
     /** {@inheritDoc} */

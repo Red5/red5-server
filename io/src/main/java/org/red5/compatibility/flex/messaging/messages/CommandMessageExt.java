@@ -19,6 +19,7 @@ public class CommandMessageExt extends CommandMessage implements IExternalizable
 
     private static final long serialVersionUID = -5371460213241777011L;
 
+    /** The wrapped command message that externalization is delegated to, if set. */
     private CommandMessage message;
 
     /**

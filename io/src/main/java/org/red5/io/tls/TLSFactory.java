@@ -95,7 +95,7 @@ public class TLSFactory {
      * Returns an SSLContext for the configured keystore and truststore with the default password.
      *
      * @return SSLContext
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception if the keystore or truststore cannot be loaded or the SSL context cannot be initialized
      */
     public static SSLContext getTLSContext() throws Exception {
         log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
@@ -133,7 +133,7 @@ public class TLSFactory {
      *
      * @param passphrase an array of {@link char} objects
      * @return SSLContext
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception if the keystore or truststore cannot be loaded or the SSL context cannot be initialized
      * @param storeType a {@link java.lang.String} object
      */
     public static SSLContext getTLSContext(String storeType, char[] passphrase) throws Exception {
@@ -177,7 +177,7 @@ public class TLSFactory {
      * @param truststorePassword a {@link java.lang.String} object
      * @param truststorePath a {@link java.lang.String} object
      * @return SSLContext
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception if the keystore or truststore cannot be loaded or the SSL context cannot be initialized
      */
     public static SSLContext getTLSContext(String storeType, String keystorePassword, String keystorePath, String truststorePassword, String truststorePath) throws Exception {
         log.info("Creating SSL context with keystore: {} and truststore: {} using {}", keystorePath, truststorePath, storeType);
@@ -209,7 +209,7 @@ public class TLSFactory {
      * @param trustStorePassphrase an array of {@link char} objects
      * @param truststoreInput a {@link java.io.InputStream} object
      * @return SSLContext
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception if the keystore or truststore cannot be loaded or the SSL context cannot be initialized
      */
     public static SSLContext getTLSContext(String storeType, char[] keyStrorePassphrase, InputStream keystoreInput, char[] trustStorePassphrase, InputStream truststoreInput) throws Exception {
         log.info("Creating SSL context with keystore and truststore input streams, using {}", storeType);

@@ -17,6 +17,7 @@ import java.util.Objects;
 public abstract class WebSocketDataListener implements IWebSocketDataListener {
 
     // used as a seed for hashCode/equals to prevent dupe instances
+    /** Per-instance identifier, seeded from the current nanosecond time, used to prevent duplicate instances in hashCode/equals. */
     protected final int localId = Objects.hash(System.nanoTime());
 
     /**

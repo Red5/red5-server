@@ -28,6 +28,9 @@ public class SSEService implements ISSEService {
     @Autowired
     private SSEManager sseManager;
 
+    /**
+     * Creates the SSE service.
+     */
     public SSEService() {
         log.debug("SSEService instantiated");
     }

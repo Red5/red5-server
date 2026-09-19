@@ -21,10 +21,21 @@ public enum AudioPacketModExType {
         this.value = value;
     }
 
+    /**
+     * Returns the numeric identifier of this ModEx sub-type as used on the wire.
+     *
+     * @return the wire value of this sub-type
+     */
     public byte getValue() {
         return value;
     }
 
+    /**
+     * Looks up the ModEx sub-type matching the given wire value.
+     *
+     * @param value the wire value to look up
+     * @return the matching {@link AudioPacketModExType}, or {@code null} if none matches
+     */
     public static AudioPacketModExType valueOf(int value) {
         for (AudioPacketModExType type : values()) {
             if (type.getValue() == value) {

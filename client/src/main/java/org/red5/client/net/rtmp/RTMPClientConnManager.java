@@ -47,8 +47,10 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
     // more than one manager, so connections registered in one could not be found from another
     protected static final IConnectionManager<BaseConnection> instance = new RTMPClientConnManager();
 
+    /** Active connections keyed by session id. */
     protected ConcurrentMap<String, BaseConnection> connMap = new ConcurrentHashMap<>();
 
+    /** Running count of connections created, used only for trace logging. */
     protected AtomicInteger conns = new AtomicInteger();
 
     /**

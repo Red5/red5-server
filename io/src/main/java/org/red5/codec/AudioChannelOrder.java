@@ -7,9 +7,12 @@ package org.red5.codec;
  */
 public enum AudioChannelOrder {
 
-    Unspecified(0), // Only the channel count is specified, without any further information about the channel order
-    Native(1), // The native channel order; the channels are in the same order in which as defined in AudioChannel
-    Custom(2); // The channel order does not correspond to any predefined order and is stored as an explicit map
+    /** Only the channel count is specified, without any further information about the channel order. */
+    Unspecified(0),
+    /** The native channel order; the channels are in the same order as defined in AudioChannel. */
+    Native(1),
+    /** The channel order does not correspond to any predefined order and is stored as an explicit map. */
+    Custom(2);
 
     private final int order;
 

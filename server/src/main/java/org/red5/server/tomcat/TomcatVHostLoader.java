@@ -54,17 +54,23 @@ public class TomcatVHostLoader extends TomcatLoader implements TomcatVHostLoader
     protected String webappRoot;
 
     //the virtual hosts name
+    /** Name of the virtual host being loaded. */
     protected String name;
 
     //the domain
+    /** Domain name associated with the virtual host. */
     protected String domain;
 
+    /** Whether webapps placed in {@link #webappRoot} should be automatically deployed. */
     protected boolean autoDeploy;
 
+    /** Whether webapps should be monitored and redeployed while the host is live. */
     protected boolean liveDeploy;
 
+    /** Whether child containers of the host should be started; defaults to {@code true}. */
     protected boolean startChildren = true;
 
+    /** Whether WAR files should be unpacked before deployment. */
     protected boolean unpackWARs;
 
     /**

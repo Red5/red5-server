@@ -21,8 +21,18 @@ public class Header implements Constants, Cloneable, Externalizable {
 
     private static final long serialVersionUID = 8982665579411495026L;
 
+    /**
+     * RTMP chunk header type, indicating how much of the previous header a chunk reuses.
+     */
     public enum HeaderType {
-        HEADER_NEW, HEADER_SAME_SOURCE, HEADER_TIMER_CHANGE, HEADER_CONTINUE;
+        /** Full header: channel, timer, size, data type and stream id are all present. */
+        HEADER_NEW,
+        /** Header shares its stream id with the previous header on the channel. */
+        HEADER_SAME_SOURCE,
+        /** Header shares stream id, size and data type, only the timer has changed. */
+        HEADER_TIMER_CHANGE,
+        /** Header reuses the previous header entirely, continuing with the same timer delta. */
+        HEADER_CONTINUE;
     }
 
     /**

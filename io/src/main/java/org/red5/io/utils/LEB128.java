@@ -176,10 +176,18 @@ public final class LEB128 {
      */
     public static class LEB128Result {
 
+        /** The decoded unsigned integer value. */
         public int value;
 
+        /** The number of bytes consumed from the input while decoding {@link #value}. */
         public int bytesRead;
 
+        /**
+         * Constructs a new LEB128Result.
+         *
+         * @param value the decoded value
+         * @param bytesRead the number of bytes consumed while decoding
+         */
         public LEB128Result(int value, int bytesRead) {
             this.value = value;
             this.bytesRead = bytesRead;
@@ -197,6 +205,11 @@ public final class LEB128 {
      */
     public static class LEB128Exception extends Exception {
 
+        /**
+         * Constructs a new LEB128Exception.
+         *
+         * @param message the detail message describing the failure
+         */
         public LEB128Exception(String message) {
             super(message);
         }

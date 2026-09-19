@@ -474,12 +474,23 @@ public class SingleItemSubscriberStream extends AbstractClientStream implements 
 
         IConnection conn;
 
+        /**
+         * Creates a notifier that reports stream lifecycle events to the given scope handler.
+         *
+         * @param stream the single item subscriber stream this notifier reports on
+         * @param handler the scope handler to be notified of stream events
+         */
         public Notifier(ISingleItemSubscriberStream stream, IStreamAwareScopeHandler handler) {
             log.trace("Notifier - stream: {} handler: {}", stream, handler);
             this.stream = stream;
             this.handler = handler;
         }
 
+        /**
+         * Sets the connection associated with the stream being monitored.
+         *
+         * @param conn the connection to associate with this notifier
+         */
         public void setConnection(IConnection conn) {
             this.conn = conn;
         }

@@ -7,7 +7,10 @@ package org.red5.codec;
  */
 public enum AudioPacketType {
 
-    SequenceStart((byte) 0), CodedFrames((byte) 0x01),
+    /** First packet of an audio track, carrying sequence/configuration data (e.g. AudioSpecificConfig). */
+    SequenceStart((byte) 0),
+    /** Packet carrying coded audio frame data. */
+    CodedFrames((byte) 0x01),
 
     // RTMP includes a previously undocumented 'audio silence' message. This silence message is identified when an
     // audio message contains a zero-length payload, or more precisely, an empty audio message without an
@@ -31,10 +34,13 @@ public enum AudioPacketType {
     //
     // AudioPacketType.SequenceEnd is to have no less than the same meaning as a silence message. We need to
     // introduce this enum to ensure we can signal the end of the audio sequence for any audio track.
-    SequenceEnd((byte) 0x02), MultichannelConfig((byte) 0x04),
-    // Turns on multitrack mode
+    /** Signals the end of the audio sequence for a track, equivalent in meaning to an audio silence message. */
+    SequenceEnd((byte) 0x02),
+    /** Carries multichannel audio configuration data. */
+    MultichannelConfig((byte) 0x04),
+    /** Turns on multitrack mode. */
     Multitrack((byte) 0x05),
-    // Modifier/extension signal. Wraps modifier data around another packet type.
+    /** Modifier/extension signal. Wraps modifier data around another packet type. */
     ModEx((byte) 0x07);
 
     private final byte packetType;

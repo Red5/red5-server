@@ -23,5 +23,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RemoteClass {
+    /**
+     * The alias name to use in place of the fully-qualified class name during serialization.
+     *
+     * @return the remote alias name
+     */
     String alias();
 }

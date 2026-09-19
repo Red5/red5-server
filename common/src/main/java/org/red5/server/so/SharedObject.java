@@ -882,7 +882,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
     }
 
     /**
-     * {@inheritDoc}
+     * Marks the shared object as modified so that pending changes are synchronized to clients.
      *
      * @param dirty a boolean
      */
@@ -892,7 +892,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
     }
 
     /**
-     * {@inheritDoc}
+     * Marks a single attribute as modified, queueing an update (or a delete when the value is now null) for clients.
      *
      * @param name a {@link java.lang.String} object
      */

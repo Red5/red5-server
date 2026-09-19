@@ -27,6 +27,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 public class GlobalScope extends Scope implements IGlobalScope, GlobalScopeMXBean {
 
     // Red5 Server instance
+    /** The owning Red5 server instance, injected via Spring prior to initialization. */
     protected transient IServer server;
 
     {

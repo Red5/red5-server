@@ -32,9 +32,14 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractStream implements IStream {
 
+    /** Logger for this class instance. */
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected boolean isTrace = log.isTraceEnabled(), isDebug = log.isDebugEnabled();
+    /** Whether trace level logging is enabled for {@link #log}. */
+    protected boolean isTrace = log.isTraceEnabled();
+
+    /** Whether debug level logging is enabled for {@link #log}. */
+    protected boolean isDebug = log.isDebugEnabled();
 
     /**
      * Stream name

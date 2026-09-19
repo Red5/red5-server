@@ -44,14 +44,19 @@ public class RTMPConnManager implements IConnectionManager<BaseConnection>, Appl
     /** Constant <code>applicationContext</code> */
     protected static ApplicationContext applicationContext;
 
+    /** Scheduler used to periodically run the connection checker task. */
     protected ScheduledExecutorService executor;
 
+    /** Handle to the scheduled connection checker task, used to cancel it on shutdown. */
     protected ScheduledFuture<?> checkerFuture;
 
+    /** Active connections managed by this instance, keyed by connection id. */
     protected ConcurrentMap<String, BaseConnection> connMap = new ConcurrentHashMap<>();
 
+    /** Running count of connections currently managed by this instance. */
     protected AtomicInteger conns = new AtomicInteger();
 
+    /** Whether debug-level diagnostic behaviour is enabled. */
     protected boolean debug;
 
     /**

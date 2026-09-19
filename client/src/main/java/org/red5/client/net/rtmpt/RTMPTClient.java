@@ -28,8 +28,10 @@ import org.red5.server.net.rtmpt.codec.RTMPTCodecFactory;
 public class RTMPTClient extends BaseRTMPClientHandler {
 
     // guarded by this
+    /** The active RTMPT polling connector thread used to send and receive data over HTTP. */
     protected RTMPTClientConnector connector;
 
+    /** Factory that produces the RTMP protocol decoder/encoder used for this RTMPT connection. */
     protected RTMPTCodecFactory codecFactory;
 
     /**

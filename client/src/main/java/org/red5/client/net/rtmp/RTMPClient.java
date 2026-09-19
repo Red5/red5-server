@@ -35,16 +35,16 @@ public class RTMPClient extends BaseRTMPClientHandler {
     /** Constant <code>CONNECTOR_WORKER_TIMEOUT=7000</code> */
     protected static final int CONNECTOR_WORKER_TIMEOUT = 7000; // milliseconds
 
-    // I/O handler
+    /** MINA I/O handler that dispatches network events to this client. */
     protected final RTMPMinaIoHandler ioHandler;
 
-    // Socket connector, disposed on disconnect
+    /** Socket connector used to establish the network connection, disposed on disconnect. */
     protected SocketConnector socketConnector;
 
-    // ConnectFuture
+    /** Future representing the pending or completed socket connection attempt. */
     protected ConnectFuture future;
 
-    // Connected IoSession
+    /** MINA I/O session for the established connection, once the connector completes. */
     protected IoSession session;
 
     /**
@@ -140,8 +140,8 @@ public class RTMPClient extends BaseRTMPClientHandler {
      * This is useful for debugging purposes, especially when dealing with connection parameters or other
      * configuration settings.
      *
-     * @param map
-     * @param name
+     * @param map the map of key/value pairs to log
+     * @param name a label identifying the map, printed in the debug header
      */
     protected void logMap(Map<String, Object> map, String name) {
         if (isDebug) {
