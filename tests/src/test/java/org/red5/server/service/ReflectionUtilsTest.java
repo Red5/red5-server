@@ -1,6 +1,10 @@
 package org.red5.server.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+
+import java.lang.reflect.Method;
 
 import java.util.Arrays;
 import java.util.List;
@@ -99,6 +103,32 @@ public class ReflectionUtilsTest {
 
     }
 
+    /**
+     * Overloads reachable through argument conversion (Boolean converts to String) must be selected by the actual
+     * argument type; this is what routes a client's publish(false) unpublish to publish(Boolean) rather than
+     * publish(String) with the name "false".
+     */
+    @Test
+    public void testOverloadPrefersAssignableParameter() {
+        IConnection conn = new DummyConnection();
+        TestService service = new TestService();
+        // repeat since candidate ordering comes from reflection and is not stable
+        for (int i = 0; i < 25; i++) {
+            IServiceCall call = new PendingCall("TestService.doTest", new Object[] { Boolean.FALSE });
+            Object[] result = ReflectionUtils.findMethod(conn, call, service, "doTest");
+            assertNotNull("method not found", result[0]);
+            assertEquals(Boolean.class, ((Method) result[0]).getParameterTypes()[0]);
+            call = new PendingCall("TestService.doTest", new Object[] { "test" });
+            result = ReflectionUtils.findMethod(conn, call, service, "doTest");
+            assertNotNull("method not found", result[0]);
+            assertEquals(String.class, ((Method) result[0]).getParameterTypes()[0]);
+            // list variant without a connection
+            result = ReflectionUtils.findMethod(service, "doTest", List.of(Boolean.FALSE));
+            assertNotNull("method not found", result[0]);
+            assertEquals(Boolean.class, ((Method) result[0]).getParameterTypes()[0]);
+        }
+    }
+
     public class TestService {
 
         public void doTest() {
@@ -107,6 +137,10 @@ public class ReflectionUtilsTest {
 
         public void doTest(List<?> param) {
             log.info("doTest - List: {}", param);
+        }
+
+        public void doTest(Boolean param) {
+            log.info("doTest Boolean: {}", param);
         }
 
         public void doTest(String param) {

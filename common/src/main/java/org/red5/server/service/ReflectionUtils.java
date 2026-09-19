@@ -8,8 +8,10 @@
 package org.red5.server.service;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,8 +65,8 @@ public class ReflectionUtils {
             Object[] args = (listArgs != null ? listArgs.toArray() : new Object[0]);
             // convert the args to their class types
             final Class<?>[] callParams = ConversionUtils.convertParams(args);
-            // search for method with matching parameters
-            for (Method method : methods) {
+            // search for method with matching parameters, trying those whose parameters accept the arguments as-is first
+            for (Method method : orderByAssignability(methods, args, null)) {
                 // track method parameters count
                 int paramCount = method.getParameterCount();
                 if (isTrace) {
@@ -162,8 +164,8 @@ public class ReflectionUtils {
             if (isDebug) {
                 log.debug("Named method(s) {}: {} found in {}", methods.size(), methodName, service);
             }
-            // search for method with matching parameters
-            for (Method method : methods) {
+            // search for method with matching parameters, trying those whose parameters accept the arguments as-is first
+            for (Method method : orderByAssignability(methods, args, conn)) {
                 // track method parameters count
                 int paramCount = method.getParameterCount();
                 if (isTrace) {
@@ -227,6 +229,61 @@ public class ReflectionUtils {
             }
         }
         return methodResult;
+    }
+
+    /**
+     * Orders candidate methods so that those whose parameter types accept the call arguments without conversion come
+     * first. Overloads such as publish(Boolean) and publish(String) are both reachable through argument conversion, so
+     * without this ordering the selected overload depends on reflection order rather than on the argument types.
+     *
+     * @param methods candidate methods sharing a name
+     * @param args call arguments, may be null
+     * @param conn connection to consider as an optional leading parameter, may be null
+     * @return the methods, directly assignable matches first
+     */
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = Map.of(boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class, short.class, Short.class, int.class, Integer.class, long.class, Long.class, float.class, Float.class, double.class, Double.class);
+
+    private static List<Method> orderByAssignability(Set<Method> methods, Object[] args, IConnection conn) {
+        List<Method> direct = new ArrayList<>();
+        List<Method> other = new ArrayList<>();
+        Object[] callArgs = args != null ? args : new Object[0];
+        for (Method method : methods) {
+            Class<?>[] paramTypes = method.getParameterTypes();
+            boolean matches = false;
+            if (paramTypes.length == callArgs.length) {
+                matches = isAssignable(paramTypes, callArgs, 0);
+            } else if (conn != null && paramTypes.length == callArgs.length + 1 && paramTypes[0].isAssignableFrom(conn.getClass())) {
+                matches = isAssignable(paramTypes, callArgs, 1);
+            }
+            (matches ? direct : other).add(method);
+        }
+        direct.addAll(other);
+        return direct;
+    }
+
+    /**
+     * Returns true when every argument can be passed to the parameter at the same index (plus offset) without conversion.
+     * A null argument fits any non-primitive parameter.
+     */
+    private static boolean isAssignable(Class<?>[] paramTypes, Object[] args, int offset) {
+        for (int i = 0; i < args.length; i++) {
+            Class<?> param = paramTypes[i + offset];
+            Object arg = args[i];
+            if (arg == null) {
+                if (param.isPrimitive()) {
+                    return false;
+                }
+                continue;
+            }
+            Class<?> argType = arg.getClass();
+            if (param.isPrimitive()) {
+                param = PRIMITIVE_WRAPPERS.get(param);
+            }
+            if (!param.isAssignableFrom(argType)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

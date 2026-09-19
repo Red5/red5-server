@@ -43,7 +43,9 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
     protected static boolean enableTaskExecutor = true;
 
     /** Constant <code>instance</code> */
-    protected static IConnectionManager<BaseConnection> instance;
+    // eagerly created; a lazily created instance raced when several clients connected at once and handed out
+    // more than one manager, so connections registered in one could not be found from another
+    protected static final IConnectionManager<BaseConnection> instance = new RTMPClientConnManager();
 
     protected ConcurrentMap<String, BaseConnection> connMap = new ConcurrentHashMap<>();
 
@@ -55,9 +57,6 @@ public class RTMPClientConnManager implements IConnectionManager<BaseConnection>
      * @return a {@link org.red5.server.net.IConnectionManager} object
      */
     public static IConnectionManager<BaseConnection> getInstance() {
-        if (instance == null) {
-            instance = new RTMPClientConnManager();
-        }
         return instance;
     }
 
