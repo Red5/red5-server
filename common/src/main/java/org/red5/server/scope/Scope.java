@@ -94,6 +94,25 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     private long creationTime;
 
     /**
+     * Minimum idle time for a room created while resolving a request, covering the gap until a connection joins.
+     */
+    public static final long NEW_ROOM_IDLE_GRACE_MILLIS = 30000L;
+
+    /**
+     * Idle check results: not removable, or blocked by a condition whose change resumes the check.
+     */
+    private static final long NOT_REMOVABLE = -1L, BLOCKED = -2L;
+
+    // Admission and deferred idle check state, guarded by this scope's monitor
+    private int pendingConnections;
+
+    private int pendingChildAdds;
+
+    private boolean idleCheckDeferred;
+
+    private long deferredMinimumIdleMillis;
+
+    /**
      * Scope nesting depth, unset by default
      */
     private int depth = UNSET;
@@ -188,6 +207,25 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * Add child scope to this scope
      */
     public boolean addChildScope(IBasicScope scope) {
+        // handler callbacks run outside the monitor; the pending count keeps the room from being removed meanwhile
+        synchronized (this) {
+            if (reaped) {
+                return false;
+            }
+            pendingChildAdds++;
+        }
+        try {
+            return addChildScopeInternal(scope);
+        } finally {
+            synchronized (this) {
+                pendingChildAdds--;
+                lastActivityTime = System.currentTimeMillis();
+                resumeDeferredIdleCheck();
+            }
+        }
+    }
+
+    private boolean addChildScopeInternal(IBasicScope scope) {
         log.debug("Add child: {}", scope);
         boolean added = false;
         if (scope.isValid()) {
@@ -241,6 +279,24 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
      * @return true on success, false otherwise
      */
     public boolean connect(IConnection conn, Object[] params) {
+        synchronized (this) {
+            if (reaped || !enabled) {
+                return false;
+            }
+            pendingConnections++;
+        }
+        try {
+            return connectInternal(conn, params);
+        } finally {
+            synchronized (this) {
+                pendingConnections--;
+                lastActivityTime = System.currentTimeMillis();
+                resumeDeferredIdleCheck();
+            }
+        }
+    }
+
+    private boolean connectInternal(IConnection conn, Object[] params) {
         log.debug("Connect - scope: {} connection: {}", this, conn);
         if (enabled) {
             if (hasParent() && !parent.connect(conn, params)) {
@@ -386,6 +442,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         }
         // decrement conn stats
         connectionStats.decrement();
+        synchronized (this) {
+            resumeDeferredIdleCheck();
+        }
     }
 
     /** {@inheritDoc} */
@@ -765,11 +824,13 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
         return null;
     }
 
-    /**
-     * Return child scope names iterator
-     *
-     * @return Child scope names iterator
-     */
+    /** Returns a detached, read-only snapshot of child scope objects. */
+    @Override
+    public Collection<IBasicScope> getBasicScopes() {
+        return Collections.unmodifiableList(new ArrayList<>(children));
+    }
+
+    /** Returns the set of child scope names. */
     public Set<String> getScopeNames() {
         log.debug("Children: {}", children);
         return children.getNames();
@@ -1026,6 +1087,9 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
             if (scope instanceof Scope) {
                 unregisterJMX();
             }
+            synchronized (this) {
+                resumeDeferredIdleCheck();
+            }
         }
     }
 
@@ -1180,8 +1244,91 @@ public class Scope extends BasicScope implements IScope, IScopeStatistics, Scope
     }
 
     /**
-     * Stops scope
+     * Detaches an empty room after its idle/retention period. Admission is closed
+     * atomically with the eligibility check; lifecycle callbacks run outside that lock.
      */
+    public boolean removeIfIdle(long now, long minimumIdleMillis) {
+        synchronized (this) {
+            if (idleRemainingMillis(now, minimumIdleMillis) != 0) {
+                return false;
+            }
+            // References obtained before removal cannot attach a connection or child.
+            reaped = true;
+        }
+        detach();
+        return true;
+    }
+
+    /**
+     * Runs a scheduled idle check. Rather than giving up, a check still inside the retention period is rescheduled
+     * for the remaining time, and a check blocked by an admission, connection or child is resumed when that clears.
+     */
+    void runIdleCheck(long minimumIdleMillis) {
+        synchronized (this) {
+            long remaining = idleRemainingMillis(System.currentTimeMillis(), minimumIdleMillis);
+            if (remaining == BLOCKED) {
+                idleCheckDeferred = true;
+                deferredMinimumIdleMillis = minimumIdleMillis;
+                return;
+            }
+            if (remaining > 0) {
+                scheduleKeepAliveJob(remaining, minimumIdleMillis);
+                return;
+            }
+            if (remaining != 0) {
+                return;
+            }
+            reaped = true;
+        }
+        detach();
+    }
+
+    /**
+     * Returns 0 when the room is removable now, the remaining retention time when only waiting on that,
+     * {@link #BLOCKED} when a transient condition prevents removal, or {@link #NOT_REMOVABLE}. Caller must hold this
+     * scope's monitor.
+     */
+    private long idleRemainingMillis(long now, long minimumIdleMillis) {
+        if (type != ScopeType.ROOM || parent == null || reaped || keepOnDisconnect || !listeners.isEmpty()) {
+            return NOT_REMOVABLE;
+        }
+        if (pendingConnections != 0 || pendingChildAdds != 0 || !connections.isEmpty() || children.stream().anyMatch(Scope::blocksRemoval)) {
+            return BLOCKED;
+        }
+        return Math.max(0L, Math.max(minimumIdleMillis, keepDelay * 1000L) - (now - lastActivityTime));
+    }
+
+    /**
+     * Child rooms remove themselves first, and a broadcast scope with an attached provider or consumer is in use.
+     * Other children, such as shared objects, are removed along with the room.
+     */
+    private static boolean blocksRemoval(IBasicScope child) {
+        if (child instanceof IScope) {
+            return true;
+        }
+        if (child instanceof IBroadcastScope broadcastScope) {
+            return !broadcastScope.getProviders().isEmpty() || !broadcastScope.getConsumers().isEmpty();
+        }
+        return false;
+    }
+
+    /**
+     * Schedules an idle check that was blocked, once no admission is in progress. Caller must hold this scope's
+     * monitor.
+     */
+    private void resumeDeferredIdleCheck() {
+        if (idleCheckDeferred && pendingConnections == 0 && pendingChildAdds == 0) {
+            idleCheckDeferred = false;
+            scheduleIdleCheck(deferredMinimumIdleMillis);
+        }
+    }
+
+    private void detach() {
+        parent.removeChildScope(this);
+        enabled = false;
+    }
+
+    /** Stops the scope's lifecycle without detaching it from its parent. */
     public void stop() {
         log.debug("stop: {}", name);
         if (enabled && running && handler != null) {

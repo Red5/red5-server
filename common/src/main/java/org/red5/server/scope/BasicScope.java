@@ -14,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.red5.server.AttributeStore;
 import org.red5.server.api.IConnection;
+import org.red5.server.api.IContext;
 import org.red5.server.api.event.IEvent;
 import org.red5.server.api.event.IEventListener;
 import org.red5.server.api.persistence.IPersistenceStore;
@@ -43,6 +44,11 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      * Scheduled job name for keep alive check
      */
     private String keepAliveJobName;
+
+    // Pending keep alive job and when it is due, guarded by this scope's monitor
+    private KeepAliveJob keepAliveJob;
+
+    private long keepAliveDueTime;
 
     /**
      * Parent scope. Scopes can be nested.
@@ -92,6 +98,11 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      * Set to amount of time (in seconds) the scope will be kept before being freed, after the last disconnect.
      */
     protected int keepDelay = 0;
+
+    // Guarded by this scope's monitor, shared with room cleanup and admission.
+    protected boolean reaped;
+
+    protected long lastActivityTime = System.currentTimeMillis();
 
     /**
      * List of security handlers
@@ -274,7 +285,10 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      *
      * Add event listener to list of notified objects
      */
-    public boolean addEventListener(IEventListener listener) {
+    public synchronized boolean addEventListener(IEventListener listener) {
+        if (reaped) {
+            return false;
+        }
         log.debug("addEventListener - scope: {} {}", getName(), listener);
         return listeners.add(listener);
     }
@@ -284,20 +298,19 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      *
      * Remove event listener from list of listeners
      */
-    public boolean removeEventListener(IEventListener listener) {
+    public synchronized boolean removeEventListener(IEventListener listener) {
         log.debug("removeEventListener - scope: {} {}", getName(), listener);
         if (log.isTraceEnabled()) {
             log.trace("Listeners - check #1: {}", listeners);
         }
         boolean removed = listeners.remove(listener);
+        if (removed) {
+            lastActivityTime = System.currentTimeMillis();
+        }
         if (!keepOnDisconnect) {
-            if (removed && keepAliveJobName == null) {
-                if (ScopeUtils.isRoom(this) && listeners.isEmpty()) {
-                    // create job to kill the scope off if no listeners join within the delay
-                    ISchedulingService schedulingService = (ISchedulingService) parent.getContext().getBean(ISchedulingService.BEAN_NAME);
-                    // by default keep a scope around for a fraction of a second
-                    keepAliveJobName = schedulingService.addScheduledOnceJob((keepDelay > 0 ? keepDelay * 1000 : 100), new KeepAliveJob(this));
-                }
+            if (removed) {
+                // create job to kill the scope off if no listeners join within the delay
+                scheduleIdleCheck(0L);
             }
         } else {
             log.trace("Scope: {} is exempt from removal when empty", getName());
@@ -306,6 +319,57 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
             log.trace("Listeners - check #2: {}", listeners);
         }
         return removed;
+    }
+
+    /**
+     * Schedules removal of this room once it has no listeners and has been idle for its retention period. A room
+     * that never had a listener can be given a longer minimum idle period, covering the gap between scope resolution
+     * and connect.
+     *
+     * @param minimumIdleMillis
+     *            minimum idle time before removal, in addition to the keep delay
+     */
+    public synchronized void scheduleIdleCheck(long minimumIdleMillis) {
+        if (reaped || keepOnDisconnect || !ScopeUtils.isRoom(this) || !listeners.isEmpty()) {
+            return;
+        }
+        // by default keep a scope around for a fraction of a second
+        scheduleKeepAliveJob(Math.max(minimumIdleMillis, keepDelay > 0 ? keepDelay * 1000L : 100L), minimumIdleMillis);
+    }
+
+    /**
+     * Schedules the keep alive job, replacing a pending one only if this check is due sooner. Caller must hold this
+     * scope's monitor.
+     *
+     * @param delayMillis
+     *            delay before the check runs
+     * @param minimumIdleMillis
+     *            minimum idle time the check requires
+     */
+    protected void scheduleKeepAliveJob(long delayMillis, long minimumIdleMillis) {
+        long dueTime = System.currentTimeMillis() + delayMillis;
+        if (keepAliveJob != null && dueTime >= keepAliveDueTime) {
+            // an earlier check is already pending
+            return;
+        }
+        ISchedulingService schedulingService;
+        try {
+            IContext context = parent.getContext();
+            if (context == null) {
+                log.debug("No context available to schedule removal of {}", getName());
+                return;
+            }
+            schedulingService = (ISchedulingService) context.getBean(ISchedulingService.BEAN_NAME);
+        } catch (Exception e) {
+            log.warn("Scheduling service unavailable, {} will not be removed when idle", getName(), e);
+            return;
+        }
+        if (keepAliveJobName != null) {
+            schedulingService.removeScheduledJob(keepAliveJobName);
+        }
+        keepAliveJob = new KeepAliveJob(minimumIdleMillis);
+        keepAliveDueTime = dueTime;
+        keepAliveJobName = schedulingService.addScheduledOnceJob(delayMillis, keepAliveJob);
     }
 
     /**
@@ -420,19 +484,29 @@ public abstract class BasicScope extends AttributeStore implements IBasicScope, 
      */
     private class KeepAliveJob implements IScheduledJob {
 
-        private final IBasicScope scope;
+        private final long minimumIdleMillis;
 
-        KeepAliveJob(IBasicScope scope) {
-            this.scope = scope;
+        KeepAliveJob(long minimumIdleMillis) {
+            this.minimumIdleMillis = minimumIdleMillis;
         }
 
         public void execute(ISchedulingService service) {
-            if (listeners.isEmpty()) {
-                // delete empty rooms
-                log.trace("Removing {} from {}", scope.getName(), parent.getName());
-                parent.removeChildScope(scope);
+            // clear before checking, so state changes made after this point schedule a new check
+            synchronized (BasicScope.this) {
+                if (keepAliveJob != this) {
+                    // superseded by a check that is due sooner
+                    return;
+                }
+                keepAliveJob = null;
+                keepAliveJobName = null;
             }
-            keepAliveJobName = null;
+            if (BasicScope.this instanceof Scope room) {
+                room.runIdleCheck(minimumIdleMillis);
+            } else if (listeners.isEmpty()) {
+                // delete empty rooms
+                log.trace("Removing {} from {}", getName(), parent.getName());
+                parent.removeChildScope(BasicScope.this);
+            }
         }
 
     }
