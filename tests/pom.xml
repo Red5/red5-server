@@ -164,7 +164,6 @@
                                 <exclude>**/TwitchConnectTest.java</exclude>
                                 <exclude>**/YouTubeConnectTest.java</exclude>
                                 <exclude>**/Red5ConnectTest.java</exclude>
-                                <exclude>**/PublisherConnectLoadTest.java</exclude>
                             </excludes>
                         </configuration>
                         <executions>
@@ -198,6 +197,33 @@
                                     <executable>bash</executable>
                                     <arguments>
                                         <argument>${project.basedir}/src/test/resources/scripts/rtmps_compose_e2e_test.sh</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>publisher-load-e2e</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.4.1</version>
+                        <executions>
+                            <execution>
+                                <id>publisher-load-compose-e2e-test</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>${project.basedir}/src/test/resources/scripts/publisher_load_compose_e2e_test.sh</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

@@ -1,0 +1,18 @@
+# Publisher load end-to-end test: Red5 built from the current checkout with plain RTMP exposed to the host,
+# where PublisherConnectLoadTest runs against it. Driven by
+# tests/src/test/resources/scripts/publisher_load_compose_e2e_test.sh.
+services:
+  red5:
+    build:
+      context: .
+      dockerfile: Dockerfile.red5
+    environment:
+      JAVA_OPTS: "-Xms256m -Xmx1g"
+    ports:
+      - "${RED5_RTMP_PORT:-19350}:1935"
+    healthcheck:
+      test: ["CMD", "bash", "-c", ":</dev/tcp/127.0.0.1/1935"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+      start_period: 15s

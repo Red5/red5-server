@@ -90,6 +90,9 @@
         <maven.test.skip>false</maven.test.skip>
         <!-- skip running the tests -->
         <skipTests>true</skipTests>
+        <!-- JUnit categories to run / exclude by default; see the integration profile -->
+        <surefire.groups />
+        <surefire.excludedGroups>org.red5.test.IntegrationTest</surefire.excludedGroups>
         <!-- to be or not to be verbose -->
         <verbose>false</verbose>
         <maven.compiler.verbose>false</maven.compiler.verbose>
@@ -325,7 +328,8 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <excludedGroups>org.red5.test.IntegrationTest</excludedGroups>
+                    <groups>${surefire.groups}</groups>
+                    <excludedGroups>${surefire.excludedGroups}</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>
@@ -588,18 +592,13 @@
     </dependencies>
     <profiles>
         <profile>
+            <!-- run only the tests in the IntegrationTest category; an empty excludedGroups element would not
+                 override the default, so the groups are driven by properties instead -->
             <id>integration</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <groups>org.red5.test.IntegrationTest</groups>
-                            <excludedGroups></excludedGroups>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <properties>
+                <surefire.groups>org.red5.test.IntegrationTest</surefire.groups>
+                <surefire.excludedGroups />
+            </properties>
         </profile>
         <profile>
             <id>release</id>
