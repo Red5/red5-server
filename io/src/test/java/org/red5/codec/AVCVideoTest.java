@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -176,17 +175,16 @@ public class AVCVideoTest {
     }
 
     @Test
-    public void testA7SliceBug() {
+    public void testA7SliceBug() throws IOException {
         log.info("\n testA7SliceBug");
-        Path path = Paths.get("target/test-classes/fixtures/ipadmini-A7.flv");
+        File file = Paths.get("target/test-classes/fixtures/ipadmini-A7.flv").toFile();
+        assertTrue("Missing fixture: " + file, file.isFile());
+        boolean checked = false;
+        FLVReader reader = new FLVReader(file, true);
         try {
-            File file = path.toFile();
-            log.info("Reading: {}", file.getName());
-            FLVReader reader = new FLVReader(file, true);
-            ITag tag = null;
             AVCVideo video = new AVCVideo();
             while (reader.hasMoreTags()) {
-                tag = reader.readTag();
+                ITag tag = reader.readTag();
                 int timestamp = tag.getTimestamp();
                 log.debug("Tag: {} timestamp: {}", tag.getDataType(), timestamp);
                 if (tag.getDataType() == 9) {
@@ -195,16 +193,16 @@ public class AVCVideoTest {
                         video.addData(buf, tag.getTimestamp());
                     }
                 }
-                // when the audio comes in for ts 2176, check for the 2 proceeding sliced keyframes
+                // when the audio comes in for ts 2176, check for the 2 preceding sliced keyframes
                 if (timestamp == 2176) {
-                    assertTrue(video.getKeyframes().length == 2);
+                    assertEquals("sliced keyframe count at ts 2176", 2, video.getKeyframes().length);
+                    checked = true;
                 }
             }
+        } finally {
             reader.close();
-            log.info("Finished reading: {}\n", file.getName());
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        assertTrue("fixture never reached timestamp 2176, slice assertion did not run", checked);
         log.info("testA7SliceBug end\n");
     }
 

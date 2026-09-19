@@ -1,10 +1,12 @@
 package org.red5.io.flv.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Test;
@@ -16,118 +18,122 @@ public class FLVReaderTest {
 
     private static Logger log = LoggerFactory.getLogger(FLVReaderTest.class);
 
-    @Test
-    public void testFLVReaderFileWithPreProcessInfo() {
-        log.info("\n testFLVReaderFileWithPreProcessInfo");
-        //Path path = Paths.get("target/test-classes/fixtures/flv1_nelly.flv");
-        Path path = Paths.get("target/test-classes/fixtures/webrtctestrecord.flv");
+    private static final String FIXTURES = "target/test-classes/fixtures/";
+
+    private static File fixture(String name) {
+        File file = Paths.get(FIXTURES + name).toFile();
+        assertTrue("Missing fixture: " + file, file.isFile());
+        return file;
+    }
+
+    /**
+     * Reads the first tags of a file and checks each has a body.
+     */
+    private static void readLeadingTags(File file, boolean generateMetadata, int count) throws IOException {
+        log.info("Reading: {}", file.getName());
+        FLVReader reader = new FLVReader(file, generateMetadata);
         try {
-            File file = path.toFile();
-            log.info("Reading: {}", file.getName());
-            FLVReader reader = new FLVReader(file, true);
-            //KeyFrameMeta meta = reader.analyzeKeyFrames();
-            //log.debug("Meta: {}", meta);
-            if (!reader.hasMoreTags()) {
-                log.warn("No tags found");
-                reader.close();
-                return;
-            }
-            ITag tag = null;
-            for (int t = 0; t < 6; t++) {
-                tag = reader.readTag();
+            for (int t = 0; t < count; t++) {
+                assertTrue(file.getName() + " ran out of tags at " + t, reader.hasMoreTags());
+                ITag tag = reader.readTag();
                 log.debug("Tag: {}", tag);
-                assertNotNull(tag.getBody());
+                assertNotNull(file.getName() + " tag " + t + " is null", tag);
+                assertNotNull(file.getName() + " tag " + t + " has no body", tag.getBody());
             }
+        } finally {
             reader.close();
-            log.info("Finished reading: {}\n", file.getName());
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        log.info("Finished reading: {}\n", file.getName());
+    }
+
+    /**
+     * Reads every tag of a file and returns the number of tags read, with a count of the non audio/video tags.
+     */
+    private static int[] readAllTags(File file, boolean generateMetadata) throws IOException {
+        log.info("Reading: {}", file.getName());
+        int total = 0, meta = 0;
+        FLVReader reader = new FLVReader(file, generateMetadata);
+        try {
+            while (reader.hasMoreTags()) {
+                ITag tag = reader.readTag();
+                assertNotNull(file.getName() + " tag " + total + " is null", tag);
+                total++;
+                if (tag.getDataType() > 9) {
+                    log.debug("Tag: {}", tag);
+                    meta++;
+                }
+            }
+        } finally {
+            reader.close();
+        }
+        log.info("Finished reading: {} tags: {} meta: {}\n", file.getName(), total, meta);
+        return new int[] { total, meta };
+    }
+
+    /**
+     * webrtctestrecord.flv is a recording with large zero-filled gaps between tags. With metadata generation enabled the
+     * reader must pre-scan the damaged file without throwing, hand back the leading valid tags, and then stop cleanly by
+     * returning null at the first unreadable tag rather than throwing or spinning.
+     */
+    @Test
+    public void testFLVReaderFileWithPreProcessInfo() throws IOException {
+        log.info("\n testFLVReaderFileWithPreProcessInfo");
+        File file = fixture("webrtctestrecord.flv");
+        FLVReader reader = new FLVReader(file, true);
+        try {
+            // file onMetaData, generated onMetaData, then the AVC sequence header
+            int[] expectedTypes = { ITag.TYPE_METADATA, ITag.TYPE_METADATA, ITag.TYPE_VIDEO };
+            for (int t = 0; t < expectedTypes.length; t++) {
+                assertTrue("ran out of tags at " + t, reader.hasMoreTags());
+                ITag tag = reader.readTag();
+                log.debug("Tag: {}", tag);
+                assertNotNull("tag " + t + " is null", tag);
+                assertEquals("tag " + t + " type", expectedTypes[t], tag.getDataType());
+                assertNotNull("tag " + t + " has no body", tag.getBody());
+                assertTrue("tag " + t + " body is empty", tag.getBody().limit() > 0);
+            }
+            // the next tag header sits in a zero-filled gap; the reader must give up cleanly
+            assertNull("expected null at the damaged region", reader.readTag());
+        } finally {
+            reader.close();
         }
     }
 
     @Test
-    public void testFLVReaderFile() {
+    public void testFLVReaderFile() throws IOException {
         log.info("\n testFLVReaderFile");
-        String[] paths = new String[] { "target/test-classes/fixtures/h264_aac.flv", "target/test-classes/fixtures/h264_mp3.flv", "target/test-classes/fixtures/h264_speex.flv", "target/test-classes/fixtures/stray.flv", "target/test-classes/fixtures/NAPNAP.flv", "target/test-classes/fixtures/dummy.flv" };
-        try {
-            for (String path : paths) {
-                File file = Paths.get(path).toFile();
-                if (file.exists() && file.canRead()) {
-                    log.info("Reading: {}", file.getName());
-                    FLVReader reader = new FLVReader(file, true);
-                    //KeyFrameMeta meta = reader.analyzeKeyFrames();
-                    //log.debug("Meta: {}", meta);
-                    ITag tag = null;
-                    for (int t = 0; t < 6; t++) {
-                        tag = reader.readTag();
-                        log.debug("Tag: {}", tag);
-                        assertNotNull(tag.getBody());
-                    }
-                    reader.close();
-                    log.info("Finished reading: {}\n", file.getName());
-                } else {
-                    log.info("File couldn't be accessed or doesnt exist: {}", file.getName());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        String[] names = { "h264_aac.flv", "h264_mp3.flv", "h264_speex.flv", "NAPNAP.flv", "ipadmini-A7.flv" };
+        for (String name : names) {
+            readLeadingTags(fixture(name), true, 6);
         }
     }
 
     @Test
-    public void testFLVReaderFileWithMetaData() {
+    public void testFLVReaderFileWithMetaData() throws IOException {
         log.info("\n testFLVReaderFileWithMetaData");
-        String[] paths = new String[] { "target/test-classes/fixtures/flashContent.flv", "target/test-classes/fixtures/flashContent1.flv" };
-        try {
-            for (String path : paths) {
-                File file = Paths.get(path).toFile();
-                if (file.exists() && file.canRead()) {
-                    log.info("Reading: {}", file.getName());
-                    FLVReader reader = new FLVReader(file, false);
-                    ITag tag = null;
-                    while (reader.hasMoreTags()) {
-                        tag = reader.readTag();
-                        if (tag != null && tag.getDataType() > 9) {
-                            log.debug("Tag: {}", tag);
-                        }
-                    }
-                    reader.close();
-                    log.info("Finished reading: {}\n", file.getName());
-                } else {
-                    log.info("File couldn't be accessed or doesnt exist: {}", file.getName());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        String[] names = { "flashContent.flv", "flashContent1.flv" };
+        for (String name : names) {
+            int[] counts = readAllTags(fixture(name), false);
+            assertTrue(name + " has no tags", counts[0] > 0);
+            assertTrue(name + " has no metadata tag", counts[1] > 0);
         }
     }
 
     @Test
-    public void testFLVReaderFileGenerateMetaData() {
+    public void testFLVReaderFileGenerateMetaData() throws IOException {
         log.info("\n testFLVReaderFileGenerateMetaData");
-        String[] paths = new String[] { "target/test-classes/fixtures/stray.flv" };
+        File file = fixture("h264_aac.flv");
+        FLVReader reader = new FLVReader(file, true);
         try {
-            for (String path : paths) {
-                File file = Paths.get(path).toFile();
-                if (file.exists() && file.canRead()) {
-                    log.info("Reading: {}", file.getName());
-                    FLVReader reader = new FLVReader(file, true);
-                    ITag tag = null;
-                    while (reader.hasMoreTags()) {
-                        tag = reader.readTag();
-                        if (tag != null && tag.getDataType() > 9) {
-                            log.debug("Tag: {}", tag);
-                        }
-                    }
-                    reader.close();
-                    log.info("Finished reading: {}\n", file.getName());
-                } else {
-                    log.info("File couldn't be accessed or doesnt exist: {}", file.getName());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            ITag first = reader.readTag();
+            assertNotNull("first tag is null", first);
+            assertEquals("first tag should be the generated metadata", ITag.TYPE_METADATA, first.getDataType());
+        } finally {
+            reader.close();
         }
+        int[] counts = readAllTags(file, true);
+        assertTrue("no tags read", counts[0] > 0);
+        assertTrue("no metadata tag produced", counts[1] > 0);
     }
 
 }
