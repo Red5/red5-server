@@ -105,7 +105,7 @@ public abstract class Tag {
             return;
         }
 
-        data = ParserUtils.parseBinary(inputStream, (int) size.getValue());
+        data = ParserUtils.parseBinary(inputStream, ParserUtils.checkElementSize(size.getValue()));
     }
 
     /**

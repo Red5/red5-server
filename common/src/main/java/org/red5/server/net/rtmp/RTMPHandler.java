@@ -143,11 +143,41 @@ public class RTMPHandler extends BaseRTMPHandler {
         this.dispatchStreamActions = dispatchStreamActions;
     }
 
+    /**
+     * Smallest inbound chunk size a peer may request. One byte chunks are protocol-representable but force a full
+     * chunk header / state machine pass per payload byte, so an operational floor is enforced. Set to 1 to restore
+     * the pre-2.0.42 compatibility behavior.
+     */
+    private int minReadChunkSize = RTMP.MIN_CHUNK_SIZE;
+
+    /**
+     * Returns the smallest inbound chunk size a peer may request.
+     *
+     * @return minimum inbound chunk size
+     */
+    public int getMinReadChunkSize() {
+        return minReadChunkSize;
+    }
+
+    /**
+     * Sets the smallest inbound chunk size a peer may request; requests below this value close the connection.
+     *
+     * @param minReadChunkSize minimum inbound chunk size, 1 disables the floor
+     */
+    public void setMinReadChunkSize(int minReadChunkSize) {
+        this.minReadChunkSize = Math.max(1, minReadChunkSize);
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void onChunkSize(RTMPConnection conn, Channel channel, Header source, ChunkSize chunkSize) {
         int requestedChunkSize = chunkSize.getSize();
         log.debug("Chunk size: {}", requestedChunkSize);
+        if (requestedChunkSize < minReadChunkSize) {
+            log.warn("Rejecting inbound chunk size {} below the configured minimum {} from {}; closing connection", requestedChunkSize, minReadChunkSize, conn.getSessionId());
+            conn.close();
+            return;
+        }
         // set chunk size on the connection
         RTMP state = conn.getState();
         // set only the read chunk size since it came from the client

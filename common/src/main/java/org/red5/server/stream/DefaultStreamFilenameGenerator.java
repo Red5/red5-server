@@ -82,11 +82,39 @@ public class DefaultStreamFilenameGenerator implements IStreamFilenameGenerator 
      * @return a {@link java.lang.String} object
      */
     public String generateFilename(IScope scope, String name, String extension, GenerationType type) {
+        validateStreamName(name);
         String result = getStreamDirectory(scope) + name;
         if (extension != null && !extension.equals("")) {
             result += extension;
         }
         return result;
+    }
+
+    /**
+     * Validates a caller supplied stream name so the generated filename stays beneath the stream root. Rejects empty
+     * names, control characters, backslashes, absolute and drive-qualified paths and any parent-directory segment.
+     *
+     * @param name stream name supplied by the client
+     * @throws IllegalArgumentException if the name could escape the stream directory
+     */
+    public static void validateStreamName(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Stream name must not be empty");
+        }
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (c < 0x20 || c == '\\') {
+                throw new IllegalArgumentException("Stream name contains an illegal character: " + name);
+            }
+        }
+        if (name.charAt(0) == '/' || name.matches("^[A-Za-z]:.*")) {
+            throw new IllegalArgumentException("Stream name must be relative: " + name);
+        }
+        for (String segment : name.split("/")) {
+            if ("..".equals(segment)) {
+                throw new IllegalArgumentException("Stream name must not contain parent references: " + name);
+            }
+        }
     }
 
     /**

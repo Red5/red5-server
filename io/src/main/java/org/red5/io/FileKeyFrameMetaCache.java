@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -25,6 +24,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.red5.io.flv.IKeyFrameDataAnalyzer.KeyFrameMeta;
+import org.red5.io.utils.XMLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -58,10 +58,9 @@ public class FileKeyFrameMetaCache implements IKeyFrameMetaCache {
         }
 
         Document dom;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
-            // Using factory get an instance of document builder
-            DocumentBuilder db = dbf.newDocumentBuilder();
+            // Using the hardened factory get an instance of document builder
+            DocumentBuilder db = XMLUtils.newSecureDocumentBuilderFactory().newDocumentBuilder();
 
             // parse using builder to get DOM representation of the XML file
             dom = db.parse(filename);
@@ -156,10 +155,9 @@ public class FileKeyFrameMetaCache implements IKeyFrameMetaCache {
         }
 
         Document dom;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             //get an instance of builder
-            DocumentBuilder db = dbf.newDocumentBuilder();
+            DocumentBuilder db = XMLUtils.newSecureDocumentBuilderFactory().newDocumentBuilder();
             //create an instance of DOM
             dom = db.newDocument();
         } catch (ParserConfigurationException pce) {

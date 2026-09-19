@@ -208,7 +208,13 @@ public class ProviderService implements IProviderService {
         // look for a custom filename gen class
         IStreamFilenameGenerator filenameGenerator = (IStreamFilenameGenerator) ScopeUtils.getScopeService(scope, IStreamFilenameGenerator.class, DefaultStreamFilenameGenerator.class);
         // get the filename
-        String filename = filenameGenerator.generateFilename(scope, name, GenerationType.PLAYBACK);
+        String filename;
+        try {
+            filename = filenameGenerator.generateFilename(scope, name, GenerationType.PLAYBACK);
+        } catch (IllegalArgumentException e) {
+            log.warn("Refusing playback of stream with invalid name: {}", e.getMessage());
+            return null;
+        }
         // start life as null and only update upon positive outcome
         File file = null;
         try {

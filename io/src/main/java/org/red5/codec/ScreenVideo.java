@@ -117,48 +117,54 @@ public class ScreenVideo extends AbstractVideo {
      * @param data
      *            Byte buffer
      */
-    private void updateSize(IoBuffer data) {
-        this.widthInfo = data.getShort();
-        this.heightInfo = data.getShort();
+    private boolean updateSize(IoBuffer data) {
+        int widthInfo = data.getShort() & 0xffff;
+        int heightInfo = data.getShort() & 0xffff;
         // extract width and height of the frame
-        this.width = this.widthInfo & 0xfff;
-        this.height = this.heightInfo & 0xfff;
+        int width = widthInfo & 0xfff;
+        int height = heightInfo & 0xfff;
         // calculate size of blocks
-        this.blockWidth = this.widthInfo & 0xf000;
-        this.blockWidth = (this.blockWidth >> 12) + 1;
-        this.blockWidth <<= 4;
-
-        this.blockHeight = this.heightInfo & 0xf000;
-        this.blockHeight = (this.blockHeight >> 12) + 1;
-        this.blockHeight <<= 4;
-
-        int xblocks = this.width / this.blockWidth;
-        if ((this.width % this.blockWidth) != 0) {
+        int blockWidth = (((widthInfo & 0xf000) >> 12) + 1) << 4;
+        int blockHeight = (((heightInfo & 0xf000) >> 12) + 1) << 4;
+        if (width == 0 || height == 0) {
+            log.debug("Rejecting screen video frame with zero dimension: {}x{}", width, height);
+            return false;
+        }
+        int xblocks = width / blockWidth;
+        if ((width % blockWidth) != 0) {
             // partial block
             xblocks += 1;
         }
-
-        int yblocks = this.height / this.blockHeight;
-        if ((this.height % this.blockHeight) != 0) {
+        int yblocks = height / blockHeight;
+        if ((height % blockHeight) != 0) {
             // partial block
             yblocks += 1;
         }
-
-        this.blockCount = xblocks * yblocks;
-
-        int blockSize = maxCompressedSize(this.blockWidth * this.blockHeight * 3);
-        int totalBlockSize = blockSize * this.blockCount;
+        int blockCount = xblocks * yblocks;
+        // every block carries at least a 2 byte size field, so a frame that is smaller than that cannot describe the
+        // dimensions it declares; reject it before retaining any codec state (issue #455)
+        long minimumPayload = 2L * blockCount;
+        if (data.remaining() < minimumPayload) {
+            log.debug("Rejecting screen video frame {}x{} ({} blocks) with only {} payload bytes", width, height, blockCount, data.remaining());
+            return false;
+        }
+        this.widthInfo = widthInfo;
+        this.heightInfo = heightInfo;
+        this.width = width;
+        this.height = height;
+        this.blockWidth = blockWidth;
+        this.blockHeight = blockHeight;
+        this.blockCount = blockCount;
+        int blockSize = maxCompressedSize(blockWidth * blockHeight * 3);
+        int totalBlockSize = blockSize * blockCount;
         if (this.totalBlockDataSize != totalBlockSize) {
-            log.info("Allocating memory for {} compressed blocks.", this.blockCount);
+            log.info("Allocating memory for {} compressed blocks.", blockCount);
             this.blockDataSize = blockSize;
             this.totalBlockDataSize = totalBlockSize;
-            this.blockData = new byte[blockSize * this.blockCount];
-            this.blockSize = new int[this.blockCount];
-            // Reset the sizes to zero
-            for (int idx = 0; idx < this.blockCount; idx++) {
-                this.blockSize[idx] = 0;
-            }
+            this.blockData = new byte[totalBlockSize];
+            this.blockSize = new int[blockCount];
         }
+        return true;
     }
 
     /** {@inheritDoc} */
@@ -169,7 +175,10 @@ public class ScreenVideo extends AbstractVideo {
         }
 
         data.get();
-        this.updateSize(data);
+        if (!this.updateSize(data)) {
+            data.rewind();
+            return false;
+        }
         int idx = 0;
         int pos = 0;
         byte[] tmpData = new byte[this.blockDataSize];

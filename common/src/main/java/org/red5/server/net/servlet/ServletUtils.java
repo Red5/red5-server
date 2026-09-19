@@ -100,22 +100,46 @@ public class ServletUtils {
      * @throws java.io.IOException
      *             on error
      */
+    /** Maximum request body accepted by the servlet helpers, configurable via the red5.servlet.maxRequestBody property. */
+    public static final long MAX_REQUEST_BODY_SIZE = Long.getLong("red5.servlet.maxRequestBody", 4L * 1024 * 1024);
+
     public static void copy(HttpServletRequest req, OutputStream output) throws IOException {
-        InputStream input = req.getInputStream();
-        int availableBytes = req.getContentLength();
-        log.debug("copy - available: {}", availableBytes);
-        if (availableBytes > 0) {
-            byte[] buf = new byte[availableBytes];
-            int bytesRead = input.read(buf);
-            while (bytesRead != -1) {
-                output.write(buf, 0, bytesRead);
-                bytesRead = input.read(buf);
-                log.trace("Bytes read: {}", bytesRead);
-            }
-            output.flush();
-        } else {
-            log.debug("Nothing to available to copy");
+        copy(req, output, MAX_REQUEST_BODY_SIZE);
+    }
+
+    /**
+     * Copies the request body to the output stream using a fixed size buffer, enforcing <code>limit</code> on the
+     * number of bytes actually read regardless of the declared Content-Length.
+     *
+     * @param req request
+     * @param output output stream
+     * @param limit maximum number of body bytes to accept
+     * @throws IOException on I/O error or when the body exceeds the limit
+     */
+    public static void copy(HttpServletRequest req, OutputStream output, long limit) throws IOException {
+        long declared = req.getContentLengthLong();
+        log.debug("copy - declared length: {} limit: {}", declared, limit);
+        if (declared > limit) {
+            throw new IOException("Request body of " + declared + " bytes exceeds the limit of " + limit);
         }
+        if (declared == 0) {
+            log.debug("Nothing to available to copy");
+            return;
+        }
+        InputStream input = req.getInputStream();
+        // never size the buffer from the declared length; stream with a bounded buffer and count what is really read
+        byte[] buf = new byte[8192];
+        long total = 0;
+        int bytesRead;
+        while ((bytesRead = input.read(buf)) != -1) {
+            total += bytesRead;
+            if (total > limit) {
+                throw new IOException("Request body exceeds the limit of " + limit + " bytes");
+            }
+            output.write(buf, 0, bytesRead);
+            log.trace("Bytes read: {}", bytesRead);
+        }
+        output.flush();
     }
 
     /**

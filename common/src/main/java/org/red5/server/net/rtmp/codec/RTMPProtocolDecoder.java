@@ -285,10 +285,15 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         }
         // store the header based on its channel id
         rtmp.setLastReadHeader(channelId, header);
-        // ensure that we dont exceed maximum packet size
+        // ensure that we dont exceed maximum packet size; this must happen before a Packet (and its buffer) is created
+        final int declaredSize = header.getSize();
         if (isTrace) {
-            int size = header.getSize();
-            log.trace("Packet size: {}", size);
+            log.trace("Packet size: {}", declaredSize);
+        }
+        if (declaredSize < 0 || declaredSize > MAX_PACKET_SIZE) {
+            // release any partial packet on this channel and fail the connection with a controlled protocol error
+            rtmp.setLastReadPacket(channelId, null);
+            throw new ProtocolException(String.format("Declared RTMP message size %d on channel %d exceeds the maximum packet size %d", declaredSize, channelId, MAX_PACKET_SIZE));
         }
         // get the size of our chunks
         int readChunkSize = rtmp.getReadChunkSize();

@@ -90,7 +90,7 @@ Windows daemon uses __procrun__ (whose executable is named prunsrv.exe).
 1. Set the __RED5_HOME__ environmental variable (see below _Managing Windows Environment Variables_ for more detail)
 2. Edit the variables in the `install-service.bat` script to match your server, ONLY if you have special requirements
 3. Download the [windows binaries](http://www.apache.org/dist/commons/daemon/binaries/windows/)
- * The most current daemon archive (_since 2013_) to use is named: `commons-daemon-1.0.15-bin-windows.zip` 
+ * The daemon archive to use, matching the version bundled with this build, is named: `commons-daemon-1.6.1-bin-windows.zip` 
 4. Unzip the daemon archive into your red5 directory
 5. Ensure `prunsrv.exe` is in your red5 home directory alongside `red5-service.jar`
 6. Execute `install-service.bat` to install the service (See Install Errors below for resolutions, if you encounter an error)

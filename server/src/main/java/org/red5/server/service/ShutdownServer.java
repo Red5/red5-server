@@ -12,13 +12,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -128,25 +132,55 @@ public class ShutdownServer implements ApplicationContextAware, InitializingBean
     }
 
     /**
+     * Writes the shutdown token to the configured token file so that red5 may be shutdown external to this VM instance.
+     */
+    protected void writeTokenFile() {
+        // the raw token is a bearer capability; it is never printed or logged
+        Path path = Paths.get(shutdownTokenFileName).toAbsolutePath();
+        try {
+            // replace any existing file so stale or badly permissioned copies never survive
+            Files.deleteIfExists(path);
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            boolean posix = path.getFileSystem().supportedFileAttributeViews().contains("posix");
+            if (posix) {
+                Set<PosixFilePermission> ownerOnly = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
+                // create atomically with owner-only permissions, independent of the process umask
+                Files.createFile(path, PosixFilePermissions.asFileAttribute(ownerOnly));
+                Files.setPosixFilePermissions(path, ownerOnly);
+                Set<PosixFilePermission> actual = Files.getPosixFilePermissions(path);
+                if (!ownerOnly.containsAll(actual)) {
+                    // fail closed: never leave a readable token behind
+                    Files.deleteIfExists(path);
+                    log.error("Unable to restrict shutdown token file permissions ({}); token file not written", actual);
+                    return;
+                }
+            } else {
+                Files.createFile(path);
+                File tokenFile = path.toFile();
+                // best effort on non-POSIX platforms (Windows ACLs inherit from the parent directory)
+                tokenFile.setReadable(false, false);
+                tokenFile.setWritable(false, false);
+                tokenFile.setExecutable(false, false);
+                tokenFile.setReadable(true, true);
+                tokenFile.setWritable(true, true);
+                log.warn("Shutdown token file {} relies on platform ACLs; ensure the parent directory is private", path);
+            }
+            Files.write(path, token.getBytes(StandardCharsets.UTF_8));
+            log.info("Shutdown token written to {}", path);
+        } catch (Exception e) {
+            log.warn("Exception handling token file", e);
+        }
+    }
+
+    /**
      * Starts internal server listening for shutdown requests.
      */
     public void start() {
         log.info("Shutdown server start");
-        // dump to stdout
-        System.out.printf("Token: %s%n", token);
-        // write out the token to a file so that red5 may be shutdown external to this VM instance.
-        try {
-            // delete existing file
-            Files.deleteIfExists(Paths.get(shutdownTokenFileName));
-            // write to file
-            Path path = Files.createFile(Paths.get(shutdownTokenFileName));
-            File tokenFile = path.toFile();
-            RandomAccessFile raf = new RandomAccessFile(tokenFile, "rws");
-            raf.write(token.getBytes());
-            raf.close();
-        } catch (Exception e) {
-            log.warn("Exception handling token file", e);
-        }
+        writeTokenFile();
         final InetAddress loopbackAddr = InetAddress.getLoopbackAddress();
         // handle format of localhost/127.0.0.1
         final String localAddr = loopbackAddr.getHostAddress();

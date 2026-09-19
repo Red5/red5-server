@@ -146,10 +146,12 @@ public class OBUParser {
             info.size = bufSize - pos;
         }
         log.trace("OBU size: {}", info.size);
-        info.data = ByteBuffer.wrap(Arrays.copyOfRange(buf, pos, (pos + info.size)));
-        if (info.size > bufSize - pos) {
-            throw new OBUParseException("Invalid OBU size: larger than remaining buffer");
+        // validate the declared payload before any copy: non-negative, no addition overflow, and within the remaining input
+        int remaining = Math.min(bufSize, buf.length) - pos;
+        if (info.size < 0 || remaining < 0 || info.size > remaining) {
+            throw new OBUParseException("Invalid OBU size: " + info.size + " larger than remaining buffer " + Math.max(remaining, 0));
         }
+        info.data = ByteBuffer.wrap(Arrays.copyOfRange(buf, pos, (pos + info.size)));
         return info;
     }
 

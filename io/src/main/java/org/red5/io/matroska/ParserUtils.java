@@ -32,6 +32,48 @@ public class ParserUtils {
     public static final int BIT_IN_BYTE = 8;
 
     /**
+     * Largest element payload that will be materialized in memory. Larger elements are rejected with an IOException.
+     * Configurable via the <code>red5.matroska.maxElementSize</code> system property (bytes).
+     */
+    public static final long MAX_ELEMENT_SIZE = Long.getLong("red5.matroska.maxElementSize", 64L * 1024 * 1024);
+
+    /**
+     * Validates a declared element size before it is used for allocation.
+     *
+     * @param size declared size
+     * @return the size as an int
+     * @throws IOException if the size is negative, exceeds the configured maximum or cannot be represented as an int
+     */
+    public static int checkElementSize(long size) throws IOException {
+        if (size < 0 || size > MAX_ELEMENT_SIZE || size > Integer.MAX_VALUE) {
+            throw new IOException("Matroska element size " + size + " exceeds the allowed maximum " + MAX_ELEMENT_SIZE);
+        }
+        return (int) size;
+    }
+
+    /**
+     * Reads exactly <code>size</code> bytes or fails.
+     *
+     * @param inputStream source
+     * @param size number of bytes to read
+     * @return buffer containing the bytes
+     * @throws IOException if the stream ends before <code>size</code> bytes are available or the size is invalid
+     */
+    public static byte[] readFully(InputStream inputStream, final int size) throws IOException {
+        checkElementSize(size);
+        byte[] buffer = new byte[size];
+        int offset = 0;
+        while (offset < size) {
+            int read = inputStream.read(buffer, offset, size - offset);
+            if (read < 0) {
+                throw new IOException("Unexpected end of stream: expected " + size + " bytes, got " + offset);
+            }
+            offset += read;
+        }
+        return buffer;
+    }
+
+    /**
      * method used to parse : int, uint and date
      *
      * @param inputStream
@@ -44,10 +86,7 @@ public class ParserUtils {
      */
     public static long parseInteger(InputStream inputStream, final int size) throws IOException {
         log.debug("parseInteger inputStream: {} size: {}", inputStream, size);
-        byte[] buffer = new byte[size];
-        int numberOfReadsBytes = inputStream.read(buffer, 0, size);
-        log.debug("numberOfReadsBytes: {}", numberOfReadsBytes);
-        //assert numberOfReadsBytes == size;
+        byte[] buffer = readFully(inputStream, size);
         long value = buffer[0] & (long) 0xff;
         for (int i = 1; i < size; ++i) {
             value = (value << BIT_IN_BYTE) | ((long) buffer[i] & (long) 0xff);
@@ -71,9 +110,7 @@ public class ParserUtils {
             return "";
         }
 
-        byte[] buffer = new byte[size];
-        int numberOfReadsBytes = inputStream.read(buffer, 0, size);
-        assert numberOfReadsBytes == size;
+        byte[] buffer = readFully(inputStream, size);
 
         return new String(buffer, "UTF-8");
     }
@@ -90,9 +127,7 @@ public class ParserUtils {
      *             - in case of IO error
      */
     public static double parseFloat(InputStream inputStream, final int size) throws IOException {
-        byte[] buffer = new byte[size];
-        int numberOfReadsBytes = inputStream.read(buffer, 0, size);
-        assert numberOfReadsBytes == size;
+        byte[] buffer = readFully(inputStream, size);
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer).order(ByteOrder.BIG_ENDIAN);
         if (8 == size) {
@@ -116,9 +151,7 @@ public class ParserUtils {
      *             - in case of any conversion exception
      */
     public static ArrayList<Tag> parseMasterElement(InputStream inputStream, final int size) throws IOException, ConverterException {
-        byte bufferForSubElements[] = new byte[size];
-        int readOfBytes = inputStream.read(bufferForSubElements, 0, size);
-        assert readOfBytes == size;
+        byte bufferForSubElements[] = readFully(inputStream, size);
 
         ArrayList<Tag> subElements = new ArrayList<Tag>();
         ByteArrayInputStream inputStreamForSubElements = new ByteArrayInputStream(bufferForSubElements);
@@ -141,17 +174,7 @@ public class ParserUtils {
      *             - in case of IO error
      */
     public static byte[] parseBinary(InputStream inputStream, final int size) throws IOException {
-        byte value[] = new byte[size];
-        int i = value.length;
-        while (i != 0) {
-            int read = inputStream.read(value, value.length - i, i);
-            if (read < 0) {
-                throw new IOException("Unexpected end of stream while reading binary");
-            }
-            i -= read;
-        }
-
-        return value;
+        return readFully(inputStream, size);
     }
 
     /**
