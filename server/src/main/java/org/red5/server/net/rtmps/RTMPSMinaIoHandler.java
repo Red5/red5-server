@@ -206,7 +206,6 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
         } else {
             this.keystorePath = Paths.get(System.getProperty("user.dir"), path).toString();
         }
-        this.keystorePath = path;
     }
 
     /**
@@ -221,7 +220,6 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
         } else {
             this.truststorePath = Paths.get(System.getProperty("user.dir"), path).toString();
         }
-        this.truststorePath = path;
     }
 
     /**
