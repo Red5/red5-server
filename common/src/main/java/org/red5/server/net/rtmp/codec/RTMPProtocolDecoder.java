@@ -613,14 +613,25 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // Calculate the new offset: accumulate previous offset + last timestamp + small gap
                 // The +1 ensures strict monotonicity
                 long newOffset = currentOffset + unsignedLast + 1;
-                // Cap the offset to prevent integer overflow in downstream int arithmetic
-                // PlayEngine and other components use int for timestamp math; values near
-                // Integer.MAX_VALUE cause overflow when small values are added
-                // Max safe offset is ~1 billion (0x40000000) to leave headroom
+                // Bound the accumulated offset: PlayEngine and other components use int for
+                // timestamp math, so values near Integer.MAX_VALUE overflow when small values
+                // are added.
+                //
+                // Clamping the offset is NOT a valid way to stay inside that bound. The clamped
+                // value is still added to every subsequent timestamp on this channel, so it does
+                // not prevent an overflow, it guarantees a ~12 day forward jump and corrupts the
+                // timeline for the life of the connection. Downstream this surfaces as timestamps
+                // of the form (realTimestamp + N * 0x40000000): the low bits stay correct while
+                // the top bits are set, which looks like valid media time to most consumers.
+                //
+                // When the accumulated compensation can no longer be represented safely, drop it
+                // instead. Subscribers then see a single backward discontinuity - exactly what
+                // they would have seen had no compensation ever been applied - and the timestamps
+                // themselves stay in a sane range.
                 final long MAX_SAFE_OFFSET = 0x40000000L; // ~12 days in ms
                 if (newOffset > MAX_SAFE_OFFSET) {
-                    log.info("Timestamp discontinuity on channel {}: capping large offset {} to {} to prevent overflow", channelId, newOffset, MAX_SAFE_OFFSET);
-                    newOffset = MAX_SAFE_OFFSET;
+                    log.warn("Timestamp discontinuity on channel {}: accumulated offset {} exceeds the safe range, dropping timestamp compensation and rebasing on raw timestamps", channelId, newOffset);
+                    newOffset = 0L;
                 } else {
                     log.warn("Timestamp discontinuity on channel {}: raw {} -> {}, adjusting offset from {} to {} (accumulated: {}ms)", channelId, unsignedLast, unsignedCurrent, currentOffset, newOffset, newOffset);
                 }
