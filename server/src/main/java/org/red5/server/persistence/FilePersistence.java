@@ -488,7 +488,12 @@ public class FilePersistence extends RamPersistence {
     @SuppressWarnings("null")
     protected boolean saveObject(IPersistable object) {
         log.debug("saveObject - object: {}", object);
-        if (!isValidObjectName(object.getName()) || (object.getPath() != null && !object.getPath().isEmpty() && !isValidObjectName(object.getPath()))) {
+        // object paths are scope context paths such as /live, so one leading slash is expected
+        String objectPath = object.getPath();
+        if (objectPath != null && objectPath.startsWith("/")) {
+            objectPath = objectPath.substring(1);
+        }
+        if (!isValidObjectName(object.getName()) || (objectPath != null && !objectPath.isEmpty() && !isValidObjectName(objectPath))) {
             log.warn("Refusing to persist object with invalid name or path: {} / {}", object.getName(), object.getPath());
             return false;
         }
