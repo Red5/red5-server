@@ -166,6 +166,21 @@ public class SharedObjectMembershipTest {
     }
 
     @Test
+    public void testClientAttributeLimit() {
+        so.setMaxClientAttributes(2);
+        IEventListener client = new Listener();
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_CONNECT, null, null), event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "a", 1), event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "b", 2), event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "c", 3));
+        assertEquals(2, so.getAttributeNames().size());
+        assertNull(so.getAttribute("c"));
+        // updating an existing attribute is still allowed
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "a", 10));
+        assertEquals(10, so.getAttribute("a"));
+        // server-side code is not limited
+        so.setAttribute("server", "x");
+        assertEquals(3, so.getAttributeNames().size());
+    }
+
+    @Test
     public void testServerSideEventsNeedNoMembership() {
         SharedObjectMessage msg = new SharedObjectMessage("members", 0, false);
         msg.addEvent(event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "k", "server"));

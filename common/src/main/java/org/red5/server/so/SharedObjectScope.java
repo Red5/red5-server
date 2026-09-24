@@ -631,6 +631,21 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
     }
 
     /**
+     * Maximum number of attributes clients may create; 0 means unlimited.
+     */
+    private int maxClientAttributes;
+
+    /**
+     * Sets the maximum number of attributes clients may create in this shared object; 0 means unlimited. Server-side updates are not
+     * limited.
+     *
+     * @param maxClientAttributes maximum attributes
+     */
+    public void setMaxClientAttributes(int maxClientAttributes) {
+        this.maxClientAttributes = maxClientAttributes;
+    }
+
+    /**
      * Returns whether the given listener is a current member of this shared object, meaning a connect was admitted and it has not since
      * disconnected.
      *
@@ -690,7 +705,10 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
                             break;
                         case SERVER_SET_ATTRIBUTE:
                             final Object value = event.getValue();
-                            if (!isWriteAllowed(key, value)) {
+                            if (source != null && maxClientAttributes > 0 && !hasAttribute(key) && getAttributeNames().size() >= maxClientAttributes) {
+                                log.warn("Rejecting new attribute {} on {}, limit of {} reached", key, getName(), maxClientAttributes);
+                                so.get().returnError(SO_NO_WRITE_ACCESS);
+                            } else if (!isWriteAllowed(key, value)) {
                                 // adds an owner event
                                 //so.get().returnAttributeValue(key);
                                 so.get().returnError(SO_NO_WRITE_ACCESS);
