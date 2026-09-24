@@ -114,6 +114,24 @@ public class RTMPMinaConnection extends RTMPConnection implements RTMPMinaConnec
 
     /** {@inheritDoc} */
     @Override
+    protected void suspendReceive() {
+        IoSession session = ioSession;
+        if (session != null && !session.isClosing()) {
+            session.suspendRead();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void resumeReceive() {
+        IoSession session = ioSession;
+        if (session != null && !session.isClosing()) {
+            session.resumeRead();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void close() {
         if (closing.compareAndSet(false, true)) {
             super.closeInternal();

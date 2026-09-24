@@ -108,6 +108,10 @@
         <property name="bandwidthDetection" value="${rtmp.bandwidth_detection}" />
         <!-- Maximum time allowed for a single RTMP packet to be processed -->
         <property name="maxHandlingTimeout" value="${rtmp.max_handling_time}" />
+        <!-- Received packet backlog: suspend reads above the high watermark, resume below the low one, close above the maximum -->
+        <property name="receivedQueueHighWatermark" value="${rtmp.receive_queue.high_watermark:8388608}" />
+        <property name="receivedQueueLowWatermark" value="${rtmp.receive_queue.low_watermark:2097152}" />
+        <property name="receivedQueueMaxBytes" value="${rtmp.receive_queue.max_bytes:67108864}" />
         <!-- Specify the size of queue that will trigger audio packet dropping, disabled if it's 0 -->
         <property name="executorQueueSizeToDropAudioPackets" value="${rtmp.executor.queue_size_to_drop_audio_packets}" />
         <!-- Concurrent collection tweaks -->
