@@ -10,12 +10,21 @@ package org.red5.client.net.rtmps;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedTrustManager;
 
 import org.apache.mina.core.future.IoFuture;
 import org.apache.mina.core.future.IoFutureListener;
@@ -25,7 +34,6 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.red5.client.net.rtmp.ClientExceptionHandler;
 import org.red5.client.net.rtmp.RTMPClient;
 import org.red5.client.net.rtmp.RTMPMinaIoHandler;
-import org.red5.io.tls.TLSFactory;
 
 /**
  * RTMPS client object (RTMPS Native)
@@ -42,7 +50,23 @@ import org.red5.io.tls.TLSFactory;
  */
 public class RTMPSClient extends RTMPClient {
 
+    /**
+     * System property that enables trust-on-first-use enrollment by default for new clients.
+     */
+    public static final String TRUST_ON_FIRST_USE_PROPERTY = "red5.rtmps.trust_on_first_use";
+
     private static String[] cipherSuites;
+
+    /**
+     * When true, the unverified certificate chain of a server with no enrolled chain is saved into the truststore before the first
+     * connection. Off by default: server certificates are verified against the JDK trust store and the configured truststore.
+     */
+    private boolean trustOnFirstUse = Boolean.getBoolean(TRUST_ON_FIRST_USE_PROPERTY);
+
+    // host and port of the server being connected to, used for SNI and hostname verification
+    private String tlsHost;
+
+    private int tlsPort;
 
     // I/O handler
     private RTMPSClientIoHandler ioHandler;
@@ -170,64 +194,24 @@ public class RTMPSClient extends RTMPClient {
             keyStoreType = keyStoreType == null ? "PKCS12" : truststorePath.lastIndexOf(".p12") > 0 ? "PKCS12" : "JKS";
             log.debug("RTMPSClient - keystoreType: {}, truststorePath: {}", keyStoreType, truststorePath);
         }
-        // ensure the truststore parent directory exists
-        java.nio.file.Path truststoreFile = Paths.get(truststorePath);
-        java.nio.file.Path parentDir = truststoreFile.getParent();
-        String pemPath;
-        if (parentDir != null) {
-            try {
-                if (!Files.exists(parentDir)) {
-                    Files.createDirectories(parentDir);
-                    log.info("Created truststore directory: {}", parentDir);
-                }
-            } catch (IOException e) {
-                log.warn("Failed to create truststore directory: {}", parentDir, e);
-            }
-            pemPath = parentDir.toString();
-        } else {
-            // truststore is in current directory
-            pemPath = ".";
-        }
-        log.info("RTMPSClient - pemPath: {}", pemPath);
-        // ensure the truststore has a certificate for the server we are connecting to
-        try {
-            // retrieve the certificate from the server and update the truststore
-            CertificateGrabber.retrieveCertificate(server, port);
-            P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s/%s.pem", pemPath, server));
-            log.info("Certificate retrieved and truststore updated for {}:{}", server, port);
-        } catch (Exception e) {
-            // log the error and attempt to retrieve the certificate from port 443
-            if (isDebug) {
-                log.debug("Error retrieving certificate from {}:{}", server, port, e);
-            } else {
-                log.warn("Error retrieving certificate from {}:{}", server, port);
-            }
-            // make an attempt to continue if 443 wasn't specified
-            if (port != 443) {
-                log.warn("Secondary attempt since standard port 443 wasn't used: {}", port);
-                try {
-                    // retrieve the certificate from the server and update the truststore
-                    CertificateGrabber.retrieveCertificate(server, 443);
-                    P12StoreManager.buildTrustStore(truststorePath, truststorePassword, String.format("%s/%s.pem", pemPath, server));
-                    log.info("Certificate retrieved and truststore updated for {}:{}", server, 443);
-                } catch (Exception e2) {
-                    if (isDebug) {
-                        log.debug("Error retrieving certificate from {}:{}", server, port, e2);
-                    } else {
-                        log.warn("Error retrieving certificate from {}:{}", server, port);
-                    }
-                }
-            }
+        tlsHost = server;
+        tlsPort = port;
+        Path truststoreFile = Paths.get(truststorePath);
+        if (trustOnFirstUse) {
+            enrollOnFirstUse(server, port, truststoreFile);
         }
         // convert the paths to input streams
         try {
             if (keystorePath != null && !keystorePath.isEmpty()) {
                 keystoreStream = Files.newInputStream(Paths.get(keystorePath));
             } else {
-                log.warn("Keystore path is null or empty, using system keystore");
+                log.debug("Keystore path is null or empty, no client certificate will be presented");
             }
-            // truststore path is required
-            truststoreStream = Files.newInputStream(Paths.get(truststorePath));
+            if (Files.exists(truststoreFile)) {
+                truststoreStream = Files.newInputStream(truststoreFile);
+            } else {
+                log.info("Truststore {} does not exist, using the JDK default trust store only", truststorePath);
+            }
         } catch (IOException e) {
             log.error("Error reading keystore or truststore files", e);
             throw new RuntimeException("Could not read keystore or truststore files", e);
@@ -287,6 +271,150 @@ public class RTMPSClient extends RTMPClient {
     }
 
     /**
+     * Enables or disables trust-on-first-use enrollment. When enabled, connecting to a server whose certificate chain has not been
+     * enrolled saves its chain, unverified, into the truststore and logs its SHA-256 fingerprint; later connections verify against
+     * it. Only enable this on a trusted network and compare the fingerprint with one obtained out of band.
+     *
+     * @param trustOnFirstUse true to enroll unknown servers on first connection
+     */
+    public void setTrustOnFirstUse(boolean trustOnFirstUse) {
+        this.trustOnFirstUse = trustOnFirstUse;
+    }
+
+    /**
+     * Returns whether trust-on-first-use enrollment is enabled.
+     *
+     * @return true if unknown servers are enrolled on first connection
+     */
+    public boolean isTrustOnFirstUse() {
+        return trustOnFirstUse;
+    }
+
+    private void enrollOnFirstUse(String server, int port, Path truststoreFile) {
+        Path parentDir = truststoreFile.getParent();
+        if (parentDir == null) {
+            parentDir = Paths.get(".");
+        }
+        Path pemFile = parentDir.resolve(server + ".pem");
+        if (Files.exists(pemFile)) {
+            log.debug("Certificate chain for {} already enrolled at {}", server, pemFile);
+            return;
+        }
+        try {
+            Files.createDirectories(parentDir);
+            CertificateGrabber.retrieveCertificate(server, port, pemFile.toString());
+            P12StoreManager.buildTrustStore(truststoreFile.toString(), truststorePassword, pemFile.toString());
+            log.info("Enrolled certificate chain for {}:{} into {}", server, port, truststoreFile);
+        } catch (Exception e) {
+            log.warn("Trust-on-first-use enrollment failed for {}:{}", server, port, e);
+        }
+    }
+
+    /**
+     * Creates the client TLS context. Server certificates are accepted when either the JDK default trust store or the configured
+     * truststore trusts them; the SSL engine also verifies the server hostname.
+     *
+     * @return TLS context
+     * @throws Exception if the stores cannot be loaded
+     */
+    protected SSLContext createSSLContext() throws Exception {
+        KeyManager[] keyManagers = null;
+        if (keystoreStream != null) {
+            KeyStore ks = KeyStore.getInstance(keyStoreType);
+            ks.load(keystoreStream, keystorePassword);
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(ks, keystorePassword);
+            keyManagers = kmf.getKeyManagers();
+        }
+        X509ExtendedTrustManager trustManager = trustManager(null);
+        if (truststoreStream != null) {
+            KeyStore ts = KeyStore.getInstance(keyStoreType);
+            ts.load(truststoreStream, truststorePassword);
+            trustManager = new EitherTrustManager(trustManager(ts), trustManager);
+        }
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(keyManagers, new TrustManager[] { trustManager }, null);
+        return context;
+    }
+
+    private static X509ExtendedTrustManager trustManager(KeyStore store) throws Exception {
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(store);
+        for (TrustManager tm : tmf.getTrustManagers()) {
+            if (tm instanceof X509ExtendedTrustManager) {
+                return (X509ExtendedTrustManager) tm;
+            }
+        }
+        throw new IllegalStateException("No X509ExtendedTrustManager available");
+    }
+
+    /**
+     * Trusts a server when the primary or the fallback trust manager trusts it. Both delegates perform hostname verification when
+     * the engine requests it.
+     */
+    private static final class EitherTrustManager extends X509ExtendedTrustManager {
+
+        private final X509ExtendedTrustManager primary, fallback;
+
+        EitherTrustManager(X509ExtendedTrustManager primary, X509ExtendedTrustManager fallback) {
+            this.primary = primary;
+            this.fallback = fallback;
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+            try {
+                primary.checkServerTrusted(chain, authType, engine);
+            } catch (CertificateException e) {
+                fallback.checkServerTrusted(chain, authType, engine);
+            }
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+            try {
+                primary.checkServerTrusted(chain, authType, socket);
+            } catch (CertificateException e) {
+                fallback.checkServerTrusted(chain, authType, socket);
+            }
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            try {
+                primary.checkServerTrusted(chain, authType);
+            } catch (CertificateException e) {
+                fallback.checkServerTrusted(chain, authType);
+            }
+        }
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+            throw new CertificateException("Client certificates are not accepted");
+        }
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+            throw new CertificateException("Client certificates are not accepted");
+        }
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            throw new CertificateException("Client certificates are not accepted");
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            X509Certificate[] a = primary.getAcceptedIssuers(), b = fallback.getAcceptedIssuers();
+            X509Certificate[] all = new X509Certificate[a.length + b.length];
+            System.arraycopy(a, 0, all, 0, a.length);
+            System.arraycopy(b, 0, all, a.length, b.length);
+            return all;
+        }
+
+    }
+
+    /**
      * <p>Setter for the field <code>cipherSuites</code>.</p>
      *
      * @param cipherSuites an array of {@link java.lang.String} objects
@@ -301,24 +429,14 @@ public class RTMPSClient extends RTMPClient {
         @Override
         public void sessionOpened(IoSession session) throws Exception {
             log.debug("RTMPS sessionOpened: {}", session);
-            // if we're using a input streams, pass them to the ctor
-            SSLContext context = null;
-            if (keystoreStream != null && truststoreStream != null) {
-                context = TLSFactory.getTLSContext(keyStoreType, keystorePassword, keystoreStream, truststorePassword, truststoreStream);
-            } else {
-                KeyStore ts = KeyStore.getInstance(keyStoreType);
-                ts.load(truststoreStream, truststorePassword);
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-                tmf.init(ts);
-                context = SSLContext.getInstance("TLS");
-                context.init(null, // No key managers needed for client
-                        tmf.getTrustManagers(), // custom truststore
-                        new java.security.SecureRandom());
-            }
+            SSLContext context = createSSLContext();
+            // the peer address gives the SSL engine the host name for SNI and hostname verification
+            session.setAttribute(SslFilter.PEER_ADDRESS, InetSocketAddress.createUnresolved(tlsHost, tlsPort));
             SslFilter sslFilter = new SslFilter(context);
             if (sslFilter != null) {
                 // we are a client
                 sslFilter.setUseClientMode(true);
+                sslFilter.setEndpointIdentificationAlgorithm("HTTPS");
                 // set the cipher suites
                 if (cipherSuites != null) {
                     sslFilter.setEnabledCipherSuites(cipherSuites);

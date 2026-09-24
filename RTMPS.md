@@ -263,6 +263,19 @@ String jarTruststorePath = String.format("jar:file:%s/lib/my_rtmps_client.jar!/r
 TLSFactory.setTruststorePath(jarTruststorePath);
 ```
 
+#### Server identity checks
+
+`RTMPSClient` verifies the server certificate against the JDK default trust store and, when its file exists, the client truststore (`javax.net.ssl.trustStore`, default `conf/rtmps_truststore.p12`). It also verifies that the certificate names the host being connected to, and sends that host name as SNI. Endpoints with public CA certificates, such as YouTube, Facebook and Twitch ingest, need no truststore entry.
+
+Before 2.0.46 the client fetched and saved whatever certificate the server presented on every connection, without verifying it. That trust-on-first-use behaviour is now off by default. To enroll a self-signed server, either import its certificate into the truststore with `keytool`, or enable enrollment explicitly on a trusted network and compare the SHA-256 fingerprint in the log with one obtained out of band:
+
+```java
+RTMPSClient client = new RTMPSClient();
+client.setTrustOnFirstUse(true); // or -Dred5.rtmps.trust_on_first_use=true
+```
+
+Enrollment only happens for a host that has no `<host>.pem` next to the truststore yet. Later connections verify against the saved chain.
+
 ## Testing
 
 Using ffplay to test playback, issue the following, but make sure to update the command for your server IP and stream name: `ffplay rtmps://localhost:8443/live/stream1` (this assumes a stream named `stream1` is being published already).
