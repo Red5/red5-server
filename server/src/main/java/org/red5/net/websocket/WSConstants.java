@@ -26,6 +26,9 @@ public class WSConstants {
     /** Constant <code>WS_CONNECTION="ws.connection"</code> */
     public final static String WS_CONNECTION = "ws.connection";
 
+    /** Connection attribute set once the application's IWebSocketAwareHandler admitted the connection */
+    public final static String WS_APP_CONNECTED = "ws.app.connected";
+
     /** Constant <code>SESSION="session"</code> */
     public final static String SESSION = "session";
 

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
@@ -31,6 +32,14 @@ import org.slf4j.LoggerFactory;
  * @author Paul Gregoire
  */
 public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Configurator {
+
+    /**
+     * Maximum number of room levels below the application a websocket path may create, configurable with the
+     * red5.websocket.max_room_depth system property.
+     */
+    public static final int MAX_ROOM_DEPTH = Integer.getInteger("red5.websocket.max_room_depth", 4);
+
+    private static final Pattern ROOM_NAME = Pattern.compile("[A-Za-z0-9._-]{1,64}");
 
     private final Logger log = LoggerFactory.getLogger(DefaultServerEndpointConfigurator.class);
 
@@ -158,7 +167,9 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             // get the associated scope
             WebSocketScope scope = manager.getScope(path);
             log.debug("WebSocketScope: {}", scope);
-            if (scope == null) {
+            if (scope == null && !isValidRoomPath(path)) {
+                log.warn("Refusing to create websocket room scopes for invalid path: {}", path);
+            } else if (scope == null) {
                 // split up the path into usable scope names
                 String[] paths = path.split("\\/");
                 // parent scope - prefer manager's app scope over separate lookup
@@ -221,6 +232,27 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             log.warn("No websocket manager found for path: {} requested uri: {}", path, request.getRequestURI().toString());
         }
         super.modifyHandshake(sec, request, response);
+    }
+
+    /**
+     * Returns whether the room segments of a request path, those after the application name, may be created as scopes: at most
+     * {@link #MAX_ROOM_DEPTH} segments of letters, digits, '.', '_' or '-', up to 64 characters each, and not "." or "..".
+     *
+     * @param path normalized request path, such as /app/room/subroom
+     * @return true if the room segments are acceptable
+     */
+    static boolean isValidRoomPath(String path) {
+        String[] paths = path.split("\\/");
+        if (paths.length - 2 > MAX_ROOM_DEPTH) {
+            return false;
+        }
+        for (int i = 2; i < paths.length; i++) {
+            String name = paths[i];
+            if (!ROOM_NAME.matcher(name).matches() || ".".equals(name) || "..".equals(name)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
