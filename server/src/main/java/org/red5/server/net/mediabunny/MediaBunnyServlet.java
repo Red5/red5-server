@@ -2,6 +2,7 @@ package org.red5.server.net.mediabunny;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,6 +10,8 @@ import java.util.concurrent.Executors;
 import org.red5.server.api.IServer;
 import org.red5.server.api.scope.IGlobalScope;
 import org.red5.server.api.scope.IScope;
+import org.red5.server.api.service.IStreamSecurityService;
+import org.red5.server.api.stream.IStreamPlaybackSecurity;
 import org.red5.server.scope.WebScope;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
@@ -91,6 +94,20 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Scope not available");
             return;
         }
+        // normalize the name as RTMP playback does, dropping any query string
+        int query = streamName.indexOf('?');
+        if (query >= 0) {
+            streamName = streamName.substring(0, query);
+            if (streamName.isBlank()) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing stream parameter");
+                return;
+            }
+        }
+        if (!isPlaybackAllowed(scope, streamName)) {
+            log.warn("MediaBunny playback of {} denied by stream playback security", streamName);
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Playback not allowed");
+            return;
+        }
         MediaBunnyStreamRegistry.StreamSubscription subscription;
         try {
             subscription = MediaBunnyStreamRegistry.getInstance().subscribe(scope, streamName);
@@ -149,6 +166,35 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
                 log.debug("AsyncContext already completed or in error state", e);
             }
         }
+    }
+
+    /**
+     * Applies the application's stream playback security handlers, as RTMP playback does. A handler that throws denies playback, since
+     * handlers written for RTMP may expect a current connection, which does not exist for this HTTP request.
+     *
+     * @param scope application scope
+     * @param streamName normalized stream name
+     * @return true if every registered handler allows playback
+     */
+    static boolean isPlaybackAllowed(IScope scope, String streamName) {
+        IStreamSecurityService security = (IStreamSecurityService) ScopeUtils.getScopeService(scope, IStreamSecurityService.class);
+        if (security != null) {
+            Set<IStreamPlaybackSecurity> handlers = security.getStreamPlaybackSecurity();
+            if (handlers != null) {
+                for (IStreamPlaybackSecurity handler : handlers) {
+                    try {
+                        // live playback defaults: start -2 (live, then recorded), length -1 (until end), flush playlist
+                        if (!handler.isPlaybackAllowed(scope, streamName, -2, -1, true)) {
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        log.warn("Stream playback security handler {} failed for {}, denying", handler, streamName, e);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     @SuppressWarnings("null")
