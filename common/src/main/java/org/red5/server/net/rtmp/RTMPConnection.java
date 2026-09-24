@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -162,6 +163,8 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      */
     private static final AtomicIntegerFieldUpdater<RTMPConnection> receivedQueueSizeUpdater = AtomicIntegerFieldUpdater.newUpdater(RTMPConnection.class, "receivedQueueSize");
 
+    private static final AtomicLongFieldUpdater<RTMPConnection> receivedQueueBytesUpdater = AtomicLongFieldUpdater.newUpdater(RTMPConnection.class, "receivedQueueBytes");
+
     /**
      * Initial channel capacity
      */
@@ -225,6 +228,31 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
      * Received packet queue size
      */
     protected volatile int receivedQueueSize;
+
+    /**
+     * Payload bytes of the packets in the received packet queue
+     */
+    protected volatile long receivedQueueBytes;
+
+    /**
+     * Queued bytes above which reading from the peer is suspended until the handler catches up; 0 disables suspension.
+     */
+    protected long receivedQueueHighWatermark = 8L * 1024 * 1024;
+
+    /**
+     * Queued bytes below which suspended reading resumes.
+     */
+    protected long receivedQueueLowWatermark = 2L * 1024 * 1024;
+
+    /**
+     * Queued bytes above which the connection is closed; 0 disables the limit.
+     */
+    protected long receivedQueueMaxBytes = 64L * 1024 * 1024;
+
+    /**
+     * Whether reading from the peer is currently suspended because of a received queue backlog
+     */
+    protected final AtomicBoolean receiveSuspended = new AtomicBoolean();
 
     /**
      * Transaction identifier for remote commands.
@@ -1622,6 +1650,16 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         if (receivedPacketQueue.offer(packet)) {
             // increment the queue size
             receivedQueueSizeUpdater.incrementAndGet(this);
+            long queuedBytes = receivedQueueBytesUpdater.addAndGet(this, packetSize(packet));
+            if (receivedQueueMaxBytes > 0 && queuedBytes > receivedQueueMaxBytes) {
+                log.warn("Received queue for {} holds {} bytes, above the {} byte limit, closing", sessionId, queuedBytes, receivedQueueMaxBytes);
+                close();
+                return;
+            }
+            if (receivedQueueHighWatermark > 0 && queuedBytes > receivedQueueHighWatermark && receiveSuspended.compareAndSet(false, true)) {
+                log.debug("Received queue for {} holds {} bytes, suspending reads", sessionId, queuedBytes);
+                suspendReceive();
+            }
         }
         // create the future for processing the queue as needed
         if (receivedPacketFuture == null) {
@@ -1638,6 +1676,11 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                             }
                             // decrement the queue size
                             receivedQueueSizeUpdater.decrementAndGet(this);
+                            long queuedBytes = receivedQueueBytesUpdater.addAndGet(this, -packetSize(p));
+                            if (queuedBytes < receivedQueueLowWatermark && receiveSuspended.compareAndSet(true, false)) {
+                                log.debug("Received queue for {} drained to {} bytes, resuming reads", sessionId, queuedBytes);
+                                resumeReceive();
+                            }
                             // create a task to handle the packet
                             ReceivedMessageTask task = new ReceivedMessageTask(conn, p);
                             // process the packet inline on this per-connection receiver thread. Previously this was
@@ -1660,9 +1703,68 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
                 } finally {
                     receivedPacketFuture = null;
                     receivedPacketQueue.clear();
+                    receivedQueueSizeUpdater.set(this, 0);
+                    receivedQueueBytesUpdater.set(this, 0L);
+                    if (receiveSuspended.compareAndSet(true, false)) {
+                        resumeReceive();
+                    }
                 }
             });
         }
+    }
+
+    private static int packetSize(Packet packet) {
+        Header header = packet.getHeader();
+        return header != null ? Math.max(header.getSize(), 0) : 0;
+    }
+
+    /**
+     * Stops reading from the peer while the received packet queue is above its high watermark, so TCP flow control pushes back on the
+     * sender. The default does nothing; transports that can pause reads override it.
+     */
+    protected void suspendReceive() {
+    }
+
+    /**
+     * Resumes reading from the peer once the received packet queue drains below its low watermark.
+     */
+    protected void resumeReceive() {
+    }
+
+    /**
+     * Sets the queued received bytes above which reading from the peer is suspended; 0 disables suspension.
+     *
+     * @param receivedQueueHighWatermark high watermark in bytes
+     */
+    public void setReceivedQueueHighWatermark(long receivedQueueHighWatermark) {
+        this.receivedQueueHighWatermark = receivedQueueHighWatermark;
+    }
+
+    /**
+     * Sets the queued received bytes below which suspended reading resumes.
+     *
+     * @param receivedQueueLowWatermark low watermark in bytes
+     */
+    public void setReceivedQueueLowWatermark(long receivedQueueLowWatermark) {
+        this.receivedQueueLowWatermark = receivedQueueLowWatermark;
+    }
+
+    /**
+     * Sets the queued received bytes above which the connection is closed; 0 disables the limit.
+     *
+     * @param receivedQueueMaxBytes maximum queued bytes
+     */
+    public void setReceivedQueueMaxBytes(long receivedQueueMaxBytes) {
+        this.receivedQueueMaxBytes = receivedQueueMaxBytes;
+    }
+
+    /**
+     * Returns the payload bytes currently waiting in the received packet queue.
+     *
+     * @return queued bytes
+     */
+    public long getReceivedQueueBytes() {
+        return receivedQueueBytes;
     }
 
     /**

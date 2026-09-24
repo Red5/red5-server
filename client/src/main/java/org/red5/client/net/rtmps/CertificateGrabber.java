@@ -2,6 +2,7 @@ package org.red5.client.net.rtmps;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.security.MessageDigest;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
@@ -30,15 +31,36 @@ public class CertificateGrabber {
     private static Logger log = LoggerFactory.getLogger(CertificateGrabber.class);
 
     /**
-     * Retrieves the full certificate chain from the specified host and port.
-     * This includes the server certificate and all intermediate CA certificates,
-     * which are required for proper TLS validation.
+     * Retrieves the full certificate chain from the specified host and port and saves it next to the truststore named by the
+     * javax.net.ssl.trustStore system property. The chain is NOT verified; see {@link #retrieveCertificate(String, int, String)}.
      *
      * @param host the hostname to connect to
      * @param port the port to connect to
      * @throws Exception if an error occurs while retrieving certificates
      */
     public static void retrieveCertificate(String host, int port) throws Exception {
+        String truststorePath = System.getProperty("javax.net.ssl.trustStore");
+        if (truststorePath == null || truststorePath.isEmpty()) {
+            throw new IllegalStateException("Truststore path is not set. Please set 'javax.net.ssl.trustStore' system property.");
+        }
+        String pemPath = truststorePath.substring(0, truststorePath.lastIndexOf('/'));
+        retrieveCertificate(host, port, String.format("%s/%s.pem", pemPath, host));
+    }
+
+    /**
+     * Retrieves the full certificate chain from the specified host and port, including intermediate CA certificates, and saves it
+     * to the given PEM file.
+     * <p>
+     * The chain is accepted WITHOUT verification, so whoever answers on the network at that moment is the one recorded. Only use
+     * this for explicit trust-on-first-use enrollment, and compare the logged SHA-256 fingerprint with one obtained out of band.
+     *
+     * @param host the hostname to connect to
+     * @param port the port to connect to
+     * @param pemFile file to write the PEM encoded chain to
+     * @return the retrieved chain, server certificate first
+     * @throws Exception if an error occurs while retrieving certificates
+     */
+    public static X509Certificate[] retrieveCertificate(String host, int port, String pemFile) throws Exception {
         // Create a trust manager that accepts all certificates (for retrieval only)
         TrustManager[] trustManagers = new TrustManager[] { new X509TrustManager() {
             public void checkClientTrusted(X509Certificate[] chain, String authType) {
@@ -61,24 +83,38 @@ public class CertificateGrabber {
             // Get the full certificate chain
             SSLSession session = socket.getSession();
             Certificate[] certs = session.getPeerCertificates();
-            // Save the full certificate chain
-            if (certs != null && certs.length > 0) {
-                // check for path to store the certificate
-                String truststorePath = System.getProperty("javax.net.ssl.trustStore");
-                if (truststorePath == null || truststorePath.isEmpty()) {
-                    throw new IllegalStateException("Truststore path is not set. Please set 'javax.net.ssl.trustStore' system property.");
-                }
-                String pemPath = truststorePath.substring(0, truststorePath.lastIndexOf('/'));
-                log.info("CertificateGrabber - pemPath: {}, chain length: {}", pemPath, certs.length);
-                // Save all certificates in the chain to a single PEM file
-                saveCertificateChain(certs, String.format("%s/%s.pem", pemPath, host));
-                // Log info about each certificate in the chain
-                for (int i = 0; i < certs.length; i++) {
-                    X509Certificate cert = (X509Certificate) certs[i];
-                    log.debug("Certificate[{}] subject: {} issuer: {} serial: {} valid: {} to {}", i, cert.getSubjectX500Principal(), cert.getIssuerX500Principal(), cert.getSerialNumber(), cert.getNotBefore(), cert.getNotAfter());
-                }
+            if (certs == null || certs.length == 0) {
+                throw new IllegalStateException("No certificates presented by " + host + ":" + port);
             }
+            X509Certificate[] chain = new X509Certificate[certs.length];
+            for (int i = 0; i < certs.length; i++) {
+                chain[i] = (X509Certificate) certs[i];
+                log.debug("Certificate[{}] subject: {} issuer: {} serial: {} valid: {} to {}", i, chain[i].getSubjectX500Principal(), chain[i].getIssuerX500Principal(), chain[i].getSerialNumber(), chain[i].getNotBefore(), chain[i].getNotAfter());
+            }
+            // Save all certificates in the chain to a single PEM file
+            saveCertificateChain(certs, pemFile);
+            log.warn("Trusting unverified certificate for {}:{} subject: {} SHA-256: {}", host, port, chain[0].getSubjectX500Principal(), fingerprint(chain[0]));
+            return chain;
         }
+    }
+
+    /**
+     * Returns the SHA-256 fingerprint of a certificate as colon separated upper-case hex.
+     *
+     * @param cert certificate
+     * @return fingerprint
+     * @throws Exception if the certificate cannot be encoded
+     */
+    public static String fingerprint(X509Certificate cert) throws Exception {
+        byte[] digest = MessageDigest.getInstance("SHA-256").digest(cert.getEncoded());
+        StringBuilder sb = new StringBuilder(digest.length * 3);
+        for (byte b : digest) {
+            if (sb.length() > 0) {
+                sb.append(':');
+            }
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
     }
 
     /**

@@ -46,6 +46,16 @@ public class SharedObjectService implements ISharedObjectService {
     private static ThreadPoolTaskScheduler scheduler;
 
     /**
+     * Maximum number of shared objects in one scope; 0 means unlimited.
+     */
+    private int maxSharedObjectsPerScope;
+
+    /**
+     * Maximum number of attributes a client may create in one shared object; 0 means unlimited.
+     */
+    private int maxAttributesPerSharedObject;
+
+    /**
      * Persistence class name
      */
     private String persistenceClassName = "org.red5.server.persistence.RamPersistence";
@@ -58,6 +68,25 @@ public class SharedObjectService implements ISharedObjectService {
      */
     public static void submitTask(Runnable task) {
         scheduler.execute(task);
+    }
+
+    /**
+     * Sets the maximum number of shared objects in one scope; 0 means unlimited.
+     *
+     * @param maxSharedObjectsPerScope maximum shared objects per scope
+     */
+    public void setMaxSharedObjectsPerScope(int maxSharedObjectsPerScope) {
+        this.maxSharedObjectsPerScope = maxSharedObjectsPerScope;
+    }
+
+    /**
+     * Sets the maximum number of attributes a client may create in one shared object; 0 means unlimited. Server-side updates are not
+     * limited.
+     *
+     * @param maxAttributesPerSharedObject maximum attributes per shared object
+     */
+    public void setMaxAttributesPerSharedObject(int maxAttributesPerSharedObject) {
+        this.maxAttributesPerSharedObject = maxAttributesPerSharedObject;
     }
 
     /**
@@ -133,8 +162,14 @@ public class SharedObjectService implements ISharedObjectService {
         }
         boolean added = hasSharedObject(scope, name);
         if (!added) {
+            if (maxSharedObjectsPerScope > 0 && getSharedObjectNames(scope).size() >= maxSharedObjectsPerScope) {
+                log.warn("Refusing to create shared object {} in {}, limit of {} reached", name, scope.getName(), maxSharedObjectsPerScope);
+                return false;
+            }
             log.debug("Attempting to add shared object: {} to {}", name, scope.getName());
-            added = scope.addChildScope(new SharedObjectScope(scope, name, persistent, getStore(scope, persistent)));
+            SharedObjectScope so = new SharedObjectScope(scope, name, persistent, getStore(scope, persistent));
+            so.setMaxClientAttributes(maxAttributesPerSharedObject);
+            added = scope.addChildScope(so);
             if (!added) {
                 added = hasSharedObject(scope, name);
                 log.debug("Add failed on create, shared object already exists: {}", added);

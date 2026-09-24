@@ -49,6 +49,8 @@
     <!-- Handles creation / lookup of shared objects -->
     <bean id="sharedObjectService" class="org.red5.server.so.SharedObjectService">
         <property name="maximumEventsPerUpdate" value="${so.max.events.per.update}"/>
+        <property name="maxSharedObjectsPerScope" value="${so.max.objects.per.scope:0}"/>
+        <property name="maxAttributesPerSharedObject" value="${so.max.attributes.per.object:0}"/>
         <property name="persistenceClassName">
             <value>org.red5.server.persistence.FilePersistence</value>
         </property>
@@ -186,6 +188,9 @@
         <property name="delayWrite" value="${fileconsumer.delayed.write}"/>
         <property name="queueThreshold" value="${fileconsumer.queue.size}"/>
         <property name="waitForVideoKeyframe" value="${fileconsumer.wait.for.keyframe}"/>
+        <property name="maxRecordingBytes" value="${fileconsumer.max.bytes:0}"/>
+        <property name="maxRecordingDurationMs" value="${fileconsumer.max.duration.ms:0}"/>
+        <property name="minFreeDiskBytes" value="${fileconsumer.min.free.disk.bytes:0}"/>
     </bean>
 
     <!-- ClientBroadcastStream and PlaylistSubscriberStream

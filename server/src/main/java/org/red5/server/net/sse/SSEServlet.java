@@ -7,10 +7,14 @@
 
 package org.red5.server.net.sse;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.red5.net.websocket.server.DefaultServerEndpointConfigurator;
 import org.red5.server.api.IServer;
 import org.red5.server.api.scope.IGlobalScope;
 import org.red5.server.api.scope.IScope;
@@ -44,6 +48,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * - Integration with Red5 scopes
  * - Async servlet processing for long-lived connections
  *
+ * Optional servlet init-params:
+ * - allowPost: accept event posts, default false. Posted events only reach connections of this servlet's application.
+ * - maxPostBytes: maximum posted body size, default 65536
+ * - maxConnections: maximum SSE connections across the server before new ones are refused with 503, default 1000
+ * - cors.enabled: set to false when an external CORS filter is used, default true
+ * - allowedOrigins: comma separated origins allowed cross-origin access; "*" allows any origin without credentials. When unset no
+ *   CORS headers are sent, so only same-origin pages can use the endpoint.
+ *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public class SSEServlet extends HttpServlet implements AsyncListener {
@@ -62,10 +74,37 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
 
     private transient SSEManager sseManager;
 
+    private boolean allowPost;
+
+    private int maxPostBytes = 64 * 1024;
+
+    private int maxConnections = 1000;
+
+    private String[] allowedOrigins = new String[0];
+
+    private boolean corsEnabled = true;
+
+    // maximum length of an event name
+    private static final int MAX_EVENT_NAME_LENGTH = 128;
+
     @Override
     public void init() throws ServletException {
         super.init();
         log.debug("Initializing SSE servlet");
+        allowPost = Boolean.parseBoolean(getInitParameter("allowPost"));
+        String value = getInitParameter("maxPostBytes");
+        if (value != null) {
+            maxPostBytes = Integer.parseInt(value.trim());
+        }
+        value = getInitParameter("maxConnections");
+        if (value != null) {
+            maxConnections = Integer.parseInt(value.trim());
+        }
+        corsEnabled = !"false".equalsIgnoreCase(getInitParameter("cors.enabled"));
+        value = getInitParameter("allowedOrigins");
+        if (value != null) {
+            allowedOrigins = Stream.of(value.split(",")).map(String::trim).filter(o -> !o.isEmpty()).toArray(String[]::new);
+        }
         ServletContext ctx = getServletContext();
         log.debug("Context path: {}", ctx.getContextPath());
         // Get the web application context
@@ -127,8 +166,20 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Scope not available");
             return;
         }
-        // Generate unique connection ID
-        String connectionId = RandomStringUtils.insecure().nextAlphabetic(11); // random 11 char string
+        if (sseManager == null) {
+            log.warn("SSE manager not available for SSE connection");
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "SSE service not available");
+            return;
+        }
+        if (sseManager.getConnectionCount() >= maxConnections) {
+            log.warn("SSE connection limit of {} reached, refusing {}", maxConnections, req.getRemoteAddr());
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Too many connections");
+            return;
+        }
+        // Generate an unguessable connection ID, since it addresses the connection
+        String connectionId = RandomStringUtils.secure().nextAlphanumeric(24);
+        // lets the async listener find the connection to clean up
+        req.setAttribute("sse.connectionId", connectionId);
         // Start async processing
         AsyncContext asyncContext = req.startAsync();
         asyncContext.setTimeout(0); // No timeout, managed by SSEManager
@@ -147,6 +198,10 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
         log.debug("SSE event post request from: {} {}", req.getRemoteAddr(), req.getRequestURI());
         // Handle CORS
         handleCORS(req, resp);
+        if (!allowPost) {
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Event posting is disabled");
+            return;
+        }
         // Validate content type
         String contentType = req.getContentType();
         if (contentType == null || !contentType.toLowerCase().contains("application/json")) {
@@ -160,15 +215,16 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
             return;
         }
         try {
-            // Read request body
-            StringBuilder requestBody = new StringBuilder();
-            try (BufferedReader reader = req.getReader()) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    requestBody.append(line);
-                }
+            // Read request body, bounded regardless of the declared Content-Length
+            if (req.getContentLengthLong() > maxPostBytes) {
+                resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+                return;
             }
-            String jsonBody = requestBody.toString();
+            String jsonBody = readBody(req.getInputStream(), maxPostBytes);
+            if (jsonBody == null) {
+                resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+                return;
+            }
             if (jsonBody.isEmpty()) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request body is required");
                 return;
@@ -179,27 +235,41 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JSON format or missing required fields");
                 return;
             }
+            if (eventRequest.event.length() > MAX_EVENT_NAME_LENGTH) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event name too long");
+                return;
+            }
+            // posts only reach connections of this servlet's application
+            IScope appScope = getScope(req);
+            if (appScope == null) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Scope not available");
+                return;
+            }
             int successCount = 0;
             // Handle different event targets
             if (eventRequest.connectionId != null && !eventRequest.connectionId.isEmpty()) {
                 // Send to specific connection
-                boolean success = sseManager.sendEventToConnection(eventRequest.connectionId, eventRequest.event, eventRequest.data);
+                SSEConnection target = sseManager.getConnection(eventRequest.connectionId);
+                boolean success = target != null && appScope.equals(target.getScope()) && target.sendEvent(eventRequest.event, eventRequest.data);
                 successCount = success ? 1 : 0;
                 log.debug("Sent event '{}' to connection '{}': {}", eventRequest.event, eventRequest.connectionId, success);
             } else if (eventRequest.scope != null && !eventRequest.scope.isEmpty()) {
-                // Send to specific scope
+                // Send to specific scope within this application
                 IScope targetScope = resolveScope(eventRequest.scope);
-                if (targetScope != null) {
-                    successCount = sseManager.broadcastEventToScope(targetScope, eventRequest.event, eventRequest.data);
-                    log.debug("Broadcast event '{}' to scope '{}': {} connections", eventRequest.event, eventRequest.scope, successCount);
-                } else {
+                if (targetScope == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Scope not found: " + eventRequest.scope);
                     return;
                 }
+                if (!appScope.equals(ScopeUtils.findApplication(targetScope))) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Scope is outside this application");
+                    return;
+                }
+                successCount = sseManager.broadcastEventToScope(targetScope, eventRequest.event, eventRequest.data);
+                log.debug("Broadcast event '{}' to scope '{}': {} connections", eventRequest.event, eventRequest.scope, successCount);
             } else {
-                // Broadcast to all connections
-                successCount = sseManager.broadcastEvent(eventRequest.event, eventRequest.data);
-                log.debug("Broadcast event '{}' to all connections: {} recipients", eventRequest.event, successCount);
+                // Broadcast to this application's connections
+                successCount = sseManager.broadcastEventToScope(appScope, eventRequest.event, eventRequest.data);
+                log.debug("Broadcast event '{}' to application {}: {} recipients", eventRequest.event, appScope.getName(), successCount);
             }
             // Return success response
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -210,20 +280,53 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
     }
 
     /**
-     * Handles CORS headers for cross-origin requests.
+     * Reads a request body up to a byte limit.
+     *
+     * @param in request input
+     * @param limit maximum bytes
+     * @return body as UTF-8, or null when it exceeds the limit
+     * @throws IOException on read failure
+     */
+    static String readBody(InputStream in, int limit) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream(Math.min(limit, 8192));
+        byte[] buf = new byte[4096];
+        int total = 0, read;
+        while ((read = in.read(buf)) != -1) {
+            total += read;
+            if (total > limit) {
+                return null;
+            }
+            out.write(buf, 0, read);
+        }
+        return out.toString(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Handles CORS headers for cross-origin requests. Only origins in the allowedOrigins init-param are granted access; credentials
+     * are only allowed for explicitly listed origins, never for "*".
      */
     @SuppressWarnings("null")
     private void handleCORS(HttpServletRequest req, HttpServletResponse resp) {
-        String origin = req.getHeader("Origin");
+        String origin = corsEnabled ? req.getHeader("Origin") : null;
         if (origin != null) {
-            resp.setHeader("Access-Control-Allow-Origin", origin);
-        } else {
-            resp.setHeader("Access-Control-Allow-Origin", "*");
+            for (String allowed : allowedOrigins) {
+                if ("*".equals(allowed)) {
+                    resp.setHeader("Access-Control-Allow-Origin", "*");
+                    break;
+                }
+                if (DefaultServerEndpointConfigurator.originMatches(allowed, origin)) {
+                    resp.setHeader("Access-Control-Allow-Origin", origin);
+                    resp.setHeader("Access-Control-Allow-Credentials", "true");
+                    resp.addHeader("Vary", "Origin");
+                    break;
+                }
+            }
         }
-        resp.setHeader("Access-Control-Allow-Credentials", "true");
-        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        resp.setHeader("Access-Control-Allow-Headers", "Accept, Cache-Control, Last-Event-ID, Content-Type");
-        resp.setHeader("Access-Control-Max-Age", "3600");
+        if (corsEnabled) {
+            resp.setHeader("Access-Control-Allow-Methods", allowPost ? "GET, POST, OPTIONS" : "GET, OPTIONS");
+            resp.setHeader("Access-Control-Allow-Headers", "Accept, Cache-Control, Last-Event-ID, Content-Type");
+            resp.setHeader("Access-Control-Max-Age", "3600");
+        }
         // Ensure web application context is available
         if (webAppCtx == null) {
             ServletContext ctx = getServletContext();

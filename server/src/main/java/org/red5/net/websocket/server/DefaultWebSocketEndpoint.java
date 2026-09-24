@@ -18,6 +18,8 @@ import org.red5.net.websocket.WSConstants;
 import org.red5.net.websocket.WebSocketConnection;
 import org.red5.net.websocket.WebSocketScope;
 import org.red5.net.websocket.model.WSMessage;
+import org.red5.server.api.websocket.IWebSocketAwareHandler;
+import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +105,18 @@ public class DefaultWebSocketEndpoint extends Endpoint {
             log.warn("Exception in onClose", e);
         } finally {
             if (conn != null) {
+                // symmetric with appConnect, only for connections the application admitted
+                if (conn.getAttribute(WSConstants.WS_APP_CONNECTED) != null && scope != null) {
+                    IWebSocketAwareHandler handler = (IWebSocketAwareHandler) ScopeUtils.getScopeService(scope.getScope(), IWebSocketAwareHandler.class);
+                    if (handler != null) {
+                        try {
+                            handler.appDisconnect(conn);
+                        } catch (Exception e) {
+                            log.warn("appDisconnect failed for {}", sessionId, e);
+                        }
+                    }
+                    conn.removeAttribute(WSConstants.WS_APP_CONNECTED);
+                }
                 // fire close, to be sure
                 scope.removeConnection(conn);
                 // force remove on exception

@@ -341,6 +341,25 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
+     * Returns a per-application setting from the servlet context init-parameters (web.xml context-param), falling back to a servlet
+     * context attribute of the same name.
+     *
+     * @param servletContext servlet context
+     * @param name setting name
+     * @return value or null when not set
+     */
+    private static String contextSetting(ServletContext servletContext, String name) {
+        String value = servletContext.getInitParameter(name);
+        if (value == null) {
+            Object attr = servletContext.getAttribute(name);
+            if (attr != null) {
+                value = attr.toString();
+            }
+        }
+        return value;
+    }
+
+    /**
      * <p>isCrossOriginPolicy.</p>
      *
      * @return a boolean
@@ -433,13 +452,20 @@ public class WebSocketPlugin extends Red5Plugin {
                 subProtocols.add("*");
             }
             log.debug("Checking for CORS");
-            // check for allowed origins override in this servlet context
-            Optional<Object> crossOpt = Optional.ofNullable(servletContext.getAttribute("crossOriginPolicy"));
-            if (crossOpt.isPresent() && Boolean.valueOf((String) crossOpt.get())) {
-                Optional<String> opt = Optional.ofNullable((String) servletContext.getAttribute("allowedOrigins"));
-                if (opt.isPresent()) {
-                    ((DefaultServerEndpointConfigurator) configurator).setAllowedOrigins(opt.get().split(","));
-                }
+            // per-application override from a context-param or servlet context attribute
+            DefaultServerEndpointConfigurator endpointConfigurator = (DefaultServerEndpointConfigurator) configurator;
+            String crossOriginSetting = contextSetting(servletContext, "crossOriginPolicy");
+            if (crossOriginSetting != null) {
+                endpointConfigurator.setCrossOriginPolicy(Boolean.parseBoolean(crossOriginSetting.trim()));
+            }
+            String allowedOriginsSetting = contextSetting(servletContext, "allowedOrigins");
+            if (allowedOriginsSetting != null) {
+                endpointConfigurator.setAllowedOrigins(Stream.of(allowedOriginsSetting.split(",")).map(String::trim).filter(o -> !o.isEmpty()).toArray(String[]::new));
+            }
+            if (!endpointConfigurator.isCrossOriginPolicy()) {
+                log.info("WebSocket Origin checking is disabled for {}; browsers on any site can open authenticated connections, set the crossOriginPolicy and allowedOrigins context-params to restrict them", path);
+            } else if (Arrays.asList(endpointConfigurator.getAllowedOrigins()).contains("*")) {
+                log.warn("WebSocket Origin checking for {} allows any origin (*), which is unsafe when HTTP sessions or credentials are used", path);
             }
             log.debug("Checking for endpoint override");
             // check for endpoint override and use default if not configured

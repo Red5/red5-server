@@ -257,6 +257,11 @@ public class RecordingListener implements IRecordingListener {
     /** {@inheritDoc} */
     public void packetReceived(IBroadcastStream stream, IStreamPacket packet) {
         if (recording.get()) {
+            String failure = recordingConsumer.getFailure();
+            if (failure != null) {
+                // the broadcast stream reports this as a failed recording and stops it
+                throw new IllegalStateException(failure);
+            }
             // store everything we would need to perform a write of the stream data
             CachedEvent event = new CachedEvent();
             event.setData(packet.getData().duplicate());

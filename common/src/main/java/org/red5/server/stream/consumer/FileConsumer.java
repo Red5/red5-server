@@ -132,6 +132,31 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     private long offerTimeout = 100L;
 
     /**
+     * Maximum bytes written for one recording; 0 means unlimited.
+     */
+    private long maxRecordingBytes;
+
+    /**
+     * Maximum recorded duration in milliseconds, measured by stream timestamps; 0 means unlimited.
+     */
+    private long maxRecordingDurationMs;
+
+    /**
+     * Minimum usable space to keep free on the recording volume; 0 disables the check.
+     */
+    private long minFreeDiskBytes;
+
+    // how often, in written tags, the free space check runs
+    private static final int FREE_SPACE_CHECK_INTERVAL = 100;
+
+    private int tagsSinceSpaceCheck;
+
+    /**
+     * Reason the recording stopped writing, or null while it is healthy.
+     */
+    private volatile String failure;
+
+    /**
      * Default ctor
      */
     public FileConsumer() {
@@ -175,6 +200,10 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
      */
     @SuppressWarnings("rawtypes")
     public void pushMessage(IPipe pipe, IMessage message) throws IOException {
+        if (failure != null) {
+            // the recording failed or reached a limit, nothing more is written
+            return;
+        }
         if (message instanceof RTMPMessage) {
             final IRTMPEvent msg = ((RTMPMessage) message).getBody();
             // if writes are delayed, queue the data and sort it by time
@@ -237,7 +266,7 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
                                 log.trace("Running FileConsumer thread. queue size: {} initialized: {} writerNotNull={}", queue.size(), initialized, (writer != null));
                             }
                             init();
-                            while (writer != null) {
+                            while (writer != null && failure == null) {
                                 if (log.isTraceEnabled()) {
                                     log.trace("Processing packet from queue. queue size: {}", queue.size());
                                 }
@@ -287,6 +316,7 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
                                         write(dataType, timestamp, tag);
                                         // clean up
                                         queued.dispose();
+                                        checkLimits(timestamp);
                                     } else {
                                         if (log.isTraceEnabled()) {
                                             log.trace("Queued media is null. queue size: {}", queue.size());
@@ -453,15 +483,83 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
                 } catch (ClosedChannelException cce) {
                     // the channel we tried to write to is closed, we should not try again on that writer
                     log.error("The writer is no longer able to write to the file: {} writable: {}", path.getFileName(), path.toFile().canWrite());
+                    fail("Recording file is closed");
                 } catch (IOException e) {
                     log.warn("Error writing tag", e);
-                    if (e.getCause() instanceof ClosedChannelException) {
-                        // the channel we tried to write to is closed, we should not try again on that writer
-                        log.error("The writer is no longer able to write to the file: {} writable: {}", path.getFileName(), path.toFile().canWrite());
-                    }
+                    // a failed write, such as a full disk, would fail again for every following tag
+                    fail("Recording write failed: " + e.getMessage());
                 }
             }
         }
+    }
+
+    /**
+     * Stops writing when the recording has reached its byte or duration limit or the volume is below its free space minimum.
+     *
+     * @param timestamp timestamp of the tag just written, relative to the start of the recording
+     */
+    private void checkLimits(int timestamp) {
+        if (maxRecordingBytes > 0 && writer != null && writer.getBytesWritten() >= maxRecordingBytes) {
+            fail(String.format("Recording reached the %d byte limit", maxRecordingBytes));
+        } else if (maxRecordingDurationMs > 0 && timestamp >= maxRecordingDurationMs) {
+            fail(String.format("Recording reached the %d ms duration limit", maxRecordingDurationMs));
+        } else if (minFreeDiskBytes > 0 && ++tagsSinceSpaceCheck >= FREE_SPACE_CHECK_INTERVAL) {
+            tagsSinceSpaceCheck = 0;
+            try {
+                long usable = Files.getFileStore(path).getUsableSpace();
+                if (usable < minFreeDiskBytes) {
+                    fail(String.format("Recording volume has %d usable bytes, below the %d byte minimum", usable, minFreeDiskBytes));
+                }
+            } catch (IOException e) {
+                log.warn("Could not check free space for {}", path, e);
+            }
+        }
+    }
+
+    private void fail(String reason) {
+        if (failure == null) {
+            failure = reason;
+            log.warn("Recording to {} stopped: {}", path, reason);
+            if (queue != null) {
+                queue.clear();
+            }
+        }
+    }
+
+    /**
+     * Returns why this consumer stopped writing, if it did.
+     *
+     * @return failure reason, or null while recording normally
+     */
+    public String getFailure() {
+        return failure;
+    }
+
+    /**
+     * Sets the maximum bytes written for one recording; 0 means unlimited.
+     *
+     * @param maxRecordingBytes maximum bytes
+     */
+    public void setMaxRecordingBytes(long maxRecordingBytes) {
+        this.maxRecordingBytes = maxRecordingBytes;
+    }
+
+    /**
+     * Sets the maximum recorded duration in milliseconds, measured by stream timestamps; 0 means unlimited.
+     *
+     * @param maxRecordingDurationMs maximum duration
+     */
+    public void setMaxRecordingDurationMs(long maxRecordingDurationMs) {
+        this.maxRecordingDurationMs = maxRecordingDurationMs;
+    }
+
+    /**
+     * Sets the minimum usable space to keep free on the recording volume; 0 disables the check.
+     *
+     * @param minFreeDiskBytes minimum free bytes
+     */
+    public void setMinFreeDiskBytes(long minFreeDiskBytes) {
+        this.minFreeDiskBytes = minFreeDiskBytes;
     }
 
     /**

@@ -15,7 +15,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -85,14 +84,13 @@ public class HttpConnectionUtil {
     }
 
     /**
-     * Returns a client with all our selected properties / params and SSL enabled.
+     * Returns a client with all our selected properties / params and SSL enabled. Server certificates and host names are verified
+     * by the shared connection manager's default TLS socket factory.
      *
      * @return client
      */
     public static final HttpClient getSecureClient() {
         HttpClientBuilder client = HttpClientBuilder.create();
-        // set the ssl verifier to accept all
-        client.setSSLHostnameVerifier(new NoopHostnameVerifier());
         // set the connection manager
         client.setConnectionManager(connectionManager);
         // dont retry

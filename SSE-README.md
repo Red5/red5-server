@@ -111,6 +111,18 @@ Update your `web.xml` to include the SSE servlet:
 </servlet-mapping>
 ```
 
+The servlet accepts these optional init parameters:
+
+| Parameter | Default | Purpose |
+|---|---|---|
+| `allowedOrigins` | none | Comma separated origins, such as `https://app.example.com`, granted cross-origin access with credentials. `*` grants any origin without credentials. When unset no CORS headers are sent, so only same-origin pages can connect. |
+| `allowPost` | `false` | Accept `POST` requests that publish events. Posted events only reach connections of the servlet's own application; a `scope` target must be inside that application. There is no built-in authentication, so only enable this behind your own access control. |
+| `maxPostBytes` | `65536` | Largest accepted `POST` body. |
+| `maxConnections` | `1000` | SSE connections allowed across the server before new ones get `503`. |
+| `cors.enabled` | `true` | Set to `false` to leave CORS to an external filter. |
+
+Before 2.0.46 the servlet echoed back any `Origin` with credentials allowed and accepted unauthenticated posts that could broadcast to every SSE connection on the server.
+
 If an external CORS filter is used, you can disable CORS directly in the servlet by adding the following init parameters:
 
 ```xml

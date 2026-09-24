@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.red5.annotations.DeclareProtected;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
 import org.red5.server.api.scope.IScope;
@@ -138,19 +139,13 @@ public class ServiceInvoker implements IServiceInvoker {
             @SuppressWarnings("null")
             Object[] params = (Object[]) methodResult[1];
             try {
-                /* XXX(paul) legacy flash logic for restricting access to methods
-                if (method.isAnnotationPresent(DeclarePrivate.class)) {
-                    // Method may not be called by clients.
-                    log.debug("Method {} is declared private.", method);
-                    throw new NotAllowedException("Access denied, method is private");
-                }
+                // DeclarePrivate methods are already excluded by ReflectionUtils
                 final DeclareProtected annotation = method.getAnnotation(DeclareProtected.class);
-                if (annotation != null && !conn.getClient().hasPermission(conn, annotation.permission())) {
+                if (annotation != null && (conn == null || conn.getClient() == null || !conn.getClient().hasPermission(conn, annotation.permission()))) {
                     // client doesn't have required permission
-                    log.debug("Client {} doesn't have required permission {} to call {}", new Object[] { conn.getClient(), annotation.permission(), method });
+                    log.debug("Connection {} doesn't have required permission {} to call {}", conn, annotation.permission(), method);
                     throw new NotAllowedException("Access denied, method is protected");
                 }
-                */
                 Object result = null;
                 log.debug("Invoking method: {}", method.toString());
                 if (method.getReturnType().equals(Void.TYPE)) {

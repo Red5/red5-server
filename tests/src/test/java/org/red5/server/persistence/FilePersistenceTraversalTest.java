@@ -146,6 +146,19 @@ public class FilePersistenceTraversalTest {
     }
 
     @Test
+    public void testScopePathWithLeadingSlashIsSaved() throws Exception {
+        // shared objects carry their scope context path, which always starts with a slash
+        Persistable so = new Persistable("chat");
+        so.setPath("/live");
+        assertTrue(persistence.saveObject(so));
+        assertTrue(existsAnywhere(new File(webapp, "persistence"), "chat.red5"));
+        Persistable escape = new Persistable("chat2");
+        escape.setPath("/../..");
+        assertFalse(persistence.saveObject(escape));
+        assertFalse(existsAnywhere(tmp, "chat2.red5"));
+    }
+
+    @Test
     public void testPlainNameIsSavedUnderPersistenceRoot() throws Exception {
         assertTrue(persistence.saveObject(new Persistable("room1")));
         assertTrue(new File(webapp, "persistence/SharedObject/room1.red5").exists());

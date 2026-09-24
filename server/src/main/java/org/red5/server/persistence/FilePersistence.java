@@ -13,6 +13,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -51,6 +53,9 @@ public class FilePersistence extends RamPersistence {
      * Modified objects.
      */
     private ConcurrentLinkedQueue<IPersistable> queue = new ConcurrentLinkedQueue<IPersistable>();
+
+    // objects currently waiting in the queue, so a frequently modified object is only queued once per flush
+    private final Set<IPersistable> pending = ConcurrentHashMap.newKeySet();
 
     /**
      * Files path
@@ -488,7 +493,12 @@ public class FilePersistence extends RamPersistence {
     @SuppressWarnings("null")
     protected boolean saveObject(IPersistable object) {
         log.debug("saveObject - object: {}", object);
-        if (!isValidObjectName(object.getName()) || (object.getPath() != null && !object.getPath().isEmpty() && !isValidObjectName(object.getPath()))) {
+        // object paths are scope context paths such as /live, so one leading slash is expected
+        String objectPath = object.getPath();
+        if (objectPath != null && objectPath.startsWith("/")) {
+            objectPath = objectPath.substring(1);
+        }
+        if (!isValidObjectName(object.getName()) || (objectPath != null && !objectPath.isEmpty() && !isValidObjectName(objectPath))) {
             log.warn("Refusing to persist object with invalid name or path: {} / {}", object.getName(), object.getPath());
             return false;
         }
@@ -591,7 +601,10 @@ public class FilePersistence extends RamPersistence {
     @Override
     public boolean save(IPersistable object) {
         if (super.save(object)) {
-            return queue.add(object);
+            if (pending.add(object)) {
+                queue.add(object);
+            }
+            return true;
         }
         return false;
     }
@@ -717,6 +730,11 @@ public class FilePersistence extends RamPersistence {
         while (!queue.isEmpty()) {
             try {
                 persistable = queue.poll();
+                if (persistable == null) {
+                    break;
+                }
+                // release before writing so a change made during the write queues the object again
+                pending.remove(persistable);
                 if (!saveObject(persistable)) {
                     log.warn("Object persist failed for: {}", persistable);
                 }

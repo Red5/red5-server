@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.red5.annotations.DeclarePrivate;
 import org.red5.io.utils.ConversionUtils;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCall;
@@ -34,6 +35,49 @@ public class ReflectionUtils {
 
     // used to prevent extra object creation when a method with a set of params is not found
     private static final Object[] NULL_RETURN = new Object[] { null, null };
+
+    /**
+     * System property that, when true, restores remote access to every public method declared by the framework application adapters.
+     */
+    public static final String EXPOSE_ADAPTER_METHODS_PROPERTY = "red5.service.expose_adapter_methods";
+
+    private static final boolean exposeAdapterMethods = Boolean.getBoolean(EXPOSE_ADAPTER_METHODS_PROPERTY);
+
+    // package holding the framework application adapters whose public methods are server-side API, not remote API
+    private static final String ADAPTER_PACKAGE = "org.red5.server.adapter.";
+
+    // adapter methods that clients such as Flash, OBS and FFmpeg call as part of the RTMP command set
+    private static final Set<String> CLIENT_CALLABLE_ADAPTER_METHODS = Set.of("FCPublish", "FCUnpublish", "FCSubscribe", "getStreamLength", "checkBandwidth", "checkBandwidthUp", "measureBandwidth", "startTransmit", "stopTransmit", "setPeerInfo");
+
+    /**
+     * Returns whether a public method may be invoked by a remote peer. Methods declared by JDK classes, methods annotated with
+     * {@link DeclarePrivate} and methods declared by the framework application adapters (other than the RTMP client command set) are
+     * not remotely callable; methods declared by application classes are.
+     *
+     * @param method method to check
+     * @return true if the method may be invoked remotely
+     */
+    public static boolean isRemotelyCallable(Method method) {
+        if (method.isAnnotationPresent(DeclarePrivate.class)) {
+            return false;
+        }
+        String declaringClass = method.getDeclaringClass().getName();
+        if (declaringClass.startsWith("java.") || declaringClass.startsWith("javax.") || declaringClass.startsWith("jdk.")) {
+            return false;
+        }
+        if (!exposeAdapterMethods && declaringClass.startsWith(ADAPTER_PACKAGE)) {
+            return CLIENT_CALLABLE_ADAPTER_METHODS.contains(method.getName());
+        }
+        return true;
+    }
+
+    private static Set<Method> findNamedMethods(Object service, String methodName) {
+        Set<Method> named = Arrays.stream(service.getClass().getMethods()).filter(m -> (m.getName().equals(methodName) && !m.getName().contains("$"))).collect(Collectors.toSet());
+        if (named.removeIf(m -> !isRemotelyCallable(m))) {
+            log.warn("Method {} on {} is not remotely callable", methodName, service.getClass().getName());
+        }
+        return named;
+    }
 
     // Note for .26 update is to ensure other service methods don't fail when a method is not found
     // See https://github.com/Red5/red5-server/commit/d4096a4d7b35b2b92905154a9e18edea04268fb4
@@ -57,7 +101,7 @@ public class ReflectionUtils {
         Object[] methodResult = NULL_RETURN;
         final int argsSize = (listArgs != null ? listArgs.size() : 0);
         // get all the name matched methods once, then filter out the ones that contain a $
-        final Set<Method> methods = Arrays.stream(service.getClass().getMethods()).filter(m -> (m.getName().equals(methodName) && !m.getName().contains("$"))).filter(m -> m.getParameterCount() == 1 || m.getParameterCount() == argsSize).collect(Collectors.toUnmodifiableSet());
+        final Set<Method> methods = findNamedMethods(service, methodName).stream().filter(m -> m.getParameterCount() == 1 || m.getParameterCount() == argsSize).collect(Collectors.toUnmodifiableSet());
         if (!methods.isEmpty()) {
             if (isDebug) {
                 log.debug("Named method(s) {}: {} found in {}", methods.size(), methodName, service);
@@ -155,7 +199,7 @@ public class ReflectionUtils {
             argsWithConnection = conn != null ? new Object[] { conn } : new Object[0];
         }
         // get all the name matched methods once, then filter out the ones that contain a $
-        final Set<Method> methods = Arrays.stream(service.getClass().getMethods()).filter(m -> (m.getName().equals(methodName) && !m.getName().contains("$"))).filter(m -> m.getParameterCount() == 1 || m.getParameterCount() == callParams.length || m.getParameterCount() == (callParams.length + 1)).collect(Collectors.toUnmodifiableSet());
+        final Set<Method> methods = findNamedMethods(service, methodName).stream().filter(m -> m.getParameterCount() == 1 || m.getParameterCount() == callParams.length || m.getParameterCount() == (callParams.length + 1)).collect(Collectors.toUnmodifiableSet());
         if (methods.isEmpty()) {
             log.warn("Named method: {} not found in {}", methodName, service);
             call.setStatus(Call.STATUS_METHOD_NOT_FOUND);

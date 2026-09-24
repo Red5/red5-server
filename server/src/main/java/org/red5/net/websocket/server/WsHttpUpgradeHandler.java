@@ -19,6 +19,8 @@ import org.red5.net.websocket.WSConstants;
 import org.red5.net.websocket.WebSocketConnection;
 import org.red5.net.websocket.WebSocketScope;
 import org.red5.net.websocket.WebSocketScopeManager;
+import org.red5.server.api.websocket.IWebSocketAwareHandler;
+import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,19 +179,63 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
                 conn.setAttribute(WSConstants.WS_HEADER_REMOTE_PORT, socketWrapper.getRemotePort());
                 // add the request headers
                 conn.setHeaders(handshakeRequest.getHeaders());
+                if (scope == null) {
+                    log.warn("No websocket scope for {}, rejecting connection", handshakeRequest.getRequestURI());
+                    reject(CloseCodes.CANNOT_ACCEPT, "No such scope");
+                    return;
+                }
+                // let the application decide before the connection joins any application state
+                IWebSocketAwareHandler handler = (IWebSocketAwareHandler) ScopeUtils.getScopeService(scope.getScope(), IWebSocketAwareHandler.class);
+                if (handler != null) {
+                    boolean admitted;
+                    try {
+                        admitted = handler.appConnect(conn, new Object[] { handshakeRequest.getParameterMap() });
+                    } catch (RuntimeException e) {
+                        log.warn("appConnect failed for {}, rejecting", wsSession.getId(), e);
+                        admitted = false;
+                    }
+                    if (!admitted) {
+                        log.info("WebSocket connection {} to {} rejected by the application", wsSession.getId(), scope.getPath());
+                        reject(CloseCodes.VIOLATED_POLICY, "Connection rejected");
+                        return;
+                    }
+                    conn.setAttribute(WSConstants.WS_APP_CONNECTED, Boolean.TRUE);
+                }
                 // add the connection to the user props
                 endpointConfig.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
                 // must be added to the session as well since the session ctor copies from the endpoint and doesnt update
                 wsSession.getUserProperties().put(WSConstants.WS_CONNECTION, conn);
-                // set connected flag
-                conn.setConnected();
-                // fire endpoint handler
-                ep.onOpen(wsSession, endpointConfig);
                 // get the endpoint path to use in registration since we're a server
                 String path = ((ServerEndpointConfig) endpointConfig).getPath();
-                webSocketContainer.registerSession(path, wsSession);
-                // add the connection to the manager
-                manager.addConnection(conn);
+                boolean registered = false, added = false;
+                try {
+                    // set connected flag
+                    conn.setConnected();
+                    // fire endpoint handler
+                    ep.onOpen(wsSession, endpointConfig);
+                    webSocketContainer.registerSession(path, wsSession);
+                    registered = true;
+                    // add the connection to the manager
+                    manager.addConnection(conn);
+                    added = true;
+                } catch (RuntimeException e) {
+                    log.warn("WebSocket connection {} failed to open, rolling back", wsSession.getId(), e);
+                    if (added) {
+                        manager.removeConnection(conn);
+                    }
+                    if (registered) {
+                        webSocketContainer.unregisterSession(path, wsSession);
+                    }
+                    if (handler != null) {
+                        try {
+                            handler.appDisconnect(conn);
+                        } catch (RuntimeException de) {
+                            log.debug("appDisconnect failed during rollback", de);
+                        }
+                        conn.removeAttribute(WSConstants.WS_APP_CONNECTED);
+                    }
+                    conn.close(CloseCodes.UNEXPECTED_CONDITION, "Open failed");
+                }
             } catch (DeploymentException e) {
                 throw new IllegalArgumentException(e);
             } finally {
@@ -197,6 +243,14 @@ public class WsHttpUpgradeHandler implements InternalHttpUpgradeHandler {
             }
         } else {
             throw new IllegalStateException(sm.getString("wsHttpUpgradeHandler.noPreInit"));
+        }
+    }
+
+    private void reject(CloseCodes code, String reason) {
+        try {
+            wsSession.close(new CloseReason(code, reason));
+        } catch (IOException e) {
+            log.debug("Exception closing rejected session", e);
         }
     }
 

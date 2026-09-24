@@ -188,6 +188,19 @@ public class SSEEvent {
     }
 
     /**
+     * Removes CR and LF characters, which would otherwise end an SSE field and let a value inject further fields or events.
+     *
+     * @param value field value
+     * @return value without line breaks
+     */
+    public static String stripLineBreaks(String value) {
+        if (value == null || (value.indexOf('\r') < 0 && value.indexOf('\n') < 0)) {
+            return value;
+        }
+        return value.replace("\r", "").replace("\n", "");
+    }
+
+    /**
      * Converts this event to SSE format string.
      *
      * @return SSE formatted string
@@ -196,11 +209,11 @@ public class SSEEvent {
         StringBuilder sb = new StringBuilder();
 
         if (id != null) {
-            sb.append("id: ").append(id).append("\n");
+            sb.append("id: ").append(SSEEvent.stripLineBreaks(id)).append("\n");
         }
 
         if (event != null) {
-            sb.append("event: ").append(event).append("\n");
+            sb.append("event: ").append(SSEEvent.stripLineBreaks(event)).append("\n");
         }
 
         if (retry != null) {
@@ -209,7 +222,7 @@ public class SSEEvent {
 
         if (data != null) {
             // Handle multi-line data
-            String[] lines = data.split("\n");
+            String[] lines = data.split("\r\n|\r|\n", -1);
             for (String line : lines) {
                 sb.append("data: ").append(line).append("\n");
             }
