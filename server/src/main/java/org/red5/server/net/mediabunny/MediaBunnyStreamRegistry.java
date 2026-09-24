@@ -6,6 +6,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.red5.server.api.scope.IBroadcastScope;
 import org.red5.server.api.scope.IScope;
@@ -26,6 +30,23 @@ public class MediaBunnyStreamRegistry {
     private final Map<String, StreamState> streams = new ConcurrentHashMap<>();
 
     private final Map<String, byte[]> pendingInitSegments = new ConcurrentHashMap<>();
+
+    /** Default maximum number of subscribers across all streams. */
+    public static final int DEFAULT_MAX_SUBSCRIBERS = 1000;
+
+    /** Default maximum number of subscribers to a single stream. */
+    public static final int DEFAULT_MAX_SUBSCRIBERS_PER_STREAM = 500;
+
+    /** Default maximum bytes queued for one subscriber before it is disconnected as a slow consumer. */
+    public static final long DEFAULT_MAX_QUEUED_BYTES = 16L * 1024 * 1024;
+
+    private volatile int maxSubscribers = DEFAULT_MAX_SUBSCRIBERS;
+
+    private volatile int maxSubscribersPerStream = DEFAULT_MAX_SUBSCRIBERS_PER_STREAM;
+
+    private volatile long maxQueuedBytes = DEFAULT_MAX_QUEUED_BYTES;
+
+    private final AtomicInteger subscriberCount = new AtomicInteger();
 
     /**
      * Returns the process-wide singleton instance of this registry.
@@ -48,6 +69,19 @@ public class MediaBunnyStreamRegistry {
      */
     public StreamSubscription subscribe(IScope scope, String streamName) {
         log.debug("Subscribing to stream: {}", streamName);
+        if (subscriberCount.incrementAndGet() > maxSubscribers) {
+            subscriberCount.decrementAndGet();
+            throw new SubscriberLimitException("MediaBunny subscriber limit of " + maxSubscribers + " reached");
+        }
+        try {
+            return addSubscriber(scope, streamName);
+        } catch (RuntimeException e) {
+            subscriberCount.decrementAndGet();
+            throw e;
+        }
+    }
+
+    private StreamSubscription addSubscriber(IScope scope, String streamName) {
         String key = buildKey(scope, streamName);
         log.debug("Subscriber key: {}", key);
         StreamState state = streams.compute(key, (k, existing) -> {
@@ -70,25 +104,33 @@ public class MediaBunnyStreamRegistry {
             state.initSegment = pendingInit;
             log.debug("Applied pending init segment for stream {}", key);
         }
-        BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
-        state.subscribers.add(queue);
+        Subscriber subscriber = new Subscriber(key, maxQueuedBytes);
+        synchronized (state) {
+            if (state.subscribers.size() >= maxSubscribersPerStream) {
+                throw new SubscriberLimitException("MediaBunny per-stream subscriber limit of " + maxSubscribersPerStream + " reached for " + streamName);
+            }
+            state.subscribers.add(subscriber);
+        }
         byte[] initSegment = state.initSegment;
         if (initSegment != null) {
-            enqueue(queue, initSegment);
+            enqueue(subscriber, initSegment);
         }
         byte[] keyframe = state.keyframeFragment;
         if (keyframe != null) {
-            enqueue(queue, keyframe);
+            enqueue(subscriber, keyframe);
         }
-        return new StreamSubscription(key, queue, this);
+        return new StreamSubscription(subscriber, this);
     }
 
     /**
-     * Offers data to a subscriber queue, logging when the (unbounded) queue unexpectedly rejects it.
+     * Queues data for a subscriber. A subscriber whose queued bytes would exceed its budget is a slow consumer: dropping fragments
+     * would corrupt its fMP4 stream, so its backlog is discarded and it is ended instead.
      */
-    private static void enqueue(BlockingQueue<byte[]> queue, byte[] data) {
-        if (!queue.offer(data)) {
-            log.warn("Subscriber queue rejected a {} byte fragment", data.length);
+    private void enqueue(Subscriber subscriber, byte[] data) {
+        if (!subscriber.offer(data)) {
+            log.warn("MediaBunny subscriber on {} exceeded {} queued bytes, disconnecting slow consumer", subscriber.key, subscriber.maxBytes);
+            removeSubscriber(subscriber);
+            subscriber.end();
         }
     }
 
@@ -99,17 +141,72 @@ public class MediaBunnyStreamRegistry {
      * @param key the stream key, as built by {@link #buildKey(IScope, String)}
      * @param queue the subscriber queue to remove
      */
-    public void unsubscribe(String key, BlockingQueue<byte[]> queue) {
-        log.debug("Unsubscribing from stream: {}", key);
+    void unsubscribe(Subscriber subscriber) {
+        log.debug("Unsubscribing from stream: {}", subscriber.key);
+        removeSubscriber(subscriber);
+        if (subscriber.release()) {
+            subscriberCount.decrementAndGet();
+        }
+    }
+
+    private void removeSubscriber(Subscriber subscriber) {
+        String key = subscriber.key;
         StreamState state = streams.get(key);
         if (state == null) {
             return;
         }
-        state.subscribers.remove(queue);
+        state.subscribers.remove(subscriber);
         if (state.subscribers.isEmpty()) {
-            state.detach();
-            streams.remove(key);
+            // only remove the state we inspected, a replacement may have been created concurrently
+            if (streams.remove(key, state)) {
+                state.detach();
+            }
         }
+    }
+
+    /**
+     * Returns the number of active subscribers across all streams.
+     *
+     * @return subscriber count
+     */
+    public int getSubscriberCount() {
+        return subscriberCount.get();
+    }
+
+    /**
+     * Sets the maximum number of subscribers across all streams.
+     *
+     * @param maxSubscribers maximum subscribers
+     */
+    public void setMaxSubscribers(int maxSubscribers) {
+        this.maxSubscribers = maxSubscribers;
+    }
+
+    /**
+     * Returns the maximum number of subscribers across all streams.
+     *
+     * @return maximum subscribers
+     */
+    public int getMaxSubscribers() {
+        return maxSubscribers;
+    }
+
+    /**
+     * Sets the maximum number of subscribers to a single stream.
+     *
+     * @param maxSubscribersPerStream maximum subscribers per stream
+     */
+    public void setMaxSubscribersPerStream(int maxSubscribersPerStream) {
+        this.maxSubscribersPerStream = maxSubscribersPerStream;
+    }
+
+    /**
+     * Sets the maximum bytes queued for a subscriber before it is disconnected as a slow consumer. Applies to new subscribers.
+     *
+     * @param maxQueuedBytes maximum queued bytes per subscriber
+     */
+    public void setMaxQueuedBytes(long maxQueuedBytes) {
+        this.maxQueuedBytes = maxQueuedBytes;
     }
 
     void onStreamClosed(String key) {
@@ -117,8 +214,8 @@ public class MediaBunnyStreamRegistry {
         if (state != null) {
             log.info("Stream closed for {}, removed state and notifying {} subscribers", key, state.subscribers.size());
             // poison-pill empty array to unblock waiting subscribers
-            for (BlockingQueue<byte[]> queue : state.subscribers) {
-                enqueue(queue, new byte[0]);
+            for (Subscriber subscriber : state.subscribers) {
+                subscriber.end();
             }
         }
         pendingInitSegments.remove(key);
@@ -132,8 +229,8 @@ public class MediaBunnyStreamRegistry {
             return;
         }
         state.initSegment = initSegment;
-        for (BlockingQueue<byte[]> queue : state.subscribers) {
-            enqueue(queue, initSegment);
+        for (Subscriber subscriber : state.subscribers) {
+            enqueue(subscriber, initSegment);
         }
     }
 
@@ -146,8 +243,8 @@ public class MediaBunnyStreamRegistry {
         if (log.isDebugEnabled()) {
             log.debug("Dispatching keyframe fragment for {} to {} subscribers ({} bytes)", key, state.subscribers.size(), fragment.length);
         }
-        for (BlockingQueue<byte[]> queue : state.subscribers) {
-            enqueue(queue, fragment);
+        for (Subscriber subscriber : state.subscribers) {
+            enqueue(subscriber, fragment);
         }
     }
 
@@ -159,8 +256,8 @@ public class MediaBunnyStreamRegistry {
         if (log.isDebugEnabled()) {
             log.debug("Dispatching fragment for {} to {} subscribers ({} bytes)", key, state.subscribers.size(), fragment.length);
         }
-        for (BlockingQueue<byte[]> queue : state.subscribers) {
-            enqueue(queue, fragment);
+        for (Subscriber subscriber : state.subscribers) {
+            enqueue(subscriber, fragment);
         }
     }
 
@@ -200,7 +297,7 @@ public class MediaBunnyStreamRegistry {
 
         private final MediaBunnyStreamListener listener;
 
-        private final List<BlockingQueue<byte[]>> subscribers = new CopyOnWriteArrayList<>();
+        private final List<Subscriber> subscribers = new CopyOnWriteArrayList<>();
 
         private volatile byte[] initSegment;
 
@@ -220,35 +317,113 @@ public class MediaBunnyStreamRegistry {
         }
     }
 
-    /** A handle to an active subscription to a MediaBunny stream, exposing the fragment queue and a way to unsubscribe. */
-    public static class StreamSubscription {
+    /** Thrown when a subscription would exceed the global or per-stream subscriber limit. */
+    public static class SubscriberLimitException extends IllegalStateException {
+
+        private static final long serialVersionUID = 1L;
+
+        SubscriberLimitException(String message) {
+            super(message);
+        }
+    }
+
+    /** A subscriber's fragment queue with a byte budget. An empty array marks the end of the stream. */
+    static class Subscriber {
+
+        private static final byte[] END = new byte[0];
+
         private final String key;
 
-        private final BlockingQueue<byte[]> queue;
+        private final long maxBytes;
+
+        private final BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
+
+        private final AtomicLong queuedBytes = new AtomicLong();
+
+        private final AtomicBoolean ended = new AtomicBoolean();
+
+        private final AtomicBoolean released = new AtomicBoolean();
+
+        Subscriber(String key, long maxBytes) {
+            this.key = key;
+            this.maxBytes = maxBytes;
+        }
+
+        boolean offer(byte[] data) {
+            if (ended.get()) {
+                return true;
+            }
+            if (queuedBytes.addAndGet(data.length) > maxBytes) {
+                queuedBytes.addAndGet(-data.length);
+                return false;
+            }
+            return queue.offer(data);
+        }
+
+        void end() {
+            if (ended.compareAndSet(false, true)) {
+                queue.clear();
+                queuedBytes.set(0);
+                queue.offer(END);
+            }
+        }
+
+        byte[] poll(long timeout, TimeUnit unit) throws InterruptedException {
+            byte[] data = queue.poll(timeout, unit);
+            if (data != null && data.length > 0) {
+                queuedBytes.addAndGet(-data.length);
+            }
+            return data;
+        }
+
+        long getQueuedBytes() {
+            return queuedBytes.get();
+        }
+
+        boolean release() {
+            return released.compareAndSet(false, true);
+        }
+    }
+
+    /** A handle to an active subscription to a MediaBunny stream. */
+    public static class StreamSubscription {
+
+        private final Subscriber subscriber;
 
         private final MediaBunnyStreamRegistry registry;
 
-        StreamSubscription(String key, BlockingQueue<byte[]> queue, MediaBunnyStreamRegistry registry) {
-            this.key = key;
-            this.queue = queue;
+        StreamSubscription(Subscriber subscriber, MediaBunnyStreamRegistry registry) {
+            this.subscriber = subscriber;
             this.registry = registry;
         }
 
         /**
-         * Returns the queue that receives this subscription's init segment, keyframe and fragment byte arrays.
+         * Waits for the next init segment, keyframe or fragment. An empty array means the stream ended or this subscriber was
+         * disconnected as a slow consumer; null means nothing arrived within the timeout.
          *
-         * @return the subscriber's fragment queue
+         * @param timeout how long to wait
+         * @param unit unit of the timeout
+         * @return next chunk, an empty array at end of stream, or null on timeout
+         * @throws InterruptedException if interrupted while waiting
          */
-        public BlockingQueue<byte[]> getQueue() {
-            return queue;
+        public byte[] poll(long timeout, TimeUnit unit) throws InterruptedException {
+            return subscriber.poll(timeout, unit);
         }
 
         /**
-         * Unsubscribes this subscription's queue from the registry, releasing the stream's listener once no
-         * subscribers remain.
+         * Returns the bytes currently queued for this subscription.
+         *
+         * @return queued bytes
+         */
+        public long getQueuedBytes() {
+            return subscriber.getQueuedBytes();
+        }
+
+        /**
+         * Unsubscribes from the registry, releasing the stream's listener once no subscribers remain. Safe to call more than once.
          */
         public void close() {
-            registry.unsubscribe(key, queue);
+            registry.unsubscribe(subscriber);
         }
     }
 }

@@ -3,9 +3,10 @@ package org.red5.server.net.mediabunny;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.red5.server.api.IServer;
 import org.red5.server.api.scope.IGlobalScope;
@@ -31,6 +32,9 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * HTTP endpoint for MediaBunny fMP4 streaming.
  * Usage: /mediabunny?stream={name}
+ * <p>
+ * Optional servlet init-params: maxSubscribers, maxSubscribersPerStream, maxQueuedBytes (per subscriber, slow consumers beyond it
+ * are disconnected) and idleTimeoutMs (a subscriber that receives nothing for this long is ended).
  */
 public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
 
@@ -44,8 +48,13 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
 
     private transient WebScope webScope;
 
-    /** Thread pool used to run per-connection streaming tasks off the servlet container's request threads. */
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    /** Default time a subscriber may go without receiving data before its stream is ended. */
+    public static final long DEFAULT_IDLE_TIMEOUT_MS = 30_000L;
+
+    /** Thread pool used to run per-connection streaming tasks off the servlet container's request threads, bounded by the subscriber limit. */
+    private transient ThreadPoolExecutor executor;
+
+    private long idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS;
 
     private static final int INIT_PREFIX_BYTES = 32;
 
@@ -53,6 +62,28 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
     @Override
     public void init() throws ServletException {
         super.init();
+        MediaBunnyStreamRegistry registry = MediaBunnyStreamRegistry.getInstance();
+        String value = getInitParameter("maxSubscribers");
+        if (value != null) {
+            registry.setMaxSubscribers(Integer.parseInt(value.trim()));
+        }
+        value = getInitParameter("maxSubscribersPerStream");
+        if (value != null) {
+            registry.setMaxSubscribersPerStream(Integer.parseInt(value.trim()));
+        }
+        value = getInitParameter("maxQueuedBytes");
+        if (value != null) {
+            registry.setMaxQueuedBytes(Long.parseLong(value.trim()));
+        }
+        value = getInitParameter("idleTimeoutMs");
+        if (value != null) {
+            idleTimeoutMs = Long.parseLong(value.trim());
+        }
+        executor = new ThreadPoolExecutor(0, Math.max(1, registry.getMaxSubscribers()), 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
+            Thread t = new Thread(r, "MediaBunny-subscriber");
+            t.setDaemon(true);
+            return t;
+        });
         ServletContext ctx = getServletContext();
         try {
             webAppCtx = WebApplicationContextUtils.getRequiredWebApplicationContext(ctx);
@@ -70,7 +101,9 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
 
     @Override
     public void destroy() {
-        executor.shutdownNow();
+        if (executor != null) {
+            executor.shutdownNow();
+        }
         super.destroy();
     }
 
@@ -111,6 +144,10 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
         MediaBunnyStreamRegistry.StreamSubscription subscription;
         try {
             subscription = MediaBunnyStreamRegistry.getInstance().subscribe(scope, streamName);
+        } catch (MediaBunnyStreamRegistry.SubscriberLimitException e) {
+            log.warn("MediaBunny subscription to {} refused: {}", streamName, e.getMessage());
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Too many subscribers");
+            return;
         } catch (Exception e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Stream not found: " + streamName);
             return;
@@ -119,12 +156,20 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
         resp.setContentType("video/mp4");
         resp.setHeader("Cache-Control", "no-cache");
         resp.setHeader("Connection", "keep-alive");
-
         AsyncContext asyncContext = req.startAsync();
+        // the streaming task ends idle subscribers itself, see idleTimeoutMs
         asyncContext.setTimeout(0);
         asyncContext.addListener(this);
-
-        executor.execute(() -> streamQueue(asyncContext, subscription));
+        try {
+            executor.execute(() -> streamQueue(asyncContext, subscription));
+        } catch (RejectedExecutionException e) {
+            subscription.close();
+            resp.reset();
+            handleCORS(req, resp);
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Too many subscribers");
+            asyncContext.complete();
+            return;
+        }
     }
 
     private void streamQueue(AsyncContext asyncContext, MediaBunnyStreamRegistry.StreamSubscription subscription) {
@@ -132,9 +177,12 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
         boolean loggedSecondChunk = false;
         int chunkCount = 0;
         try (OutputStream out = asyncContext.getResponse().getOutputStream()) {
-            BlockingQueue<byte[]> queue = subscription.getQueue();
             while (true) {
-                byte[] chunk = queue.take();
+                byte[] chunk = subscription.poll(idleTimeoutMs, TimeUnit.MILLISECONDS);
+                if (chunk == null) {
+                    log.debug("MediaBunny subscriber idle for {} ms, ending", idleTimeoutMs);
+                    break;
+                }
                 if (chunk.length == 0) {
                     log.debug("MediaBunny received end-of-stream signal");
                     break;
