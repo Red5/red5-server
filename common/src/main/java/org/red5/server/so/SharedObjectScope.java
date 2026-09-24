@@ -630,6 +630,17 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         return true;
     }
 
+    /**
+     * Returns whether the given listener is a current member of this shared object, meaning a connect was admitted and it has not since
+     * disconnected.
+     *
+     * @param listener event listener, usually a connection
+     * @return true if the listener is a member
+     */
+    protected boolean isMember(IEventListener listener) {
+        return listeners.contains(listener);
+    }
+
     /** {@inheritDoc} */
     @Override
     public void dispatchEvent(IEvent e) {
@@ -643,12 +654,23 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
                 } else {
                     beginUpdate();
                 }
-                for (ISharedObjectEvent event : msg.getEvents()) {
+                events: for (ISharedObjectEvent event : msg.getEvents()) {
                     final String key = event.getKey();
-                    switch (event.getType()) {
+                    final ISharedObjectEvent.Type type = event.getType();
+                    // client-originated mutations and sends require current membership, which only an admitted connect grants
+                    if (source != null && (type == ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE || type == ISharedObjectEvent.Type.SERVER_DELETE_ATTRIBUTE || type == ISharedObjectEvent.Type.SERVER_SEND_MESSAGE) && !isMember(source)) {
+                        log.debug("Rejecting {} on {} from non-member {}", type, getName(), source);
+                        if (type != ISharedObjectEvent.Type.SERVER_SEND_MESSAGE) {
+                            so.get().returnError(SO_NO_WRITE_ACCESS);
+                        }
+                        continue;
+                    }
+                    switch (type) {
                         case SERVER_CONNECT:
                             if (!isConnectionAllowed()) {
                                 so.get().returnError(SO_NO_READ_ACCESS);
+                                // a denied connect ends the rest of this message
+                                break events;
                             } else if (source != null) {
                                 if (source instanceof BaseConnection) {
                                     ((BaseConnection) source).registerBasicScope(this);
