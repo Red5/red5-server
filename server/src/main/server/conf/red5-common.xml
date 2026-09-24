@@ -186,6 +186,9 @@
         <property name="delayWrite" value="${fileconsumer.delayed.write}"/>
         <property name="queueThreshold" value="${fileconsumer.queue.size}"/>
         <property name="waitForVideoKeyframe" value="${fileconsumer.wait.for.keyframe}"/>
+        <property name="maxRecordingBytes" value="${fileconsumer.max.bytes:0}"/>
+        <property name="maxRecordingDurationMs" value="${fileconsumer.max.duration.ms:0}"/>
+        <property name="minFreeDiskBytes" value="${fileconsumer.min.free.disk.bytes:0}"/>
     </bean>
 
     <!-- ClientBroadcastStream and PlaylistSubscriberStream

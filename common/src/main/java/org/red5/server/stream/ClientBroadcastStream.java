@@ -403,6 +403,8 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                                 log.warn("Error while notifying listener {}", listener, e);
                                 if (listener instanceof RecordingListener) {
                                     sendRecordFailedNotify(e.getMessage());
+                                    // a recording that failed, or reached a limit, is not continued
+                                    stopRecording();
                                 }
                             }
                         }
