@@ -816,8 +816,8 @@ public class Input extends org.red5.io.amf.Input {
         amf3_mode -= 1;
         if (result == null) {
             // Create result object based on classname
-            if ("".equals(className)) {
-                // "anonymous" object, load as Map
+            if ("".equals(className) || (instance == null && !"RecordSet".equals(className) && !"RecordSetPage".equals(className))) {
+                // "anonymous" object, or a class that may not or could not be instantiated, load as Map
                 // Resolve circular references
                 for (Map.Entry<String, Object> entry : properties.entrySet()) {
                     if (entry.getValue() == pending) {
