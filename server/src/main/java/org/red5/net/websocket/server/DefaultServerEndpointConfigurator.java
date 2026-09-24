@@ -1,9 +1,12 @@
 package org.red5.net.websocket.server;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -115,15 +118,83 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                 return false;
             }
             log.debug("allowedOrigins: {}", Arrays.toString(allowedOrigins));
-            // allow "*" == any / all or origin suffix matches
-            Optional<String> opt = Stream.of(allowedOrigins).filter(origin -> "*".equals(origin) || origin.endsWith(originHeaderValue)).findFirst();
-            // non-match fail
-            if (!opt.isPresent()) {
-                log.info("Origin: {} did not match the allowed: {}", originHeaderValue, allowedOrigins);
+            // allow "*" == any / all, otherwise the origin must equal an allowed origin
+            if (!Stream.of(allowedOrigins).anyMatch(allowed -> originMatches(allowed, originHeaderValue))) {
+                log.info("Origin: {} did not match the allowed: {}", originHeaderValue, Arrays.toString(allowedOrigins));
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Compares an Origin header with an allowed origin. "*" allows any origin. An allowed origin with a scheme, such as
+     * https://example.com:8443, must equal the header's scheme, host and port, with default ports filled in and case ignored. An
+     * allowed origin without a scheme, such as example.com or example.com:8443, matches that exact host, and port if given, under any
+     * scheme. Suffixes and sub-domains never match.
+     *
+     * @param allowed allowed origin
+     * @param origin Origin header value
+     * @return true if the origin is allowed
+     */
+    static boolean originMatches(String allowed, String origin) {
+        if (allowed == null) {
+            return false;
+        }
+        allowed = allowed.trim();
+        if ("*".equals(allowed)) {
+            return true;
+        }
+        String[] actual = parseOrigin(origin.trim());
+        if (actual == null) {
+            return false;
+        }
+        if (allowed.contains("://")) {
+            String[] expected = parseOrigin(allowed);
+            return expected != null && Arrays.equals(expected, actual);
+        }
+        // host[:port] without a scheme
+        String[] expected = parseOrigin("scheme://" + allowed);
+        if (expected == null) {
+            return false;
+        }
+        boolean portGiven = allowed.lastIndexOf(':') > allowed.lastIndexOf(']');
+        return expected[1].equals(actual[1]) && (!portGiven || expected[2].equals(actual[2]));
+    }
+
+    /**
+     * Parses a serialized origin into lower-case scheme, host and port, filling in the default port for http, https, ws and wss.
+     *
+     * @param origin origin such as https://example.com
+     * @return scheme, host and port, or null when it is not a valid origin
+     */
+    private static String[] parseOrigin(String origin) {
+        try {
+            URI uri = new URI(origin);
+            String scheme = uri.getScheme(), host = uri.getHost();
+            if (scheme == null || host == null || uri.getRawUserInfo() != null || (uri.getRawPath() != null && !uri.getRawPath().isEmpty() && !"/".equals(uri.getRawPath())) || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+                return null;
+            }
+            scheme = scheme.toLowerCase(Locale.ROOT);
+            int port = uri.getPort();
+            if (port == -1) {
+                switch (scheme) {
+                    case "http":
+                    case "ws":
+                        port = 80;
+                        break;
+                    case "https":
+                    case "wss":
+                        port = 443;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return new String[] { scheme, host.toLowerCase(Locale.ROOT), String.valueOf(port) };
+        } catch (URISyntaxException e) {
+            return null;
+        }
     }
 
     /** {@inheritDoc} */
