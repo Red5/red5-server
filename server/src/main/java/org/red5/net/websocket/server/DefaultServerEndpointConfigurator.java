@@ -137,7 +137,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
      * @param origin Origin header value
      * @return true if the origin is allowed
      */
-    static boolean originMatches(String allowed, String origin) {
+    public static boolean originMatches(String allowed, String origin) {
         if (allowed == null) {
             return false;
         }

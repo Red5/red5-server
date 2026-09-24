@@ -105,20 +105,20 @@ public class SSEConnection {
             try {
                 StringBuilder eventBuilder = new StringBuilder();
                 if (id != null) {
-                    eventBuilder.append("id: ").append(id).append("\n");
+                    eventBuilder.append("id: ").append(SSEEvent.stripLineBreaks(id)).append("\n");
                 } else {
                     // Auto-generate ID if not provided
                     eventBuilder.append("id: ").append(lastEventId.incrementAndGet()).append("\n");
                 }
                 if (event != null) {
-                    eventBuilder.append("event: ").append(event).append("\n");
+                    eventBuilder.append("event: ").append(SSEEvent.stripLineBreaks(event)).append("\n");
                 }
                 if (retry != null) {
                     eventBuilder.append("retry: ").append(retry).append("\n");
                 }
                 if (data != null) {
                     // Handle multi-line data
-                    String[] lines = data.split("\n");
+                    String[] lines = data.split("\r\n|\r|\n", -1);
                     for (String line : lines) {
                         eventBuilder.append("data: ").append(line).append("\n");
                     }
