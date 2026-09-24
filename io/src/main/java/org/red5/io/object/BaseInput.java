@@ -22,6 +22,16 @@ public class BaseInput {
     //protected static Logger log = LoggerFactory.getLogger(BaseInput.class);
 
     /**
+     * Maximum nesting depth of decoded values, configurable with the red5.amf.max_depth system property.
+     */
+    public static final int MAX_DEPTH = Integer.getInteger("red5.amf.max_depth", 256);
+
+    /**
+     * Current nesting depth of the value being decoded
+     */
+    private int depth;
+
+    /**
      * References map
      */
     protected ConcurrentMap<Integer, Object> refMap = new ConcurrentHashMap<>();
@@ -74,6 +84,41 @@ public class BaseInput {
      */
     protected Object getReference(int id) {
         return refMap.get(Integer.valueOf(id));
+    }
+
+    /**
+     * Enters a nested value, failing when the maximum nesting depth would be exceeded. Every call must be paired with {@link #exitNested()}.
+     */
+    protected void enterNested() {
+        if (++depth > MAX_DEPTH) {
+            depth--;
+            throw new DecodeLimitException("AMF nesting depth exceeds " + MAX_DEPTH);
+        }
+    }
+
+    /**
+     * Leaves a nested value entered with {@link #enterNested()}.
+     */
+    protected void exitNested() {
+        depth--;
+    }
+
+    /**
+     * Fails when a declared element count is negative or larger than the remaining input could hold.
+     *
+     * @param count
+     *            declared number of elements
+     * @param minElementSize
+     *            smallest possible encoded size of one element in bytes
+     * @param remaining
+     *            bytes remaining in the input
+     * @return the validated count
+     */
+    protected static int checkCount(int count, int minElementSize, int remaining) {
+        if (count < 0 || (long) count * minElementSize > remaining) {
+            throw new DecodeLimitException(String.format("Declared count %d exceeds remaining input of %d bytes", count, remaining));
+        }
+        return count;
     }
 
     /**

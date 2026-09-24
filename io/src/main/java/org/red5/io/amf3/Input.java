@@ -521,6 +521,8 @@ public class Input extends org.red5.io.amf.Input {
         }
         count = (count >> 1);
         String key = readString();
+        // every dense element takes at least one marker byte
+        checkCount(count, 1, buf.remaining());
         amf3_mode += 1;
         Object result;
         if (key.equals("")) {
@@ -689,6 +691,7 @@ public class Input extends org.red5.io.amf.Input {
                 int count = type >> 2;
                 log.debug("Count: {}", count);
                 if (attributes == null) {
+                    checkCount(count, 1, buf.remaining());
                     attributes = new ArrayList<>(count);
                     for (int i = 0; i < count; i++) {
                         attributes.add(readString());
@@ -734,6 +737,7 @@ public class Input extends org.red5.io.amf.Input {
                     log.debug("Count: {}", count);
                 }
                 if (attributes == null) {
+                    checkCount(count, 1, buf.remaining());
                     attributes = new ArrayList<>(count);
                     for (int i = 0; i < count; i++) {
                         attributes.add(readString());
@@ -894,6 +898,7 @@ public class Input extends org.red5.io.amf.Input {
             return (ByteArray) getReference(type >> 1);
         }
         type >>= 1;
+        checkCount(type, 1, buf.remaining());
         ByteArray result = new ByteArray(buf, type);
         storeReference(result);
         return result;
@@ -912,7 +917,7 @@ public class Input extends org.red5.io.amf.Input {
         if ((type & 1) == 0) {
             return (Vector<Integer>) getReference(type >> 1);
         }
-        int len = type >> 1;
+        int len = checkCount(type >> 1, 4, buf.remaining());
         Vector<Integer> array = new Vector<Integer>(len);
         storeReference(array);
         @SuppressWarnings("unused")
@@ -936,7 +941,7 @@ public class Input extends org.red5.io.amf.Input {
         if ((type & 1) == 0) {
             return (Vector<Long>) getReference(type >> 1);
         }
-        int len = type >> 1;
+        int len = checkCount(type >> 1, 4, buf.remaining());
         Vector<Long> array = new Vector<Long>(len);
         storeReference(array);
         @SuppressWarnings("unused")
@@ -965,7 +970,7 @@ public class Input extends org.red5.io.amf.Input {
         if ((type & 1) == 0) {
             return (Vector<Double>) getReference(type >> 1);
         }
-        int len = type >> 1;
+        int len = checkCount(type >> 1, 8, buf.remaining());
         log.debug("Length: {}", len);
         Vector<Double> array = new Vector<Double>(len);
         storeReference(array);
@@ -987,13 +992,23 @@ public class Input extends org.red5.io.amf.Input {
     @SuppressWarnings("unchecked")
     @Override
     public Vector<Object> readVectorObject() {
+        enterNested();
+        try {
+            return readVectorObjectValue();
+        } finally {
+            exitNested();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Vector<Object> readVectorObjectValue() {
         log.debug("readVectorObject");
         int type = readInteger();
         log.debug("Type: {}", type);
         if ((type & 1) == 0) {
             return (Vector<Object>) getReference(type >> 1);
         }
-        int len = type >> 1;
+        int len = checkCount(type >> 1, 1, buf.remaining());
         log.debug("Length: {}", len);
         Vector<Object> array = new Vector<Object>(len);
         storeReference(array);

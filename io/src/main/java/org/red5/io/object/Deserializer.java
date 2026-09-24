@@ -120,6 +120,20 @@ public class Deserializer {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> T deserialize(Input in, Type target) {
+        if (in instanceof BaseInput) {
+            BaseInput input = (BaseInput) in;
+            input.enterNested();
+            try {
+                return deserializeValue(in, target);
+            } finally {
+                input.exitNested();
+            }
+        }
+        return deserializeValue(in, target);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <T> T deserializeValue(Input in, Type target) {
         byte type = in.readDataType();
         if (log.isTraceEnabled()) {
             log.trace("Type {}: {} target: {}", type, DataTypes.toStringValue(type), (target != null ? target.toString() : "Target not specified"));
