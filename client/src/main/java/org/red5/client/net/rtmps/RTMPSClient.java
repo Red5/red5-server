@@ -430,12 +430,14 @@ public class RTMPSClient extends RTMPClient {
         public void sessionOpened(IoSession session) throws Exception {
             log.debug("RTMPS sessionOpened: {}", session);
             SSLContext context = createSSLContext();
-            // the peer address gives the SSL engine the host name for SNI and hostname verification
-            session.setAttribute(SslFilter.PEER_ADDRESS, InetSocketAddress.createUnresolved(tlsHost, tlsPort));
-            SslFilter sslFilter = new SslFilter(context);
+            // Pass the original host name to the SSL engine for SNI and hostname verification.
+            SslFilter sslFilter = new SslFilter(context) {
+                @Override
+                protected SSLEngine createEngine(IoSession sslSession, InetSocketAddress remoteAddress) {
+                    return super.createEngine(sslSession, InetSocketAddress.createUnresolved(tlsHost, tlsPort));
+                }
+            };
             if (sslFilter != null) {
-                // we are a client
-                sslFilter.setUseClientMode(true);
                 sslFilter.setEndpointIdentificationAlgorithm("HTTPS");
                 // set the cipher suites
                 if (cipherSuites != null) {

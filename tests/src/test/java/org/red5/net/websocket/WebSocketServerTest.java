@@ -24,7 +24,6 @@ import org.apache.catalina.LifecycleException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.filterchain.IoFilter.NextFilter;
-import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
@@ -502,15 +501,6 @@ public class WebSocketServerTest {
 
     @SuppressWarnings("unused")
     private class DummyOutput implements ProtocolDecoderOutput, ProtocolEncoderOutput {
-
-        @Override
-        public void mergeAll() {
-        }
-
-        @Override
-        public WriteFuture flush() {
-            return null;
-        }
 
         @Override
         public void write(Object message) {

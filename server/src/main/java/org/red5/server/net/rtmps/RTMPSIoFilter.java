@@ -12,7 +12,6 @@ import java.util.Optional;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.ssl.SslFilter.SslFilterMessage;
 import org.red5.server.net.rtmp.InboundHandshake;
 import org.red5.server.net.rtmp.RTMPConnManager;
 import org.red5.server.net.rtmp.RTMPConnection;
@@ -41,11 +40,8 @@ public class RTMPSIoFilter extends RTMPEIoFilter {
     @Override
     public void messageReceived(NextFilter nextFilter, IoSession session, Object obj) throws Exception {
         log.trace("messageReceived nextFilter: {} session: {} message: {}", nextFilter, session, obj);
-        if (obj instanceof SslFilterMessage) {
-            log.trace("SSL message: {}", obj);
-            nextFilter.messageReceived(session, obj);
-        } else if (obj == session.getAttribute(RTMPSInboundMarkFilter.UNDECRYPTED_INBOUND)) {
-            // MINA 2.0.x forwards the received buffer itself, undecrypted, once TLS has closed
+        if (obj == session.getAttribute(RTMPSInboundMarkFilter.UNDECRYPTED_INBOUND)) {
+            // MINA can forward the received buffer itself, undecrypted, once TLS has closed
             if (!session.containsAttribute(TLS_CLOSED)) {
                 session.setAttribute(TLS_CLOSED, Boolean.TRUE);
                 IoBuffer buf = (IoBuffer) obj;

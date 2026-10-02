@@ -10,6 +10,9 @@
     <packaging>war</packaging>
     <name>SOSample</name>
     <version>2.0</version>
+    <properties>
+        <mina.version>2.2.9</mina.version>
+    </properties>
     <url>https://github.com/Red5/red5-examples/tree/master/SOSample</url>
     <description>Shared Ball Demo</description>
     <build>

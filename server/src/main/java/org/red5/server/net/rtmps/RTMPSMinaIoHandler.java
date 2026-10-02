@@ -8,6 +8,7 @@
 package org.red5.server.net.rtmps;
 
 import java.io.NotActiveException;
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Provider;
@@ -15,6 +16,7 @@ import java.security.Security;
 import java.util.Arrays;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
 
 import org.apache.mina.core.filterchain.IoFilterChain;
@@ -134,8 +136,14 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
             log.error("Exception getting SSL context", ex);
         }
         // create the ssl filter using server mode
-        SslFilter sslFilter = new SslFilter(sslContext);
-        sslFilter.setUseClientMode(useClientMode);
+        SslFilter sslFilter = new SslFilter(sslContext) {
+            @Override
+            protected SSLEngine createEngine(IoSession sslSession, InetSocketAddress remoteAddress) {
+                SSLEngine engine = super.createEngine(sslSession, remoteAddress);
+                engine.setUseClientMode(useClientMode);
+                return engine;
+            }
+        };
         sslFilter.setNeedClientAuth(needClientAuth);
         sslFilter.setWantClientAuth(wantClientAuth);
         if (cipherSuites != null) {
@@ -153,9 +161,6 @@ public class RTMPSMinaIoHandler extends RTMPMinaIoHandler {
         chain.addFirst("sslFilter", sslFilter);
         // mark undecrypted input so the rtmps filter can reject it if the ssl filter forwards it after TLS closure
         chain.addBefore("sslFilter", "rtmpsInboundMark", new RTMPSInboundMarkFilter());
-        // use notification messages
-        session.setAttribute(SslFilter.USE_NOTIFICATION, Boolean.TRUE);
-        log.debug("isSslStarted: {}", sslFilter.isSslStarted(session));
         // add rtmps filter
         session.getFilterChain().addAfter("sslFilter", "rtmpsFilter", new RTMPSIoFilter());
         // create a connection

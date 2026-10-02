@@ -1,15 +1,15 @@
 package org.red5.server.net.rtmpe;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.write.DefaultWriteRequest;
 import org.apache.mina.core.write.WriteRequest;
-import org.apache.mina.core.write.WriteRequestWrapper;
 
 /**
  * Used to parcel encrypted content for RTMPE.
  *
  * @author Paul Gregoire
  */
-public class EncryptedWriteRequest extends WriteRequestWrapper {
+public class EncryptedWriteRequest extends DefaultWriteRequest {
 
     private final IoBuffer encryptedMessage;
 
@@ -20,7 +20,7 @@ public class EncryptedWriteRequest extends WriteRequestWrapper {
      * @param encryptedMessage a {@link org.apache.mina.core.buffer.IoBuffer} object
      */
     public EncryptedWriteRequest(WriteRequest writeRequest, IoBuffer encryptedMessage) {
-        super(writeRequest);
+        super(encryptedMessage, writeRequest.getFuture(), writeRequest.getDestination());
         this.encryptedMessage = encryptedMessage;
     }
 

@@ -4,11 +4,9 @@ import java.net.SocketAddress;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.filterchain.IoFilter;
-import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.write.DefaultWriteRequest;
 import org.apache.mina.core.write.WriteRequest;
-import org.apache.mina.core.write.WriteRequestWrapper;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.ProtocolEncoder;
@@ -80,24 +78,26 @@ public class RTMPChannelFilter extends ProtocolCodecFilter {
                 throw new IllegalArgumentException("encodedMessage is empty. Forgot to call flip?");
             }
         }
-
-        @Override
-        public WriteFuture flush() {
-            return null;
-        }
-
-        @Override
-        public void mergeAll() {
-        }
-
     }
 
-    private static class EndOfMessage extends WriteRequestWrapper {
+    private static class EndOfMessage extends DefaultWriteRequest {
 
         private static final IoBuffer EMPTY_BUFFER = IoBuffer.wrap(new byte[0]);
 
+        private final WriteRequest parentRequest;
+
         public EndOfMessage(WriteRequest writeRequest) {
-            super(writeRequest);
+            super(EMPTY_BUFFER, writeRequest.getFuture(), writeRequest.getDestination());
+            parentRequest = writeRequest;
+        }
+
+        @Override
+        public WriteRequest getOriginalRequest() {
+            return parentRequest.getOriginalRequest();
+        }
+
+        public WriteRequest getParentRequest() {
+            return parentRequest;
         }
 
         @Override
