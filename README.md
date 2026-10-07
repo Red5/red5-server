@@ -1,4 +1,4 @@
-# Red5 open source media server
+# Red5 open-source media server
 
 ===========
 
@@ -6,8 +6,14 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 
-* Red5 open source media server is one of the [free live streaming solutions](https://www.red5.net/open-source-live-streaming/) provided by Red5. It is written in Java and is designed to be flexible with a simple plugin architecture that allows for customization of virtually any video-on-demand (VOD) and live streaming scenario. Read more about its key features and capabilities [here](https://www.red5.net/red5-media-server/) Installed over 1,000,000 times worldwide, Red5 open source media server has powered applications for organizations like Amazon, the US Department of Defense, Akamai, Harvard University, and many others. Red5 open source media server is server core for [Red5pro](https://www.red5.net/red5-pro/low-latency-streaming-software/) and [Red5Cloud](https://www.red5.net/red5-cloud-low-latency-live-streaming-platform/).Red5 open source media server is ideal for developers, hobbyists, and students who want to experiment with live video streaming technology, build a media server and learn how it works. 
+Red5 open-source media server is one of the [free live streaming solutions](https://www.red5.net/open-source-live-streaming/) provided by Red5. Written in Java, it features a flexible plugin architecture for building and experimenting with live streaming and video-on-demand (VOD) applications. Learn more about its key features and capabilities [here](https://www.red5.net/red5-media-server/).
 
+Red5 open-source media server supports the RTMP protocol only. It is ideal for developers, hobbyists, and students who want to experiment with open-source live streaming technology, build a media server, and learn how it works.
+
+For production use cases requiring additional protocols and capabilities, Red5 offers licensed commercial live streaming software: [Red5 Pro](https://www.red5.net/red5-pro/low-latency-streaming-software/) and [Red5 Cloud](https://www.red5.net/red5-cloud-low-latency-live-streaming-platform/). They support ingest via WHIP, Zixi, RTSP, RTMP, SRT, Enhanced RTMP, MPEG-TS, and MOQ (Media over QUIC), with delivery via HLS, LL-HLS, DASH, LL-DASH, SRT, RTSP, RTMP, and MOQ.
+
+Installed more than 1,000,000 times worldwide, Red5 open-source media server has powered applications for organizations including Amazon, the U.S. Department of Defense, Akamai, Harvard University, and many others. The open-source media server also serves as the server core for Red5 Pro and Red5 Cloud.
+ 
 Automatic builds (Courtesy of Apache [OpenMeetings](http://openmeetings.apache.org/)):
 
  * [Red5](https://ci-builds.apache.org/job/OpenMeetings/job/Red5-server/)
