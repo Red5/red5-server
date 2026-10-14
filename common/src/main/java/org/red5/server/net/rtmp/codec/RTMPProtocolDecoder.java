@@ -83,6 +83,15 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     /** Constant <code>MAX_PACKET_SIZE=3145728</code> */
     protected static int MAX_PACKET_SIZE = 3145728; // 3MB
 
+    /** Smallest backward timestamp step considered at all; below this is ordinary jitter. */
+    private static final long MIN_DISCONTINUITY_MS = 1000L;
+
+    /** A restart's first timestamp lands below this. */
+    private static final long RESTART_START_WINDOW_MS = 1000L;
+
+    /** A backward step this large is a restart wherever it lands; anything smaller is a late frame. */
+    private static final long MIN_LARGE_DISCONTINUITY_MS = 30000L;
+
     /**
      * Constructs a new RTMPProtocolDecoder.
      */
@@ -354,14 +363,24 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // flip so we can read / decode the packet data into a message
         buf.flip();
         try {
-            // timebase + timedelta
+            // timebase + timedelta, on wire time
             final int timestamp = header.getTimer();
             // store the last ts in thread local for debugging
             //lastTimestamp.set(header.getTimerBase());
             final IRTMPEvent message = decodeMessage(conn, packet.getHeader(), buf);
             // flash will send an earlier time stamp when resetting a video stream with a new key frame. To avoid dropping it, we give it the
             // minimal increment since the last message. To avoid relative time stamps being mis-computed, we don't reset the header we stored.
-            message.setTimestamp(timestamp);
+            // Discontinuity compensation is applied here, once per message, so the stored headers keep wire time.
+            long offset = rtmp.getTimestampOffset(channelId);
+            if (offset > 0) {
+                int adjusted = (int) ((Integer.toUnsignedLong(timestamp) + offset) & 0xFFFFFFFFL);
+                if (isTrace) {
+                    log.trace("Channel {} timestamp adjusted: raw={} + offset={} = {}", channelId, timestamp, offset, adjusted);
+                }
+                message.setTimestamp(adjusted);
+            } else {
+                message.setTimestamp(timestamp);
+            }
             if (isTrace) {
                 log.trace("Decoded message: {}", message);
             }
@@ -597,8 +616,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 throw new ProtocolException(String.format("Unexpected header: %s", headerSize));
         }
         log.trace("Decoded chunk {} {}", Header.HeaderType.values()[headerSize], header);
-        // Apply timestamp discontinuity compensation
-        // This handles source restarts where timestamps reset to 0
+        // Timestamp discontinuity detection for source restarts where timestamps reset to 0.
+        // The header chain stays on wire time: the offset is applied once per message in
+        // decodePacket, never written into a header. Writing it into the header made every
+        // later chunk inherit an adjusted base, re-added the offset per chunk, and then
+        // compared that inflated value against the next raw Type 0 timestamp, so one
+        // compensation compounded into another until the offset overflowed.
         int rawTimer = header.getTimer();
         long currentOffset = rtmp.getTimestampOffset(channelId);
         int lastRawTimestamp = rtmp.getLastRawTimestamp(channelId);
@@ -607,9 +630,13 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             // Use unsigned arithmetic to detect large backward jumps
             long unsignedLast = Integer.toUnsignedLong(lastRawTimestamp);
             long unsignedCurrent = Integer.toUnsignedLong(rawTimer);
-            // A backward jump > 1 second is likely a discontinuity (source restart)
-            // We use 1 second threshold to catch resets while allowing normal jitter
-            if (unsignedLast > unsignedCurrent && (unsignedLast - unsignedCurrent) > 1000L) {
+            long backwardMs = unsignedLast - unsignedCurrent;
+            // A restart resets near zero or discards a long span. A backward step of a few
+            // seconds is a late frame from a lossy publisher and must pass through unchanged;
+            // compensating it shifts the whole channel for the life of the connection.
+            boolean restart = unsignedLast > unsignedCurrent && backwardMs > MIN_DISCONTINUITY_MS
+                    && (unsignedCurrent < RESTART_START_WINDOW_MS || backwardMs > MIN_LARGE_DISCONTINUITY_MS);
+            if (restart) {
                 // Calculate the new offset: accumulate previous offset + last timestamp + small gap
                 // The +1 ensures strict monotonicity
                 long newOffset = currentOffset + unsignedLast + 1;
@@ -636,23 +663,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     log.warn("Timestamp discontinuity on channel {}: raw {} -> {}, adjusting offset from {} to {} (accumulated: {}ms)", channelId, unsignedLast, unsignedCurrent, currentOffset, newOffset, newOffset);
                 }
                 rtmp.setTimestampOffset(channelId, newOffset);
-                currentOffset = newOffset;
             }
         }
         // Store raw timestamp for next discontinuity detection
         rtmp.setLastRawTimestamp(channelId, rawTimer);
-        // Apply offset if we have one
-        if (currentOffset > 0) {
-            long adjustedTimer = Integer.toUnsignedLong(rawTimer) + currentOffset;
-            // Clamp to 32-bit range (will wrap, but that's expected for very long streams)
-            int adjustedTimerInt = (int) (adjustedTimer & 0xFFFFFFFFL);
-            if (log.isTraceEnabled()) {
-                log.trace("Channel {} timestamp adjusted: raw={} + offset={} = {}", channelId, rawTimer, currentOffset, adjustedTimerInt);
-            }
-            // Update the header with adjusted timestamp
-            header.setTimerBase(adjustedTimerInt);
-            header.setTimerDelta(0);
-        }
         return header;
     }
 
