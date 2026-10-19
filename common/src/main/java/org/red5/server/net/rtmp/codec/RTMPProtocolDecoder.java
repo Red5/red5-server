@@ -361,7 +361,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             final IRTMPEvent message = decodeMessage(conn, packet.getHeader(), buf);
             // flash will send an earlier time stamp when resetting a video stream with a new key frame. To avoid dropping it, we give it the
             // minimal increment since the last message. To avoid relative time stamps being mis-computed, we don't reset the header we stored.
-            message.setTimestamp(timestamp);
+            // discontinuity compensation is applied here, once per message; the stored headers keep wire time
+            long offset = rtmp.getTimestampOffset(channelId);
+            message.setTimestamp(offset > 0 ? (int) ((Integer.toUnsignedLong(timestamp) + offset) & 0xFFFFFFFFL) : timestamp);
             if (isTrace) {
                 log.trace("Decoded message: {}", message);
             }
@@ -504,7 +506,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     header.setExtended(false);
                 }
                 header.setTimerBase(timeBase);
-                header.setTimerDelta(timeDelta);
+                // an absolute timestamp carries no delta; inheriting the previous one shifts every later frame
+                header.setTimerDelta(0);
                 break;
             case HEADER_SAME_SOURCE: // type 1
                 // a delta time value
@@ -607,9 +610,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             // Use unsigned arithmetic to detect large backward jumps
             long unsignedLast = Integer.toUnsignedLong(lastRawTimestamp);
             long unsignedCurrent = Integer.toUnsignedLong(rawTimer);
-            // A backward jump > 1 second is likely a discontinuity (source restart)
-            // We use 1 second threshold to catch resets while allowing normal jitter
-            if (unsignedLast > unsignedCurrent && (unsignedLast - unsignedCurrent) > 1000L) {
+            // A restart lands near zero or discards a long span; a backward step of a few seconds is a late
+            // frame from a lossy publisher and must pass through unchanged
+            long backwardMs = unsignedLast - unsignedCurrent;
+            if (unsignedLast > unsignedCurrent && backwardMs > 1000L && (unsignedCurrent < 1000L || backwardMs > 30000L)) {
                 // Calculate the new offset: accumulate previous offset + last timestamp + small gap
                 // The +1 ensures strict monotonicity
                 long newOffset = currentOffset + unsignedLast + 1;
@@ -625,23 +629,10 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                     log.warn("Timestamp discontinuity on channel {}: raw {} -> {}, adjusting offset from {} to {} (accumulated: {}ms)", channelId, unsignedLast, unsignedCurrent, currentOffset, newOffset, newOffset);
                 }
                 rtmp.setTimestampOffset(channelId, newOffset);
-                currentOffset = newOffset;
             }
         }
         // Store raw timestamp for next discontinuity detection
         rtmp.setLastRawTimestamp(channelId, rawTimer);
-        // Apply offset if we have one
-        if (currentOffset > 0) {
-            long adjustedTimer = Integer.toUnsignedLong(rawTimer) + currentOffset;
-            // Clamp to 32-bit range (will wrap, but that's expected for very long streams)
-            int adjustedTimerInt = (int) (adjustedTimer & 0xFFFFFFFFL);
-            if (log.isTraceEnabled()) {
-                log.trace("Channel {} timestamp adjusted: raw={} + offset={} = {}", channelId, rawTimer, currentOffset, adjustedTimerInt);
-            }
-            // Update the header with adjusted timestamp
-            header.setTimerBase(adjustedTimerInt);
-            header.setTimerDelta(0);
-        }
         return header;
     }
 
