@@ -111,6 +111,10 @@ public class TomcatConnector {
                     <entry key="truststorePass" value="${rtmps.truststorepass}" />
                     <entry key="clientAuth" value="false" />
                     <entry key="allowUnsafeLegacyRenegotiation" value="true" />
+
+                    PEM alternative to the keystore entries:
+                    <entry key="certificateFile" value="${red5.root}/conf/fullchain.pem" />
+                    <entry key="certificateKeyFile" value="${red5.root}/conf/privkey.pem" />
                  */
                 sslHostConfig.setSslProtocol("TLS");
                 sslHostConfig.setTruststoreFile(connectionProperties.get("truststoreFile"));
@@ -141,12 +145,30 @@ public class TomcatConnector {
                 sslHostConfig.setInsecureRenegotiation(!secure);
                 // create a new ssl host config certificate
                 SSLHostConfigCertificate sslHostConfigCert = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
-                sslHostConfigCert.setCertificateKeystoreFile(connectionProperties.get("keystoreFile"));
-                sslHostConfigCert.setCertificateKeystorePassword(connectionProperties.get("keystorePass"));
-                if (connectionProperties.containsKey("keystoreType")) {
-                    sslHostConfigCert.setCertificateKeystoreType(connectionProperties.get("keystoreType"));
+                if (connectionProperties.containsKey("certificateFile")) {
+                    // PEM certificate and private key, takes precedence over a keystore
+                    String keyFile = connectionProperties.get("certificateKeyFile");
+                    if (keyFile == null) {
+                        throw new IllegalArgumentException("certificateKeyFile is required when certificateFile is set");
+                    }
+                    sslHostConfigCert.setCertificateFile(connectionProperties.get("certificateFile"));
+                    sslHostConfigCert.setCertificateKeyFile(keyFile);
+                    // only needed for an encrypted private key
+                    if (connectionProperties.containsKey("certificateKeyPassword")) {
+                        sslHostConfigCert.setCertificateKeyPassword(connectionProperties.get("certificateKeyPassword"));
+                    }
+                    // optional intermediate chain when it is not already part of certificateFile
+                    if (connectionProperties.containsKey("certificateChainFile")) {
+                        sslHostConfigCert.setCertificateChainFile(connectionProperties.get("certificateChainFile"));
+                    }
                 } else {
-                    sslHostConfigCert.setCertificateKeystoreType("JKS");
+                    sslHostConfigCert.setCertificateKeystoreFile(connectionProperties.get("keystoreFile"));
+                    sslHostConfigCert.setCertificateKeystorePassword(connectionProperties.get("keystorePass"));
+                    if (connectionProperties.containsKey("keystoreType")) {
+                        sslHostConfigCert.setCertificateKeystoreType(connectionProperties.get("keystoreType"));
+                    } else {
+                        sslHostConfigCert.setCertificateKeystoreType("JKS");
+                    }
                 }
                 // set the certificate key alias
                 if (connectionProperties.containsKey("certificateKeyAlias")) {
