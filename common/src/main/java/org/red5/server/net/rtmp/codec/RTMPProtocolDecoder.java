@@ -83,6 +83,15 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     /** Constant <code>MAX_PACKET_SIZE=3145728</code> */
     protected static int MAX_PACKET_SIZE = 3145728; // 3MB
 
+    // discontinuity detection thresholds, in milliseconds
+    private static final long RESTART_MIN_BACKWARD_MS = 1000L; // anything smaller is jitter
+
+    private static final long RESTART_NEAR_ZERO_MS = 1000L; // landing this close to zero is a restart
+
+    private static final long RESTART_LATE_FRAME_MS = 5000L; // a step back of up to this long is a late frame
+
+    private static final long RESTART_LONG_BACKWARD_MS = 30000L; // a step back longer than this is always a restart
+
     /**
      * Constructs a new RTMPProtocolDecoder.
      */
@@ -303,6 +312,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             log.trace("Creating new packet");
             // create a new packet
             packet = new Packet(header.clone());
+            // remember whether this message opened with an absolute timestamp, see the collapse below
+            rtmp.setAbsoluteMessageStart(channelId, chunkHeader.getFormat() == HEADER_NEW);
             // store the packet based on its channel id
             rtmp.setLastReadPacket(channelId, packet);
         } else {
@@ -381,8 +392,12 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             // collapse the time stamps on the last header after decode is complete
             Header lastHeader = rtmp.getLastReadHeader(channelId);
             lastHeader.setTimerBase(timestamp);
-            // clear the delta
-            //lastHeader.setTimerDelta(0);
+            // a Type 3 chunk that starts a new message after a Type 0 takes the Type 0 timestamp as its delta (RTMP spec 5.3.1.2.4);
+            // the Type 0 header itself carries no delta so its own timestamp stays absolute
+            if (rtmp.isAbsoluteMessageStart(channelId)) {
+                lastHeader.setTimerDelta(timestamp);
+                rtmp.setAbsoluteMessageStart(channelId, false);
+            }
             if (isTrace) {
                 log.trace("Last read header after decode: {}", lastHeader);
             }
@@ -612,8 +627,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             long unsignedCurrent = Integer.toUnsignedLong(rawTimer);
             // A restart lands near zero or discards a long span; a backward step of a few seconds is a late
             // frame from a lossy publisher and must pass through unchanged
-            long backwardMs = unsignedLast - unsignedCurrent;
-            if (unsignedLast > unsignedCurrent && backwardMs > 1000L && (unsignedCurrent < 1000L || backwardMs > 30000L)) {
+            if (isTimestampRestart(unsignedLast, unsignedCurrent)) {
                 // Calculate the new offset: accumulate previous offset + last timestamp + small gap
                 // The +1 ensures strict monotonicity
                 long newOffset = currentOffset + unsignedLast + 1;
@@ -634,6 +648,25 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // Store raw timestamp for next discontinuity detection
         rtmp.setLastRawTimestamp(channelId, rawTimer);
         return header;
+    }
+
+    /**
+     * Distinguishes a publisher restart from a late frame. A restart lands near zero, discards a long span, or drops to
+     * under half of the previous time after a large step back; a backward step of a few seconds is a late frame from a lossy
+     * publisher and must pass through unchanged.
+     *
+     * @param last
+     *            last raw timestamp in milliseconds, unsigned
+     * @param current
+     *            current raw timestamp in milliseconds, unsigned
+     * @return true if the step back is a restart
+     */
+    static boolean isTimestampRestart(long last, long current) {
+        long backwardMs = last - current;
+        if (backwardMs <= RESTART_MIN_BACKWARD_MS) {
+            return false;
+        }
+        return current < RESTART_NEAR_ZERO_MS || backwardMs > RESTART_LONG_BACKWARD_MS || (backwardMs > RESTART_LATE_FRAME_MS && current < last / 2);
     }
 
     /**

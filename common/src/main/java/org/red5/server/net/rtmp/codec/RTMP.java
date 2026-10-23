@@ -464,6 +464,26 @@ public class RTMP {
         getChannelInfo(channelId).setLastRawTimestamp(timestamp);
     }
 
+    /**
+     * Whether the message currently being read on a channel started with a Type 0 chunk.
+     *
+     * @param channelId channel id
+     * @return true if the message started with a Type 0 chunk
+     */
+    public boolean isAbsoluteMessageStart(int channelId) {
+        return getChannelInfo(channelId).isAbsoluteMessageStart();
+    }
+
+    /**
+     * Record whether the message currently being read on a channel started with a Type 0 chunk.
+     *
+     * @param channelId channel id
+     * @param absolute true if the message started with a Type 0 chunk
+     */
+    public void setAbsoluteMessageStart(int channelId, boolean absolute) {
+        getChannelInfo(channelId).setAbsoluteMessageStart(absolute);
+    }
+
     /*
      * (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -550,6 +570,9 @@ public class RTMP {
 
         // last raw timestamp seen (before offset applied) for discontinuity detection
         private int lastRawTimestamp;
+
+        // true when the message being read started with a Type 0 (absolute timestamp) chunk
+        private boolean absoluteMessageStart;
 
         /**
          * @return the readHeader
@@ -685,6 +708,21 @@ public class RTMP {
          */
         public void setLastRawTimestamp(int lastRawTimestamp) {
             this.lastRawTimestamp = lastRawTimestamp;
+        }
+
+        /**
+         * @return true if the message being read started with a Type 0 chunk
+         */
+        public boolean isAbsoluteMessageStart() {
+            return absoluteMessageStart;
+        }
+
+        /**
+         * @param absoluteMessageStart
+         *            true if the message being read started with a Type 0 chunk
+         */
+        public void setAbsoluteMessageStart(boolean absoluteMessageStart) {
+            this.absoluteMessageStart = absoluteMessageStart;
         }
     }
 
