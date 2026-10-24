@@ -183,9 +183,12 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 //log.trace("Allocated buffer size: {}", bufSize);
                 out = IoBuffer.allocate(bufSize, false);
                 out.setAutoExpand(true);
+                // only the first chunk picks a header type, the rest of the message follows in Type 3 chunks
+                byte headerType = getHeaderType(header, lastHeader);
+                packet.setHeaderType(headerType);
                 do {
                     // encode the header
-                    encodeHeader(header, lastHeader, out);
+                    encodeHeader(header, lastHeader, headerType, out);
                     // write a chunk directly from the source buffer. The previous code allocated a
                     // temporary byte[] per chunk and copied through it; this loop runs once per chunk
                     // for every outbound message, so under load it was a dominant allocation source.
@@ -196,11 +199,10 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                     data.limit(dataLimit);
                     // move header over to last header
                     lastHeader = header.clone();
+                    headerType = HEADER_CONTINUE;
                 } while (data.hasRemaining());
-                // collapse the time stamps on the last header after decode is complete
-                lastHeader.setTimerBase(lastHeader.getTimer());
-                // clear the delta
-                lastHeader.setTimerDelta(0);
+                // the last header keeps this message's timestamp and the delta it put on the wire, which a Type 3 chunk
+                // starting the next message implies (RTMP spec 5.3.1.2.4); a Type 0 message keeps a delta of 0
                 // set last write header
                 rtmp.setLastWriteHeader(channelId, lastHeader);
                 data.free();
@@ -362,10 +364,10 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
     }
 
     /**
-     * Determine type of header to use.
+     * Determine type of header to use for the first chunk of a message.
      *
      * @param header RTMP message header
-     * @param lastHeader Previous header
+     * @param lastHeader Header of the previous message on the channel
      * @return Header type to use
      */
     private byte getHeaderType(final Header header, final Header lastHeader) {
@@ -375,8 +377,13 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
         } else if (header.getSize() != lastHeader.getSize() || header.getDataType() != lastHeader.getDataType()) {
             // same source header if last header data type or size differ
             return HEADER_SAME_SOURCE;
-        } else if (header.getTimer() != lastHeader.getTimer()) {
-            // timer change marker if there's time gap between header time stamps
+        }
+        // a Type 3 chunk that starts a message implies the previous timestamp field as its delta (RTMP spec 5.3.1.2.4), so
+        // it only repeats a non-zero, non-extended delta from a Type 1 or 2. After a Type 0 it would imply the absolute
+        // timestamp, which decoders that predate that rule misread; a Type 0 is recorded with a delta of 0 to rule it out
+        final int lastDelta = lastHeader.getTimerDelta();
+        if (lastDelta == 0 || lastHeader.isExtended() || calculateTimestampDelta(header.getTimer(), lastHeader.getTimer()) != lastDelta) {
+            // timer change marker if the delta differs from the one a Type 3 would imply
             return HEADER_TIMER_CHANGE;
         }
         // continue encoding
@@ -420,14 +427,25 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
     }
 
     /**
-     * Encode RTMP header into given IoBuffer.
+     * Encode RTMP header for the first chunk of a message into given IoBuffer.
      *
      * @param header RTMP message header
-     * @param lastHeader Previous header
+     * @param lastHeader Header of the previous message on the channel
      * @param buf Buffer for writing encoded header into
      */
     public void encodeHeader(Header header, Header lastHeader, IoBuffer buf) {
-        byte headerType = getHeaderType(header, lastHeader);
+        encodeHeader(header, lastHeader, getHeaderType(header, lastHeader), buf);
+    }
+
+    /**
+     * Encode RTMP chunk header of the given type into given IoBuffer.
+     *
+     * @param header RTMP message header
+     * @param lastHeader Previous header on the channel
+     * @param headerType Header type to write
+     * @param buf Buffer for writing encoded header into
+     */
+    private void encodeHeader(Header header, Header lastHeader, byte headerType, IoBuffer buf) {
         RTMPUtils.encodeHeaderByte(buf, headerType, header.getChannelId());
         if (log.isTraceEnabled()) {
             log.trace("encodeHeader: {} lastHeader: {}", Header.HeaderType.values()[headerType], lastHeader);
@@ -508,6 +526,11 @@ public class RTMPProtocolEncoder implements Constants, IEventEncoder {
                 header.setTimerBase(timeBase);
                 break;
             case HEADER_CONTINUE: // type 3 - 0 bytes
+                // a Type 3 carries the previous delta forward; keep it on this header so the next message compares against
+                // what is on the wire (no change for the continuation chunks of a message)
+                timeDelta = lastHeader.getTimerDelta();
+                header.setTimerBase(header.getTimer() - timeDelta);
+                header.setTimerDelta(timeDelta);
                 // Write the extended timestamp if indicated by the previous header.
                 // FFmpeg/libav compatibility: use the same extended timestamp value as the original header.
                 // For Type 0 originated messages: the extended value was the absolute timestamp

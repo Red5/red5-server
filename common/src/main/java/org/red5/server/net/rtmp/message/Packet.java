@@ -47,6 +47,11 @@ public class Packet implements Externalizable {
     private IoBuffer data;
 
     /**
+     * Chunk header type of the first chunk of this message, -1 until known
+     */
+    private transient byte headerType = -1;
+
+    /**
      * Expiration time
      */
     private transient long expirationTime = 0L;
@@ -100,6 +105,25 @@ public class Packet implements Externalizable {
      */
     public Header getHeader() {
         return header;
+    }
+
+    /**
+     * Returns the chunk header type (Type 0-3) of the first chunk of this message.
+     *
+     * @return header type, or -1 if not known
+     */
+    public byte getHeaderType() {
+        return headerType;
+    }
+
+    /**
+     * Sets the chunk header type (Type 0-3) of the first chunk of this message.
+     *
+     * @param headerType
+     *            header type
+     */
+    public void setHeaderType(byte headerType) {
+        this.headerType = headerType;
     }
 
     /**
@@ -229,7 +253,7 @@ public class Packet implements Externalizable {
         header = (Header) in.readObject();
         message = (IRTMPEvent) in.readObject();
         message.setHeader(header);
-        message.setTimestamp(header.getTimer());
+        // the message keeps its own serialized timestamp; the header holds wire time, which differs after a publisher restart
     }
 
     /** {@inheritDoc} */
