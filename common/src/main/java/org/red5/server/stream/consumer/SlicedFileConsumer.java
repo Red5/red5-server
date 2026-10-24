@@ -146,6 +146,11 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     private int queueThreshold = -1;
 
     /**
+     * Threshold used when none is configured.
+     */
+    static final int DEFAULT_QUEUE_THRESHOLD = 240;
+
+    /**
      * Percentage of the queue which is sliced for writing
      */
     private int percentage = 25;
@@ -227,6 +232,14 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
             return;
         }
         if (message instanceof RTMPMessage) {
+            // initialize a writer
+            if (writer == null) {
+                init();
+                if (writer == null) {
+                    // not recording or appending, or already uninitialized, so nothing is queued that would never be written
+                    return;
+                }
+            }
             final IRTMPEvent msg = ((RTMPMessage) message).getBody();
             // get the type
             byte dataType = msg.getDataType();
@@ -283,13 +296,14 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
             } finally {
                 readLock.unlock();
             }
-            // initialize a writer
-            if (writer == null) {
-                init();
-                if (msg instanceof VideoData) {
-                    writeQueuedDataSlice(createTimestampLimitedSlice(msg.getTimestamp()));
-                } else if (queueThreshold >= 0 && queueSize >= queueThreshold) {
-                    writeQueuedDataSlice(createFixedLengthSlice(queueThreshold / (100 / percentage)));
+            // write a slice on every video message and whenever the queue reaches its threshold, so the queue stays bounded
+            if (msg instanceof VideoData) {
+                writeQueuedDataSlice(createTimestampLimitedSlice(msg.getTimestamp()));
+            } else {
+                // without a configured threshold audio only streams would never be sliced
+                int threshold = queueThreshold > 0 ? queueThreshold : DEFAULT_QUEUE_THRESHOLD;
+                if (queueSize >= threshold) {
+                    writeQueuedDataSlice(createFixedLengthSlice(Math.max(1, threshold * percentage / 100)));
                 }
             }
         } else if (message instanceof ResetMessage) {
@@ -526,6 +540,10 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
                 }
                 writer = null;
             }
+            // as a prototype bean destroy is never called, so the writer thread is released here
+            if (scheduledExecutorService != null) {
+                scheduledExecutorService.shutdown();
+            }
             // clear path ref
             path = null;
         }
@@ -713,6 +731,20 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
+     * Returns the number of items waiting to be written.
+     *
+     * @return queue size
+     */
+    int getQueueSize() {
+        readLock.lock();
+        try {
+            return queue == null ? 0 : queue.size();
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    /**
      * Returns why this consumer stopped writing, if it did.
      *
      * @return failure reason, or null while recording normally
@@ -829,7 +861,9 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     }
 
     /**
-     * Sets the threshold for the queue. When the threshold is met a worker is spawned to empty the sorted queue to the writer.
+     * Sets the threshold for the queue. When the threshold is met a worker is spawned to write the oldest part of the sorted queue, a
+     * percentage of the threshold. Video messages also write everything queued up to their timestamp. When not set, or 0 or less,
+     * {@value #DEFAULT_QUEUE_THRESHOLD} is used.
      *
      * @param queueThreshold
      *            number of items to queue before spawning worker
