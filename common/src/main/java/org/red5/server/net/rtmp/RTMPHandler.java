@@ -643,7 +643,8 @@ public class RTMPHandler extends BaseRTMPHandler {
                         }
                     }
                 }
-                if (!sharedObjectService.createSharedObject(scope, name, persistent)) {
+                // client creation is subject to the client limits of the service (persistence, per-connection count)
+                if (!sharedObjectService.createClientSharedObject(conn, scope, name, persistent)) {
                     log.debug("Shared object create failed");
                     sendSOCreationFailed(conn, message);
                     return;

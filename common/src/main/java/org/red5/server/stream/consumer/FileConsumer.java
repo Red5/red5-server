@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.red5.codec.VideoCodec;
@@ -105,9 +106,20 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     private ITag audioConfigurationTag;
 
     /**
-     * Keeps track of the last spawned write worker.
+     * Keeps track of the write worker; only one is started per consumer.
      */
     private volatile Future<?> writerFuture;
+
+    /**
+     * Set by uninit; the write worker drains what is queued and exits, and later messages are ignored.
+     */
+    private volatile boolean stopping;
+
+    // how long the write worker waits for queued data before checking whether it should stop
+    private static final long WRITER_POLL_MS = 100L;
+
+    // how long uninit waits for the write worker to drain the queue and exit
+    private static final long WRITER_STOP_TIMEOUT_MS = 5000L;
 
     private volatile boolean gotKeyFrame = false;
 
@@ -132,24 +144,9 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     private long offerTimeout = 100L;
 
     /**
-     * Maximum bytes written for one recording; 0 means unlimited.
+     * Size, duration and free space limits of the recording.
      */
-    private long maxRecordingBytes;
-
-    /**
-     * Maximum recorded duration in milliseconds, measured by stream timestamps; 0 means unlimited.
-     */
-    private long maxRecordingDurationMs;
-
-    /**
-     * Minimum usable space to keep free on the recording volume; 0 disables the check.
-     */
-    private long minFreeDiskBytes;
-
-    // how often, in written tags, the free space check runs
-    private static final int FREE_SPACE_CHECK_INTERVAL = 100;
-
-    private int tagsSinceSpaceCheck;
+    private final RecordingLimits limits = new RecordingLimits();
 
     /**
      * Reason the recording stopped writing, or null while it is healthy.
@@ -200,8 +197,8 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
      */
     @SuppressWarnings("rawtypes")
     public void pushMessage(IPipe pipe, IMessage message) throws IOException {
-        if (failure != null) {
-            // the recording failed or reached a limit, nothing more is written
+        if (failure != null || stopping) {
+            // the recording failed, reached a limit or was stopped, nothing more is written
             return;
         }
         if (message instanceof RTMPMessage) {
@@ -256,24 +253,30 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
                     log.warn("Stream data was not accepted by the queue - timestamp: {} data type: {}", timestamp, dataType, e);
                 }
             }
-            // initialize a writer
-            if (writer == null) {
-                executor.submit(new Runnable() {
+            // start the one write worker, which initializes the writer
+            if (writerFuture == null) {
+                final BlockingQueue<QueuedMediaData> pending = queue;
+                writerFuture = executor.submit(new Runnable() {
                     public void run() {
                         Thread.currentThread().setName("ProFileConsumer-" + path.getFileName());
                         try {
                             if (log.isTraceEnabled()) {
-                                log.trace("Running FileConsumer thread. queue size: {} initialized: {} writerNotNull={}", queue.size(), initialized, (writer != null));
+                                log.trace("Running FileConsumer thread. queue size: {} initialized: {} writerNotNull={}", pending.size(), initialized, (writer != null));
                             }
                             init();
                             while (writer != null && failure == null) {
                                 if (log.isTraceEnabled()) {
-                                    log.trace("Processing packet from queue. queue size: {}", queue.size());
+                                    log.trace("Processing packet from queue. queue size: {}", pending.size());
                                 }
 
                                 try {
-                                    QueuedMediaData queued = queue.take();
-                                    if (queued != null) {
+                                    // poll rather than take, so the worker exits once uninit is called and the queue is drained
+                                    QueuedMediaData queued = pending.poll(WRITER_POLL_MS, TimeUnit.MILLISECONDS);
+                                    if (queued == null) {
+                                        if (stopping) {
+                                            break;
+                                        }
+                                    } else {
                                         // get data type
                                         byte dataType = queued.getDataType();
                                         // get timestamp
@@ -317,13 +320,11 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
                                         // clean up
                                         queued.dispose();
                                         checkLimits(timestamp);
-                                    } else {
-                                        if (log.isTraceEnabled()) {
-                                            log.trace("Queued media is null. queue size: {}", queue.size());
-                                        }
                                     }
                                 } catch (InterruptedException e) {
-                                    log.warn("{}", e.getMessage(), e);
+                                    log.warn("Write worker interrupted for {}", path);
+                                    Thread.currentThread().interrupt();
+                                    break;
                                 }
                                 //finally {
                                 //    if (log.isTraceEnabled()) {
@@ -424,6 +425,10 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
             } else {
                 log.warn("Consumer is uninitialized");
             }
+            if (writer != null) {
+                // an appended file may already be at a limit, and the volume may already be short of space
+                checkLimits(0);
+            }
             log.debug("Init - complete");
         }
     }
@@ -432,20 +437,25 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
      * Reset or uninitialize
      */
     public void uninit() {
+        // let the write worker drain what is queued and exit; the consumer is created per recording and not reused
+        stopping = true;
+        Future<?> future = writerFuture;
+        if (future != null) {
+            try {
+                future.get(WRITER_STOP_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                log.warn("Write worker for {} did not finish within {} ms, interrupting it", path, WRITER_STOP_TIMEOUT_MS);
+                future.cancel(true);
+            } catch (Exception e) {
+                log.warn("Exception waiting for write result on uninit", e);
+            }
+            writerFuture = null;
+        }
+        // as a prototype bean destroy is never called, so the worker thread is released here
+        executor.shutdown();
         if (initialized.get()) {
             log.debug("Uninit");
             if (writer != null) {
-                if (writerFuture != null) {
-                    try {
-                        writerFuture.get();
-                    } catch (Exception e) {
-                        log.warn("Exception waiting for write result on uninit", e);
-                    }
-                    if (writerFuture.cancel(false)) {
-                        log.debug("Future completed");
-                    }
-                }
-                writerFuture = null;
                 // clear the queue
                 queue.clear();
                 queue = null;
@@ -494,24 +504,16 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     }
 
     /**
-     * Stops writing when the recording has reached its byte or duration limit or the volume is below its free space minimum.
+     * Stops writing when the recording file has reached its byte or duration limit, counting any content it is appended to, or the
+     * volume is below its free space minimum.
      *
-     * @param timestamp timestamp of the tag just written, relative to the start of the recording
+     * @param timestamp timestamp of the tag just written, relative to the start of this recording session
      */
     private void checkLimits(int timestamp) {
-        if (maxRecordingBytes > 0 && writer != null && writer.getBytesWritten() >= maxRecordingBytes) {
-            fail(String.format("Recording reached the %d byte limit", maxRecordingBytes));
-        } else if (maxRecordingDurationMs > 0 && timestamp >= maxRecordingDurationMs) {
-            fail(String.format("Recording reached the %d ms duration limit", maxRecordingDurationMs));
-        } else if (minFreeDiskBytes > 0 && ++tagsSinceSpaceCheck >= FREE_SPACE_CHECK_INTERVAL) {
-            tagsSinceSpaceCheck = 0;
-            try {
-                long usable = Files.getFileStore(path).getUsableSpace();
-                if (usable < minFreeDiskBytes) {
-                    fail(String.format("Recording volume has %d usable bytes, below the %d byte minimum", usable, minFreeDiskBytes));
-                }
-            } catch (IOException e) {
-                log.warn("Could not check free space for {}", path, e);
+        if (writer != null) {
+            String reason = limits.check(writer, path, timestamp);
+            if (reason != null) {
+                fail(reason);
             }
         }
     }
@@ -536,21 +538,40 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     }
 
     /**
-     * Sets the maximum bytes written for one recording; 0 means unlimited.
+     * Sets the maximum bytes of media data in the recording file, including what it held before when appending; 0 means unlimited.
      *
      * @param maxRecordingBytes maximum bytes
      */
     public void setMaxRecordingBytes(long maxRecordingBytes) {
-        this.maxRecordingBytes = maxRecordingBytes;
+        limits.setMaxBytes(maxRecordingBytes);
     }
 
     /**
-     * Sets the maximum recorded duration in milliseconds, measured by stream timestamps; 0 means unlimited.
+     * Returns the maximum bytes of media data in the recording file; 0 means unlimited.
+     *
+     * @return maximum bytes
+     */
+    public long getMaxRecordingBytes() {
+        return limits.getMaxBytes();
+    }
+
+    /**
+     * Sets the maximum duration of the recording file in milliseconds, measured by stream timestamps and including what it held
+     * before when appending; 0 means unlimited.
      *
      * @param maxRecordingDurationMs maximum duration
      */
     public void setMaxRecordingDurationMs(long maxRecordingDurationMs) {
-        this.maxRecordingDurationMs = maxRecordingDurationMs;
+        limits.setMaxDurationMs(maxRecordingDurationMs);
+    }
+
+    /**
+     * Returns the maximum duration of the recording file in milliseconds; 0 means unlimited.
+     *
+     * @return maximum duration
+     */
+    public long getMaxRecordingDurationMs() {
+        return limits.getMaxDurationMs();
     }
 
     /**
@@ -559,7 +580,16 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
      * @param minFreeDiskBytes minimum free bytes
      */
     public void setMinFreeDiskBytes(long minFreeDiskBytes) {
-        this.minFreeDiskBytes = minFreeDiskBytes;
+        limits.setMinFreeDiskBytes(minFreeDiskBytes);
+    }
+
+    /**
+     * Returns the minimum usable space to keep free on the recording volume; 0 disables the check.
+     *
+     * @return minimum free bytes
+     */
+    public long getMinFreeDiskBytes() {
+        return limits.getMinFreeDiskBytes();
     }
 
     /**

@@ -13,9 +13,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.amf.Input;
@@ -86,6 +89,21 @@ public class FilePersistence extends RamPersistence {
      * Name of the job for serializing persistent objects.
      */
     private String storeJobName;
+
+    /**
+     * Minimum usable bytes applied to new instances; 0 disables the check.
+     */
+    private static volatile long defaultMinFreeBytes;
+
+    /**
+     * Minimum usable bytes on the persistence volume for a write to proceed; 0 disables the check.
+     */
+    private volatile long minFreeBytes = defaultMinFreeBytes;
+
+    /**
+     * Whether the persistence volume is currently below the free space minimum, so the condition is only logged on change.
+     */
+    private final AtomicBoolean lowSpace = new AtomicBoolean();
 
     /**
      * Create file persistence object from given resource pattern resolver
@@ -237,6 +255,28 @@ public class FilePersistence extends RamPersistence {
      */
     public void setPersistenceInterval(int persistenceInterval) {
         this.persistenceInterval = persistenceInterval;
+    }
+
+    /**
+     * Sets the minimum usable bytes on the persistence volume used by instances created after this call; 0 disables the check. Stores
+     * are created reflectively per scope, so this is the configuration hook (so.persistence.min.free.bytes).
+     *
+     * @param minFreeBytes
+     *            minimum usable bytes
+     */
+    public static void setDefaultMinFreeBytes(long minFreeBytes) {
+        defaultMinFreeBytes = minFreeBytes;
+    }
+
+    /**
+     * Sets the minimum usable bytes on the persistence volume; while usable space is below it, writes are skipped and the objects stay
+     * queued for the next flush. 0 disables the check.
+     *
+     * @param minFreeBytes
+     *            minimum usable bytes
+     */
+    public void setMinFreeBytes(long minFreeBytes) {
+        this.minFreeBytes = minFreeBytes;
     }
 
     /**
@@ -493,16 +533,18 @@ public class FilePersistence extends RamPersistence {
     @SuppressWarnings("null")
     protected boolean saveObject(IPersistable object) {
         log.debug("saveObject - object: {}", object);
-        // object paths are scope context paths such as /live, so one leading slash is expected
-        String objectPath = object.getPath();
-        if (objectPath != null && objectPath.startsWith("/")) {
-            objectPath = objectPath.substring(1);
-        }
-        if (!isValidObjectName(object.getName()) || (objectPath != null && !objectPath.isEmpty() && !isValidObjectName(objectPath))) {
+        if (!hasValidNameAndPath(object)) {
             log.warn("Refusing to persist object with invalid name or path: {} / {}", object.getName(), object.getPath());
             return false;
         }
-        boolean result = true;
+        // if it's a persistent SharedObject and it's empty don't write it to disk. APPSERVER-364
+        if (object instanceof SharedObject) {
+            SharedObject soRef = (SharedObject) object;
+            if (soRef.getAttributes().size() == 0) {
+                // return true to trick the server into thinking everything is just fine :P
+                return true;
+            }
+        }
         String path = getObjectFilepath(object, true);
         log.trace("Path: {}", path);
         Resource resPath = resources.getResource(path);
@@ -531,70 +573,115 @@ public class FilePersistence extends RamPersistence {
             }
             dir = resPath.getFile();
             log.debug("Resulting absolute path: {}", dir.getAbsolutePath());
-            if (!dir.isDirectory() && !dir.mkdirs()) {
-                log.error("Could not create directory {}", dir.getAbsolutePath());
-                result = false;
-            }
         } catch (IOException err) {
             log.error("Could not create resource file for path {}", path, err);
-            result = false;
+            return false;
         }
-        //if we made it this far and everything seems ok
-        if (result) {
-            // if it's a persistent SharedObject and it's empty don't write it to disk. APPSERVER-364
-            if (object instanceof SharedObject) {
-                SharedObject soRef = (SharedObject) object;
-                if (soRef.getAttributes().size() == 0) {
-                    // return true to trick the server into thinking everything is just fine :P
-                    return true;
-                }
+        String filename = getObjectFilename(object);
+        log.debug("File name: {}", filename);
+        //strip path
+        if (filename.indexOf('/') != -1) {
+            filename = filename.substring(filename.lastIndexOf('/'));
+            log.debug("New file name: {}", filename);
+        }
+        File file = new File(dir, filename);
+        // containment and free space are checked before any directory is created
+        if (!isWithinPersistenceRoot(file)) {
+            log.warn("Refusing to persist object {} outside the persistence root: {}", object.getName(), file);
+            return false;
+        }
+        if (!hasFreeSpace(dir)) {
+            return false;
+        }
+        if (!dir.isDirectory() && !dir.mkdirs()) {
+            log.error("Could not create directory {}", dir.getAbsolutePath());
+            return false;
+        }
+        boolean result = true;
+        //Resource resFile = resources.getResource(filename);
+        //log.debug("Resource (file) check #1 - file name: {} exists: {}", resPath.getFilename(), exists);
+        IoBuffer buf = null;
+        try {
+            int initialSize = 8192;
+            if (file.exists()) {
+                // We likely also need the original file size when writing object
+                initialSize += (int) file.length();
             }
-            String filename = getObjectFilename(object);
-            log.debug("File name: {}", filename);
-            //strip path
-            if (filename.indexOf('/') != -1) {
-                filename = filename.substring(filename.lastIndexOf('/'));
-                log.debug("New file name: {}", filename);
-            }
-            File file = new File(dir, filename);
-            if (!isWithinPersistenceRoot(file)) {
-                log.warn("Refusing to persist object {} outside the persistence root: {}", object.getName(), file);
-                return false;
-            }
-            //Resource resFile = resources.getResource(filename);
-            //log.debug("Resource (file) check #1 - file name: {} exists: {}", resPath.getFilename(), exists);
-            IoBuffer buf = null;
-            try {
-                int initialSize = 8192;
-                if (file.exists()) {
-                    // We likely also need the original file size when writing object
-                    initialSize += (int) file.length();
-                }
-                buf = IoBuffer.allocate(initialSize);
-                buf.setAutoExpand(true);
-                Output out = new Output(buf);
-                out.writeString(object.getClass().getName());
-                object.serialize(out);
-                buf.flip();
+            buf = IoBuffer.allocate(initialSize);
+            buf.setAutoExpand(true);
+            Output out = new Output(buf);
+            out.writeString(object.getClass().getName());
+            object.serialize(out);
+            buf.flip();
 
-                FileOutputStream output = new FileOutputStream(file.getAbsolutePath());
-                ServletUtils.copy(buf.asInputStream(), output);
-                output.close();
-                log.debug("Stored persistent object {} at {}", object, filename);
-            } catch (IOException e) {
-                log.error("Could not create / write file {}", filename, e);
-                log.warn("Exception {}", e);
-                result = false;
-            } finally {
-                if (buf != null) {
-                    buf.free();
-                    buf = null;
-                }
-                file = null;
-                dir = null;
+            FileOutputStream output = new FileOutputStream(file.getAbsolutePath());
+            ServletUtils.copy(buf.asInputStream(), output);
+            output.close();
+            log.debug("Stored persistent object {} at {}", object, filename);
+        } catch (IOException e) {
+            log.error("Could not create / write file {}", filename, e);
+            log.warn("Exception {}", e);
+            result = false;
+        } finally {
+            if (buf != null) {
+                buf.free();
+                buf = null;
             }
+            file = null;
+            dir = null;
         }
         return result;
+    }
+
+    /**
+     * Checks the object name and path against the identifier grammar used for file persistence.
+     *
+     * @param object
+     *            Persistable object
+     * @return true if the name and path may be mapped onto the filesystem
+     */
+    private boolean hasValidNameAndPath(IPersistable object) {
+        // object paths are scope context paths such as /live, so one leading slash is expected
+        String objectPath = object.getPath();
+        if (objectPath != null && objectPath.startsWith("/")) {
+            objectPath = objectPath.substring(1);
+        }
+        return isValidObjectName(object.getName()) && (objectPath == null || objectPath.isEmpty() || isValidObjectName(objectPath));
+    }
+
+    /**
+     * Checks that the volume holding the given directory has at least the configured minimum of usable space. The low space condition is
+     * logged once when it is detected and once when it clears, not once per object.
+     *
+     * @param dir
+     *            target directory, which may not exist yet
+     * @return true if there is enough usable space or no minimum is configured
+     */
+    private boolean hasFreeSpace(File dir) {
+        if (minFreeBytes <= 0) {
+            lowSpace.set(false);
+            return true;
+        }
+        // usable space is only reported for existing paths
+        File existing = dir;
+        while (existing != null && !existing.exists()) {
+            existing = existing.getParentFile();
+        }
+        if (existing == null) {
+            log.warn("Could not check free space for {}", dir);
+            return true;
+        }
+        long usable = existing.getUsableSpace();
+        if (usable < minFreeBytes) {
+            if (lowSpace.compareAndSet(false, true)) {
+                log.error("Persistence volume at {} has {} usable bytes, below the {} byte minimum; persistent objects are not written until space is available", existing, usable, minFreeBytes);
+            }
+            return false;
+        }
+        if (lowSpace.compareAndSet(true, false)) {
+            log.info("Persistence volume at {} has {} usable bytes again, resuming writes", existing, usable);
+        }
+        return true;
     }
 
     /** {@inheritDoc} */
@@ -727,6 +814,7 @@ public class FilePersistence extends RamPersistence {
 
     private void persist() {
         IPersistable persistable = null;
+        List<IPersistable> failed = null;
         while (!queue.isEmpty()) {
             try {
                 persistable = queue.poll();
@@ -736,10 +824,28 @@ public class FilePersistence extends RamPersistence {
                 // release before writing so a change made during the write queues the object again
                 pending.remove(persistable);
                 if (!saveObject(persistable)) {
-                    log.warn("Object persist failed for: {}", persistable);
+                    if (lowSpace.get()) {
+                        // a write skipped for low space is retried on the next flush, not within this one
+                        log.debug("Object persist skipped for: {}", persistable);
+                        if (failed == null) {
+                            failed = new ArrayList<>();
+                        }
+                        failed.add(persistable);
+                    } else {
+                        // other failures are not retried until the object changes again, so a permanent failure is not logged every flush
+                        log.warn("Object persist failed for: {}", persistable);
+                    }
                 }
             } catch (Throwable e) {
                 log.error("Error while saving {} in {}. {}", new Object[] { persistable, this, e });
+            }
+        }
+        if (failed != null) {
+            for (IPersistable object : failed) {
+                // objects removed from the store meanwhile are not written again
+                if (objects.get(getObjectId(object)) == object && pending.add(object)) {
+                    queue.add(object);
+                }
             }
         }
     }

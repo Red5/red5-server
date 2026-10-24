@@ -7,12 +7,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
+import jakarta.servlet.ServletContext;
 import jakarta.websocket.Extension;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.server.HandshakeRequest;
@@ -30,7 +30,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Red5 implementation of the WebSocket JSR365 ServerEndpointConfig.Configurator.
+ * Red5 implementation of the WebSocket JSR365 ServerEndpointConfig.Configurator. One instance serves one web application on one host and
+ * is bound to that application's scope.
+ * <p>
+ * Origin checking starts from the {@link WebSocketPlugin} defaults and is set per web application with these web.xml context-params (or
+ * servlet context attributes of the same names):
+ *
+ * <pre>
+ * &lt;context-param&gt;
+ *     &lt;param-name&gt;crossOriginPolicy&lt;/param-name&gt;
+ *     &lt;param-value&gt;true&lt;/param-value&gt;
+ * &lt;/context-param&gt;
+ * &lt;context-param&gt;
+ *     &lt;param-name&gt;allowedOrigins&lt;/param-name&gt;
+ *     &lt;param-value&gt;https://example.com,https://example.com:8443&lt;/param-value&gt;
+ * &lt;/context-param&gt;
+ * </pre>
+ *
+ * When <code>crossOriginPolicy</code> is true, {@link #checkOrigin(String)} rejects a handshake whose Origin header is missing or does not
+ * match an entry of <code>allowedOrigins</code>, see {@link #originMatches(String, String)}; an entry without a scheme matches its host,
+ * and port if given, under any scheme. When it is false, the default, every origin is accepted, including a missing one. The HTTP
+ * principal, session and cookies of the upgrade request are carried into the WebSocket connection, so an application that authenticates
+ * WebSocket users that way must enable origin checking, or any site the user visits can open an authenticated connection.
  *
  * @author Paul Gregoire
  */
@@ -46,8 +67,8 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
 
     private final Logger log = LoggerFactory.getLogger(DefaultServerEndpointConfigurator.class);
 
-    // application scope associated with this endpoint configurator
-    private IScope applicationScope;
+    // application scope of the web application served by this endpoint configurator; handshakes only use this scope's manager
+    private volatile IScope applicationScope;
 
     // Cross-origin policy enable/disabled (defaults to the plugin's setting)
     private boolean crossOriginPolicy = WebSocketPlugin.isCrossOriginPolicy();
@@ -107,7 +128,12 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         return result;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * With origin checking disabled every handshake is accepted, with or without an Origin header. With it enabled the Origin header must
+     * be present and match one of the allowed origins.
+     */
     @Override
     public boolean checkOrigin(String originHeaderValue) {
         log.debug("checkOrigin: {}", originHeaderValue);
@@ -229,9 +255,10 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             path = path.substring(0, path.length() - 1);
         }
         log.debug("Normalized path: {}", path);
-        // get the manager
+        // get the manager of the application scope bound to this endpoint, never one found by application name
+        IScope appScope = applicationScope;
         WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
-        WebSocketScopeManager manager = plugin.getManager(path);
+        WebSocketScopeManager manager = (appScope != null && plugin != null) ? plugin.getManager(appScope) : null;
         if (manager != null) {
             // add the websocket scope manager to the user props
             sec.getUserProperties().put(WSConstants.WS_MANAGER, manager);
@@ -243,17 +270,12 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             } else if (scope == null) {
                 // split up the path into usable scope names
                 String[] paths = path.split("\\/");
-                // parent scope - prefer manager's app scope over separate lookup
-                IScope appScope = Optional.ofNullable(applicationScope).orElse(manager.getApplication());
-                if (appScope == null) {
-                    // fallback to plugin lookup
-                    appScope = plugin.getApplicationScope(path);
-                }
+                // parent scope is the bound application scope
                 IScope parentScope = appScope;
                 // room scope
                 IScope roomScope = null;
                 // create child scopes
-                log.debug("Creating child websocket scope of {} for path: {} split: {}", applicationScope, path, Arrays.toString(paths));
+                log.debug("Creating child websocket scope of {} for path: {} split: {}", appScope, path, Arrays.toString(paths));
                 for (int i = 2; i < paths.length; i++) {
                     // start with the first room and proceed from there
                     roomScope = ScopeUtils.resolveScope(parentScope, paths[i]);
@@ -275,7 +297,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                     // get the new ws scope
                     scope = manager.getScope(path);
                     // copy the listeners from the app websocket scope if available
-                    if (appScope != null && appScope.hasAttribute(WSConstants.WS_SCOPE)) {
+                    if (appScope.hasAttribute(WSConstants.WS_SCOPE)) {
                         WebSocketScope appWsScope = (WebSocketScope) appScope.getAttribute(WSConstants.WS_SCOPE);
                         if (appWsScope != null && scope != null) {
                             Set<IWebSocketDataListener> listeners = appWsScope.getListeners();
@@ -299,10 +321,33 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             } else {
                 log.warn("WebSocket scope is null for path: {} - handshake may fail", path);
             }
+        } else if (appScope == null) {
+            log.warn("No application scope is bound to the websocket endpoint for path: {} requested uri: {}", path, request.getRequestURI().toString());
         } else {
-            log.warn("No websocket manager found for path: {} requested uri: {}", path, request.getRequestURI().toString());
+            log.warn("No websocket manager found for application scope: {} path: {} requested uri: {}", appScope, path, request.getRequestURI().toString());
         }
         super.modifyHandshake(sec, request, response);
+    }
+
+    /**
+     * Binds this configurator to the application scope of the given web application, unless it is already bound to an application scope
+     * that still has a websocket manager. Called before each handshake so the binding follows an application that has been reloaded.
+     *
+     * @param servletContext servlet context of the web application served by this configurator
+     */
+    void bindApplicationScope(ServletContext servletContext) {
+        IScope current = applicationScope;
+        if (current != null) {
+            WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
+            if (plugin == null || plugin.getManager(current) != null) {
+                return;
+            }
+        }
+        IScope resolved = WebSocketPlugin.resolveApplicationScope(servletContext);
+        if (resolved != null && resolved != current) {
+            log.debug("Binding websocket endpoint to application scope: {}", resolved);
+            applicationScope = resolved;
+        }
     }
 
     /**
@@ -327,16 +372,17 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * <p>Getter for the field <code>applicationScope</code>.</p>
+     * Returns the application scope this configurator is bound to; handshakes are served by that scope's websocket manager only.
      *
-     * @return a {@link org.red5.server.api.scope.IScope} object
+     * @return a {@link org.red5.server.api.scope.IScope} object or null if not bound yet
      */
     public IScope getApplicationScope() {
         return applicationScope;
     }
 
     /**
-     * <p>Setter for the field <code>applicationScope</code>.</p>
+     * Binds this configurator to an application scope. When not set, or when the bound scope no longer has a websocket manager, the scope
+     * is resolved from the web application's <code>web.scope</code> or <code>web.handler</code> bean before the next handshake.
      *
      * @param applicationScope a {@link org.red5.server.api.scope.IScope} object
      */
@@ -345,7 +391,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * <p>isCrossOriginPolicy.</p>
+     * Returns whether Origin checking is enabled for this web application.
      *
      * @return a boolean
      */
@@ -354,7 +400,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * <p>Setter for the field <code>crossOriginPolicy</code>.</p>
+     * Enables or disables Origin checking for this web application; set from the <code>crossOriginPolicy</code> context-param when present.
      *
      * @param crossOriginPolicy a boolean
      */
@@ -372,7 +418,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * Sets the allowed origins for this instance.
+     * Sets the allowed origins for this instance; set from the comma-separated <code>allowedOrigins</code> context-param when present.
      *
      * @param allowedOrigins an array of {@link java.lang.String} objects
      */

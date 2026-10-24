@@ -747,6 +747,13 @@ public class MultiThreadedApplicationAdapter extends StatefulScopeWrappingAdapte
         return service.createSharedObject(scope, name, persistent);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean createClientSharedObject(IConnection conn, IScope scope, String name, boolean persistent) {
+        ISharedObjectService service = (ISharedObjectService) ScopeUtils.getScopeService(scope, ISharedObjectService.class, SharedObjectService.class, false);
+        return service.createClientSharedObject(conn, scope, name, persistent);
+    }
+
     /**
      * {@inheritDoc}
      *

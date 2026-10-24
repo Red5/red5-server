@@ -9,6 +9,7 @@ package org.red5.server.api.so;
 
 import java.util.Set;
 
+import org.red5.server.api.IConnection;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.IScopeService;
 
@@ -51,6 +52,24 @@ public interface ISharedObjectService extends IScopeService {
      * </pre>
      */
     public boolean createSharedObject(IScope scope, String name, boolean persistent);
+
+    /**
+     * Create a new shared object on behalf of a client connection. Implementations may apply client-specific limits here that do not apply
+     * to server-side creation through {@link #createSharedObject(IScope, String, boolean)}. The default delegates to that method.
+     *
+     * @param conn
+     *            the client connection requesting the shared object
+     * @param scope
+     *            the scope to create the shared object in
+     * @param name
+     *            the name of the shared object
+     * @param persistent
+     *            will the shared object be persistent
+     * @return true if the shared object was created or already exists, otherwise false
+     */
+    default boolean createClientSharedObject(IConnection conn, IScope scope, String name, boolean persistent) {
+        return createSharedObject(scope, name, persistent);
+    }
 
     /**
      * Get a shared object by name.

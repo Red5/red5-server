@@ -25,4 +25,14 @@
 	<!-- To enable SSE support, replace the above bean definition with the following one -->
     <!-- <bean id="web.handler" class="org.red5.server.adapter.SSEApplicationAdapter" /> -->
 
+    <!-- To give this application its own recording limits, uncomment the following bean; it inherits the server fileConsumer
+        bean from red5-common.xml and replaces only the properties set here (0 means unlimited) -->
+    <!--
+    <bean id="fileConsumer" parent="fileConsumer" scope="prototype" lazy-init="true">
+        <property name="maxRecordingBytes" value="1073741824" />
+        <property name="maxRecordingDurationMs" value="3600000" />
+        <property name="minFreeDiskBytes" value="0" />
+    </bean>
+    -->
+
 </beans>

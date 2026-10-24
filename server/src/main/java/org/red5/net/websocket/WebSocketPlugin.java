@@ -13,11 +13,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.servlet.ServletContext;
@@ -34,6 +36,7 @@ import org.red5.net.websocket.server.DefaultServerEndpointConfigurator;
 import org.red5.net.websocket.server.DefaultWsServerContainer;
 import org.red5.server.Server;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
+import org.red5.server.adapter.StatefulScopeWrappingAdapter;
 import org.red5.server.api.listeners.ScopeListenerAdapter;
 import org.red5.server.api.scope.IScope;
 import org.red5.server.api.scope.ScopeType;
@@ -42,10 +45,32 @@ import org.red5.server.plugin.Red5Plugin;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * WebSocketPlugin - centralized WebSocket configuration and locator. <br>
  * This plugin will be called by Red5 plugin launcher to associate application components with WebSockets.
+ * <p>
+ * Each web application gets its own {@link DefaultWsServerContainer} and {@link DefaultServerEndpointConfigurator}, keyed by the
+ * application's host and context path, and each application scope gets its own {@link WebSocketScopeManager}, keyed by the scope instance.
+ * A handshake is bound to the manager of the application scope that serves the request, never to another application that merely shares
+ * its name.
+ * <p>
+ * Origin checking: the plugin's <code>crossOriginPolicy</code> and <code>allowedOrigins</code> properties are server-wide defaults. A web
+ * application overrides them with web.xml context-params (or servlet context attributes) of the same names:
+ * <ul>
+ * <li><code>crossOriginPolicy</code> - <code>true</code> to check the Origin header of WebSocket handshakes, <code>false</code> to accept
+ * any origin. Checking is off by default.</li>
+ * <li><code>allowedOrigins</code> - comma-separated origins, such as <code>https://example.com,https://example.com:8443</code>. An entry
+ * with a scheme must match the Origin's scheme, host and port exactly, with default ports filled in. An entry without a scheme, such as
+ * <code>example.com</code> or <code>example.com:5080</code>, matches that exact host, and port if given, under any scheme. Sub-domains and
+ * suffixes never match. <code>*</code> allows any origin.</li>
+ * </ul>
+ * While checking is enabled a handshake without an Origin header is rejected; while it is disabled such handshakes are accepted. The HTTP
+ * principal, session and cookies of the upgrade request are carried into the WebSocket connection, so with checking off a page on any site
+ * can open a connection with the user's credentials. Applications that authenticate WebSocket users through the HTTP session, cookies or
+ * container login must enable <code>crossOriginPolicy</code> and list their own origins in <code>allowedOrigins</code>.
  *
  * @author Paul Gregoire
  */
@@ -59,19 +84,19 @@ public class WebSocketPlugin extends Red5Plugin {
     // Shared executor
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
-    // Same origin policy enable/disabled
+    // Same origin policy enable/disabled; never read, see setSameOriginPolicy
     private static boolean sameOriginPolicy;
 
-    // Cross-origin policy enable/disabled
+    // Origin checking enable/disabled, the server-wide default (off)
     private static boolean crossOriginPolicy;
 
-    // Cross-origin names
+    // Allowed origins, the server-wide default
     private static String[] allowedOrigins = new String[] { "*" };
 
-    // holds application scopes and their associated websocket scope manager
-    private static ConcurrentMap<IScope, WebSocketScopeManager> managerMap = new ConcurrentHashMap<>();
+    // holds application scopes, by instance, and their associated websocket scope manager
+    private static ConcurrentMap<ScopeKey, WebSocketScopeManager> managerMap = new ConcurrentHashMap<>();
 
-    // holds DefaultWsServerContainer instances keyed by their servlet context path
+    // holds DefaultWsServerContainer instances keyed by their host identity and servlet context path
     private static ConcurrentMap<String, DefaultWsServerContainer> containerMap = new ConcurrentHashMap<>();
 
     private ScopeListenerAdapter scopeListener;
@@ -154,7 +179,7 @@ public class WebSocketPlugin extends Red5Plugin {
         } else {
             log.debug("Configuring application scope: {}", scope);
             // get the websocket scope manager for the red5 scope
-            WebSocketScopeManager manager = managerMap.get(scope);
+            WebSocketScopeManager manager = getManager(scope);
             if (manager == null) {
                 // get the application adapter
                 MultiThreadedApplicationAdapter app = (MultiThreadedApplicationAdapter) scope.getHandler();
@@ -162,7 +187,7 @@ public class WebSocketPlugin extends Red5Plugin {
                 // set the application in the plugin to create a websocket scope manager for it
                 setApplication(app);
                 // get the new manager
-                manager = managerMap.get(scope);
+                manager = getManager(scope);
             }
             // create a websocket scope for the application
             WebSocketScope wsScope = new WebSocketScope(scope);
@@ -188,7 +213,7 @@ public class WebSocketPlugin extends Red5Plugin {
             // create a websocket scope for the scope
             String path = scope.getContextPath();
             log.debug("Room path: {}", path);
-            WebSocketScopeManager manager = managerMap.get(appScope);
+            WebSocketScopeManager manager = getManager(appScope);
             if (manager != null) {
                 WebSocketScope wsScope = manager.getScope(path);
                 if (wsScope == null) {
@@ -234,22 +259,61 @@ public class WebSocketPlugin extends Red5Plugin {
      *
      * @param path a {@link java.lang.String} object
      * @return IScope
+     * @deprecated an application name does not identify an application: the same name may be deployed on several hosts or global scopes,
+     *             and this returns whichever one is found first. Use the scope bound to the request instead, see
+     *             {@link #resolveApplicationScope(ServletContext)} and {@link DefaultServerEndpointConfigurator#getApplicationScope()}.
      */
+    @Deprecated
     public IScope getApplicationScope(String path) {
         // set a reference to the application scope so we can create room scopes
         String applicationScopeName = path.split("\\/")[1];
         log.debug("Looking for application scope: {}", applicationScopeName);
-        return managerMap.keySet().stream().filter(scope -> (ScopeUtils.isApp(scope) && scope.getName().equals(applicationScopeName))).findFirst().orElse(null);
+        return managerMap.keySet().stream().map(ScopeKey::scope).filter(scope -> (ScopeUtils.isApp(scope) && scope.getName().equals(applicationScopeName))).findFirst().orElse(null);
     }
 
     /**
-     * Returns a WebSocketScopeManager for a given scope.
+     * Returns the application scope of a web application: its <code>web.scope</code> bean, or else the scope of its
+     * <code>web.handler</code> bean, from the Spring application context stored in the servlet context. Returns null when that context
+     * has not been created yet or defines neither bean.
+     *
+     * @param servletContext servlet context of the web application
+     * @return application scope or null
+     */
+    public static IScope resolveApplicationScope(ServletContext servletContext) {
+        if (servletContext == null) {
+            return null;
+        }
+        Object attr = servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+        if (attr instanceof ApplicationContext appCtx) {
+            if (appCtx.containsBean("web.scope")) {
+                Object webScope = appCtx.getBean("web.scope");
+                if (webScope instanceof IScope scope) {
+                    return scope;
+                }
+            }
+            if (appCtx.containsBean("web.handler")) {
+                // use one level higher than MultiThreadedApplicationAdapter since we only need the scope
+                Object handler = appCtx.getBean("web.handler");
+                if (handler instanceof StatefulScopeWrappingAdapter app) {
+                    return app.getScope();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a WebSocketScopeManager for a given application scope. The scope must be the registered application scope instance itself;
+     * another scope that is merely equal to it, such as a same-named application in another global scope, does not match.
      *
      * @param scope a {@link org.red5.server.api.scope.IScope} object
      * @return WebSocketScopeManager if registered for the given scope and null otherwise
      */
     public WebSocketScopeManager getManager(IScope scope) {
-        return managerMap.get(scope);
+        if (scope == null) {
+            return null;
+        }
+        return managerMap.get(new ScopeKey(scope));
     }
 
     /**
@@ -257,7 +321,11 @@ public class WebSocketPlugin extends Red5Plugin {
      *
      * @param path a {@link java.lang.String} object
      * @return WebSocketScopeManager if registered for the given path and null otherwise
+     * @deprecated an application name does not identify an application: the same name may be deployed on several hosts or global scopes,
+     *             and this returns whichever manager is found first. Use {@link #getManager(IScope)} with the application scope bound to
+     *             the request, or {@link WebSocketConnection#getScope()} for an open connection.
      */
+    @Deprecated
     public WebSocketScopeManager getManager(String path) {
         log.debug("getManager: {}", path);
         // determine what the app scope name is
@@ -271,8 +339,8 @@ public class WebSocketPlugin extends Red5Plugin {
             if (log.isTraceEnabled()) {
                 log.trace("Managers: {}", managerMap.entrySet());
             }
-            for (Entry<IScope, WebSocketScopeManager> entry : managerMap.entrySet()) {
-                IScope appScope = entry.getKey();
+            for (Entry<ScopeKey, WebSocketScopeManager> entry : managerMap.entrySet()) {
+                IScope appScope = entry.getKey().scope();
                 if (appScope.getName().equals(name)) {
                     log.debug("Application scope name matches path: {}", name);
                     return entry.getValue();
@@ -292,7 +360,10 @@ public class WebSocketPlugin extends Red5Plugin {
      * @return WebSocketScopeManager if registered for the given path and null otherwise
      */
     public WebSocketScopeManager removeManager(IScope scope) {
-        return managerMap.remove(scope);
+        if (scope == null) {
+            return null;
+        }
+        return managerMap.remove(new ScopeKey(scope));
     }
 
     /**
@@ -300,10 +371,62 @@ public class WebSocketPlugin extends Red5Plugin {
      *
      * @param path a {@link java.lang.String} object
      * @return DefaultWsServerContainer
+     * @deprecated containers are kept per host and context path, so a context path alone is ambiguous when several hosts serve it. This
+     *             accepts a full container key (host identity followed by the context path) or a context path served by a single host, and
+     *             returns null when several hosts serve the context path. Use {@link #getWsServerContainer(ServletContext)}.
      */
+    @Deprecated
     public DefaultWsServerContainer getWsServerContainer(String path) {
         log.debug("getWsServerContainer: {}", path);
-        return containerMap.get(path);
+        DefaultWsServerContainer container = containerMap.get(path);
+        if (container == null) {
+            Set<DefaultWsServerContainer> matches = containerMap.values().stream().filter(c -> path.equals(normalizeContextPath(c.getServletContext().getContextPath()))).collect(Collectors.toSet());
+            if (matches.size() == 1) {
+                container = matches.iterator().next();
+            } else if (matches.size() > 1) {
+                log.warn("Context path {} is served by {} hosts, look the container up by its servlet context instead", path, matches.size());
+            }
+        }
+        return container;
+    }
+
+    /**
+     * Returns the DefaultWsServerContainer of a web application, if one has been created.
+     *
+     * @param servletContext servlet context of the web application
+     * @return DefaultWsServerContainer or null
+     */
+    public static DefaultWsServerContainer getWsServerContainer(ServletContext servletContext) {
+        return containerMap.get(containerKey(servletContext));
+    }
+
+    /**
+     * Returns the key of a web application's server container: its host identity followed by its context path, or the context path alone
+     * when no host identity is available. The host identity is the servlet context's virtual server name, which Tomcat reports as
+     * engine/host and which, unlike the red5.host.id attribute, is already available when the container is created; red5.host.id is the
+     * fallback.
+     *
+     * @param servletContext servlet context of the web application
+     * @return container key
+     */
+    static String containerKey(ServletContext servletContext) {
+        String path = normalizeContextPath(servletContext.getContextPath());
+        String hostId = null;
+        try {
+            hostId = servletContext.getVirtualServerName();
+        } catch (UnsupportedOperationException e) {
+            log.trace("Virtual server name is not available", e);
+        }
+        if (StringUtils.isBlank(hostId)) {
+            Object attr = servletContext.getAttribute("red5.host.id");
+            hostId = attr != null ? attr.toString() : null;
+        }
+        return StringUtils.isBlank(hostId) ? path : hostId + path;
+    }
+
+    private static String normalizeContextPath(String path) {
+        // handle root
+        return (path == null || path.isEmpty()) ? "/" : path;
     }
 
     /** {@inheritDoc} */
@@ -314,9 +437,9 @@ public class WebSocketPlugin extends Red5Plugin {
         final IScope appScope = application.getScope();
         // atomically create and initialize manager to prevent race condition
         // where getManager() could return a manager before setApplication() is called
-        managerMap.computeIfAbsent(appScope, scope -> {
+        managerMap.computeIfAbsent(new ScopeKey(appScope), key -> {
             WebSocketScopeManager manager = new WebSocketScopeManager();
-            manager.setApplication(scope);
+            manager.setApplication(key.scope());
             return manager;
         });
         super.setApplication(application);
@@ -326,7 +449,9 @@ public class WebSocketPlugin extends Red5Plugin {
      * <p>isSameOriginPolicy.</p>
      *
      * @return a boolean
+     * @deprecated no origin check reads this setting; see {@link #setSameOriginPolicy(boolean)}
      */
+    @Deprecated
     public static boolean isSameOriginPolicy() {
         return sameOriginPolicy;
     }
@@ -335,7 +460,13 @@ public class WebSocketPlugin extends Red5Plugin {
      * <p>Setter for the field <code>sameOriginPolicy</code>.</p>
      *
      * @param sameOriginPolicy a boolean
+     * @deprecated this setting has never been read and has no effect. Origin checking is controlled by
+     *             {@link #setCrossOriginPolicy(boolean)} and {@link #setAllowedOrigins(String[])}, or per application by the
+     *             <code>crossOriginPolicy</code> and <code>allowedOrigins</code> context-params; to accept only the application's own site,
+     *             enable crossOriginPolicy and list that origin in allowedOrigins. The setter remains so existing Spring configurations
+     *             still load.
      */
+    @Deprecated
     public void setSameOriginPolicy(boolean sameOriginPolicy) {
         WebSocketPlugin.sameOriginPolicy = sameOriginPolicy;
     }
@@ -360,7 +491,7 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>isCrossOriginPolicy.</p>
+     * Returns the server-wide default for Origin checking.
      *
      * @return a boolean
      */
@@ -369,7 +500,8 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>Setter for the field <code>crossOriginPolicy</code>.</p>
+     * Sets the server-wide default for Origin checking, used by web applications that do not set the <code>crossOriginPolicy</code>
+     * context-param. While enabled, handshakes whose Origin header is missing or not allowed are rejected with 403. Off by default.
      *
      * @param crossOriginPolicy a boolean
      */
@@ -378,7 +510,7 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>Getter for the field <code>allowedOrigins</code>.</p>
+     * Returns the server-wide default allowed origins.
      *
      * @return an array of {@link java.lang.String} objects
      */
@@ -387,7 +519,8 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>Setter for the field <code>allowedOrigins</code>.</p>
+     * Sets the server-wide default allowed origins, used by web applications that do not set the <code>allowedOrigins</code>
+     * context-param; see the class description for the matching rules. Defaults to <code>*</code>, any origin.
      *
      * @param allowedOrigins an array of {@link java.lang.String} objects
      */
@@ -413,15 +546,13 @@ public class WebSocketPlugin extends Red5Plugin {
      * @return WsServerContainer
      */
     public static ServerContainer getWsServerContainerInstance(ServletContext servletContext) {
-        String path = servletContext.getContextPath();
-        // handle root
-        if (path.length() == 0) {
-            path = "/";
-        }
-        log.info("getWsServerContainerInstance: {}", path);
+        String path = normalizeContextPath(servletContext.getContextPath());
+        // key by host and context path so hosts serving the same context path keep their own container and origin settings
+        String key = containerKey(servletContext);
+        log.info("getWsServerContainerInstance: {} key: {}", path, key);
         DefaultWsServerContainer container;
-        if (containerMap.containsKey(path)) {
-            container = containerMap.get(path);
+        if (containerMap.containsKey(key)) {
+            container = containerMap.get(key);
         } else {
             // instance a server container for WS
             container = new DefaultWsServerContainer(servletContext);
@@ -482,7 +613,7 @@ public class WebSocketPlugin extends Red5Plugin {
                 log.warn("WebSocket endpoint setup exception", t);
             }
             // store container for lookup
-            containerMap.put(path, container);
+            containerMap.put(key, container);
             // add session listener
             servletContext.addListener(new HttpSessionListener() {
 
@@ -510,6 +641,24 @@ public class WebSocketPlugin extends Red5Plugin {
         // set the container to the context for lookup
         servletContext.setAttribute(Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE, container);
         return container;
+    }
+
+    /**
+     * Map key that compares application scopes by instance. Scope equality is derived from the name, type, path and depth hash codes,
+     * which is not strict enough to keep two applications apart.
+     */
+    private record ScopeKey(IScope scope) {
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof ScopeKey other && other.scope == scope;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(scope);
+        }
+
     }
 
 }

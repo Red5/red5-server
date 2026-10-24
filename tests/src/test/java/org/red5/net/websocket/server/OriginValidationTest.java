@@ -61,6 +61,10 @@ public class OriginValidationTest {
         DefaultServerEndpointConfigurator configurator = new DefaultServerEndpointConfigurator();
         configurator.setCrossOriginPolicy(false);
         assertTrue(configurator.checkOrigin("https://anything.example"));
+        // a missing Origin is accepted only while checking is off
+        assertTrue(configurator.checkOrigin(null));
+        configurator.setCrossOriginPolicy(true);
+        assertFalse(configurator.checkOrigin(null));
     }
 
     @Test

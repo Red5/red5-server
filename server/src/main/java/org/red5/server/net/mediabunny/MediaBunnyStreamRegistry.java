@@ -8,7 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.red5.server.api.scope.IBroadcastScope;
@@ -19,7 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Registry for MediaBunny stream subscriptions backed by ClientBroadcastStream listeners.
+ * Registry for MediaBunny stream subscriptions backed by ClientBroadcastStream listeners. The stream state is shared process-wide, while
+ * subscriber limits belong to each endpoint and are passed in with every subscription, see {@link MediaBunnySubscriberLimits}.
  */
 public class MediaBunnyStreamRegistry {
 
@@ -30,23 +30,6 @@ public class MediaBunnyStreamRegistry {
     private final Map<String, StreamState> streams = new ConcurrentHashMap<>();
 
     private final Map<String, byte[]> pendingInitSegments = new ConcurrentHashMap<>();
-
-    /** Default maximum number of subscribers across all streams. */
-    public static final int DEFAULT_MAX_SUBSCRIBERS = 1000;
-
-    /** Default maximum number of subscribers to a single stream. */
-    public static final int DEFAULT_MAX_SUBSCRIBERS_PER_STREAM = 500;
-
-    /** Default maximum bytes queued for one subscriber before it is disconnected as a slow consumer. */
-    public static final long DEFAULT_MAX_QUEUED_BYTES = 16L * 1024 * 1024;
-
-    private volatile int maxSubscribers = DEFAULT_MAX_SUBSCRIBERS;
-
-    private volatile int maxSubscribersPerStream = DEFAULT_MAX_SUBSCRIBERS_PER_STREAM;
-
-    private volatile long maxQueuedBytes = DEFAULT_MAX_QUEUED_BYTES;
-
-    private final AtomicInteger subscriberCount = new AtomicInteger();
 
     /**
      * Returns the process-wide singleton instance of this registry.
@@ -60,41 +43,52 @@ public class MediaBunnyStreamRegistry {
     /**
      * Subscribes to the named broadcast stream in the given scope, attaching a listener to it if one is not already
      * attached, and returns a subscription whose queue receives the stream's init segment, latest keyframe fragment
-     * (if any) and subsequent fragments.
+     * (if any) and subsequent fragments. The subscriber's slot is taken from, and its queue budget read from, the caller's
+     * limits, so each endpoint enforces its own limits while the stream state is shared.
      *
      * @param scope the scope containing the broadcast stream
      * @param streamName the name of the stream to subscribe to
+     * @param limits limits of the endpoint the subscriber connected to
+     * @param address remote address of the subscriber, or null if unknown
      * @return a new subscription for the stream
+     * @throws SubscriberLimitException if one of the limits would be exceeded
      * @throws IllegalStateException if the named stream cannot be found in the scope
      */
-    public StreamSubscription subscribe(IScope scope, String streamName) {
+    public StreamSubscription subscribe(IScope scope, String streamName, MediaBunnySubscriberLimits limits, String address) {
         log.debug("Subscribing to stream: {}", streamName);
-        if (subscriberCount.incrementAndGet() > maxSubscribers) {
-            subscriberCount.decrementAndGet();
-            throw new SubscriberLimitException("MediaBunny subscriber limit of " + maxSubscribers + " reached");
-        }
+        String key = buildKey(scope, streamName);
+        limits.acquire(key, address);
+        Subscriber subscriber = new Subscriber(key, limits, address);
         try {
-            return addSubscriber(scope, streamName);
+            addSubscriber(scope, streamName, subscriber);
         } catch (RuntimeException e) {
-            subscriberCount.decrementAndGet();
+            subscriber.release();
             throw e;
         }
+        return new StreamSubscription(subscriber, this);
     }
 
-    private StreamSubscription addSubscriber(IScope scope, String streamName) {
-        String key = buildKey(scope, streamName);
+    private void addSubscriber(IScope scope, String streamName, Subscriber subscriber) {
+        String key = subscriber.key;
         log.debug("Subscriber key: {}", key);
+        // add the subscriber inside compute, so reusing a state cannot interleave with removeSubscriber dropping it as empty
         StreamState state = streams.compute(key, (k, existing) -> {
+            StreamState target = existing;
             IBroadcastScope bs = scope.getBroadcastScope(streamName);
             IClientBroadcastStream currentStream = (bs != null) ? bs.getClientBroadcastStream() : null;
-            if (existing != null) {
-                if (currentStream != null && currentStream == existing.stream) {
-                    return existing; // same stream, reuse
+            if (existing == null || currentStream == null || currentStream != existing.stream) {
+                if (existing != null) {
+                    log.info("Stream changed for {}, detaching old listener", k);
+                    // end the old subscribers first, they would receive nothing more and must not get the new stream's init segment
+                    existing.retire();
                 }
-                log.info("Stream changed for {}, detaching old listener", k);
-                existing.detach();
+                target = createState(scope, streamName);
+                if (target == null) {
+                    return null;
+                }
             }
-            return createState(scope, streamName);
+            target.subscribers.add(subscriber);
+            return target;
         });
         if (state == null) {
             throw new IllegalStateException("Stream not found: " + streamName);
@@ -104,13 +98,6 @@ public class MediaBunnyStreamRegistry {
             state.initSegment = pendingInit;
             log.debug("Applied pending init segment for stream {}", key);
         }
-        Subscriber subscriber = new Subscriber(key, maxQueuedBytes);
-        synchronized (state) {
-            if (state.subscribers.size() >= maxSubscribersPerStream) {
-                throw new SubscriberLimitException("MediaBunny per-stream subscriber limit of " + maxSubscribersPerStream + " reached for " + streamName);
-            }
-            state.subscribers.add(subscriber);
-        }
         byte[] initSegment = state.initSegment;
         if (initSegment != null) {
             enqueue(subscriber, initSegment);
@@ -119,7 +106,6 @@ public class MediaBunnyStreamRegistry {
         if (keyframe != null) {
             enqueue(subscriber, keyframe);
         }
-        return new StreamSubscription(subscriber, this);
     }
 
     /**
@@ -135,78 +121,41 @@ public class MediaBunnyStreamRegistry {
     }
 
     /**
-     * Removes a subscriber's queue from the stream's subscriber list, detaching and removing the stream's state
-     * entirely once its last subscriber has been removed.
+     * Removes a subscriber from its stream and returns its slot to the limits it was taken from. Safe to call more than once.
      *
-     * @param key the stream key, as built by {@link #buildKey(IScope, String)}
-     * @param queue the subscriber queue to remove
+     * @param subscriber the subscriber to remove
      */
     void unsubscribe(Subscriber subscriber) {
         log.debug("Unsubscribing from stream: {}", subscriber.key);
         removeSubscriber(subscriber);
-        if (subscriber.release()) {
-            subscriberCount.decrementAndGet();
-        }
+        subscriber.release();
     }
 
+    /**
+     * Removes a subscriber from the stream's subscriber list, detaching and removing the stream's state once its last subscriber has
+     * been removed. This runs under the key's lock in the map, as the reuse in {@link #addSubscriber} does, so a state is never dropped
+     * while a new subscriber is being added to it.
+     */
     private void removeSubscriber(Subscriber subscriber) {
-        String key = subscriber.key;
-        StreamState state = streams.get(key);
-        if (state == null) {
-            return;
-        }
-        state.subscribers.remove(subscriber);
-        if (state.subscribers.isEmpty()) {
-            // only remove the state we inspected, a replacement may have been created concurrently
-            if (streams.remove(key, state)) {
+        streams.computeIfPresent(subscriber.key, (k, state) -> {
+            state.subscribers.remove(subscriber);
+            if (state.subscribers.isEmpty()) {
                 state.detach();
+                return null;
             }
-        }
+            return state;
+        });
     }
 
     /**
-     * Returns the number of active subscribers across all streams.
+     * Returns the number of subscribers attached to a stream's state.
      *
-     * @return subscriber count
+     * @param key the stream key
+     * @return attached subscribers, 0 if the stream has no state
      */
-    public int getSubscriberCount() {
-        return subscriberCount.get();
-    }
-
-    /**
-     * Sets the maximum number of subscribers across all streams.
-     *
-     * @param maxSubscribers maximum subscribers
-     */
-    public void setMaxSubscribers(int maxSubscribers) {
-        this.maxSubscribers = maxSubscribers;
-    }
-
-    /**
-     * Returns the maximum number of subscribers across all streams.
-     *
-     * @return maximum subscribers
-     */
-    public int getMaxSubscribers() {
-        return maxSubscribers;
-    }
-
-    /**
-     * Sets the maximum number of subscribers to a single stream.
-     *
-     * @param maxSubscribersPerStream maximum subscribers per stream
-     */
-    public void setMaxSubscribersPerStream(int maxSubscribersPerStream) {
-        this.maxSubscribersPerStream = maxSubscribersPerStream;
-    }
-
-    /**
-     * Sets the maximum bytes queued for a subscriber before it is disconnected as a slow consumer. Applies to new subscribers.
-     *
-     * @param maxQueuedBytes maximum queued bytes per subscriber
-     */
-    public void setMaxQueuedBytes(long maxQueuedBytes) {
-        this.maxQueuedBytes = maxQueuedBytes;
+    int getAttachedSubscriberCount(String key) {
+        StreamState state = streams.get(key);
+        return (state != null) ? state.subscribers.size() : 0;
     }
 
     void onStreamClosed(String key) {
@@ -315,9 +264,17 @@ public class MediaBunnyStreamRegistry {
                 log.debug("Failed to remove MediaBunny listener", e);
             }
         }
+
+        /** Detaches the listener and ends every subscriber, used when this state is replaced by one for a new stream. */
+        void retire() {
+            detach();
+            for (Subscriber subscriber : subscribers) {
+                subscriber.end();
+            }
+        }
     }
 
-    /** Thrown when a subscription would exceed the global or per-stream subscriber limit. */
+    /** Thrown when a subscription would exceed the global, per-stream or per-address subscriber limit. */
     public static class SubscriberLimitException extends IllegalStateException {
 
         private static final long serialVersionUID = 1L;
@@ -336,6 +293,10 @@ public class MediaBunnyStreamRegistry {
 
         private final long maxBytes;
 
+        private final MediaBunnySubscriberLimits limits;
+
+        private final String address;
+
         private final BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
 
         private final AtomicLong queuedBytes = new AtomicLong();
@@ -344,9 +305,11 @@ public class MediaBunnyStreamRegistry {
 
         private final AtomicBoolean released = new AtomicBoolean();
 
-        Subscriber(String key, long maxBytes) {
+        Subscriber(String key, MediaBunnySubscriberLimits limits, String address) {
             this.key = key;
-            this.maxBytes = maxBytes;
+            this.limits = limits;
+            this.address = address;
+            this.maxBytes = limits.getMaxQueuedBytes();
         }
 
         boolean offer(byte[] data) {
@@ -380,8 +343,11 @@ public class MediaBunnyStreamRegistry {
             return queuedBytes.get();
         }
 
-        boolean release() {
-            return released.compareAndSet(false, true);
+        /** Returns this subscriber's slot to the limits it was taken from, once. */
+        void release() {
+            if (released.compareAndSet(false, true)) {
+                limits.release(key, address);
+            }
         }
     }
 

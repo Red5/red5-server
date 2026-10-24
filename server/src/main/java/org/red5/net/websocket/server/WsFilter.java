@@ -13,14 +13,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.tomcat.websocket.server.Constants;
-import org.red5.net.websocket.WSConstants;
 import org.red5.net.websocket.WebSocketPlugin;
-import org.red5.server.adapter.StatefulScopeWrappingAdapter;
-import org.red5.server.api.scope.IScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Handles the initial HTTP connection for WebSocket connections.
@@ -56,21 +51,7 @@ public class WsFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
-        // if we need the spring / app context
-        ApplicationContext appCtx = (ApplicationContext) request.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-        if (appCtx != null) {
-            // use one level higher than MultithreadedAppAdapter since we only need the scope
-            StatefulScopeWrappingAdapter app = (StatefulScopeWrappingAdapter) appCtx.getBean("web.handler");
-            // applications scope
-            IScope appScope = app.getScope();
-            if (appScope != null) {
-                log.debug("Application scope: {} ws scope: {}", appScope.getName(), appScope.getAttribute(WSConstants.WS_SCOPE));
-            } else {
-                log.warn("Application scope is null for {}", appCtx);
-            }
-        } else {
-            log.warn("Application context was not found in the servlet context for {}", contextPath);
-        }
+        // the endpoint configurator is bound to this application's scope during the upgrade, see UpgradeUtil.doUpgrade
         // HTTP request with an upgrade header for WebSocket present
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
