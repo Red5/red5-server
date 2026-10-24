@@ -81,6 +81,11 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     private int schedulerThreadSize = 1;
 
     /**
+     * Orders queued data by timestamp with decoder configuration first; queued data has no natural ordering of its own.
+     */
+    private static QueuedMediaDataComparator comparator = new QueuedMediaDataComparator();
+
+    /**
      * Queue to hold data for delayed writing
      */
     private PriorityQueue<QueuedMediaData> queue;
@@ -163,6 +168,17 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
     private volatile boolean gotVideoKeyframe;
 
     /**
+     * Size, duration and free space limits of the recording; the slices are batches of writes to one file, so the limits apply to the
+     * whole file rather than to each slice.
+     */
+    private final RecordingLimits limits = new RecordingLimits();
+
+    /**
+     * Reason the recording stopped writing, or null while it is healthy.
+     */
+    private volatile String failure;
+
+    /**
      * Default ctor
      */
     public SlicedFileConsumer() {
@@ -206,6 +222,10 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
      */
     @SuppressWarnings("rawtypes")
     public void pushMessage(IPipe pipe, IMessage message) throws IOException {
+        if (failure != null) {
+            // the recording failed or reached a limit, nothing more is written
+            return;
+        }
         if (message instanceof RTMPMessage) {
             final IRTMPEvent msg = ((RTMPMessage) message).getBody();
             // get the type
@@ -216,7 +236,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
             // if writes are delayed, queue the data and sort it by time
             if (queue == null) {
                 // if we plan to use a queue, create one
-                queue = new PriorityQueue<QueuedMediaData>(queueThreshold <= 0 ? 11 : queueThreshold);
+                queue = new PriorityQueue<QueuedMediaData>(queueThreshold <= 0 ? 11 : queueThreshold, comparator);
             }
             QueuedMediaData queued = null;
             if (msg instanceof IStreamData) {
@@ -467,6 +487,10 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
             } else {
                 log.warn("Consumer is uninitialized");
             }
+            if (writer != null) {
+                // an appended file may already be at a limit, and the volume may already be short of space
+                checkLimits(0);
+            }
             log.debug("Init - complete");
         }
     }
@@ -522,7 +546,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
             writeLock.unlock();
         }
         // sort
-        Arrays.sort(slice);
+        Arrays.sort(slice, comparator);
         // write
         doWrites(slice);
     }
@@ -618,7 +642,10 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
         log.debug("Write - timestamp: {} type: {}", timestamp, dataType);
         // get queued
         ITag tag = queued.getData();
-        if (tag != null) {
+        if (failure != null) {
+            // the recording failed or reached a limit, drop what is left
+            queued.dispose();
+        } else if (tag != null) {
             // only allow blank tags if they are of audio type
             if (tag.getBodySize() > 0 || dataType == ITag.TYPE_AUDIO) {
                 // if the last message was a reset or we just started, use the header timer
@@ -635,6 +662,7 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
                         if (!writer.writeTag(tag)) {
                             log.warn("Tag was not written");
                         }
+                        checkLimits(timestamp);
                     } else {
                         log.warn("Skipping message with negative timestamp");
                     }
@@ -642,18 +670,83 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
                     // the channel we tried to write to is closed, we should not try
                     // again on that writer
                     log.error("The writer is no longer able to write to the file: {} writable: {}", path.getFileName(), path.toFile().canWrite());
+                    fail("Recording file is closed");
                 } catch (IOException e) {
                     log.warn("Error writing tag", e);
-                    if (e.getCause() instanceof ClosedChannelException) {
-                        // the channel we tried to write to is closed, we should not
-                        // try again on that writer
-                        log.error("The writer is no longer able to write to the file: {} writable: {}", path.getFileName(), path.toFile().canWrite());
-                    }
+                    // a failed write, such as a full disk, would fail again for every following tag
+                    fail("Recording write failed: " + e.getMessage());
                 } finally {
                     queued.dispose();
                 }
             }
         }
+    }
+
+    /**
+     * Stops writing when the recording file has reached its byte or duration limit, counting any content it is appended to, or the
+     * volume is below its free space minimum.
+     *
+     * @param timestamp timestamp of the tag just written, relative to the start of this recording session
+     */
+    private void checkLimits(int timestamp) {
+        if (writer != null) {
+            String reason = limits.check(writer, path, timestamp);
+            if (reason != null) {
+                fail(reason);
+            }
+        }
+    }
+
+    private void fail(String reason) {
+        if (failure == null) {
+            failure = reason;
+            log.warn("Recording to {} stopped: {}", path, reason);
+            writeLock.lock();
+            try {
+                if (queue != null) {
+                    queue.clear();
+                }
+            } finally {
+                writeLock.unlock();
+            }
+        }
+    }
+
+    /**
+     * Returns why this consumer stopped writing, if it did.
+     *
+     * @return failure reason, or null while recording normally
+     */
+    public String getFailure() {
+        return failure;
+    }
+
+    /**
+     * Sets the maximum bytes of media data in the recording file, including what it held before when appending; 0 means unlimited.
+     *
+     * @param maxRecordingBytes maximum bytes
+     */
+    public void setMaxRecordingBytes(long maxRecordingBytes) {
+        limits.setMaxBytes(maxRecordingBytes);
+    }
+
+    /**
+     * Sets the maximum duration of the recording file in milliseconds, measured by stream timestamps and including what it held
+     * before when appending; 0 means unlimited.
+     *
+     * @param maxRecordingDurationMs maximum duration
+     */
+    public void setMaxRecordingDurationMs(long maxRecordingDurationMs) {
+        limits.setMaxDurationMs(maxRecordingDurationMs);
+    }
+
+    /**
+     * Sets the minimum usable space to keep free on the recording volume; 0 disables the check.
+     *
+     * @param minFreeDiskBytes minimum free bytes
+     */
+    public void setMinFreeDiskBytes(long minFreeDiskBytes) {
+        limits.setMinFreeDiskBytes(minFreeDiskBytes);
     }
 
     /**

@@ -132,24 +132,9 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     private long offerTimeout = 100L;
 
     /**
-     * Maximum bytes written for one recording; 0 means unlimited.
+     * Size, duration and free space limits of the recording.
      */
-    private long maxRecordingBytes;
-
-    /**
-     * Maximum recorded duration in milliseconds, measured by stream timestamps; 0 means unlimited.
-     */
-    private long maxRecordingDurationMs;
-
-    /**
-     * Minimum usable space to keep free on the recording volume; 0 disables the check.
-     */
-    private long minFreeDiskBytes;
-
-    // how often, in written tags, the free space check runs
-    private static final int FREE_SPACE_CHECK_INTERVAL = 100;
-
-    private int tagsSinceSpaceCheck;
+    private final RecordingLimits limits = new RecordingLimits();
 
     /**
      * Reason the recording stopped writing, or null while it is healthy.
@@ -424,6 +409,10 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
             } else {
                 log.warn("Consumer is uninitialized");
             }
+            if (writer != null) {
+                // an appended file may already be at a limit, and the volume may already be short of space
+                checkLimits(0);
+            }
             log.debug("Init - complete");
         }
     }
@@ -494,24 +483,16 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     }
 
     /**
-     * Stops writing when the recording has reached its byte or duration limit or the volume is below its free space minimum.
+     * Stops writing when the recording file has reached its byte or duration limit, counting any content it is appended to, or the
+     * volume is below its free space minimum.
      *
-     * @param timestamp timestamp of the tag just written, relative to the start of the recording
+     * @param timestamp timestamp of the tag just written, relative to the start of this recording session
      */
     private void checkLimits(int timestamp) {
-        if (maxRecordingBytes > 0 && writer != null && writer.getBytesWritten() >= maxRecordingBytes) {
-            fail(String.format("Recording reached the %d byte limit", maxRecordingBytes));
-        } else if (maxRecordingDurationMs > 0 && timestamp >= maxRecordingDurationMs) {
-            fail(String.format("Recording reached the %d ms duration limit", maxRecordingDurationMs));
-        } else if (minFreeDiskBytes > 0 && ++tagsSinceSpaceCheck >= FREE_SPACE_CHECK_INTERVAL) {
-            tagsSinceSpaceCheck = 0;
-            try {
-                long usable = Files.getFileStore(path).getUsableSpace();
-                if (usable < minFreeDiskBytes) {
-                    fail(String.format("Recording volume has %d usable bytes, below the %d byte minimum", usable, minFreeDiskBytes));
-                }
-            } catch (IOException e) {
-                log.warn("Could not check free space for {}", path, e);
+        if (writer != null) {
+            String reason = limits.check(writer, path, timestamp);
+            if (reason != null) {
+                fail(reason);
             }
         }
     }
@@ -536,21 +517,40 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
     }
 
     /**
-     * Sets the maximum bytes written for one recording; 0 means unlimited.
+     * Sets the maximum bytes of media data in the recording file, including what it held before when appending; 0 means unlimited.
      *
      * @param maxRecordingBytes maximum bytes
      */
     public void setMaxRecordingBytes(long maxRecordingBytes) {
-        this.maxRecordingBytes = maxRecordingBytes;
+        limits.setMaxBytes(maxRecordingBytes);
     }
 
     /**
-     * Sets the maximum recorded duration in milliseconds, measured by stream timestamps; 0 means unlimited.
+     * Returns the maximum bytes of media data in the recording file; 0 means unlimited.
+     *
+     * @return maximum bytes
+     */
+    public long getMaxRecordingBytes() {
+        return limits.getMaxBytes();
+    }
+
+    /**
+     * Sets the maximum duration of the recording file in milliseconds, measured by stream timestamps and including what it held
+     * before when appending; 0 means unlimited.
      *
      * @param maxRecordingDurationMs maximum duration
      */
     public void setMaxRecordingDurationMs(long maxRecordingDurationMs) {
-        this.maxRecordingDurationMs = maxRecordingDurationMs;
+        limits.setMaxDurationMs(maxRecordingDurationMs);
+    }
+
+    /**
+     * Returns the maximum duration of the recording file in milliseconds; 0 means unlimited.
+     *
+     * @return maximum duration
+     */
+    public long getMaxRecordingDurationMs() {
+        return limits.getMaxDurationMs();
     }
 
     /**
@@ -559,7 +559,16 @@ public class FileConsumer implements Constants, IPushableConsumer, IPipeConnecti
      * @param minFreeDiskBytes minimum free bytes
      */
     public void setMinFreeDiskBytes(long minFreeDiskBytes) {
-        this.minFreeDiskBytes = minFreeDiskBytes;
+        limits.setMinFreeDiskBytes(minFreeDiskBytes);
+    }
+
+    /**
+     * Returns the minimum usable space to keep free on the recording volume; 0 disables the check.
+     *
+     * @return minimum free bytes
+     */
+    public long getMinFreeDiskBytes() {
+        return limits.getMinFreeDiskBytes();
     }
 
     /**

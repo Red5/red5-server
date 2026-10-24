@@ -32,6 +32,26 @@ public interface ITagWriter extends AutoCloseable {
     public long getBytesWritten();
 
     /**
+     * Return the bytes of tag data that were already in the file before this writer started and are kept in it, as when appending.
+     * {@link #getBytesWritten()} only counts what this writer wrote, so the two together give the tag data in the finished file.
+     *
+     * @return bytes kept from the existing file, 0 when the file is written from the start
+     */
+    default long getExistingBytes() {
+        return 0L;
+    }
+
+    /**
+     * Return the duration in milliseconds of the content that was already in the file before this writer started, as when appending.
+     * Timestamps of the tags this writer is given are offset by this amount in the file.
+     *
+     * @return duration of the existing content in milliseconds, 0 when the file is written from the start
+     */
+    default int getExistingDuration() {
+        return 0;
+    }
+
+    /**
      * Return the file that is written.
      *
      * @return the File to be written

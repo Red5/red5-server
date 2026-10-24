@@ -188,6 +188,12 @@ public class FLVWriter implements ITagWriter {
     // offset in previous flv to skip when appending
     private long appendOffset = HEADER_LENGTH + 4L;
 
+    // bytes of tag data in the previous flv that are carried into the new one when appending
+    private long existingBytes;
+
+    // duration of the previous flv in milliseconds when appending
+    private int existingDuration;
+
     /**
      * Creates writer implementation with for a given file
      *
@@ -270,8 +276,11 @@ public class FLVWriter implements ITagWriter {
                     }
                     // if we are appending get the duration as offset
                     timeOffset = duration;
+                    existingDuration = duration;
                     log.debug("Duration: {}", duration);
                 }
+                // the tags past the header and metadata are copied into the new flv when it is finalized
+                existingBytes = Math.max(0L, Files.size(path) - appendOffset);
                 // move / rename previous flv
                 Files.move(path, path.resolveSibling(path.toFile().getName().replace(".flv", ".old")));
                 log.debug("Previous flv renamed");
@@ -1124,6 +1133,18 @@ public class FLVWriter implements ITagWriter {
     @Override
     public long getBytesWritten() {
         return bytesWritten;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public long getExistingBytes() {
+        return existingBytes;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getExistingDuration() {
+        return existingDuration;
     }
 
     /**
