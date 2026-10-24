@@ -30,7 +30,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Red5 implementation of the WebSocket JSR365 ServerEndpointConfig.Configurator.
+ * Red5 implementation of the WebSocket JSR365 ServerEndpointConfig.Configurator. One instance serves one web application on one host and
+ * is bound to that application's scope.
+ * <p>
+ * Origin checking starts from the {@link WebSocketPlugin} defaults and is set per web application with these web.xml context-params (or
+ * servlet context attributes of the same names):
+ *
+ * <pre>
+ * &lt;context-param&gt;
+ *     &lt;param-name&gt;crossOriginPolicy&lt;/param-name&gt;
+ *     &lt;param-value&gt;true&lt;/param-value&gt;
+ * &lt;/context-param&gt;
+ * &lt;context-param&gt;
+ *     &lt;param-name&gt;allowedOrigins&lt;/param-name&gt;
+ *     &lt;param-value&gt;https://example.com,https://example.com:8443&lt;/param-value&gt;
+ * &lt;/context-param&gt;
+ * </pre>
+ *
+ * When <code>crossOriginPolicy</code> is true, {@link #checkOrigin(String)} rejects a handshake whose Origin header is missing or does not
+ * match an entry of <code>allowedOrigins</code>, see {@link #originMatches(String, String)}; an entry without a scheme matches its host,
+ * and port if given, under any scheme. When it is false, the default, every origin is accepted, including a missing one. The HTTP
+ * principal, session and cookies of the upgrade request are carried into the WebSocket connection, so an application that authenticates
+ * WebSocket users that way must enable origin checking, or any site the user visits can open an authenticated connection.
  *
  * @author Paul Gregoire
  */
@@ -107,7 +128,12 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
         return result;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * With origin checking disabled every handshake is accepted, with or without an Origin header. With it enabled the Origin header must
+     * be present and match one of the allowed origins.
+     */
     @Override
     public boolean checkOrigin(String originHeaderValue) {
         log.debug("checkOrigin: {}", originHeaderValue);
@@ -365,7 +391,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * <p>isCrossOriginPolicy.</p>
+     * Returns whether Origin checking is enabled for this web application.
      *
      * @return a boolean
      */
@@ -374,7 +400,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * <p>Setter for the field <code>crossOriginPolicy</code>.</p>
+     * Enables or disables Origin checking for this web application; set from the <code>crossOriginPolicy</code> context-param when present.
      *
      * @param crossOriginPolicy a boolean
      */
@@ -392,7 +418,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * Sets the allowed origins for this instance.
+     * Sets the allowed origins for this instance; set from the comma-separated <code>allowedOrigins</code> context-param when present.
      *
      * @param allowedOrigins an array of {@link java.lang.String} objects
      */

@@ -56,6 +56,21 @@ import org.springframework.web.context.WebApplicationContext;
  * application's host and context path, and each application scope gets its own {@link WebSocketScopeManager}, keyed by the scope instance.
  * A handshake is bound to the manager of the application scope that serves the request, never to another application that merely shares
  * its name.
+ * <p>
+ * Origin checking: the plugin's <code>crossOriginPolicy</code> and <code>allowedOrigins</code> properties are server-wide defaults. A web
+ * application overrides them with web.xml context-params (or servlet context attributes) of the same names:
+ * <ul>
+ * <li><code>crossOriginPolicy</code> - <code>true</code> to check the Origin header of WebSocket handshakes, <code>false</code> to accept
+ * any origin. Checking is off by default.</li>
+ * <li><code>allowedOrigins</code> - comma-separated origins, such as <code>https://example.com,https://example.com:8443</code>. An entry
+ * with a scheme must match the Origin's scheme, host and port exactly, with default ports filled in. An entry without a scheme, such as
+ * <code>example.com</code> or <code>example.com:5080</code>, matches that exact host, and port if given, under any scheme. Sub-domains and
+ * suffixes never match. <code>*</code> allows any origin.</li>
+ * </ul>
+ * While checking is enabled a handshake without an Origin header is rejected; while it is disabled such handshakes are accepted. The HTTP
+ * principal, session and cookies of the upgrade request are carried into the WebSocket connection, so with checking off a page on any site
+ * can open a connection with the user's credentials. Applications that authenticate WebSocket users through the HTTP session, cookies or
+ * container login must enable <code>crossOriginPolicy</code> and list their own origins in <code>allowedOrigins</code>.
  *
  * @author Paul Gregoire
  */
@@ -69,13 +84,13 @@ public class WebSocketPlugin extends Red5Plugin {
     // Shared executor
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
-    // Same origin policy enable/disabled
+    // Same origin policy enable/disabled; never read, see setSameOriginPolicy
     private static boolean sameOriginPolicy;
 
-    // Cross-origin policy enable/disabled
+    // Origin checking enable/disabled, the server-wide default (off)
     private static boolean crossOriginPolicy;
 
-    // Cross-origin names
+    // Allowed origins, the server-wide default
     private static String[] allowedOrigins = new String[] { "*" };
 
     // holds application scopes, by instance, and their associated websocket scope manager
@@ -434,7 +449,9 @@ public class WebSocketPlugin extends Red5Plugin {
      * <p>isSameOriginPolicy.</p>
      *
      * @return a boolean
+     * @deprecated no origin check reads this setting; see {@link #setSameOriginPolicy(boolean)}
      */
+    @Deprecated
     public static boolean isSameOriginPolicy() {
         return sameOriginPolicy;
     }
@@ -443,7 +460,13 @@ public class WebSocketPlugin extends Red5Plugin {
      * <p>Setter for the field <code>sameOriginPolicy</code>.</p>
      *
      * @param sameOriginPolicy a boolean
+     * @deprecated this setting has never been read and has no effect. Origin checking is controlled by
+     *             {@link #setCrossOriginPolicy(boolean)} and {@link #setAllowedOrigins(String[])}, or per application by the
+     *             <code>crossOriginPolicy</code> and <code>allowedOrigins</code> context-params; to accept only the application's own site,
+     *             enable crossOriginPolicy and list that origin in allowedOrigins. The setter remains so existing Spring configurations
+     *             still load.
      */
+    @Deprecated
     public void setSameOriginPolicy(boolean sameOriginPolicy) {
         WebSocketPlugin.sameOriginPolicy = sameOriginPolicy;
     }
@@ -468,7 +491,7 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>isCrossOriginPolicy.</p>
+     * Returns the server-wide default for Origin checking.
      *
      * @return a boolean
      */
@@ -477,7 +500,8 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>Setter for the field <code>crossOriginPolicy</code>.</p>
+     * Sets the server-wide default for Origin checking, used by web applications that do not set the <code>crossOriginPolicy</code>
+     * context-param. While enabled, handshakes whose Origin header is missing or not allowed are rejected with 403. Off by default.
      *
      * @param crossOriginPolicy a boolean
      */
@@ -486,7 +510,7 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>Getter for the field <code>allowedOrigins</code>.</p>
+     * Returns the server-wide default allowed origins.
      *
      * @return an array of {@link java.lang.String} objects
      */
@@ -495,7 +519,8 @@ public class WebSocketPlugin extends Red5Plugin {
     }
 
     /**
-     * <p>Setter for the field <code>allowedOrigins</code>.</p>
+     * Sets the server-wide default allowed origins, used by web applications that do not set the <code>allowedOrigins</code>
+     * context-param; see the class description for the matching rules. Defaults to <code>*</code>, any origin.
      *
      * @param allowedOrigins an array of {@link java.lang.String} objects
      */

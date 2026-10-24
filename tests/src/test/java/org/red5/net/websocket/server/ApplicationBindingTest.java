@@ -1,5 +1,6 @@
 package org.red5.net.websocket.server;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -136,6 +137,29 @@ public class ApplicationBindingTest {
         WsPerSessionServerEndpointConfig perSession = new WsPerSessionServerEndpointConfig(sec);
         unbound.modifyHandshake(perSession, request(PATH), response());
         assertNull(perSession.getUserProperties().get(WSConstants.WS_MANAGER));
+    }
+
+    @Test
+    public void testOriginSettingsComeFromOwnApplication() {
+        // same context path on two hosts, each with its own origin context-params (issue #470)
+        DefaultWsServerContainer containerA = container(hostA, appA, Map.of("crossOriginPolicy", "true", "allowedOrigins", "https://a.example.com"));
+        DefaultWsServerContainer containerB = container(hostB, appB, Map.of("crossOriginPolicy", "true", "allowedOrigins", " https://b.example.com , b.example.net:5080 "));
+        DefaultServerEndpointConfigurator configuratorA = bind(containerA);
+        DefaultServerEndpointConfigurator configuratorB = bind(containerB);
+        assertSame(appA, configuratorA.getApplicationScope());
+        assertSame(appB, configuratorB.getApplicationScope());
+        assertTrue(configuratorA.checkOrigin("https://a.example.com"));
+        assertFalse(configuratorA.checkOrigin("https://b.example.com"));
+        assertFalse(configuratorA.checkOrigin(null));
+        assertTrue(configuratorB.checkOrigin("https://b.example.com"));
+        assertTrue(configuratorB.checkOrigin("http://b.example.net:5080"));
+        assertFalse(configuratorB.checkOrigin("https://a.example.com"));
+        // an application without the context-params keeps the plugin default, checking off
+        IScope appC = new Scope(new Scope(null, ScopeType.GLOBAL, "hostC", false), ScopeType.APPLICATION, APP, false);
+        DefaultServerEndpointConfigurator configuratorC = configurator(container(hostA.replace("hostA", "hostC"), appC, Map.of()));
+        assertFalse(configuratorC.isCrossOriginPolicy());
+        assertTrue(configuratorC.checkOrigin("https://a.example.com"));
+        assertTrue(configuratorC.checkOrigin(null));
     }
 
     @Test
