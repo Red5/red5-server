@@ -445,20 +445,21 @@ public class RTMP {
     }
 
     /**
-     * Get the last raw timestamp (before offset applied) for a channel.
+     * Get the highest raw timestamp (before offset applied) seen on a channel since its last restart, which discontinuity
+     * detection measures backward steps from.
      *
      * @param channelId channel id
-     * @return last raw timestamp
+     * @return highest raw timestamp
      */
     public int getLastRawTimestamp(int channelId) {
         return getChannelInfo(channelId).getLastRawTimestamp();
     }
 
     /**
-     * Set the last raw timestamp (before offset applied) for a channel.
+     * Set the highest raw timestamp (before offset applied) seen on a channel since its last restart.
      *
      * @param channelId channel id
-     * @param timestamp last raw timestamp
+     * @param timestamp highest raw timestamp
      */
     public void setLastRawTimestamp(int channelId, int timestamp) {
         getChannelInfo(channelId).setLastRawTimestamp(timestamp);
@@ -548,7 +549,7 @@ public class RTMP {
         // timestamp offset for discontinuity compensation (accumulated across restarts)
         private long timestampOffset;
 
-        // last raw timestamp seen (before offset applied) for discontinuity detection
+        // highest raw timestamp seen (before offset applied) since the last restart, for discontinuity detection
         private int lastRawTimestamp;
 
         /**
@@ -673,7 +674,7 @@ public class RTMP {
         }
 
         /**
-         * @return the lastRawTimestamp before offset applied
+         * @return the highest raw timestamp before offset applied since the last restart
          */
         public int getLastRawTimestamp() {
             return lastRawTimestamp;

@@ -373,10 +373,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             // store the last ts in thread local for debugging
             //lastTimestamp.set(header.getTimerBase());
             final IRTMPEvent message = decodeMessage(conn, packet.getHeader(), buf);
-            // flash will send an earlier time stamp when resetting a video stream with a new key frame. To avoid dropping it, we give it the
-            // minimal increment since the last message. To avoid relative time stamps being mis-computed, we don't reset the header we stored.
-            // discontinuity compensation is applied here, once per message; the stored headers keep wire time
-            long offset = rtmp.getTimestampOffset(channelId);
+            // discontinuity compensation is applied here, once per completed message; the stored headers keep wire time
+            final long offset = updateTimestampOffset(rtmp, channelId, timestamp, absoluteStart);
             message.setTimestamp(offset > 0 ? (int) ((Integer.toUnsignedLong(timestamp) + offset) & 0xFFFFFFFFL) : timestamp);
             if (isTrace) {
                 log.trace("Decoded message: {}", message);
@@ -593,7 +591,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // indicated the presence of an extended timestamp field.
                 // The extended flag is properly tracked through Type 0/1/2 header decoding based on the wire timestamp values.
                 // Note: We intentionally do NOT check the decoded timestamp values (timerBase/timerDelta) here because
-                // those values may include discontinuity offsets that don't reflect what was on the wire.
+                // presence follows the timestamp field of that last header, not the timer computed from base and delta.
                 boolean hasExtendedTimestamp = lastHeader.isExtended();
                 if (hasExtendedTimestamp) {
                     headerLength += 4;
@@ -617,48 +615,68 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 throw new ProtocolException(String.format("Unexpected header: %s", headerSize));
         }
         log.trace("Decoded chunk {} {}", Header.HeaderType.values()[headerSize], header);
-        // Apply timestamp discontinuity compensation
-        // This handles source restarts where timestamps reset to 0
-        int rawTimer = header.getTimer();
-        long currentOffset = rtmp.getTimestampOffset(channelId);
-        int lastRawTimestamp = rtmp.getLastRawTimestamp(channelId);
-        // Detect timestamp discontinuity on Type 0 headers (absolute timestamps)
-        if (headerSize == HEADER_NEW && lastRawTimestamp > 0) {
-            // Use unsigned arithmetic to detect large backward jumps
-            long unsignedLast = Integer.toUnsignedLong(lastRawTimestamp);
-            long unsignedCurrent = Integer.toUnsignedLong(rawTimer);
-            // A restart lands near zero or discards a long span; a backward step of a few seconds is a late
-            // frame from a lossy publisher and must pass through unchanged
-            if (isTimestampRestart(unsignedLast, unsignedCurrent)) {
-                // Calculate the new offset: accumulate previous offset + last timestamp + small gap
-                // The +1 ensures strict monotonicity
-                long newOffset = currentOffset + unsignedLast + 1;
-                // Cap the offset to prevent integer overflow in downstream int arithmetic
-                // PlayEngine and other components use int for timestamp math; values near
-                // Integer.MAX_VALUE cause overflow when small values are added
-                // Max safe offset is ~1 billion (0x40000000) to leave headroom
-                final long MAX_SAFE_OFFSET = 0x40000000L; // ~12 days in ms
-                if (newOffset > MAX_SAFE_OFFSET) {
-                    log.info("Timestamp discontinuity on channel {}: capping large offset {} to {} to prevent overflow", channelId, newOffset, MAX_SAFE_OFFSET);
-                    newOffset = MAX_SAFE_OFFSET;
-                } else {
-                    log.warn("Timestamp discontinuity on channel {}: raw {} -> {}, adjusting offset from {} to {} (accumulated: {}ms)", channelId, unsignedLast, unsignedCurrent, currentOffset, newOffset, newOffset);
-                }
-                rtmp.setTimestampOffset(channelId, newOffset);
-            }
-        }
-        // Store raw timestamp for next discontinuity detection
-        rtmp.setLastRawTimestamp(channelId, rawTimer);
         return header;
+    }
+
+    /**
+     * Timestamp discontinuity compensation for a completed message. A Type 0 message that steps back far enough from the
+     * highest raw timestamp seen on the channel is a publisher restart and moves the channel offset so that the restarted
+     * timeline continues after that highest timestamp. Any other message only raises the highest timestamp.
+     *
+     * @param rtmp
+     *            RTMP state holding the channel offset and highest raw timestamp
+     * @param channelId
+     *            channel id
+     * @param timestamp
+     *            raw (wire) timestamp of the message
+     * @param absoluteStart
+     *            true if the message opened with a Type 0 chunk
+     * @return offset to add to the message timestamp
+     */
+    private long updateTimestampOffset(RTMP rtmp, int channelId, int timestamp, boolean absoluteStart) {
+        final long highest = Integer.toUnsignedLong(rtmp.getLastRawTimestamp(channelId));
+        final long current = Integer.toUnsignedLong(timestamp);
+        long offset = rtmp.getTimestampOffset(channelId);
+        // only an absolute timestamp can step back; deltas are unsigned
+        if (absoluteStart && highest > 0 && isTimestampRestart(highest, current)) {
+            // a restart near zero keeps its own timeline, which keeps audio and video aligned across channels; one landing
+            // elsewhere continues from where the previous timeline stopped instead of jumping ahead by its landing time.
+            // The +1 ensures strict monotonicity
+            long newOffset = offset + highest + 1 - (current < RESTART_NEAR_ZERO_MS ? 0 : current);
+            // Cap the offset to prevent integer overflow in downstream int arithmetic
+            // PlayEngine and other components use int for timestamp math; values near
+            // Integer.MAX_VALUE cause overflow when small values are added
+            // Max safe offset is ~1 billion (0x40000000) to leave headroom
+            final long MAX_SAFE_OFFSET = 0x40000000L; // ~12 days in ms
+            if (newOffset > MAX_SAFE_OFFSET) {
+                log.info("Timestamp discontinuity on channel {}: capping large offset {} to {} to prevent overflow", channelId, newOffset, MAX_SAFE_OFFSET);
+                newOffset = MAX_SAFE_OFFSET;
+            } else {
+                log.warn("Timestamp discontinuity on channel {}: raw {} -> {}, adjusting offset from {} to {} (accumulated: {}ms)", channelId, highest, current, offset, newOffset, newOffset);
+            }
+            rtmp.setTimestampOffset(channelId, newOffset);
+            // the restarted timeline is the one to measure from now
+            rtmp.setLastRawTimestamp(channelId, timestamp);
+            return newOffset;
+        }
+        // a late frame must not lower the mark, or a later restart would rebase to below what was already delivered
+        if (current > highest) {
+            rtmp.setLastRawTimestamp(channelId, timestamp);
+        }
+        return offset;
     }
 
     /**
      * Distinguishes a publisher restart from a late frame. A restart lands near zero, discards a long span, or drops to
      * under half of the previous time after a large step back; a backward step of a few seconds is a late frame from a lossy
      * publisher and must pass through unchanged.
+     * <p>
+     * A step back that fits neither case is taken as a late frame. When it is in fact a restart, downstream sees one
+     * backward step, as it did before compensation existed; a late frame taken as a restart would instead shift every
+     * later timestamp on the channel by the length of the step and put it out of sync with the other channels.
      *
      * @param last
-     *            last raw timestamp in milliseconds, unsigned
+     *            highest raw timestamp in milliseconds since the last restart, unsigned
      * @param current
      *            current raw timestamp in milliseconds, unsigned
      * @return true if the step back is a restart

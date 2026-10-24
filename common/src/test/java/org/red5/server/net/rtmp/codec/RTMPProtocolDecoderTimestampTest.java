@@ -6,6 +6,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Before;
 import org.junit.Test;
@@ -172,8 +177,10 @@ public class RTMPProtocolDecoderTimestampTest implements Constants {
     public void testLargeBackwardJumpIsADiscontinuityEvenAboveOneSecond() {
         decode(type0(100000));
         Packet restarted = decode(type0(50000));
-        assertEquals(100001L, conn.getState().getTimestampOffset(CHANNEL));
-        assertEquals(150001, messageTime(restarted));
+        // a restart landing away from zero continues right after the previous timeline instead of jumping ahead by 50s
+        assertEquals(50001L, conn.getState().getTimestampOffset(CHANNEL));
+        assertEquals(100001, messageTime(restarted));
+        assertEquals(100041, messageTime(decode(type1(40))));
     }
 
     @Test
@@ -181,8 +188,38 @@ public class RTMPProtocolDecoderTimestampTest implements Constants {
         decode(type0(20000));
         // 15s back, landing at under half of the previous time
         Packet restarted = decode(type0(5000));
+        assertEquals(15001L, conn.getState().getTimestampOffset(CHANNEL));
+        assertEquals(20001, messageTime(restarted));
+    }
+
+    @Test
+    public void testRestartAfterALateFrameRebasesPastTheHighestTimestamp() {
+        decode(type0(20000));
+        // a late frame passes through and must not lower the mark a later restart rebases from
+        assertEquals(17000, messageTime(decode(type0(17000))));
+        Packet restarted = decode(type0(0));
         assertEquals(20001L, conn.getState().getTimestampOffset(CHANNEL));
-        assertEquals(25001, messageTime(restarted));
+        assertEquals(20001, messageTime(restarted));
+    }
+
+    @Test
+    public void testLateFrameIsMeasuredFromTheHighestTimestamp() {
+        decode(type0(20000));
+        decode(type0(17000));
+        decode(type1(40)); // 17040
+        // 9000 is under half of 20000 after more than 5s back, which is a restart; against 17040 it would not be
+        Packet restarted = decode(type0(9000));
+        assertEquals(11001L, conn.getState().getTimestampOffset(CHANNEL));
+        assertEquals(20001, messageTime(restarted));
+    }
+
+    @Test
+    public void testAbandonedMessageDoesNotTriggerARestart() {
+        decode(type0(20000));
+        // a Type 0 message near zero left partial, then replaced by one of a different size at the current time
+        assertNull(decoder.decodePacket(conn, conn.getDecoderState(), firstChunk(HEADER_NEW, 500, 1000)));
+        assertEquals(20040, messageTime(decode(type0(20040))));
+        assertEquals(0L, conn.getState().getTimestampOffset(CHANNEL));
     }
 
     @Test
@@ -343,15 +380,20 @@ public class RTMPProtocolDecoderTimestampTest implements Constants {
         assertEquals("last header holds wire time, not the offset time", 500, conn.getState().getLastReadHeader(CHANNEL).getTimerBase());
     }
 
-    /**
-     * Packet.readExternal rebuilds the message timestamp from the header, so a deserialized packet (clustering)
-     * loses the discontinuity offset. This pins the current behavior.
-     */
     @Test
-    public void testHeaderOfRestartedPacketDoesNotCarryOffset() {
+    public void testDeserializedPacketKeepsTheRebasedTimestamp() throws Exception {
         decode(type0(20000));
         Packet restarted = decode(type0(500));
         assertEquals(500, headerTime(restarted));
-        assertTrue(messageTime(restarted) != headerTime(restarted));
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+            out.writeObject(restarted);
+        }
+        Packet copy;
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+            copy = (Packet) in.readObject();
+        }
+        assertEquals("header keeps wire time", 500, headerTime(copy));
+        assertEquals("message keeps the rebased time", 20501, messageTime(copy));
     }
 }

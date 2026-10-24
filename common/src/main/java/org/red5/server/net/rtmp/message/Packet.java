@@ -253,7 +253,7 @@ public class Packet implements Externalizable {
         header = (Header) in.readObject();
         message = (IRTMPEvent) in.readObject();
         message.setHeader(header);
-        message.setTimestamp(header.getTimer());
+        // the message keeps its own serialized timestamp; the header holds wire time, which differs after a publisher restart
     }
 
     /** {@inheritDoc} */
