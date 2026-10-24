@@ -8,17 +8,19 @@
         <param-name>webAppRootKey</param-name>
         <param-value>/live</param-value>
     </context-param>
-    <!-- WebSocket Origin checking, off unless enabled here or on the WebSocket plugin. When enabled, handshakes without an Origin
-         header or from an origin not listed are rejected. Entries are comma-separated; one with a scheme must match scheme, host
-         and port exactly, one without a scheme (example.com or example.com:5080) matches that host, and port if given, under any
-         scheme, and * allows any origin. Enable it if the application relies on HTTP sessions, cookies or container login.
-    <context-param>
-        <param-name>crossOriginPolicy</param-name>
-        <param-value>true</param-value>
-    </context-param>
+    <!-- WebSocket Origin checking is on by default and accepts only handshakes from this server's own origin, as named by the
+         request's X-Forwarded-Host or Host header, so a reverse proxy must pass the original host on. List other trusted origins
+         in allowedOrigins, comma-separated; one with a scheme must match scheme, host and port exactly, one without a scheme
+         (example.com or example.com:5080) matches that host, and port if given, under any scheme, and * allows any origin, which
+         is unsafe when HTTP sessions, cookies or container login are used. Handshakes without an Origin header come from
+         non-browser clients and are accepted unless allowMissingOrigin is false. crossOriginPolicy false turns checking off.
     <context-param>
         <param-name>allowedOrigins</param-name>
         <param-value>https://example.com,http://localhost:5080</param-value>
+    </context-param>
+    <context-param>
+        <param-name>allowMissingOrigin</param-name>
+        <param-value>false</param-value>
     </context-param>
     -->
     <!-- Server-Sent Events Servlet -->

@@ -150,15 +150,17 @@ public class ApplicationBindingTest {
         assertSame(appB, configuratorB.getApplicationScope());
         assertTrue(configuratorA.checkOrigin("https://a.example.com"));
         assertFalse(configuratorA.checkOrigin("https://b.example.com"));
-        assertFalse(configuratorA.checkOrigin(null));
+        // browsers always send an Origin, so a missing one is accepted by default (issue #489)
+        assertTrue(configuratorA.checkOrigin(null));
         assertTrue(configuratorB.checkOrigin("https://b.example.com"));
         assertTrue(configuratorB.checkOrigin("http://b.example.net:5080"));
         assertFalse(configuratorB.checkOrigin("https://a.example.com"));
-        // an application without the context-params keeps the plugin default, checking off
+        // an application without the context-params keeps the plugin defaults: checking on, same-origin only (issue #489)
         IScope appC = new Scope(new Scope(null, ScopeType.GLOBAL, "hostC", false), ScopeType.APPLICATION, APP, false);
         DefaultServerEndpointConfigurator configuratorC = configurator(container(hostA.replace("hostA", "hostC"), appC, Map.of()));
-        assertFalse(configuratorC.isCrossOriginPolicy());
-        assertTrue(configuratorC.checkOrigin("https://a.example.com"));
+        assertTrue(configuratorC.isCrossOriginPolicy());
+        assertFalse(configuratorC.checkOrigin("https://a.example.com", "c.example.com"));
+        assertTrue(configuratorC.checkOrigin("https://c.example.com", "c.example.com"));
         assertTrue(configuratorC.checkOrigin(null));
     }
 
