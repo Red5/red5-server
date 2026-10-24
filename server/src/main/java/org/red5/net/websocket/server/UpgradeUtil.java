@@ -180,6 +180,10 @@ public class UpgradeUtil {
         WsHandshakeRequest wsRequest = new WsHandshakeRequest(req, pathParams);
         WsHandshakeResponse wsResponse = new WsHandshakeResponse();
         WsPerSessionServerEndpointConfig perSessionServerEndpointConfig = new WsPerSessionServerEndpointConfig(sec);
+        // bind the endpoint to the application scope of the web application this container serves
+        if (sec.getConfigurator() instanceof DefaultServerEndpointConfigurator configurator) {
+            configurator.bindApplicationScope(sc.getServletContext());
+        }
         sec.getConfigurator().modifyHandshake(perSessionServerEndpointConfig, wsRequest, wsResponse);
         wsRequest.finished();
         // Add any additional headers

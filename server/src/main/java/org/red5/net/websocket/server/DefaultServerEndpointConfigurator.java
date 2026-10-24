@@ -7,12 +7,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
+import jakarta.servlet.ServletContext;
 import jakarta.websocket.Extension;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.server.HandshakeRequest;
@@ -46,8 +46,8 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
 
     private final Logger log = LoggerFactory.getLogger(DefaultServerEndpointConfigurator.class);
 
-    // application scope associated with this endpoint configurator
-    private IScope applicationScope;
+    // application scope of the web application served by this endpoint configurator; handshakes only use this scope's manager
+    private volatile IScope applicationScope;
 
     // Cross-origin policy enable/disabled (defaults to the plugin's setting)
     private boolean crossOriginPolicy = WebSocketPlugin.isCrossOriginPolicy();
@@ -229,9 +229,10 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             path = path.substring(0, path.length() - 1);
         }
         log.debug("Normalized path: {}", path);
-        // get the manager
+        // get the manager of the application scope bound to this endpoint, never one found by application name
+        IScope appScope = applicationScope;
         WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
-        WebSocketScopeManager manager = plugin.getManager(path);
+        WebSocketScopeManager manager = (appScope != null && plugin != null) ? plugin.getManager(appScope) : null;
         if (manager != null) {
             // add the websocket scope manager to the user props
             sec.getUserProperties().put(WSConstants.WS_MANAGER, manager);
@@ -243,17 +244,12 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             } else if (scope == null) {
                 // split up the path into usable scope names
                 String[] paths = path.split("\\/");
-                // parent scope - prefer manager's app scope over separate lookup
-                IScope appScope = Optional.ofNullable(applicationScope).orElse(manager.getApplication());
-                if (appScope == null) {
-                    // fallback to plugin lookup
-                    appScope = plugin.getApplicationScope(path);
-                }
+                // parent scope is the bound application scope
                 IScope parentScope = appScope;
                 // room scope
                 IScope roomScope = null;
                 // create child scopes
-                log.debug("Creating child websocket scope of {} for path: {} split: {}", applicationScope, path, Arrays.toString(paths));
+                log.debug("Creating child websocket scope of {} for path: {} split: {}", appScope, path, Arrays.toString(paths));
                 for (int i = 2; i < paths.length; i++) {
                     // start with the first room and proceed from there
                     roomScope = ScopeUtils.resolveScope(parentScope, paths[i]);
@@ -275,7 +271,7 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                     // get the new ws scope
                     scope = manager.getScope(path);
                     // copy the listeners from the app websocket scope if available
-                    if (appScope != null && appScope.hasAttribute(WSConstants.WS_SCOPE)) {
+                    if (appScope.hasAttribute(WSConstants.WS_SCOPE)) {
                         WebSocketScope appWsScope = (WebSocketScope) appScope.getAttribute(WSConstants.WS_SCOPE);
                         if (appWsScope != null && scope != null) {
                             Set<IWebSocketDataListener> listeners = appWsScope.getListeners();
@@ -299,10 +295,33 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
             } else {
                 log.warn("WebSocket scope is null for path: {} - handshake may fail", path);
             }
+        } else if (appScope == null) {
+            log.warn("No application scope is bound to the websocket endpoint for path: {} requested uri: {}", path, request.getRequestURI().toString());
         } else {
-            log.warn("No websocket manager found for path: {} requested uri: {}", path, request.getRequestURI().toString());
+            log.warn("No websocket manager found for application scope: {} path: {} requested uri: {}", appScope, path, request.getRequestURI().toString());
         }
         super.modifyHandshake(sec, request, response);
+    }
+
+    /**
+     * Binds this configurator to the application scope of the given web application, unless it is already bound to an application scope
+     * that still has a websocket manager. Called before each handshake so the binding follows an application that has been reloaded.
+     *
+     * @param servletContext servlet context of the web application served by this configurator
+     */
+    void bindApplicationScope(ServletContext servletContext) {
+        IScope current = applicationScope;
+        if (current != null) {
+            WebSocketPlugin plugin = (WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME);
+            if (plugin == null || plugin.getManager(current) != null) {
+                return;
+            }
+        }
+        IScope resolved = WebSocketPlugin.resolveApplicationScope(servletContext);
+        if (resolved != null && resolved != current) {
+            log.debug("Binding websocket endpoint to application scope: {}", resolved);
+            applicationScope = resolved;
+        }
     }
 
     /**
@@ -327,16 +346,17 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     }
 
     /**
-     * <p>Getter for the field <code>applicationScope</code>.</p>
+     * Returns the application scope this configurator is bound to; handshakes are served by that scope's websocket manager only.
      *
-     * @return a {@link org.red5.server.api.scope.IScope} object
+     * @return a {@link org.red5.server.api.scope.IScope} object or null if not bound yet
      */
     public IScope getApplicationScope() {
         return applicationScope;
     }
 
     /**
-     * <p>Setter for the field <code>applicationScope</code>.</p>
+     * Binds this configurator to an application scope. When not set, or when the bound scope no longer has a websocket manager, the scope
+     * is resolved from the web application's <code>web.scope</code> or <code>web.handler</code> bean before the next handshake.
      *
      * @param applicationScope a {@link org.red5.server.api.scope.IScope} object
      */

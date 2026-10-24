@@ -175,6 +175,15 @@ public class DefaultWsServerContainer extends WsWebSocketContainer implements Se
     }
 
     /**
+     * Returns the servlet context of the web application this container serves.
+     *
+     * @return servlet context
+     */
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * Until the WebSocket specification provides such a mechanism, this Tomcat proprietary method is provided to enable applications to programmatically

@@ -12,11 +12,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Set;
 
 import org.red5.net.websocket.WebSocketConnection;
-import org.red5.net.websocket.WebSocketPlugin;
 import org.red5.net.websocket.WebSocketScope;
-import org.red5.net.websocket.WebSocketScopeManager;
 import org.red5.net.websocket.model.WSMessage;
-import org.red5.server.plugin.PluginRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +44,11 @@ public class DefaultWebSocketDataListener extends WebSocketDataListener {
         // assume we have text
         String msg = new String(message.getPayload().array());
         log.info("onWSMessage: {}", msg);
-        // get the path
-        String path = message.getPath();
+        // use the scope the sending connection was bound to at handshake, not one looked up by application name
+        WebSocketConnection sender = message.getConnection();
+        WebSocketScope wsScope = sender != null ? sender.getScope() : null;
         // just echo back the message
-        WebSocketScopeManager manager = ((WebSocketPlugin) PluginRegistry.getPlugin(WebSocketPlugin.NAME)).getManager(path);
-        if (manager != null) {
-            // get the ws scope
-            WebSocketScope wsScope = manager.getScope(path);
+        if (wsScope != null) {
             Set<WebSocketConnection> conns = wsScope.getConns();
             for (WebSocketConnection conn : conns) {
                 log.debug("Echoing to {}", conn);
@@ -66,7 +61,7 @@ public class DefaultWebSocketDataListener extends WebSocketDataListener {
                 }
             }
         } else {
-            log.info("No manager found for path: {}", path);
+            log.info("No websocket scope found for the connection of message: {}", message);
         }
     }
 
