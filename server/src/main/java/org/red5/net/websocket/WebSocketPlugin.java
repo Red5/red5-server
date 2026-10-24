@@ -57,20 +57,24 @@ import org.springframework.web.context.WebApplicationContext;
  * A handshake is bound to the manager of the application scope that serves the request, never to another application that merely shares
  * its name.
  * <p>
- * Origin checking: the plugin's <code>crossOriginPolicy</code> and <code>allowedOrigins</code> properties are server-wide defaults. A web
- * application overrides them with web.xml context-params (or servlet context attributes) of the same names:
+ * Origin checking: the plugin's <code>crossOriginPolicy</code>, <code>allowedOrigins</code> and <code>allowMissingOrigin</code> properties
+ * are server-wide defaults. A web application overrides them with web.xml context-params (or servlet context attributes) of the same
+ * names:
  * <ul>
- * <li><code>crossOriginPolicy</code> - <code>true</code> to check the Origin header of WebSocket handshakes, <code>false</code> to accept
- * any origin. Checking is off by default.</li>
- * <li><code>allowedOrigins</code> - comma-separated origins, such as <code>https://example.com,https://example.com:8443</code>. An entry
- * with a scheme must match the Origin's scheme, host and port exactly, with default ports filled in. An entry without a scheme, such as
+ * <li><code>crossOriginPolicy</code> - <code>true</code>, the default, to check the Origin header of WebSocket handshakes,
+ * <code>false</code> to accept any origin.</li>
+ * <li><code>allowedOrigins</code> - comma-separated origins accepted besides the request's own, such as
+ * <code>https://example.com,https://example.com:8443</code>. None by default, so only same-origin handshakes are accepted. An entry with
+ * a scheme must match the Origin's scheme, host and port exactly, with default ports filled in. An entry without a scheme, such as
  * <code>example.com</code> or <code>example.com:5080</code>, matches that exact host, and port if given, under any scheme. Sub-domains and
- * suffixes never match. <code>*</code> allows any origin.</li>
+ * suffixes never match. <code>*</code> allows any origin, which is unsafe when HTTP sessions or credentials are used.</li>
+ * <li><code>allowMissingOrigin</code> - <code>true</code>, the default, to accept a handshake without an Origin header. Browsers always
+ * send one, so such a handshake comes from a non-browser client and cannot carry a visitor's credentials across sites.</li>
  * </ul>
- * While checking is enabled a handshake without an Origin header is rejected; while it is disabled such handshakes are accepted. The HTTP
- * principal, session and cookies of the upgrade request are carried into the WebSocket connection, so with checking off a page on any site
- * can open a connection with the user's credentials. Applications that authenticate WebSocket users through the HTTP session, cookies or
- * container login must enable <code>crossOriginPolicy</code> and list their own origins in <code>allowedOrigins</code>.
+ * A handshake is same-origin when the Origin's host equals the request's <code>X-Forwarded-Host</code> header, or its <code>Host</code>
+ * header when there is none, and the Origin's port equals the port given there, or the default port of the Origin's scheme when none is
+ * given. A reverse proxy must therefore pass the original host on. The HTTP principal, session and cookies of the upgrade request are
+ * carried into the WebSocket connection, which is why cross-site handshakes are refused unless their origin is allowed.
  *
  * @author Paul Gregoire
  */
@@ -87,11 +91,14 @@ public class WebSocketPlugin extends Red5Plugin {
     // Same origin policy enable/disabled; never read, see setSameOriginPolicy
     private static boolean sameOriginPolicy;
 
-    // Origin checking enable/disabled, the server-wide default (off)
-    private static boolean crossOriginPolicy;
+    // Origin checking enable/disabled, the server-wide default (on)
+    private static boolean crossOriginPolicy = true;
 
-    // Allowed origins, the server-wide default
-    private static String[] allowedOrigins = new String[] { "*" };
+    // Allowed origins besides the request's own, the server-wide default (none, so only same-origin handshakes are accepted)
+    private static String[] allowedOrigins = new String[0];
+
+    // Whether a handshake without an Origin header is accepted while checking is on, the server-wide default (accepted)
+    private static boolean allowMissingOrigin = true;
 
     // holds application scopes, by instance, and their associated websocket scope manager
     private static ConcurrentMap<ScopeKey, WebSocketScopeManager> managerMap = new ConcurrentHashMap<>();
@@ -494,9 +501,8 @@ public class WebSocketPlugin extends Red5Plugin {
      * @param sameOriginPolicy a boolean
      * @deprecated this setting has never been read and has no effect. Origin checking is controlled by
      *             {@link #setCrossOriginPolicy(boolean)} and {@link #setAllowedOrigins(String[])}, or per application by the
-     *             <code>crossOriginPolicy</code> and <code>allowedOrigins</code> context-params; to accept only the application's own site,
-     *             enable crossOriginPolicy and list that origin in allowedOrigins. The setter remains so existing Spring configurations
-     *             still load.
+     *             <code>crossOriginPolicy</code> and <code>allowedOrigins</code> context-params; only same-origin handshakes are accepted
+     *             by default. The setter remains so existing Spring configurations still load.
      */
     @Deprecated
     public void setSameOriginPolicy(boolean sameOriginPolicy) {
@@ -533,12 +539,34 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Sets the server-wide default for Origin checking, used by web applications that do not set the <code>crossOriginPolicy</code>
-     * context-param. While enabled, handshakes whose Origin header is missing or not allowed are rejected with 403. Off by default.
+     * context-param. While enabled, handshakes from an origin that is neither the request's own nor allowed are rejected with 403. On by
+     * default.
      *
      * @param crossOriginPolicy a boolean
      */
     public void setCrossOriginPolicy(boolean crossOriginPolicy) {
         WebSocketPlugin.crossOriginPolicy = crossOriginPolicy;
+    }
+
+    /**
+     * Returns the server-wide default for accepting handshakes without an Origin header while checking is on.
+     *
+     * @return a boolean
+     */
+    public static boolean isAllowMissingOrigin() {
+        return allowMissingOrigin;
+    }
+
+    /**
+     * Sets the server-wide default for accepting handshakes without an Origin header while checking is on, used by web applications that
+     * do not set the <code>allowMissingOrigin</code> context-param. Browsers always send an Origin header with a WebSocket handshake, so
+     * a handshake without one does not come from a web page and cannot carry a visitor's credentials across sites; it comes from a
+     * non-browser client, which could send any Origin it likes. Accepted by default, so native clients keep working.
+     *
+     * @param allowMissingOrigin a boolean
+     */
+    public void setAllowMissingOrigin(boolean allowMissingOrigin) {
+        WebSocketPlugin.allowMissingOrigin = allowMissingOrigin;
     }
 
     /**
@@ -552,7 +580,8 @@ public class WebSocketPlugin extends Red5Plugin {
 
     /**
      * Sets the server-wide default allowed origins, used by web applications that do not set the <code>allowedOrigins</code>
-     * context-param; see the class description for the matching rules. Defaults to <code>*</code>, any origin.
+     * context-param; see the class description for the matching rules. Empty by default, so only same-origin handshakes are accepted;
+     * <code>*</code> accepts any origin.
      *
      * @param allowedOrigins an array of {@link java.lang.String} objects
      */
@@ -625,8 +654,12 @@ public class WebSocketPlugin extends Red5Plugin {
             if (allowedOriginsSetting != null) {
                 endpointConfigurator.setAllowedOrigins(Stream.of(allowedOriginsSetting.split(",")).map(String::trim).filter(o -> !o.isEmpty()).toArray(String[]::new));
             }
+            String allowMissingOriginSetting = contextSetting(servletContext, "allowMissingOrigin");
+            if (allowMissingOriginSetting != null) {
+                endpointConfigurator.setAllowMissingOrigin(Boolean.parseBoolean(allowMissingOriginSetting.trim()));
+            }
             if (!endpointConfigurator.isCrossOriginPolicy()) {
-                log.info("WebSocket Origin checking is disabled for {}; browsers on any site can open authenticated connections, set the crossOriginPolicy and allowedOrigins context-params to restrict them", path);
+                log.warn("WebSocket Origin checking is disabled for {}; browsers on any site can open authenticated connections, remove crossOriginPolicy=false or list trusted origins in allowedOrigins instead", path);
             } else if (Arrays.asList(endpointConfigurator.getAllowedOrigins()).contains("*")) {
                 log.warn("WebSocket Origin checking for {} allows any origin (*), which is unsafe when HTTP sessions or credentials are used", path);
             }

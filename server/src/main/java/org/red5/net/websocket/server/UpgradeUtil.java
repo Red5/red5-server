@@ -108,7 +108,9 @@ public class UpgradeUtil {
         }
         // Origin check
         String origin = req.getHeader(Constants.ORIGIN_HEADER_NAME);
-        if (!sec.getConfigurator().checkOrigin(origin)) {
+        // the default configurator also accepts the request's own origin, which needs the request's host
+        boolean originAllowed = (sec.getConfigurator() instanceof DefaultServerEndpointConfigurator configurator) ? configurator.checkOrigin(origin, DefaultServerEndpointConfigurator.requestHost(req)) : sec.getConfigurator().checkOrigin(origin);
+        if (!originAllowed) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

@@ -13,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.Extension;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.server.HandshakeRequest;
@@ -47,11 +48,14 @@ import org.slf4j.LoggerFactory;
  * &lt;/context-param&gt;
  * </pre>
  *
- * When <code>crossOriginPolicy</code> is true, {@link #checkOrigin(String)} rejects a handshake whose Origin header is missing or does not
- * match an entry of <code>allowedOrigins</code>, see {@link #originMatches(String, String)}; an entry without a scheme matches its host,
- * and port if given, under any scheme. When it is false, the default, every origin is accepted, including a missing one. The HTTP
- * principal, session and cookies of the upgrade request are carried into the WebSocket connection, so an application that authenticates
- * WebSocket users that way must enable origin checking, or any site the user visits can open an authenticated connection.
+ * <code>crossOriginPolicy</code> is true by default: {@link #checkOrigin(String, String)} accepts a handshake from the request's own
+ * origin, see {@link #isSameOrigin(String, String)}, or from an entry of <code>allowedOrigins</code>, see
+ * {@link #originMatches(String, String)}, and rejects any other with 403. <code>allowedOrigins</code> is empty by default, so only
+ * same-origin handshakes are accepted; an entry without a scheme matches its host, and port if given, under any scheme, and
+ * <code>*</code> accepts any origin. A handshake without an Origin header comes from a non-browser client and is accepted unless the
+ * <code>allowMissingOrigin</code> context-param is false. Setting <code>crossOriginPolicy</code> to false accepts every origin. The HTTP
+ * principal, session and cookies of the upgrade request are carried into the WebSocket connection, so with checking off any site the user
+ * visits can open an authenticated connection.
  *
  * @author Paul Gregoire
  */
@@ -75,6 +79,9 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
 
     // Cross-origin names (defaults to the plugin's setting)
     private String[] allowedOrigins = WebSocketPlugin.getAllowedOrigins();
+
+    // Whether a handshake without an Origin header is accepted while checking is on (defaults to the plugin's setting)
+    private boolean allowMissingOrigin = WebSocketPlugin.isAllowMissingOrigin();
 
     // holds handshake modification implementations
     private CopyOnWriteArraySet<HandshakeModifier> handshakeModifiers = new CopyOnWriteArraySet<>();
@@ -131,26 +138,87 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
     /**
      * {@inheritDoc}
      *
-     * With origin checking disabled every handshake is accepted, with or without an Origin header. With it enabled the Origin header must
-     * be present and match one of the allowed origins.
+     * Without the request this cannot recognize a same-origin handshake, so only allowed origins are accepted; the upgrade uses
+     * {@link #checkOrigin(String, String)} with the request's host.
      */
     @Override
     public boolean checkOrigin(String originHeaderValue) {
-        log.debug("checkOrigin: {}", originHeaderValue);
-        // if CORS is enabled
-        if (crossOriginPolicy) {
-            if (originHeaderValue == null) {
-                log.info("Origin header is missing and cross-origin policy is enabled");
+        return checkOrigin(originHeaderValue, null);
+    }
+
+    /**
+     * Checks the Origin header of a handshake. With origin checking disabled every handshake is accepted. With it enabled, the default, a
+     * handshake is accepted when its origin is the request's own, see {@link #isSameOrigin(String, String)}, or matches an allowed origin,
+     * see {@link #originMatches(String, String)}; a handshake without an Origin header is accepted when allowMissingOrigin is true, the
+     * default.
+     *
+     * @param originHeaderValue Origin header value, or null when the header is missing
+     * @param requestHost host and optional port the request was made to, see {@link #requestHost(HttpServletRequest)}, or null if unknown
+     * @return true if the handshake may proceed
+     */
+    public boolean checkOrigin(String originHeaderValue, String requestHost) {
+        log.debug("checkOrigin: {} host: {}", originHeaderValue, requestHost);
+        if (!crossOriginPolicy) {
+            return true;
+        }
+        if (originHeaderValue == null) {
+            // browsers always send an Origin, so this is a non-browser client
+            if (!allowMissingOrigin) {
+                log.info("Origin header is missing and missing origins are not allowed");
                 return false;
             }
-            log.debug("allowedOrigins: {}", Arrays.toString(allowedOrigins));
-            // allow "*" == any / all, otherwise the origin must equal an allowed origin
-            if (!Stream.of(allowedOrigins).anyMatch(allowed -> originMatches(allowed, originHeaderValue))) {
-                log.info("Origin: {} did not match the allowed: {}", originHeaderValue, Arrays.toString(allowedOrigins));
-                return false;
-            }
+            return true;
+        }
+        if (requestHost != null && isSameOrigin(originHeaderValue, requestHost)) {
+            return true;
+        }
+        log.debug("allowedOrigins: {}", Arrays.toString(allowedOrigins));
+        // allow "*" == any / all, otherwise the origin must equal an allowed origin
+        if (!Stream.of(allowedOrigins).anyMatch(allowed -> originMatches(allowed, originHeaderValue))) {
+            log.info("Origin: {} is not the request's own ({}) and did not match the allowed: {}", originHeaderValue, requestHost, Arrays.toString(allowedOrigins));
+            return false;
         }
         return true;
+    }
+
+    /**
+     * Returns the host, and port if given, that a request was made to: the first X-Forwarded-Host value when a reverse proxy set one,
+     * otherwise the Host header. A browser cannot set either header on a WebSocket handshake, so a cross-site page cannot use them to pass
+     * as same-origin.
+     *
+     * @param request upgrade request
+     * @return host[:port], or null when the request carries neither header
+     */
+    public static String requestHost(HttpServletRequest request) {
+        String host = request.getHeader("X-Forwarded-Host");
+        if (host != null && !host.isBlank()) {
+            int comma = host.indexOf(',');
+            return (comma == -1 ? host : host.substring(0, comma)).trim();
+        }
+        host = request.getHeader("Host");
+        return (host == null || host.isBlank()) ? null : host.trim();
+    }
+
+    /**
+     * Returns whether an Origin header names the site a request was made to: its host equals the request host, case ignored, and its
+     * port equals the request host's port or, when the request host gives none, the default port of the Origin's scheme. The scheme is not
+     * compared, since a TLS terminating proxy hides it, so a page served over http may connect to the same host and port over wss.
+     *
+     * @param origin Origin header value
+     * @param requestHost host[:port] the request was made to
+     * @return true if the origin is the request's own
+     */
+    public static boolean isSameOrigin(String origin, String requestHost) {
+        if (origin == null || requestHost == null || requestHost.isBlank()) {
+            return false;
+        }
+        String[] actual = parseOrigin(origin.trim());
+        if (actual == null) {
+            return false;
+        }
+        // under the origin's scheme, so a request host without a port gets that scheme's default port
+        String[] expected = parseOrigin(actual[0] + "://" + requestHost.trim());
+        return expected != null && expected[1].equals(actual[1]) && expected[2].equals(actual[2]);
     }
 
     /**
@@ -406,6 +474,25 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
      */
     public void setCrossOriginPolicy(boolean crossOriginPolicy) {
         this.crossOriginPolicy = crossOriginPolicy;
+    }
+
+    /**
+     * Returns whether a handshake without an Origin header is accepted while checking is on.
+     *
+     * @return a boolean
+     */
+    public boolean isAllowMissingOrigin() {
+        return allowMissingOrigin;
+    }
+
+    /**
+     * Sets whether a handshake without an Origin header is accepted while checking is on; set from the <code>allowMissingOrigin</code>
+     * context-param when present.
+     *
+     * @param allowMissingOrigin a boolean
+     */
+    public void setAllowMissingOrigin(boolean allowMissingOrigin) {
+        this.allowMissingOrigin = allowMissingOrigin;
     }
 
     /**
