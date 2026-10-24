@@ -30,6 +30,20 @@
     <servlet>
         <servlet-name>mediabunny</servlet-name>
         <servlet-class>org.red5.server.net.mediabunny.MediaBunnyServlet</servlet-class>
+        <!-- Optional limits, each applying to this application only; see MediaBunnyServlet for all of them
+        <init-param>
+            <param-name>maxSubscribers</param-name>
+            <param-value>1000</param-value>
+        </init-param>
+        <init-param>
+            <param-name>maxSubscribersPerAddress</param-name>
+            <param-value>0</param-value>
+        </init-param>
+        <init-param>
+            <param-name>allowedOrigins</param-name>
+            <param-value>https://player.example.com</param-value>
+        </init-param>
+        -->
         <load-on-startup>4</load-on-startup>
         <async-supported>true</async-supported>
     </servlet>
