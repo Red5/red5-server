@@ -29,6 +29,8 @@ public class WsContextListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         log.debug("contextDestroyed - sce: {}", sce);
+        // release the container so a redeployed context does not reuse it
+        WebSocketPlugin.removeWsServerContainer(sce.getServletContext());
     }
 
 }

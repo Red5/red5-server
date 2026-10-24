@@ -73,7 +73,11 @@ public class WsFilter implements Filter {
     /** {@inheritDoc} */
     @Override
     public void destroy() {
-        // NO-OP
+        // the filter is destroyed with its context, release the container so a redeployed context does not reuse it
+        if (sc != null) {
+            WebSocketPlugin.removeWsServerContainer(sc.getServletContext());
+            sc = null;
+        }
     }
 
 }
