@@ -312,8 +312,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             log.trace("Creating new packet");
             // create a new packet
             packet = new Packet(header.clone());
-            // remember whether this message opened with an absolute timestamp, see the collapse below
-            rtmp.setAbsoluteMessageStart(channelId, chunkHeader.getFormat() == HEADER_NEW);
+            // remember how this message opened, see the collapse below
+            packet.setHeaderType(chunkHeader.getFormat());
             // store the packet based on its channel id
             rtmp.setLastReadPacket(channelId, packet);
         } else {
@@ -326,6 +326,7 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // Clear the corrupted packet and start fresh
                 rtmp.setLastReadPacket(channelId, null);
                 packet = new Packet(header.clone());
+                packet.setHeaderType(chunkHeader.getFormat());
                 rtmp.setLastReadPacket(channelId, packet);
             }
         }
@@ -367,6 +368,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         try {
             // timebase + timedelta
             final int timestamp = header.getTimer();
+            // read before decoding, an Abort message clears the packet
+            final boolean absoluteStart = packet.getHeaderType() == HEADER_NEW;
             // store the last ts in thread local for debugging
             //lastTimestamp.set(header.getTimerBase());
             final IRTMPEvent message = decodeMessage(conn, packet.getHeader(), buf);
@@ -394,9 +397,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             lastHeader.setTimerBase(timestamp);
             // a Type 3 chunk that starts a new message after a Type 0 takes the Type 0 timestamp as its delta (RTMP spec 5.3.1.2.4);
             // the Type 0 header itself carries no delta so its own timestamp stays absolute
-            if (rtmp.isAbsoluteMessageStart(channelId)) {
+            if (absoluteStart) {
                 lastHeader.setTimerDelta(timestamp);
-                rtmp.setAbsoluteMessageStart(channelId, false);
             }
             if (isTrace) {
                 log.trace("Last read header after decode: {}", lastHeader);

@@ -80,6 +80,34 @@ public class RTMPProtocolDecoderTimestampTest implements Constants {
         return in;
     }
 
+    /** First chunk of a message declaring {@code size} bytes, carrying one read chunk of its body. */
+    private IoBuffer firstChunk(int format, int ts, int size) {
+        int chunkSize = conn.getState().getReadChunkSize();
+        IoBuffer in = IoBuffer.allocate(16 + chunkSize);
+        in.put((byte) ((format << 6) | CHANNEL));
+        medium(in, ts);
+        medium(in, size);
+        in.put(TYPE_AUDIO_DATA);
+        if (format == HEADER_NEW) {
+            in.putInt(0);
+        }
+        in.put(new byte[Math.min(size, chunkSize)]);
+        in.flip();
+        return in;
+    }
+
+    private static IoBuffer abort(int channelId) {
+        IoBuffer in = IoBuffer.allocate(16);
+        in.put((byte) 2);
+        medium(in, 0);
+        medium(in, 4);
+        in.put(TYPE_ABORT);
+        in.putInt(0);
+        in.putInt(channelId);
+        in.flip();
+        return in;
+    }
+
     private Packet decode(IoBuffer in) {
         Packet packet = decoder.decodePacket(conn, conn.getDecoderState(), in);
         assertNotNull("expected a complete packet", packet);
@@ -264,6 +292,46 @@ public class RTMPProtocolDecoderTimestampTest implements Constants {
         decode(type0(1000));
         assertEquals(1040, messageTime(decode(type1(40))));
         assertEquals(1080, messageTime(decode(type3())));
+    }
+
+    // header type of the message's first chunk
+
+    @Test
+    public void testPacketRecordsItsFirstChunkHeaderType() {
+        assertEquals(HEADER_NEW, decode(type0(1000)).getHeaderType());
+        assertEquals(HEADER_SAME_SOURCE, decode(type1(40)).getHeaderType());
+        assertEquals(HEADER_TIMER_CHANGE, decode(type2(40)).getHeaderType());
+        assertEquals(HEADER_CONTINUE, decode(type3()).getHeaderType());
+    }
+
+    @Test
+    public void testType1ReplacingAPartialType0MessageKeepsItsDelta() {
+        // a Type 0 message left partial, then replaced by a Type 1 message of a different size
+        assertNull(decoder.decodePacket(conn, conn.getDecoderState(), firstChunk(HEADER_NEW, 1000, 1000)));
+        assertEquals(1040, messageTime(decode(type1(40))));
+        // the replacement opened with a Type 1, so a following Type 3 repeats its 40ms delta
+        assertEquals(1080, messageTime(decode(type3())));
+    }
+
+    @Test
+    public void testType0ReplacingAPartialType1MessageImpliesItsTimestamp() {
+        decode(type0(1000));
+        // a Type 1 message left partial, then replaced by a Type 0 message of a different size
+        assertNull(decoder.decodePacket(conn, conn.getDecoderState(), firstChunk(HEADER_SAME_SOURCE, 40, 1000)));
+        assertEquals(3000, messageTime(decode(type0(3000))));
+        // the replacement opened with a Type 0, so a following Type 3 implies its timestamp as the delta
+        assertEquals(6000, messageTime(decode(type3())));
+    }
+
+    @Test
+    public void testAbortedMessageDoesNotAffectTheNextOne() {
+        assertNull(decoder.decodePacket(conn, conn.getDecoderState(), firstChunk(HEADER_NEW, 1000, 1000)));
+        // Abort messages are consumed by the decoder and not returned
+        assertNull(decoder.decodePacket(conn, conn.getDecoderState(), abort(CHANNEL)));
+        assertNull(conn.getState().getLastReadPacket(CHANNEL));
+        assertEquals(2000, messageTime(decode(type0(2000))));
+        assertEquals(2040, messageTime(decode(type1(40))));
+        assertEquals(2080, messageTime(decode(type3())));
     }
 
     // header chain
