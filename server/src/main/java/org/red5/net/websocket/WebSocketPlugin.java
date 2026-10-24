@@ -163,6 +163,8 @@ public class WebSocketPlugin extends Red5Plugin {
             entry.getValue().stop();
         });
         managerMap.clear();
+        containerMap.values().forEach(WebSocketPlugin::destroyContainer);
+        containerMap.clear();
         executor.shutdownNow();
     }
 
@@ -398,6 +400,36 @@ public class WebSocketPlugin extends Red5Plugin {
      */
     public static DefaultWsServerContainer getWsServerContainer(ServletContext servletContext) {
         return containerMap.get(containerKey(servletContext));
+    }
+
+    /**
+     * Removes the server container of a web application that is being destroyed and shuts it down, closing its open sessions, so a
+     * redeployed context gets a new container with its own settings. A container that was already replaced by one for a newer servlet
+     * context under the same key is left in place.
+     *
+     * @param servletContext servlet context of the web application being destroyed
+     * @return the removed container, or null if this servlet context had none
+     */
+    public static DefaultWsServerContainer removeWsServerContainer(ServletContext servletContext) {
+        String key = containerKey(servletContext);
+        DefaultWsServerContainer container = containerMap.get(key);
+        if (container != null && container.getServletContext() == servletContext && containerMap.remove(key, container)) {
+            log.debug("Removing websocket server container: {}", key);
+            if (servletContext.getAttribute(Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE) == container) {
+                servletContext.removeAttribute(Constants.SERVER_CONTAINER_SERVLET_CONTEXT_ATTRIBUTE);
+            }
+            destroyContainer(container);
+            return container;
+        }
+        return null;
+    }
+
+    private static void destroyContainer(DefaultWsServerContainer container) {
+        try {
+            container.destroy();
+        } catch (Exception e) {
+            log.warn("Exception destroying websocket server container", e);
+        }
     }
 
     /**
