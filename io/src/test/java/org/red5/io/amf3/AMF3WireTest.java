@@ -29,6 +29,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
 import org.red5.compatibility.flex.messaging.io.ObjectProxy;
 import org.red5.compatibility.flex.messaging.messages.CommandMessage;
+import org.red5.compatibility.flex.messaging.messages.RemotingMessage;
 import org.red5.io.object.Deserializer;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.ObjectMap;
@@ -210,6 +211,24 @@ public class AMF3WireTest {
         assertEquals("mid", msg.getMessageId());
         assertEquals(1234L, msg.getTimestamp());
         assertEquals("the-body", msg.getBody());
+        assertFalse(buf.hasRemaining());
+    }
+
+    /**
+     * A member is converted to the type of the bean property it is set on, as the AMF0 reader does. BlazeDS sends the parameters of a
+     * RemotingMessage as an ArrayCollection, Red5's RemotingMessage holds them in an Object[].
+     */
+    @Test
+    public void testMemberConvertedToPropertyType() {
+        IoBuffer buf = IoBuffer.wrap(bytes(0x0A, 0x0B, 0x4F, "flex.messaging.messages.RemotingMessage", //
+                0x15, "parameters", 0x0A, 0x07, 0x43, "flex.messaging.io.ArrayCollection", 0x09, 0x05, 0x01, 0x06, 0x03, "a", 0x04, 0x01, //
+                0x13, "operation", 0x06, 0x09, "echo", //
+                0x01));
+        Object result = decode(amf3Context(buf));
+        assertTrue(String.valueOf(result), result instanceof RemotingMessage);
+        RemotingMessage msg = (RemotingMessage) result;
+        assertArrayEquals(new Object[] { "a", 1 }, msg.getParameters());
+        assertEquals("echo", msg.getOperation());
         assertFalse(buf.hasRemaining());
     }
 

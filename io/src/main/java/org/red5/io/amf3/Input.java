@@ -10,7 +10,6 @@ package org.red5.io.amf3;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
@@ -31,6 +30,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.ConversionException;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.amf.AMF;
 import org.red5.io.object.DataTypes;
@@ -714,12 +714,20 @@ public class Input extends org.red5.io.amf.Input {
                     }
                     field.set(result, value);
                 } catch (Exception e) {
+                    // no public field: set the bean property, converted to the property type first as the AMF0 reader does
                     try {
+                        Type type = getPropertyType(result, key);
+                        if (type instanceof Class && !((Class) type).isAssignableFrom(value.getClass())) {
+                            try {
+                                value = ConversionUtils.convert(value, (Class) type);
+                            } catch (ConversionException ce) {
+                                // left to the conversions of BeanUtils
+                            }
+                        }
                         BeanUtils.setProperty(result, key, value);
-                    } catch (IllegalAccessException ex) {
-                        log.warn("Error mapping key: {} value: {}", key, value);
-                    } catch (InvocationTargetException ex) {
-                        log.warn("Error mapping key: {} value: {}", key, value);
+                    } catch (Exception ex) {
+                        // one member that cannot be set must not fail the rest of the message
+                        log.warn("Error mapping key: {} value: {}", key, value, ex);
                     }
                 }
             } else {
