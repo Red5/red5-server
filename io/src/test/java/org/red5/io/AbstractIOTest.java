@@ -225,10 +225,17 @@ public abstract class AbstractIOTest {
         resetOutput();
     }
 
-    //@Test //This test failed, not sure why :(
+    /**
+     * Neither AMF0 nor AMF3 has a 64-bit integer type, a long is sent as an IEEE-754 double, so only longs that a double holds exactly
+     * (magnitude up to 2^53, or a power of two such as Long.MIN_VALUE) can survive a round trip; Long.MAX_VALUE rounds to 2^63, which the
+     * narrowing conversion back to long saturates to Long.MAX_VALUE. This test used to pick an unrestricted random long, which lost its low
+     * bits and failed for both encodings; the random value is now drawn from the exactly representable range.
+     */
+    @Test
     public void testNumberLong() {
         log.debug("\ntestNumberLong");
-        for (Number n : new Number[] { Long.MIN_VALUE, rnd.nextLong(), -666L, 0L, 666L, Long.MAX_VALUE }) {
+        final long maxExact = 1L << 53;
+        for (Number n : new Number[] { Long.MIN_VALUE, -maxExact, rnd.nextLong(-maxExact, maxExact + 1), -666L, 0L, 666L, maxExact, Long.MAX_VALUE }) {
             Serializer.serialize(out, n);
             dumpOutput();
             Number rn = Deserializer.deserialize(in, Number.class);
