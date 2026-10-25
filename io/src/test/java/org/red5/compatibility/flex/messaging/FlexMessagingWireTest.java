@@ -12,6 +12,7 @@ import java.util.HexFormat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
+import org.red5.compatibility.flex.messaging.io.ArrayCollection;
 import org.red5.compatibility.flex.messaging.messages.AcknowledgeMessage;
 import org.red5.compatibility.flex.messaging.messages.AcknowledgeMessageExt;
 import org.red5.compatibility.flex.messaging.messages.AsyncMessage;
@@ -132,6 +133,32 @@ public class FlexMessagingWireTest {
         for (AsyncMessage message : new AsyncMessage[] { new AsyncMessage(), new AcknowledgeMessage(), new CommandMessage() }) {
             assertTrue(message.getMessageId(), RandomGUID.isUID(message.getMessageId()));
         }
+    }
+
+    /**
+     * mx.collections.ArrayCollection writes its source as the only value of its externalizable body. The source is read whatever kind of
+     * list it decodes to: here a vector of object, 10 05 00 01 "a" "b".
+     */
+    @Test
+    public void testArrayCollectionWithVectorSource() {
+        byte[] data = bytes(0x0A, 0x07, 0x43, "flex.messaging.io.ArrayCollection", 0x10, 0x05, 0x00, 0x01, 0x06, 0x03, "a", 0x06, 0x03, "b");
+        Object decoded = decode(data);
+        assertTrue(String.valueOf(decoded), decoded instanceof ArrayCollection);
+        assertEquals(Arrays.asList("a", "b"), decoded);
+    }
+
+    @Test
+    public void testArrayCollectionWithArraySource() {
+        byte[] data = bytes(0x0A, 0x07, 0x43, "flex.messaging.io.ArrayCollection", 0x09, 0x05, 0x01, 0x06, 0x03, "a", 0x04, 0x02);
+        assertEquals(Arrays.asList("a", 2), decode(data));
+    }
+
+    @Test
+    public void testArrayCollectionWithNullSource() {
+        byte[] data = bytes(0x0A, 0x07, 0x43, "flex.messaging.io.ArrayCollection", 0x01);
+        Object decoded = decode(data);
+        assertTrue(String.valueOf(decoded), decoded instanceof ArrayCollection);
+        assertTrue(((ArrayCollection<?>) decoded).isEmpty());
     }
 
 }

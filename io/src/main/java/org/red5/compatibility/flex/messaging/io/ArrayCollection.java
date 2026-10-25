@@ -205,16 +205,28 @@ public class ArrayCollection<T> implements List<T>, IExternalizable {
         return source.subList(fromIndex, toIndex);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * Reads the source, the only value of the body. It is an array on the wire, which decodes to a list, an array or, for a vector, a
+     * Vector; null leaves the collection empty.
+     */
     @Override
     @SuppressWarnings("unchecked")
     public void readExternal(IDataInput input) {
         log.debug("readExternal");
+        Object value = input.readObject();
         if (source == null) {
-            source = (ArrayList<T>) input.readObject();
+            source = new ArrayList<T>();
         } else {
             source.clear();
-            source.addAll((ArrayList<T>) input.readObject());
+        }
+        if (value instanceof Collection) {
+            source.addAll((Collection<T>) value);
+        } else if (value instanceof Object[]) {
+            source.addAll(Arrays.asList((T[]) value));
+        } else if (value != null) {
+            throw new RuntimeException(String.format("ArrayCollection source must be an array, found %s", value.getClass().getName()));
         }
     }
 
