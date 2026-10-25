@@ -235,7 +235,8 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         if (!checkWriteReference(array)) {
             storeReference(array);
             buf.put(AMF.TYPE_MIXED_ARRAY);
-            buf.putInt(array.size() + 1);
+            // the count and the length member are the length of the list, as for a map with index keys
+            buf.putInt(array.size());
             int idx = 0;
             for (Object item : array) {
                 if (item != null) {
@@ -246,7 +247,7 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
                 }
             }
             putString("length");
-            Serializer.serialize(this, array.size() + 1);
+            Serializer.serialize(this, array.size());
             buf.put(AMF.END_OF_OBJECT_SEQUENCE);
         }
     }

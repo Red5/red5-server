@@ -401,6 +401,20 @@ public class AMF0WireTest {
         assertBytes(wire().u8(AMF.TYPE_MIXED_ARRAY).u32(0).utf8("k").string("v").objectEnd().toArray(), serialize(map));
     }
 
+    /**
+     * A list of more than 100 elements that are mostly null is written as an ECMA array of the non null elements. Its count and the length
+     * member Red5 adds are the length of the list.
+     */
+    @Test
+    public void encodeSparseList() {
+        List<Object> list = new ArrayList<>();
+        for (int i = 0; i < 150; i++) {
+            list.add(i % 50 == 0 ? "x" : null);
+        }
+        byte[] expected = wire().u8(AMF.TYPE_MIXED_ARRAY).u32(150).utf8("0").string("x").utf8("50").string("x").utf8("100").string("x").utf8("length").number(150).objectEnd().toArray();
+        assertBytes(expected, serialize(list));
+    }
+
     @Test
     public void encodeStrictArray() {
         assertBytes(wire().u8(AMF.TYPE_ARRAY).u32(2).number(1).string("x").toArray(), serialize(new Object[] { 1d, "x" }));
