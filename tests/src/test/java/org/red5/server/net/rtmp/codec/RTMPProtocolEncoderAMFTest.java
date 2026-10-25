@@ -7,7 +7,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,20 +20,30 @@ import java.util.Vector;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.red5.client.net.rtmp.codec.RTMPClientProtocolDecoder;
 import org.red5.server.api.IConnection.Encoding;
+import org.red5.server.api.IContext;
+import org.red5.server.api.IServer;
+import org.red5.server.api.Red5;
+import org.red5.server.api.scope.IGlobalScope;
+import org.red5.server.api.scope.IScope;
+import org.red5.server.net.rtmp.RTMPHandler;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
 import org.red5.server.net.rtmp.event.FlexMessage;
 import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
+import org.red5.server.net.rtmp.event.Ping;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
+import org.red5.server.net.rtmp.message.Packet;
 import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusCodes;
 import org.red5.server.net.rtmp.status.StatusObject;
+import org.red5.server.net.rtmp.status.StatusObjectService;
 import org.red5.server.service.Call;
 import org.red5.server.service.PendingCall;
 
@@ -217,22 +229,14 @@ public class RTMPProtocolEncoderAMFTest {
         }
     }
 
-    private static StatusObject connectSuccess() {
-        // as RTMPHandler builds it
-        StatusObject status = new StatusObject(StatusCodes.NC_CONNECT_SUCCESS, StatusObject.STATUS, "Connection succeeded.");
-        status.setAdditional("fmsVer", "RED5/1,0,10,0");
-        status.setAdditional("capabilities", 33);
-        status.setAdditional("mode", 1);
-        return status;
-    }
-
     /**
-     * NetConnection.Connect.Success as the server builds it, a StatusObject written as an anonymous AMF0 object.
+     * A StatusObject as the result of a call is written as an anonymous AMF0 object.
      */
     @Test
     @SuppressWarnings("unchecked")
     public void testConnectSuccessStatusObject() {
-        IoBuffer out = flip(encoder(Encoding.AMF0).encodeInvoke(result("connect", 1, connectSuccess())));
+        StatusObject connectSuccess = new StatusObject(StatusCodes.NC_CONNECT_SUCCESS, StatusObject.STATUS, "Connection succeeded.");
+        IoBuffer out = flip(encoder(Encoding.AMF0).encodeInvoke(result("connect", 1, connectSuccess)));
         String body = hex(out);
         // an anonymous object (0x03), not a typed object naming a server class
         assertTrue(body, body.startsWith(amf0String("_result") + amf0Number(1) + "05" + "03"));
@@ -245,19 +249,171 @@ public class RTMPProtocolEncoderAMFTest {
     }
 
     /**
-     * Reproducer: the properties RTMPHandler adds to the connect result with StatusObject.setAdditional (fmsVer, capabilities, mode, data
-     * and the Enhanced RTMP fourCcList, audioFourCcInfoMap, videoFourCcInfoMap and CapsEx) never reach the wire. StatusObject has no getter
-     * for them, so the AMF0 writer, which writes bean properties, leaves them out; on AMF3 connections RTMPHandler copies the status into a
-     * map without them. Where they belong (the command object, where FMS sends fmsVer, capabilities and mode, or the information object)
-     * needs a decision, so this is not fixed here. Note that RTMPProtocolEncoder.generateErrorResult also puts the server stack trace of
-     * every failed call into the additional properties: a getter would send it to AMF0 clients, and StatusObject.writeExternal already
-     * sends it to AMF3 clients.
+     * The result of a successful connect as RTMPHandler answers it and the encoder writes it, always AMF0: ["_result", 1, properties,
+     * information]. The properties of the server go in the command object, where FMS sends fmsVer, capabilities and mode and FFmpeg's
+     * RTMP server fmsVer and capabilities, with the Enhanced RTMP support (fourCcList, videoFourCcInfoMap, audioFourCcInfoMap, capsEx),
+     * which the server states in an object of the connect result as the client does in the command object of connect. The information
+     * object carries level, code, description, data (the data version) and objectEncoding, 3 when the client asked for AMF3, otherwise
+     * 0. All are anonymous objects (0x03).
      */
-    @Ignore("connect result additional properties are not written, see the javadoc")
     @Test
+    @SuppressWarnings("unchecked")
     public void testConnectSuccessCarriesAdditionalProperties() {
-        IoBuffer out = flip(encoder(Encoding.AMF0).encodeInvoke(result("connect", 1, connectSuccess())));
-        assertTrue(hex(out), hex(out).contains(Hex.encodeHexString("fmsVer".getBytes(StandardCharsets.US_ASCII))));
+        for (Encoding encoding : new Encoding[] { Encoding.AMF0, Encoding.AMF3 }) {
+            ConnectConnection conn = new ConnectConnection();
+            Invoke reply = new ConnectHandler().connect(conn, encoding, true);
+            // the connection asked for AMF3 is switched to it before the result is written
+            assertEquals(encoding, conn.getEncoding());
+            RTMPProtocolEncoder encoder = new RTMPProtocolEncoder();
+            encoder.setConnection(conn);
+            IoBuffer out = flip(encoder.encodeInvoke(reply));
+            String fourCcInfoMap = "03" + key("*") + amf0Number(4) + "000009";
+            String properties = "03" + key("fmsVer") + amf0String(Red5.getFMSVersion()) + key("capabilities") + amf0Number(Red5.getCapabilities()) + key("mode") + amf0Number(1) //
+                    + key("fourCcList") + "0a00000001" + amf0String("*") + key("videoFourCcInfoMap") + fourCcInfoMap + key("audioFourCcInfoMap") + fourCcInfoMap + key("capsEx") + amf0Number(15) + "000009";
+            String data = "03";
+            for (Map.Entry<String, Object> entry : ((Map<String, Object>) Red5.getDataVersion()).entrySet()) {
+                data += key(entry.getKey()) + amf0String((String) entry.getValue());
+            }
+            data += "000009";
+            String info = "03" + key("level") + amf0String("status") + key("code") + amf0String(StatusCodes.NC_CONNECT_SUCCESS) + key("description") + amf0String("Connection succeeded.") //
+                    + key("data") + data + key("objectEncoding") + amf0Number(encoding == Encoding.AMF3 ? 3 : 0) + "000009";
+            assertEquals(encoding.toString(), amf0String("_result") + amf0Number(1) + properties + info, hex(out));
+            // a client reads the properties as the command object and the information object as the result
+            Invoke decoded = (Invoke) decode(Encoding.AMF0, Constants.TYPE_INVOKE, out);
+            assertEquals(1, decoded.getTransactionId());
+            Map<String, Object> decodedProperties = decoded.getConnectionParams();
+            assertEquals(Red5.getFMSVersion(), decodedProperties.get("fmsVer"));
+            assertEquals(15, ((Number) decodedProperties.get("capsEx")).intValue());
+            assertEquals(1, decoded.getCall().getArguments().length);
+            Map<String, Object> decodedInfo = (Map<String, Object>) decoded.getCall().getArguments()[0];
+            assertEquals(StatusCodes.NC_CONNECT_SUCCESS, decodedInfo.get("code"));
+            assertEquals(encoding == Encoding.AMF3 ? 3 : 0, ((Number) decodedInfo.get("objectEncoding")).intValue());
+        }
+    }
+
+    /**
+     * A refused connect is answered with _error, no properties and the information object, whose description is that of this connect:
+     * the shared status object of the status object service is not changed.
+     */
+    @Test
+    public void testConnectRejected() {
+        for (Encoding encoding : new Encoding[] { Encoding.AMF0, Encoding.AMF3 }) {
+            ConnectConnection conn = new ConnectConnection();
+            ConnectHandler handler = new ConnectHandler();
+            Invoke reply = handler.connect(conn, encoding, false);
+            RTMPProtocolEncoder encoder = new RTMPProtocolEncoder();
+            encoder.setConnection(conn);
+            IoBuffer out = flip(encoder.encodeInvoke(reply));
+            String info = "03" + key("level") + amf0String("error") + key("code") + amf0String(StatusCodes.NC_CONNECT_REJECTED) + key("description") + amf0String("Connection to 'live' denied.") //
+                    + key("objectEncoding") + amf0Number(encoding == Encoding.AMF3 ? 3 : 0) + "000009";
+            assertEquals(encoding.toString(), amf0String("_error") + amf0Number(1) + "05" + info, hex(out));
+            assertEquals("", handler.getStatus(StatusCodes.NC_CONNECT_REJECTED).getDescription());
+        }
+    }
+
+    /** An AMF0 object key, a UTF-8 string without a type marker. */
+    static String key(String k) {
+        return amf0String(k).substring(2);
+    }
+
+    /**
+     * Drives the connect handling of RTMPHandler: the server finds the application scope "live" and the scope allows the connection or
+     * not.
+     */
+    static class ConnectHandler extends RTMPHandler {
+
+        ConnectHandler() {
+            StatusObjectService statusObjectService = new StatusObjectService();
+            statusObjectService.loadAndCacheStatusObjects();
+            setStatusObjectService(statusObjectService);
+        }
+
+        Invoke connect(ConnectConnection conn, Encoding encoding, boolean allowed) {
+            IScope scope = stub(IScope.class, Map.of("isConnectionAllowed", allowed, "getName", "live"));
+            IContext context = stub(IContext.class, Map.of("resolveScope", scope));
+            IGlobalScope global = stub(IGlobalScope.class, Map.of("getContext", context));
+            setServer(stub(IServer.class, Map.of("lookupGlobal", global)));
+            Map<String, Object> params = new HashMap<>();
+            params.put("app", "live");
+            params.put("tcUrl", "rtmp://localhost/live");
+            params.put("objectEncoding", encoding == Encoding.AMF3 ? 3d : 0d);
+            Invoke connect = new Invoke(new PendingCall(null, "connect", null));
+            connect.setTransactionId(1);
+            connect.setConnectionParams(params);
+            Header header = new Header();
+            header.setStreamId(0);
+            onCommand(conn, conn.getChannel(3), header, connect);
+            assertEquals(1, conn.written.size());
+            return (Invoke) conn.written.get(0).getMessage();
+        }
+
+    }
+
+    /** A connection that is never opened: its connect succeeds and it keeps what is written to it. */
+    static class ConnectConnection extends RTMPMinaConnection {
+
+        final List<Packet> written = new ArrayList<>();
+
+        ConnectConnection() {
+            getState().setState(RTMP.STATE_CONNECTED);
+        }
+
+        @Override
+        public boolean connect(IScope newScope, Object[] params) {
+            return true;
+        }
+
+        @Override
+        public boolean connect(IScope newScope) {
+            return true;
+        }
+
+        @Override
+        public void ping(Ping ping) {
+        }
+
+        @Override
+        public void write(Packet out) {
+            written.add(out);
+        }
+
+        @Override
+        public IoSession getIoSession() {
+            return stub(IoSession.class, Map.of());
+        }
+
+    }
+
+    /** A stub of an interface that answers the named methods and otherwise returns the default value of the return type. */
+    @SuppressWarnings("unchecked")
+    static <T> T stub(Class<T> type, Map<String, Object> answers) {
+        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, (proxy, method, args) -> {
+            if (answers.containsKey(method.getName())) {
+                return answers.get(method.getName());
+            }
+            switch (method.getName()) {
+                case "hashCode":
+                    return System.identityHashCode(proxy);
+                case "equals":
+                    return proxy == args[0];
+                case "toString":
+                    return type.getSimpleName();
+            }
+            Class<?> returnType = method.getReturnType();
+            if (returnType == boolean.class) {
+                return false;
+            }
+            if (returnType == int.class) {
+                return 0;
+            }
+            if (returnType == long.class) {
+                return 0L;
+            }
+            if (returnType == double.class) {
+                return 0d;
+            }
+            return null;
+        });
     }
 
     /**
