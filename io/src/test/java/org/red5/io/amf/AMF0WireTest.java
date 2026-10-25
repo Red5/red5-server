@@ -424,6 +424,27 @@ public class AMF0WireTest {
         assertSame(list.get(1), list.get(2));
     }
 
+    /**
+     * Spec 2.9: a reference points to a complex object read before it. An index no object was read for is malformed input, it must fail
+     * the decoding instead of turning into null.
+     */
+    @Test
+    public void decodeReferenceOutOfRangeFails() {
+        assertDecodeFails(wire().reference(0).toArray(), "AMF0 reference 0");
+        // the object is index 0, there is no index 1
+        assertDecodeFails(wire().u8(AMF.TYPE_OBJECT).utf8("a").reference(1).objectEnd().toArray(), "AMF0 reference 1");
+        assertDecodeFails(wire().u8(AMF.TYPE_ARRAY).u32(2).u8(AMF.TYPE_OBJECT).objectEnd().reference(0xFFFF).toArray(), "AMF0 reference 65535");
+    }
+
+    private static void assertDecodeFails(byte[] data, String message) {
+        try {
+            Object value = decode(data);
+            fail("malformed input decoded as " + value);
+        } catch (RuntimeException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains(message));
+        }
+    }
+
     // ---------------------------------------------------------------- encoding
 
     @Test

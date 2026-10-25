@@ -697,11 +697,20 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     /**
      * {@inheritDoc}
      *
-     * Reads Reference
+     * Reads a reference: a U16 index of a complex object read before it in the body.
+     *
+     * @throws RuntimeException
+     *             if no object was read for the index
      */
     @Override
     public Object readReference() {
-        return getReference(buf.getUnsignedShort());
+        int index = buf.getUnsignedShort();
+        Object obj = getReference(index);
+        if (obj == null) {
+            // every complex object read takes an index and none is stored as null, so the input is malformed
+            throw new RuntimeException(String.format("AMF0 reference %d out of range, %d objects known", index, refId.get()));
+        }
+        return obj;
     }
 
     /**
