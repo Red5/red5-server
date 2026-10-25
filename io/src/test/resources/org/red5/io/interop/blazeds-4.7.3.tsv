@@ -1,0 +1,18 @@
+# AMF3 interop vectors produced by Apache Flex BlazeDS 4.7.3 (flex-messaging-core, Maven Central) for the types Mini-AMF 0.9.1 does not
+# implement, and Red5's encodings of the same values that BlazeDS decoded to the same value. Columns as in miniamf-0.9.1.tsv.
+amf3	vec_int	0d090100000001fffffffe7fffffff80000000	(#0vec[i:1,i:-2,d:41dfffffffc00000,d:c1e0000000000000])	differs	BlazeDS writes the fixed flag 01, Red5 writes 00
+amf3	vec_int.red5	0d090000000001fffffffe7fffffff80000000	(#0vec[i:1,i:-2,d:41dfffffffc00000,d:c1e0000000000000])	canonical	Red5's encoding, BlazeDS decodes it to the same value
+amf3	vec_int_empty	0d0101	(#0vec[])	differs	BlazeDS writes the fixed flag 01, Red5 writes 00
+amf3	vec_int_empty.red5	0d0100	(#0vec[])	canonical	Red5's encoding, BlazeDS decodes it to the same value
+amf3	vec_number	0f09013ff80000000000007ff800000000000080000000000000007ff0000000000000	(#0vec[d:3ff8000000000000,d:NaN,d:8000000000000000,d:7ff0000000000000])	differs	BlazeDS writes the fixed flag 01, Red5 writes 00
+amf3	vec_number.red5	0f09003ff80000000000007ff800000000000080000000000000007ff0000000000000	(#0vec[d:3ff8000000000000,d:NaN,d:8000000000000000,d:7ff0000000000000])	canonical	Red5's encoding, BlazeDS decodes it to the same value
+amf3	vec_object	100701216a6176612e6c616e672e4f626a656374060361040101	(#0vec[s'a',i:1,null])	differs	BlazeDS writes the fixed flag 01 and the Java element class as the object type name, Red5 writes 00 and an empty type name
+amf3	vec_object.red5	10070001060361040101	(#0vec[s'a',i:1,null])	canonical	Red5's encoding, BlazeDS decodes it to the same value
+amf3	vec_string	100701216a6176612e6c616e672e537472696e670603780603790602	(#0vec[s'x',s'y',s'x'])	differs	BlazeDS writes the fixed flag 01 and the Java element class as the object type name, Red5 writes 00 and an empty type name
+amf3	vec_string.red5	100700010603780603790600	(#0vec[s'x',s'y',s'x'])	canonical	Red5's encoding, BlazeDS decodes it to the same value
+amf3	vec_repeated	0a2301036103620d050100000007000000080d02	(#0{a=#1vec[i:7,i:8],b=&1})	differs	BlazeDS writes the fixed flag 01 and the map with sealed traits, Red5 writes 00 and dynamic traits
+amf3	vec_repeated.red5	0a0b0103610d0500000000070000000803620d0201	(#0{a=#1vec[i:7,i:8],b=&1})	canonical	Red5's encoding, BlazeDS decodes it to the same value
+amf3	vec_uint.red5	0e07000000000000000001ffffffff	(#0vec[i:0,i:1,d:41efffffffe00000])	canonical	Red5's encoding, BlazeDS decodes it to the same value
+amf3	dictionary	11050206036104010402060774776f	(#0{2=s'two',a=i:1})	none	BlazeDS writes the weak-keys flag as the AMF3 false marker 02 where AMF3 3.16 has a U8 flag; Red5 has no Java type it writes as a dictionary
+amf3	dictionary_repeated	0a230105643105643211050206036104010402060774776f1102	(#0{d1=#1{2=s'two',a=i:1},d2=&1})	none	BlazeDS writes the weak-keys flag as the AMF3 false marker 02 where AMF3 3.16 has a U8 flag; Red5 has no Java type it writes as a dictionary
+amf3	xml_document	0b6d3c726f6f7420613d22312220623d2274776f223e3c6368696c643e746578743c2f6368696c643e3c656d7074792f3e3c2f726f6f743e	(#0xml:<root a=1 b=two><child>text</child><empty></empty></root>)	none	BlazeDS writes a DOM document as AMF3 XML 0x0B, as Red5 does
