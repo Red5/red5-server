@@ -474,7 +474,9 @@ public class Output extends org.red5.io.amf.Output {
         log.debug("Storing object reference");
         storeReference(object);
         Class<?> objectClass = object.getClass();
-        if (IExternalizable.class.isAssignableFrom(objectClass)) {
+        // an anonymous class has no class name on the wire, so it cannot be externalizable: like the AMF0 writer, write its bean properties
+        // as an anonymous object
+        if (IExternalizable.class.isAssignableFrom(objectClass) && !objectClass.isAnnotationPresent(Anonymous.class)) {
             log.debug("Object is IExternalizable");
             // the object knows how to serialize itself: U29O-traits-ext is 0x07 (inline object, inline traits, externalizable), the
             // remaining bits are not significant and no sealed members follow; this applies to ObjectProxy as well
@@ -502,7 +504,7 @@ public class Output extends org.red5.io.amf.Output {
         }
         // write out either start of object marker for class name or "empty" start of object marker
         if (!objectClass.isAnnotationPresent(Anonymous.class)) {
-            log.debug("Object is annotated as Anonymous");
+            log.debug("Object is not annotated as Anonymous");
             putString(Serializer.getClassName(objectClass));
         } else {
             putString("");

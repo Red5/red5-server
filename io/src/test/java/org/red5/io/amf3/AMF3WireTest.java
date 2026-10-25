@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
+import org.red5.annotations.Anonymous;
 import org.red5.compatibility.flex.messaging.io.ObjectProxy;
 import org.red5.compatibility.flex.messaging.messages.CommandMessage;
 import org.red5.compatibility.flex.messaging.messages.RemotingMessage;
@@ -582,6 +583,53 @@ public class AMF3WireTest {
         Object decoded = decode(amf0Context(IoBuffer.wrap(data)));
         assertTrue(String.valueOf(decoded), decoded instanceof ObjectProxy);
         assertEquals("v", ((ObjectProxy<?, ?>) decoded).get("k"));
+    }
+
+    /**
+     * A class annotated {@link Anonymous} is written without its class name also when it is externalizable: as an anonymous dynamic object
+     * (0x0B, empty class name) with the bean properties the AMF0 writer writes for it, not as externalizable traits naming a server class a
+     * client cannot instantiate.
+     */
+    @Test
+    public void testAnonymousExternalizableIsAnAnonymousObject() {
+        AnonymousExternalizable value = new AnonymousExternalizable();
+        value.setA("x");
+        byte[] data = encode(value);
+        assertEquals("11 0A 0B 01 03 61 06 03 78 01", hex(data));
+        Object decoded = decode(amf0Context(IoBuffer.wrap(data)));
+        assertEquals(Map.of("a", "x"), decoded);
+        // the AMF0 writer writes the same members in an anonymous object
+        IoBuffer buf = newBuffer();
+        Serializer.serialize(new org.red5.io.amf.Output(buf), value);
+        assertEquals("03 00 01 61 02 00 01 78 00 00 09", hex(written(buf)));
+    }
+
+    /**
+     * An externalizable class that is written without its class name.
+     */
+    @Anonymous
+    public static class AnonymousExternalizable implements IExternalizable {
+
+        private String a;
+
+        public String getA() {
+            return a;
+        }
+
+        public void setA(String a) {
+            this.a = a;
+        }
+
+        @Override
+        public void readExternal(IDataInput input) {
+            a = input.readUTF();
+        }
+
+        @Override
+        public void writeExternal(IDataOutput output) {
+            output.writeUTF(a);
+        }
+
     }
 
     @Test
