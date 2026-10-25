@@ -190,6 +190,22 @@ public class Output extends org.red5.io.amf.Output {
         putString(string, encoded);
     }
 
+    /**
+     * Writes the name of a dynamic member or the key of an associative array entry. The empty string ends the dynamic members of an object
+     * and the associative portion of an array, so it cannot be used as a name.
+     *
+     * @param name
+     *            member name or key
+     * @throws IllegalArgumentException
+     *             if the name is empty
+     */
+    private void putMemberName(String name) {
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("AMF3 cannot encode an empty member name or associative array key, the empty string ends the members");
+        }
+        putString(name);
+    }
+
     /** {@inheritDoc} */
     @Override
     public void writeNumber(Number num) {
@@ -367,7 +383,7 @@ public class Output extends org.red5.io.amf.Output {
                 // Entry will be serialized later
                 continue;
             }
-            putString(key.toString());
+            putMemberName(key.toString());
             Serializer.serialize(this, entry.getValue());
         }
         putString("");
@@ -529,7 +545,7 @@ public class Output extends org.red5.io.amf.Output {
         // store key/value pairs
         amf3_mode += 1;
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            putString(entry.getKey().toString());
+            putMemberName(entry.getKey().toString());
             Serializer.serialize(this, entry.getValue());
         }
         amf3_mode -= 1;

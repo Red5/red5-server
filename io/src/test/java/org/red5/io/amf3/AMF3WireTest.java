@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -518,6 +519,27 @@ public class AMF3WireTest {
         assertEquals(32771, decoded.size());
         assertSame(decoded.get(0), decoded.get(32769));
         assertSame(decoded.get(32768), decoded.get(32770));
+    }
+
+    /**
+     * The empty string ends the dynamic members of an object and the associative portion of an array (spec 3.11, 3.12), so a member
+     * or key named "" cannot be encoded; writing it would end the value early and corrupt the rest of the stream.
+     */
+    @Test
+    public void testEmptyMemberNameIsRejected() {
+        ObjectMap<String, Object> object = new ObjectMap<>();
+        object.put("", 1);
+        Map<Object, Object> array = new LinkedHashMap<>();
+        array.put(0, "zero");
+        array.put("", 1);
+        for (Object value : new Object[] { object, array }) {
+            try {
+                encode(value);
+                fail("an empty member name must be rejected: " + value);
+            } catch (IllegalArgumentException expected) {
+                assertTrue(expected.getMessage(), expected.getMessage().contains("empty"));
+            }
+        }
     }
 
     @Test
