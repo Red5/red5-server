@@ -11,7 +11,6 @@ import java.beans.ConstructorProperties;
 import java.beans.PropertyChangeEvent;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -709,7 +708,8 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         this.path = path;
         // set the parameters which are passed from the client via the command object, not the args after the object
         this.params = params;
-        if (Integer.valueOf(3).equals(params.get("objectEncoding"))) {
+        // AMF numbers decode as doubles
+        if (params.get("objectEncoding") instanceof Number objectEncoding && objectEncoding.intValue() == 3) {
             if (isDebug) {
                 log.debug("Setting object encoding to AMF3");
             }
@@ -717,9 +717,9 @@ public abstract class RTMPConnection extends BaseConnection implements IStreamCa
         }
         // get enhanced properties
         List<String> fourCcList = null; // earlier impls of RTMP-E may use this style
-        if (params.containsKey("fourCcList")) {
-            log.debug("FourCC list: {}", params.get("fourCcList"));
-            fourCcList = (ArrayList<String>) params.get("fourCcList");
+        if (params.get("fourCcList") instanceof List<?> list) {
+            log.debug("FourCC list: {}", list);
+            fourCcList = (List<String>) list;
         } else {
             log.debug("FourCC list not found; either not using RTMP-E or using newer style of codec support");
         }
