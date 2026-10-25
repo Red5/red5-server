@@ -121,8 +121,8 @@ public class AmfInteropVectorsTest {
         if ("decode".equals(check)) {
             byte[] data = bytes.startsWith(SHA) ? red5Bytes() : HexFormat.of().parseHex(bytes);
             assertValue(value, decode(data, false));
-            if ("amf0".equals(codec) && !name.startsWith("nested_switch")) {
-                // a body without switched values decodes the same with the plain AMF0 input
+            if (!"amf3".equals(codec)) {
+                // an AMF0 body decodes the same with the plain AMF0 input, also when it has values switched to AMF3
                 assertValue(value, decode(data, true));
             }
         } else {

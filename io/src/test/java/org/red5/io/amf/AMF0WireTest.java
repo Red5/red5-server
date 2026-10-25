@@ -9,6 +9,7 @@ package org.red5.io.amf;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -28,6 +29,7 @@ import java.util.function.Consumer;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
+import org.red5.io.amf3.ByteArray;
 import org.red5.io.model.CircularRefBean;
 import org.red5.io.object.Deserializer;
 import org.red5.io.object.Serializer;
@@ -346,6 +348,80 @@ public class AMF0WireTest {
         assertNotNull(doc);
         assertEquals(70000, doc.getDocumentElement().getTextContent().length());
         assertEquals("z", decode(in));
+    }
+
+    /**
+     * Spec 2.17 and 3.1: the avmplus-object marker (0x11) switches to AMF3 for the next value only, the values after it are AMF0 again.
+     * <code>{a: 0x11 "foo", b: 1}</code> followed by an AMF0 string.
+     */
+    @Test
+    public void decodeAvmplusObjectSwitchesOneValueToAMF3() {
+        Input in = input(wire().u8(AMF.TYPE_OBJECT).utf8("a").u8(AMF.TYPE_AMF3_OBJECT, 0x06, 0x07, 'f', 'o', 'o').utf8("b").number(1).objectEnd().string("next").toArray());
+        Map<?, ?> object = (Map<?, ?>) decode(in);
+        assertEquals(2, object.size());
+        assertEquals("foo", object.get("a"));
+        assertEquals(1d, object.get("b"));
+        assertEquals("next", decode(in));
+        assertFalse(in.buf.hasRemaining());
+    }
+
+    /**
+     * Switched AMF3 values of every kind an AMF0 value cannot hold: an anonymous object with an integer member, a vector of int and a byte
+     * array, each followed by an AMF0 value.
+     */
+    @Test
+    public void decodeAvmplusObjectComplexValues() {
+        Input in = input(wire() //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x0B, 0x01, 0x03, 'k', 0x04, 0x05, 0x01).number(1) //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x05, 0x00).u32(1).u32(0xFFFFFFFEL).number(2) //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0C, 0x05, 0x7F, 0x80).number(3).toArray());
+        Map<?, ?> object = (Map<?, ?>) decode(in);
+        assertEquals(1, object.size());
+        assertEquals(5, object.get("k"));
+        assertEquals(1d, decode(in));
+        assertEquals(Arrays.asList(1, -2), decode(in));
+        assertEquals(2d, decode(in));
+        ByteArray bytes = (ByteArray) decode(in);
+        assertEquals(2, bytes.length());
+        assertEquals(0x7F, bytes.readUnsignedByte());
+        assertEquals(0x80, bytes.readUnsignedByte());
+        assertEquals(3d, decode(in));
+    }
+
+    /**
+     * The AMF3 string, object and traits reference tables of switched values span the body, as BlazeDS and Mini-AMF keep them, also across
+     * {@link Input#reset()}, which only starts a new AMF0 reference table: the values after the first refer to its member name, the object
+     * itself and its traits.
+     */
+    @Test
+    public void decodeAvmplusReferenceTablesSpanTheBody() {
+        Input in = input(wire() //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x0B, 0x01, 0x03, 'k', 0x04, 0x01, 0x01) // {k: 1}, string 0 "k", object 0, traits 0
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x06, 0x00) // string reference 0
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x00) // object reference 0
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x01, 0x00, 0x04, 0x02, 0x01) // traits reference 0, member name reference 0: {k: 2}
+                .toArray());
+        Map<?, ?> first = (Map<?, ?>) decode(in);
+        assertEquals(1, first.get("k"));
+        in.reset();
+        assertEquals("k", decode(in));
+        assertSame(first, decode(in));
+        Map<?, ?> fourth = (Map<?, ?>) decode(in);
+        assertEquals(1, fourth.size());
+        assertEquals(2, fourth.get("k"));
+    }
+
+    /**
+     * Spec 2.9: only AMF0 complex objects take an AMF0 reference index; a switched AMF3 value does not. In <code>[0x11 {}, {}, ref 1]</code>
+     * the strict array is index 0 and ref 1 is the AMF0 object. Mini-AMF 0.9.1 numbers the switched value, BlazeDS 4.7.3 does not.
+     */
+    @Test
+    public void decodeAvmplusValueTakesNoReferenceIndex() {
+        byte[] data = wire().u8(AMF.TYPE_ARRAY).u32(3).u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x0B, 0x01, 0x01).u8(AMF.TYPE_OBJECT).objectEnd().reference(1).toArray();
+        List<?> list = (List<?>) decode(data);
+        assertEquals(3, list.size());
+        assertTrue(list.get(1) instanceof Map);
+        assertSame(list.get(1), list.get(2));
     }
 
     // ---------------------------------------------------------------- encoding

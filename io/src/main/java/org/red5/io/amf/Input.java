@@ -68,6 +68,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     /** Data type of the value most recently read by {@link #readDataType()}. */
     protected byte currentDataType;
 
+    /** Reads the AMF3 values switched to with the avmplus-object marker, created when the first one is found. */
+    private org.red5.io.amf3.Input amf3Input;
+
     /**
      * Creates Input object from byte buffer
      *
@@ -612,12 +615,33 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     /**
      * {@inheritDoc}
      *
-     * Reads Custom
+     * Reads the AMF3 value that follows an avmplus-object marker, or returns null for the AMF0 types without a value Red5 can represent
+     * (unsupported, movieclip and recordset).
      */
     @Override
     public Object readCustom() {
-        // return null for now
+        if (currentDataType == AMF.TYPE_AMF3_OBJECT) {
+            return readSwitchedValue();
+        }
         return null;
+    }
+
+    /**
+     * Reads the AMF3 value that follows an avmplus-object marker (AMF0 2.17, 3.1); the marker switches to AMF3 for that value only. The
+     * AMF3 string, object and traits reference tables of the switched values span the body this input reads, also across {@link #reset()},
+     * as they do for {@link org.red5.io.amf3.Input} in its AMF0 context and for BlazeDS and Mini-AMF. A switched value is not an AMF0
+     * complex object and takes no AMF0 reference index.
+     *
+     * @return decoded AMF3 value
+     */
+    private Object readSwitchedValue() {
+        if (amf3Input == null) {
+            amf3Input = new org.red5.io.amf3.Input(buf);
+            amf3Input.enforceAMF3();
+        }
+        log.trace("Switch to AMF3 for one value");
+        amf3Input.continueNesting(this);
+        return Deserializer.deserialize(amf3Input, Object.class);
     }
 
     /**
@@ -680,7 +704,11 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         return getReference(buf.getUnsignedShort());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * Clears the AMF0 references. The AMF3 reference tables of switched values are scoped to the body and are kept.
+     */
     @Override
     public void reset() {
         clearReferences();

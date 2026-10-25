@@ -51,6 +51,51 @@ public class DecodeLimitTest {
         assertLimit(new org.red5.io.amf.Input(IoBuffer.wrap(out.toByteArray())));
     }
 
+    /**
+     * An AMF3 value switched to from AMF0 continues the depth of the AMF0 values around it, the switched value taking the level of its
+     * marker: AMF0 strict arrays with AMF3 arrays inside decode up to the limit in total and fail beyond it, with the plain AMF0 input as
+     * with the AMF3 input in its AMF0 context.
+     */
+    @Test
+    public void testSwitchedValuesContinueTheAmf0Depth() {
+        int amf0Levels = BaseInput.MAX_DEPTH / 2;
+        int amf3Levels = BaseInput.MAX_DEPTH - amf0Levels;
+        byte[] deepest = amf0WithSwitchedAmf3(amf0Levels, amf3Levels);
+        byte[] tooDeep = amf0WithSwitchedAmf3(amf0Levels, amf3Levels + 1);
+        for (boolean plain : new boolean[] { true, false }) {
+            Object result = Deserializer.deserialize(amf0Input(deepest, plain), Object.class);
+            int depth = 0;
+            while (result instanceof List<?> list && !list.isEmpty()) {
+                result = list.get(0);
+                depth++;
+            }
+            // MAX_DEPTH arrays, the innermost empty
+            assertEquals(BaseInput.MAX_DEPTH - 1, depth);
+            assertLimit(amf0Input(tooDeep, plain));
+        }
+    }
+
+    private static Input amf0Input(byte[] data, boolean plain) {
+        IoBuffer buf = IoBuffer.wrap(data);
+        return plain ? new org.red5.io.amf.Input(buf) : new org.red5.io.amf3.Input(buf);
+    }
+
+    private static byte[] amf0WithSwitchedAmf3(int amf0Levels, int amf3Levels) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (int i = 0; i < amf0Levels; i++) {
+            out.write(0x0A); // strict array of one element
+            out.writeBytes(new byte[] { 0, 0, 0, 1 });
+        }
+        out.write(0x11); // avmplus-object marker
+        for (int i = 1; i < amf3Levels; i++) {
+            out.write(0x09); // array of one dense element
+            writeU29(out, (1 << 1) | 1);
+            out.write(0x01);
+        }
+        out.writeBytes(new byte[] { 0x09, 0x01, 0x01 }); // empty array
+        return out.toByteArray();
+    }
+
     @Test
     public void testModerateNestingDecodes() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

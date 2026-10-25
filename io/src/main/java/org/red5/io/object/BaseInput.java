@@ -104,6 +104,18 @@ public class BaseInput {
     }
 
     /**
+     * Makes this input continue the nesting depth of another input whose current value it decodes, such as the AMF3 value that follows an
+     * AMF0 avmplus-object marker. The value takes the level the other input entered for the marker, so the depth limit applies as if one
+     * input decoded both.
+     *
+     * @param outer
+     *            input that entered the level of the value
+     */
+    protected void continueNesting(BaseInput outer) {
+        depth = outer.depth - 1;
+    }
+
+    /**
      * Fails when a declared element count is negative or larger than the remaining input could hold.
      *
      * @param count
