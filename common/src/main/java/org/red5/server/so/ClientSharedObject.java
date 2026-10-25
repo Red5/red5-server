@@ -147,6 +147,8 @@ public class ClientSharedObject extends SharedObject implements IClientSharedObj
                             notifyDelete(event.getKey());
                             break;
                         case CLIENT_SEND_MESSAGE:
+                        case SERVER_SEND_MESSAGE:
+                            // both directions share the send message marker, the decoder names it SERVER_SEND_MESSAGE
                             notifySendMessage(event.getKey(), (List<?>) event.getValue());
                             break;
                         case CLIENT_UPDATE_DATA:
