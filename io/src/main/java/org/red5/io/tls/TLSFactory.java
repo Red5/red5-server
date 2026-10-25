@@ -131,7 +131,7 @@ public class TLSFactory {
     /**
      * Returns an SSLContext for the configured keystore and truststore with the provided password.
      *
-     * @param passphrase an array of {@link char} objects
+     * @param passphrase an array of {@code char} objects
      * @return SSLContext
      * @throws java.lang.Exception if the keystore or truststore cannot be loaded or the SSL context cannot be initialized
      * @param storeType a {@link java.lang.String} object
@@ -204,9 +204,9 @@ public class TLSFactory {
      * Returns an SSLContext for the provided keystore and truststore input streams.
      *
      * @param storeType a {@link java.lang.String} object
-     * @param keyStrorePassphrase an array of {@link char} objects
+     * @param keyStrorePassphrase an array of {@code char} objects
      * @param keystoreInput a {@link java.io.InputStream} object
-     * @param trustStorePassphrase an array of {@link char} objects
+     * @param trustStorePassphrase an array of {@code char} objects
      * @param truststoreInput a {@link java.io.InputStream} object
      * @return SSLContext
      * @throws java.lang.Exception if the keystore or truststore cannot be loaded or the SSL context cannot be initialized

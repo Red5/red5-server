@@ -82,7 +82,7 @@ public class StateCookie {
     /**
      * <p>Constructor for StateCookie.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @throws org.red5.io.sctp.SctpException if the offset and length do not fit the data or the MAC length is invalid
@@ -114,7 +114,7 @@ public class StateCookie {
      * <p>getBytes.</p>
      *
      * @param messageAuthenticationCode a {@link javax.crypto.Mac} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.security.InvalidKeyException if any.
      * @throws java.security.NoSuchAlgorithmException if any.
      */
@@ -176,7 +176,7 @@ public class StateCookie {
     /**
      * <p>Getter for the field <code>mac</code>.</p>
      *
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public byte[] getMac() {
         return mac;

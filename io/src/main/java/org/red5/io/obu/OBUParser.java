@@ -95,7 +95,7 @@ public class OBUParser {
     /**
      * <p>getNextObu.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @param bufSize a int
      * @return a {@link org.red5.io.obu.OBUInfo} object
@@ -173,7 +173,7 @@ public class OBUParser {
     /**
      * <p>parseSequenceHeader.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param bufSize a int
      * @return a {@link org.red5.io.obu.OBPSequenceHeader} object
      * @throws org.red5.io.obu.OBUParseException if any.
@@ -960,7 +960,7 @@ public class OBUParser {
     /**
      * <p>parseFrame.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param bufSize a int
      * @param seq a {@link org.red5.io.obu.OBPSequenceHeader} object
      * @param state a {@link org.red5.io.obu.OBPState} object
@@ -1064,7 +1064,7 @@ public class OBUParser {
     /**
      * <p>parseMetadata.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param bufSize a int
      * @return a {@link org.red5.io.obu.OBPMetadata} object
      * @throws org.red5.io.obu.OBUParseException if any.
@@ -1178,7 +1178,7 @@ public class OBUParser {
     /**
      * <p>parseTileList.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param bufSize a long
      * @return a {@link org.red5.io.obu.OBPTileList} object
      * @throws org.red5.io.obu.OBUParseException if any.

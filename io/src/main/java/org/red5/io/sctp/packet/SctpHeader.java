@@ -50,7 +50,7 @@ public final class SctpHeader {
     /**
      * <p>Constructor for SctpHeader.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @throws org.red5.io.sctp.SctpException if any.
@@ -78,7 +78,7 @@ public final class SctpHeader {
     /**
      * <p>getBytes.</p>
      *
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public byte[] getBytes() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE);

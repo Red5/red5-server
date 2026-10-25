@@ -167,7 +167,7 @@ public class WSMessage {
     /**
      * Adds additional payload data.
      *
-     * @param additionalPayload an array of {@link byte} objects
+     * @param additionalPayload an array of {@code byte} objects
      */
     public void addPayload(byte[] additionalPayload) {
         if (payload == null) {

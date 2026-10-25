@@ -62,7 +62,7 @@ public class SctpChannel {
     /**
      * <p>send.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      */
@@ -73,7 +73,7 @@ public class SctpChannel {
     /**
      * <p>receive.</p>
      *
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public byte[] receive() {
         // TODO

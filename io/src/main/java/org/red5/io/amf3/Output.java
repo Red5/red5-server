@@ -163,7 +163,7 @@ public class Output extends org.red5.io.amf.Output {
      * <p>putString.</p>
      *
      * @param str a {@link java.lang.String} object
-     * @param encoded an array of {@link byte} objects
+     * @param encoded an array of {@code byte} objects
      */
     protected void putString(String str, byte[] encoded) {
         final int len = encoded.length;

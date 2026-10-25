@@ -31,7 +31,7 @@ public class CookieEcho extends Chunk {
     /**
      * <p>Constructor for CookieEcho.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @throws org.red5.io.sctp.SctpException if any.
@@ -45,7 +45,7 @@ public class CookieEcho extends Chunk {
     /**
      * <p>Constructor for CookieEcho.</p>
      *
-     * @param cookie an array of {@link byte} objects
+     * @param cookie an array of {@code byte} objects
      */
     public CookieEcho(byte[] cookie) {
         super(ChunkType.COOKIE_ECHO, (byte) 0x00);

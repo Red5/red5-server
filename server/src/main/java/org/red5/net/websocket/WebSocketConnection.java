@@ -243,7 +243,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sends binary data to the client.
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @throws java.io.IOException if the session is closed or the write fails
      */
     public void send(byte[] buf) throws IOException {
@@ -286,7 +286,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sends a ping to the client.
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @throws java.io.IOException if the session is closed or the write fails
      * @throws java.lang.IllegalArgumentException if the payload exceeds the size allowed for a control frame
      */
@@ -309,7 +309,7 @@ public class WebSocketConnection extends AttributeStore implements Comparable<We
     /**
      * Sends a pong back to the client; normally in response to a ping.
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @throws java.io.IOException if the session is closed or the write fails
      * @throws java.lang.IllegalArgumentException if the payload exceeds the size allowed for a control frame
      */

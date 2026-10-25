@@ -53,7 +53,7 @@ public final class LEB128 {
     /**
      * <p>encode.</p>
      *
-     * @param value an array of {@link byte} objects
+     * @param value an array of {@code byte} objects
      * @return a int
      */
     public static int encode(byte[] value) {
@@ -109,7 +109,7 @@ public final class LEB128 {
     /**
      * Decodes an LEB128 unsigned integer from a byte array into a regular int.
      *
-     * @param value an array of {@link byte} objects
+     * @param value an array of {@code byte} objects
      * @return LEB128Result
      */
     public static LEB128Result decode(byte[] value) {
@@ -150,7 +150,7 @@ public final class LEB128 {
     /**
      * <p>hexBytesToUnsignedInt.</p>
      *
-     * @param hex an array of {@link byte} objects
+     * @param hex an array of {@code byte} objects
      * @return a int
      */
     public static int hexBytesToUnsignedInt(byte[] hex) {

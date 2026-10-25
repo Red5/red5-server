@@ -36,7 +36,7 @@ public class OBUInfo {
      * @param size a int
      * @param temporalId a int
      * @param spatialId a int
-     * @param prefix an array of {@link byte} objects
+     * @param prefix an array of {@code byte} objects
      * @param data a {@link java.nio.ByteBuffer} object
      */
     public OBUInfo(OBUType obuType, int size, int temporalId, int spatialId, byte[] prefix, ByteBuffer data) {
@@ -55,7 +55,7 @@ public class OBUInfo {
      * @param size a int
      * @param temporalId a int
      * @param spatialId a int
-     * @param prefix an array of {@link byte} objects
+     * @param prefix an array of {@code byte} objects
      */
     public OBUInfo(OBUType obuType, int size, int temporalId, int spatialId, byte[] prefix) {
         this.obuType = obuType;
@@ -94,7 +94,7 @@ public class OBUInfo {
     /**
      * <p>build.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @return a {@link org.red5.io.obu.OBUInfo} object

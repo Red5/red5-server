@@ -27,7 +27,7 @@ public interface IHandshake {
     /**
      * <p>validate.</p>
      *
-     * @param handshake an array of {@link byte} objects
+     * @param handshake an array of {@code byte} objects
      * @return a boolean
      */
     public boolean validate(byte[] handshake);

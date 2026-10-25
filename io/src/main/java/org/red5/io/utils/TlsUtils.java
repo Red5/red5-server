@@ -168,7 +168,7 @@ public class TlsUtils {
      * <p>writeUint8.</p>
      *
      * @param i a short
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeUint8(short i, byte[] buf, int offset) {
@@ -179,7 +179,7 @@ public class TlsUtils {
      * <p>writeUint8.</p>
      *
      * @param i a int
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeUint8(int i, byte[] buf, int offset) {
@@ -202,7 +202,7 @@ public class TlsUtils {
      * <p>writeUint16.</p>
      *
      * @param i a int
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeUint16(int i, byte[] buf, int offset) {
@@ -227,7 +227,7 @@ public class TlsUtils {
      * <p>writeUint24.</p>
      *
      * @param i a int
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeUint24(int i, byte[] buf, int offset) {
@@ -254,7 +254,7 @@ public class TlsUtils {
      * <p>writeUint32.</p>
      *
      * @param i a long
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeUint32(long i, byte[] buf, int offset) {
@@ -284,7 +284,7 @@ public class TlsUtils {
      * <p>writeUint48.</p>
      *
      * @param i a long
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeUint48(long i, byte[] buf, int offset) {
@@ -318,7 +318,7 @@ public class TlsUtils {
      * <p>writeUint64.</p>
      *
      * @param i a long
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeUint64(long i, byte[] buf, int offset) {
@@ -335,7 +335,7 @@ public class TlsUtils {
     /**
      * <p>writeOpaque8.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param output a {@link java.io.OutputStream} object
      * @throws java.io.IOException if any.
      */
@@ -347,8 +347,8 @@ public class TlsUtils {
     /**
      * <p>writeOpaque8.</p>
      *
-     * @param data an array of {@link byte} objects
-     * @param buf an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
+     * @param buf an array of {@code byte} objects
      * @param off a int
      * @throws java.io.IOException if any.
      */
@@ -360,7 +360,7 @@ public class TlsUtils {
     /**
      * <p>writeOpaque16.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param output a {@link java.io.OutputStream} object
      * @throws java.io.IOException if any.
      */
@@ -372,8 +372,8 @@ public class TlsUtils {
     /**
      * <p>writeOpaque16.</p>
      *
-     * @param data an array of {@link byte} objects
-     * @param buf an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
+     * @param buf an array of {@code byte} objects
      * @param off a int
      * @throws java.io.IOException if any.
      */
@@ -385,7 +385,7 @@ public class TlsUtils {
     /**
      * <p>writeOpaque24.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param output a {@link java.io.OutputStream} object
      * @throws java.io.IOException if any.
      */
@@ -397,8 +397,8 @@ public class TlsUtils {
     /**
      * <p>writeOpaque24.</p>
      *
-     * @param data an array of {@link byte} objects
-     * @param buf an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
+     * @param buf an array of {@code byte} objects
      * @param off a int
      * @throws java.io.IOException if any.
      */
@@ -410,7 +410,7 @@ public class TlsUtils {
     /**
      * <p>writeUint8Array.</p>
      *
-     * @param uints an array of {@link short} objects
+     * @param uints an array of {@code short} objects
      * @param output a {@link java.io.OutputStream} object
      * @throws java.io.IOException if any.
      */
@@ -423,8 +423,8 @@ public class TlsUtils {
     /**
      * <p>writeUint8Array.</p>
      *
-     * @param uints an array of {@link short} objects
-     * @param buf an array of {@link byte} objects
+     * @param uints an array of {@code short} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @throws java.io.IOException if any.
      */
@@ -438,7 +438,7 @@ public class TlsUtils {
     /**
      * <p>writeUint8ArrayWithUint8Length.</p>
      *
-     * @param uints an array of {@link short} objects
+     * @param uints an array of {@code short} objects
      * @param output a {@link java.io.OutputStream} object
      * @throws java.io.IOException if any.
      */
@@ -450,8 +450,8 @@ public class TlsUtils {
     /**
      * <p>writeUint8ArrayWithUint8Length.</p>
      *
-     * @param uints an array of {@link short} objects
-     * @param buf an array of {@link byte} objects
+     * @param uints an array of {@code short} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @throws java.io.IOException if any.
      */
@@ -463,7 +463,7 @@ public class TlsUtils {
     /**
      * <p>writeUint16Array.</p>
      *
-     * @param uints an array of {@link int} objects
+     * @param uints an array of {@code int} objects
      * @param output a {@link java.io.OutputStream} object
      * @throws java.io.IOException if any.
      */
@@ -476,8 +476,8 @@ public class TlsUtils {
     /**
      * <p>writeUint16Array.</p>
      *
-     * @param uints an array of {@link int} objects
-     * @param buf an array of {@link byte} objects
+     * @param uints an array of {@code int} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @throws java.io.IOException if any.
      */
@@ -491,8 +491,8 @@ public class TlsUtils {
     /**
      * <p>writeUint16ArrayWithUint8Length.</p>
      *
-     * @param uints an array of {@link int} objects
-     * @param buf an array of {@link byte} objects
+     * @param uints an array of {@code int} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @throws java.io.IOException if any.
      */
@@ -505,7 +505,7 @@ public class TlsUtils {
     /**
      * <p>writeUint16ArrayWithUint16Length.</p>
      *
-     * @param uints an array of {@link int} objects
+     * @param uints an array of {@code int} objects
      * @param output a {@link java.io.OutputStream} object
      * @throws java.io.IOException if any.
      */
@@ -518,8 +518,8 @@ public class TlsUtils {
     /**
      * <p>writeUint16ArrayWithUint16Length.</p>
      *
-     * @param uints an array of {@link int} objects
-     * @param buf an array of {@link byte} objects
+     * @param uints an array of {@code int} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @throws java.io.IOException if any.
      */
@@ -532,8 +532,8 @@ public class TlsUtils {
     /**
      * <p>decodeOpaque8.</p>
      *
-     * @param buf an array of {@link byte} objects
-     * @return an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] decodeOpaque8(byte[] buf) throws IOException {
@@ -543,9 +543,9 @@ public class TlsUtils {
     /**
      * <p>decodeOpaque8.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param minLength a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] decodeOpaque8(byte[] buf, int minLength) throws IOException {
@@ -565,8 +565,8 @@ public class TlsUtils {
     /**
      * <p>decodeOpaque16.</p>
      *
-     * @param buf an array of {@link byte} objects
-     * @return an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] decodeOpaque16(byte[] buf) throws IOException {
@@ -576,9 +576,9 @@ public class TlsUtils {
     /**
      * <p>decodeOpaque16.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param minLength a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] decodeOpaque16(byte[] buf, int minLength) throws IOException {
@@ -598,7 +598,7 @@ public class TlsUtils {
     /**
      * <p>decodeUint8.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @return a short
      * @throws java.io.IOException if any.
      */
@@ -615,8 +615,8 @@ public class TlsUtils {
     /**
      * <p>decodeUint8ArrayWithUint8Length.</p>
      *
-     * @param buf an array of {@link byte} objects
-     * @return an array of {@link short} objects
+     * @param buf an array of {@code byte} objects
+     * @return an array of {@code short} objects
      * @throws java.io.IOException if any.
      */
     public static short[] decodeUint8ArrayWithUint8Length(byte[] buf) throws IOException {
@@ -642,7 +642,7 @@ public class TlsUtils {
     /**
      * <p>decodeUint16.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @return a int
      * @throws java.io.IOException if any.
      */
@@ -659,8 +659,8 @@ public class TlsUtils {
     /**
      * <p>decodeUint16ArrayWithUint8Length.</p>
      *
-     * @param buf an array of {@link byte} objects
-     * @return an array of {@link int} objects
+     * @param buf an array of {@code byte} objects
+     * @return an array of {@code int} objects
      * @throws java.io.IOException if any.
      */
     public static int[] decodeUint16ArrayWithUint8Length(byte[] buf) throws IOException {
@@ -685,7 +685,7 @@ public class TlsUtils {
     /**
      * <p>decodeUint32.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @return a long
      * @throws java.io.IOException if any.
      */
@@ -702,8 +702,8 @@ public class TlsUtils {
     /**
      * <p>encodeOpaque8.</p>
      *
-     * @param buf an array of {@link byte} objects
-     * @return an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeOpaque8(byte[] buf) throws IOException {
@@ -713,8 +713,8 @@ public class TlsUtils {
     /**
      * <p>encodeOpaque16.</p>
      *
-     * @param buf an array of {@link byte} objects
-     * @return an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeOpaque16(byte[] buf) throws IOException {
@@ -727,8 +727,8 @@ public class TlsUtils {
     /**
      * <p>encodeOpaque24.</p>
      *
-     * @param buf an array of {@link byte} objects
-     * @return an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeOpaque24(byte[] buf) throws IOException {
@@ -742,7 +742,7 @@ public class TlsUtils {
      * <p>encodeUint8.</p>
      *
      * @param uint a short
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeUint8(short uint) throws IOException {
@@ -754,8 +754,8 @@ public class TlsUtils {
     /**
      * <p>encodeUint8ArrayWithUint8Length.</p>
      *
-     * @param uints an array of {@link short} objects
-     * @return an array of {@link byte} objects
+     * @param uints an array of {@code short} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeUint8ArrayWithUint8Length(short[] uints) throws IOException {
@@ -768,7 +768,7 @@ public class TlsUtils {
      * <p>encodeUint16.</p>
      *
      * @param uint a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeUint16(int uint) throws IOException {
@@ -780,8 +780,8 @@ public class TlsUtils {
     /**
      * <p>encodeUint16ArrayWithUint8Length.</p>
      *
-     * @param uints an array of {@link int} objects
-     * @return an array of {@link byte} objects
+     * @param uints an array of {@code int} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeUint16ArrayWithUint8Length(int[] uints) throws IOException {
@@ -794,8 +794,8 @@ public class TlsUtils {
     /**
      * <p>encodeUint16ArrayWithUint16Length.</p>
      *
-     * @param uints an array of {@link int} objects
-     * @return an array of {@link byte} objects
+     * @param uints an array of {@code int} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeUint16ArrayWithUint16Length(int[] uints) throws IOException {
@@ -809,7 +809,7 @@ public class TlsUtils {
      * <p>encodeUint24.</p>
      *
      * @param uint a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeUint24(int uint) throws IOException {
@@ -822,7 +822,7 @@ public class TlsUtils {
      * <p>encodeUint32.</p>
      *
      * @param uint a long
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] encodeUint32(long uint) throws IOException {
@@ -834,7 +834,7 @@ public class TlsUtils {
     /**
      * <p>readInt32.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @return a int
      */
@@ -864,7 +864,7 @@ public class TlsUtils {
     /**
      * <p>readUint8.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @return a short
      */
@@ -894,7 +894,7 @@ public class TlsUtils {
     /**
      * <p>readUint16.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @return a int
      */
@@ -930,7 +930,7 @@ public class TlsUtils {
     /**
      * <p>readUint24.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @return a int
      */
@@ -971,7 +971,7 @@ public class TlsUtils {
     /**
      * <p>readUint32.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @return a long
      */
@@ -999,7 +999,7 @@ public class TlsUtils {
     /**
      * <p>readUint48.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @return a long
      */
@@ -1014,7 +1014,7 @@ public class TlsUtils {
      *
      * @param length a int
      * @param input a {@link java.io.InputStream} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readAllOrNothing(int length, InputStream input) throws IOException {
@@ -1037,7 +1037,7 @@ public class TlsUtils {
      *
      * @param length a int
      * @param input a {@link java.io.InputStream} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readFully(int length, InputStream input) throws IOException {
@@ -1054,7 +1054,7 @@ public class TlsUtils {
     /**
      * <p>readFully.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param input a {@link java.io.InputStream} object
      * @throws java.io.IOException if any.
      */
@@ -1069,7 +1069,7 @@ public class TlsUtils {
      * <p>readOpaque8.</p>
      *
      * @param input a {@link java.io.InputStream} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readOpaque8(InputStream input) throws IOException {
@@ -1082,7 +1082,7 @@ public class TlsUtils {
      *
      * @param input a {@link java.io.InputStream} object
      * @param minLength a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readOpaque8(InputStream input, int minLength) throws IOException {
@@ -1099,7 +1099,7 @@ public class TlsUtils {
      * @param input a {@link java.io.InputStream} object
      * @param minLength a int
      * @param maxLength a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readOpaque8(InputStream input, int minLength, int maxLength) throws IOException {
@@ -1114,7 +1114,7 @@ public class TlsUtils {
      * <p>readOpaque16.</p>
      *
      * @param input a {@link java.io.InputStream} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readOpaque16(InputStream input) throws IOException {
@@ -1127,7 +1127,7 @@ public class TlsUtils {
      *
      * @param input a {@link java.io.InputStream} object
      * @param minLength a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readOpaque16(InputStream input, int minLength) throws IOException {
@@ -1142,7 +1142,7 @@ public class TlsUtils {
      * <p>readOpaque24.</p>
      *
      * @param input a {@link java.io.InputStream} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readOpaque24(InputStream input) throws IOException {
@@ -1155,7 +1155,7 @@ public class TlsUtils {
      *
      * @param input a {@link java.io.InputStream} object
      * @param minLength a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static byte[] readOpaque24(InputStream input, int minLength) throws IOException {
@@ -1171,7 +1171,7 @@ public class TlsUtils {
      *
      * @param count a int
      * @param input a {@link java.io.InputStream} object
-     * @return an array of {@link short} objects
+     * @return an array of {@code short} objects
      * @throws java.io.IOException if any.
      */
     public static short[] readUint8Array(int count, InputStream input) throws IOException {
@@ -1187,7 +1187,7 @@ public class TlsUtils {
      *
      * @param input a {@link java.io.InputStream} object
      * @param minLength a int
-     * @return an array of {@link short} objects
+     * @return an array of {@code short} objects
      * @throws java.io.IOException if any.
      */
     public static short[] readUint8ArrayWithUint8Length(InputStream input, int minLength) throws IOException {
@@ -1204,7 +1204,7 @@ public class TlsUtils {
      *
      * @param count a int
      * @param input a {@link java.io.InputStream} object
-     * @return an array of {@link int} objects
+     * @return an array of {@code int} objects
      * @throws java.io.IOException if any.
      */
     public static int[] readUint16Array(int count, InputStream input) throws IOException {
@@ -1218,7 +1218,7 @@ public class TlsUtils {
     /**
      * <p>readASN1Object.</p>
      *
-     * @param encoding an array of {@link byte} objects
+     * @param encoding an array of {@code byte} objects
      * @return a {@link org.bouncycastle.asn1.ASN1Primitive} object
      * @throws java.io.IOException if any.
      */
@@ -1239,7 +1239,7 @@ public class TlsUtils {
     /**
      * <p>readDERObject.</p>
      *
-     * @param encoding an array of {@link byte} objects
+     * @param encoding an array of {@code byte} objects
      * @return a {@link org.bouncycastle.asn1.ASN1Primitive} object
      * @throws java.io.IOException if any.
      */
@@ -1257,7 +1257,7 @@ public class TlsUtils {
      * <p>requireDEREncoding.</p>
      *
      * @param asn1 a {@link org.bouncycastle.asn1.ASN1Object} object
-     * @param encoding an array of {@link byte} objects
+     * @param encoding an array of {@code byte} objects
      * @throws java.io.IOException if any.
      */
     public static void requireDEREncoding(ASN1Object asn1, byte[] encoding) throws IOException {
@@ -1274,7 +1274,7 @@ public class TlsUtils {
     /**
      * <p>writeGMTUnixTime.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      */
     public static void writeGMTUnixTime(byte[] buf, int offset) {
@@ -1305,7 +1305,7 @@ public class TlsUtils {
      *
      * @param extensions a {@link java.util.Hashtable} object
      * @param extensionType a {@link java.lang.Integer} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public static byte[] getExtensionData(Hashtable extensions, Integer extensionType) {
         return extensions == null ? null : (byte[]) extensions.get(extensionType);
@@ -1353,7 +1353,7 @@ public class TlsUtils {
     /**
      * <p>isNullOrEmpty.</p>
      *
-     * @param array an array of {@link byte} objects
+     * @param array an array of {@code byte} objects
      * @return a boolean
      */
     public static boolean isNullOrEmpty(byte[] array) {
@@ -1363,7 +1363,7 @@ public class TlsUtils {
     /**
      * <p>isNullOrEmpty.</p>
      *
-     * @param array an array of {@link short} objects
+     * @param array an array of {@code short} objects
      * @return a boolean
      */
     public static boolean isNullOrEmpty(short[] array) {
@@ -1373,7 +1373,7 @@ public class TlsUtils {
     /**
      * <p>isNullOrEmpty.</p>
      *
-     * @param array an array of {@link int} objects
+     * @param array an array of {@code int} objects
      * @return a boolean
      */
     public static boolean isNullOrEmpty(int[] array) {
@@ -1413,8 +1413,8 @@ public class TlsUtils {
     /**
      * <p>clone.</p>
      *
-     * @param data an array of {@link byte} objects
-     * @return an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
+     * @return an array of {@code byte} objects
      */
     public static byte[] clone(byte[] data) {
         return null == data ? (byte[]) null : data.length == 0 ? EMPTY_BYTES : (byte[]) data.clone();
@@ -1434,9 +1434,9 @@ public class TlsUtils {
      * <p>constantTimeAreEqual.</p>
      *
      * @param len a int
-     * @param a an array of {@link byte} objects
+     * @param a an array of {@code byte} objects
      * @param aOff a int
-     * @param b an array of {@link byte} objects
+     * @param b an array of {@code byte} objects
      * @param bOff a int
      * @return a boolean
      */
@@ -1451,10 +1451,10 @@ public class TlsUtils {
     /**
      * <p>copyOfRangeExact.</p>
      *
-     * @param original an array of {@link byte} objects
+     * @param original an array of {@code byte} objects
      * @param from a int
      * @param to a int
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public static byte[] copyOfRangeExact(byte[] original, int from, int to) {
         int newLength = to - from;
@@ -1500,10 +1500,10 @@ public class TlsUtils {
     /**
      * <p>getCommonCipherSuites.</p>
      *
-     * @param peerCipherSuites an array of {@link int} objects
-     * @param localCipherSuites an array of {@link int} objects
+     * @param peerCipherSuites an array of {@code int} objects
+     * @param localCipherSuites an array of {@code int} objects
      * @param useLocalOrder a boolean
-     * @return an array of {@link int} objects
+     * @return an array of {@code int} objects
      */
     public static int[] getCommonCipherSuites(int[] peerCipherSuites, int[] localCipherSuites, boolean useLocalOrder) {
         int[] ordered = peerCipherSuites, unordered = localCipherSuites;
@@ -1600,7 +1600,7 @@ public class TlsUtils {
     /**
      * <p>containsNonAscii.</p>
      *
-     * @param bs an array of {@link byte} objects
+     * @param bs an array of {@code byte} objects
      * @return a boolean
      */
     public static boolean containsNonAscii(byte[] bs) {

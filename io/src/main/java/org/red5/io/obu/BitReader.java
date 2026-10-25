@@ -16,7 +16,7 @@ public class BitReader {
     /**
      * <p>Constructor for BitReader.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param bufSize a int
      */
     public BitReader(byte[] buf, int bufSize) {
@@ -30,7 +30,7 @@ public class BitReader {
     /**
      * <p>Constructor for BitReader.</p>
      *
-     * @param buf an array of {@link byte} objects
+     * @param buf an array of {@code byte} objects
      * @param offset a int
      * @param size a int
      */

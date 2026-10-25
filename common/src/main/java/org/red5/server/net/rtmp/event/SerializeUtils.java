@@ -21,7 +21,7 @@ public class SerializeUtils {
      * <p>ByteBufferToByteArray.</p>
      *
      * @param buf a {@link org.apache.mina.core.buffer.IoBuffer} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public static byte[] ByteBufferToByteArray(IoBuffer buf) {
         byte[] byteBuf = new byte[buf.limit()];
@@ -36,7 +36,7 @@ public class SerializeUtils {
      * <p>NioByteBufferToByteArray.</p>
      *
      * @param buf a {@link java.nio.ByteBuffer} object
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public static byte[] NioByteBufferToByteArray(ByteBuffer buf) {
         byte[] byteBuf = new byte[buf.limit()];
@@ -50,7 +50,7 @@ public class SerializeUtils {
     /**
      * <p>ByteArrayToByteBuffer.</p>
      *
-     * @param byteBuf an array of {@link byte} objects
+     * @param byteBuf an array of {@code byte} objects
      * @param buf a {@link org.apache.mina.core.buffer.IoBuffer} object
      */
     public static void ByteArrayToByteBuffer(byte[] byteBuf, IoBuffer buf) {
@@ -61,7 +61,7 @@ public class SerializeUtils {
     /**
      * <p>ByteArrayToNioByteBuffer.</p>
      *
-     * @param byteBuf an array of {@link byte} objects
+     * @param byteBuf an array of {@code byte} objects
      * @param buf a {@link java.nio.ByteBuffer} object
      */
     public static void ByteArrayToNioByteBuffer(byte[] byteBuf, ByteBuffer buf) {

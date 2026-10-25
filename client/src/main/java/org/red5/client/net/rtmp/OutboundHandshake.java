@@ -323,7 +323,7 @@ public class OutboundHandshake extends RTMPHandshake {
      * </pre>
      *
      * @return true if validation passes and false otherwise
-     * @param s2 an array of {@link byte} objects
+     * @param s2 an array of {@code byte} objects
      */
     public boolean decodeServerResponse2(byte[] s2) {
         log.debug("decodeServerResponse2");
@@ -476,7 +476,7 @@ public class OutboundHandshake extends RTMPHandshake {
     /**
      * <p>getHandshakeBytes.</p>
      *
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public byte[] getHandshakeBytes() {
         return c1;

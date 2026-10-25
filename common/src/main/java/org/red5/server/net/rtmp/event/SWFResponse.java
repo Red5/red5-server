@@ -27,7 +27,7 @@ public class SWFResponse extends Ping {
     /**
      * <p>Constructor for SWFResponse.</p>
      *
-     * @param bytes an array of {@link byte} objects
+     * @param bytes an array of {@code byte} objects
      */
     public SWFResponse(byte[] bytes) {
         this();

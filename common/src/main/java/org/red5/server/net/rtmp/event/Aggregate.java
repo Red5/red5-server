@@ -121,7 +121,7 @@ public class Aggregate extends BaseEvent implements IoConstants, IStreamData<Agg
     /**
      * <p>Setter for the field <code>data</code>.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      */
     public void setData(byte[] data) {
         this.data = IoBuffer.allocate(data.length);

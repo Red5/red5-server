@@ -214,7 +214,7 @@ public class AbstractMessage implements Message, Serializable {
      * <p>readFlags.</p>
      *
      * @param input a {@link org.red5.io.amf3.IDataInput} object
-     * @return an array of {@link short} objects
+     * @return an array of {@code short} objects
      */
     protected short[] readFlags(IDataInput input) {
         boolean hasNextFlag = true;

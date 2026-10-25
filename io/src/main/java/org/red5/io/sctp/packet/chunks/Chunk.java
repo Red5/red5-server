@@ -41,7 +41,7 @@ public abstract class Chunk {
     /**
      * <p>Constructor for Chunk.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @throws org.red5.io.sctp.SctpException if any.
@@ -116,7 +116,7 @@ public abstract class Chunk {
     /**
      * <p>getBytes.</p>
      *
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public byte[] getBytes() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE);

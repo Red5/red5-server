@@ -61,7 +61,7 @@ public final class UnsignedByte extends UnsignedNumber {
     /**
      * <p>fromBytes.</p>
      *
-     * @param c an array of {@link byte} objects
+     * @param c an array of {@code byte} objects
      * @return a {@link org.red5.io.object.UnsignedByte} object
      */
     public static UnsignedByte fromBytes(byte[] c) {
@@ -71,7 +71,7 @@ public final class UnsignedByte extends UnsignedNumber {
     /**
      * <p>fromBytes.</p>
      *
-     * @param c an array of {@link byte} objects
+     * @param c an array of {@code byte} objects
      * @param idx a int
      * @return a {@link org.red5.io.object.UnsignedByte} object
      */

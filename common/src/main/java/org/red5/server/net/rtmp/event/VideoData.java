@@ -159,7 +159,7 @@ public class VideoData extends BaseEvent implements IoConstants, IStreamData<Vid
     /**
      * <p>Setter for the field <code>data</code>.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      */
     public void setData(byte[] data) {
         // set some properties if we can

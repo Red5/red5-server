@@ -18,7 +18,7 @@ public class ChunkFactory {
     /**
      * <p>createChunk.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @return a {@link org.red5.io.sctp.packet.chunks.Chunk} object

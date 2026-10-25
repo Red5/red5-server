@@ -90,7 +90,7 @@ public final class UnsignedLong extends UnsignedNumber {
     /**
      * <p>fromBytes.</p>
      *
-     * @param c an array of {@link byte} objects
+     * @param c an array of {@code byte} objects
      * @return a {@link org.red5.io.object.UnsignedLong} object
      */
     public static UnsignedLong fromBytes(byte[] c) {
@@ -100,7 +100,7 @@ public final class UnsignedLong extends UnsignedNumber {
     /**
      * <p>fromBytes.</p>
      *
-     * @param c an array of {@link byte} objects
+     * @param c an array of {@code byte} objects
      * @param offset a int
      * @return a {@link org.red5.io.object.UnsignedLong} object
      */

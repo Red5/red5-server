@@ -26,7 +26,7 @@ public class ByteNibbler {
     /**
      * <p>Constructor for ByteNibbler.</p>
      *
-     * @param b an array of {@link byte} objects
+     * @param b an array of {@code byte} objects
      */
     public ByteNibbler(byte[] b) {
         data = b;
@@ -80,7 +80,7 @@ public class ByteNibbler {
     /**
      * <p>toHexString.</p>
      *
-     * @param ba an array of {@link byte} objects
+     * @param ba an array of {@code byte} objects
      * @return a {@link java.lang.String} object
      */
     public static String toHexString(byte[] ba) {
@@ -94,7 +94,7 @@ public class ByteNibbler {
     /**
      * <p>toBinaryString.</p>
      *
-     * @param ba an array of {@link byte} objects
+     * @param ba an array of {@code byte} objects
      * @return a {@link java.lang.String} object
      */
     public static String toBinaryString(byte[] ba) {

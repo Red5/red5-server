@@ -258,7 +258,7 @@ public class VP8Video extends AbstractVideo {
     /**
      * <p>isKeyFrame.</p>
      *
-     * @param input an array of {@link byte} objects
+     * @param input an array of {@code byte} objects
      * @param offset a int
      * @return a boolean
      */

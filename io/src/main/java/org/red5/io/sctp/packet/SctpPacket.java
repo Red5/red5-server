@@ -33,7 +33,7 @@ public class SctpPacket {
     /**
      * <p>Constructor for SctpPacket.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @throws org.red5.io.sctp.SctpException if any.
@@ -96,7 +96,7 @@ public class SctpPacket {
     /**
      * <p>getBytes.</p>
      *
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public byte[] getBytes() {
         int resultSize = header.getSize();

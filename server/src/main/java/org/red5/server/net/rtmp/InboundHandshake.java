@@ -445,7 +445,7 @@ public class InboundHandshake extends RTMPHandshake {
     /**
      * <p>setHandshakeBytes.</p>
      *
-     * @param handshake an array of {@link byte} objects
+     * @param handshake an array of {@code byte} objects
      */
     public void setHandshakeBytes(byte[] handshake) {
         this.handshakeBytes = handshake;
@@ -454,7 +454,7 @@ public class InboundHandshake extends RTMPHandshake {
     /**
      * <p>getHandshakeBytes.</p>
      *
-     * @return an array of {@link byte} objects
+     * @return an array of {@code byte} objects
      */
     public byte[] getHandshakeBytes() {
         return s1;

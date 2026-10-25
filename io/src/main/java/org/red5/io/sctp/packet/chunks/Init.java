@@ -57,7 +57,7 @@ public class Init extends Chunk {
     /**
      * <p>Constructor for Init.</p>
      *
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param offset a int
      * @param length a int
      * @throws org.red5.io.sctp.SctpException if any.

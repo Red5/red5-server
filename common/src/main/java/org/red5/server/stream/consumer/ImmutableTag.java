@@ -225,7 +225,7 @@ public class ImmutableTag implements ITag {
      *
      * @param dataType a byte
      * @param timestamp a int
-     * @param data an array of {@link byte} objects
+     * @param data an array of {@code byte} objects
      * @param previousTagSize a int
      * @return a {@link org.red5.server.stream.consumer.ImmutableTag} object
      */
