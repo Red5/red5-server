@@ -932,25 +932,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 final int start = in.position();
                 while (in.position() - start < length) {
                     String tmp = input.getString();
-                    map.put(tmp, Deserializer.deserialize(input, Object.class));
+                    map.put(tmp, Deserializer.deserialize(valueInput(in, input, amf3Input), Object.class));
                 }
                 value = map;
             } else if (type != ISharedObjectEvent.Type.SERVER_SEND_MESSAGE && type != ISharedObjectEvent.Type.CLIENT_SEND_MESSAGE) {
                 if (length > 0) {
                     key = input.getString();
                     if (length > key.length() + 2) {
-                        // determine if the object is encoded with amf3
-                        byte objType = in.get();
-                        in.position(in.position() - 1);
-                        Input propertyInput;
-                        if (objType == AMF.TYPE_AMF3_OBJECT && !(input instanceof org.red5.io.amf3.Input)) {
-                            // The next parameter is encoded using AMF3
-                            propertyInput = amf3Input;
-                        } else {
-                            // The next parameter is encoded using AMF0
-                            propertyInput = input;
-                        }
-                        value = Deserializer.deserialize(propertyInput, Object.class);
+                        value = Deserializer.deserialize(valueInput(in, input, amf3Input), Object.class);
                     }
                 }
             } else {
@@ -960,24 +949,32 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 // read parameters
                 final List<Object> list = new LinkedList<Object>();
                 while (in.position() - start < length) {
-                    byte objType = in.get();
-                    in.position(in.position() - 1);
-                    // determine if the object is encoded with amf3
-                    Input propertyInput;
-                    if (objType == AMF.TYPE_AMF3_OBJECT && !(input instanceof org.red5.io.amf3.Input)) {
-                        // The next parameter is encoded using AMF3
-                        propertyInput = amf3Input;
-                    } else {
-                        // The next parameter is encoded using AMF0
-                        propertyInput = input;
-                    }
-                    Object tmp = Deserializer.deserialize(propertyInput, Object.class);
-                    list.add(tmp);
+                    list.add(Deserializer.deserialize(valueInput(in, input, amf3Input), Object.class));
                 }
                 value = list;
             }
             so.addEvent(type, key, value);
         }
+    }
+
+    /**
+     * Returns the input to read the next shared object value with. Any value may be switched to AMF3 with the avmplus-object marker, as
+     * the encoder does on AMF3 connections; an AMF0 input cannot read it, so the AMF3 input of the message reads it. Its reference tables
+     * span the message, as those of the encoder do.
+     *
+     * @param in
+     *            buffer positioned at the value
+     * @param input
+     *            input of the message
+     * @param amf3Input
+     *            AMF3 input of the message
+     * @return input for the value
+     */
+    private static Input valueInput(IoBuffer in, Input input, Input amf3Input) {
+        if (!(input instanceof org.red5.io.amf3.Input) && in.get(in.position()) == AMF.TYPE_AMF3_OBJECT) {
+            return amf3Input;
+        }
+        return input;
     }
 
     /**
