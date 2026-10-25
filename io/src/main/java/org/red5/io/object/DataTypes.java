@@ -116,18 +116,20 @@ public class DataTypes {
     public static final byte CUSTOM_XML_MASK = 0x60;
 
     /**
-     * Vector type markers
+     * Vector&lt;int&gt; type. Core types stay below {@link #CUSTOM_MOCK_MASK}: the vector types used to be the AMF3 markers plus
+     * {@link #CUSTOM_AMF_MASK}, which made the AMF0 unsupported (0x0D) and recordset (0x0E) markers, reported as custom AMF types, decode
+     * as vectors.
      */
-    public static final byte CORE_VECTOR_INT = 0x0D + 0x30; //61
+    public static final byte CORE_VECTOR_INT = 0x12;
 
-    /** Constant <code>CORE_VECTOR_UINT=0x0E + 0x30</code> */
-    public static final byte CORE_VECTOR_UINT = 0x0E + 0x30; //62
+    /** Vector&lt;uint&gt; type */
+    public static final byte CORE_VECTOR_UINT = 0x13;
 
-    /** Constant <code>CORE_VECTOR_NUMBER=0x0F + 0x30</code> */
-    public static final byte CORE_VECTOR_NUMBER = 0x0F + 0x30; //63
+    /** Vector&lt;Number&gt; type */
+    public static final byte CORE_VECTOR_NUMBER = 0x14;
 
-    /** Constant <code>CORE_VECTOR_OBJECT=0x10 + 0x30</code> */
-    public static final byte CORE_VECTOR_OBJECT = 0x10 + 0x30; //64
+    /** Vector&lt;Object&gt; type */
+    public static final byte CORE_VECTOR_OBJECT = 0x15;
 
     // Some helper methods..
 
@@ -172,6 +174,14 @@ public class DataTypes {
                 return "Vector<Object>";
             case OPT_REFERENCE:
                 return "Reference";
+            case CORE_SWITCH:
+                return "AMF3 switch";
+            case CORE_END_OBJECT:
+                return "End of object";
+        }
+        if (dataType < CUSTOM_MOCK_MASK) {
+            // negative (0x80 and above) or an unassigned core value
+            return String.format("Unknown[0x%02X]", dataType & 0xff);
         }
         if (dataType >= CUSTOM_MOCK_MASK && dataType < CUSTOM_AMF_MASK) {
             return "MOCK[" + (dataType - CUSTOM_MOCK_MASK) + ']';
@@ -193,10 +203,12 @@ public class DataTypes {
      *
      * @param type
      *            Data type as byte
-     * @return boolean <code>true</code> if data type is primitive, <code>false</code> otherwise
+     * @return boolean <code>true</code> if data type is primitive ({@link #CORE_SKIP} through {@link #CORE_DATE}), <code>false</code>
+     *         otherwise
      */
     public static boolean isBasicType(byte type) {
-        return type <= CORE_DATE;
+        // byte is signed, so the 0xef and 0xff markers would otherwise fall below CORE_DATE
+        return type >= CORE_SKIP && type <= CORE_DATE;
     }
 
     /**
@@ -204,10 +216,24 @@ public class DataTypes {
      *
      * @param type
      *            Data type as byte
-     * @return boolean <code>true</code> if data type is complex (non-primitive), <code>false</code> otherwise
+     * @return boolean <code>true</code> if data type is complex (non-primitive): an array, map, XML, object, byte array or vector,
+     *         <code>false</code> otherwise
      */
     public static boolean isComplexType(byte type) {
-        return type >= CORE_ARRAY && type <= CORE_OBJECT;
+        switch (type) {
+            case CORE_ARRAY:
+            case CORE_MAP:
+            case CORE_XML:
+            case CORE_OBJECT:
+            case CORE_BYTEARRAY:
+            case CORE_VECTOR_INT:
+            case CORE_VECTOR_UINT:
+            case CORE_VECTOR_NUMBER:
+            case CORE_VECTOR_OBJECT:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**

@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.annotations.Anonymous;
-import org.red5.compatibility.flex.messaging.io.ObjectProxy;
 import org.red5.io.amf.AMF;
 import org.red5.io.object.RecordSet;
 import org.red5.io.object.Serializer;
@@ -51,6 +50,11 @@ public class Output extends org.red5.io.amf.Output {
      * Set to a value above 0 to disable writing of the AMF3 object tag.
      */
     private int amf3_mode;
+
+    /**
+     * Largest value of an unsigned 29-bit integer.
+     */
+    private static final long MAX_U29 = 0x1FFFFFFFL;
 
     /**
      * List of strings already written.
@@ -110,30 +114,32 @@ public class Output extends org.red5.io.amf.Output {
     }
 
     /**
-     * <p>putInteger.</p>
+     * Writes a U29: an unsigned header, length or reference value from 0 to 2^29 - 1, or the value of the integer type from -2^28 to 2^28 - 1,
+     * which is written as its 29-bit two's complement.
      *
      * @param value a long
+     * @throws IllegalArgumentException if the value does not fit into 29 bits
      */
     protected void putInteger(long value) {
-        if ((value >= -268435456) && (value <= 268435455)) {
-            value &= 0x1FFFFFFF;
+        if (value < AMF3.MIN_INTEGER_VALUE || value > MAX_U29) {
+            throw new IllegalArgumentException(String.format("Value %d does not fit into an AMF3 U29", value));
         }
-        if (value < 128) {
+        value &= MAX_U29;
+        if (value < 0x80) {
             buf.put((byte) value);
-        } else if (value < 16384) {
+        } else if (value < 0x4000) {
             buf.put((byte) (((value >> 7) & 0x7F) | 0x80));
             buf.put((byte) (value & 0x7F));
-        } else if (value < 2097152) {
+        } else if (value < 0x200000) {
             buf.put((byte) (((value >> 14) & 0x7F) | 0x80));
             buf.put((byte) (((value >> 7) & 0x7F) | 0x80));
             buf.put((byte) (value & 0x7F));
-        } else if (value < 1073741824) {
+        } else {
+            // the fourth byte carries all 8 bits
             buf.put((byte) (((value >> 22) & 0x7F) | 0x80));
             buf.put((byte) (((value >> 15) & 0x7F) | 0x80));
             buf.put((byte) (((value >> 8) & 0x7F) | 0x80));
             buf.put((byte) (value & 0xFF));
-        } else {
-            log.error("Integer out of range: {}", value);
         }
     }
 
@@ -454,13 +460,9 @@ public class Output extends org.red5.io.amf.Output {
         Class<?> objectClass = object.getClass();
         if (IExternalizable.class.isAssignableFrom(objectClass)) {
             log.debug("Object is IExternalizable");
-            // the object knows how to serialize itself
-            int type = 1 << 1 | 1;
-            if (object instanceof ObjectProxy) {
-                type |= AMF3.TYPE_OBJECT_PROXY << 2;
-            } else {
-                type |= AMF3.TYPE_OBJECT_EXTERNALIZABLE << 2;
-            }
+            // the object knows how to serialize itself: U29O-traits-ext is 0x07 (inline object, inline traits, externalizable), the
+            // remaining bits are not significant and no sealed members follow; this applies to ObjectProxy as well
+            int type = AMF3.TYPE_OBJECT_EXTERNALIZABLE << 2 | 1 << 1 | 1;
             putInteger(type);
             putString(Serializer.getClassName(objectClass));
             amf3_mode += 1;
@@ -544,16 +546,39 @@ public class Output extends org.red5.io.amf.Output {
     /** {@inheritDoc} */
     @Override
     public void writeXML(Document xml) {
+        writeXMLValue(xml, XMLUtils.docToString(xml));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Writes the text as an AMF3 XML value, prefixed with the avmplus-object marker in the AMF0 context.
+     */
+    @Override
+    public void writeXML(String xml) {
+        writeXMLValue(xml, xml);
+    }
+
+    /**
+     * Writes an AMF3 XML value: the XML marker, then a U29X holding the byte length or an object reference, then the UTF-8 text. XML values
+     * enter the object reference table.
+     *
+     * @param ref
+     *            object identifying the value in the reference table
+     * @param text
+     *            XML text
+     */
+    private void writeXMLValue(Object ref, String text) {
         writeAMF3();
         buf.put(AMF3.TYPE_XML);
-        if (hasReference(xml)) {
-            putInteger(getReferenceId(xml) << 1);
+        if (hasReference(ref)) {
+            putInteger(getReferenceId(ref) << 1);
             return;
         }
-        final byte[] encoded = encodeString(XMLUtils.docToString(xml));
+        final byte[] encoded = encodeString(text);
         putInteger(encoded.length << 1 | 1);
         buf.put(encoded);
-        storeReference(xml);
+        storeReference(ref);
     }
 
     /** {@inheritDoc} */
@@ -643,6 +668,7 @@ public class Output extends org.red5.io.amf.Output {
     @Override
     public void writeVectorNumber(Vector<Double> vector) {
         log.debug("writeVectorNumber: {}", vector);
+        writeAMF3();
         buf.put(AMF3.TYPE_VECTOR_NUMBER);
         if (hasReference(vector)) {
             putInteger(getReferenceId(vector) << 1);
@@ -650,7 +676,7 @@ public class Output extends org.red5.io.amf.Output {
         }
         storeReference(vector);
         putInteger(vector.size() << 1 | 1);
-        putInteger(0);
+        // fixed-length flag
         buf.put((byte) 0x00);
         for (Double v : vector) {
             buf.putDouble(v);
@@ -665,6 +691,7 @@ public class Output extends org.red5.io.amf.Output {
     @Override
     public void writeVectorObject(Vector<Object> vector) {
         log.debug("writeVectorObject: {}", vector);
+        writeAMF3();
         buf.put(AMF3.TYPE_VECTOR_OBJECT);
         if (hasReference(vector)) {
             putInteger(getReferenceId(vector) << 1);
@@ -672,11 +699,27 @@ public class Output extends org.red5.io.amf.Output {
         }
         storeReference(vector);
         putInteger(vector.size() << 1 | 1);
-        putInteger(0);
-        buf.put((byte) 0x01);
+        // fixed-length flag
+        buf.put((byte) 0x00);
+        // object type name, empty for any type
+        putString("");
+        // the elements are AMF3 values
+        amf3_mode += 1;
         for (Object v : vector) {
             Serializer.serialize(this, v);
         }
+        amf3_mode -= 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Clears the object and string reference tables.
+     */
+    @Override
+    public void reset() {
+        super.reset();
+        stringReferences.clear();
     }
 
 }

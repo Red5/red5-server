@@ -37,7 +37,8 @@ public class RecordSetPage {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public RecordSetPage(Input input) {
         Map mapResult = Deserializer.deserialize(input, Map.class);
-        cursor = (Integer) mapResult.get("Cursor");
+        // AMF numbers decode as doubles
+        cursor = ((Number) mapResult.get("Cursor")).intValue();
         data = (List<List<Object>>) mapResult.get("Page");
     }
 

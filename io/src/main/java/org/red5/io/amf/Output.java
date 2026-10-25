@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -282,7 +281,8 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     public void writeDate(Date date) {
         buf.put(AMF.TYPE_DATE);
         buf.putDouble(date.getTime());
-        buf.putShort((short) (TimeZone.getDefault().getRawOffset() / 60 / 1000));
+        // the time-zone is reserved and should be 0x0000, the time is always UTC
+        buf.putShort((short) 0);
     }
 
     /** {@inheritDoc} */
@@ -475,7 +475,8 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     public void writeString(String string) {
         final byte[] encoded = encodeString(string);
         final int len = encoded.length;
-        if (len < AMF.LONG_STRING_LENGTH) {
+        // the string marker is used whenever the UTF-8 length fits in a U16, the long string marker only above that
+        if (len <= AMF.LONG_STRING_LENGTH) {
             buf.put(AMF.TYPE_STRING);
             // write unsigned short
             buf.put((byte) ((len >> 8) & 0xff));
@@ -535,22 +536,23 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     }
 
     /**
-     * Write out string
+     * Write out a UTF-8 string with a U16 byte length and no type marker, as used for property names, class names and other short strings.
      *
      * @param buf
      *            Byte buffer to write to
      * @param string
      *            String to write
+     * @throws IllegalArgumentException
+     *             if the UTF-8 form of the string is longer than 65535 bytes, which a U16 length cannot represent
      */
     public static void putString(IoBuffer buf, String string) {
         final byte[] encoded = encodeString(string);
-        if (encoded.length < AMF.LONG_STRING_LENGTH) {
-            // write unsigned short
-            buf.put((byte) ((encoded.length >> 8) & 0xff));
-            buf.put((byte) (encoded.length & 0xff));
-        } else {
-            buf.putInt(encoded.length);
+        if (encoded.length > AMF.LONG_STRING_LENGTH) {
+            throw new IllegalArgumentException(String.format("AMF0 cannot encode a %d byte UTF-8 name (property, class or header name), its U16 length limits it to %d bytes", encoded.length, AMF.LONG_STRING_LENGTH));
         }
+        // write unsigned short
+        buf.put((byte) ((encoded.length >> 8) & 0xff));
+        buf.put((byte) (encoded.length & 0xff));
         buf.put(encoded);
     }
 
@@ -563,19 +565,21 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     /** {@inheritDoc} */
     @Override
     public void writeXML(Document xml) {
-        buf.put(AMF.TYPE_XML);
-        putString(XMLUtils.docToString(xml));
+        writeXML(XMLUtils.docToString(xml));
     }
 
     /**
-     * Convenience method to allow XML text to be used, instead of requiring an XML Document.
+     * Convenience method to allow XML text to be used, instead of requiring an XML Document. The XML document marker is followed by
+     * UTF-8-long, a U32 byte length and the UTF-8 text.
      *
      * @param xml
      *            xml to write
      */
     public void writeXML(String xml) {
+        final byte[] encoded = encodeString(xml);
         buf.put(AMF.TYPE_XML);
-        putString(xml);
+        buf.putInt(encoded.length);
+        buf.put(encoded);
     }
 
     /**

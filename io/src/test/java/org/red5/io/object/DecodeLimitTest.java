@@ -88,8 +88,8 @@ public class DecodeLimitTest {
     }
 
     @Test
-    public void testNegativeAmf3VectorLength() {
-        // four byte U29 with the sign bit set decodes as a negative integer
+    public void testMaximumAmf3VectorLength() {
+        // the largest four byte U29 length; headers are unsigned, so this is a count of 2^28 - 1 elements, far beyond the input
         assertLimit(amf3(new byte[] { 0x0D, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, 0x00 }));
     }
 

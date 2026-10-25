@@ -215,6 +215,8 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         int len = 0;
         switch (currentDataType) {
             case AMF.TYPE_LONG_STRING:
+            case AMF.TYPE_XML:
+                // long string and xml document are both UTF-8-long: a U32 byte length followed by the UTF-8 text
                 log.trace("Long string type");
                 len = buf.getInt();
                 if (len < 0) {
@@ -276,9 +278,8 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         // The timezone can be ignored as the date always is encoded in UTC
         @SuppressWarnings("unused")
         short timeZoneMins = buf.getShort();
-        Date date = new Date(ms);
-        storeReference(date);
-        return date;
+        // dates are not complex objects and do not take an AMF0 reference index
+        return new Date(ms);
     }
 
     /** {@inheritDoc} */
@@ -485,8 +486,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     protected Map<String, Object> readSimpleObject() {
         log.debug("readSimpleObject");
         Map<String, Object> result = new ObjectMap<>();
-        readKeyValues(result);
+        // the object takes its reference index when it is encountered, before its members, so members can refer to it or to earlier siblings
         storeReference(result);
+        readKeyValues(result);
         return result;
     }
 
@@ -506,11 +508,14 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
                 Object result = null;
                 Object instance;
                 if (className.equals("RecordSet")) {
+                    // these instances only exist once their members are read, so reserve the index first to keep later indices in order
+                    int reference = storeReference(className);
                     result = new RecordSet(this);
-                    storeReference(result);
+                    storeReference(reference, result);
                 } else if (className.equals("RecordSetPage")) {
+                    int reference = storeReference(className);
                     result = new RecordSetPage(this);
-                    storeReference(result);
+                    storeReference(reference, result);
                 } else if (!classAllowed(className)) {
                     log.debug("Class creation is not allowed {}", className);
                     result = readSimpleObject();
@@ -581,7 +586,7 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
         } catch (IOException ioex) {
             log.error("IOException converting xml to dom", ioex);
         }
-        storeReference(doc);
+        // xml documents are not complex objects and do not take an AMF0 reference index
         return doc;
     }
 

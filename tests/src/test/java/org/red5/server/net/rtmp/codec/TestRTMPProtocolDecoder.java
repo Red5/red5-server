@@ -1,30 +1,42 @@
 package org.red5.server.net.rtmp.codec;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
+import org.red5.io.amf.Input;
 import org.red5.io.amf.Output;
+import org.red5.io.object.Deserializer;
 import org.red5.io.utils.IOUtils;
 import org.red5.server.api.Red5;
 import org.red5.server.net.rtmp.IRTMPHandler;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
 import org.red5.server.net.rtmp.RTMPUtils;
+import org.red5.server.net.rtmp.event.FlexMessage;
+import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.Invoke;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.message.ChunkHeader;
+import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.message.Packet;
+import org.red5.server.so.ISharedObjectEvent;
+import org.red5.server.so.ISharedObjectMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,18 +321,183 @@ public class TestRTMPProtocolDecoder implements IRTMPHandler {
         byte[] copy = Arrays.copyOfRange(encoded.array(), encoded.arrayOffset(), encoded.remaining());
         log.debug("Encoded: {}", Hex.encodeHexString(copy));
 
-        List<?> objects = dec.decodeBuffer(conn, encoded);
-        log.info("Decoded: {}", objects);
-        if (objects != null) {
-            for (Object object : objects) {
-                log.info("Decoded object: {}", object);
-            }
+        try {
+            List<?> objects = dec.decodeBuffer(conn, encoded);
+            log.info("Decoded: {}", objects);
+            assertNotNull(objects);
+            assertEquals(1, objects.size());
+            Object msg = ((Packet) objects.get(0)).getMessage();
+            assertEquals(Notify.class, msg.getClass());
+            Notify notify = (Notify) msg;
+            assertEquals(action, notify.getAction());
+            // the notify carries the original body: the action and the metadata object
+            Input input = new Input(notify.getData().duplicate());
+            assertEquals(action, Deserializer.deserialize(input, String.class));
+            Map<?, ?> metadata = Deserializer.deserialize(input, Object.class);
+            log.info("Metadata: {}", metadata);
+            assertEquals("NGINX RTMP (github.com/arut/nginx-rtmp-module)", metadata.get("Server"));
+            // the captured packet differs from the json above in its dimensions
+            assertEquals(String.valueOf(metadata), 1920.0d, metadata.get("width"));
+            assertEquals(String.valueOf(metadata), 1080.0d, metadata.get("height"));
+            assertEquals(7.0d, metadata.get("videocodecid"));
+            assertEquals(10.0d, metadata.get("audiocodecid"));
+            assertTrue(metadata.containsKey("profile"));
+            assertTrue(metadata.containsKey("level"));
+            assertEquals(14, metadata.size());
+        } finally {
+            Red5.setConnectionLocal(null);
         }
+    }
 
-        //Notify event = dec.decodePacket(encoded);
-        //log.debug("Decoded: {}", event.toString());
+    private static IoBuffer hexBuffer(String hex) {
+        return IoBuffer.wrap(IOUtils.hexStringToByteArray(hex.replace(" ", "")));
+    }
 
-        Red5.setConnectionLocal(null);
+    private static String amf0String(String s) {
+        return String.format("02 %04x %s", s.length(), Hex.encodeHexString(s.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private static String amf3String(String s) {
+        // inline UTF-8-vr for strings shorter than 64 bytes
+        return String.format("06 %02x %s", s.length() << 1 | 1, Hex.encodeHexString(s.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    /**
+     * Flex message (0x11) with params mixing AMF0 values and AMF3 values switched with the avmplus-object marker; the AMF3 string table spans
+     * the params.
+     */
+    @Test
+    public void testDecodeFlexMessageMixedParams() {
+        RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
+        IoBuffer in = hexBuffer("00 " + amf0String("echo") + " 00 4000000000000000 05 " // action, transaction id 2, null command object
+                + amf0String("p0") // AMF0 string
+                + " 11 " + amf3String("s") // AMF3 string
+                + " 00 3ff0000000000000" // AMF0 number 1.0
+                + " 11 06 00" // AMF3 string reference 0
+                + " 11 04 05" // AMF3 integer 5
+                + " 01 01"); // AMF0 boolean true
+        FlexMessage msg = dec.decodeFlexMessage(in);
+        assertEquals(2, msg.getTransactionId());
+        assertEquals("echo", msg.getCall().getServiceMethodName());
+        assertArrayEquals(new Object[] { "p0", "s", 1.0d, "s", 5, Boolean.TRUE }, msg.getCall().getArguments());
+        assertFalse(in.hasRemaining());
+    }
+
+    /**
+     * Object and traits references in AMF3 params refer to objects of earlier params of the same message body.
+     */
+    @Test
+    public void testDecodeFlexMessageReferencesAcrossParams() {
+        RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
+        IoBuffer in = hexBuffer("00 " + amf0String("echo") + " 00 0000000000000000 05" //
+                + " 11 0a 0b 01 03 61 04 01 01" // {a: 1}, inline dynamic traits
+                + " 11 0a 01 03 62 04 02 01" // {b: 2}, traits reference 0
+                + " 11 0a 00" // object reference 0
+                + " 11 0a 02" // object reference 1
+                + " 11 06 02"); // string reference 1 ("b")
+        FlexMessage msg = dec.decodeFlexMessage(in);
+        Object[] args = msg.getCall().getArguments();
+        assertEquals(5, args.length);
+        assertEquals(Map.of("a", 1), args[0]);
+        assertEquals(Map.of("b", 2), args[1]);
+        assertSame(args[0], args[2]);
+        assertSame(args[1], args[3]);
+        assertEquals("b", args[4]);
+        assertFalse(in.hasRemaining());
+    }
+
+    /**
+     * Without the avmplus-object marker the params are AMF0: 0x10 is a typed object, not a vector.
+     */
+    @Test
+    public void testDecodeFlexMessageTypedObjectParam() {
+        RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
+        IoBuffer in = hexBuffer("00 " + amf0String("echo") + " 00 0000000000000000 05" //
+                + " 10 0003 466f6f 0001 61 " + amf0String("b") + " 000009" // typed object Foo {a: "b"}
+                + amf0String("z"));
+        FlexMessage msg = dec.decodeFlexMessage(in);
+        Object[] args = msg.getCall().getArguments();
+        assertEquals(2, args.length);
+        assertEquals(Map.of("a", "b"), args[0]);
+        assertEquals("z", args[1]);
+        assertFalse(in.hasRemaining());
+    }
+
+    /**
+     * Flex shared object message with encoding 3: the name and keys are AMF0 strings, values may be switched to AMF3.
+     */
+    @Test
+    public void testDecodeFlexSharedObjectEncoding3() {
+        RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
+        String key = Hex.encodeHexString("color".getBytes(StandardCharsets.UTF_8));
+        // set attribute: U16 key, then the value
+        String value = "11 " + amf3String("red");
+        int length = 2 + 5 + 1 + 5;
+        IoBuffer in = hexBuffer("03 0002 736f 00000001 00000002 00000000" // encoding, name "so", version 1, persistent, unknown
+                + String.format(" 03 %08x 0005 %s %s", length, key, value));
+        ISharedObjectMessage so = dec.decodeFlexSharedObject(in);
+        assertEquals("so", so.getName());
+        assertEquals(1, so.getVersion());
+        assertTrue(so.isPersistent());
+        assertEquals(1, so.getEvents().size());
+        ISharedObjectEvent event = so.getEvents().iterator().next();
+        assertEquals(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, event.getType());
+        assertEquals("color", event.getKey());
+        assertEquals("red", event.getValue());
+        assertFalse(in.hasRemaining());
+    }
+
+    /**
+     * Invoke on an AMF3 connection: each value switched to AMF3 applies to that value only, AMF0 values may follow.
+     */
+    @Test
+    public void testDecodeInvokeOnAMF3Connection() {
+        RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
+        RTMPMinaConnection conn = new RTMPMinaConnection() {
+            @Override
+            public Encoding getEncoding() {
+                return Encoding.AMF3;
+            }
+        };
+        conn.getState().setState(RTMP.STATE_CONNECTED);
+        conn.setHandler(this);
+        try {
+            IoBuffer in = hexBuffer("11 " + amf3String("echo") // action as Red5 writes it on AMF3 connections
+                    + " 11 04 03" // transaction id 3
+                    + " 11 01" // null command object
+                    + " 11 06 00" // string reference 0
+                    + " " + amf0String("x"));
+            Header header = new Header();
+            header.setDataType(Constants.TYPE_INVOKE);
+            header.setStreamId(0);
+            IRTMPEvent event = dec.decodeMessage(conn, header, in);
+            assertTrue(event instanceof Invoke);
+            Invoke invoke = (Invoke) event;
+            assertEquals(3, invoke.getTransactionId());
+            assertEquals("echo", invoke.getCall().getServiceMethodName());
+            assertArrayEquals(new Object[] { "echo", "x" }, invoke.getCall().getArguments());
+            assertFalse(in.hasRemaining());
+        } finally {
+            conn.close();
+        }
+    }
+
+    /**
+     * Data frame with AMF3 parameters: the notify is re-encoded as AMF0.
+     */
+    @Test
+    public void testDecodeStreamDataWithAMF3Params() {
+        RTMPProtocolDecoder dec = new RTMPProtocolDecoder();
+        IoBuffer in = hexBuffer(amf0String("@setDataFrame") + amf0String("onMetaData") //
+                + " 11 0a 0b 01 11 6475726174696f6e 05 4024000000000000 0b 776964746804 8a00 01"); // {duration: 10.0, width: 1280}
+        Notify notify = dec.decodeStreamData(in);
+        assertEquals("onMetaData", notify.getAction());
+        Input input = new Input(notify.getData().duplicate());
+        assertEquals("onMetaData", Deserializer.deserialize(input, String.class));
+        Map<?, ?> params = Deserializer.deserialize(input, Object.class);
+        assertEquals(10.0d, params.get("duration"));
+        assertEquals(1280.0d, ((Number) params.get("width")).doubleValue(), 0d);
+        assertEquals(2, params.size());
     }
 
     /**

@@ -16,10 +16,11 @@ import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,8 +29,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -45,7 +44,13 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
- * Input for Red5 data (AMF3) types
+ * Input for Red5 data (AMF3) types.
+ * <p>
+ * An instance starts in an AMF0 context, where values follow the AMF0 type table and the AMF0 avmplus-object marker (0x11) switches to AMF3
+ * for the next value only. {@link #enforceAMF3()} puts the instance into an AMF3 context, where 0x11 is the AMF3 dictionary marker. AMF3
+ * string, object and traits references are kept in a {@link RefStorage} that may be shared by several instances decoding the same message
+ * body; AMF0 references are kept per instance.
+ * </p>
  *
  * @author The Red5 Project
  * @author Luke Hubbard, Codegent Ltd (luke@codegent.com)
@@ -54,7 +59,7 @@ import org.w3c.dom.Document;
 public class Input extends org.red5.io.amf.Input {
 
     /**
-     * Holds informations about already deserialized classes.
+     * Holds informations about already deserialized classes (AMF3 traits).
      */
     protected static class ClassReference {
 
@@ -63,10 +68,10 @@ public class Input extends org.red5.io.amf.Input {
         /** Name of the deserialized class. */
         protected String className;
 
-        /** Type of the class. */
+        /** Type of the class, one of the AMF3.TYPE_OBJECT_* constants. */
         protected int type;
 
-        /** Names of the attributes of the class. */
+        /** Names of the sealed attributes of the class. */
         protected List<String> attributeNames;
 
         /**
@@ -90,103 +95,34 @@ public class Input extends org.red5.io.amf.Input {
     }
 
     /**
-     * Dummy class that is stored as reference for objects currently being deserialized that reference themselves.
-     */
-    protected static class PendingObject {
-
-        private static Logger log = LoggerFactory.getLogger(PendingObject.class);
-
-        /**
-         * <p>Constructor for PendingObject.</p>
-         */
-        public PendingObject() {
-            if (log.isDebugEnabled()) {
-                log.debug("PendingObject");
-            }
-        }
-
-        static final class PendingProperty {
-            Object obj;
-
-            Class<?> klass;
-
-            String name;
-
-            PendingProperty(Object obj, Class<?> klass, String name) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Pending property - obj: {} class: {} name: {}", new Object[] { obj, klass, name });
-                }
-                this.obj = obj;
-                this.klass = klass;
-                this.name = name;
-            }
-        }
-
-        private List<PendingProperty> properties;
-
-        /**
-         * Queues a property that could not be resolved yet because it references an object still being deserialized.
-         *
-         * @param obj
-         *            the object whose property is pending
-         * @param klass
-         *            the class declaring the pending field/property
-         * @param name
-         *            the name of the pending field/property
-         */
-        public void addPendingProperty(Object obj, Class<?> klass, String name) {
-            if (properties == null) {
-                properties = new ArrayList<PendingProperty>();
-            }
-            properties.add(new PendingProperty(obj, klass, name));
-        }
-
-        /**
-         * Resolves all pending properties queued via {@link #addPendingProperty(Object, Class, String)} by assigning the given
-         * result to each of them, then clears the pending list.
-         *
-         * @param result
-         *            the resolved object to assign to each pending property
-         */
-        public void resolveProperties(Object result) {
-            if (properties != null) {
-                for (PendingProperty prop : properties) {
-                    try {
-                        prop.klass.getField(prop.name).set(prop.obj, result);
-                    } catch (Exception e) {
-                        try {
-                            BeanUtils.setProperty(prop.obj, prop.name, result);
-                        } catch (Exception ex) {
-                            log.warn("Error mapping property: {} ({})", prop.name, result);
-                        }
-                    }
-                }
-                properties.clear();
-            } else {
-                // No pending properties
-                return;
-            }
-        }
-    }
-
-    /**
      * Class used to collect AMF3 references. In AMF3 references should be collected through the whole "body" (across several Input
      * objects).
      */
     public static class RefStorage {
-        // informations about previously deserialized classes
+        // traits of previously deserialized objects; only inline traits are added
         private List<ClassReference> classReferences = new ArrayList<>();
 
-        // list of string values found in the input stream
+        // list of string values found in the input stream; the empty string is never added
         private List<String> stringReferences = new ArrayList<>();
 
-        private ConcurrentMap<Integer, Object> refMap = new ConcurrentHashMap<>(4);
+        // complex values (objects, arrays, dates, xml, byte arrays, vectors, dictionaries) in the order they were found
+        private List<Object> objectReferences = new ArrayList<>();
     }
 
     /**
-     * Set to a value above 0 to enforce AMF3 decoding mode.
+     * Set to a value above 0 to decode AMF3; 0 means the AMF0 context.
      */
     private int amf3_mode;
+
+    /**
+     * Nesting depth of the value being decoded, mirrors the depth tracked by the base class.
+     */
+    private int nesting;
+
+    /**
+     * Nesting depth at which an AMF0 avmplus-object marker switched to AMF3, or -1 when no switch is active.
+     */
+    private int switchDepth = -1;
 
     /**
      * Stores references declared in this input of previous ones in the same message body
@@ -214,7 +150,6 @@ public class Input extends org.red5.io.amf.Input {
     public Input(IoBuffer buf, RefStorage refStorage) {
         super(buf);
         this.refStorage = refStorage;
-        this.refMap = refStorage.refMap;
     }
 
     /**
@@ -222,6 +157,15 @@ public class Input extends org.red5.io.amf.Input {
      */
     public void enforceAMF3() {
         amf3_mode++;
+    }
+
+    /**
+     * Returns whether values are currently decoded as AMF3.
+     *
+     * @return true in an AMF3 context, false in an AMF0 context
+     */
+    protected boolean isAMF3() {
+        return amf3_mode > 0;
     }
 
     /**
@@ -233,117 +177,114 @@ public class Input extends org.red5.io.amf.Input {
         return buf;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    protected void enterNested() {
+        super.enterNested();
+        nesting++;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void exitNested() {
+        if (switchDepth == nesting) {
+            // the value that followed the avmplus-object marker is complete
+            endSwitch();
+        }
+        nesting--;
+        super.exitNested();
+    }
+
+    private void endSwitch() {
+        switchDepth = -1;
+        amf3_mode--;
+        log.trace("Switched back to AMF0");
+    }
+
     /**
      * {@inheritDoc}
      *
-     * Reads the data type
+     * Reads the data type. In the AMF0 context the AMF0 type table applies and the avmplus-object marker switches to AMF3 for the next
+     * value only; in the AMF3 context the AMF3 type table applies.
      */
     @Override
     public byte readDataType() {
         log.trace("readDataType - amf3_mode: {}", amf3_mode);
-        byte coreType = AMF3.TYPE_UNDEFINED;
-        if (buf != null) {
-            currentDataType = buf.get();
-            log.debug("Current data type: {}", currentDataType);
-            switch (currentDataType) {
-                case AMF.TYPE_AMF3_OBJECT:
-                    log.trace("Got AMF3 object indicator");
-                    amf3_mode = 1;
-                    currentDataType = buf.get();
-                    break;
-                case AMF3.TYPE_VECTOR_INT:
-                case AMF3.TYPE_VECTOR_UINT:
-                case AMF3.TYPE_VECTOR_NUMBER:
-                case AMF3.TYPE_VECTOR_OBJECT:
-                    log.trace("Assuming Vector type");
-                    amf3_mode = 1;
-                    break;
-            }
-            if (amf3_mode == 0) {
-                // AMF0 object
-                switch (currentDataType) {
-                    case AMF.TYPE_NULL:
-                    case AMF.TYPE_UNDEFINED:
-                        return DataTypes.CORE_NULL;
-                    case AMF.TYPE_NUMBER:
-                        return DataTypes.CORE_NUMBER;
-                    case AMF.TYPE_BOOLEAN:
-                        return DataTypes.CORE_BOOLEAN;
-                    case AMF.TYPE_STRING:
-                    case AMF.TYPE_LONG_STRING:
-                        return DataTypes.CORE_STRING;
-                    case AMF.TYPE_CLASS_OBJECT:
-                    case AMF.TYPE_OBJECT:
-                        return DataTypes.CORE_OBJECT;
-                    case AMF.TYPE_MIXED_ARRAY:
-                        return DataTypes.CORE_MAP;
-                    case AMF.TYPE_ARRAY:
-                        return DataTypes.CORE_ARRAY;
-                    case AMF.TYPE_DATE:
-                        return DataTypes.CORE_DATE;
-                    case AMF.TYPE_XML:
-                        return DataTypes.CORE_XML;
-                    case AMF.TYPE_REFERENCE:
-                        return DataTypes.OPT_REFERENCE;
-                }
-            }
-            log.debug("Current data type (after amf checks): {}", currentDataType);
-            switch (currentDataType) {
-                case AMF3.TYPE_UNDEFINED:
-                case AMF3.TYPE_NULL:
-                    coreType = DataTypes.CORE_NULL;
-                    break;
-                case AMF3.TYPE_INTEGER:
-                case AMF3.TYPE_NUMBER:
-                    coreType = DataTypes.CORE_NUMBER;
-                    break;
-                case AMF3.TYPE_BOOLEAN_TRUE:
-                case AMF3.TYPE_BOOLEAN_FALSE:
-                    coreType = DataTypes.CORE_BOOLEAN;
-                    break;
-                case AMF3.TYPE_STRING:
-                    coreType = DataTypes.CORE_STRING;
-                    break;
-                // TODO check XML_SPECIAL
-                case AMF3.TYPE_XML:
-                case AMF3.TYPE_XML_DOCUMENT:
-                    coreType = DataTypes.CORE_XML;
-                    break;
-                case AMF3.TYPE_OBJECT:
-                    coreType = DataTypes.CORE_OBJECT;
-                    break;
-                case AMF3.TYPE_ARRAY:
-                    // should we map this to list or array?
-                    coreType = DataTypes.CORE_ARRAY;
-                    break;
-                case AMF3.TYPE_DATE:
-                    coreType = DataTypes.CORE_DATE;
-                    break;
-                case AMF3.TYPE_BYTEARRAY:
-                    coreType = DataTypes.CORE_BYTEARRAY;
-                    break;
-                case AMF3.TYPE_VECTOR_INT:
-                    coreType = DataTypes.CORE_VECTOR_INT;
-                    break;
-                case AMF3.TYPE_VECTOR_UINT:
-                    coreType = DataTypes.CORE_VECTOR_UINT;
-                    break;
-                case AMF3.TYPE_VECTOR_NUMBER:
-                    coreType = DataTypes.CORE_VECTOR_NUMBER;
-                    break;
-                case AMF3.TYPE_VECTOR_OBJECT:
-                    coreType = DataTypes.CORE_VECTOR_OBJECT;
-                    break;
-                default:
-                    log.info("Unknown datatype: {}", currentDataType);
-                    // End of object, and anything else lets just skip
-                    coreType = DataTypes.CORE_SKIP;
-                    break;
-            }
-            log.debug("Core type: {}", coreType);
-        } else {
-            log.error("Why is buf null?");
+        if (switchDepth >= 0 && switchDepth >= nesting) {
+            // a switched value read without the deserializer is complete once the next value at the same depth starts
+            endSwitch();
         }
+        if (amf3_mode == 0) {
+            byte coreType = super.readDataType();
+            if (coreType != DataTypes.CORE_SWITCH) {
+                return coreType;
+            }
+            log.trace("Got AMF3 object indicator");
+            amf3_mode++;
+            switchDepth = nesting;
+        }
+        return readAMF3DataType();
+    }
+
+    private byte readAMF3DataType() {
+        currentDataType = buf.get();
+        log.debug("Current data type: {}", currentDataType);
+        byte coreType;
+        switch (currentDataType) {
+            case AMF3.TYPE_UNDEFINED:
+            case AMF3.TYPE_NULL:
+                coreType = DataTypes.CORE_NULL;
+                break;
+            case AMF3.TYPE_INTEGER:
+            case AMF3.TYPE_NUMBER:
+                coreType = DataTypes.CORE_NUMBER;
+                break;
+            case AMF3.TYPE_BOOLEAN_TRUE:
+            case AMF3.TYPE_BOOLEAN_FALSE:
+                coreType = DataTypes.CORE_BOOLEAN;
+                break;
+            case AMF3.TYPE_STRING:
+                coreType = DataTypes.CORE_STRING;
+                break;
+            case AMF3.TYPE_XML:
+            case AMF3.TYPE_XML_DOCUMENT:
+                coreType = DataTypes.CORE_XML;
+                break;
+            case AMF3.TYPE_OBJECT:
+                coreType = DataTypes.CORE_OBJECT;
+                break;
+            case AMF3.TYPE_ARRAY:
+                coreType = DataTypes.CORE_ARRAY;
+                break;
+            case AMF3.TYPE_DATE:
+                coreType = DataTypes.CORE_DATE;
+                break;
+            case AMF3.TYPE_BYTEARRAY:
+                coreType = DataTypes.CORE_BYTEARRAY;
+                break;
+            case AMF3.TYPE_VECTOR_INT:
+                coreType = DataTypes.CORE_VECTOR_INT;
+                break;
+            case AMF3.TYPE_VECTOR_UINT:
+                coreType = DataTypes.CORE_VECTOR_UINT;
+                break;
+            case AMF3.TYPE_VECTOR_NUMBER:
+                coreType = DataTypes.CORE_VECTOR_NUMBER;
+                break;
+            case AMF3.TYPE_VECTOR_OBJECT:
+                coreType = DataTypes.CORE_VECTOR_OBJECT;
+                break;
+            case AMF3.TYPE_DICTIONARY:
+                // decoded by readMap
+                coreType = DataTypes.CORE_MAP;
+                break;
+            default:
+                log.info("Unknown datatype: {}", currentDataType);
+                // End of object, and anything else lets just skip
+                coreType = DataTypes.CORE_SKIP;
+                break;
+        }
+        log.debug("Core type: {}", coreType);
         return coreType;
     }
 
@@ -364,6 +305,9 @@ public class Input extends org.red5.io.amf.Input {
      */
     @Override
     public Boolean readBoolean() {
+        if (!isAMF3()) {
+            return super.readBoolean();
+        }
         return (currentDataType == AMF3.TYPE_BOOLEAN_TRUE) ? Boolean.TRUE : Boolean.FALSE;
     }
 
@@ -374,31 +318,24 @@ public class Input extends org.red5.io.amf.Input {
      */
     @Override
     public Number readNumber() {
-        if (buf.hasRemaining()) {
-            int remaining = buf.remaining();
-            if (log.isTraceEnabled()) {
-                log.trace("Remaining bytes for Number: {}", remaining);
-            }
-            Number v;
-            if (currentDataType == AMF3.TYPE_NUMBER) {
-                // prevent buffer underrun if we dont have 8 bytes for the expected double
-                if (remaining >= 8) {
-                    v = buf.getDouble();
-                } else {
-                    v = buf.getInt();
-                }
-            } else {
-                // we are decoding an int
-                v = readInteger();
-            }
-            if (log.isTraceEnabled()) {
-                log.trace("readNumber - value: {}", v);
-            }
-            return v;
-        } else {
-            log.warn("No remaining bytes for buffer readNumber");
+        if (!isAMF3()) {
+            return super.readNumber();
         }
-        return null;
+        if (!buf.hasRemaining()) {
+            log.warn("No remaining bytes for buffer readNumber");
+            return null;
+        }
+        Number v;
+        if (currentDataType == AMF3.TYPE_NUMBER) {
+            v = buf.getDouble();
+        } else {
+            // integer type: U29 holding a signed 29-bit value
+            v = readI29();
+        }
+        if (log.isTraceEnabled()) {
+            log.trace("readNumber - value: {}", v);
+        }
+        return v;
     }
 
     /**
@@ -409,39 +346,43 @@ public class Input extends org.red5.io.amf.Input {
     @Override
     public String readString() {
         log.trace("readString - amf3_mode: {}", amf3_mode);
-        String string;
-        // check current type to ensure reading the string as AMF3 is intended
-        if (currentDataType == AMF3.TYPE_STRING || amf3_mode > 0) {
-            int len = readInteger();
-            log.debug("readString - length: {}", len);
-            // get the length of the string (0x03 = 1, 0x05 = 2, 0x07 = 3 etc..)
-            // 0x01 is special and it means "empty"
-            if (len == 1) {
-                // Empty string
-                return "";
-            }
-            if ((len & 1) == 0) {
-                //if the refs are empty an IndexOutOfBoundsEx will be thrown
-                if (refStorage.stringReferences.isEmpty()) {
-                    log.debug("String reference list is empty");
-                }
-                // Reference
-                return refStorage.stringReferences.get(len >> 1);
-            }
-            len >>= 1;
-            log.debug("readString - new length: {}", len);
-            int limit = buf.limit();
-            log.debug("readString - limit: {}", limit);
-            final ByteBuffer strBuf = buf.buf();
-            strBuf.limit(strBuf.position() + len);
-            string = AMF.CHARSET.decode(strBuf).toString();
-            log.debug("String: {}", string);
-            buf.limit(limit); // reset the limit
-            refStorage.stringReferences.add(string);
-        } else {
+        if (!isAMF3()) {
             // read the string as AMF0
-            string = super.readString();
+            return super.readString();
         }
+        return readAMF3String();
+    }
+
+    /**
+     * Reads an AMF3 UTF-8-vr string, using the string reference table.
+     *
+     * @return string
+     */
+    private String readAMF3String() {
+        int ref = readU29();
+        log.debug("readString - header: {}", ref);
+        if ((ref & 1) == 0) {
+            // reference
+            return getStringReference(ref >> 1);
+        }
+        int len = ref >> 1;
+        if (len == 0) {
+            // the empty string is never sent by reference
+            return "";
+        }
+        String string = decodeUTF8(len);
+        log.debug("String: {}", string);
+        refStorage.stringReferences.add(string);
+        return string;
+    }
+
+    private String decodeUTF8(int len) {
+        checkCount(len, 1, buf.remaining());
+        int limit = buf.limit();
+        final ByteBuffer strBuf = buf.buf();
+        strBuf.limit(strBuf.position() + len);
+        final String string = AMF.CHARSET.decode(strBuf).toString();
+        buf.limit(limit); // reset the limit
         return string;
     }
 
@@ -476,10 +417,17 @@ public class Input extends org.red5.io.amf.Input {
         return refStorage;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * Reads a string without a type marker: an AMF3 UTF-8-vr in the AMF3 context, an AMF0 UTF-8 (U16 length) string otherwise.
+     */
     @Override
     public String getString() {
-        return readString();
+        if (!isAMF3()) {
+            return super.getString();
+        }
+        return readAMF3String();
     }
 
     /**
@@ -489,14 +437,17 @@ public class Input extends org.red5.io.amf.Input {
      */
     @Override
     public Date readDate() {
-        int ref = readInteger();
+        if (!isAMF3()) {
+            return super.readDate();
+        }
+        int ref = readU29();
         if ((ref & 1) == 0) {
             // reference to previously found date
-            return (Date) getReference(ref >> 1);
+            return (Date) getObjectReference(ref >> 1);
         }
         long ms = (long) buf.getDouble();
         Date date = new Date(ms);
-        storeReference(date);
+        storeObjectReference(date);
         return date;
     }
 
@@ -510,20 +461,19 @@ public class Input extends org.red5.io.amf.Input {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object readArray(Type target) {
-        int count = readInteger();
+        if (!isAMF3()) {
+            return super.readArray(target);
+        }
+        int count = readU29();
         log.debug("Count: {} and {} ref {}", new Object[] { count, (count & 1), (count >> 1) });
         if ((count & 1) == 0) {
-            //Reference
-            Object ref = getReference(count >> 1);
-            if (ref != null) {
-                return ref;
-            }
+            // reference
+            return getObjectReference(count >> 1);
         }
         count = (count >> 1);
-        String key = readString();
+        String key = readAMF3String();
         // every dense element takes at least one marker byte
         checkCount(count, 1, buf.remaining());
-        amf3_mode += 1;
         Object result;
         if (key.equals("")) {
             Class<?> nested = Object.class;
@@ -532,7 +482,7 @@ public class Input extends org.red5.io.amf.Input {
             if (target instanceof ParameterizedType) {
                 ParameterizedType t = (ParameterizedType) target;
                 Type[] actualTypeArguments = t.getActualTypeArguments();
-                if (actualTypeArguments.length == 1) {
+                if (actualTypeArguments.length == 1 && actualTypeArguments[0] instanceof Class) {
                     nested = (Class<?>) actualTypeArguments[0];
                 }
                 target = t.getRawType();
@@ -544,7 +494,7 @@ public class Input extends org.red5.io.amf.Input {
                 log.debug("Using an array for key: {} count: {}", key, count);
                 nested = ArrayUtils.getGenericType(collection.getComponentType());
                 result = Array.newInstance(nested, count);
-                storeReference(result);
+                storeObjectReference(result);
                 for (int i = 0; i < count; i++) {
                     final Object value = Deserializer.deserialize(this, nested);
                     Array.set(result, i, value);
@@ -559,7 +509,7 @@ public class Input extends org.red5.io.amf.Input {
                     resultCollection = new ArrayList(count);
                 }
                 result = resultCollection;
-                storeReference(result);
+                storeObjectReference(result);
                 for (int i = 0; i < count; i++) {
                     final Object value = Deserializer.deserialize(this, nested);
                     resultCollection.add(value);
@@ -571,8 +521,7 @@ public class Input extends org.red5.io.amf.Input {
             if (target instanceof ParameterizedType) {
                 ParameterizedType t = (ParameterizedType) target;
                 Type[] actualTypeArguments = t.getActualTypeArguments();
-                if (actualTypeArguments.length == 2) {
-                    //k = (Class<?>) actualTypeArguments[0];
+                if (actualTypeArguments.length == 2 && actualTypeArguments[1] instanceof Class) {
                     v = (Class<?>) actualTypeArguments[1];
                 }
                 target = t.getRawType();
@@ -592,11 +541,11 @@ public class Input extends org.red5.io.amf.Input {
                 resultMap = new HashMap(count);
             }
             // associative array
-            storeReference(resultMap);
+            storeObjectReference(resultMap);
             while (!key.equals("")) {
                 final Object value = Deserializer.deserialize(this, v);
                 resultMap.put(key, value);
-                key = readString();
+                key = readAMF3String();
             }
             for (int i = 0; i < count; i++) {
                 final Object value = Deserializer.deserialize(this, v);
@@ -604,286 +553,181 @@ public class Input extends org.red5.io.amf.Input {
             }
             result = resultMap;
         }
-        amf3_mode -= 1;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Reads an AMF0 ECMA array in the AMF0 context or an AMF3 dictionary in the AMF3 context.
+     */
+    @Override
+    public Object readMap() {
+        if (!isAMF3()) {
+            return super.readMap();
+        }
+        if (currentDataType == AMF3.TYPE_DICTIONARY) {
+            return readDictionary();
+        }
+        throw new RuntimeException(String.format("AMF3 type 0x%02X is not a map", currentDataType));
+    }
+
+    /**
+     * Reads an AMF3 dictionary: U29Dict (count or reference), U8 weak-keys flag, then count key / value pairs of any value type.
+     *
+     * @return map of the dictionary entries in wire order
+     */
+    private Map<Object, Object> readDictionary() {
+        int ref = readU29();
+        if ((ref & 1) == 0) {
+            @SuppressWarnings("unchecked")
+            Map<Object, Object> map = (Map<Object, Object>) getObjectReference(ref >> 1);
+            return map;
+        }
+        int count = ref >> 1;
+        // weak-keys flag, has no meaning outside of the AVM
+        byte weakKeys = buf.get();
+        log.debug("Dictionary count: {} weak keys: {}", count, weakKeys);
+        // every key and value take at least one marker byte
+        checkCount(count, 2, buf.remaining());
+        Map<Object, Object> result = new LinkedHashMap<>();
+        storeObjectReference(result);
+        for (int i = 0; i < count; i++) {
+            Object key = Deserializer.deserialize(this, Object.class);
+            Object value = Deserializer.deserialize(this, Object.class);
+            result.put(key, value);
+        }
         return result;
     }
 
     /** {@inheritDoc} */
-    @Override
-    public Object readMap() {
-        //throw new UnsupportedOperationException("AMF3 doesn't support maps");
-        return super.readMap();
-    }
-
-    /** {@inheritDoc} */
-    @SuppressWarnings({ "unchecked", "rawtypes", "null", "serial" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object readObject() {
         log.trace("readObject - amf3_mode: {}", amf3_mode);
-        int type = readInteger();
+        if (!isAMF3()) {
+            return super.readObject();
+        }
+        int type = readU29();
         log.debug("Type: {} and {} ref {}", new Object[] { type, (type & 1), (type >> 1) });
         if ((type & 1) == 0) {
-            // Reference
-            Object ref = getReference(type >> 1);
-            if (ref != null) {
-                return ref;
-            }
-            byte b = buf.get();
-            if (b == 7) {
-                log.debug("BEL: {}", b); //7
-            } else {
-                log.debug("Non-BEL byte: {} extra byte: {}", b, buf.get());
-            }
+            // object reference
+            return getObjectReference(type >> 1);
         }
         type >>= 1;
-        List<String> attributes = null;
-        String className;
-        Object result = null;
-        boolean inlineClass = (type & 1) == 1;
-        log.debug("Class is in-line? {}", inlineClass);
-        if (!inlineClass) {
-            ClassReference info = refStorage.classReferences.get(type >> 1);
-            className = info.className;
-            attributes = info.attributeNames;
-            type = info.type;
-            if (attributes != null) {
-                type |= attributes.size() << 2;
-            }
+        ClassReference traits;
+        if ((type & 1) == 0) {
+            // traits reference
+            traits = getTraitsReference(type >> 1);
         } else {
+            // inline traits
             type >>= 1;
-            className = readString();
-            log.debug("Type: {} classname: {}", type, className);
-            //check for flex class alias since these wont be detected as externalizable
-            if (classAliases.containsKey(className)) {
-                //make sure type is externalizable
-                type = 1;
-            } else if (className.startsWith("flex")) {
-                //set the attributes for messaging classes
-                if (className.endsWith("CommandMessage")) {
-                    attributes = new LinkedList<String>() {
-                        {
-                            add("timestamp");
-                            add("headers");
-                            add("operation");
-                            add("body");
-                            add("correlationId");
-                            add("messageId");
-                            add("timeToLive");
-                            add("clientId");
-                            add("destination");
-                        }
-                    };
-                } else {
-                    log.debug("Attributes for {} were not set", className);
-                }
-            }
-        }
-        amf3_mode += 1;
-        Object instance = newInstance(className);
-        Map<String, Object> properties = null;
-        PendingObject pending = new PendingObject();
-        int tempRefId = storeReference(pending);
-        log.debug("Object type: {}", (type & 0x03));
-        switch (type & 0x03) {
-            case AMF3.TYPE_OBJECT_PROPERTY:
-                log.debug("Detected: Object property type");
-                // Load object properties into map
-                int count = type >> 2;
-                log.debug("Count: {}", count);
-                if (attributes == null) {
-                    checkCount(count, 1, buf.remaining());
-                    attributes = new ArrayList<>(count);
-                    for (int i = 0; i < count; i++) {
-                        attributes.add(readString());
-                    }
-                    refStorage.classReferences.add(new ClassReference(className, AMF3.TYPE_OBJECT_PROPERTY, attributes));
-                }
-                properties = new ObjectMap<>();
-                for (int i = 0; i < count; i++) {
-                    String name = attributes.get(i);
-                    properties.put(name, Deserializer.deserialize(this, getPropertyType(instance, name)));
-                }
-                break;
-            case AMF3.TYPE_OBJECT_EXTERNALIZABLE:
-                log.debug("Detected: Externalizable type");
-                // Use custom class to deserialize the object
-                if ("".equals(className)) {
-                    throw new RuntimeException("Classname is required to load an Externalizable object");
-                }
-                log.debug("Externalizable class: {}", className);
-                if (className.length() == 3) {
-                    //check for special DS class aliases
-                    className = classAliases.get(className);
-                }
-                result = newInstance(className);
-                if (result == null) {
-                    throw new RuntimeException(String.format("Could not instantiate class: %s", className));
-                }
-                if (!(result instanceof IExternalizable)) {
-                    throw new RuntimeException(String.format("Class must implement the IExternalizable interface: %s", className));
-                }
-                refStorage.classReferences.add(new ClassReference(className, AMF3.TYPE_OBJECT_EXTERNALIZABLE, null));
-                storeReference(tempRefId, result);
-                ((IExternalizable) result).readExternal(new DataInput(this));
-                break;
-            case AMF3.TYPE_OBJECT_VALUE:
-                if (log.isDebugEnabled()) {
-                    log.debug("Detected: Object value type");
-                }
-                // First, we should read typed (non-dynamic) properties ("sealed traits" according to AMF3 specification).
-                // Property names are stored in the beginning, then values are stored.
-                count = type >> 2;
-                if (log.isDebugEnabled()) {
-                    log.debug("Count: {}", count);
-                }
-                if (attributes == null) {
-                    checkCount(count, 1, buf.remaining());
-                    attributes = new ArrayList<>(count);
-                    for (int i = 0; i < count; i++) {
-                        attributes.add(readString());
-                    }
-                }
-                // use the size of the attributes if we have no count
-                if (count == 0 && attributes != null) {
-                    count = attributes.size();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Using class attribute size for property count: {}", count);
-                    }
-                    //read the attributes from the stream and log if count doesnt match
-                    List<String> tmpAttributes = new ArrayList<String>(count);
-                    for (int i = 0; i < count; i++) {
-                        tmpAttributes.add(readString());
-                    }
-                    if (log.isDebugEnabled()) {
-                        if (count != tmpAttributes.size()) {
-                            log.debug("Count and attributes length does not match!");
-                        }
-                    }
-                }
-                // create a single reference for attributes
-                refStorage.classReferences.add(new ClassReference(className, AMF3.TYPE_OBJECT_VALUE, attributes));
-                // create props
-                properties = new ObjectMap<>();
-                for (String key : attributes) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Looking for property: {}", key);
-                    }
-                    Object value = Deserializer.deserialize(this, getPropertyType(instance, key));
-                    if (log.isDebugEnabled()) {
-                        log.debug("Key: {} Value: {}", key, value);
-                    }
-                    properties.put(key, value);
-                }
-                if (log.isTraceEnabled()) {
-                    log.trace("Buffer - position: {} limit: {}", buf.position(), buf.limit());
-                }
-                // no more items to read if we are at the end of the buffer
-                if (buf.hasRemaining()) {
-                    // Now we should read dynamic properties which are stored as name-value pairs.
-                    // Dynamic properties are NOT remembered in 'classReferences'.
-                    String key = readString();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Looking for property: {}", key);
-                    }
-                    while (!"".equals(key)) {
-                        Object value = Deserializer.deserialize(this, getPropertyType(instance, key));
-                        properties.put(key, value);
-                        if (!buf.hasRemaining()) {
-                            break;
-                        }
-                        key = readString();
-                    }
-                }
-                break;
-            default:
-            case AMF3.TYPE_OBJECT_PROXY:
-                if (log.isDebugEnabled()) {
-                    log.debug("Detected: Object proxy type");
-                }
-                if ("".equals(className)) {
-                    throw new RuntimeException("Classname is required to load an Externalizable object");
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Externalizable class: {}", className);
-                }
-                result = newInstance(className);
-                if (result == null) {
-                    throw new RuntimeException(String.format("Could not instantiate class: %s", className));
-                }
-                if (!(result instanceof IExternalizable)) {
-                    throw new RuntimeException(String.format("Class must implement the IExternalizable interface: %s", className));
-                }
-                refStorage.classReferences.add(new ClassReference(className, AMF3.TYPE_OBJECT_PROXY, null));
-                storeReference(tempRefId, result);
-                ((IExternalizable) result).readExternal(new DataInput(this));
-        }
-        amf3_mode -= 1;
-        if (result == null) {
-            // Create result object based on classname
-            if ("".equals(className) || (instance == null && !"RecordSet".equals(className) && !"RecordSetPage".equals(className))) {
-                // "anonymous" object, or a class that may not or could not be instantiated, load as Map
-                // Resolve circular references
-                for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                    if (entry.getValue() == pending) {
-                        entry.setValue(properties);
-                    }
-                }
-                storeReference(tempRefId, properties);
-                result = properties;
-            } else if ("RecordSet".equals(className)) {
-                // TODO: how are RecordSet objects encoded?
-                throw new RuntimeException("Objects of type RecordSet not supported yet");
-            } else if ("RecordSetPage".equals(className)) {
-                // TODO: how are RecordSetPage objects encoded?
-                throw new RuntimeException("Objects of type RecordSetPage not supported yet");
+            if ((type & 1) == 1) {
+                // externalizable, any further bits are not significant
+                traits = new ClassReference(readAMF3String(), AMF3.TYPE_OBJECT_EXTERNALIZABLE, Collections.emptyList());
             } else {
-                // Apply properties to object
-                result = newInstance(className);
-                if (result != null) {
-                    storeReference(tempRefId, result);
-                    Class resultClass = result.getClass();
-                    pending.resolveProperties(result);
-                    for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                        // Resolve circular references
-                        final String key = entry.getKey();
-                        Object value = entry.getValue();
-                        if (value == pending) {
-                            value = result;
-                        }
-                        if (value instanceof PendingObject) {
-                            // Defer setting of value until real object is created
-                            ((PendingObject) value).addPendingProperty(result, resultClass, key);
-                            continue;
-                        }
-                        if (value != null) {
-                            try {
-                                final Field field = resultClass.getField(key);
-                                final Class fieldType = field.getType();
-                                if (!fieldType.isAssignableFrom(value.getClass())) {
-                                    value = ConversionUtils.convert(value, fieldType);
-                                } else if (value instanceof Enum) {
-                                    value = Enum.valueOf(fieldType, value.toString());
-                                }
-                                field.set(result, value);
-                            } catch (Exception e) {
-                                try {
-                                    BeanUtils.setProperty(result, key, value);
-                                } catch (IllegalAccessException ex) {
-                                    log.warn("Error mapping key: {} value: {}", key, value);
-                                } catch (InvocationTargetException ex) {
-                                    log.warn("Error mapping key: {} value: {}", key, value);
-                                }
-                            }
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Skipping null property: {}", key);
-                            }
-                        }
-                    }
-                } // else fall through
+                boolean dynamic = ((type >> 1) & 1) == 1;
+                int count = type >> 2;
+                String className = readAMF3String();
+                // every sealed member name takes at least one byte
+                checkCount(count, 1, buf.remaining());
+                List<String> attributes = new ArrayList<>(count);
+                for (int i = 0; i < count; i++) {
+                    attributes.add(readAMF3String());
+                }
+                traits = new ClassReference(className, dynamic ? AMF3.TYPE_OBJECT_VALUE : AMF3.TYPE_OBJECT_PROPERTY, attributes);
             }
+            // only inline traits enter the traits reference table
+            refStorage.classReferences.add(traits);
+        }
+        String className = traits.className;
+        log.debug("Traits - class: {} type: {} sealed: {}", className, traits.type, traits.attributeNames);
+        if (traits.type == AMF3.TYPE_OBJECT_EXTERNALIZABLE) {
+            return readExternalizable(className);
+        }
+        if ("RecordSet".equals(className)) {
+            // TODO: how are RecordSet objects encoded?
+            throw new RuntimeException("Objects of type RecordSet not supported yet");
+        } else if ("RecordSetPage".equals(className)) {
+            // TODO: how are RecordSetPage objects encoded?
+            throw new RuntimeException("Objects of type RecordSetPage not supported yet");
+        }
+        Object instance = newInstance(className);
+        Map<String, Object> properties = new ObjectMap<>();
+        // the object enters the reference table before its members are read, so members may refer to it; anonymous objects and classes
+        // that could not be instantiated are returned as a map
+        Object result = (instance != null) ? instance : properties;
+        storeObjectReference(result);
+        // sealed members: the names come from the traits, the values follow in the same order
+        for (String name : traits.attributeNames) {
+            properties.put(name, Deserializer.deserialize(this, getPropertyType(instance, name)));
+        }
+        if (traits.type == AMF3.TYPE_OBJECT_VALUE) {
+            // dynamic members are name / value pairs ending with the empty string, they are not part of the traits; some encoders omit
+            // the final empty string of the outermost object at the end of the message, so the end of the input also ends the members
+            while (buf.hasRemaining()) {
+                String key = readAMF3String();
+                if ("".equals(key)) {
+                    break;
+                }
+                log.debug("Looking for property: {}", key);
+                properties.put(key, Deserializer.deserialize(this, getPropertyType(instance, key)));
+            }
+        }
+        if (instance != null) {
+            applyProperties(instance, properties);
         }
         return result;
+    }
+
+    private Object readExternalizable(String className) {
+        log.debug("Externalizable class: {}", className);
+        if ("".equals(className)) {
+            throw new RuntimeException("Classname is required to load an Externalizable object");
+        }
+        Object result = newInstance(className);
+        if (result == null) {
+            throw new RuntimeException(String.format("Could not instantiate class: %s", className));
+        }
+        if (!(result instanceof IExternalizable)) {
+            throw new RuntimeException(String.format("Class must implement the IExternalizable interface: %s", className));
+        }
+        storeObjectReference(result);
+        ((IExternalizable) result).readExternal(new DataInput(this));
+        return result;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void applyProperties(Object result, Map<String, Object> properties) {
+        Class resultClass = result.getClass();
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            final String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value != null) {
+                try {
+                    final Field field = resultClass.getField(key);
+                    final Class fieldType = field.getType();
+                    if (!fieldType.isAssignableFrom(value.getClass())) {
+                        value = ConversionUtils.convert(value, fieldType);
+                    } else if (value instanceof Enum) {
+                        value = Enum.valueOf(fieldType, value.toString());
+                    }
+                    field.set(result, value);
+                } catch (Exception e) {
+                    try {
+                        BeanUtils.setProperty(result, key, value);
+                    } catch (IllegalAccessException ex) {
+                        log.warn("Error mapping key: {} value: {}", key, value);
+                    } catch (InvocationTargetException ex) {
+                        log.warn("Error mapping key: {} value: {}", key, value);
+                    }
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping null property: {}", key);
+                }
+            }
+        }
     }
 
     /**
@@ -893,14 +737,17 @@ public class Input extends org.red5.io.amf.Input {
      */
     @Override
     public ByteArray readByteArray() {
-        int type = readInteger();
+        if (!isAMF3()) {
+            return super.readByteArray();
+        }
+        int type = readU29();
         if ((type & 1) == 0) {
-            return (ByteArray) getReference(type >> 1);
+            return (ByteArray) getObjectReference(type >> 1);
         }
         type >>= 1;
         checkCount(type, 1, buf.remaining());
         ByteArray result = new ByteArray(buf, type);
-        storeReference(result);
+        storeObjectReference(result);
         return result;
     }
 
@@ -912,16 +759,19 @@ public class Input extends org.red5.io.amf.Input {
     @SuppressWarnings("unchecked")
     @Override
     public Vector<Integer> readVectorInt() {
-        log.debug("readVectorInt");
-        int type = readInteger();
-        if ((type & 1) == 0) {
-            return (Vector<Integer>) getReference(type >> 1);
+        if (!isAMF3()) {
+            return super.readVectorInt();
         }
-        int len = checkCount(type >> 1, 4, buf.remaining());
+        log.debug("readVectorInt");
+        int type = readU29();
+        if ((type & 1) == 0) {
+            return (Vector<Integer>) getObjectReference(type >> 1);
+        }
+        int len = type >> 1;
+        readVectorFixed();
+        checkCount(len, 4, buf.remaining());
         Vector<Integer> array = new Vector<Integer>(len);
-        storeReference(array);
-        @SuppressWarnings("unused")
-        int ref2 = readInteger();
+        storeObjectReference(array);
         for (int j = 0; j < len; ++j) {
             array.add(buf.getInt());
         }
@@ -936,22 +786,22 @@ public class Input extends org.red5.io.amf.Input {
     @SuppressWarnings("unchecked")
     @Override
     public Vector<Long> readVectorUInt() {
-        log.debug("readVectorUInt");
-        int type = readInteger();
-        if ((type & 1) == 0) {
-            return (Vector<Long>) getReference(type >> 1);
+        if (!isAMF3()) {
+            return super.readVectorUInt();
         }
-        int len = checkCount(type >> 1, 4, buf.remaining());
+        log.debug("readVectorUInt");
+        int type = readU29();
+        if ((type & 1) == 0) {
+            return (Vector<Long>) getObjectReference(type >> 1);
+        }
+        int len = type >> 1;
+        readVectorFixed();
+        checkCount(len, 4, buf.remaining());
         Vector<Long> array = new Vector<Long>(len);
-        storeReference(array);
-        @SuppressWarnings("unused")
-        int ref2 = readInteger();
+        storeObjectReference(array);
         for (int j = 0; j < len; ++j) {
-            long value = (buf.get() & 0xff) << 24L;
-            value += (buf.get() & 0xff) << 16L;
-            value += (buf.get() & 0xff) << 8L;
-            value += (buf.get() & 0xff);
-            array.add(value);
+            // U32
+            array.add(buf.getUnsignedInt());
         }
         return array;
     }
@@ -964,22 +814,23 @@ public class Input extends org.red5.io.amf.Input {
     @SuppressWarnings("unchecked")
     @Override
     public Vector<Double> readVectorNumber() {
+        if (!isAMF3()) {
+            return super.readVectorNumber();
+        }
         log.debug("readVectorNumber");
-        int type = readInteger();
+        int type = readU29();
         log.debug("Type: {}", type);
         if ((type & 1) == 0) {
-            return (Vector<Double>) getReference(type >> 1);
+            return (Vector<Double>) getObjectReference(type >> 1);
         }
-        int len = checkCount(type >> 1, 8, buf.remaining());
+        int len = type >> 1;
         log.debug("Length: {}", len);
+        readVectorFixed();
+        checkCount(len, 8, buf.remaining());
         Vector<Double> array = new Vector<Double>(len);
-        storeReference(array);
-        int ref2 = readInteger();
-        log.debug("Ref2: {}", ref2);
+        storeObjectReference(array);
         for (int j = 0; j < len; ++j) {
-            Double d = buf.getDouble();
-            log.debug("Double: {}", d);
-            array.add(d);
+            array.add(buf.getDouble());
         }
         return array;
     }
@@ -987,74 +838,40 @@ public class Input extends org.red5.io.amf.Input {
     /**
      * {@inheritDoc}
      *
-     * Read Vector&lt;Object&gt; object.
+     * Read Vector&lt;Object&gt; object: U29V, U8 fixed flag, the UTF-8-vr object type name, then each element as a full AMF3 value.
      */
     @SuppressWarnings("unchecked")
     @Override
     public Vector<Object> readVectorObject() {
-        enterNested();
-        try {
-            return readVectorObjectValue();
-        } finally {
-            exitNested();
+        if (!isAMF3()) {
+            return super.readVectorObject();
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Vector<Object> readVectorObjectValue() {
         log.debug("readVectorObject");
-        int type = readInteger();
+        int type = readU29();
         log.debug("Type: {}", type);
         if ((type & 1) == 0) {
-            return (Vector<Object>) getReference(type >> 1);
+            return (Vector<Object>) getObjectReference(type >> 1);
         }
-        int len = checkCount(type >> 1, 1, buf.remaining());
+        int len = type >> 1;
         log.debug("Length: {}", len);
+        readVectorFixed();
+        String typeName = readAMF3String();
+        log.debug("Object type name: {}", typeName);
+        // every element takes at least one marker byte
+        checkCount(len, 1, buf.remaining());
         Vector<Object> array = new Vector<Object>(len);
-        storeReference(array);
-        int ref2 = readInteger();
-        log.debug("Ref2: {}", ref2);
-        buf.skip(1);
-        Object object = null;
+        storeObjectReference(array);
         for (int j = 0; j < len; ++j) {
-            byte objectType = buf.get();
-            log.debug("Object type: {}", objectType);
-            switch (objectType) {
-                case AMF3.TYPE_UNDEFINED:
-                case AMF3.TYPE_NULL:
-                    object = null;
-                    break;
-                case AMF3.TYPE_STRING:
-                    object = readString();
-                    break;
-                case AMF3.TYPE_NUMBER:
-                    object = readNumber();
-                    break;
-                case AMF3.TYPE_INTEGER:
-                    object = readInteger();
-                    break;
-                case AMF3.TYPE_BYTEARRAY:
-                    object = readByteArray();
-                    break;
-                case AMF3.TYPE_VECTOR_INT:
-                    object = readVectorInt();
-                    break;
-                case AMF3.TYPE_VECTOR_UINT:
-                    object = readVectorUInt();
-                    break;
-                case AMF3.TYPE_VECTOR_NUMBER:
-                    object = readVectorNumber();
-                    break;
-                case AMF3.TYPE_VECTOR_OBJECT:
-                    object = readVectorObject();
-                    break;
-                default:
-                    object = readObject();
-            }
-            array.add(object);
+            array.add(Deserializer.deserialize(this, Object.class));
         }
         log.debug("Vector: {}", array);
         return array;
+    }
+
+    private void readVectorFixed() {
+        // U8 fixed-length flag, has no meaning for the decoded vector
+        byte fixed = buf.get();
+        log.debug("Fixed length: {}", fixed);
     }
 
     /**
@@ -1064,6 +881,9 @@ public class Input extends org.red5.io.amf.Input {
      */
     @Override
     public Object readCustom() {
+        if (!isAMF3()) {
+            return super.readCustom();
+        }
         // Return null for now
         return null;
     }
@@ -1071,99 +891,111 @@ public class Input extends org.red5.io.amf.Input {
     /** {@inheritDoc} */
     @Override
     public Object readReference() {
+        if (!isAMF3()) {
+            return super.readReference();
+        }
         throw new RuntimeException("AMF3 doesn't support direct references");
     }
 
     /**
-     * Parser of AMF3 "compressed" integer data type
+     * Reads an unsigned 29-bit integer (U29) as used by AMF3 headers, lengths and references.
      *
-     * @return a converted integer value
+     * @return value in the range 0 to 2^29 - 1
      */
-    private int readInteger() {
-        int b = buf.get();
-        if (buf.hasRemaining()) {
-            int n = 0;
-            int result = 0;
-            while ((b & 0x80) != 0 && n < 3) {
-                result <<= 7;
-                result |= (b & 0x7f);
-                b = buf.get();
-                n++;
-            }
-            if (n < 3) {
-                result <<= 7;
-                result |= b;
-            } else {
-                // use all 8 bits from the 4th byte
-                result <<= 8;
-                result |= b & 0x0ff;
-                // check if the integer should be negative
-                if ((result & 0x10000000) != 0) {
-                    // extend the sign bit
-                    result |= 0xe0000000;
-                }
-            }
-            return result;
-        }
-        return b;
-    }
-
-    //Read UInt29 style
-    @SuppressWarnings("unused")
-    private int readAMF3IntegerNew() {
+    private int readU29() {
         int b = buf.get() & 0xFF;
-        if (b < 128) {
+        if (b < 0x80) {
             return b;
         }
         int value = (b & 0x7F) << 7;
         b = buf.get() & 0xFF;
-        if (b < 128) {
-            return (value | b);
+        if (b < 0x80) {
+            return value | b;
         }
-        value = (value | b & 0x7F) << 7;
+        value = (value | (b & 0x7F)) << 7;
         b = buf.get() & 0xFF;
-        if (b < 128) {
-            return (value | b);
+        if (b < 0x80) {
+            return value | b;
         }
-        value = (value | b & 0x7F) << 8;
-        b = buf.get() & 0xFF;
-        return (value | b);
+        // the fourth byte contributes all 8 bits
+        value = (value | (b & 0x7F)) << 8;
+        return value | (buf.get() & 0xFF);
+    }
+
+    /**
+     * Reads the value of the AMF3 integer type: a U29 holding a signed 29-bit integer.
+     *
+     * @return value in the range -2^28 to 2^28 - 1
+     */
+    private int readI29() {
+        int value = readU29();
+        // extend the sign bit of the 29-bit value
+        return (value << 3) >> 3;
+    }
+
+    private String getStringReference(int index) {
+        List<String> strings = refStorage.stringReferences;
+        if (index >= strings.size()) {
+            throw new RuntimeException(String.format("AMF3 string reference %d out of range, %d strings known", index, strings.size()));
+        }
+        return strings.get(index);
+    }
+
+    private ClassReference getTraitsReference(int index) {
+        List<ClassReference> traits = refStorage.classReferences;
+        if (index >= traits.size()) {
+            throw new RuntimeException(String.format("AMF3 traits reference %d out of range, %d traits known", index, traits.size()));
+        }
+        return traits.get(index);
+    }
+
+    private Object getObjectReference(int index) {
+        List<Object> objects = refStorage.objectReferences;
+        if (index >= objects.size()) {
+            throw new RuntimeException(String.format("AMF3 object reference %d out of range, %d objects known", index, objects.size()));
+        }
+        return objects.get(index);
+    }
+
+    private void storeObjectReference(Object obj) {
+        refStorage.objectReferences.add(obj);
     }
 
     /** {@inheritDoc} */
     @Override
     public Document readXML() {
-        int len = readInteger();
-        if (len == 1) {
-            // Empty string, should not happen
-            return null;
+        if (!isAMF3()) {
+            return super.readXML();
         }
+        int len = readU29();
         if ((len & 1) == 0) {
-            // Reference
-            return (Document) getReference(len >> 1);
+            // reference
+            return (Document) getObjectReference(len >> 1);
         }
         len >>= 1;
-        int limit = buf.limit();
-        final ByteBuffer strBuf = buf.buf();
-        strBuf.limit(strBuf.position() + len);
-        final String xmlString = AMF.CHARSET.decode(strBuf).toString();
-        buf.limit(limit); // Reset the limit
         Document doc = null;
-        try {
-            doc = XMLUtils.stringToDoc(xmlString);
-        } catch (IOException ioex) {
-            log.error("IOException converting xml to dom", ioex);
+        if (len > 0) {
+            final String xmlString = decodeUTF8(len);
+            try {
+                doc = XMLUtils.stringToDoc(xmlString);
+            } catch (IOException ioex) {
+                log.error("IOException converting xml to dom", ioex);
+            }
         }
-        storeReference(doc);
+        // an inline xml value takes a reference index even when empty or unparseable
+        storeObjectReference(doc);
         return doc;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * Clears the AMF0 references. The AMF3 string, object and traits references are scoped to the message body and are kept, so values that
+     * follow can still refer to those read before the reset.
+     */
     @Override
     public void reset() {
         super.reset();
-        // input must keep the String references for all parameters
-        //refStorage.stringReferences.clear();
     }
 
 }

@@ -19,7 +19,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.amf.AMF;
 import org.red5.io.amf.Output;
-import org.red5.io.amf3.AMF3;
 import org.red5.io.object.DataTypes;
 import org.red5.io.object.Deserializer;
 import org.red5.io.object.Input;
@@ -993,14 +992,14 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
      * @return notify
      */
     private Invoke decodeAction(Encoding encoding, IoBuffer in, Header header) {
-        // for response, the action string and invokeId is always encoded as AMF0 we use the first byte to decide which encoding to use
+        // the command body is AMF0; on an AMF3 connection any value may be switched to AMF3 with the avmplus-object marker, which applies
+        // to that value only, so the AMF3 input starts in its AMF0 context
         in.mark();
         byte tmp = in.get();
         in.reset();
         Input input;
-        if (encoding == Encoding.AMF3 && tmp == AMF.TYPE_AMF3_OBJECT) {
+        if (encoding == Encoding.AMF3) {
             input = new org.red5.io.amf3.Input(in);
-            ((org.red5.io.amf3.Input) input).enforceAMF3();
         } else {
             input = new org.red5.io.amf.Input(in);
         }
@@ -1292,10 +1291,9 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         // TODO: Unknown byte, probably encoding as with Flex SOs?
         byte flexByte = in.get();
         log.trace("Flex byte: {}", flexByte);
-        // Encoding of message params can be mixed - some params may be in AMF0, others in AMF3,
-        // but according to AMF3 spec, we should collect AMF3 references for the whole message body (through all params)
-        org.red5.io.amf3.Input.RefStorage refStorage = new org.red5.io.amf3.Input.RefStorage();
-        Input input = new org.red5.io.amf.Input(in);
+        // The body is AMF0 and each value may be switched to AMF3 with the avmplus-object marker, so params can be mixed AMF0 and AMF3.
+        // A single input decodes the whole body: the AMF3 string, object and traits references span all params of the message body.
+        Input input = new org.red5.io.amf3.Input(in);
         String action = Deserializer.deserialize(input, String.class);
         FlexMessage msg = new FlexMessage();
         msg.setTransactionId(readTransactionId(input));
@@ -1307,28 +1305,6 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 paramList.add(obj);
             }
             while (in.hasRemaining()) {
-                // Check for AMF3 encoding of parameters
-                byte objectEncodingType = in.get();
-                log.debug("Object encoding: {}", objectEncodingType);
-                in.position(in.position() - 1);
-                switch (objectEncodingType) {
-                    case AMF.TYPE_AMF3_OBJECT:
-                    case AMF3.TYPE_VECTOR_NUMBER:
-                    case AMF3.TYPE_VECTOR_OBJECT:
-                        // The next parameter is encoded using AMF3
-                        input = new org.red5.io.amf3.Input(in, refStorage);
-                        // Vectors with number and object have to have AMF3 forced
-                        ((org.red5.io.amf3.Input) input).enforceAMF3();
-                        break;
-                    case AMF3.TYPE_VECTOR_INT:
-                    case AMF3.TYPE_VECTOR_UINT:
-                        // The next parameter is encoded using AMF3
-                        input = new org.red5.io.amf3.Input(in, refStorage);
-                        break;
-                    default:
-                        // The next parameter is encoded using AMF0
-                        input = new org.red5.io.amf.Input(in);
-                }
                 paramList.add(Deserializer.deserialize(input, Object.class));
             }
             params = paramList.toArray();

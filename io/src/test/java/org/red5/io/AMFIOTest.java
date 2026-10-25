@@ -131,16 +131,21 @@ public class AMFIOTest extends AbstractIOTest {
         switch (headerSize) {
             case 0x00: // HEADER_NEW
                 headerLength = 12;
+                break;
             case 0x01: //HEADER_SAME_SOURCE
                 headerLength = 8;
+                break;
             case 0x02: //HEADER_TIMER_CHANGE
                 headerLength = 4;
+                break;
             case 0x03: //HEADER_CONTINUE
                 headerLength = 1;
+                break;
             default:
                 headerLength = -1;
         }
         log.debug("Header length: {}", headerLength);
+        assertEquals("Type 0 header is 12 bytes", 12, headerLength);
         headerLength += byteCount - 1;
         log.debug("Header length 2: {}", headerLength);
         byte headerDataType = 0;

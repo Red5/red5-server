@@ -106,19 +106,22 @@ public class RecordSet {
     @SuppressWarnings({ "unchecked" })
     public RecordSet(Input input) {
         Map<String, Object> dataMap = input.readKeyValues();
-        Object map = dataMap.get("serverinfo");
+        // Flash Remoting and Output.writeRecordSet use serverInfo; serverinfo is still accepted
+        Object map = dataMap.containsKey("serverInfo") ? dataMap.get("serverInfo") : dataMap.get("serverinfo");
         Map<String, Object> serverInfo = null;
         if (map != null) {
             if (!(map instanceof Map)) {
                 throw new RuntimeException("Expected Map but got " + map.getClass().getName());
             }
             serverInfo = (Map<String, Object>) map;
-            totalCount = (Integer) serverInfo.get("totalCount");
+            // AMF numbers decode as doubles
+            totalCount = ((Number) serverInfo.get("totalCount")).intValue();
             List<List<Object>> initialData = (List<List<Object>>) serverInfo.get("initialData");
-            cursor = (Integer) serverInfo.get("cursor");
+            cursor = ((Number) serverInfo.get("cursor")).intValue();
             serviceName = (String) serverInfo.get("serviceName");
             columns = (List<String>) serverInfo.get("columnNames");
-            version = (Integer) serverInfo.get("version");
+            Object versionValue = serverInfo.get("version");
+            version = (versionValue instanceof Number) ? ((Number) versionValue).intValue() : 0;
             id = serverInfo.get("id");
             this.data = new ArrayList<List<Object>>(Collections.nCopies(totalCount, (List<Object>) null));
             for (int i = 0; i < initialData.size(); i++) {
