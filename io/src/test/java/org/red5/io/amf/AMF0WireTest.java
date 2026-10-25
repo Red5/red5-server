@@ -200,6 +200,27 @@ public class AMF0WireTest {
         assertEquals("next", decode(in));
     }
 
+    /**
+     * Spec 2.10: ECMA array keys are UTF-8 strings. Red5 maps the keys of array elements, decimal ints, to Integer; every other key stays
+     * the string it was, also numeric looking ones that are not an int or not written the way an int is.
+     */
+    @Test
+    public void decodeEcmaArrayNumericKeys() {
+        Wire wire = wire().u8(AMF.TYPE_MIXED_ARRAY).u32(0);
+        for (String key : new String[] { "0", "1", "-1", "01", "-0", "+1", "1.5", "2147483647", "2147483648", "12345678901" }) {
+            wire.utf8(key).string("v" + key);
+        }
+        Map<?, ?> map = (Map<?, ?>) decode(wire.objectEnd().toArray());
+        assertEquals(10, map.size());
+        assertEquals("v0", map.get(0));
+        assertEquals("v1", map.get(1));
+        assertEquals("v-1", map.get(-1));
+        assertEquals("v2147483647", map.get(2147483647));
+        for (String key : new String[] { "01", "-0", "+1", "1.5", "2147483648", "12345678901" }) {
+            assertEquals(key, "v" + key, map.get(key));
+        }
+    }
+
     @Test
     public void decodeStrictArray() {
         Input in = input(wire().u8(AMF.TYPE_ARRAY).u32(2).number(1).string("x").string("next").toArray());

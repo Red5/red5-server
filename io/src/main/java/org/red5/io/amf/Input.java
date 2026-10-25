@@ -25,7 +25,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.amf3.ByteArray;
 import org.red5.io.object.BaseInput;
@@ -367,21 +366,41 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
             String key = getString();
             Object item = Deserializer.deserialize(this, Object.class);
             //log.info("key: {} item: {}", key, item);
-            if (!NumberUtils.isParsable(key)) {
-                result.put(key, item);
-            } else {
-                // map keys are either integers or strings, none will be doubles
-                if (key.contains(".")) {
-                    result.put(key, item);
-                } else {
-                    result.put(Integer.valueOf(key), item);
-                }
-            }
+            result.put(arrayKey(key), item);
         }
         result.remove("length");
         // replace the original reference with the final result
         storeReference(reference, result);
         return result;
+    }
+
+    /**
+     * Returns the map key for an ECMA array key. The keys are strings on the wire; the key of an array element, an int in decimal, is
+     * returned as an Integer. Any other key is returned unchanged, also numeric looking keys such as "01", "1.5" or "2147483648", which are
+     * not written the way an int is or do not fit one.
+     *
+     * @param key
+     *            key as read
+     * @return Integer for an int key, the key otherwise
+     */
+    static Object arrayKey(String key) {
+        int length = key.length();
+        int start = (length > 1 && key.charAt(0) == '-') ? 1 : 0;
+        // an int has at most 10 digits
+        if (length == start || length - start > 10) {
+            return key;
+        }
+        for (int i = start; i < length; i++) {
+            char c = key.charAt(i);
+            if (c < '0' || c > '9') {
+                return key;
+            }
+        }
+        long value = Long.parseLong(key);
+        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE || !Long.toString(value).equals(key)) {
+            return key;
+        }
+        return Integer.valueOf((int) value);
     }
 
     /**
