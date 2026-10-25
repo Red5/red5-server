@@ -23,26 +23,53 @@ public class RandomGUID extends Object {
     }
 
     /**
-     * Returns a byte array for the given uuid or guid.
+     * Returns the 16 bytes of a UID, as AS3 mx.utils.UIDUtil.toByteArray does: only a UID, see {@link #isUID(String)}, has a byte form.
      *
      * @param uid
      *            unique id
-     * @return array of bytes containing the id
+     * @return array of bytes containing the id, or null if the id is null or not a UID
      */
     public final static byte[] toByteArray(String uid) {
+        if (!isUID(uid)) {
+            return null;
+        }
         byte[] result = new byte[16];
-        char[] chars = uid.toCharArray();
         int r = 0;
-        for (int i = 0; i < chars.length; ++i) {
-            if (chars[i] == '-') {
+        for (int i = 0; i < uid.length(); ++i) {
+            if (uid.charAt(i) == '-') {
                 continue;
             }
-            int h1 = Character.digit(chars[i], 16);
+            int h1 = Character.digit(uid.charAt(i), 16);
             ++i;
-            int h2 = Character.digit(chars[i], 16);
+            int h2 = Character.digit(uid.charAt(i), 16);
             result[(r++)] = (byte) ((h1 << 4 | h2) & 0xFF);
         }
         return result;
+    }
+
+    /**
+     * Returns whether the id is a UID as AS3 mx.utils.UIDUtil.isUID defines it: 36 characters, hyphens at 8, 13, 18 and 23 and upper case
+     * hex digits everywhere else. Only these ids read back from their byte form unchanged.
+     *
+     * @param uid
+     *            id to check
+     * @return true if the id is a UID
+     */
+    public static boolean isUID(String uid) {
+        if (uid == null || uid.length() != 36) {
+            return false;
+        }
+        for (int i = 0; i < 36; i++) {
+            char c = uid.charAt(i);
+            if (i == 8 || i == 13 || i == 18 || i == 23) {
+                if (c != '-') {
+                    return false;
+                }
+            } else if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

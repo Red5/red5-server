@@ -31,7 +31,7 @@ public class AcknowledgeMessage extends AsyncMessage {
      * <p>Constructor for AcknowledgeMessage.</p>
      */
     public AcknowledgeMessage() {
-        this.messageId = UUID.randomUUID().toString();
+        this.messageId = UUID.randomUUID().toString().toUpperCase();
         this.timestamp = System.currentTimeMillis();
     }
 
