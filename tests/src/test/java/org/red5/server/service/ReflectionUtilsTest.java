@@ -1,18 +1,23 @@
 package org.red5.server.service;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
+import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCall;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
+import org.red5.server.net.rtmp.status.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,6 +132,143 @@ public class ReflectionUtilsTest {
             assertNotNull("method not found", result[0]);
             assertEquals(Boolean.class, ((Method) result[0]).getParameterTypes()[0]);
         }
+    }
+
+    /**
+     * A status object decodes as a map; with onStatus(Object[]), onStatus(Object) and onStatus(Status) on the service, the map goes to
+     * onStatus(Object), with or without a connection. Object is a supertype of IConnection, which once kept it from taking the argument,
+     * and onStatus(Object[]) was then invoked with the map itself instead of an array.
+     */
+    @Test
+    public void testMapArgumentPrefersObjectParameter() throws Exception {
+        Map<String, Object> status = new ObjectMap<>();
+        status.put("code", "NetStream.Play.Start");
+        status.put("level", "status");
+        for (IConnection conn : new IConnection[] { new DummyConnection(), null }) {
+            for (int i = 0; i < 25; i++) {
+                StatusService service = new StatusService();
+                assertEquals(Object.class, invoke(conn, service, "onStatus", status).getParameterTypes()[0]);
+                assertEquals("Object", service.received);
+                assertSame(status, service.value);
+            }
+        }
+    }
+
+    /**
+     * A method whose only parameter is Object[] receives the call arguments as that array, whatever their number.
+     */
+    @Test
+    public void testObjectArrayParameterReceivesArguments() throws Exception {
+        Map<String, Object> status = new ObjectMap<>();
+        status.put("code", "NetStream.Play.Start");
+        for (IConnection conn : new IConnection[] { new DummyConnection(), null }) {
+            ArrayStatusService service = new ArrayStatusService();
+            invoke(conn, service, "onStatus", status);
+            assertArrayEquals(new Object[] { status }, service.values);
+            invoke(conn, service, "onStatus", "test", 42);
+            assertArrayEquals(new Object[] { "test", 42 }, service.values);
+            invoke(conn, service, "onStatus");
+            assertArrayEquals(new Object[0], service.values);
+            // a single argument that already is an array is passed as is
+            Object[] values = new Object[] { "test", 42 };
+            invoke(conn, service, "onStatus", (Object) values);
+            assertSame(values, service.values);
+        }
+    }
+
+    /**
+     * A method whose only parameter is Object takes one argument of any type, as a method whose only parameter is a String takes a
+     * string.
+     */
+    @Test
+    public void testSingleObjectParameter() throws Exception {
+        for (IConnection conn : new IConnection[] { new DummyConnection(), null }) {
+            ObjectService service = new ObjectService();
+            invoke(conn, service, "onValue", List.of(1, 2));
+            assertEquals(List.of(1, 2), service.value);
+            invoke(conn, service, "onValue", 3.0d);
+            assertEquals(3.0d, service.value);
+        }
+    }
+
+    /**
+     * A connection parameter ahead of the arguments still receives the connection.
+     */
+    @Test
+    public void testConnectionParameterStillInjected() throws Exception {
+        IConnection conn = new DummyConnection();
+        ConnectionService service = new ConnectionService();
+        invoke(conn, service, "onValue", "test");
+        assertSame(conn, service.conn);
+        assertEquals("test", service.value);
+    }
+
+    /**
+     * Finds the method for a call as ServiceInvoker does and invokes it with the parameters found.
+     */
+    private static Method invoke(IConnection conn, Object service, String methodName, Object... args) throws Exception {
+        IServiceCall call = new PendingCall(methodName, args);
+        Object[] result = ReflectionUtils.findMethod(conn, call, service, methodName);
+        assertNotNull("method not found for " + Arrays.toString(args), result[0]);
+        Method method = (Method) result[0];
+        method.invoke(service, (Object[]) result[1]);
+        return method;
+    }
+
+    public static class StatusService {
+
+        String received;
+
+        Object value;
+
+        public void onStatus(Object[] params) {
+            received = "Object[]";
+            value = params;
+        }
+
+        public void onStatus(Object status) {
+            received = "Object";
+            value = status;
+        }
+
+        public void onStatus(Status status) {
+            received = "Status";
+            value = status;
+        }
+
+    }
+
+    public static class ArrayStatusService {
+
+        Object[] values;
+
+        public void onStatus(Object[] params) {
+            values = params;
+        }
+
+    }
+
+    public static class ObjectService {
+
+        Object value;
+
+        public void onValue(Object value) {
+            this.value = value;
+        }
+
+    }
+
+    public static class ConnectionService {
+
+        IConnection conn;
+
+        Object value;
+
+        public void onValue(IConnection conn, Object value) {
+            this.conn = conn;
+            this.value = value;
+        }
+
     }
 
     public class TestService {

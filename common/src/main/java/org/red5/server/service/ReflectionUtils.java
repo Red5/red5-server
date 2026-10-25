@@ -226,16 +226,21 @@ public class ReflectionUtils {
                 }
                 // get the methods parameter types
                 Class<?>[] paramTypes = method.getParameterTypes();
-                // search for method with Object[] as the first and only parameter
+                // search for method with Object[] as the first and only parameter, which receives the arguments as one array
                 if (paramCount == 1 && paramTypes[0].isArray()) {
-                    if (isTrace) {
-                        log.trace("Method {} matched - parameter 0 is an array", methodName);
+                    Object[] arrayParams = arrayParameter(paramTypes[0], args);
+                    if (arrayParams != null) {
+                        if (isTrace) {
+                            log.trace("Method {} matched - parameter 0 is an array", methodName);
+                        }
+                        methodResult = new Object[] { method, arrayParams };
+                        break;
                     }
-                    methodResult = new Object[] { method, args };
-                    break;
                 }
-                // search for method matching parameters without a forced connection parameter
-                if (paramCount == callParams.length && !paramTypes[0].isAssignableFrom(IConnection.class)) {
+                // search for method matching parameters without a forced connection parameter; a parameter of a supertype of
+                // IConnection, such as Object, takes an argument here, it is only a connection parameter when there is one more
+                // parameter than arguments
+                if (paramCount == callParams.length && !IConnection.class.isAssignableFrom(paramTypes[0])) {
                     // attempt to convert the args to match the method
                     try {
                         Object[] convertedArgs = ConversionUtils.convertParams(args, paramTypes);
@@ -328,6 +333,22 @@ public class ReflectionUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns the invocation parameters for a method whose only parameter is an array: a single argument that already is such an array
+     * is passed as is, otherwise the arguments are passed together as the array.
+     *
+     * @param arrayType the type of the parameter
+     * @param args call arguments, may be null
+     * @return parameters to invoke the method with, or null when the arguments cannot be passed as the parameter
+     */
+    private static Object[] arrayParameter(Class<?> arrayType, Object[] args) {
+        if (args != null && args.length == 1 && arrayType.isInstance(args[0])) {
+            return args;
+        }
+        Object[] all = args != null ? args : new Object[0];
+        return arrayType.isInstance(all) ? new Object[] { all } : null;
     }
 
 }
