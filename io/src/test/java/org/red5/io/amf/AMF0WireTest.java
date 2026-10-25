@@ -9,6 +9,7 @@ package org.red5.io.amf;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -16,16 +17,20 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.Vector;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
+import org.red5.io.amf3.ByteArray;
 import org.red5.io.model.CircularRefBean;
 import org.red5.io.object.Deserializer;
 import org.red5.io.object.Serializer;
@@ -198,6 +203,27 @@ public class AMF0WireTest {
         assertEquals("next", decode(in));
     }
 
+    /**
+     * Spec 2.10: ECMA array keys are UTF-8 strings. Red5 maps the keys of array elements, decimal ints, to Integer; every other key stays
+     * the string it was, also numeric looking ones that are not an int or not written the way an int is.
+     */
+    @Test
+    public void decodeEcmaArrayNumericKeys() {
+        Wire wire = wire().u8(AMF.TYPE_MIXED_ARRAY).u32(0);
+        for (String key : new String[] { "0", "1", "-1", "01", "-0", "+1", "1.5", "2147483647", "2147483648", "12345678901" }) {
+            wire.utf8(key).string("v" + key);
+        }
+        Map<?, ?> map = (Map<?, ?>) decode(wire.objectEnd().toArray());
+        assertEquals(10, map.size());
+        assertEquals("v0", map.get(0));
+        assertEquals("v1", map.get(1));
+        assertEquals("v-1", map.get(-1));
+        assertEquals("v2147483647", map.get(2147483647));
+        for (String key : new String[] { "01", "-0", "+1", "1.5", "2147483648", "12345678901" }) {
+            assertEquals(key, "v" + key, map.get(key));
+        }
+    }
+
     @Test
     public void decodeStrictArray() {
         Input in = input(wire().u8(AMF.TYPE_ARRAY).u32(2).number(1).string("x").string("next").toArray());
@@ -325,6 +351,101 @@ public class AMF0WireTest {
         assertEquals("z", decode(in));
     }
 
+    /**
+     * Spec 2.17 and 3.1: the avmplus-object marker (0x11) switches to AMF3 for the next value only, the values after it are AMF0 again.
+     * <code>{a: 0x11 "foo", b: 1}</code> followed by an AMF0 string.
+     */
+    @Test
+    public void decodeAvmplusObjectSwitchesOneValueToAMF3() {
+        Input in = input(wire().u8(AMF.TYPE_OBJECT).utf8("a").u8(AMF.TYPE_AMF3_OBJECT, 0x06, 0x07, 'f', 'o', 'o').utf8("b").number(1).objectEnd().string("next").toArray());
+        Map<?, ?> object = (Map<?, ?>) decode(in);
+        assertEquals(2, object.size());
+        assertEquals("foo", object.get("a"));
+        assertEquals(1d, object.get("b"));
+        assertEquals("next", decode(in));
+        assertFalse(in.buf.hasRemaining());
+    }
+
+    /**
+     * Switched AMF3 values of every kind an AMF0 value cannot hold: an anonymous object with an integer member, a vector of int and a byte
+     * array, each followed by an AMF0 value.
+     */
+    @Test
+    public void decodeAvmplusObjectComplexValues() {
+        Input in = input(wire() //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x0B, 0x01, 0x03, 'k', 0x04, 0x05, 0x01).number(1) //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x05, 0x00).u32(1).u32(0xFFFFFFFEL).number(2) //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0C, 0x05, 0x7F, 0x80).number(3).toArray());
+        Map<?, ?> object = (Map<?, ?>) decode(in);
+        assertEquals(1, object.size());
+        assertEquals(5, object.get("k"));
+        assertEquals(1d, decode(in));
+        assertEquals(Arrays.asList(1, -2), decode(in));
+        assertEquals(2d, decode(in));
+        ByteArray bytes = (ByteArray) decode(in);
+        assertEquals(2, bytes.length());
+        assertEquals(0x7F, bytes.readUnsignedByte());
+        assertEquals(0x80, bytes.readUnsignedByte());
+        assertEquals(3d, decode(in));
+    }
+
+    /**
+     * The AMF3 string, object and traits reference tables of switched values span the body, as BlazeDS and Mini-AMF keep them, also across
+     * {@link Input#reset()}, which only starts a new AMF0 reference table: the values after the first refer to its member name, the object
+     * itself and its traits.
+     */
+    @Test
+    public void decodeAvmplusReferenceTablesSpanTheBody() {
+        Input in = input(wire() //
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x0B, 0x01, 0x03, 'k', 0x04, 0x01, 0x01) // {k: 1}, string 0 "k", object 0, traits 0
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x06, 0x00) // string reference 0
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x00) // object reference 0
+                .u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x01, 0x00, 0x04, 0x02, 0x01) // traits reference 0, member name reference 0: {k: 2}
+                .toArray());
+        Map<?, ?> first = (Map<?, ?>) decode(in);
+        assertEquals(1, first.get("k"));
+        in.reset();
+        assertEquals("k", decode(in));
+        assertSame(first, decode(in));
+        Map<?, ?> fourth = (Map<?, ?>) decode(in);
+        assertEquals(1, fourth.size());
+        assertEquals(2, fourth.get("k"));
+    }
+
+    /**
+     * Spec 2.9: only AMF0 complex objects take an AMF0 reference index; a switched AMF3 value does not. In <code>[0x11 {}, {}, ref 1]</code>
+     * the strict array is index 0 and ref 1 is the AMF0 object. Mini-AMF 0.9.1 numbers the switched value, BlazeDS 4.7.3 does not.
+     */
+    @Test
+    public void decodeAvmplusValueTakesNoReferenceIndex() {
+        byte[] data = wire().u8(AMF.TYPE_ARRAY).u32(3).u8(AMF.TYPE_AMF3_OBJECT, 0x0A, 0x0B, 0x01, 0x01).u8(AMF.TYPE_OBJECT).objectEnd().reference(1).toArray();
+        List<?> list = (List<?>) decode(data);
+        assertEquals(3, list.size());
+        assertTrue(list.get(1) instanceof Map);
+        assertSame(list.get(1), list.get(2));
+    }
+
+    /**
+     * Spec 2.9: a reference points to a complex object read before it. An index no object was read for is malformed input, it must fail
+     * the decoding instead of turning into null.
+     */
+    @Test
+    public void decodeReferenceOutOfRangeFails() {
+        assertDecodeFails(wire().reference(0).toArray(), "AMF0 reference 0");
+        // the object is index 0, there is no index 1
+        assertDecodeFails(wire().u8(AMF.TYPE_OBJECT).utf8("a").reference(1).objectEnd().toArray(), "AMF0 reference 1");
+        assertDecodeFails(wire().u8(AMF.TYPE_ARRAY).u32(2).u8(AMF.TYPE_OBJECT).objectEnd().reference(0xFFFF).toArray(), "AMF0 reference 65535");
+    }
+
+    private static void assertDecodeFails(byte[] data, String message) {
+        try {
+            Object value = decode(data);
+            fail("malformed input decoded as " + value);
+        } catch (RuntimeException expected) {
+            assertTrue(expected.getMessage(), expected.getMessage().contains(message));
+        }
+    }
+
     // ---------------------------------------------------------------- encoding
 
     @Test
@@ -378,6 +499,20 @@ public class AMF0WireTest {
         assertBytes(wire().u8(AMF.TYPE_MIXED_ARRAY).u32(0).utf8("k").string("v").objectEnd().toArray(), serialize(map));
     }
 
+    /**
+     * A list of more than 100 elements that are mostly null is written as an ECMA array of the non null elements. Its count and the length
+     * member Red5 adds are the length of the list.
+     */
+    @Test
+    public void encodeSparseList() {
+        List<Object> list = new ArrayList<>();
+        for (int i = 0; i < 150; i++) {
+            list.add(i % 50 == 0 ? "x" : null);
+        }
+        byte[] expected = wire().u8(AMF.TYPE_MIXED_ARRAY).u32(150).utf8("0").string("x").utf8("50").string("x").utf8("100").string("x").utf8("length").number(150).objectEnd().toArray();
+        assertBytes(expected, serialize(list));
+    }
+
     @Test
     public void encodeStrictArray() {
         assertBytes(wire().u8(AMF.TYPE_ARRAY).u32(2).number(1).string("x").toArray(), serialize(new Object[] { 1d, "x" }));
@@ -425,6 +560,35 @@ public class AMF0WireTest {
     }
 
     /**
+     * Spec 2.9: a reference is a U16 index. Indices up to 65535 are referenced; an object whose index does not fit is written inline
+     * again and takes a new index, as a decoder gives every inline object one.
+     */
+    @Test
+    public void encodeReferencesBeyondU16() {
+        // the array takes index 0, objects.get(k) index k + 1, so objects.get(65535) is the first object with index 65536
+        List<Object> objects = new ArrayList<>();
+        for (int i = 0; i < 65536; i++) {
+            ObjectMap<String, Object> object = new ObjectMap<>();
+            object.put("i", (double) i);
+            objects.add(object);
+        }
+        objects.add(objects.get(0));
+        objects.add(objects.get(40000));
+        objects.add(objects.get(65535));
+        objects.add(objects.get(65535));
+        byte[] encoded = serialize(objects);
+        byte[] last = wire().u8(AMF.TYPE_OBJECT).utf8("i").number(65535).objectEnd().toArray();
+        byte[] tail = wire().raw(last).reference(1).reference(40001).raw(last).raw(last).toArray();
+        assertBytes(tail, Arrays.copyOfRange(encoded, encoded.length - tail.length, encoded.length));
+        List<?> decoded = (List<?>) decode(encoded);
+        assertEquals(65540, decoded.size());
+        assertSame(decoded.get(0), decoded.get(65536));
+        assertSame(decoded.get(40000), decoded.get(65537));
+        assertEquals(decoded.get(65535), decoded.get(65538));
+        assertEquals(decoded.get(65535), decoded.get(65539));
+    }
+
+    /**
      * Spec 2.17: the XML document marker is followed by UTF-8-long, a U32 byte length.
      */
     @Test
@@ -437,6 +601,59 @@ public class AMF0WireTest {
         Document doc = XMLUtils.stringToDoc("<a><b>text</b></a>");
         String xml = XMLUtils.docToString(doc);
         assertBytes(wire().u8(AMF.TYPE_XML).utf8Long(xml).toArray(), serialize(doc));
+    }
+
+    /**
+     * Spec 2.17 and 3.1: AMF0 has no vector type, a vector is written as the avmplus-object marker followed by the AMF3 vector (AMF3 3.15:
+     * U29V length, fixed flag, for a vector of object the type name, then the elements).
+     */
+    @Test
+    public void encodeVectorSwitchesToAMF3() {
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x05, 0x00).u32(1).u32(0xFFFFFFFEL).toArray(), serialize(new Vector<>(List.of(1, -2))));
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0E, 0x05, 0x00).u32(1).u32(0xFFFFFFFFL).toArray(), serialize(new Vector<>(List.of(1L, 4294967295L))));
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0F, 0x03, 0x00).dbl(1.5).toArray(), serialize(new Vector<>(List.of(1.5d))));
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x10, 0x05, 0x00, 0x01, 0x06, 0x03, 's', 0x05).dbl(1.5).toArray(), serialize(new Vector<Object>(List.of("s", 1.5d))));
+    }
+
+    /**
+     * The switched vectors of a body share the AMF3 reference tables, so a vector written again is an AMF3 object reference; they take no
+     * AMF0 reference index, so the AMF0 object after them is index 1. The plain AMF0 input reads the body back.
+     */
+    @Test
+    public void encodeVectorReferencesSpanTheBody() {
+        Vector<Integer> vector = new Vector<>(List.of(7));
+        ObjectMap<String, Object> shared = new ObjectMap<>();
+        ObjectMap<String, Object> object = new ObjectMap<>();
+        object.put("v", vector);
+        object.put("w", vector);
+        object.put("o", shared);
+        object.put("r", shared);
+        byte[] expected = wire().u8(AMF.TYPE_OBJECT) //
+                .utf8("v").u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x03, 0x00).u32(7) //
+                .utf8("w").u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x00) //
+                .utf8("o").u8(AMF.TYPE_OBJECT).objectEnd() //
+                .utf8("r").reference(1) //
+                .objectEnd().toArray();
+        byte[] encoded = serialize(object);
+        assertBytes(expected, encoded);
+        Map<?, ?> decoded = (Map<?, ?>) decode(encoded);
+        assertTrue(decoded.get("v") instanceof Vector);
+        assertEquals(vector, decoded.get("v"));
+        assertSame(decoded.get("v"), decoded.get("w"));
+        assertSame(decoded.get("o"), decoded.get("r"));
+    }
+
+    /**
+     * Spec 3.1: a ByteArray, which AMF0 cannot hold either, is written as the avmplus-object marker followed by the AMF3 byte array.
+     */
+    @Test
+    public void encodeByteArraySwitchesToAMF3() {
+        ByteArray bytes = new ByteArray();
+        bytes.writeBytes(new byte[] { 0x7F, (byte) 0x80 });
+        byte[] encoded = serialize(bytes);
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0C, 0x05, 0x7F, 0x80).toArray(), encoded);
+        ByteArray decoded = (ByteArray) decode(encoded);
+        assertEquals(2, decoded.length());
     }
 
     @Test

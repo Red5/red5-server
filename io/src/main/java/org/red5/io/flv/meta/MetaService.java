@@ -105,7 +105,7 @@ public class MetaService implements IMetaService {
             int cuePointTimeStamp = 0;
             int counter = 0;
 
-            if (metaArr != null) {
+            if (metaArr.length > 0) {
                 Arrays.sort(metaArr);
                 cuePointTimeStamp = getTimeInMilliseconds(metaArr[0]);
             }

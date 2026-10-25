@@ -55,7 +55,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     /** {@inheritDoc} */
     @Override
     public int getVideoCodecId() {
-        return ((Double) this.get("videocodecid")).intValue();
+        return ((Number) this.get("videocodecid")).intValue();
     }
 
     /** {@inheritDoc} */
@@ -67,7 +67,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     /** {@inheritDoc} */
     @Override
     public int getAudioCodecId() {
-        return ((Double) this.get("audiocodecid")).intValue();
+        return ((Number) this.get("audiocodecid")).intValue();
     }
 
     /** {@inheritDoc} */
@@ -79,7 +79,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     /** {@inheritDoc} */
     @Override
     public double getFrameRate() {
-        return (Double) this.get("framerate");
+        return ((Number) this.get("framerate")).doubleValue();
     }
 
     /** {@inheritDoc} */
@@ -91,7 +91,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     /** {@inheritDoc} */
     @Override
     public int getVideoDataRate() {
-        return (Integer) this.get("videodatarate");
+        return ((Number) this.get("videodatarate")).intValue();
     }
 
     /** {@inheritDoc} */
@@ -103,7 +103,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     /** {@inheritDoc} */
     @Override
     public int getWidth() {
-        return (Integer) this.get("width");
+        return ((Number) this.get("width")).intValue();
     }
 
     /** {@inheritDoc} */
@@ -115,7 +115,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     /** {@inheritDoc} */
     @Override
     public double getDuration() {
-        return (Double) this.get("duration");
+        return ((Number) this.get("duration")).doubleValue();
     }
 
     /** {@inheritDoc} */
@@ -127,7 +127,7 @@ public class MetaData<K, V> extends HashMap<String, Object> implements IMetaData
     /** {@inheritDoc} */
     @Override
     public int getHeight() {
-        return (Integer) this.get("height");
+        return ((Number) this.get("height")).intValue();
     }
 
     /** {@inheritDoc} */

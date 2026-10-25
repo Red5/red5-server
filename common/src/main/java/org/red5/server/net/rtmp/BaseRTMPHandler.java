@@ -116,7 +116,7 @@ public abstract class BaseRTMPHandler implements IRTMPHandler, Constants, Status
                         }
                         break;
                     case TYPE_NOTIFY:
-                        // like an invoke, but does not return anything and has a invoke / transaction id of 0
+                        // a data message: a call without a result on stream 0 (a name and arguments, no transaction id), otherwise stream data
                     case TYPE_FLEX_STREAM_SEND:
                         Notify notify = (Notify) message;
                         if (notify.getCall() != null) {

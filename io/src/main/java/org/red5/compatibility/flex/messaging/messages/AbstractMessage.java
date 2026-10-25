@@ -62,7 +62,7 @@ public class AbstractMessage implements Message, Serializable {
      */
     public AbstractMessage() {
         timestamp = System.currentTimeMillis();
-        messageId = UUID.randomUUID().toString();
+        messageId = UUID.randomUUID().toString().toUpperCase();
     }
 
     /**

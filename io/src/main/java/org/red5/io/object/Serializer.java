@@ -70,8 +70,23 @@ public class Serializer {
      * @param obj
      *            Object to serialize
      */
-    @SuppressWarnings("unchecked")
     public static void serialize(Output out, Field field, Method getter, Object parent, Object obj) {
+        // every value, members included, is written through here, so this bounds the nesting depth
+        BaseOutput nested = (out instanceof BaseOutput) ? (BaseOutput) out : null;
+        if (nested != null) {
+            nested.enterNested();
+        }
+        try {
+            serializeValue(out, field, getter, parent, obj);
+        } finally {
+            if (nested != null) {
+                nested.exitNested();
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void serializeValue(Output out, Field field, Method getter, Object parent, Object obj) {
         log.trace("serialize: {}", obj);
         if (obj == null) {
             out.writeNull();

@@ -42,7 +42,7 @@ public class CommandMessage extends AsyncMessage {
      * <p>Constructor for CommandMessage.</p>
      */
     public CommandMessage() {
-        this.messageId = UUID.randomUUID().toString();
+        this.messageId = UUID.randomUUID().toString().toUpperCase();
         this.timestamp = System.currentTimeMillis();
     }
 

@@ -25,7 +25,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.amf3.ByteArray;
 import org.red5.io.object.BaseInput;
@@ -68,6 +67,9 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
 
     /** Data type of the value most recently read by {@link #readDataType()}. */
     protected byte currentDataType;
+
+    /** Reads the AMF3 values switched to with the avmplus-object marker, created when the first one is found. */
+    private org.red5.io.amf3.Input amf3Input;
 
     /**
      * Creates Input object from byte buffer
@@ -367,21 +369,41 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
             String key = getString();
             Object item = Deserializer.deserialize(this, Object.class);
             //log.info("key: {} item: {}", key, item);
-            if (!NumberUtils.isParsable(key)) {
-                result.put(key, item);
-            } else {
-                // map keys are either integers or strings, none will be doubles
-                if (key.contains(".")) {
-                    result.put(key, item);
-                } else {
-                    result.put(Integer.valueOf(key), item);
-                }
-            }
+            result.put(arrayKey(key), item);
         }
         result.remove("length");
         // replace the original reference with the final result
         storeReference(reference, result);
         return result;
+    }
+
+    /**
+     * Returns the map key for an ECMA array key. The keys are strings on the wire; the key of an array element, an int in decimal, is
+     * returned as an Integer. Any other key is returned unchanged, also numeric looking keys such as "01", "1.5" or "2147483648", which are
+     * not written the way an int is or do not fit one.
+     *
+     * @param key
+     *            key as read
+     * @return Integer for an int key, the key otherwise
+     */
+    static Object arrayKey(String key) {
+        int length = key.length();
+        int start = (length > 1 && key.charAt(0) == '-') ? 1 : 0;
+        // an int has at most 10 digits
+        if (length == start || length - start > 10) {
+            return key;
+        }
+        for (int i = start; i < length; i++) {
+            char c = key.charAt(i);
+            if (c < '0' || c > '9') {
+                return key;
+            }
+        }
+        long value = Long.parseLong(key);
+        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE || !Long.toString(value).equals(key)) {
+            return key;
+        }
+        return Integer.valueOf((int) value);
     }
 
     /**
@@ -593,12 +615,33 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     /**
      * {@inheritDoc}
      *
-     * Reads Custom
+     * Reads the AMF3 value that follows an avmplus-object marker, or returns null for the AMF0 types without a value Red5 can represent
+     * (unsupported, movieclip and recordset).
      */
     @Override
     public Object readCustom() {
-        // return null for now
+        if (currentDataType == AMF.TYPE_AMF3_OBJECT) {
+            return readSwitchedValue();
+        }
         return null;
+    }
+
+    /**
+     * Reads the AMF3 value that follows an avmplus-object marker (AMF0 2.17, 3.1); the marker switches to AMF3 for that value only. The
+     * AMF3 string, object and traits reference tables of the switched values span the body this input reads, also across {@link #reset()},
+     * as they do for {@link org.red5.io.amf3.Input} in its AMF0 context and for BlazeDS and Mini-AMF. A switched value is not an AMF0
+     * complex object and takes no AMF0 reference index.
+     *
+     * @return decoded AMF3 value
+     */
+    private Object readSwitchedValue() {
+        if (amf3Input == null) {
+            amf3Input = new org.red5.io.amf3.Input(buf);
+            amf3Input.enforceAMF3();
+        }
+        log.trace("Switch to AMF3 for one value");
+        amf3Input.continueNesting(this);
+        return Deserializer.deserialize(amf3Input, Object.class);
     }
 
     /**
@@ -654,14 +697,27 @@ public class Input extends BaseInput implements org.red5.io.object.Input {
     /**
      * {@inheritDoc}
      *
-     * Reads Reference
+     * Reads a reference: a U16 index of a complex object read before it in the body.
+     *
+     * @throws RuntimeException
+     *             if no object was read for the index
      */
     @Override
     public Object readReference() {
-        return getReference(buf.getUnsignedShort());
+        int index = buf.getUnsignedShort();
+        Object obj = getReference(index);
+        if (obj == null) {
+            // every complex object read takes an index and none is stored as null, so the input is malformed
+            throw new RuntimeException(String.format("AMF0 reference %d out of range, %d objects known", index, refId.get()));
+        }
+        return obj;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * Clears the AMF0 references. The AMF3 reference tables of switched values are scoped to the body and are kept.
+     */
     @Override
     public void reset() {
         clearReferences();

@@ -17,16 +17,20 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
+import org.red5.annotations.Anonymous;
 import org.red5.compatibility.flex.messaging.io.ObjectProxy;
 import org.red5.compatibility.flex.messaging.messages.CommandMessage;
+import org.red5.compatibility.flex.messaging.messages.RemotingMessage;
 import org.red5.io.object.Deserializer;
 import org.red5.io.object.Serializer;
 import org.red5.io.utils.ObjectMap;
@@ -208,6 +212,24 @@ public class AMF3WireTest {
         assertEquals("mid", msg.getMessageId());
         assertEquals(1234L, msg.getTimestamp());
         assertEquals("the-body", msg.getBody());
+        assertFalse(buf.hasRemaining());
+    }
+
+    /**
+     * A member is converted to the type of the bean property it is set on, as the AMF0 reader does. BlazeDS sends the parameters of a
+     * RemotingMessage as an ArrayCollection, Red5's RemotingMessage holds them in an Object[].
+     */
+    @Test
+    public void testMemberConvertedToPropertyType() {
+        IoBuffer buf = IoBuffer.wrap(bytes(0x0A, 0x0B, 0x4F, "flex.messaging.messages.RemotingMessage", //
+                0x15, "parameters", 0x0A, 0x07, 0x43, "flex.messaging.io.ArrayCollection", 0x09, 0x05, 0x01, 0x06, 0x03, "a", 0x04, 0x01, //
+                0x13, "operation", 0x06, 0x09, "echo", //
+                0x01));
+        Object result = decode(amf3Context(buf));
+        assertTrue(String.valueOf(result), result instanceof RemotingMessage);
+        RemotingMessage msg = (RemotingMessage) result;
+        assertArrayEquals(new Object[] { "a", 1 }, msg.getParameters());
+        assertEquals("echo", msg.getOperation());
         assertFalse(buf.hasRemaining());
     }
 
@@ -496,6 +518,50 @@ public class AMF3WireTest {
         assertEquals(new Vector<>(Arrays.asList(4294967295L)), decode(amf0Context(IoBuffer.wrap(data))));
     }
 
+    /**
+     * Object references are U29O-ref values: 28 bits of index. An index above 32767 must still be written as that index.
+     */
+    @Test
+    public void testObjectReferenceAbove32767() {
+        // the outer list takes index 0, inner.get(k) index k + 1, so inner.get(32768) has index 32769
+        List<Object> inner = new ArrayList<>();
+        for (int i = 0; i < 32769; i++) {
+            inner.add(new ArrayList<>(Arrays.asList(i)));
+        }
+        List<Object> outer = new ArrayList<>(inner);
+        outer.add(inner.get(0));
+        outer.add(inner.get(32768));
+        byte[] data = encode(outer);
+        // 0x09 then U29 1 << 1, and 0x09 then U29 32769 << 1 = 65538 in three bytes
+        byte[] tail = Arrays.copyOfRange(data, data.length - 6, data.length);
+        assertEquals("09 02 09 84 80 02", hex(tail));
+        List<?> decoded = (List<?>) decode(amf0Context(IoBuffer.wrap(data)));
+        assertEquals(32771, decoded.size());
+        assertSame(decoded.get(0), decoded.get(32769));
+        assertSame(decoded.get(32768), decoded.get(32770));
+    }
+
+    /**
+     * The empty string ends the dynamic members of an object and the associative portion of an array (spec 3.11, 3.12), so a member
+     * or key named "" cannot be encoded; writing it would end the value early and corrupt the rest of the stream.
+     */
+    @Test
+    public void testEmptyMemberNameIsRejected() {
+        ObjectMap<String, Object> object = new ObjectMap<>();
+        object.put("", 1);
+        Map<Object, Object> array = new LinkedHashMap<>();
+        array.put(0, "zero");
+        array.put("", 1);
+        for (Object value : new Object[] { object, array }) {
+            try {
+                encode(value);
+                fail("an empty member name must be rejected: " + value);
+            } catch (IllegalArgumentException expected) {
+                assertTrue(expected.getMessage(), expected.getMessage().contains("empty"));
+            }
+        }
+    }
+
     @Test
     public void testResetClearsStringReferences() {
         IoBuffer buf = newBuffer();
@@ -517,6 +583,53 @@ public class AMF3WireTest {
         Object decoded = decode(amf0Context(IoBuffer.wrap(data)));
         assertTrue(String.valueOf(decoded), decoded instanceof ObjectProxy);
         assertEquals("v", ((ObjectProxy<?, ?>) decoded).get("k"));
+    }
+
+    /**
+     * A class annotated {@link Anonymous} is written without its class name also when it is externalizable: as an anonymous dynamic object
+     * (0x0B, empty class name) with the bean properties the AMF0 writer writes for it, not as externalizable traits naming a server class a
+     * client cannot instantiate.
+     */
+    @Test
+    public void testAnonymousExternalizableIsAnAnonymousObject() {
+        AnonymousExternalizable value = new AnonymousExternalizable();
+        value.setA("x");
+        byte[] data = encode(value);
+        assertEquals("11 0A 0B 01 03 61 06 03 78 01", hex(data));
+        Object decoded = decode(amf0Context(IoBuffer.wrap(data)));
+        assertEquals(Map.of("a", "x"), decoded);
+        // the AMF0 writer writes the same members in an anonymous object
+        IoBuffer buf = newBuffer();
+        Serializer.serialize(new org.red5.io.amf.Output(buf), value);
+        assertEquals("03 00 01 61 02 00 01 78 00 00 09", hex(written(buf)));
+    }
+
+    /**
+     * An externalizable class that is written without its class name.
+     */
+    @Anonymous
+    public static class AnonymousExternalizable implements IExternalizable {
+
+        private String a;
+
+        public String getA() {
+            return a;
+        }
+
+        public void setA(String a) {
+            this.a = a;
+        }
+
+        @Override
+        public void readExternal(IDataInput input) {
+            a = input.readUTF();
+        }
+
+        @Override
+        public void writeExternal(IDataOutput output) {
+            output.writeUTF(a);
+        }
+
     }
 
     @Test

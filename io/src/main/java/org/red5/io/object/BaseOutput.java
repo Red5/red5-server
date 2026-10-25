@@ -54,12 +54,12 @@ public class BaseOutput {
     /**
      * References map
      */
-    protected Map<IdentityWrapper, Short> refMap;
+    protected Map<IdentityWrapper, Integer> refMap;
 
     /**
-     * Reference id
+     * Reference id, the index the next stored object takes
      */
-    protected short refId;
+    protected int refId;
 
     /**
      * BaseOutput Constructor
@@ -75,7 +75,7 @@ public class BaseOutput {
      *            Object to store
      */
     protected void storeReference(Object obj) {
-        refMap.put(new IdentityWrapper(obj), Short.valueOf(refId++));
+        refMap.put(new IdentityWrapper(obj), Integer.valueOf(refId++));
     }
 
     /**
@@ -102,10 +102,45 @@ public class BaseOutput {
      *
      * @param obj
      *            Object
-     * @return short Reference id
+     * @return int Reference id
      */
-    protected short getReferenceId(Object obj) {
-        return refMap.get(new IdentityWrapper(obj)).shortValue();
+    protected int getReferenceId(Object obj) {
+        return refMap.get(new IdentityWrapper(obj)).intValue();
+    }
+
+    /**
+     * Current nesting depth of the value being written
+     */
+    private int depth;
+
+    /**
+     * Enters a nested value, failing when the nesting depth would exceed {@link BaseInput#MAX_DEPTH}, the depth a decoder accepts. A cycle
+     * that cannot be written as a reference, such as one back to an AMF0 object whose index does not fit the U16 of a reference, would
+     * otherwise recurse until the stack overflows. Every call must be paired with {@link #exitNested()}.
+     */
+    protected void enterNested() {
+        if (++depth > BaseInput.MAX_DEPTH) {
+            depth--;
+            throw new IllegalStateException("AMF nesting depth exceeds " + BaseInput.MAX_DEPTH + ", the value is nested too deeply or contains a cycle that cannot be written as a reference");
+        }
+    }
+
+    /**
+     * Leaves a nested value entered with {@link #enterNested()}.
+     */
+    protected void exitNested() {
+        depth--;
+    }
+
+    /**
+     * Makes this output continue the nesting depth of another output whose current value it writes, such as the AMF3 value the AMF0 encoder
+     * writes after an avmplus-object marker, so the depth limit applies as if one output wrote both.
+     *
+     * @param outer
+     *            output that entered the level of the value
+     */
+    protected void continueNesting(BaseOutput outer) {
+        depth = outer.depth;
     }
 
 }

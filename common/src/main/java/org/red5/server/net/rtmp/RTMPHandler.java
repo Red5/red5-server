@@ -8,12 +8,13 @@
 package org.red5.server.net.rtmp;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.red5.io.CapsExMask;
+import org.red5.io.FourCcInfoMask;
 import org.red5.io.object.StreamAction;
+import org.red5.io.utils.ObjectMap;
 import org.red5.server.api.IConnection.Encoding;
 import org.red5.server.api.IContext;
 import org.red5.server.api.IServer;
@@ -272,6 +273,8 @@ public class RTMPHandler extends BaseRTMPHandler {
             return;
         }
         boolean disconnectOnReturn = false;
+        // the command object of the reply, the properties of the server in the result of a successful connect
+        Map<String, Object> commandObject = null;
         // "connected" here means that there is a scope associated with the connection (post-"connect")
         boolean connected = conn.isConnected();
         if (connected) {
@@ -384,19 +387,12 @@ public class RTMPHandler extends BaseRTMPHandler {
                                         call.setStatus(Call.STATUS_SUCCESS_RESULT);
                                         if (call instanceof IPendingServiceCall) {
                                             IPendingServiceCall pc = (IPendingServiceCall) call;
-                                            // send fmsver and capabilities
-                                            StatusObject result = getStatus(NC_CONNECT_SUCCESS);
-                                            result.setAdditional("fmsVer", Red5.getFMSVersion());
-                                            result.setAdditional("capabilities", Red5.getCapabilities());
-                                            result.setAdditional("mode", Integer.valueOf(1));
-                                            result.setAdditional("data", Red5.getDataVersion());
-                                            // XXX(paul) This is where the server needs to state its support for Enhanced-RTMP.
-                                            // support is via attributes audio/videoFourCcInfoMap, capsEx, and fourCcList.
-                                            result.setAdditional("fourCcList", new Object[] { "*" });
-                                            result.setAdditional("audioFourCcInfoMap", Collections.singletonMap("*", 4));
-                                            result.setAdditional("videoFourCcInfoMap", Collections.singletonMap("*", 4));
-                                            result.setAdditional("CapsEx", (CapsExMask.Reconnect.getMask() | CapsExMask.Multitrack.getMask() | CapsExMask.ModEx.getMask() | CapsExMask.TimestampNanoOffset.getMask()));
-                                            pc.setResult(result);
+                                            // the properties of the server, Enhanced RTMP support included, go in the command object
+                                            commandObject = getConnectProperties();
+                                            // the information object carries the status and the data version
+                                            Map<String, Object> info = getStatusInfo(NC_CONNECT_SUCCESS);
+                                            info.put("data", getDataVersion());
+                                            pc.setResult(info);
                                         }
                                         // Measure initial round-trip time after connecting
                                         conn.ping(new Ping(PingType.STREAM_BEGIN, 0, -1));
@@ -405,7 +401,7 @@ public class RTMPHandler extends BaseRTMPHandler {
                                         call.setStatus(Call.STATUS_ACCESS_DENIED);
                                         if (call instanceof IPendingServiceCall) {
                                             IPendingServiceCall pc = (IPendingServiceCall) call;
-                                            pc.setResult(getStatus(NC_CONNECT_REJECTED));
+                                            pc.setResult(getStatusInfo(NC_CONNECT_REJECTED));
                                         }
                                         disconnectOnReturn = true;
                                     }
@@ -414,12 +410,12 @@ public class RTMPHandler extends BaseRTMPHandler {
                                     call.setStatus(Call.STATUS_ACCESS_DENIED);
                                     if (call instanceof IPendingServiceCall) {
                                         IPendingServiceCall pc = (IPendingServiceCall) call;
-                                        StatusObject status = getStatus(NC_CONNECT_REJECTED);
+                                        Map<String, Object> status = getStatusInfo(NC_CONNECT_REJECTED);
                                         Object reason = rejected.getReason();
                                         if (reason != null) {
-                                            status.setApplication(reason);
+                                            status.put("application", reason);
                                             //should we set description?
-                                            status.setDescription(reason.toString());
+                                            status.put("description", reason.toString());
                                         }
                                         pc.setResult(status);
                                     }
@@ -431,8 +427,8 @@ public class RTMPHandler extends BaseRTMPHandler {
                                 call.setStatus(Call.STATUS_ACCESS_DENIED);
                                 if (call instanceof IPendingServiceCall) {
                                     IPendingServiceCall pc = (IPendingServiceCall) call;
-                                    StatusObject status = getStatus(NC_CONNECT_REJECTED);
-                                    status.setDescription(String.format("Connection to '%s' denied.", path));
+                                    Map<String, Object> status = getStatusInfo(NC_CONNECT_REJECTED);
+                                    status.put("description", String.format("Connection to '%s' denied.", path));
                                     pc.setResult(status);
                                 }
                                 disconnectOnReturn = true;
@@ -442,8 +438,8 @@ public class RTMPHandler extends BaseRTMPHandler {
                         log.warn("Scope not found", err);
                         call.setStatus(Call.STATUS_SERVICE_NOT_FOUND);
                         if (call instanceof IPendingServiceCall) {
-                            StatusObject status = getStatus(NC_CONNECT_REJECTED);
-                            status.setDescription(String.format("No scope '%s' on this server.", path));
+                            Map<String, Object> status = getStatusInfo(NC_CONNECT_REJECTED);
+                            status.put("description", String.format("No scope '%s' on this server.", path));
                             ((IPendingServiceCall) call).setResult(status);
                         }
                         log.info("Scope {} not found on {}", path, host);
@@ -452,8 +448,8 @@ public class RTMPHandler extends BaseRTMPHandler {
                         log.warn("Scope shutting down", err);
                         call.setStatus(Call.STATUS_APP_SHUTTING_DOWN);
                         if (call instanceof IPendingServiceCall) {
-                            StatusObject status = getStatus(NC_CONNECT_APPSHUTDOWN);
-                            status.setDescription(String.format("Application at '%s' is currently shutting down.", path));
+                            Map<String, Object> status = getStatusInfo(NC_CONNECT_APPSHUTDOWN);
+                            status.put("description", String.format("Application at '%s' is currently shutting down.", path));
                             ((IPendingServiceCall) call).setResult(status);
                         }
                         log.info("Application at {} currently shutting down on {}", path, host);
@@ -463,8 +459,8 @@ public class RTMPHandler extends BaseRTMPHandler {
                     log.warn("Scope {} not found", path);
                     call.setStatus(Call.STATUS_SERVICE_NOT_FOUND);
                     if (call instanceof IPendingServiceCall) {
-                        StatusObject status = getStatus(NC_CONNECT_INVALID_APPLICATION);
-                        status.setDescription(String.format("No scope '%s' on this server.", path));
+                        Map<String, Object> status = getStatusInfo(NC_CONNECT_INVALID_APPLICATION);
+                        status.put("description", String.format("No scope '%s' on this server.", path));
                         ((IPendingServiceCall) call).setResult(status);
                     }
                     log.info("No application scope found for {} on host {}", path, host);
@@ -474,30 +470,20 @@ public class RTMPHandler extends BaseRTMPHandler {
                 call.setStatus(Call.STATUS_GENERAL_EXCEPTION);
                 if (call instanceof IPendingServiceCall) {
                     IPendingServiceCall pc = (IPendingServiceCall) call;
-                    pc.setResult(getStatus(NC_CONNECT_FAILED));
+                    pc.setResult(getStatusInfo(NC_CONNECT_FAILED));
                 }
                 log.error("Error connecting {}", e);
                 disconnectOnReturn = true;
             }
-            // Evaluate request for AMF3 encoding
-            if (Double.valueOf(3d).equals(params.get("objectEncoding"))) {
-                if (call instanceof IPendingServiceCall) {
-                    Object pcResult = ((IPendingServiceCall) call).getResult();
-                    Map<String, Object> result;
-                    if (pcResult instanceof Map) {
-                        result = (Map<String, Object>) pcResult;
-                        result.put("objectEncoding", 3);
-                    } else if (pcResult instanceof StatusObject) {
-                        result = new HashMap<>();
-                        StatusObject status = (StatusObject) pcResult;
-                        result.put("code", status.getCode());
-                        result.put("description", status.getDescription());
-                        result.put("application", status.getApplication());
-                        result.put("level", status.getLevel());
-                        result.put("objectEncoding", 3);
-                        ((IPendingServiceCall) call).setResult(result);
-                    }
+            // Evaluate request for AMF3 encoding, the information object tells the client the encoding of the connection
+            boolean amf3 = Double.valueOf(3d).equals(params.get("objectEncoding"));
+            if (call instanceof IPendingServiceCall) {
+                Object pcResult = ((IPendingServiceCall) call).getResult();
+                if (pcResult instanceof Map) {
+                    ((Map<String, Object>) pcResult).put("objectEncoding", amf3 ? 3 : 0);
                 }
+            }
+            if (amf3) {
                 conn.getState().setEncoding(Encoding.AMF3);
             }
         } else {
@@ -533,6 +519,7 @@ public class RTMPHandler extends BaseRTMPHandler {
                 Invoke reply = new Invoke();
                 reply.setCall(call);
                 reply.setTransactionId(transId);
+                reply.setConnectionParams(commandObject);
                 channel.write(reply);
                 if (disconnectOnReturn) {
                     log.debug("Close connection due to connect handling exception: {}", conn.getSessionId());
@@ -552,6 +539,64 @@ public class RTMPHandler extends BaseRTMPHandler {
      */
     public StatusObject getStatus(String code) {
         return statusObjectService.getStatusObject(code);
+    }
+
+    /**
+     * Returns the information object for a status code, a new anonymous object with the level, code and description of the status
+     * object, and its application if it has one. The status objects of the status object service are shared, so a result that changes
+     * them must start from this copy.
+     *
+     * @param code
+     *            status code
+     * @return information object
+     */
+    public Map<String, Object> getStatusInfo(String code) {
+        StatusObject status = getStatus(code);
+        Map<String, Object> info = new ObjectMap<>();
+        info.put("level", status.getLevel());
+        info.put("code", status.getCode());
+        info.put("description", status.getDescription());
+        if (status.getApplication() != null) {
+            info.put("application", status.getApplication());
+        }
+        return info;
+    }
+
+    /**
+     * Returns the properties of the server, which the result of a successful connect carries in its command object, the object after
+     * the transaction id; the information object follows it. FMS sends fmsVer, capabilities and mode there, and the Enhanced RTMP
+     * specification has the server state its support in an object of the connect result, as the client does in the command object of
+     * connect: fourCcList, videoFourCcInfoMap, audioFourCcInfoMap and capsEx.
+     *
+     * @return properties of the server
+     */
+    public Map<String, Object> getConnectProperties() {
+        Map<String, Object> properties = new ObjectMap<>();
+        properties.put("fmsVer", Red5.getFMSVersion());
+        properties.put("capabilities", Red5.getCapabilities());
+        properties.put("mode", Integer.valueOf(1));
+        // Enhanced RTMP: any codec is forwarded
+        properties.put("fourCcList", new Object[] { "*" });
+        Map<String, Object> videoFourCcInfoMap = new ObjectMap<>();
+        videoFourCcInfoMap.put("*", Integer.valueOf(FourCcInfoMask.CanForward.getMask()));
+        properties.put("videoFourCcInfoMap", videoFourCcInfoMap);
+        Map<String, Object> audioFourCcInfoMap = new ObjectMap<>();
+        audioFourCcInfoMap.put("*", Integer.valueOf(FourCcInfoMask.CanForward.getMask()));
+        properties.put("audioFourCcInfoMap", audioFourCcInfoMap);
+        properties.put("capsEx", Integer.valueOf(CapsExMask.Reconnect.getMask() | CapsExMask.Multitrack.getMask() | CapsExMask.ModEx.getMask() | CapsExMask.TimestampNanoOffset.getMask()));
+        return properties;
+    }
+
+    /**
+     * Returns the data version of the server for the information object of a successful connect, as an anonymous object.
+     *
+     * @return data version
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getDataVersion() {
+        Map<String, Object> data = new ObjectMap<>();
+        data.putAll((Map<String, Object>) Red5.getDataVersion());
+        return data;
     }
 
     /** {@inheritDoc} */
@@ -695,9 +740,13 @@ public class RTMPHandler extends BaseRTMPHandler {
      * @param description optional human-readable description, or null
      */
     public static void sendReconnectRequest(RTMPConnection conn, String tcUrl, String description) {
-        StatusObject status = new StatusObject(NC_CONNECT_RECONNECT_REQUEST, "status", description != null ? description : "Server is requesting reconnection");
+        // the info object: level, code, description and the optional tcUrl to reconnect to
+        Map<String, Object> status = new ObjectMap<>();
+        status.put("level", StatusObject.STATUS);
+        status.put("code", NC_CONNECT_RECONNECT_REQUEST);
+        status.put("description", description != null ? description : "Server is requesting reconnection");
         if (tcUrl != null) {
-            status.setAdditional("tcUrl", tcUrl);
+            status.put("tcUrl", tcUrl);
         }
         Channel channel = conn.getChannel(3);
         if (channel != null) {
