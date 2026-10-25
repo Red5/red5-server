@@ -1,0 +1,89 @@
+package org.red5.server.persistence;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.red5.server.so.SharedObject;
+import org.red5.test.LegacyBean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.FileSystemResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.w3c.dom.Document;
+
+/**
+ * Persists shared objects with the FilePersistence of whatever Red5 build is on the classpath. Run against the classes of a04119fb to
+ * produce the legacy files the new code must still load.
+ */
+public class LegacyGenerator {
+
+    public static final long DATE_MS = 1700000000123L;
+
+    public static void main(String[] args) throws Exception {
+        File webapp = new File(args[0]);
+        new File(webapp, "persistence").mkdirs();
+        FileSystemResourceLoader loader = new FileSystemResourceLoader() {
+            @Override
+            protected Resource getResourceByPath(String path) {
+                return new FileSystemResource(new File(webapp, path));
+            }
+        };
+        FilePersistence persistence = new FilePersistence(new PathMatchingResourcePatternResolver(loader));
+        // values: everything but XML, which the old writer wrote with a U16 length
+        Date date = new Date(DATE_MS);
+        Map<String, Object> shared = new LinkedHashMap<>();
+        shared.put("id", 7);
+        shared.put("label", "shared");
+        Map<String, Object> inner = new LinkedHashMap<>();
+        inner.put("x", 1.5d);
+        inner.put("label", "inner");
+        Map<String, Object> nested = new LinkedHashMap<>();
+        nested.put("inner", inner);
+        nested.put("list", Arrays.asList(1, 2, 3));
+        nested.put("when", date);
+        nested.put("again", shared);
+        List<Object> mixed = new ArrayList<>();
+        // dates before an object reference: the old reader gave each date a reference index
+        mixed.add(date);
+        mixed.add(date);
+        mixed.add(shared);
+        mixed.add(shared);
+        mixed.add(inner);
+        char[] longChars = new char[70000];
+        Arrays.fill(longChars, 'L');
+        char[] maxChars = new char[65535];
+        Arrays.fill(maxChars, 'M');
+        Map<String, Object> values = new HashMap<>();
+        values.put("date", date);
+        values.put("shared", shared);
+        values.put("nested", nested);
+        values.put("mixed", mixed);
+        values.put("bean", new LegacyBean("bean", 42, date));
+        values.put("longString", new String(longChars));
+        values.put("maxString", new String(maxChars));
+        values.put("unicode", "héllo 世界 😀");
+        values.put("number", 3.25d);
+        values.put("integer", 12);
+        values.put("flag", Boolean.TRUE);
+        values.put("nothing", null);
+        persistence.save(new SharedObject(values, "legacy", "/legacyapp", true));
+        // XML on its own, so an XML incompatibility cannot hide the other values
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        doc.appendChild(doc.createElement("root")).appendChild(doc.createElement("child")).setTextContent("text");
+        Map<String, Object> xml = new HashMap<>();
+        xml.put("xml", doc);
+        xml.put("after", "after xml");
+        persistence.save(new SharedObject(xml, "legacyxml", "/legacyapp", true));
+        persistence.notifyClose();
+        System.out.println("written under " + webapp);
+    }
+
+}
