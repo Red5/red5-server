@@ -22,7 +22,9 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.red5.server.so.SharedObject;
 import org.red5.test.LegacyBean;
 import org.springframework.core.io.FileSystemResource;
@@ -53,13 +55,16 @@ public class LegacyFilePersistenceTest {
 
     private static final long DATE_MS = 1700000000123L;
 
+    @Rule
+    public TemporaryFolder tmp = new TemporaryFolder();
+
     private File webapp;
 
     private FilePersistence persistence;
 
     @Before
     public void setUp() throws Exception {
-        webapp = Files.createTempDirectory("red5-legacy-persistence").toFile();
+        webapp = tmp.newFolder("webapp");
         File dir = new File(webapp, "persistence/SHARED_OBJECT/legacyapp");
         assertTrue(dir.mkdirs());
         try (InputStream in = new GZIPInputStream(getClass().getResourceAsStream("/persistence/legacy/legacy.red5.gz"))) {
