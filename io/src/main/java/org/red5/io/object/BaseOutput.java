@@ -108,4 +108,28 @@ public class BaseOutput {
         return refMap.get(new IdentityWrapper(obj)).intValue();
     }
 
+    /**
+     * Current nesting depth of the value being written
+     */
+    private int depth;
+
+    /**
+     * Enters a nested value, failing when the nesting depth would exceed {@link BaseInput#MAX_DEPTH}, the depth a decoder accepts. A cycle
+     * that cannot be written as a reference, such as one back to an AMF0 object whose index does not fit the U16 of a reference, would
+     * otherwise recurse until the stack overflows. Every call must be paired with {@link #exitNested()}.
+     */
+    protected void enterNested() {
+        if (++depth > BaseInput.MAX_DEPTH) {
+            depth--;
+            throw new IllegalStateException("AMF nesting depth exceeds " + BaseInput.MAX_DEPTH + ", the value is nested too deeply or contains a cycle that cannot be written as a reference");
+        }
+    }
+
+    /**
+     * Leaves a nested value entered with {@link #enterNested()}.
+     */
+    protected void exitNested() {
+        depth--;
+    }
+
 }
