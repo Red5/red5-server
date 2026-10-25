@@ -248,7 +248,9 @@ public class RTMPProtocolEncoderAMFTest {
      * and the Enhanced RTMP fourCcList, audioFourCcInfoMap, videoFourCcInfoMap and CapsEx) never reach the wire. StatusObject has no getter
      * for them, so the AMF0 writer, which writes bean properties, leaves them out; on AMF3 connections RTMPHandler copies the status into a
      * map without them. Where they belong (the command object, where FMS sends fmsVer, capabilities and mode, or the information object)
-     * needs a decision, so this is not fixed here.
+     * needs a decision, so this is not fixed here. Note that RTMPProtocolEncoder.generateErrorResult also puts the server stack trace of
+     * every failed call into the additional properties: a getter would send it to AMF0 clients, and StatusObject.writeExternal already
+     * sends it to AMF3 clients.
      */
     @Ignore("connect result additional properties are not written, see the javadoc")
     @Test
