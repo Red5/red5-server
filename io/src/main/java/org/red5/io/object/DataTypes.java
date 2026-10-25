@@ -207,7 +207,7 @@ public class DataTypes {
      * @return boolean <code>true</code> if data type is complex (non-primitive), <code>false</code> otherwise
      */
     public static boolean isComplexType(byte type) {
-        return type >= CORE_ARRAY || type <= CORE_OBJECT;
+        return type >= CORE_ARRAY && type <= CORE_OBJECT;
     }
 
     /**
