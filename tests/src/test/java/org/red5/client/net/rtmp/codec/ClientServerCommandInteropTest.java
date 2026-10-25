@@ -3,6 +3,7 @@ package org.red5.client.net.rtmp.codec;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -14,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.red5.server.api.IConnection.Encoding;
 import org.red5.server.api.Red5;
@@ -117,22 +118,81 @@ public class ClientServerCommandInteropTest {
     }
 
     /**
-     * Reproducer: a notify (data message 0x12) on stream 0, as RTMPConnection.notify sends a call without a result in either direction.
-     * The encoder writes the name and the arguments, as a data message has no transaction id, but unless the name starts with "on" or "@"
-     * (stream data, issue #440) the decoder reads it as an invoke: it takes the first argument as the transaction id and fails on a
-     * non-number (ClassCastException) or drops a numeric one. This is how the decoder has handled data messages on stream 0 since before
-     * the AMF changes; changing it alters what third-party peers see, so it is left for a decision.
+     * A notify (data message 0x12) on stream 0, as RTMPConnection.notify sends a call without a result: a data message carries a name and
+     * values (RTMP 1.0, 7.1.2), so every value after the name is an argument, a number or an object first included.
      */
-    @Ignore("data messages on stream 0 are decoded as invokes, see the javadoc")
     @Test
+    @SuppressWarnings("unchecked")
     public void testNotify() {
         for (Encoding encoding : Encoding.values()) {
             Notify notify = new Notify();
             notify.setCall(new Call(null, "chat", new Object[] { "hi", 2.5d }));
             String prefix = encoding == Encoding.AMF3 ? "11" + amf3String("chat") + "11" + amf3String("hi") : amf0String("chat") + amf0String("hi");
             Notify decoded = (Notify) roundTrip(encoding, Constants.TYPE_NOTIFY, notify, prefix);
+            assertFalse(decoded instanceof Invoke);
             assertEquals("chat", decoded.getCall().getServiceMethodName());
             assertArrayEquals(new Object[] { "hi", 2.5d }, decoded.getCall().getArguments());
+            // a number first, which an invoke would take as the transaction id
+            notify = new Notify();
+            notify.setCall(new Call(null, "position", new Object[] { 2.5d, "x" }));
+            prefix = encoding == Encoding.AMF3 ? "11" + amf3String("position") + "1105" : amf0String("position") + "00";
+            decoded = (Notify) roundTrip(encoding, Constants.TYPE_NOTIFY, notify, prefix);
+            assertEquals("position", decoded.getCall().getServiceMethodName());
+            assertArrayEquals(new Object[] { 2.5d, "x" }, decoded.getCall().getArguments());
+            // an object first, which an invoke would take as the command object, and a name starting with "on"
+            Map<String, Object> info = new LinkedHashMap<>();
+            info.put("user", "a");
+            notify = new Notify();
+            notify.setCall(new Call(null, "onUserJoined", new Object[] { info, null }));
+            decoded = (Notify) roundTrip(encoding, Constants.TYPE_NOTIFY, notify, encoding == Encoding.AMF3 ? "11" + amf3String("onUserJoined") : amf0String("onUserJoined"));
+            assertEquals("onUserJoined", decoded.getCall().getServiceMethodName());
+            Object[] args = decoded.getCall().getArguments();
+            assertEquals(2, args.length);
+            assertEquals("a", ((Map<String, Object>) args[0]).get("user"));
+            assertNull(args[1]);
+            assertNull(decoded.getConnectionParams());
+        }
+    }
+
+    /**
+     * A data message from an AMF3 client (type 15): a format selector byte of 0, then AMF0 values of which each may be switched to AMF3,
+     * as the Enhanced RTMP specification describes types 15, 16 and 17. On stream 0 it is a call without a result.
+     */
+    @Test
+    public void testFlexDataMessage() {
+        IoBuffer in = IoBuffer.wrap(hex("00" + amf0String("chat") + "11" + amf3String("hi") + "1105" + String.format("%016x", Double.doubleToLongBits(2.5d)) + "110600"));
+        Header header = new Header();
+        header.setDataType(Constants.TYPE_FLEX_STREAM_SEND);
+        header.setStreamId(0);
+        Notify decoded = (Notify) new RTMPProtocolDecoder().decodeMessage(connection(Encoding.AMF3), header, in);
+        assertFalse(in.hasRemaining());
+        assertEquals("chat", decoded.getCall().getServiceMethodName());
+        // the AMF3 string table spans the message, 0 is the first AMF3 string
+        assertArrayEquals(new Object[] { "hi", 2.5d, "hi" }, decoded.getCall().getArguments());
+    }
+
+    /**
+     * The data frame commands are stream data also on stream 0 (issue #440), they are not calls.
+     */
+    @Test
+    public void testSetDataFrameOnStreamZeroIsStreamData() {
+        for (byte dataType : new byte[] { Constants.TYPE_NOTIFY, Constants.TYPE_FLEX_STREAM_SEND }) {
+            String body = amf0String("@setDataFrame") + amf0String("onMetaData") + "08" + "00000001" + "0005" + Hex.encodeHexString("width".getBytes(StandardCharsets.UTF_8)) + "00" + String.format("%016x", Double.doubleToLongBits(640d)) + "000009";
+            IoBuffer in = IoBuffer.wrap(hex((dataType == Constants.TYPE_FLEX_STREAM_SEND ? "00" : "") + body));
+            Header header = new Header();
+            header.setDataType(dataType);
+            header.setStreamId(0);
+            Notify decoded = (Notify) new RTMPProtocolDecoder().decodeMessage(connection(Encoding.AMF0), header, in);
+            assertNull(decoded.getCall());
+            assertEquals("onMetaData", decoded.getAction());
+        }
+    }
+
+    private static byte[] hex(String hex) {
+        try {
+            return Hex.decodeHex(hex);
+        } catch (DecoderException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 

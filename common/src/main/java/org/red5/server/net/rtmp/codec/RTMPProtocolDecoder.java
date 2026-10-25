@@ -52,6 +52,7 @@ import org.red5.server.net.rtmp.message.Packet;
 import org.red5.server.net.rtmp.message.SharedObjectTypeMapping;
 import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusCodes;
+import org.red5.server.service.Call;
 import org.red5.server.service.PendingCall;
 import org.red5.server.so.FlexSharedObjectMessage;
 import org.red5.server.so.ISharedObjectEvent;
@@ -738,33 +739,23 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
                 if (isTrace) {
                     log.trace("Decoding flex stream send on stream id: {}", header.getStreamId());
                 }
-                // skip first byte
+                // skip the format selector, 0 for AMF0 values that may each be switched to AMF3
                 in.get();
-                // decode stream data; slice from the current position
-                message = decodeStreamData(in.slice());
+                if (isStreamData(header, in)) {
+                    // decode stream data; slice from the current position
+                    message = decodeStreamData(in.slice());
+                } else {
+                    message = decodeNotify(Encoding.AMF3, in, header);
+                }
                 break;
             case TYPE_NOTIFY:
                 if (isTrace) {
                     log.trace("Decoding notify on stream id: {}", header.getStreamId());
                 }
-                // Per RTMP spec, TYPE_NOTIFY (0x12) carries stream data (onMetaData, onCuePoint,
-                // @setDataFrame, onFI, ...). Some encoders (older FFmpeg, librtmp-based publishers,
-                // mobile encoders) send `@setDataFrame onMetaData` with streamId=0 before/during
-                // stream creation. Routing those to decodeAction trips a ClassCastException because
-                // the AMF token after the action string is a String, not the Number transactionId
-                // that an invoke payload would have. See issue #440.
-                if (header.getStreamId().doubleValue() != 0.0d || looksLikeStreamData(in)) {
+                if (isStreamData(header, in)) {
                     message = decodeStreamData(in);
                 } else {
-                    if (log.isDebugEnabled()) {
-                        // Log header and first bytes for debugging chunk assembly issues
-                        in.mark();
-                        byte[] preview = new byte[Math.min(16, in.remaining())];
-                        in.get(preview);
-                        in.reset();
-                        log.debug("Decoding TYPE_NOTIFY as action - channel: {}, streamId: {}, size: {}, timer: {}, firstBytes: {}", header.getChannelId(), header.getStreamId(), header.getSize(), header.getTimer(), Hex.encodeHexString(preview));
-                    }
-                    message = decodeAction(conn.getEncoding(), in, header);
+                    message = decodeNotify(conn.getEncoding(), in, header);
                 }
                 break;
             case TYPE_PING:
@@ -1018,22 +1009,84 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
         input.reset();
         // get / set the parameters if there any
         Object[] params = in.hasRemaining() ? handleParameters(in, invoke, input) : new Object[0];
-        // determine service information
+        // create the pending call for invoke
+        invoke.setCall(new PendingCall(serviceName(action), serviceMethod(action), params));
+        return invoke;
+    }
+
+    /**
+     * Decodes a data message (type 18, or type 15 after its format selector) that is not stream data, such as a call without a result
+     * sent with RTMPConnection.notify. A data message carries a name and values (RTMP 1.0, 7.1.2), there is no transaction id and no
+     * command object: every value after the name is an argument of the call.
+     *
+     * @param encoding
+     *            AMF encoding of the values
+     * @param in
+     *            buffer positioned at the name
+     * @param header
+     *            data header
+     * @return notify
+     */
+    private Notify decodeNotify(Encoding encoding, IoBuffer in, Header header) {
+        // as for a command, the values are AMF0 and on an AMF3 connection each may be switched to AMF3, with reference tables that span
+        // the message body
+        in.mark();
+        byte tmp = in.get();
+        in.reset();
+        Input input;
+        if (encoding == Encoding.AMF3) {
+            input = new org.red5.io.amf3.Input(in);
+        } else {
+            input = new org.red5.io.amf.Input(in);
+        }
+        String action = Deserializer.deserialize(input, String.class);
+        if (action == null) {
+            log.warn("Failed to decode data message name - first byte was 0x{}, header: {}", String.format("%02X", tmp), header);
+            throw new RuntimeException("Data message name was null - expected AMF string but first byte was 0x" + String.format("%02X", tmp));
+        }
+        if (isTrace) {
+            log.trace("Data message: {}", action);
+        }
+        List<Object> params = new ArrayList<>();
+        while (in.hasRemaining()) {
+            params.add(Deserializer.deserialize(input, Object.class));
+        }
+        Notify notify = new Notify();
+        notify.setCall(new Call(serviceName(action), serviceMethod(action), params.toArray()));
+        return notify;
+    }
+
+    /**
+     * Returns the service name of an action, the part before the last dot without an '@' or '|' prefix, which java does not allow in a
+     * name.
+     *
+     * @param action
+     *            action
+     * @return service name or null if the action has none
+     */
+    private static String serviceName(String action) {
         final int dotIndex = action.lastIndexOf('.');
         String serviceName = (dotIndex == -1) ? null : action.substring(0, dotIndex);
-        // pull off the prefixes since java doesn't allow this on a method name
         if (serviceName != null && (serviceName.startsWith("@") || serviceName.startsWith("|"))) {
             serviceName = serviceName.substring(1);
         }
-        String serviceMethod = (dotIndex == -1) ? action : action.substring(dotIndex + 1, action.length());
-        // pull off the prefixes since java doesnt allow this on a method name
+        return serviceName;
+    }
+
+    /**
+     * Returns the method name of an action, the part after the last dot without an '@' or '|' prefix, which java does not allow in a name.
+     *
+     * @param action
+     *            action
+     * @return method name
+     */
+    private static String serviceMethod(String action) {
+        final int dotIndex = action.lastIndexOf('.');
+        String serviceMethod = (dotIndex == -1) ? action : action.substring(dotIndex + 1);
         if (serviceMethod.startsWith("@") || serviceMethod.startsWith("|")) {
             serviceMethod = serviceMethod.substring(1);
         }
-        // create the pending call for invoke
-        PendingCall call = new PendingCall(serviceName, serviceMethod, params);
-        invoke.setCall(call);
-        return invoke;
+        return serviceMethod;
     }
 
     private int readTransactionId(Input input) {
@@ -1042,16 +1095,21 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
     }
 
     /**
-     * Peeks the first AMF0 token of a TYPE_NOTIFY payload to determine whether it carries
-     * stream data (e.g. {@code @setDataFrame}, {@code onMetaData}, {@code onCuePoint},
-     * {@code onFI}) rather than an invoke-style action. Buffer position is restored.
+     * Returns whether a data message carries stream data, which is passed on to the stream as it is, rather than a call. Data messages on
+     * a stream are stream data (onMetaData, onCuePoint, NetStream.send). On stream 0, the NetConnection, they are calls without a result,
+     * except for the data frame commands such as {@code @setDataFrame}, which some publishers (older FFmpeg, librtmp based and mobile
+     * encoders) send on stream 0 before or while the stream is created (issue #440). Buffer position is restored.
      *
-     * Used to recover from publishers that send data-frame notifies on streamId 0 (issue #440).
-     *
-     * @param in buffer positioned at the start of the AMF payload
-     * @return true if the payload looks like stream data and should go through decodeStreamData
+     * @param header
+     *            data header
+     * @param in
+     *            buffer positioned at the start of the AMF payload
+     * @return true if the payload is stream data and should go through decodeStreamData
      */
-    private boolean looksLikeStreamData(IoBuffer in) {
+    private boolean isStreamData(Header header, IoBuffer in) {
+        if (header.getStreamId().doubleValue() != 0.0d) {
+            return true;
+        }
         if (in.remaining() < 4) {
             return false;
         }
@@ -1070,16 +1128,8 @@ public class RTMPProtocolDecoder implements Constants, IEventDecoder {
             if (len <= 0 || len > in.remaining()) {
                 return false;
             }
-            // '@' marks data-frame messages (@setDataFrame); 'on' prefixes the common
-            // metadata notifies (onMetaData, onCuePoint, onFI, onTextData, ...)
-            byte b0 = in.get();
-            if (b0 == '@') {
-                return true;
-            }
-            if (b0 == 'o' && in.remaining() > 0 && in.get() == 'n') {
-                return true;
-            }
-            return false;
+            // '@' marks the data frame commands (@setDataFrame, @clearDataFrame)
+            return in.get() == '@';
         } finally {
             in.reset();
         }

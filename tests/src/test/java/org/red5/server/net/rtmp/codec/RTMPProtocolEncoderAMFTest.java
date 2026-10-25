@@ -20,6 +20,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.red5.client.net.rtmp.codec.RTMPClientProtocolDecoder;
 import org.red5.server.api.IConnection.Encoding;
 import org.red5.server.net.rtmp.RTMPMinaConnection;
 import org.red5.server.net.rtmp.event.FlexMessage;
@@ -362,7 +363,8 @@ public class RTMPProtocolEncoderAMFTest {
     }
 
     /**
-     * A notify (no transaction id) such as onBWDone or a client method call from the server.
+     * A notify (data message, no transaction id) such as onBWDone or a client method call from the server, read back by the client
+     * decoder as a call with all its arguments.
      */
     @Test
     public void testNotify() {
@@ -370,10 +372,31 @@ public class RTMPProtocolEncoderAMFTest {
         notify.setCall(new Call(null, "onBWDone", new Object[] { 1.5d }));
         IoBuffer out = flip(encoder(Encoding.AMF0).encodeNotify(notify));
         assertEquals(amf0String("onBWDone") + amf0Number(1.5d), hex(out));
+        assertClientNotify(Encoding.AMF0, out, "onBWDone", 1.5d);
         notify = new Notify();
         notify.setCall(new Call(null, "onBWDone", new Object[] { 1.5d }));
         out = flip(encoder(Encoding.AMF3).encodeNotify(notify));
         assertEquals("11" + amf3String("onBWDone") + "1105" + double64(1.5d), hex(out));
+        assertClientNotify(Encoding.AMF3, out, "onBWDone", 1.5d);
+        // a server-side call of a client method through ServiceUtils.notifyOnConnection
+        for (Encoding encoding : Encoding.values()) {
+            notify = new Notify();
+            notify.setCall(new Call(null, "receiveMessage", new Object[] { "from", "text", DATE }));
+            out = flip(encoder(encoding).encodeNotify(notify));
+            assertClientNotify(encoding, out, "receiveMessage", "from", "text", DATE);
+        }
+    }
+
+    private static void assertClientNotify(Encoding encoding, IoBuffer in, String method, Object... args) {
+        Header header = new Header();
+        header.setDataType(Constants.TYPE_NOTIFY);
+        header.setStreamId(0);
+        IRTMPEvent event = new RTMPClientProtocolDecoder().decodeMessage(connection(encoding), header, in);
+        assertFalse("the whole body must be read", in.hasRemaining());
+        assertFalse(encoding.toString(), event instanceof Invoke);
+        Notify decoded = (Notify) event;
+        assertEquals(method, decoded.getCall().getServiceMethodName());
+        assertArrayEquals(encoding.toString(), args, decoded.getCall().getArguments());
     }
 
     /**
