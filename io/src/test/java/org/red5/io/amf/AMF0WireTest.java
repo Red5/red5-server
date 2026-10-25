@@ -16,6 +16,8 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -422,6 +424,35 @@ public class AMF0WireTest {
         byte[] dateBytes = wire().u8(AMF.TYPE_DATE).dbl(0).u16(0).toArray();
         byte[] expected = wire().u8(AMF.TYPE_ARRAY).u32(4).raw(dateBytes).raw(dateBytes).u8(AMF.TYPE_OBJECT).objectEnd().reference(1).toArray();
         assertBytes(expected, serialize(new Object[] { date, date, shared, shared }));
+    }
+
+    /**
+     * Spec 2.9: a reference is a U16 index. Indices up to 65535 are referenced; an object whose index does not fit is written inline
+     * again and takes a new index, as a decoder gives every inline object one.
+     */
+    @Test
+    public void encodeReferencesBeyondU16() {
+        // the array takes index 0, objects.get(k) index k + 1, so objects.get(65535) is the first object with index 65536
+        List<Object> objects = new ArrayList<>();
+        for (int i = 0; i < 65536; i++) {
+            ObjectMap<String, Object> object = new ObjectMap<>();
+            object.put("i", (double) i);
+            objects.add(object);
+        }
+        objects.add(objects.get(0));
+        objects.add(objects.get(40000));
+        objects.add(objects.get(65535));
+        objects.add(objects.get(65535));
+        byte[] encoded = serialize(objects);
+        byte[] last = wire().u8(AMF.TYPE_OBJECT).utf8("i").number(65535).objectEnd().toArray();
+        byte[] tail = wire().raw(last).reference(1).reference(40001).raw(last).raw(last).toArray();
+        assertBytes(tail, Arrays.copyOfRange(encoded, encoded.length - tail.length, encoded.length));
+        List<?> decoded = (List<?>) decode(encoded);
+        assertEquals(65540, decoded.size());
+        assertSame(decoded.get(0), decoded.get(65536));
+        assertSame(decoded.get(40000), decoded.get(65537));
+        assertEquals(decoded.get(65535), decoded.get(65538));
+        assertEquals(decoded.get(65535), decoded.get(65539));
     }
 
     /**

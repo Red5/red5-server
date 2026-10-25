@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -494,6 +495,29 @@ public class AMF3WireTest {
         byte[] data = encode(new Vector<>(Arrays.asList(4294967295L)));
         assertEquals("11 0E 03 00 FF FF FF FF", hex(data));
         assertEquals(new Vector<>(Arrays.asList(4294967295L)), decode(amf0Context(IoBuffer.wrap(data))));
+    }
+
+    /**
+     * Object references are U29O-ref values: 28 bits of index. An index above 32767 must still be written as that index.
+     */
+    @Test
+    public void testObjectReferenceAbove32767() {
+        // the outer list takes index 0, inner.get(k) index k + 1, so inner.get(32768) has index 32769
+        List<Object> inner = new ArrayList<>();
+        for (int i = 0; i < 32769; i++) {
+            inner.add(new ArrayList<>(Arrays.asList(i)));
+        }
+        List<Object> outer = new ArrayList<>(inner);
+        outer.add(inner.get(0));
+        outer.add(inner.get(32768));
+        byte[] data = encode(outer);
+        // 0x09 then U29 1 << 1, and 0x09 then U29 32769 << 1 = 65538 in three bytes
+        byte[] tail = Arrays.copyOfRange(data, data.length - 6, data.length);
+        assertEquals("09 02 09 84 80 02", hex(tail));
+        List<?> decoded = (List<?>) decode(amf0Context(IoBuffer.wrap(data)));
+        assertEquals(32771, decoded.size());
+        assertSame(decoded.get(0), decoded.get(32769));
+        assertSame(decoded.get(32768), decoded.get(32770));
     }
 
     @Test

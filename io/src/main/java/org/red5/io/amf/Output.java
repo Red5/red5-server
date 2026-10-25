@@ -99,6 +99,11 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     }
 
     /**
+     * Largest index an AMF0 reference can hold, its index is a U16.
+     */
+    private static final int MAX_REFERENCE = 0xFFFF;
+
+    /**
      * Output buffer
      */
     protected IoBuffer buf;
@@ -121,13 +126,14 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     }
 
     /**
-     * <p>checkWriteReference.</p>
+     * Writes a reference to an object written before, if its index fits the U16 of the reference type. An object with a larger index is
+     * not referenced: the caller writes it inline again and stores it under the next index, as a decoder gives every inline object one.
      *
      * @param obj a {@link java.lang.Object} object
-     * @return a boolean
+     * @return true if a reference was written, false if the object must be written inline
      */
     protected boolean checkWriteReference(Object obj) {
-        if (hasReference(obj)) {
+        if (hasReference(obj) && getReferenceId(obj) <= MAX_REFERENCE) {
             writeReference(obj);
             return true;
         }
@@ -304,7 +310,8 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     public void writeReference(Object obj) {
         log.debug("Write reference");
         buf.put(AMF.TYPE_REFERENCE);
-        buf.putShort(getReferenceId(obj));
+        // U16 index
+        buf.putShort((short) getReferenceId(obj));
     }
 
     /** {@inheritDoc} */

@@ -54,12 +54,12 @@ public class BaseOutput {
     /**
      * References map
      */
-    protected Map<IdentityWrapper, Short> refMap;
+    protected Map<IdentityWrapper, Integer> refMap;
 
     /**
-     * Reference id
+     * Reference id, the index the next stored object takes
      */
-    protected short refId;
+    protected int refId;
 
     /**
      * BaseOutput Constructor
@@ -75,7 +75,7 @@ public class BaseOutput {
      *            Object to store
      */
     protected void storeReference(Object obj) {
-        refMap.put(new IdentityWrapper(obj), Short.valueOf(refId++));
+        refMap.put(new IdentityWrapper(obj), Integer.valueOf(refId++));
     }
 
     /**
@@ -102,10 +102,10 @@ public class BaseOutput {
      *
      * @param obj
      *            Object
-     * @return short Reference id
+     * @return int Reference id
      */
-    protected short getReferenceId(Object obj) {
-        return refMap.get(new IdentityWrapper(obj)).shortValue();
+    protected int getReferenceId(Object obj) {
+        return refMap.get(new IdentityWrapper(obj)).intValue();
     }
 
 }
