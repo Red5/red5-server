@@ -117,7 +117,6 @@ public class Serializer {
                 // look at the type counts
                 if (nans > 0) {
                     // if we have non-number types, use object
-                    ((org.red5.io.amf3.Output) out).enforceAMF3();
                     out.writeVectorObject((Vector<Object>) obj);
                 } else if (dubs == 0 && longs == 0) {
                     // no doubles or longs
@@ -127,7 +126,6 @@ public class Serializer {
                     out.writeVectorUInt((Vector<Long>) obj);
                 } else {
                     // handle any other types of numbers
-                    ((org.red5.io.amf3.Output) out).enforceAMF3();
                     out.writeVectorNumber((Vector<Double>) obj);
                 }
             } else if (obj instanceof List<?>) {
