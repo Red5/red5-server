@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.junit.Test;
@@ -44,6 +45,49 @@ public class EncodeDepthTest {
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage(), e.getMessage().contains("nesting depth"));
         }
+    }
+
+    /**
+     * A vector the AMF0 encoder switches to AMF3 continues the depth of the AMF0 values around it, as the decoder counts it: AMF0 lists with
+     * vectors inside encode and decode up to the limit in total and fail beyond it.
+     */
+    @Test
+    public void testSwitchedVectorsContinueTheAmf0Depth() {
+        int amf0Levels = BaseInput.MAX_DEPTH / 2;
+        int vectorLevels = BaseInput.MAX_DEPTH - amf0Levels;
+        IoBuffer buf = IoBuffer.allocate(4096).setAutoExpand(true);
+        Serializer.serialize(new Output(buf), nestedWithVectors(amf0Levels, vectorLevels));
+        buf.flip();
+        Object decoded = Deserializer.deserialize(new Input(buf), Object.class);
+        int depth = 0;
+        while (decoded instanceof List<?> list && !list.isEmpty()) {
+            decoded = list.get(0);
+            depth++;
+        }
+        assertEquals(BaseInput.MAX_DEPTH - 1, depth);
+        try {
+            Serializer.serialize(new Output(IoBuffer.allocate(4096).setAutoExpand(true)), nestedWithVectors(amf0Levels, vectorLevels + 1));
+            fail("nesting beyond the decoder's limit must not be encoded");
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage(), e.getMessage().contains("nesting depth"));
+        }
+    }
+
+    private static List<Object> nestedWithVectors(int amf0Levels, int vectorLevels) {
+        Vector<Object> vector = new Vector<>();
+        for (int i = 1; i < vectorLevels; i++) {
+            Vector<Object> outer = new Vector<>();
+            outer.add(vector);
+            vector = outer;
+        }
+        List<Object> list = new ArrayList<>();
+        list.add(vector);
+        for (int i = 1; i < amf0Levels; i++) {
+            List<Object> outer = new ArrayList<>();
+            outer.add(list);
+            list = outer;
+        }
+        return list;
     }
 
     /**

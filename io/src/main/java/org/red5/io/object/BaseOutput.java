@@ -132,4 +132,15 @@ public class BaseOutput {
         depth--;
     }
 
+    /**
+     * Makes this output continue the nesting depth of another output whose current value it writes, such as the AMF3 value the AMF0 encoder
+     * writes after an avmplus-object marker, so the depth limit applies as if one output wrote both.
+     *
+     * @param outer
+     *            output that entered the level of the value
+     */
+    protected void continueNesting(BaseOutput outer) {
+        depth = outer.depth;
+    }
+
 }

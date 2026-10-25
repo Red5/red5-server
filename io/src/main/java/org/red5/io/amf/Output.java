@@ -109,6 +109,11 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     protected IoBuffer buf;
 
     /**
+     * Writes the values switched to AMF3, created when the first one is written
+     */
+    private org.red5.io.amf3.Output amf3Output;
+
+    /**
      * Creates output with given byte buffer
      *
      * @param buf
@@ -496,34 +501,69 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
         buf.put(encoded);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * AMF0 has no byte array type, the byte array is written as an AMF3 value after the avmplus-object marker.
+     */
     @Override
     public void writeByteArray(ByteArray array) {
-        throw new RuntimeException("ByteArray objects not supported with AMF0");
+        switchedOutput().writeByteArray(array);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * AMF0 has no vector type, the vector is written as an AMF3 value after the avmplus-object marker.
+     */
     @Override
     public void writeVectorInt(Vector<Integer> vector) {
-        throw new RuntimeException("Vector objects not supported with AMF0");
+        switchedOutput().writeVectorInt(vector);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * AMF0 has no vector type, the vector is written as an AMF3 value after the avmplus-object marker.
+     */
     @Override
     public void writeVectorUInt(Vector<Long> vector) {
-        throw new RuntimeException("Vector objects not supported with AMF0");
+        switchedOutput().writeVectorUInt(vector);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * AMF0 has no vector type, the vector is written as an AMF3 value after the avmplus-object marker.
+     */
     @Override
     public void writeVectorNumber(Vector<Double> vector) {
-        throw new RuntimeException("Vector objects not supported with AMF0");
+        switchedOutput().writeVectorNumber(vector);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     *
+     * AMF0 has no vector type, the vector is written as an AMF3 value after the avmplus-object marker.
+     */
     @Override
     public void writeVectorObject(Vector<Object> vector) {
-        throw new RuntimeException("Vector objects not supported with AMF0");
+        switchedOutput().writeVectorObject(vector);
+    }
+
+    /**
+     * Returns the output for the values AMF0 cannot hold, which are written as AMF3 values each after an avmplus-object marker (AMF0 2.17,
+     * 3.1). Its string, object and traits reference tables span the body this output writes, as the AMF0 input and other decoders keep
+     * them for the switched values of a body; a switched value takes no AMF0 reference index.
+     *
+     * @return AMF3 output in its AMF0 context, at the nesting depth of this output
+     */
+    private org.red5.io.amf3.Output switchedOutput() {
+        if (amf3Output == null) {
+            amf3Output = new org.red5.io.amf3.Output(buf);
+        }
+        amf3Output.continueNesting(this);
+        return amf3Output;
     }
 
     /**
@@ -600,10 +640,13 @@ public class Output extends BaseOutput implements org.red5.io.object.Output {
     }
 
     /**
-     * <p>reset.</p>
+     * Clears the reference tables, also the AMF3 tables of switched values, to start a new body.
      */
     public void reset() {
         clearReferences();
+        if (amf3Output != null) {
+            amf3Output.reset();
+        }
     }
 
     /**

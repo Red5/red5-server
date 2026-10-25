@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.Vector;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Hex;
@@ -600,6 +601,59 @@ public class AMF0WireTest {
         Document doc = XMLUtils.stringToDoc("<a><b>text</b></a>");
         String xml = XMLUtils.docToString(doc);
         assertBytes(wire().u8(AMF.TYPE_XML).utf8Long(xml).toArray(), serialize(doc));
+    }
+
+    /**
+     * Spec 2.17 and 3.1: AMF0 has no vector type, a vector is written as the avmplus-object marker followed by the AMF3 vector (AMF3 3.15:
+     * U29V length, fixed flag, for a vector of object the type name, then the elements).
+     */
+    @Test
+    public void encodeVectorSwitchesToAMF3() {
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x05, 0x00).u32(1).u32(0xFFFFFFFEL).toArray(), serialize(new Vector<>(List.of(1, -2))));
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0E, 0x05, 0x00).u32(1).u32(0xFFFFFFFFL).toArray(), serialize(new Vector<>(List.of(1L, 4294967295L))));
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0F, 0x03, 0x00).dbl(1.5).toArray(), serialize(new Vector<>(List.of(1.5d))));
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x10, 0x05, 0x00, 0x01, 0x06, 0x03, 's', 0x05).dbl(1.5).toArray(), serialize(new Vector<Object>(List.of("s", 1.5d))));
+    }
+
+    /**
+     * The switched vectors of a body share the AMF3 reference tables, so a vector written again is an AMF3 object reference; they take no
+     * AMF0 reference index, so the AMF0 object after them is index 1. The plain AMF0 input reads the body back.
+     */
+    @Test
+    public void encodeVectorReferencesSpanTheBody() {
+        Vector<Integer> vector = new Vector<>(List.of(7));
+        ObjectMap<String, Object> shared = new ObjectMap<>();
+        ObjectMap<String, Object> object = new ObjectMap<>();
+        object.put("v", vector);
+        object.put("w", vector);
+        object.put("o", shared);
+        object.put("r", shared);
+        byte[] expected = wire().u8(AMF.TYPE_OBJECT) //
+                .utf8("v").u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x03, 0x00).u32(7) //
+                .utf8("w").u8(AMF.TYPE_AMF3_OBJECT, 0x0D, 0x00) //
+                .utf8("o").u8(AMF.TYPE_OBJECT).objectEnd() //
+                .utf8("r").reference(1) //
+                .objectEnd().toArray();
+        byte[] encoded = serialize(object);
+        assertBytes(expected, encoded);
+        Map<?, ?> decoded = (Map<?, ?>) decode(encoded);
+        assertTrue(decoded.get("v") instanceof Vector);
+        assertEquals(vector, decoded.get("v"));
+        assertSame(decoded.get("v"), decoded.get("w"));
+        assertSame(decoded.get("o"), decoded.get("r"));
+    }
+
+    /**
+     * Spec 3.1: a ByteArray, which AMF0 cannot hold either, is written as the avmplus-object marker followed by the AMF3 byte array.
+     */
+    @Test
+    public void encodeByteArraySwitchesToAMF3() {
+        ByteArray bytes = new ByteArray();
+        bytes.writeBytes(new byte[] { 0x7F, (byte) 0x80 });
+        byte[] encoded = serialize(bytes);
+        assertBytes(wire().u8(AMF.TYPE_AMF3_OBJECT, 0x0C, 0x05, 0x7F, 0x80).toArray(), encoded);
+        ByteArray decoded = (ByteArray) decode(encoded);
+        assertEquals(2, decoded.length());
     }
 
     @Test
