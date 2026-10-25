@@ -12,13 +12,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.amf.Input;
@@ -104,6 +111,49 @@ public class FilePersistence extends RamPersistence {
      * Whether the persistence volume is currently below the free space minimum, so the condition is only logged on change.
      */
     private final AtomicBoolean lowSpace = new AtomicBoolean();
+
+    /**
+     * Budget of persisted bytes applied to new instances; 0 disables the budget.
+     */
+    private static volatile long defaultMaxBytes;
+
+    /**
+     * Budget of the bytes of the files under this store's persistence root; 0 disables the budget.
+     */
+    private volatile long maxBytes = defaultMaxBytes;
+
+    /**
+     * Whether a write was skipped for the budget, so the condition is only logged on change.
+     */
+    private final AtomicBoolean overBudget = new AtomicBoolean();
+
+    /**
+     * Whether a write was skipped for the budget during the current flush.
+     */
+    private boolean budgetSkipped;
+
+    /**
+     * Persisted bytes by canonical persistence root. Shared objects of room scopes get stores of their own on the root of their
+     * application, so the budget is accounted per root rather than per store.
+     */
+    private static final ConcurrentMap<String, DiskUsage> diskUsage = new ConcurrentHashMap<>();
+
+    /**
+     * Persisted bytes of this store's persistence root, resolved on first use. Guarded by this store.
+     */
+    private DiskUsage usage;
+
+    /**
+     * Outcome of a write
+     */
+    private enum Write {
+        /** written, or nothing to write */
+        WRITTEN,
+        /** skipped for low space or the budget, retried on the next flush */
+        SKIPPED,
+        /** failed */
+        FAILED
+    }
 
     /**
      * Create file persistence object from given resource pattern resolver
@@ -212,6 +262,10 @@ public class FilePersistence extends RamPersistence {
             log.debug("Root dir: {} path: {}", rootDir, path);
             // set the path
             this.path = path;
+            synchronized (this) {
+                // the root may have changed
+                usage = null;
+            }
         } catch (IOException err) {
             log.error("I/O exception thrown when setting file path to {}", path, err);
             throw new RuntimeException(err);
@@ -277,6 +331,58 @@ public class FilePersistence extends RamPersistence {
      */
     public void setMinFreeBytes(long minFreeBytes) {
         this.minFreeBytes = minFreeBytes;
+    }
+
+    /**
+     * Sets the budget of persisted bytes used by instances created after this call; 0 disables the budget. Stores are created
+     * reflectively per scope, so this is the configuration hook (so.persistence.max.bytes).
+     *
+     * @param maxBytes
+     *            budget in bytes
+     */
+    public static void setDefaultMaxBytes(long maxBytes) {
+        defaultMaxBytes = maxBytes;
+    }
+
+    /**
+     * Sets the budget of the bytes of the files under this store's persistence root, which is per application; 0 disables the budget. The
+     * files already present are counted the first time the budget is checked. A write that would take the total beyond the budget is
+     * skipped and the object stays queued for the next flush, so it is written once removed or smaller objects make room.
+     *
+     * @param maxBytes
+     *            budget in bytes
+     */
+    public void setMaxBytes(long maxBytes) {
+        this.maxBytes = maxBytes;
+    }
+
+    /**
+     * Returns the total size of the persisted files under this store's persistence root counted against the budget; 0 until the budget
+     * has been checked once.
+     *
+     * @return persisted bytes
+     */
+    public synchronized long getPersistedBytes() {
+        return getUsage().total();
+    }
+
+    /**
+     * Returns the usage of this store's persistence root, shared with the other stores on that root. Called while holding this store's
+     * lock.
+     *
+     * @return disk usage
+     */
+    private DiskUsage getUsage() {
+        if (usage == null) {
+            File root;
+            try {
+                root = getPersistenceRoot();
+            } catch (IOException e) {
+                root = new File(rootDir, path);
+            }
+            usage = diskUsage.computeIfAbsent(canonicalPath(root), key -> new DiskUsage(new File(key)));
+        }
+        return usage;
     }
 
     /**
@@ -530,20 +636,33 @@ public class FilePersistence extends RamPersistence {
      *            Persistable object
      * @return a boolean
      */
+    protected synchronized boolean saveObject(IPersistable object) {
+        return write(object) == Write.WRITTEN;
+    }
+
+    /**
+     * Writes a persistable object to its file. Called while holding this store's lock.
+     *
+     * @param object
+     *            Persistable object
+     * @return whether the object was written, skipped for space or budget, or failed
+     */
     @SuppressWarnings("null")
-    protected boolean saveObject(IPersistable object) {
+    private Write write(IPersistable object) {
         log.debug("saveObject - object: {}", object);
         if (!hasValidNameAndPath(object)) {
             log.warn("Refusing to persist object with invalid name or path: {} / {}", object.getName(), object.getPath());
-            return false;
+            return Write.FAILED;
         }
-        // if it's a persistent SharedObject and it's empty don't write it to disk. APPSERVER-364
+        boolean empty = false;
         if (object instanceof SharedObject) {
             SharedObject soRef = (SharedObject) object;
-            if (soRef.getAttributes().size() == 0) {
-                // return true to trick the server into thinking everything is just fine :P
-                return true;
+            if (soRef.isClosed()) {
+                // a closed shared object has dropped its attributes, the stored state is kept as it is
+                return Write.WRITTEN;
             }
+            // an empty shared object is not written to disk. APPSERVER-364
+            empty = soRef.getAttributes().isEmpty();
         }
         String path = getObjectFilepath(object, true);
         log.trace("Path: {}", path);
@@ -575,7 +694,7 @@ public class FilePersistence extends RamPersistence {
             log.debug("Resulting absolute path: {}", dir.getAbsolutePath());
         } catch (IOException err) {
             log.error("Could not create resource file for path {}", path, err);
-            return false;
+            return Write.FAILED;
         }
         String filename = getObjectFilename(object);
         log.debug("File name: {}", filename);
@@ -585,21 +704,29 @@ public class FilePersistence extends RamPersistence {
             log.debug("New file name: {}", filename);
         }
         File file = new File(dir, filename);
-        // containment and free space are checked before any directory is created
+        // containment, free space and the budget are checked before any directory is created
         if (!isWithinPersistenceRoot(file)) {
             log.warn("Refusing to persist object {} outside the persistence root: {}", object.getName(), file);
-            return false;
+            return Write.FAILED;
+        }
+        if (empty) {
+            // the file of an earlier state is removed, otherwise cleared attributes would come back on the next load
+            if (file.isFile()) {
+                String key = canonicalPath(file);
+                if (!file.delete()) {
+                    log.warn("Could not remove the file of empty object {}: {}", object.getName(), file);
+                    return Write.FAILED;
+                }
+                releaseUsage(key);
+                checkRemoveEmptyDirectories(getObjectFilename(object));
+                log.debug("Removed the file of empty object {}", object.getName());
+            }
+            return Write.WRITTEN;
         }
         if (!hasFreeSpace(dir)) {
-            return false;
+            return Write.SKIPPED;
         }
-        if (!dir.isDirectory() && !dir.mkdirs()) {
-            log.error("Could not create directory {}", dir.getAbsolutePath());
-            return false;
-        }
-        boolean result = true;
-        //Resource resFile = resources.getResource(filename);
-        //log.debug("Resource (file) check #1 - file name: {} exists: {}", resPath.getFilename(), exists);
+        Write result = Write.WRITTEN;
         IoBuffer buf = null;
         try {
             int initialSize = 8192;
@@ -613,24 +740,191 @@ public class FilePersistence extends RamPersistence {
             out.writeString(object.getClass().getName());
             object.serialize(out);
             buf.flip();
-
-            FileOutputStream output = new FileOutputStream(file.getAbsolutePath());
-            ServletUtils.copy(buf.asInputStream(), output);
-            output.close();
+            // the encoded size is what the file will take; it is reserved against the budget before anything is written
+            final long size = buf.remaining();
+            if (!reserve(file, size)) {
+                return Write.SKIPPED;
+            }
+            if (!dir.isDirectory() && !dir.mkdirs()) {
+                log.error("Could not create directory {}", dir.getAbsolutePath());
+                getUsage().update(canonicalPath(file), file.isFile() ? file.length() : 0L);
+                return Write.FAILED;
+            }
+            try (FileOutputStream output = new FileOutputStream(file.getAbsolutePath())) {
+                ServletUtils.copy(buf.asInputStream(), output);
+            }
             log.debug("Stored persistent object {} at {}", object, filename);
         } catch (IOException e) {
             log.error("Could not create / write file {}", filename, e);
             log.warn("Exception {}", e);
-            result = false;
+            // the file may have been left as it was, or truncated
+            getUsage().update(canonicalPath(file), file.isFile() ? file.length() : 0L);
+            result = Write.FAILED;
         } finally {
             if (buf != null) {
                 buf.free();
                 buf = null;
             }
-            file = null;
-            dir = null;
         }
         return result;
+    }
+
+    /**
+     * Reserves the size a file is about to take against the budget of its persistence root. Skips are logged once when the condition
+     * starts; it ends when a flush has written everything it could without a budget skip. Called while holding this store's lock.
+     *
+     * @param file
+     *            target file, which may exist already
+     * @param size
+     *            bytes to write
+     * @return true if the write fits or no budget is configured
+     */
+    private boolean reserve(File file, long size) {
+        final long max = maxBytes;
+        final DiskUsage disk = getUsage();
+        if (disk.reserve(canonicalPath(file), size, max, extension)) {
+            return true;
+        }
+        budgetSkipped = true;
+        if (overBudget.compareAndSet(false, true)) {
+            log.error("Persistent objects under {} take {} bytes, writing {} more would exceed the budget of {} bytes; objects are not written until others are removed or shrink", disk.root, disk.total(), size, max);
+        }
+        return false;
+    }
+
+    /**
+     * Removes a deleted file from the usage of its persistence root.
+     *
+     * @param key
+     *            canonical path of the file, resolved before it was deleted
+     */
+    private synchronized void releaseUsage(String key) {
+        getUsage().release(key);
+    }
+
+    /**
+     * Sizes of the persisted files under one persistence root, shared by the stores on that root. Files are only tracked once a budget has
+     * been checked, which first counts the files already present.
+     */
+    private static final class DiskUsage {
+
+        private final File root;
+
+        private final Map<String, Long> files = new HashMap<>();
+
+        private long total;
+
+        private boolean scanned;
+
+        DiskUsage(File root) {
+            this.root = root;
+        }
+
+        /**
+         * Records the size a file is about to take, unless that would take the total beyond the maximum.
+         *
+         * @param key
+         *            canonical path of the file
+         * @param size
+         *            its new size
+         * @param max
+         *            maximum total, 0 for none
+         * @param extension
+         *            extension of persisted files, for the first count
+         * @return true if recorded, false if the maximum would be exceeded
+         */
+        synchronized boolean reserve(String key, long size, long max, String extension) {
+            if (max > 0 && !scanned) {
+                scan(extension);
+            }
+            if (!scanned) {
+                return true;
+            }
+            Long previous = files.get(key);
+            long next = total - (previous != null ? previous : 0L) + size;
+            if (max > 0 && next > max) {
+                return false;
+            }
+            files.put(key, size);
+            total = next;
+            return true;
+        }
+
+        /**
+         * Replaces the recorded size of a file, as after a failed write.
+         *
+         * @param key
+         *            canonical path of the file
+         * @param size
+         *            its actual size
+         */
+        synchronized void update(String key, long size) {
+            if (scanned) {
+                Long previous = files.put(key, size);
+                total += size - (previous != null ? previous : 0L);
+            }
+        }
+
+        /**
+         * Removes a deleted file.
+         *
+         * @param key
+         *            canonical path of the file
+         */
+        synchronized void release(String key) {
+            if (scanned) {
+                Long previous = files.remove(key);
+                if (previous != null) {
+                    total -= previous;
+                }
+            }
+        }
+
+        synchronized long total() {
+            return total;
+        }
+
+        /**
+         * Counts the files already under the root.
+         *
+         * @param extension
+         *            extension of persisted files
+         */
+        private void scan(String extension) {
+            scanned = true;
+            if (!root.isDirectory()) {
+                return;
+            }
+            // links are not followed, files outside the root are not counted
+            try (Stream<Path> paths = Files.walk(root.toPath())) {
+                paths.filter(p -> Files.isRegularFile(p) && p.getFileName().toString().endsWith(extension)).forEach(p -> {
+                    File existing = p.toFile();
+                    long length = existing.length();
+                    if (files.putIfAbsent(canonicalPath(existing), length) == null) {
+                        total += length;
+                    }
+                });
+                LoggerFactory.getLogger(FilePersistence.class).debug("Persisted objects under {} take {} bytes", root, total);
+            } catch (IOException | UncheckedIOException e) {
+                LoggerFactory.getLogger(FilePersistence.class).warn("Could not count the persisted objects under {}", root, e);
+            }
+        }
+
+    }
+
+    /**
+     * Returns the canonical path of a file, or its absolute path if it cannot be resolved.
+     *
+     * @param file
+     *            file
+     * @return path used as tracking key
+     */
+    private static String canonicalPath(File file) {
+        try {
+            return file.getCanonicalPath();
+        } catch (IOException e) {
+            return file.getAbsolutePath();
+        }
     }
 
     /**
@@ -765,15 +1059,24 @@ public class FilePersistence extends RamPersistence {
 
     /** {@inheritDoc} */
     @Override
-    public boolean remove(String name) {
+    public synchronized boolean remove(String name) {
         if (!isValidObjectName(name)) {
             log.warn("Refusing to remove object with invalid name: {}", name);
             return false;
         }
+        IPersistable removed = objects.get(name);
         super.remove(name);
+        if (removed != null && pending.remove(removed)) {
+            // a queued write would bring the file back
+            queue.remove(removed);
+        }
         boolean result = true;
         String filename = path + '/' + name + extension;
         Resource resFile = resources.getResource(filename);
+        if (!resFile.exists()) {
+            // resolved against the root directory, as when the object was written or loaded
+            resFile = resources.getResource("file://" + rootDir + '/' + filename);
+        }
         if (resFile.exists()) {
             try {
                 File target = resFile.getFile();
@@ -781,8 +1084,10 @@ public class FilePersistence extends RamPersistence {
                     log.warn("Refusing to remove file outside the persistence root: {}", target);
                     return false;
                 }
+                String key = canonicalPath(target);
                 result = target.delete();
                 if (result) {
+                    releaseUsage(key);
                     checkRemoveEmptyDirectories(filename);
                 }
             } catch (IOException err) {
@@ -812,9 +1117,35 @@ public class FilePersistence extends RamPersistence {
         super.notifyClose();
     }
 
-    private void persist() {
+    /**
+     * Writes an object's pending changes, then drops it from memory so the next {@link #load(String)} reads it from its file. An object
+     * whose changes are skipped for low space or the budget, or fail, stays loaded and queued.
+     *
+     * @param object
+     *            the object to evict
+     * @return true if the object was dropped from memory
+     */
+    @Override
+    public synchronized boolean evict(IPersistable object) {
+        // release before writing so a change made during the write queues the object again
+        if (pending.remove(object)) {
+            queue.remove(object);
+            if (write(object) != Write.WRITTEN) {
+                if (pending.add(object)) {
+                    queue.add(object);
+                }
+                return false;
+            }
+        }
+        objects.remove(getObjectId(object), object);
+        log.debug("Evicted persistent object {}", object);
+        return true;
+    }
+
+    private synchronized void persist() {
+        budgetSkipped = false;
         IPersistable persistable = null;
-        List<IPersistable> failed = null;
+        List<IPersistable> skipped = null;
         while (!queue.isEmpty()) {
             try {
                 persistable = queue.poll();
@@ -823,30 +1154,32 @@ public class FilePersistence extends RamPersistence {
                 }
                 // release before writing so a change made during the write queues the object again
                 pending.remove(persistable);
-                if (!saveObject(persistable)) {
-                    if (lowSpace.get()) {
-                        // a write skipped for low space is retried on the next flush, not within this one
-                        log.debug("Object persist skipped for: {}", persistable);
-                        if (failed == null) {
-                            failed = new ArrayList<>();
-                        }
-                        failed.add(persistable);
-                    } else {
-                        // other failures are not retried until the object changes again, so a permanent failure is not logged every flush
-                        log.warn("Object persist failed for: {}", persistable);
+                Write result = write(persistable);
+                if (result == Write.SKIPPED) {
+                    // a write skipped for low space or the budget is retried on the next flush, not within this one
+                    log.debug("Object persist skipped for: {}", persistable);
+                    if (skipped == null) {
+                        skipped = new ArrayList<>();
                     }
+                    skipped.add(persistable);
+                } else if (result == Write.FAILED) {
+                    // other failures are not retried until the object changes again, so a permanent failure is not logged every flush
+                    log.warn("Object persist failed for: {}", persistable);
                 }
             } catch (Throwable e) {
                 log.error("Error while saving {} in {}. {}", new Object[] { persistable, this, e });
             }
         }
-        if (failed != null) {
-            for (IPersistable object : failed) {
+        if (skipped != null) {
+            for (IPersistable object : skipped) {
                 // objects removed from the store meanwhile are not written again
                 if (objects.get(getObjectId(object)) == object && pending.add(object)) {
                     queue.add(object);
                 }
             }
+        }
+        if (!budgetSkipped && overBudget.compareAndSet(true, false)) {
+            log.info("Persistent objects under {} fit the budget of {} bytes again, resuming writes", rootDir, maxBytes);
         }
     }
 

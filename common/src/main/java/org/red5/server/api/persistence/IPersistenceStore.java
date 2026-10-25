@@ -115,6 +115,19 @@ public interface IPersistenceStore {
     public Collection<IPersistable> getObjects();
 
     /**
+     * Drops a loaded object from memory so that a later {@link #load(String)} reads it back from durable storage. Pending changes of the
+     * object are written first; if they cannot be written the object stays loaded. Stores that only keep objects in memory cannot evict
+     * without losing data and return false.
+     *
+     * @param obj
+     *            the object to evict
+     * @return true if the object was written and dropped from memory, false if it stays loaded
+     */
+    default boolean evict(IPersistable obj) {
+        return false;
+    }
+
+    /**
      * Notify store that it's being closed. This allows the store to write any pending objects to disk.
      */
     public void notifyClose();

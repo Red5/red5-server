@@ -181,6 +181,62 @@ public class SharedObjectMembershipTest {
     }
 
     @Test
+    public void testClientValueSizeLimit() {
+        IEventListener client = new Listener();
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_CONNECT, null, null));
+        // unlimited by default
+        String large = "x".repeat(100_000);
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "large", large));
+        assertEquals(large, so.getAttribute("large"));
+        // an AMF0 string is a marker, a 16 bit length and its bytes: 10 characters encode to 13 bytes
+        so.setMaxValueBytes(13);
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "fits", "0123456789"), event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "over", "0123456789A"));
+        assertEquals("0123456789", so.getAttribute("fits"));
+        assertNull(so.getAttribute("over"));
+        // an existing attribute cannot grow beyond the limit either
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "fits", "0123456789A"));
+        assertEquals("0123456789", so.getAttribute("fits"));
+        // server-side updates are not limited
+        so.setAttribute("server", "0123456789A");
+        assertEquals("0123456789A", so.getAttribute("server"));
+    }
+
+    @Test
+    public void testPerObjectBudget() {
+        // an attribute is accounted as its name plus its AMF0 encoded value: "a" and 10 characters take 1 + 13 bytes
+        so.setMaxBytesPerObject(28);
+        SharedObject data = (SharedObject) so.getStatistics();
+        IEventListener client = new Listener();
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_CONNECT, null, null), event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "a", "0123456789"), event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "b", "0123456789"), event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "c", "0"));
+        assertEquals(28L, data.getAttributeBytes());
+        assertNull("the budget is exhausted", so.getAttribute("c"));
+        // shrinking an attribute is allowed and frees budget: "a" with 5 characters takes 9 bytes
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "a", "01234"));
+        assertEquals(23L, data.getAttributeBytes());
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "c", "0"));
+        assertEquals("0", so.getAttribute("c"));
+        assertEquals(28L, data.getAttributeBytes());
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "d", "0"));
+        assertNull(so.getAttribute("d"));
+        // deleting is always allowed and frees budget
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_DELETE_ATTRIBUTE, "b", null));
+        assertEquals(14L, data.getAttributeBytes());
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "d", "0123456789"));
+        assertEquals("0123456789", so.getAttribute("d"));
+        assertEquals(28L, data.getAttributeBytes());
+        // server-side updates count toward the budget but are not rejected
+        so.setAttribute("server", "0123456789");
+        assertEquals(47L, data.getAttributeBytes());
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "e", "0"));
+        assertNull(so.getAttribute("e"));
+        // clearing frees everything
+        so.removeAttributes();
+        assertEquals(0L, data.getAttributeBytes());
+        dispatch(client, event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "e", "0"));
+        assertEquals("0", so.getAttribute("e"));
+    }
+
+    @Test
     public void testServerSideEventsNeedNoMembership() {
         SharedObjectMessage msg = new SharedObjectMessage("members", 0, false);
         msg.addEvent(event(ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE, "k", "server"));

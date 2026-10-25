@@ -570,6 +570,48 @@ public abstract class BaseConnection extends AttributeStore implements IConnecti
     }
 
     /**
+     * Registers a shared object scope unless this connection is already connected to the given number of other shared objects. The count
+     * is of the shared objects this connection is connected to now, so it goes down when the connection leaves a shared object or
+     * disconnects.
+     *
+     * @param basicScope
+     *            shared object scope to register
+     * @param maxSharedObjects
+     *            maximum number of shared objects connected at the same time, 0 for no limit
+     * @return true if the scope was registered or was already registered, false if the limit was reached
+     */
+    public boolean registerBasicScope(SharedObjectScope basicScope, int maxSharedObjects) {
+        if (maxSharedObjects > 0) {
+            // check and add under one lock so concurrent connects from this connection cannot exceed the limit
+            synchronized (basicScopes) {
+                if (!basicScopes.contains(basicScope) && getSharedObjectCount() >= maxSharedObjects) {
+                    return false;
+                }
+                basicScopes.add(basicScope);
+            }
+            basicScope.addEventListener(this);
+            return true;
+        }
+        registerBasicScope(basicScope);
+        return true;
+    }
+
+    /**
+     * Returns the number of shared objects this connection is currently connected to.
+     *
+     * @return number of connected shared objects
+     */
+    public int getSharedObjectCount() {
+        int count = 0;
+        for (IBasicScope basicScope : basicScopes) {
+            if (basicScope instanceof SharedObjectScope) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
      * Unregister basic scope
      *
      * @param basicScope

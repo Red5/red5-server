@@ -16,13 +16,18 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.red5.server.BaseConnection;
 import org.red5.server.api.IAttributeStore;
 import org.red5.server.api.IContext;
 import org.red5.server.api.event.IEvent;
 import org.red5.server.api.event.IEventListener;
+import org.red5.server.api.persistence.IPersistable;
 import org.red5.server.api.persistence.IPersistenceStore;
 import org.red5.server.api.scheduling.IScheduledJob;
 import org.red5.server.api.scheduling.ISchedulingService;
@@ -32,6 +37,7 @@ import org.red5.server.api.so.ISharedObject;
 import org.red5.server.api.so.ISharedObjectListener;
 import org.red5.server.api.so.ISharedObjectSecurity;
 import org.red5.server.api.so.ISharedObjectSecurityService;
+import org.red5.server.api.so.ISharedObjectService;
 import org.red5.server.api.statistics.ISharedObjectStatistics;
 import org.red5.server.net.rtmp.status.StatusCodes;
 import org.red5.server.scope.BasicScope;
@@ -48,6 +54,16 @@ import org.slf4j.LoggerFactory;
 public class SharedObjectScope extends BasicScope implements ISharedObject, StatusCodes {
 
     private Logger log = LoggerFactory.getLogger(SharedObjectScope.class);
+
+    /**
+     * Parent scope attribute holding the accounted size of the scope's shared objects
+     */
+    private static final String SO_SCOPE_BYTES = IPersistable.TRANSIENT_PREFIX + "_SO_SCOPE_BYTES_";
+
+    /**
+     * Parent scope attribute holding the versions of persistent shared objects evicted from memory, by name
+     */
+    private static final String SO_EVICTED_VERSIONS = IPersistable.TRANSIENT_PREFIX + "_SO_EVICTED_VERSIONS_";
 
     /**
      * Server-side listeners
@@ -78,6 +94,56 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
      * Linger job name
      */
     private String lingerJobName;
+
+    /**
+     * Maximum AMF encoded size of a value written by a client; 0 means unlimited.
+     */
+    private int maxValueBytes;
+
+    /**
+     * Maximum accounted size of this shared object's attributes after a client write; 0 means unlimited.
+     */
+    private long maxBytesPerObject;
+
+    /**
+     * Maximum accounted size of the attributes of all shared objects in the parent scope after a client write; 0 means unlimited.
+     */
+    private long maxBytesPerScope;
+
+    /**
+     * Maximum number of shared objects one connection may be connected to at the same time; 0 means unlimited.
+     */
+    private int maxConnectedPerConnection;
+
+    /**
+     * Time without listeners after which a persistent shared object is evicted from memory; 0 disables eviction.
+     */
+    private volatile long idleEvictMillis;
+
+    /**
+     * Time the last listener left, or the idle period started
+     */
+    private volatile long idleSince;
+
+    /**
+     * Whether an idle check is scheduled
+     */
+    private final AtomicBoolean evictionCheckScheduled = new AtomicBoolean();
+
+    /**
+     * Messages are handled under the read lock; eviction takes the write lock, so it never runs while a message is handled.
+     */
+    private final ReentrantReadWriteLock evictionLock = new ReentrantReadWriteLock();
+
+    /**
+     * Whether this persistent shared object was evicted from memory; an evicted scope has been removed from its parent.
+     */
+    private volatile boolean evicted;
+
+    /**
+     * Service that created this shared object, used to reload it after eviction
+     */
+    private ISharedObjectService service;
 
     /**
      * Creates shared object with given parent scope, name, persistence flag state and store object
@@ -112,7 +178,80 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
             // Save
             store.save(tmp);
         }
+        if (persistent) {
+            // an object reloaded after eviction continues with the version it had in memory
+            ConcurrentMap<String, Integer> evictedVersions = getEvictedVersions(parent, false);
+            Integer evictedVersion = evictedVersions != null ? evictedVersions.remove(name) : null;
+            if (evictedVersion != null) {
+                tmp.restoreVersion(evictedVersion);
+            }
+        }
         so.set(tmp);
+    }
+
+    /**
+     * Returns the versions of the persistent shared objects of a scope that were evicted from memory, by name.
+     *
+     * @param parent
+     *            parent scope
+     * @param create
+     *            whether to create the map if the scope has none
+     * @return versions by name, or null if there is none and create is false
+     */
+    @SuppressWarnings("unchecked")
+    private static ConcurrentMap<String, Integer> getEvictedVersions(IScope parent, boolean create) {
+        synchronized (parent) {
+            Object versions = parent.getAttribute(SO_EVICTED_VERSIONS);
+            if (versions == null && create) {
+                versions = new ConcurrentHashMap<String, Integer>();
+                parent.setAttribute(SO_EVICTED_VERSIONS, versions);
+            }
+            return (ConcurrentMap<String, Integer>) versions;
+        }
+    }
+
+    /**
+     * Returns whether the named persistent shared object of a scope was evicted from memory and has not been loaded again since.
+     *
+     * @param parent
+     *            parent scope
+     * @param name
+     *            shared object name
+     * @return true if the object was evicted and can be reloaded from its store
+     */
+    static boolean isEvicted(IScope parent, String name) {
+        ConcurrentMap<String, Integer> evictedVersions = getEvictedVersions(parent, false);
+        return evictedVersions != null && evictedVersions.containsKey(name);
+    }
+
+    /**
+     * Returns the counter of the accounted size of the shared objects of a scope.
+     *
+     * @param parent
+     *            parent scope
+     * @return counter shared by the scope's shared objects
+     */
+    private static AtomicLong getScopeBytes(IScope parent) {
+        synchronized (parent) {
+            Object bytes = parent.getAttribute(SO_SCOPE_BYTES);
+            if (bytes == null) {
+                bytes = new AtomicLong();
+                parent.setAttribute(SO_SCOPE_BYTES, bytes);
+            }
+            return (AtomicLong) bytes;
+        }
+    }
+
+    /**
+     * Returns the accounted size of the attributes of all shared objects in the given scope that are subject to a memory budget.
+     *
+     * @param parent
+     *            parent scope
+     * @return accounted size in bytes
+     */
+    public static long getScopeAttributeBytes(IScope parent) {
+        Object bytes = parent.getAttribute(SO_SCOPE_BYTES);
+        return bytes instanceof AtomicLong ? ((AtomicLong) bytes).get() : 0L;
     }
 
     /** {@inheritDoc} */
@@ -386,8 +525,128 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
         if (so.get().isClosed()) {
             log.debug("Removing scope: {}", this);
             getParent().removeChildScope(this);
+        } else if (idleEvictMillis > 0 && listeners.isEmpty() && isPersistent()) {
+            // the last listener left, a persistent object starts its idle period
+            idleSince = System.currentTimeMillis();
+            scheduleEvictionCheck(idleEvictMillis);
         }
         return result;
+    }
+
+    /**
+     * Sets the time without listeners after which this shared object, if persistent, is written to its store and evicted from memory; 0
+     * disables eviction. The object is not evicted while it is acquired, has server-side listeners, security or service handlers
+     * registered, or has changes its store cannot write. An evicted object is removed from its parent scope and reloaded from the store,
+     * with its version, the next time it is requested. Server-side code that keeps a reference to a persistent shared object should
+     * acquire it, or look it up again when it needs it.
+     *
+     * @param idleEvictMillis
+     *            idle time in milliseconds, 0 to disable
+     */
+    public void setIdleEvictMillis(long idleEvictMillis) {
+        this.idleEvictMillis = idleEvictMillis;
+        if (idleEvictMillis > 0 && listeners.isEmpty() && isPersistent()) {
+            // an object created without listeners is idle from the start
+            idleSince = System.currentTimeMillis();
+            scheduleEvictionCheck(idleEvictMillis);
+        }
+    }
+
+    /**
+     * Sets the service used to reload this shared object after it was evicted.
+     *
+     * @param service
+     *            shared object service
+     */
+    void setService(ISharedObjectService service) {
+        this.service = service;
+    }
+
+    /**
+     * Schedules a check for eviction of this idle shared object, unless one is already scheduled.
+     *
+     * @param delay
+     *            delay in milliseconds
+     */
+    private void scheduleEvictionCheck(long delay) {
+        if (evictionCheckScheduled.compareAndSet(false, true)) {
+            try {
+                ISchedulingService scheduler = (ISchedulingService) getParent().getContext().getBean(ISchedulingService.BEAN_NAME);
+                scheduler.addScheduledOnceJob(delay, new IScheduledJob() {
+                    public void execute(ISchedulingService service) {
+                        evictionCheckScheduled.set(false);
+                        long next = checkEviction();
+                        if (next > 0) {
+                            scheduleEvictionCheck(next);
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                evictionCheckScheduled.set(false);
+                log.warn("Could not schedule the idle check of shared object {}", getName(), e);
+            }
+        }
+    }
+
+    /**
+     * Evicts this persistent shared object from memory if it has had no listeners for the idle period and is not in use: pending changes
+     * are written by the store, the store drops the object, its version is kept for the reload and the scope is removed from its parent.
+     *
+     * @return delay in milliseconds until the object should be checked again, or -1 if no check is needed: it was evicted, eviction is
+     *         disabled, or it has listeners and the last one to leave will start a new idle period
+     */
+    long checkEviction() {
+        final SharedObject sharedObject = so.get();
+        if (idleEvictMillis <= 0 || sharedObject == null || sharedObject.isClosed() || !sharedObject.isPersistent()) {
+            return -1L;
+        }
+        final Lock writeLock = evictionLock.writeLock();
+        if (!writeLock.tryLock()) {
+            // a message is being handled
+            return idleEvictMillis;
+        }
+        try {
+            if (evicted) {
+                return -1L;
+            }
+            if (!listeners.isEmpty() || !sharedObject.getListeners().isEmpty()) {
+                return -1L;
+            }
+            long idle = System.currentTimeMillis() - idleSince;
+            if (idle < idleEvictMillis) {
+                return idleEvictMillis - idle;
+            }
+            if (sharedObject.isAcquired() || !serverListeners.isEmpty() || !securityHandlers.isEmpty() || !handlers.isEmpty()) {
+                // in use by the application
+                return idleEvictMillis;
+            }
+            final int version = sharedObject.getVersion();
+            final IPersistenceStore store = sharedObject.getStore();
+            if (store == null || !store.evict(sharedObject)) {
+                // changes that could not be written yet, or a store that only keeps objects in memory
+                log.debug("Shared object {} could not be evicted from its store, checking again later", getName());
+                return idleEvictMillis;
+            }
+            evicted = true;
+            sharedObject.disableSizeAccounting();
+            getEvictedVersions(getParent(), true).put(getName(), version);
+            // removed while holding the lock so a lookup cannot find this scope once a message waiting for it sees the eviction
+            getParent().removeChildScope(this);
+            log.debug("Evicted idle persistent shared object {} version {} from memory", getName(), version);
+            return -1L;
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Returns whether this persistent shared object was evicted from memory. An evicted scope is no longer part of its parent; the shared
+     * object is reloaded from its store by the next lookup.
+     *
+     * @return true if evicted
+     */
+    public boolean isEvicted() {
+        return evicted;
     }
 
     /** {@inheritDoc} */
@@ -646,6 +905,67 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
     }
 
     /**
+     * Sets the maximum AMF encoded size of a value written by a client; 0 means unlimited. Server-side updates are not limited.
+     *
+     * @param maxValueBytes maximum value size in bytes
+     */
+    public void setMaxValueBytes(int maxValueBytes) {
+        this.maxValueBytes = maxValueBytes;
+    }
+
+    /**
+     * Sets the budget of this shared object: a client write that would grow the accounted size of its attributes beyond it is rejected; 0
+     * means unlimited. The accounted size of an attribute is the UTF-8 length of its name plus the AMF encoded length of its value, and
+     * server-side updates count toward it but are not rejected.
+     *
+     * @param maxBytesPerObject maximum accounted size in bytes
+     */
+    public void setMaxBytesPerObject(long maxBytesPerObject) {
+        this.maxBytesPerObject = maxBytesPerObject;
+        enableSizeAccounting();
+    }
+
+    /**
+     * Sets the budget of the shared objects of the parent scope: a client write that would grow the accounted size of all their
+     * attributes beyond it is rejected; 0 means unlimited. Only shared objects in memory are counted, and server-side updates count toward
+     * it but are not rejected.
+     *
+     * @param maxBytesPerScope maximum accounted size in bytes
+     */
+    public void setMaxBytesPerScope(long maxBytesPerScope) {
+        this.maxBytesPerScope = maxBytesPerScope;
+        enableSizeAccounting();
+    }
+
+    /**
+     * Starts accounting the size of the attributes once a memory budget is set.
+     */
+    private void enableSizeAccounting() {
+        if (hasMemoryBudget()) {
+            so.get().enableSizeAccounting(getScopeBytes(getParent()));
+        }
+    }
+
+    /**
+     * Returns whether a memory budget applies to this shared object.
+     *
+     * @return true if a per object or per scope budget is set
+     */
+    private boolean hasMemoryBudget() {
+        return maxBytesPerObject > 0 || maxBytesPerScope > 0;
+    }
+
+    /**
+     * Sets the maximum number of shared objects a connection may be connected to at the same time, checked when a connection connects to
+     * this shared object; 0 means unlimited. Leaving a shared object or disconnecting frees the connection's slot.
+     *
+     * @param maxConnectedPerConnection maximum connected shared objects per connection
+     */
+    public void setMaxConnectedPerConnection(int maxConnectedPerConnection) {
+        this.maxConnectedPerConnection = maxConnectedPerConnection;
+    }
+
+    /**
      * Returns whether the given listener is a current member of this shared object, meaning a connect was admitted and it has not since
      * disconnected.
      *
@@ -660,89 +980,146 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
     @Override
     public void dispatchEvent(IEvent e) {
         if (e instanceof ISharedObjectMessage || e.getType() == IEvent.Type.SHARED_OBJECT) {
+            final Lock readLock = evictionLock.readLock();
+            readLock.lock();
             try {
-                IEventListener source = null;
-                ISharedObjectMessage msg = (ISharedObjectMessage) e;
-                if (msg.hasSource()) {
-                    source = msg.getSource();
-                    beginUpdate(source);
-                } else {
-                    beginUpdate();
-                }
-                events: for (ISharedObjectEvent event : msg.getEvents()) {
-                    final String key = event.getKey();
-                    final ISharedObjectEvent.Type type = event.getType();
-                    // client-originated mutations and sends require current membership, which only an admitted connect grants
-                    if (source != null && (type == ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE || type == ISharedObjectEvent.Type.SERVER_DELETE_ATTRIBUTE || type == ISharedObjectEvent.Type.SERVER_SEND_MESSAGE) && !isMember(source)) {
-                        log.debug("Rejecting {} on {} from non-member {}", type, getName(), source);
-                        if (type != ISharedObjectEvent.Type.SERVER_SEND_MESSAGE) {
-                            so.get().returnError(SO_NO_WRITE_ACCESS);
-                        }
-                        continue;
-                    }
-                    switch (type) {
-                        case SERVER_CONNECT:
-                            if (!isConnectionAllowed()) {
-                                so.get().returnError(SO_NO_READ_ACCESS);
-                                // a denied connect ends the rest of this message
-                                break events;
-                            } else if (source != null) {
-                                if (source instanceof BaseConnection) {
-                                    ((BaseConnection) source).registerBasicScope(this);
-                                } else {
-                                    addEventListener(source);
-                                }
-                            }
-                            break;
-                        case SERVER_DISCONNECT:
-                            if (source != null) {
-                                if (source instanceof BaseConnection) {
-                                    ((BaseConnection) source).unregisterBasicScope(this);
-                                } else {
-                                    removeEventListener(source);
-                                }
-                            }
-                            break;
-                        case SERVER_SET_ATTRIBUTE:
-                            final Object value = event.getValue();
-                            if (source != null && maxClientAttributes > 0 && !hasAttribute(key) && getAttributeNames().size() >= maxClientAttributes) {
-                                log.warn("Rejecting new attribute {} on {}, limit of {} reached", key, getName(), maxClientAttributes);
-                                so.get().returnError(SO_NO_WRITE_ACCESS);
-                            } else if (!isWriteAllowed(key, value)) {
-                                // adds an owner event
-                                //so.get().returnAttributeValue(key);
-                                so.get().returnError(SO_NO_WRITE_ACCESS);
-                            } else {
-                                setAttribute(key, value);
-                            }
-                            break;
-                        case SERVER_DELETE_ATTRIBUTE:
-                            if (!isDeleteAllowed(key)) {
-                                //so.get().returnAttributeValue(key);
-                                so.get().returnError(SO_NO_WRITE_ACCESS);
-                            } else {
-                                removeAttribute(key);
-                            }
-                            break;
-                        case SERVER_SEND_MESSAGE:
-                            final List<?> arguments = (List<?>) event.getValue();
-                            // Ignore request silently if not allowed
-                            if (isSendAllowed(key, arguments)) {
-                                sendMessage(key, arguments);
-                            } else {
-                                log.debug("Send is not allowed for {}", key);
-                            }
-                            break;
-                        default:
-                            log.warn("Unknown SO event: {}", event.getType());
-                    }
+                if (!evicted) {
+                    handleMessage((ISharedObjectMessage) e);
+                    return;
                 }
             } finally {
-                endUpdate();
+                readLock.unlock();
+            }
+            // evicted after the message was routed here, hand it to the object reloaded from the store
+            ISharedObject reloaded = reload();
+            if (reloaded != null && reloaded != this) {
+                reloaded.dispatchEvent(e);
+            } else {
+                log.warn("Shared object {} was evicted and could not be reloaded", getName());
             }
         } else {
             // don't know how to handle this event
             super.dispatchEvent(e);
+        }
+    }
+
+    /**
+     * Looks up this shared object in its parent scope, which reloads it from its store after eviction.
+     *
+     * @return the shared object in memory, or null if it could not be loaded
+     */
+    private ISharedObject reload() {
+        ISharedObjectService soService = service;
+        if (soService == null) {
+            soService = (ISharedObjectService) ScopeUtils.getScopeService(getParent(), ISharedObjectService.class, SharedObjectService.class, false);
+        }
+        return soService != null ? soService.getSharedObject(getParent(), getName(), true) : null;
+    }
+
+    /**
+     * Applies the events of a shared object message.
+     *
+     * @param msg
+     *            shared object message
+     */
+    private void handleMessage(ISharedObjectMessage msg) {
+        try {
+            IEventListener source = null;
+            if (msg.hasSource()) {
+                source = msg.getSource();
+                beginUpdate(source);
+            } else {
+                beginUpdate();
+            }
+            events: for (ISharedObjectEvent event : msg.getEvents()) {
+                final String key = event.getKey();
+                final ISharedObjectEvent.Type type = event.getType();
+                // client-originated mutations and sends require current membership, which only an admitted connect grants
+                if (source != null && (type == ISharedObjectEvent.Type.SERVER_SET_ATTRIBUTE || type == ISharedObjectEvent.Type.SERVER_DELETE_ATTRIBUTE || type == ISharedObjectEvent.Type.SERVER_SEND_MESSAGE) && !isMember(source)) {
+                    log.debug("Rejecting {} on {} from non-member {}", type, getName(), source);
+                    if (type != ISharedObjectEvent.Type.SERVER_SEND_MESSAGE) {
+                        so.get().returnError(SO_NO_WRITE_ACCESS);
+                    }
+                    continue;
+                }
+                switch (type) {
+                    case SERVER_CONNECT:
+                        if (!isConnectionAllowed()) {
+                            so.get().returnError(SO_NO_READ_ACCESS);
+                            // a denied connect ends the rest of this message
+                            break events;
+                        } else if (source != null) {
+                            if (source instanceof BaseConnection) {
+                                if (!((BaseConnection) source).registerBasicScope(this, maxConnectedPerConnection)) {
+                                    log.warn("Refusing connection to {} for {}, limit of {} connected shared objects per connection reached", getName(), source, maxConnectedPerConnection);
+                                    so.get().returnError(SO_NO_READ_ACCESS);
+                                    break events;
+                                }
+                            } else {
+                                addEventListener(source);
+                            }
+                        }
+                        break;
+                    case SERVER_DISCONNECT:
+                        if (source != null) {
+                            if (source instanceof BaseConnection) {
+                                ((BaseConnection) source).unregisterBasicScope(this);
+                            } else {
+                                removeEventListener(source);
+                            }
+                        }
+                        break;
+                    case SERVER_SET_ATTRIBUTE:
+                        final Object value = event.getValue();
+                        if (source != null && maxClientAttributes > 0 && !hasAttribute(key) && getAttributeNames().size() >= maxClientAttributes) {
+                            log.warn("Rejecting new attribute {} on {}, limit of {} reached", key, getName(), maxClientAttributes);
+                            so.get().returnError(SO_NO_WRITE_ACCESS);
+                            break;
+                        }
+                        // client values are only measured when a size limit applies
+                        final boolean measured = source != null && (maxValueBytes > 0 || hasMemoryBudget());
+                        final int valueSize = measured ? AttributeSize.ofValue(value) : 0;
+                        if (measured && maxValueBytes > 0 && (valueSize < 0 || valueSize > maxValueBytes)) {
+                            log.warn("Rejecting attribute {} on {}, value of {} bytes exceeds the limit of {}", key, getName(), valueSize, maxValueBytes);
+                            so.get().returnError(SO_NO_WRITE_ACCESS);
+                        } else if (!isWriteAllowed(key, value)) {
+                            // adds an owner event
+                            //so.get().returnAttributeValue(key);
+                            so.get().returnError(SO_NO_WRITE_ACCESS);
+                        } else if (measured && hasMemoryBudget()) {
+                            SharedObject.WriteResult result = so.get().setAttributeWithinBudget(key, value, AttributeSize.of(key, valueSize), maxBytesPerObject, maxBytesPerScope);
+                            if (result == SharedObject.WriteResult.REJECTED) {
+                                so.get().returnError(SO_NO_WRITE_ACCESS);
+                            } else if (result == SharedObject.WriteResult.SET) {
+                                notifyUpdate(key, value);
+                            }
+                        } else {
+                            setAttribute(key, value);
+                        }
+                        break;
+                    case SERVER_DELETE_ATTRIBUTE:
+                        if (!isDeleteAllowed(key)) {
+                            //so.get().returnAttributeValue(key);
+                            so.get().returnError(SO_NO_WRITE_ACCESS);
+                        } else {
+                            removeAttribute(key);
+                        }
+                        break;
+                    case SERVER_SEND_MESSAGE:
+                        final List<?> arguments = (List<?>) event.getValue();
+                        // Ignore request silently if not allowed
+                        if (isSendAllowed(key, arguments)) {
+                            sendMessage(key, arguments);
+                        } else {
+                            log.debug("Send is not allowed for {}", key);
+                        }
+                        break;
+                    default:
+                        log.warn("Unknown SO event: {}", event.getType());
+                }
+            }
+        } finally {
+            endUpdate();
         }
     }
 
@@ -751,11 +1128,23 @@ public class SharedObjectScope extends BasicScope implements ISharedObject, Stat
     public boolean setAttribute(String name, Object value) {
         boolean success = so.get().setAttribute(name, value);
         if (success) {
-            for (ISharedObjectListener listener : serverListeners) {
-                listener.onSharedObjectUpdate(this, name, value);
-            }
+            notifyUpdate(name, value);
         }
         return success;
+    }
+
+    /**
+     * Notifies the server-side listeners of an updated attribute.
+     *
+     * @param name
+     *            attribute name
+     * @param value
+     *            new value
+     */
+    private void notifyUpdate(String name, Object value) {
+        for (ISharedObjectListener listener : serverListeners) {
+            listener.onSharedObjectUpdate(this, name, value);
+        }
     }
 
     /** {@inheritDoc} */

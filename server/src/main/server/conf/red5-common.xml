@@ -54,6 +54,11 @@
         <property name="maxNameDepth" value="${so.max.name.depth:16}"/>
         <property name="allowClientPersistent" value="${so.allow.client.persistent:true}"/>
         <property name="maxSharedObjectsPerConnection" value="${so.max.per.connection:0}"/>
+        <property name="maxValueBytes" value="${so.max.value.bytes:0}"/>
+        <property name="maxBytesPerSharedObject" value="${so.max.bytes.per.object:0}"/>
+        <property name="maxBytesPerScope" value="${so.max.bytes.per.scope:0}"/>
+        <property name="maxConnectedPerConnection" value="${so.max.connected.per.connection:0}"/>
+        <property name="persistentIdleEvictSeconds" value="${so.persistent.idle.evict.seconds:0}"/>
         <property name="persistenceClassName">
             <value>org.red5.server.persistence.FilePersistence</value>
         </property>
@@ -73,6 +78,14 @@
             <value>org.red5.server.persistence.FilePersistence.setDefaultMinFreeBytes</value>
         </property>
         <property name="arguments" value="${so.persistence.min.free.bytes:0}"/>
+    </bean>
+
+    <!-- Use injection to set the budget of persisted bytes per application; stores are created per scope -->
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod">
+            <value>org.red5.server.persistence.FilePersistence.setDefaultMaxBytes</value>
+        </property>
+        <property name="arguments" value="${so.persistence.max.bytes:0}"/>
     </bean>
 
     <!-- High level access to streams -->
