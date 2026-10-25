@@ -21,7 +21,6 @@ import java.util.Vector;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.red5.client.net.rtmp.codec.RTMPClientProtocolDecoder;
 import org.red5.server.api.IConnection.Encoding;
@@ -40,6 +39,7 @@ import org.red5.server.net.rtmp.event.Ping;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.net.rtmp.message.Header;
 import org.red5.server.net.rtmp.message.Packet;
+import org.red5.server.net.rtmp.status.RuntimeStatusObject;
 import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusCodes;
 import org.red5.server.net.rtmp.status.StatusObject;
@@ -439,13 +439,11 @@ public class RTMPProtocolEncoderAMFTest {
     }
 
     /**
-     * Reproducer: onStatus on an AMF3 connection. Status is IExternalizable, so the AMF3 encoder writes it as an externalizable object
-     * (traits 0x07) of the class org.red5.server.net.rtmp.status.Status, ignoring its {@code @Anonymous} annotation. Red5's decoder refuses
-     * to instantiate it (org.red5.server. is on the deserialization deny-list since 919dff6a) and fails the message, so a Red5 client on
-     * an AMF3 connection is disconnected on the first onStatus; a Flash client cannot read it either without registering the class alias.
-     * The AMF0 encoder writes the same Status as an anonymous object.
+     * onStatus on an AMF3 connection. Status is IExternalizable but {@code @Anonymous}, so it is written as an anonymous dynamic object
+     * (0x0A, traits 0x0B, empty class name 0x01) with the members the AMF0 encoder writes. It used to be written as an externalizable object
+     * of the class org.red5.server.net.rtmp.status.Status, which Red5's decoder refuses (deny-list) and Flash cannot read without a class
+     * alias, so a client on an AMF3 connection was disconnected on the first onStatus.
      */
-    @Ignore("AMF3 status objects are externalizable server classes, see the javadoc")
     @Test
     public void testOnStatusOnAMF3Connection() {
         Status status = new Status(StatusCodes.NS_PLAY_START, Status.STATUS, "Started playing test.");
@@ -453,9 +451,10 @@ public class RTMPProtocolEncoderAMFTest {
         status.setDetails("test");
         IoBuffer out = flip(encoder(Encoding.AMF3).encodeInvoke(invoke("onStatus", 0, status)));
         String body = hex(out);
-        assertTrue(body, body.startsWith("11" + amf3String("onStatus") + "110400" + "1101" + "110a07"));
+        assertTrue(body, body.startsWith("11" + amf3String("onStatus") + "110400" + "1101" + "110a0b01"));
         Invoke decoded = (Invoke) decode(Encoding.AMF3, Constants.TYPE_INVOKE, out);
         Object info = decoded.getCall().getArguments()[0];
+        assertTrue(String.valueOf(info), info instanceof Map);
         assertEquals(String.valueOf(info), StatusCodes.NS_PLAY_START, value(info, "code"));
         assertEquals(Status.STATUS, value(info, "level"));
         assertEquals("Started playing test.", value(info, "description"));
@@ -491,13 +490,31 @@ public class RTMPProtocolEncoderAMFTest {
     }
 
     /**
-     * Reproducer: the NetConnection.Call.Failed StatusObject is written as an externalizable server class on AMF3 connections, as in
+     * The NetConnection.Call.Failed StatusObject on an AMF3 connection is an anonymous object as well, see
      * {@link #testOnStatusOnAMF3Connection()}.
      */
-    @Ignore("AMF3 status objects are externalizable server classes, see testOnStatusOnAMF3Connection")
     @Test
     public void testErrorResultOnAMF3Connection() {
         assertErrorResult(Encoding.AMF3);
+    }
+
+    /**
+     * RuntimeStatusObject, which the status object service returns for NetStream.Play codes, is anonymous on both encodings as well.
+     */
+    @Test
+    public void testRuntimeStatusObjectIsAnonymous() {
+        for (Encoding encoding : new Encoding[] { Encoding.AMF0, Encoding.AMF3 }) {
+            RuntimeStatusObject status = new RuntimeStatusObject(StatusCodes.NS_PLAY_START, StatusObject.STATUS, "Started playing test.");
+            IoBuffer out = flip(encoder(encoding).encodeInvoke(invoke("onStatus", 0, status)));
+            String body = hex(out);
+            String object = encoding == Encoding.AMF3 ? "110a0b01" : "03";
+            String head = encoding == Encoding.AMF3 ? "11" + amf3String("onStatus") + "110400" + "1101" : amf0String("onStatus") + amf0Number(0) + "05";
+            assertTrue(encoding + " " + body, body.startsWith(head + object));
+            Invoke decoded = (Invoke) decode(encoding, Constants.TYPE_INVOKE, out);
+            Object info = decoded.getCall().getArguments()[0];
+            assertTrue(encoding + " " + info, info instanceof Map);
+            assertEquals(StatusCodes.NS_PLAY_START, ((Map<?, ?>) info).get("code"));
+        }
     }
 
     @SuppressWarnings("unchecked")

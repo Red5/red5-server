@@ -7,14 +7,16 @@
 
 package org.red5.server.net.rtmp.status;
 
+import org.red5.annotations.Anonymous;
 import org.red5.io.amf3.IDataInput;
 import org.red5.io.amf3.IDataOutput;
 
 /**
- * Runtime status object
+ * Runtime status object. Like StatusObject it is written as an anonymous object; the annotation is not inherited, so it is repeated here.
  *
  * @author mondain
  */
+@Anonymous
 public class RuntimeStatusObject extends StatusObject {
 
     /**
