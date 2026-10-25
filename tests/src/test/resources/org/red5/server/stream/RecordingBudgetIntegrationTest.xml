@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.springframework.org/schema/beans"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="red5.server" class="org.red5.server.Server" />
+
+    <bean id="schedulingService" class="org.red5.server.scheduling.JDKSchedulingService" />
+
+    <bean id="global.clientRegistry" class="org.red5.server.ClientRegistry" />
+
+    <bean id="global.serviceInvoker" class="org.red5.server.service.ServiceInvoker" />
+
+    <bean id="global.mappingStrategy" class="org.red5.server.MappingStrategy" />
+
+    <bean id="global.context" autowire="byType" class="org.red5.server.Context">
+        <property name="contextPath" value="test" />
+    </bean>
+
+    <bean id="global.handler" autowire="byType" class="org.red5.server.CoreHandler" />
+
+    <bean id="global.scope" class="org.red5.server.scope.GlobalScope" init-method="register">
+        <property name="server" ref="red5.server" />
+        <property name="name" value="default" />
+        <property name="context" ref="global.context" />
+        <property name="handler" ref="global.handler" />
+        <property name="persistenceClass" value="org.red5.server.persistence.RamPersistence" />
+    </bean>
+
+    <bean id="web.context" autowire="byType" class="org.red5.server.Context" />
+
+    <bean id="web.scope" class="org.red5.server.scope.WebScope">
+        <property name="server" ref="red5.server" />
+        <property name="parent" ref="global.scope" />
+        <property name="context" ref="web.context" />
+        <property name="handler" ref="web.handler" />
+        <property name="persistenceClass" value="org.red5.server.persistence.RamPersistence" />
+        <property name="contextPath" value="/junit" />
+        <property name="virtualHosts" value="*" />
+    </bean>
+
+    <bean id="web.handler" class="org.red5.server.adapter.MultiThreadedApplicationAdapter" />
+
+    <!-- records into the directory the test sets up -->
+    <bean id="streamFilenameGenerator" class="org.red5.server.stream.RecordingBudgetIntegrationTest$TestFilenameGenerator" />
+
+    <!-- as in red5-common.xml, with the budget set by each test -->
+    <bean id="recordingBudget" class="org.red5.server.stream.recording.RecordingBudget" destroy-method="destroy" />
+
+</beans>

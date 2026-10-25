@@ -50,6 +50,7 @@ import org.red5.server.stream.DefaultStreamFilenameGenerator;
 import org.red5.server.stream.IStreamData;
 import org.red5.server.stream.message.RTMPMessage;
 import org.red5.server.stream.message.ResetMessage;
+import org.red5.server.stream.recording.RecordingSession;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -779,6 +780,25 @@ public class SlicedFileConsumer implements Constants, IPushableConsumer, IPipeCo
      */
     public void setMinFreeDiskBytes(long minFreeDiskBytes) {
         limits.setMinFreeDiskBytes(minFreeDiskBytes);
+    }
+
+    /**
+     * Sets the accounting of this recording against the application's recording budget and the principal's quota; the recording
+     * stops, like at its own limits, once either is reached.
+     *
+     * @param session recording session, or null for none
+     */
+    public void setRecordingSession(RecordingSession session) {
+        limits.setSession(session);
+    }
+
+    /**
+     * Returns the accounting of this recording, if any.
+     *
+     * @return recording session, or null
+     */
+    public RecordingSession getRecordingSession() {
+        return limits.getSession();
     }
 
     /**

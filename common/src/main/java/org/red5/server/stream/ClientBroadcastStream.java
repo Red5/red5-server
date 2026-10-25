@@ -77,6 +77,7 @@ import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusCodes;
 import org.red5.server.stream.message.RTMPMessage;
 import org.red5.server.stream.message.StatusMessage;
+import org.red5.server.stream.recording.RecordingRefusedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -401,7 +402,7 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
                                 listener.packetReceived(this, (IStreamPacket) rtmpEvent);
                             } catch (Exception e) {
                                 log.warn("Error while notifying listener {}", listener, e);
-                                if (listener instanceof RecordingListener) {
+                                if (listener instanceof IRecordingListener) {
                                     sendRecordFailedNotify(e.getMessage());
                                     // a recording that failed, or reached a limit, is not continued
                                     stopRecording();
@@ -723,7 +724,12 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
     /**
      * {@inheritDoc}
      *
-     * Save broadcasted stream.
+     * Save broadcasted stream. The recording listener is the application's prototype bean named
+     * {@value IRecordingListener#BEAN_NAME} if it declares one, or a {@link RecordingListener}.
+     *
+     * @throws IOException
+     *             if the stream is no longer connected, or the application's recording budget or the principal's quota does not allow
+     *             the recording; the cause is then a {@link RecordingRefusedException}
      */
     public void saveAs(String name, boolean isAppend) throws IOException {
         //log.debug("SaveAs - name: {} append: {}", name, isAppend);
@@ -734,17 +740,21 @@ public class ClientBroadcastStream extends AbstractClientStream implements IClie
         }
         // one recording listener at a time via this entry point
         if (recordingListener == null) {
-            // XXX Paul: Revisit this section to allow for implementation of custom IRecordingListener
-            //IRecordingListener listener = (IRecordingListener) ScopeUtils.getScopeService(conn.getScope(), IRecordingListener.class, RecordingListener.class, false);
             // create a recording listener
-            IRecordingListener listener = new RecordingListener();
+            IRecordingListener listener = RecordingListener.createRecordingListener(conn.getScope());
             //log.debug("Created: {}", listener);
             // initialize the listener
-            if (listener.init(conn, name, isAppend)) {
+            boolean initialized;
+            try {
+                initialized = listener.init(conn, name, isAppend);
+            } catch (RecordingRefusedException e) {
+                throw new IOException(e.getMessage(), e);
+            }
+            if (initialized) {
                 // get decoder info if it exists for the stream
                 IStreamCodecInfo codecInfo = getCodecInfo();
                 //log.debug("Codec info: {}", codecInfo);
-                if (codecInfo instanceof StreamCodecInfo) {
+                if (codecInfo instanceof StreamCodecInfo && listener.getFileConsumer() != null) {
                     StreamCodecInfo info = (StreamCodecInfo) codecInfo;
                     IVideoStreamCodec videoCodec = info.getVideoCodec();
                     //log.debug("Video codec: {}", videoCodec);

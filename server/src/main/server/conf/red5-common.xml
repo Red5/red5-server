@@ -204,6 +204,12 @@
         <property name="minFreeDiskBytes" value="${fileconsumer.min.free.disk.bytes:0}"/>
     </bean>
 
+    <!-- Recording budget of each application's record directory, with attribution of every recording; an application can declare
+         its own recordingBudget bean in its red5-web.xml to add a per-principal quota hook or a retention policy -->
+    <bean id="recordingBudget" lazy-init="true" class="org.red5.server.stream.recording.RecordingBudget" destroy-method="destroy">
+        <property name="maxApplicationBytes" value="${recording.app.max.bytes:0}"/>
+    </bean>
+
     <!-- ClientBroadcastStream and PlaylistSubscriberStream
         that will be used by RTMPConnection and maybe other classes.
         These beans are lazy-init because most likely server will need

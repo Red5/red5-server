@@ -6,13 +6,23 @@ import org.red5.server.api.stream.IBroadcastStream;
 import org.red5.server.api.stream.IStreamListener;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.stream.consumer.FileConsumer;
+import org.red5.server.stream.recording.RecordingRefusedException;
 
 /**
  * Recording listener interface.
+ * <br>
+ * An application can supply its own implementation, typically extending {@link RecordingListener}, as a prototype bean named
+ * {@value #BEAN_NAME} in its context; broadcast streams create their recording listener from it, and use {@link RecordingListener}
+ * otherwise. The bean must be a prototype, since each recording needs its own listener.
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
 public interface IRecordingListener extends IStreamListener {
+
+    /**
+     * Name of the prototype bean an application can declare to supply its own recording listener.
+     */
+    public static final String BEAN_NAME = "recordingListener";
 
     /**
      * Initialize the listener.
@@ -24,6 +34,8 @@ public interface IRecordingListener extends IStreamListener {
      * @param isAppend
      *            Append mode
      * @return true if initialization completes and false otherwise
+     * @throws RecordingRefusedException
+     *             if the application's recording budget or the principal's quota does not allow the recording
      */
     public boolean init(IConnection conn, String name, boolean isAppend);
 
@@ -37,6 +49,8 @@ public interface IRecordingListener extends IStreamListener {
      * @param isAppend
      *            Append mode
      * @return true if initialization completes and false otherwise
+     * @throws RecordingRefusedException
+     *             if the application's recording budget does not allow the recording
      */
     public boolean init(IScope scope, String name, boolean isAppend);
 
