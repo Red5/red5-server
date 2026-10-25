@@ -15,11 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
@@ -153,6 +156,33 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
      * Whether or not this shared object is closed
      */
     protected volatile AtomicBoolean closed = new AtomicBoolean(false);
+
+    /**
+     * Whether the encoded size of the attributes is accounted; only enabled when a memory budget applies to this shared object.
+     */
+    private transient volatile boolean accounting;
+
+    /**
+     * Accounted size of each attribute, maintained under the write lock while accounting is enabled.
+     */
+    private transient ConcurrentMap<String, Integer> attributeSizes = new ConcurrentHashMap<>();
+
+    /**
+     * Accounted size of all attributes while accounting is enabled.
+     */
+    private transient AtomicLong attributeBytes = new AtomicLong();
+
+    /**
+     * Accounted size of the shared objects of the parent scope, shared by those shared objects; may be null.
+     */
+    private transient volatile AtomicLong scopeBytes;
+
+    /**
+     * Outcome of a client write subject to memory budgets.
+     */
+    enum WriteResult {
+        SET, UNCHANGED, REJECTED
+    }
 
     /**
      * Constructs a new SharedObject.
@@ -393,7 +423,10 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
             version.incrementAndGet();
             // update last mod time
             lastModified = System.currentTimeMillis();
-            if (storage == null || !storage.save(this)) {
+            if (closed.get()) {
+                // a closed shared object has been removed from its store, saving the changes made while closing would put it back
+                log.trace("Shared object {} is closed, not storing it", name);
+            } else if (storage == null || !storage.save(this)) {
                 log.warn("Could not store shared object");
             }
             sendUpdates();
@@ -462,8 +495,110 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
     @Override
     public boolean setAttribute(String name, Object value) {
         log.debug("setAttribute - name: {} value: {}", name, value);
+        return applyAttribute(name, value, (accounting && name != null && value != null) ? measure(name, value) : 0, 0L);
+    }
+
+    /**
+     * Sets an attribute for a client unless the write would grow this shared object beyond the given budgets. A write that does not grow
+     * the accounted size is always allowed. The check and the write are made under the write lock and the scope budget is reserved
+     * atomically, so concurrent writes cannot exceed either budget.
+     *
+     * @param name
+     *            attribute name
+     * @param value
+     *            attribute value; null removes the attribute
+     * @param size
+     *            accounted size of the attribute, see {@link AttributeSize#of(String, int)}
+     * @param maxObjectBytes
+     *            budget of this shared object, 0 for none
+     * @param maxScopeBytes
+     *            budget of the shared objects of the parent scope, 0 for none
+     * @return whether the attribute was set, left unchanged or rejected for a budget
+     */
+    WriteResult setAttributeWithinBudget(String name, Object value, int size, long maxObjectBytes, long maxScopeBytes) {
+        if (name == null) {
+            return WriteResult.UNCHANGED;
+        }
+        if (value == null) {
+            size = 0;
+        }
+        boolean locked = false;
+        beginUpdate();
+        try {
+            if (!(locked = writeLock.tryLock(100L, TimeUnit.MILLISECONDS))) {
+                log.trace("Failed to get write lock");
+                return WriteResult.UNCHANGED;
+            }
+            long reserved = 0L;
+            if (accounting) {
+                Integer previous = attributeSizes.get(name);
+                long delta = size - (previous == null ? 0 : previous);
+                if (delta > 0) {
+                    if (maxObjectBytes > 0 && attributeBytes.get() + delta > maxObjectBytes) {
+                        log.warn("Rejecting attribute {} on {}, {} bytes would exceed the budget of {} bytes per shared object", name, this.name, attributeBytes.get() + delta, maxObjectBytes);
+                        return WriteResult.REJECTED;
+                    }
+                    AtomicLong scope = scopeBytes;
+                    if (maxScopeBytes > 0 && scope != null) {
+                        if (!reserve(scope, delta, maxScopeBytes)) {
+                            log.warn("Rejecting attribute {} on {}, the shared objects of its scope would exceed the budget of {} bytes", name, this.name, maxScopeBytes);
+                            return WriteResult.REJECTED;
+                        }
+                        reserved = delta;
+                    }
+                }
+            }
+            return applyAttribute(name, value, size, reserved) ? WriteResult.SET : WriteResult.UNCHANGED;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return WriteResult.UNCHANGED;
+        } finally {
+            if (locked) {
+                writeLock.unlock();
+            }
+            endUpdate();
+        }
+    }
+
+    /**
+     * Adds a positive amount to a shared counter unless the result would exceed the maximum.
+     *
+     * @param counter
+     *            counter
+     * @param delta
+     *            amount to add
+     * @param max
+     *            maximum value
+     * @return true if the amount was added
+     */
+    private static boolean reserve(AtomicLong counter, long delta, long max) {
+        long current;
+        do {
+            current = counter.get();
+            if (current + delta > max) {
+                return false;
+            }
+        } while (!counter.compareAndSet(current, current + delta));
+        return true;
+    }
+
+    /**
+     * Sets or, for a null value, removes an attribute and queues the matching events.
+     *
+     * @param name
+     *            attribute name
+     * @param value
+     *            attribute value; null removes the attribute
+     * @param size
+     *            accounted size of the attribute, used while accounting is enabled
+     * @param reservedScopeBytes
+     *            bytes already added to the scope counter for this write, given back if nothing is stored
+     * @return true if the attribute changed
+     */
+    private boolean applyAttribute(String name, Object value, int size, long reservedScopeBytes) {
         boolean result = false;
         boolean locked = false;
+        boolean accounted = false;
         try {
             beginUpdate();
             if (locked = writeLock.tryLock(100L, TimeUnit.MILLISECONDS)) {
@@ -475,10 +610,19 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
                             syncEvents.add(new SharedObjectEvent(Type.CLIENT_DELETE_DATA, name, null));
                             deleteStats.incrementAndGet();
                             result = true;
+                            if (accounting) {
+                                account(name, 0, reservedScopeBytes);
+                                accounted = true;
+                            }
                         }
                     } else {
                         boolean set = super.setAttribute(name, value);
                         log.debug("Set attribute?: {}", set);
+                        // the value is stored even when it equals the previous one
+                        if (accounting && name != null) {
+                            account(name, size, reservedScopeBytes);
+                            accounted = true;
+                        }
                         if (set) {
                             // only sync if the attribute changed
                             syncEvents.add(new SharedObjectEvent(Type.CLIENT_UPDATE_DATA, name, value));
@@ -493,12 +637,134 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
         } catch (Exception e) {
             log.warn("Exception in setAttribute", e);
         } finally {
+            if (!accounted && reservedScopeBytes != 0L) {
+                // nothing was stored, give back the reservation
+                AtomicLong scope = scopeBytes;
+                if (scope != null) {
+                    scope.addAndGet(-reservedScopeBytes);
+                }
+            }
             if (locked) {
                 writeLock.unlock();
             }
             endUpdate();
         }
         return result;
+    }
+
+    /**
+     * Records the accounted size of an attribute and applies the change to this object's and the scope's totals. Called under the write
+     * lock while accounting is enabled.
+     *
+     * @param name
+     *            attribute name
+     * @param size
+     *            new accounted size, 0 when the attribute was removed
+     * @param reservedScopeBytes
+     *            part of the change already added to the scope counter
+     */
+    private void account(String name, int size, long reservedScopeBytes) {
+        Integer previous = size > 0 ? attributeSizes.put(name, size) : attributeSizes.remove(name);
+        long delta = size - (previous == null ? 0 : previous);
+        attributeBytes.addAndGet(delta);
+        AtomicLong scope = scopeBytes;
+        if (scope != null && delta != reservedScopeBytes) {
+            scope.addAndGet(delta - reservedScopeBytes);
+        }
+    }
+
+    /**
+     * Returns the accounted size of an attribute.
+     *
+     * @param name
+     *            attribute name
+     * @param value
+     *            attribute value
+     * @return accounted size in bytes
+     */
+    private static int measure(String name, Object value) {
+        return AttributeSize.of(name, AttributeSize.ofValue(value));
+    }
+
+    /**
+     * Starts accounting the encoded size of the attributes, counting the current ones, and adds them to the given scope counter.
+     *
+     * @param scopeCounter
+     *            counter shared by the shared objects of the parent scope, may be null
+     */
+    void enableSizeAccounting(AtomicLong scopeCounter) {
+        writeLock.lock();
+        try {
+            if (accounting) {
+                return;
+            }
+            scopeBytes = scopeCounter;
+            accounting = true;
+            recount();
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Stops accounting the encoded size of the attributes and removes them from the scope counter, as when this object leaves memory.
+     */
+    void disableSizeAccounting() {
+        writeLock.lock();
+        try {
+            if (!accounting) {
+                return;
+            }
+            accounting = false;
+            AtomicLong scope = scopeBytes;
+            if (scope != null) {
+                scope.addAndGet(-attributeBytes.get());
+            }
+            scopeBytes = null;
+            attributeSizes.clear();
+            attributeBytes.set(0L);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Measures every attribute again and replaces this object's previous total in the scope counter. Called under the write lock.
+     */
+    private void recount() {
+        long previous = attributeBytes.get();
+        attributeSizes.clear();
+        long total = 0L;
+        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+            int size = measure(entry.getKey(), entry.getValue());
+            attributeSizes.put(entry.getKey(), size);
+            total += size;
+        }
+        attributeBytes.set(total);
+        AtomicLong scope = scopeBytes;
+        if (scope != null) {
+            scope.addAndGet(total - previous);
+        }
+    }
+
+    /**
+     * Returns the accounted size of the attributes: the UTF-8 length of each name plus the AMF0 encoded length of its value. It is only
+     * maintained while a memory budget applies to this shared object and is 0 otherwise.
+     *
+     * @return accounted size in bytes
+     */
+    public long getAttributeBytes() {
+        return attributeBytes.get();
+    }
+
+    /**
+     * Restores the version of an object reloaded from persistent storage after it was evicted from memory.
+     *
+     * @param version
+     *            version at eviction
+     */
+    void restoreVersion(int version) {
+        this.version.set(version);
     }
 
     /** {@inheritDoc} */
@@ -510,8 +776,13 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
             try {
                 writeLock.lockInterruptibly();
                 for (Map.Entry<String, Object> entry : values.entrySet()) {
-                    if (super.setAttribute(entry.getKey(), entry.getValue())) {
+                    final String key = entry.getKey();
+                    final Object value = entry.getValue();
+                    if (super.setAttribute(key, value)) {
                         --valuesCount;
+                    }
+                    if (accounting && key != null && value != null) {
+                        account(key, measure(key, value), 0L);
                     }
                 }
                 return (valuesCount == 0);
@@ -537,6 +808,22 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /** {@inheritDoc} */
     @Override
+    public Object setAttributeIfAbsent(String name, Object value) {
+        Object previous = super.setAttributeIfAbsent(name, value);
+        if (previous == null && accounting && name != null && value != null) {
+            writeLock.lock();
+            try {
+                Object current = attributes.get(name);
+                account(name, current == null ? 0 : measure(name, current), 0L);
+            } finally {
+                writeLock.unlock();
+            }
+        }
+        return previous;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public boolean removeAttribute(String name) {
         boolean result = false;
         try {
@@ -548,6 +835,9 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
                     syncEvents.add(event);
                     deleteStats.incrementAndGet();
                     result = true;
+                    if (accounting) {
+                        account(name, 0, 0L);
+                    }
                 }
                 notifyModified();
             }
@@ -728,6 +1018,14 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
             log.trace("Attributes: {}", map);
         }
         super.setAttributes(map);
+        if (accounting) {
+            writeLock.lock();
+            try {
+                recount();
+            } finally {
+                writeLock.unlock();
+            }
+        }
         ownerMessage.setName(name);
         ownerMessage.setPersistent(persistent);
     }
@@ -778,7 +1076,7 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
 
     /**
      * Prevent shared object from being released. Each call to acquire must be paired with a call to release so the SO isn't held forever.
-     * This is only valid for non-persistent SOs.
+     * A non-persistent SO is not released while acquired, and a persistent SO is not evicted from memory while acquired.
      */
     public void acquire() {
         log.debug("acquire");
@@ -900,6 +1198,16 @@ public class SharedObject extends AttributeStore implements ISharedObjectStatist
         log.trace("setDirty: {}", name);
         // get uses read lock, no need to do locking here
         Object value = getAttribute(name);
+        if (accounting && name != null) {
+            // the value may have been changed in place
+            writeLock.lock();
+            try {
+                Object current = attributes.get(name);
+                account(name, current == null ? 0 : measure(name, current), 0L);
+            } finally {
+                writeLock.unlock();
+            }
+        }
         if (ownerMessage.addEvent(Type.CLIENT_UPDATE_ATTRIBUTE, name, null)) {
             // a null value means a removal the attribute
             if (value == null) {

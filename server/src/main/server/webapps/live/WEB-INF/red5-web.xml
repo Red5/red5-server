@@ -35,4 +35,36 @@
     </bean>
     -->
 
+    <!-- To give this application its own recording budget, per-principal quota or retention policy, uncomment the following
+        bean, which replaces the server recordingBudget bean from red5-common.xml for this application. The retention policy deletes
+        the oldest recordings in the application's streams directory; that directory may also hold video on demand content, so the
+        policy only considers regular files with the listed extensions, and is off unless configured here -->
+    <!--
+    <bean id="recordingBudget" class="org.red5.server.stream.recording.RecordingBudget" init-method="init" destroy-method="destroy">
+        <property name="maxApplicationBytes" value="10737418240" />
+        <property name="retentionPolicy">
+            <bean class="org.red5.server.stream.recording.OldestFirstRetentionPolicy">
+                <property name="maxAgeMs" value="604800000" />
+                <property name="maxTotalBytes" value="8589934592" />
+                <property name="extensions">
+                    <list>
+                        <value>.flv</value>
+                    </list>
+                </property>
+            </bean>
+        </property>
+        <property name="retentionIntervalMs" value="3600000" />
+        <property name="recordDirectory" value="${red5.root}/webapps/live/streams" />
+        <property name="principalQuota">
+            <bean class="com.example.MyRecordingQuota" />
+        </property>
+    </bean>
+    -->
+
+    <!-- To use an application specific recording listener, such as a subclass of org.red5.server.stream.RecordingListener,
+        declare it as a prototype bean named recordingListener -->
+    <!--
+    <bean id="recordingListener" scope="prototype" class="com.example.MyRecordingListener" />
+    -->
+
 </beans>

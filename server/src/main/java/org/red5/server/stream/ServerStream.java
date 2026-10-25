@@ -50,7 +50,7 @@ import org.red5.server.net.rtmp.event.IRTMPEvent;
 import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.server.stream.message.RTMPMessage;
 import org.red5.server.stream.message.ResetMessage;
-import org.red5.server.util.ScopeUtils;
+import org.red5.server.stream.recording.RecordingRefusedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -370,14 +370,20 @@ public class ServerStream extends AbstractStream implements IServerStream, IFilt
         // one recording listener at a time via this entry point
         if (recordingListener == null) {
             IScope scope = getScope();
-            // create a recording listener
-            IRecordingListener listener = (IRecordingListener) ScopeUtils.getScopeService(scope, IRecordingListener.class, RecordingListener.class);
+            // create a recording listener; each recording gets its own, from the application's prototype bean if it declares one
+            IRecordingListener listener = RecordingListener.createRecordingListener(scope);
             // initialize the listener
-            if (listener.init(scope, name, isAppend)) {
+            boolean initialized;
+            try {
+                initialized = listener.init(scope, name, isAppend);
+            } catch (RecordingRefusedException e) {
+                throw new IOException(e.getMessage(), e);
+            }
+            if (initialized) {
                 // get decoder info if it exists for the stream
                 IStreamCodecInfo codecInfo = getCodecInfo();
                 log.debug("Codec info: {}", codecInfo);
-                if (codecInfo instanceof StreamCodecInfo) {
+                if (codecInfo instanceof StreamCodecInfo && listener.getFileConsumer() != null) {
                     StreamCodecInfo info = (StreamCodecInfo) codecInfo;
                     IVideoStreamCodec videoCodec = info.getVideoCodec();
                     log.debug("Video codec: {}", videoCodec);

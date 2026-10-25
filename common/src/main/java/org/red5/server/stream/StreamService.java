@@ -40,6 +40,7 @@ import org.red5.server.api.stream.support.SimplePlayItem;
 import org.red5.server.net.rtmp.RTMPConnection;
 import org.red5.server.net.rtmp.status.Status;
 import org.red5.server.net.rtmp.status.StatusCodes;
+import org.red5.server.stream.recording.RecordingRefusedException;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -788,7 +789,9 @@ public class StreamService implements IStreamService {
                 bs.startPublishing();
             } catch (IOException e) {
                 log.warn("Stream I/O exception", e);
-                sendNSFailed(streamConn, StatusCodes.NS_RECORD_NOACCESS, "The file could not be created/written to.", name, streamId);
+                // a recording refused by the application's recording budget or the principal's quota says why
+                String description = e.getCause() instanceof RecordingRefusedException ? e.getMessage() : "The file could not be created/written to.";
+                sendNSFailed(streamConn, StatusCodes.NS_RECORD_NOACCESS, description, name, streamId);
                 bs.close();
                 if (created) {
                     streamConn.deleteStreamById(streamId);

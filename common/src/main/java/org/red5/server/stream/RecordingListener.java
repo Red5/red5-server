@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.io.IKeyFrameMetaCache;
 import org.red5.server.api.IConnection;
+import org.red5.server.api.IContext;
 import org.red5.server.api.scheduling.IScheduledJob;
 import org.red5.server.api.scheduling.ISchedulingService;
 import org.red5.server.api.scope.IScope;
@@ -32,9 +33,13 @@ import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.stream.consumer.FileConsumer;
 import org.red5.server.stream.message.RTMPMessage;
+import org.red5.server.stream.recording.RecordingBudget;
+import org.red5.server.stream.recording.RecordingRefusedException;
+import org.red5.server.stream.recording.RecordingSession;
 import org.red5.server.util.ScopeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 
 /**
@@ -87,6 +92,19 @@ public class RecordingListener implements IRecordingListener {
     private EventQueueJob eqj;
 
     /**
+     * Budget accounting the recording, or null.
+     */
+    private RecordingBudget budget;
+
+    /**
+     * Accounting of the recording, or null.
+     */
+    private RecordingSession session;
+
+    // name used to find the record directory of an application through its filename generator
+    private static final String RECORD_DIRECTORY_PROBE = "recording";
+
+    /**
      * Get the file we'd be recording to based on scope and given name.
      *
      * @param scope
@@ -127,93 +145,202 @@ public class RecordingListener implements IRecordingListener {
         return file;
     }
 
+    /**
+     * Get the record directory of the application of a scope: the directory its recordings are written to, which holds the directories
+     * of its sub-scopes.
+     *
+     * @param scope
+     *            scope
+     * @return directory, or null if the filename generator does not provide one
+     */
+    public static File getRecordDirectory(IScope scope) {
+        IScope app = ScopeUtils.findApplication(scope);
+        File probe = getRecordFile(app != null ? app : scope, RECORD_DIRECTORY_PROBE);
+        return probe != null ? probe.getAbsoluteFile().getParentFile() : null;
+    }
+
+    /**
+     * Creates the recording listener for a stream in a scope: the application's prototype bean named
+     * {@value IRecordingListener#BEAN_NAME} if it declares one, or a new {@link RecordingListener}.
+     *
+     * @param scope
+     *            scope of the stream
+     * @return a new recording listener
+     */
+    public static IRecordingListener createRecordingListener(IScope scope) {
+        IContext context = scope != null ? scope.getContext() : null;
+        ApplicationContext appCtx = context != null ? context.getApplicationContext() : null;
+        if (appCtx != null && appCtx.containsBean(IRecordingListener.BEAN_NAME)) {
+            if (!appCtx.isPrototype(IRecordingListener.BEAN_NAME)) {
+                log.warn("The {} bean is not a prototype, so it would be shared by every recording; using the default listener", IRecordingListener.BEAN_NAME);
+            } else {
+                Object bean = appCtx.getBean(IRecordingListener.BEAN_NAME);
+                if (bean instanceof IRecordingListener) {
+                    log.debug("Using the application's recording listener: {}", bean.getClass().getName());
+                    return (IRecordingListener) bean;
+                }
+                log.warn("The {} bean is not an IRecordingListener: {}; using the default listener", IRecordingListener.BEAN_NAME, bean.getClass().getName());
+            }
+        }
+        return new RecordingListener();
+    }
+
     /** {@inheritDoc} */
     public boolean init(IConnection conn, String name, boolean isAppend) {
         // get connections scope
-        return init(conn.getScope(), name, isAppend);
+        return init(conn.getScope(), conn, name, isAppend);
     }
 
     /** {@inheritDoc} */
     public boolean init(IScope scope, String name, boolean isAppend) {
+        return init(scope, null, name, isAppend);
+    }
+
+    /**
+     * Initialize the listener, accounting the recording with the application's recording budget, if it has one.
+     *
+     * @param scope
+     *            Stream source scope
+     * @param conn
+     *            Stream source connection, or null
+     * @param name
+     *            Stream name
+     * @param isAppend
+     *            Append mode
+     * @return true if initialization completes and false otherwise
+     * @throws RecordingRefusedException
+     *             if the application's recording budget or the principal's quota does not allow the recording
+     */
+    protected boolean init(IScope scope, IConnection conn, String name, boolean isAppend) {
         // get the file for our filename
         File file = getRecordFile(scope, name);
-        if (file != null) {
-            // If append mode is on...
-            if (!isAppend) {
-                if (file.exists()) {
-                    // when "live" or "record" is used, any previously recorded stream with the same stream URI is deleted.
-                    if (!file.delete()) {
-                        log.warn("Existing file: {} could not be deleted", file.getName());
-                        return false;
-                    }
-                }
-            } else {
-                if (file.exists()) {
-                    appending = true;
-                } else {
-                    // if a recorded stream at the same URI does not already exist, "append" creates the stream as though "record" was passed.
-                    isAppend = false;
-                }
+        if (file == null) {
+            log.warn("Record file is null");
+            return false;
+        }
+        // account the recording before any existing file is replaced, so a refused recording leaves it in place
+        startSession(scope, conn, name, file, isAppend && file.exists());
+        boolean initialized = false;
+        try {
+            initialized = init(scope, file, isAppend);
+        } finally {
+            if (!initialized) {
+                stopSession("Recording could not be initialized");
             }
-            // if the file doesn't exist yet, create it
-            if (!file.exists()) {
-                // Make sure the destination directory exists
-                String path = file.getAbsolutePath();
-                int slashPos = path.lastIndexOf(File.separator);
-                if (slashPos != -1) {
-                    path = path.substring(0, slashPos);
-                }
-                File tmp = new File(path);
-                if (!tmp.isDirectory()) {
-                    tmp.mkdirs();
-                }
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    log.warn("New recording file could not be created for: {}", file.getName(), e);
+        }
+        return initialized;
+    }
+
+    /**
+     * Prepares the recording file and the file consumer.
+     */
+    private boolean init(IScope scope, File file, boolean isAppend) {
+        // If append mode is on...
+        if (!isAppend) {
+            if (file.exists()) {
+                // when "live" or "record" is used, any previously recorded stream with the same stream URI is deleted.
+                if (!file.delete()) {
+                    log.warn("Existing file: {} could not be deleted", file.getName());
                     return false;
                 }
             }
-            if (log.isDebugEnabled()) {
-                try {
-                    log.debug("Recording file: {}", file.getCanonicalPath());
-                } catch (IOException e) {
-                    log.warn("Exception getting file path", e);
-                }
-            }
-            //remove existing meta info
-            if (scope.getContext().hasBean("keyframe.cache")) {
-                IKeyFrameMetaCache keyFrameCache = (IKeyFrameMetaCache) scope.getContext().getBean("keyframe.cache");
-                keyFrameCache.removeKeyFrameMeta(file);
-            }
-            // get instance via spring
-            if (scope.getContext().hasBean("fileConsumer")) {
-                log.debug("Context contains a file consumer");
-                recordingConsumer = (FileConsumer) scope.getContext().getBean("fileConsumer");
-                recordingConsumer.setScope(scope);
-                recordingConsumer.setFile(file);
-            } else {
-                log.debug("Context does not contain a file consumer, using direct instance");
-                // get a new instance
-                recordingConsumer = new FileConsumer(scope, file);
-            }
-            // set the mode on the consumer
-            if (isAppend) {
-                recordingConsumer.setMode("append");
-            } else {
-                recordingConsumer.setMode("record");
-            }
-            // set the filename
-            setFileName(file.getName());
-            // get the scheduler
-            scheduler = (ISchedulingService) scope.getParent().getContext().getBean(ISchedulingService.BEAN_NAME);
-            // set recording true
-            recording.set(true);
         } else {
-            log.warn("Record file is null");
+            if (file.exists()) {
+                appending = true;
+            } else {
+                // if a recorded stream at the same URI does not already exist, "append" creates the stream as though "record" was passed.
+                isAppend = false;
+            }
         }
+        // if the file doesn't exist yet, create it
+        if (!file.exists()) {
+            // Make sure the destination directory exists
+            String path = file.getAbsolutePath();
+            int slashPos = path.lastIndexOf(File.separator);
+            if (slashPos != -1) {
+                path = path.substring(0, slashPos);
+            }
+            File tmp = new File(path);
+            if (!tmp.isDirectory()) {
+                tmp.mkdirs();
+            }
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                log.warn("New recording file could not be created for: {}", file.getName(), e);
+                return false;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            try {
+                log.debug("Recording file: {}", file.getCanonicalPath());
+            } catch (IOException e) {
+                log.warn("Exception getting file path", e);
+            }
+        }
+        //remove existing meta info
+        if (scope.getContext().hasBean("keyframe.cache")) {
+            IKeyFrameMetaCache keyFrameCache = (IKeyFrameMetaCache) scope.getContext().getBean("keyframe.cache");
+            keyFrameCache.removeKeyFrameMeta(file);
+        }
+        // get instance via spring
+        if (scope.getContext().hasBean("fileConsumer")) {
+            log.debug("Context contains a file consumer");
+            recordingConsumer = (FileConsumer) scope.getContext().getBean("fileConsumer");
+            recordingConsumer.setScope(scope);
+            recordingConsumer.setFile(file);
+        } else {
+            log.debug("Context does not contain a file consumer, using direct instance");
+            // get a new instance
+            recordingConsumer = new FileConsumer(scope, file);
+        }
+        // set the mode on the consumer
+        if (isAppend) {
+            recordingConsumer.setMode("append");
+        } else {
+            recordingConsumer.setMode("record");
+        }
+        // the consumer reports what it writes to the budget and stops at the budget or quota
+        recordingConsumer.setRecordingSession(session);
+        // set the filename
+        setFileName(file.getName());
+        // get the scheduler
+        scheduler = (ISchedulingService) scope.getParent().getContext().getBean(ISchedulingService.BEAN_NAME);
+        // set recording true
+        recording.set(true);
         // since init finished, return recording flag
         return recording.get();
+    }
+
+    /**
+     * Accounts the recording with the application's recording budget, if the context has one.
+     */
+    private void startSession(IScope scope, IConnection conn, String name, File file, boolean isAppend) {
+        IContext context = scope.getContext();
+        if (context != null && context.hasBean(RecordingBudget.BEAN_NAME)) {
+            RecordingBudget recordingBudget = (RecordingBudget) context.getBean(RecordingBudget.BEAN_NAME);
+            File directory = getRecordDirectory(scope);
+            if (directory == null) {
+                directory = file.getAbsoluteFile().getParentFile();
+            }
+            IScope app = ScopeUtils.findApplication(scope);
+            String application = app != null ? app.getName() : scope.getName();
+            // throws when the budget or quota is used up
+            session = recordingBudget.start(directory.toPath(), application, conn, name, file.toPath(), isAppend);
+            budget = recordingBudget;
+        }
+    }
+
+    /**
+     * Ends the accounting of the recording, once its file is closed.
+     */
+    private void stopSession(String failure) {
+        if (session != null) {
+            if (failure != null && session.getFailure() == null) {
+                session.setFailure(failure);
+            }
+            budget.stop(session);
+        }
     }
 
     /**
@@ -249,6 +376,8 @@ public class RecordingListener implements IRecordingListener {
                 log.debug("Processing done, event queue empty, moving on");
             }
             recordingConsumer.uninit();
+            // the file is closed, so the budget measures its final size
+            stopSession(recordingConsumer.getFailure());
         } else {
             log.debug("Recording listener was already stopped");
         }

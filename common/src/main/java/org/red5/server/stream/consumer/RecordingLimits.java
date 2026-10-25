@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.red5.io.ITagWriter;
+import org.red5.server.stream.recording.RecordingSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,9 @@ import org.slf4j.LoggerFactory;
  * <br>
  * Size and duration count the content already in the file when appending, so a file cannot grow past its limits over several append
  * sessions. A value of 0 disables a limit.
+ * <br>
+ * When the recording is accounted by a {@link RecordingSession}, each check also reports the size and duration to the session, which
+ * stops the recording once the application's recording budget or the principal's quota is reached.
  *
  * @author Paul Gregoire (mondain@gmail.com)
  */
@@ -49,6 +53,11 @@ final class RecordingLimits {
     private int checksUntilSpaceCheck;
 
     /**
+     * Accounting of the recording against the application budget and principal quota, or null.
+     */
+    private volatile RecordingSession session;
+
+    /**
      * Checks the recording against its limits.
      *
      * @param writer
@@ -60,8 +69,11 @@ final class RecordingLimits {
      * @return reason the recording has to stop, or null while it is within its limits
      */
     String check(ITagWriter writer, Path path, int timestamp) {
+        long bytes = writer.getExistingBytes() + writer.getBytesWritten();
+        // the session is always updated, so it holds the final size and duration when the recording stops
+        RecordingSession recording = session;
+        String budgetFailure = recording != null ? recording.update(bytes, writer.getBytesWritten(), timestamp) : null;
         if (maxBytes > 0) {
-            long bytes = writer.getExistingBytes() + writer.getBytesWritten();
             if (bytes >= maxBytes) {
                 return String.format("Recording reached the %d byte limit", maxBytes);
             }
@@ -85,7 +97,15 @@ final class RecordingLimits {
                 log.warn("Could not check free space for {}", path, e);
             }
         }
-        return null;
+        return budgetFailure;
+    }
+
+    RecordingSession getSession() {
+        return session;
+    }
+
+    void setSession(RecordingSession session) {
+        this.session = session;
     }
 
     long getMaxBytes() {
