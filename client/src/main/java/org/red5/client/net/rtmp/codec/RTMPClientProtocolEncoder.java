@@ -61,7 +61,11 @@ public class RTMPClientProtocolEncoder extends RTMPProtocolEncoder {
             output = new org.red5.io.amf.Output(out);
         } else {
             if (conn.getEncoding() == Encoding.AMF3) {
-                output = new org.red5.io.amf3.Output(out);
+                // AMF3 string, object and traits references are scoped to the whole message body, so keep the output the action was
+                // written with; a new one would number the parameters' strings from 0 again while the peer continues the table
+                if (!(output instanceof org.red5.io.amf3.Output)) {
+                    output = new org.red5.io.amf3.Output(out);
+                }
             } else {
                 output = new org.red5.io.amf.Output(out);
             }
