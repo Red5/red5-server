@@ -1,7 +1,6 @@
 package org.red5.server.net.mediabunny;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -22,10 +21,9 @@ import org.red5.server.net.rtmp.event.AudioData;
 import org.red5.server.net.rtmp.event.VideoData;
 import org.red5.codec.AudioPacketType;
 import org.red5.codec.VideoPacketType;
-import org.red5.io.moq.cmaf.model.CmafFragment;
-import org.red5.io.moq.cmaf.model.SampleFlags;
-import org.red5.io.moq.cmaf.util.Fmp4FragmentBuilder;
-import org.red5.io.moq.cmaf.util.Fmp4InitSegmentBuilder;
+import org.red5.server.net.mediabunny.fmp4.SampleFlags;
+import org.red5.server.net.mediabunny.fmp4.Fmp4FragmentBuilder;
+import org.red5.server.net.mediabunny.fmp4.Fmp4InitSegmentBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -358,11 +356,6 @@ public class MediaBunnyStreamListener implements IStreamListener {
         }
         try {
             byte[] initSegment = builder.build();
-            patchBrandBox(initSegment, "ftyp", "iso6");
-            initSegment = ensureMvex(initSegment, new int[] { 1, 2 });
-            if (log.isInfoEnabled()) {
-                log.info("Init segment contains mvex={} trex={}", containsAscii(initSegment, "mvex"), containsAscii(initSegment, "trex"));
-            }
             log.info("Init segment built for stream {} ({} bytes) prefix={}", streamKey, initSegment.length, hexPrefix(initSegment, 24));
             initSegmentSent = true;
             registry.onInitSegment(streamKey, initSegment);
@@ -416,34 +409,27 @@ public class MediaBunnyStreamListener implements IStreamListener {
     }
 
     private void flushVideoBuffer() {
-        flushBuffer(videoBuffer, ++fragmentSequence, 1, 1, CmafFragment.MediaType.VIDEO);
+        flushBuffer(videoBuffer, ++fragmentSequence, 1, true);
     }
 
     private void flushAudioBuffer() {
-        flushBuffer(audioBuffer, ++fragmentSequence, 2, 2, CmafFragment.MediaType.AUDIO);
+        flushBuffer(audioBuffer, ++fragmentSequence, 2, false);
     }
 
-    private void flushBuffer(TrackBuffer buffer, long sequence, long trackId, long groupId, CmafFragment.MediaType mediaType) {
+    private void flushBuffer(TrackBuffer buffer, long sequence, long trackId, boolean video) {
         if (buffer.samples.isEmpty()) {
             return;
         }
         boolean keyframe = buffer.startsWithKeyframe;
-        Fmp4FragmentBuilder.FragmentConfig config = new Fmp4FragmentBuilder.FragmentConfig().setSequenceNumber(sequence).setTrackId(trackId).setBaseDecodeTime(buffer.fragmentStartDecodeTime).setGroupId(groupId).setMediaType(mediaType).setMediaData(buffer.media.toByteArray()).setSamples(new ArrayList<>(buffer.samples));
-        byte[] fragment;
-        try {
-            fragment = fragmentBuilder.buildFragment(config).serialize();
-            patchBrandBox(fragment, "styp", "iso6");
-            fragment = stripLeadingBox(fragment, "styp");
-            if (log.isDebugEnabled()) {
-                log.debug("Built {} fragment for stream {} ({} bytes, keyframe={})", mediaType, streamKey, fragment.length, keyframe);
-            }
-            if (keyframe && mediaType == CmafFragment.MediaType.VIDEO) {
-                registry.onKeyframeFragment(streamKey, fragment);
-            } else {
-                registry.onFragment(streamKey, fragment);
-            }
-        } catch (IOException e) {
-            log.warn("Failed to build fragment for stream: {}", streamKey, e);
+        Fmp4FragmentBuilder.FragmentConfig config = new Fmp4FragmentBuilder.FragmentConfig().setSequenceNumber(sequence).setTrackId(trackId).setBaseDecodeTime(buffer.fragmentStartDecodeTime).setMediaData(buffer.media.toByteArray()).setSamples(new ArrayList<>(buffer.samples));
+        byte[] fragment = fragmentBuilder.buildFragment(config);
+        if (log.isDebugEnabled()) {
+            log.debug("Built {} fragment for stream {} ({} bytes, keyframe={})", video ? "VIDEO" : "AUDIO", streamKey, fragment.length, keyframe);
+        }
+        if (keyframe && video) {
+            registry.onKeyframeFragment(streamKey, fragment);
+        } else {
+            registry.onFragment(streamKey, fragment);
         }
         buffer.reset();
     }
@@ -537,166 +523,6 @@ public class MediaBunnyStreamListener implements IStreamListener {
             offset += array.length;
         }
         return out;
-    }
-
-    private static void patchBrandBox(byte[] data, String boxType, String replacementBrand) {
-        if (data == null || data.length < 16) {
-            return;
-        }
-        if (boxType.length() != 4 || replacementBrand.length() != 4) {
-            return;
-        }
-        if (!matchesBoxType(data, boxType)) {
-            return;
-        }
-        // Replace major_brand at offset 8..11
-        for (int i = 0; i < 4; i++) {
-            data[8 + i] = (byte) replacementBrand.charAt(i);
-        }
-    }
-
-    private static boolean containsAscii(byte[] data, String needle) {
-        if (data == null || needle == null || needle.isEmpty()) {
-            return false;
-        }
-        byte[] target = needle.getBytes(StandardCharsets.US_ASCII);
-        outer: for (int i = 0; i <= data.length - target.length; i++) {
-            for (int j = 0; j < target.length; j++) {
-                if (data[i + j] != target[j]) {
-                    continue outer;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private static byte[] ensureMvex(byte[] data, int[] trackIds) {
-        if (data == null || data.length < 16 || trackIds == null || trackIds.length == 0) {
-            return data;
-        }
-        if (containsAscii(data, "mvex")) {
-            return data;
-        }
-        int moovOffset = findBoxOffset(data, "moov");
-        if (moovOffset < 0) {
-            return data;
-        }
-        int moovSize = readU32(data, moovOffset);
-        if (moovSize < 8 || moovOffset + moovSize > data.length) {
-            return data;
-        }
-        byte[] mvex = buildMvex(trackIds);
-        int newMoovSize = moovSize + mvex.length;
-        byte[] out = new byte[data.length + mvex.length];
-        System.arraycopy(data, 0, out, 0, moovOffset);
-        System.arraycopy(data, moovOffset, out, moovOffset, moovSize);
-        int insertPos = moovOffset + moovSize;
-        System.arraycopy(mvex, 0, out, insertPos, mvex.length);
-        System.arraycopy(data, insertPos, out, insertPos + mvex.length, data.length - insertPos);
-        writeU32(out, moovOffset, newMoovSize);
-        return out;
-    }
-
-    private static int findBoxOffset(byte[] data, String boxType) {
-        if (data == null || data.length < 8 || boxType == null || boxType.length() != 4) {
-            return -1;
-        }
-        int offset = 0;
-        while (offset + 8 <= data.length) {
-            int size = readU32(data, offset);
-            if (size < 8 || offset + size > data.length) {
-                return -1;
-            }
-            if (matchesBoxTypeAt(data, offset, boxType)) {
-                return offset;
-            }
-            offset += size;
-        }
-        return -1;
-    }
-
-    private static boolean matchesBoxTypeAt(byte[] data, int offset, String boxType) {
-        for (int i = 0; i < 4; i++) {
-            if (data[offset + 4 + i] != (byte) boxType.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static int readU32(byte[] data, int offset) {
-        return ((data[offset] & 0xff) << 24) | ((data[offset + 1] & 0xff) << 16) | ((data[offset + 2] & 0xff) << 8) | (data[offset + 3] & 0xff);
-    }
-
-    private static void writeU32(byte[] data, int offset, int value) {
-        data[offset] = (byte) ((value >> 24) & 0xff);
-        data[offset + 1] = (byte) ((value >> 16) & 0xff);
-        data[offset + 2] = (byte) ((value >> 8) & 0xff);
-        data[offset + 3] = (byte) (value & 0xff);
-    }
-
-    private static byte[] buildMvex(int[] trackIds) {
-        byte[] trexAll = new byte[0];
-        for (int trackId : trackIds) {
-            byte[] trex = buildTrex(trackId);
-            trexAll = concat(trexAll, trex);
-        }
-        return buildBox("mvex", trexAll);
-    }
-
-    private static byte[] buildTrex(int trackId) {
-        byte[] payload = new byte[4 + 4 + 4 + 4 + 4 + 4];
-        int pos = 0;
-        // version + flags
-        payload[pos++] = 0;
-        payload[pos++] = 0;
-        payload[pos++] = 0;
-        payload[pos++] = 0;
-        // trackId
-        writeU32(payload, pos, trackId);
-        pos += 4;
-        // default_sample_description_index
-        writeU32(payload, pos, 1);
-        pos += 4;
-        // default_sample_duration
-        writeU32(payload, pos, 0);
-        pos += 4;
-        // default_sample_size
-        writeU32(payload, pos, 0);
-        pos += 4;
-        // default_sample_flags
-        writeU32(payload, pos, 0);
-        return buildBox("trex", payload);
-    }
-
-    private static byte[] stripLeadingBox(byte[] data, String boxType) {
-        if (data == null || data.length < 8) {
-            return data;
-        }
-        if (boxType.length() != 4) {
-            return data;
-        }
-        if (!matchesBoxType(data, boxType)) {
-            return data;
-        }
-        int size = ((data[0] & 0xff) << 24) | ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
-        if (size <= 8 || size > data.length) {
-            return data;
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Stripping leading {} box ({} bytes)", boxType, size);
-        }
-        return Arrays.copyOfRange(data, size, data.length);
-    }
-
-    private static boolean matchesBoxType(byte[] data, String boxType) {
-        for (int i = 0; i < 4; i++) {
-            if (data[4 + i] != (byte) boxType.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static int[] parseAvcDimensions(byte[] avcConfig) {

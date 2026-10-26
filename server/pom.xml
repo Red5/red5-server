@@ -145,10 +145,6 @@
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.red5</groupId>
-            <artifactId>red5-moq-pkgr</artifactId>
-        </dependency>
     </dependencies>
     <profiles>
         <profile>
