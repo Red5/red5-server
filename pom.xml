@@ -107,7 +107,7 @@
         <bc.version>1.86</bc.version>
         <mina.version>2.2.9</mina.version>
         <spring.version>6.2.19</spring.version>
-        <tomcat.version>11.0.25</tomcat.version>
+        <tomcat.version>11.0.27</tomcat.version>
         <junit.version>[4.13.1,)</junit.version>
         <isoparser.version>1.9.59</isoparser.version>
         <caffeine.version>3.2.4</caffeine.version>
