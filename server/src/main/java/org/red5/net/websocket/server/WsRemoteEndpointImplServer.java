@@ -59,8 +59,8 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
 
     /** {@inheritDoc} */
     @Override
-    protected void doWrite(SendHandler handler, long blockingWriteTimeoutExpiry, ByteBuffer... buffers) {
-        if (blockingWriteTimeoutExpiry == -1) {
+    protected void doWrite(SendHandler handler, boolean blocking, long writeTimeoutExpiry, ByteBuffer... buffers) {
+        if (!blocking) {
             this.handler = handler;
             this.buffers = buffers;
             // This is definitely the same thread that triggered the write so a dispatch will be required.
@@ -68,7 +68,7 @@ public class WsRemoteEndpointImplServer extends WsRemoteEndpointImplBase {
         } else {
             // Blocking
             try {
-                final long timeout = blockingWriteTimeoutExpiry - System.currentTimeMillis();
+                final long timeout = writeTimeoutExpiry - System.currentTimeMillis();
                 for (ByteBuffer buffer : buffers) {
                     if (timeout <= 0) {
                         SendResult sr = new SendResult(null, new SocketTimeoutException());
