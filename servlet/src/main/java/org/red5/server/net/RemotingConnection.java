@@ -164,6 +164,12 @@ public class RemotingConnection implements IRemotingConnection {
     }
 
     /** {@inheritDoc} */
+    public void uninitialize() {
+        // remove the client from the session and client registry
+        cleanup();
+    }
+
+    /** {@inheritDoc} */
     public boolean connect(IScope scope) {
         notSupported();
         return false;
@@ -482,9 +488,8 @@ public class RemotingConnection implements IRemotingConnection {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("deprecation")
     public int size() {
-        return session != null ? session.getValueNames().length : 0;
+        return session != null ? Collections.list(session.getAttributeNames()).size() : 0;
     }
 
     /** {@inheritDoc} */
@@ -503,6 +508,20 @@ public class RemotingConnection implements IRemotingConnection {
     @Override
     public boolean setAttribute(Enum<?> enm, Object value) {
         return setAttribute(enm.name(), value);
+    }
+
+    /** {@inheritDoc} */
+    public Object setAttributeIfAbsent(String name, Object value) {
+        if (name == null || value == null) {
+            return null;
+        }
+        synchronized (session) {
+            Object previous = session.getAttribute(name);
+            if (previous == null) {
+                session.setAttribute(name, value);
+            }
+            return previous;
+        }
     }
 
     /** {@inheritDoc} */

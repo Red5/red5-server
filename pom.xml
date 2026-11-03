@@ -126,6 +126,7 @@
         <module>io</module>
         <module>common</module>
         <module>server</module>
+        <module>servlet</module>
         <module>client</module>
         <module>service</module>
         <module>tests</module>
