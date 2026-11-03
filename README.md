@@ -58,7 +58,7 @@ in addition to any other Red5 projects in the __dependencies__ section
 
 ## Build from Source
 
-As of release 1.2.2 the target JDK is now JDK 11 and the Maven poms use the [toolchain plugin](https://maven.apache.org/guides/mini/guide-using-toolchains.html).
+As of release 2.2.0 the target JDK is JDK 25 (Maven 3.6+). If your Maven rc pins an older JAVA_HOME, build with `MAVEN_SKIP_RC=1 mvn ...`.
 
 To build the red5 jars, execute the following on the command line:
 ```sh
@@ -83,7 +83,7 @@ Prerequisites:
 - `docker`
 - `ffmpeg`
 - `ffprobe`
-- Java 21 and Maven
+- Java 25 and Maven
 
 Run against the published image (`mondain/red5:latest`):
 ```sh
