@@ -78,6 +78,7 @@ public class MediaBunnyServlet extends HttpServlet implements AsyncListener {
     /** Thread pool used to run per-connection streaming tasks off the servlet container's request threads, bounded by maxSubscribers. */
     private transient volatile ThreadPoolExecutor executor;
 
+    /** Milliseconds without data after which an idle subscriber is ended, from the idleTimeoutMs init-param. */
     private volatile long idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS;
 
     /** Exact origins granted credentialed CORS access. */

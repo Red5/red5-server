@@ -38,6 +38,9 @@ public class Fmp4FragmentBuilder {
         return Box.serialize(moof, new MdatBox(config.mediaData));
     }
 
+    /**
+     * Describes one media fragment (moof + mdat) to build: sequence number, track, base decode time, sample table and media payload.
+     */
     public static class FragmentConfig {
 
         private long sequenceNumber;
@@ -54,26 +57,56 @@ public class Fmp4FragmentBuilder {
 
         private List<SampleData> samples = new ArrayList<>();
 
+        /**
+         * Sets the fragment sequence number written to the movie fragment header.
+         *
+         * @param sequenceNumber fragment sequence number, starting at 1
+         * @return this configuration
+         */
         public FragmentConfig setSequenceNumber(long sequenceNumber) {
             this.sequenceNumber = sequenceNumber;
             return this;
         }
 
+        /**
+         * Sets the track the fragment belongs to.
+         *
+         * @param trackId track identifier matching the init segment
+         * @return this configuration
+         */
         public FragmentConfig setTrackId(long trackId) {
             this.trackId = trackId;
             return this;
         }
 
+        /**
+         * Sets the decode time of the first sample in the fragment.
+         *
+         * @param baseDecodeTime decode time in track timescale units
+         * @return this configuration
+         */
         public FragmentConfig setBaseDecodeTime(long baseDecodeTime) {
             this.baseDecodeTime = baseDecodeTime;
             return this;
         }
 
+        /**
+         * Sets the concatenated sample payload placed in the mdat box.
+         *
+         * @param mediaData media bytes for all samples, in sample order
+         * @return this configuration
+         */
         public FragmentConfig setMediaData(byte[] mediaData) {
             this.mediaData = mediaData;
             return this;
         }
 
+        /**
+         * Sets the sample table and records whether any sample carries a (signed) composition time offset.
+         *
+         * @param samples samples in decode order; null clears the list
+         * @return this configuration
+         */
         public FragmentConfig setSamples(List<SampleData> samples) {
             this.samples = samples != null ? samples : new ArrayList<>();
             for (SampleData sample : this.samples) {
@@ -89,6 +122,9 @@ public class Fmp4FragmentBuilder {
 
     }
 
+    /**
+     * Timing, size and flags of a single sample in a fragment.
+     */
     public static class SampleData {
 
         final long duration;
@@ -100,6 +136,8 @@ public class Fmp4FragmentBuilder {
         final Long compositionTimeOffset;
 
         /**
+         * Creates a sample description.
+         *
          * @param duration sample duration in track timescale units
          * @param size sample size in bytes
          * @param flags sample flags

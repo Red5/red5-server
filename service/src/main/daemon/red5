@@ -38,7 +38,7 @@ echo "Path $FILE_PATH";
 JAVA_HOME="/usr/lib/jvm/default-java"
 
 # Our classpath including our jar file and the Apache Commons Daemon library
-CLASS_PATH="$FILE_PATH/commons-daemon-1.6.1.jar:$FILE_PATH/red5-service.jar:$FILE_PATH/conf"
+CLASS_PATH="$FILE_PATH/commons-daemon-${commons-daemon.version}.jar:$FILE_PATH/red5-service.jar:$FILE_PATH/conf"
 
 # The fully qualified name of the class to execute
 CLASS="org.red5.daemon.EngineLauncher"
@@ -58,7 +58,7 @@ LOG_ERR="$FILE_PATH/log/$NAME-error.log"
 # JAVA options
 # You can set JVM additional options here if you want
 if [ -z "$JVM_OPTS" ]; then 
-    JVM_OPTS="-Xverify:none -XX:+TieredCompilation -XX:+UseBiasedLocking -XX:InitialCodeCacheSize=8m -XX:ReservedCodeCacheSize=32m -Dorg.terracotta.quartz.skipUpdateCheck=true"
+    JVM_OPTS="-XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+TieredCompilation -XX:InitialCodeCacheSize=8m -XX:ReservedCodeCacheSize=32m -Dorg.terracotta.quartz.skipUpdateCheck=true"
 fi
 # Set up logging options
 LOGGING_OPTS="-Dlogback.ContextSelector=org.red5.logging.LoggingContextSelector -Dcatalina.useNaming=true"

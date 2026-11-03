@@ -4,12 +4,12 @@ if [ -z "$RED5_HOME" ]; then
   export RED5_HOME=`pwd`; 
 fi
 
-# Java 11
+# Java 25
 # Set JavaHome if it exists
 if [ -f "${JAVA_HOME}/bin/java" ]; then
    JAVA_HOME=${JAVA_HOME}
 else
-   echo "Please set JAVA_HOME in your current path. Preferably use JDK 21 or newer."
+   echo "Please set JAVA_HOME in your current path. Preferably use JDK 25 or newer."
 fi
 
 P=":" # The default classpath separator

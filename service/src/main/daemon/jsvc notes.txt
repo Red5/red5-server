@@ -1,4 +1,11 @@
-./jsvc -debug -server -version -procname red5 -user mondain -home /usr/lib/jvm/java-7-oracle -outfile /tmp/jsvcout.log -errfile /tmp/jsvcerr.log -cwd /home/mondain/workspace/red5-server/target/red5-server-1.0.2-RELEASE -cp /home/mondain/workspace/red5-server/target/red5-server-1.0.2-RELEASE/lib/commons-daemon-1.0.15.jar:/home/mondain/workspace/red5-server/target/red5-server-1.0.2-RELEASE/red5-service.jar org.red5.daemon.EngineLauncher
+Apache Commons Daemon / jsvc notes
+Bundled commons-daemon jar: 1.6.1 (current release, 2026-06-03). Build jsvc from the matching native source tarball; distro packages are often older (Ubuntu 24.04 ships 1.0.15).
+Example launch (run jsvc by absolute path; JAVA_HOME must be a full JDK, 25 for this build):
+
+/usr/bin/jsvc -debug -server -version -procname red5 -user red5 -home /usr/lib/jvm/java-25-openjdk-amd64 -outfile /tmp/jsvcout.log -errfile /tmp/jsvcerr.log -cwd $RED5_HOME -cp $RED5_HOME/commons-daemon-1.6.1.jar:$RED5_HOME/red5-service.jar org.red5.daemon.EngineLauncher
+
+The usage text below is from jsvc 1.0.15-dev and is kept for reference; run `jsvc -help` for the options of the version you installed.
+
 
 Usage: jsvc [-options] class [args...]
 

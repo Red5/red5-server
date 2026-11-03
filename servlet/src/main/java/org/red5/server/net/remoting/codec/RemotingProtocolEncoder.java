@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RemotingProtocolEncoder {
 
+    /** Logger for this encoder. */
     protected static Logger log = LoggerFactory.getLogger(RemotingProtocolEncoder.class);
 
     /**

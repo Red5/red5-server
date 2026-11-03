@@ -8,7 +8,7 @@ This project uses Java (primary), Rust (JNI/native layer), and Maven for builds.
 
 ## Project Overview
 
-Red5 Server is an open-source media server written in Java that supports RTMP, RTMPT, RTMPS, RTMPE, and Server-Sent Events (SSE) protocols for streaming video/audio and real-time messaging. The project uses Maven as its build system with a multi-module structure. Current version is **2.0.23**.
+Red5 Server is an open-source media server written in Java that supports RTMP, RTMPT, RTMPS, RTMPE, and Server-Sent Events (SSE) protocols for streaming video/audio and real-time messaging. The project uses Maven as its build system with a multi-module structure. Current version is **2.2.0**.
 
 ## Build Commands
 
@@ -98,7 +98,7 @@ SSE implementation for real-time server-to-client communication:
 - Features: W3C SSE compliance, connection management, keep-alive support, scope integration, CORS support
 
 ### Technology Stack
-- **Java 21** (minimum requirement)
+- **Java 25** (minimum requirement)
 - **Maven 3.6+** for build management
 - **Spring Framework 6.2.x** for dependency injection and application context
 - **Tomcat 11.0.x** (embedded) for servlet container

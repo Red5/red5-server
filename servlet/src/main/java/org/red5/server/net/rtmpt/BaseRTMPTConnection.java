@@ -88,6 +88,11 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
      */
     protected int maxQueueOfferAttempts = 4;
 
+    /**
+     * Creates a connection of the given type.
+     *
+     * @param type connection type
+     */
     public BaseRTMPTConnection(String type) {
         super(type);
         this.buffer = IoBuffer.allocate(0).setAutoExpand(true);
@@ -135,6 +140,11 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         return readBytes.get();
     }
 
+    /**
+     * Adds to the count of bytes read on this connection.
+     *
+     * @param read number of bytes read
+     */
     public void updateReadBytes(int read) {
         readBytes.addAndGet(read);
     }
@@ -145,6 +155,11 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         return writtenBytes.get();
     }
 
+    /**
+     * Adds to the count of bytes written on this connection.
+     *
+     * @param wrote number of bytes written
+     */
     public void updateWrittenBytes(int wrote) {
         writtenBytes.addAndGet(wrote);
     }
@@ -257,6 +272,12 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         }
     }
 
+    /**
+     * Drains queued outgoing messages into a single buffer and notifies the handler of each sent packet.
+     *
+     * @param targetSize initial capacity of the returned buffer
+     * @return the combined buffer, or null if nothing was pending
+     */
     protected IoBuffer foldPendingMessages(int targetSize) {
         log.debug("foldPendingMessages - target size: {}", targetSize);
         IoBuffer result = null;
@@ -291,15 +312,27 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
         return result;
     }
 
+    /**
+     * Sets the protocol decoder.
+     *
+     * @param decoder decoder, which must be an RTMPTProtocolDecoder
+     */
     public void setDecoder(RTMPProtocolDecoder decoder) {
         this.decoder = (RTMPTProtocolDecoder) decoder;
     }
 
+    /**
+     * Sets the protocol encoder.
+     *
+     * @param encoder encoder, which must be an RTMPTProtocolEncoder
+     */
     public void setEncoder(RTMPProtocolEncoder encoder) {
         this.encoder = (RTMPTProtocolEncoder) encoder;
     }
 
     /**
+     * Sets the maximum number of incoming messages handled per processing pass.
+     *
      * @param maxInMessagesPerProcess
      *            the maxInMessagesPerProcess to set
      */
@@ -308,6 +341,8 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
     }
 
     /**
+     * Sets how long to wait when offering to the incoming or outgoing queue.
+     *
      * @param maxQueueOfferTime
      *            the maxQueueOfferTime to set
      */
@@ -316,6 +351,8 @@ public abstract class BaseRTMPTConnection extends RTMPConnection {
     }
 
     /**
+     * Sets the maximum offer attempts before failing on the incoming or outgoing queues.
+     *
      * @param maxQueueOfferAttempts
      *            the maxQueueOfferAttempts to set
      */

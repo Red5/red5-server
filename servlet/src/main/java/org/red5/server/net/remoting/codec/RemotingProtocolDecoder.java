@@ -25,8 +25,12 @@ import org.red5.server.net.remoting.message.RemotingPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Remoting protocol decoder; reads AMF remoting requests into packets.
+ */
 public class RemotingProtocolDecoder {
 
+    /** Logger for this decoder. */
     protected static Logger log = LoggerFactory.getLogger(RemotingProtocolDecoder.class);
 
     /**

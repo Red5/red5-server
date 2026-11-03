@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 
 ENV RED5_HOME=/opt/red5
 WORKDIR /opt/red5

@@ -52,7 +52,8 @@ public class RTMPTServlet extends HttpServlet {
 
     private static final long serialVersionUID = 5925399677454936613L;
 
-    protected static Logger log = LoggerFactory.getLogger(RTMPTServlet.class);
+    /** Logger for this servlet. */
+    protected static Logger log = Red5LoggerFactory.getLogger(RTMPTServlet.class);
 
     /**
      * HTTP request method to use for RTMPT calls.
@@ -85,7 +86,7 @@ public class RTMPTServlet extends HttpServlet {
      */
     private static String ident2;
 
-    // Whether or not to enforce content type checking for requests
+    /** Whether or not to enforce content type checking for requests. */
     private boolean enforceContentTypeCheck;
 
     /**
@@ -695,6 +696,8 @@ public class RTMPTServlet extends HttpServlet {
     }
 
     /**
+     * Returns whether the request content type is enforced.
+     *
      * @return the enforceContentTypeCheck
      */
     public boolean isEnforceContentTypeCheck() {
@@ -702,6 +705,8 @@ public class RTMPTServlet extends HttpServlet {
     }
 
     /**
+     * Sets whether the request content type is enforced.
+     *
      * @param enforceContentTypeCheck
      *            the enforceContentTypeCheck to set
      */
@@ -724,6 +729,8 @@ public class RTMPTServlet extends HttpServlet {
         }
 
         /**
+         * Returns the session id of the request.
+         *
          * @return the sessionId
          */
         public String getSessionId() {
@@ -731,6 +738,8 @@ public class RTMPTServlet extends HttpServlet {
         }
 
         /**
+         * Returns the request number within the session.
+         *
          * @return the requestNumber
          */
         public Integer getRequestNumber() {
