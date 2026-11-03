@@ -35,18 +35,33 @@ public class Fmp4InitSegmentBuilder {
 
     private final List<TrackConfig> tracks = new ArrayList<>();
 
+    /**
+     * Adds a video track to the init segment.
+     *
+     * @param config video track configuration
+     * @return this builder
+     */
     public Fmp4InitSegmentBuilder addVideoTrack(VideoTrackConfig config) {
         tracks.add(config);
         return this;
     }
 
+    /**
+     * Adds an audio track to the init segment.
+     *
+     * @param config audio track configuration
+     * @return this builder
+     */
     public Fmp4InitSegmentBuilder addAudioTrack(AudioTrackConfig config) {
         tracks.add(config);
         return this;
     }
 
     /**
+     * Builds the initialization segment from the configured tracks.
+     *
      * @return serialized ftyp + moov
+     * @throws IllegalStateException if no track has been added
      */
     public byte[] build() {
         if (tracks.isEmpty()) {
@@ -66,6 +81,9 @@ public class Fmp4InitSegmentBuilder {
         return Box.serialize(new FtypBox(MAJOR_BRAND, 0, COMPATIBLE_BRANDS), moov);
     }
 
+    /**
+     * Settings common to all tracks: identifier, timescale, codec FourCC and codec configuration record.
+     */
     public abstract static class TrackConfig {
 
         final long trackId;
@@ -107,12 +125,25 @@ public class Fmp4InitSegmentBuilder {
 
     }
 
+    /**
+     * Configuration of a video track.
+     */
     public static class VideoTrackConfig extends TrackConfig {
 
         private final int width;
 
         private final int height;
 
+        /**
+         * Creates a video track configuration.
+         *
+         * @param trackId track identifier
+         * @param timescale track timescale in ticks per second
+         * @param codecFourcc sample entry FourCC, for example avc1
+         * @param codecConfig codec configuration record bytes
+         * @param width frame width in pixels
+         * @param height frame height in pixels
+         */
         public VideoTrackConfig(long trackId, long timescale, String codecFourcc, byte[] codecConfig, int width, int height) {
             super(trackId, timescale, codecFourcc, codecConfig, "vide", "VideoHandler");
             this.width = width;
@@ -136,6 +167,9 @@ public class Fmp4InitSegmentBuilder {
 
     }
 
+    /**
+     * Configuration of an audio track.
+     */
     public static class AudioTrackConfig extends TrackConfig {
 
         private final int channelCount;
@@ -144,6 +178,17 @@ public class Fmp4InitSegmentBuilder {
 
         private final int sampleSize;
 
+        /**
+         * Creates an audio track configuration.
+         *
+         * @param trackId track identifier
+         * @param timescale track timescale in ticks per second
+         * @param codecFourcc sample entry FourCC, for example mp4a
+         * @param codecConfig codec configuration record bytes
+         * @param channelCount number of audio channels
+         * @param sampleRate sample rate in Hz
+         * @param sampleSize sample size in bits
+         */
         public AudioTrackConfig(long trackId, long timescale, String codecFourcc, byte[] codecConfig, int channelCount, int sampleRate, int sampleSize) {
             super(trackId, timescale, codecFourcc, codecConfig, "soun", "SoundHandler");
             this.channelCount = channelCount;

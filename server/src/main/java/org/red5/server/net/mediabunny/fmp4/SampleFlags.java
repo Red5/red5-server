@@ -22,6 +22,8 @@ public final class SampleFlags {
     }
 
     /**
+     * Creates the flags for a sync sample.
+     *
      * @return flags for a sync sample (key frame) that does not depend on other samples
      */
     public static SampleFlags createSyncSampleFlags() {
@@ -29,6 +31,8 @@ public final class SampleFlags {
     }
 
     /**
+     * Creates the flags for a non-sync sample.
+     *
      * @return flags for a non-sync sample (non-key frame) that depends on other samples
      */
     public static SampleFlags createNonSyncSampleFlags() {

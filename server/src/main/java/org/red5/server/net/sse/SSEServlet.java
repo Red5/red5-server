@@ -74,14 +74,19 @@ public class SSEServlet extends HttpServlet implements AsyncListener {
 
     private transient SSEManager sseManager;
 
+    /** Whether event posts are accepted, from the allowPost init-param. */
     private boolean allowPost;
 
+    /** Maximum accepted size of a posted body in bytes, from the maxPostBytes init-param. */
     private int maxPostBytes = 64 * 1024;
 
+    /** Maximum SSE connections across the server before new ones are refused, from the maxConnections init-param. */
     private int maxConnections = 1000;
 
+    /** Origins granted cross-origin access, from the allowedOrigins init-param. */
     private String[] allowedOrigins = new String[0];
 
+    /** Whether CORS headers are emitted, disabled with the cors.enabled init-param. */
     private boolean corsEnabled = true;
 
     // maximum length of an event name

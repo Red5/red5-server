@@ -32,8 +32,10 @@ public class RemotingCall extends PendingCall {
      */
     public String clientCallback;
 
+    /** True if the call was received in AMF3 encoding. */
     public boolean isAMF3;
 
+    /** True if the call is a Flex messaging request rather than a plain remoting call. */
     public boolean isMessaging;
 
     /**

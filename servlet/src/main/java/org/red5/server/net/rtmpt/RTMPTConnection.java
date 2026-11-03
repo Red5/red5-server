@@ -187,10 +187,20 @@ public class RTMPTConnection extends BaseRTMPTConnection {
         return inActivityExceeded || (isReaderIdle() && isWriterIdle());
     }
 
+    /**
+     * Sets the remote address of the client.
+     *
+     * @param remoteAddress client address
+     */
     public void setRemoteAddress(String remoteAddress) {
         this.remoteAddress = remoteAddress;
     }
 
+    /**
+     * Sets the remote port of the client.
+     *
+     * @param remotePort client port
+     */
     public void setRemotePort(int remotePort) {
         this.remotePort = remotePort;
     }
