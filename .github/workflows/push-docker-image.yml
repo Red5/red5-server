@@ -7,7 +7,7 @@ on:
 
 jobs:
   push-docker-image:
-    uses: Red5/docker/.github/workflows/push-docker-image.yml@4ec701169e70c9abef5abaacb7a4090a5f351fba
+    uses: Red5/docker/.github/workflows/push-docker-image.yml@2bc7fea731644ad2caa781126fe71540e276895d
     with:
       version: ${{ github.event.release.tag_name }}
     secrets:
