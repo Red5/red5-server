@@ -2,8 +2,11 @@
 Description=Red5
 
 [Service]
-Type=simple
-ExecStart=/etc/init.d/red5
+# jsvc detaches from the init script, so systemd must track the daemon via its pid file
+Type=forking
+PIDFile=/tmp/red5.pid
+ExecStart=/etc/init.d/red5 start
+ExecStop=/etc/init.d/red5 stop
 
 [Install]
 WantedBy=multi-user.target

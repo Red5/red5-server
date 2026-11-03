@@ -2,7 +2,9 @@
 
 Herein you will find the service / daemon portion of the project. We utilize the [Apache Commons Daemon project](https://commons.apache.org/proper/commons-daemon/) for our service process on all supported platforms; currently [Linux](https://commons.apache.org/proper/commons-daemon/jsvc.html) and [Windows](https://commons.apache.org/proper/commons-daemon/procrun.html) are supported.
 
-Apache Daemon [Windows binaries download](http://www.apache.org/dist/commons/daemon/binaries/windows/)
+Bundled Commons Daemon version: **1.6.1** (see `commons-daemon.version` in `pom.xml`; released 2026-06-03 and current at the time of writing). The Java library is bundled with the build; the native launchers (jsvc on Linux, procrun on Windows) are separate downloads, see below.
+
+Apache Daemon [Windows binaries download](https://downloads.apache.org/commons/daemon/binaries/windows/) (x86, x64 and, as of 1.6.0, ARM64)
 
 
 ## Daemon Details
@@ -20,8 +22,9 @@ Linux daemon uses __jsvc__ and the `init.d` script `red5`.
 1. Set / export __RED5_HOME__ environmental variable
 2. Edit the variables in the init.d script to match your server
 3. Install jsvc
- * Debian `sudo apt-get install jsvc`
- * CentOS `sudo yum ??`
+ * Debian / Ubuntu `sudo apt-get install jsvc`
+ * RHEL / CentOS / Fedora `sudo dnf install apache-commons-daemon-jsvc` (EPEL on RHEL-family systems)
+ * Distribution packages often lag behind; to match the bundled 1.6.1 release, build jsvc from the [source tarball](https://commons.apache.org/proper/commons-daemon/download_daemon.cgi) (`commons-daemon-1.6.1-native-src.tar.gz`, in `src/native/unix`: `sh support/buildconf.sh && ./configure --with-java=$JAVA_HOME && make`) and point `EXEC` in the `red5` script at the resulting binary. jsvc needs a full JDK (JDK 25 is the target for this build).
 4. Copy the `red5` script to your init.d directory, ex. `/etc/init.d/`
 5. This step is for Systemd enabled operating systems __only__ such as CentOS 7. Copy the `red5.service` file into the `/etc/systemd/system/` directory. Modify the file as needed, ensure the `ExecStart` path is correctly pointing to the init script.
 6. Install the init.d script
@@ -109,7 +112,7 @@ The JAVA_HOME environment variable is not defined correctly
 This environment variable is needed to run this program
 NB: JAVA_HOME should point to a JDK not a JRE
 ```
-To resolve this, remove the __JAVA_HOME__ variable and create one for __JRE_HOME__. Now go back to step 6 and try again.
+The script expects a JDK 9+ style layout (`bin\java.exe` directly under __JAVA_HOME__, no `jre` subdirectory), which is the case for JDK 25. Make sure __JAVA_HOME__ points at an installed JDK and then go back to step 6 and try again. If you only have a runtime installed, set __JRE_HOME__ instead.
 
 
 

@@ -31,7 +31,7 @@ if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
 )
 echo Using Daemon:           "%EXECUTABLE%"
 set SERVICE_NAME=Red5
-set "CLASSPATH=%RED5_HOME%\commons-daemon-1.6.1.jar;%RED5_HOME%\red5-service.jar;%RED5_HOME%\conf"
+set "CLASSPATH=%RED5_HOME%\commons-daemon-${commons-daemon.version}.jar;%RED5_HOME%\red5-service.jar;%RED5_HOME%\conf"
 set "WORKING_PATH=%RED5_HOME%\"
 
 rem Make sure prerequisite environment variables are set
@@ -45,11 +45,12 @@ if not exist "%JRE_HOME%\bin\java.exe" goto noJavaHome
 if not exist "%JRE_HOME%\bin\javaw.exe" goto noJavaHome
 goto okJavaHome
 :gotJdkHome
-if not exist "%JAVA_HOME%\jre\bin\java.exe" goto noJavaHome
-if not exist "%JAVA_HOME%\jre\bin\javaw.exe" goto noJavaHome
+rem JDK 9 and newer have no "jre" subdirectory; the JDK home is also the runtime home
+if not exist "%JAVA_HOME%\bin\java.exe" goto noJavaHome
+if not exist "%JAVA_HOME%\bin\javaw.exe" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\javac.exe" goto noJavaHome
 if not "%JRE_HOME%" == "" goto okJavaHome
-set "JRE_HOME=%JAVA_HOME%\jre"
+set "JRE_HOME=%JAVA_HOME%"
 goto okJavaHome
 :noJavaHome
 echo The JAVA_HOME environment variable is not defined correctly

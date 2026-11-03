@@ -35,6 +35,7 @@
             <includes>
                 <include>*.bat</include>
             </includes>
+            <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/daemon</directory>
