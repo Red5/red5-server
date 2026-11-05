@@ -249,7 +249,7 @@ public class ApplicationBindingTest {
         });
     }
 
-    private static HandshakeRequest request(String path) {
+    static HandshakeRequest request(String path) {
         return (HandshakeRequest) Proxy.newProxyInstance(ApplicationBindingTest.class.getClassLoader(), new Class<?>[] { HandshakeRequest.class }, (proxy, method, args) -> {
             switch (method.getName()) {
                 case "getRequestURI":
@@ -265,7 +265,7 @@ public class ApplicationBindingTest {
         });
     }
 
-    private static HandshakeResponse response() {
+    static HandshakeResponse response() {
         Map<String, List<String>> headers = new HashMap<>();
         return (HandshakeResponse) Proxy.newProxyInstance(ApplicationBindingTest.class.getClassLoader(), new Class<?>[] { HandshakeResponse.class }, (proxy, method, args) -> {
             if ("getHeaders".equals(method.getName())) {
