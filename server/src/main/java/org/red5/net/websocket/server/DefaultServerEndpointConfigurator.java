@@ -358,6 +358,13 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                     roomScope = ScopeUtils.resolveScope(parentScope, paths[i]);
                     // if the room scope doesnt already exist create it
                     if (roomScope == null) {
+                        if (parentScope.hasChildScope(paths[i])) {
+                            // child names are shared by all scope types, so a name held by a child that is not a scope, such as the
+                            // broadcast scope of a published stream, cannot also name a room; the connection is served by the deepest
+                            // scope that exists, which is the scope that holds that stream
+                            log.debug("Name {} in {} is taken by a non-room child, using {} for path: {}", paths[i], parentScope, parentScope, path);
+                            break;
+                        }
                         if (parentScope.createChildScope(paths[i])) {
                             roomScope = ScopeUtils.resolveScope(parentScope, paths[i]);
                         }

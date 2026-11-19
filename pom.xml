@@ -112,7 +112,7 @@
         <isoparser.version>1.9.59</isoparser.version>
         <caffeine.version>3.2.4</caffeine.version>
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <commons-codec.version>1.22.1</commons-codec.version>
+        <commons-codec.version>1.23.0</commons-codec.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.22.0</commons-io.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
