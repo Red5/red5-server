@@ -349,6 +349,13 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                     roomScope = ScopeUtils.resolveScope(parentScope, paths[i]);
                     // if the room scope doesnt already exist create it
                     if (roomScope == null) {
+                        if (parentScope.hasChildScope(paths[i])) {
+                            // child names are shared by all scope types, so a name held by a child that is not a scope, such as the
+                            // broadcast scope of a published stream, cannot also name a room; the connection is served by the deepest
+                            // scope that exists, which is the scope that holds that stream
+                            log.debug("Name {} in {} is taken by a non-room child, using {} for path: {}", paths[i], parentScope, parentScope, path);
+                            break;
+                        }
                         if (parentScope.createChildScope(paths[i])) {
                             roomScope = ScopeUtils.resolveScope(parentScope, paths[i]);
                         }
@@ -358,16 +365,18 @@ public class DefaultServerEndpointConfigurator extends ServerEndpointConfig.Conf
                         parentScope = roomScope;
                     }
                 }
-                // create and add the websocket scope for the room or app scope
-                IScope scopeToUse = roomScope != null ? roomScope : appScope;
+                // create and add the websocket scope for the deepest scope reached, which is the app scope when no room applies
+                IScope scopeToUse = parentScope;
                 if (scopeToUse != null) {
                     manager.makeScope(scopeToUse);
-                    // get the new ws scope
-                    scope = manager.getScope(path);
+                    // get the new ws scope, which is registered under the context path of the scope it serves and so differs from the
+                    // request path when the path ended at a stream name instead of a room
+                    scope = manager.getScope(scopeToUse.getContextPath());
                     // copy the listeners from the app websocket scope if available
                     if (appScope.hasAttribute(WSConstants.WS_SCOPE)) {
                         WebSocketScope appWsScope = (WebSocketScope) appScope.getAttribute(WSConstants.WS_SCOPE);
-                        if (appWsScope != null && scope != null) {
+                        // a scope already is the app websocket scope when the path ended at a stream name directly under the app
+                        if (appWsScope != null && scope != null && scope != appWsScope) {
                             Set<IWebSocketDataListener> listeners = appWsScope.getListeners();
                             for (IWebSocketDataListener listener : listeners) {
                                 log.debug("Adding listener: {}", listener);
